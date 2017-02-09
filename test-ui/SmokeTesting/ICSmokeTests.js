@@ -1,251 +1,333 @@
 StartTest (function (t) {
+    var commonICST = Ext.create('Inventory.CommonICSmokeTest');
     var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
 
-        //region Scenario 3. Add IC Transactions
-        .displayText('=====   Scenario 3. Add IC Transactions ====')
+        //Open IC Screens
+        .displayText('===== Start IC Open Screens =====')
+        .addFunction(function(next){
+            commonICST.openICScreens (t,next)
+        })
 
-        //region Scenario 3.1: Add Direct IR for Non Lotted Item
-        .displayText('=====  Scenario 3.1: Add Direct IR for Non Lotted Item =====')
-        .clickMenuScreen('Inventory Receipts','Screen')
-        .waitUntilLoaded()
+
+        //IC Add Maintenance Screens
+        .displayText('===== Start IC Add Maintenance =====')
+        //region Scenario 1: Add New Storage Location
+        .displayText('===== Scenario 1: Adding New Storage Location. =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Storage Locations','Screen')
         .clickButton('New')
-        .waitUntilLoaded('icinventoryreceipt')
-        .selectComboBoxRowNumber('ReceiptType',4,0)
-        .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','Smoke - NLTI - 01','strItemNo')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100000')
-        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
-        .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Smoke_LB')
-        .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'Smoke_LB')
-        .verifyGridData('InventoryReceipt', 1, 'colGross', '100000')
-        .verifyGridData('InventoryReceipt', 1, 'colNet', '100000')
-        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000000')
-
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblGrossWgt').text;
-            if (total == 'Gross: 100,000.00') {
-                t.ok(true, 'Gross is correct.');
-            }
-            else {
-                t.ok(false, 'Gross is incorrect.');
-            }
-            next();
-        })
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblNetWgt').text;
-            if (total == 'Net: 100,000.00') {
-                t.ok(true, 'Net is correct.');
-            }
-            else {
-                t.ok(false, 'Net is incorrect.');
-            }
-            next();
-        })
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblTotal').text;
-            if (total == 'Total: 1,000,000.00') {
-                t.ok(true, 'Total is correct.');
-            }
-            else {
-                t.ok(false, 'Total is incorrect.');
-            }
-            next();
-        })
-
-        .clickButton('PostPreview')
-        .waitUntilLoaded('cmcmrecaptransaction')
-        .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000000')
-        .clickButton('Post')
-        .addResult('Successfully Posted',3000)
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',3000)
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',3000)
-        .waitUntilLoaded('')
+        .waitUntilLoaded('icstorageunit')
+        .enterData('Text Field','Name','Smoke Storage')
+        .enterData('Text Field','Description','Test Smoke Storage')
+        .selectComboBoxRowNumber('UnitType',6,0)
+        .selectComboBoxRowNumber('Location',1,0)
+        .selectComboBoxRowNumber('SubLocation',6,0)
+        .selectComboBoxRowNumber('ParentUnit',1,0)
+        .enterData('Text Field','Aisle','Test Aisle - 01')
+        .clickCheckBox('AllowConsume', true)
+        .clickCheckBox('AllowMultipleItems', true)
+        .clickCheckBox('AllowMultipleLots', true)
+        .clickCheckBox('CycleCounted', true)
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
         .clickButton('Close')
-        .waitUntilLoaded('')
-        .displayText('===== Create Direct Inventory Receipt for Non Lotted Item Done=====')
+        .displayText('===== Storage Location Created =====')
+        //endregion
 
-        //region Scenario 3.2. Create Direct Inventory Receipt for Lotted Item
-        .displayText('=====  Scenario 3.2. Create Direct IR for Lotted Item  =====')
+
+        //region Scenario 2. Add Inventory UOM
+        .displayText('===== Scenario 2. Add Inventory UOM =====')
+        .clickMenuScreen('Inventory UOM','Screen')
+        .clickButton('New')
+        .waitUntilLoaded('icinventoryuom')
+        .enterData('Text Field','UnitMeasure','Smoke_LB')
+        .enterData('Text Field','Symbol','Test_LB')
+        .selectComboBoxRowNumber('UnitType',6,0)
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+
+
+        //Add Inventory UOM with Conversion 5 lb bag
+        .clickButton('New')
+        .waitUntilLoaded('icinventoryuom')
+        .enterData('Text Field','UnitMeasure','Smoke 5 LB bag')
+        .enterData('Text Field','Symbol','Smoke 5 LB bag')
+        .selectComboBoxRowNumber('UnitType',7,0)
+        .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+        //.selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
+        .enterGridData('Conversion', 1, 'dblConversionToStock', '5')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+
+
+        //Add Inventory UOM with Conversion 10 lb bag
+        .clickButton('New')
+        .waitUntilLoaded('icinventoryuom')
+        .enterData('Text Field','UnitMeasure','Smoke 10 LB bag')
+        .enterData('Text Field','Symbol','Smoke 10 LB bag')
+        .selectComboBoxRowNumber('UnitType',7,0)
+        .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+        //.selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
+        .enterGridData('Conversion', 1, 'dblConversionToStock', '10')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        .displayText('===== Inventory UOM Created =====')
+        //endregion
+
+
+        //region Fuel Category
+        .displayText('===== Scenario 3: Add New Fuel Type, Fuel Category, Feed Stock, Fuel Code, Production Process, Feed Stock UOM =====')
+        .clickMenuScreen('Fuel Types','Screen')
+        .clickButton('Close')
+        .clickButton('FuelCategory')
+        .waitUntilLoaded('icfuelcategory')
+        .enterGridData('GridTemplate', 1, 'colRinFuelCategoryCode', 'ICSmokeFuelCategory')
+        .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeFuelCategoryDesc')
+        .enterGridData('GridTemplate', 1, 'colEquivalenceValue', 'ICSmokeFuelCategory_EV')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+
+        //Feed Stock
+        .clickButton('FeedStock')
+        .waitUntilLoaded('')
+        .enterGridData('GridTemplate', 1, 'colRinFeedStockCode', 'ICSmokeFeedStock')
+        .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeFeedStockDesc')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+
+        //FuelCode
+        .clickButton('FuelCode')
+        .waitUntilLoaded('icfuelcode')
+        .enterGridData('GridTemplate', 1, 'colRinFuelCode', 'ICSmokeFuelCode')
+        .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeFuelCodeDesc')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+
+        //Production Process
+        .clickButton('ProductionProcess')
+        .waitUntilLoaded('icprocesscode')
+        .enterGridData('GridTemplate', 1, 'colRinProcessCode', 'ICSmokeProductionProcess')
+        .enterGridData('GridTemplate', 1, 'colDescription', 'ICSmokeProductionProcessDesc')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+
+        //Feed Stock UOM
+        .clickButton('FeedStockUOM')
+        .waitUntilLoaded('icfeedstockuom')
+        .selectGridComboBoxRowValue('GridTemplate',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
+        .enterGridData('GridTemplate', 1, 'colRinFeedStockUOMCode', 'Test UOM Code 1')
+        .verifyStatusMessage('Edited')
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+
+        //Fuel Type
+        .clickButton('New')
+        .selectComboBoxRowNumber('FuelCategory',1,0)
+        //.selectComboBoxRowValue('FuelCategory', 'ICSmokeFuelCategory', 'FuelCategory',0)
+        .selectComboBoxRowNumber('FeedStock',1,0)
+        //.selectComboBoxRowValue('FeedStock', 'ICSmokeFeedStock', 'FeedStock',0)
+        .enterData('Text Field','BatchNo','1')
+        .verifyData('Text Field','EquivalenceValue','ICSmokeFuelCategory_EV')
+        .selectComboBoxRowNumber('FuelCode',1,0)
+        //.selectComboBoxRowValue('FuelCode', 'ICSmokeFuelCode', 'FuelCode',0)
+        .selectComboBoxRowNumber('ProductionProcess',1,0)
+        //.selectComboBoxRowValue('ProductionProcess', 'ICSmokeProductionProcess', 'ProductionProcess',0)
+        .selectComboBoxRowNumber('FeedStockUom',1,0)
+        //.selectComboBoxRowValue('FeedStockUom', 'Smoke_LB', 'FeedStockUom',0)
+        .enterData('Text Field','FeedStockFactor','10')
+        .clickCheckBox('RenewableBiomass', true)
+        .enterData('Text Field','PercentOfDenaturant','25')
+        .clickCheckBox('DeductDenaturantFromRin', true)
+        .clickButton('Save')
+        .verifyStatusMessage('Saved')
+        .clickButton('Close')
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('===== Add Fuel Type Done =====')
+        //endregion
+
+
+        //Add Category
+        .displayText('===== Scenario 4: Add Category =====')
+        .addFunction(function(next){
+            commonIC.addCategory (t,next, 'Smoke Category', 'Test Smoke Category Description', 2)
+        })
+
+        //Add Commodity
+        .displayText('===== Scenario 6: Add Commodity =====')
+        .addFunction(function(next){
+            commonIC.addCommodity (t,next, 'Smoke Commodity', 'Test Smoke Commodity Description')
+        })
+
+        //Add Lotted Item
+        .displayText('===== Scenario 5: Add Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addInventoryItem
+            (t,next,
+                'Smoke - LTI - 01'
+                , 'Test Lotted Item For Other Smoke Testing'
+                , 3
+//                , 'Grains'
+//                , 'SC - Commodity - 01'
+//                , 'LB'
+//                , 'LB'
+                , 10
+                , 10
+                , 40
+            )
+        })
+
+        //Add Non Lotted Item
+        .displayText('===== Scenario 6: Add Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addInventoryItem
+            (t,next,
+                'Smoke - NLTI - 01'
+                , 'Test Non Lotted Item Smoke Testing'
+                , 4
+//                , 'Grains'
+//                , 'SC - Commodity - 01'
+//                , 'LB'
+//                , 'LB'
+                , 10
+                , 10
+                , 40
+            )
+        })
+
+
+        //IC Add Transactions
+        .displayText('===== Start IC Add Transactions =====')
+         //Create Direct IR for Non Lotted Item
+        .displayText('===== Scenario 1: Create Direct IR for Non Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addDirectIRNonLotted (t,next, 4, 1, 'Smoke - NLTI - 01','LB', 1000, 10)
+        })
+
+
+        //Create Direct IR for Lotted Item
+        .displayText('===== Scenario 2: Create Direct IR for Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addDirectIRLotted (t,next, 4, 1, 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+        })
+
+        //Create Direct IR for Lotted Item with other charges
+        .displayText('===== Scenario 3: Direct IR for Lotted Item with other charges  =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Inventory Receipts','Screen')
         .clickButton('New')
         .waitUntilLoaded('icinventoryreceipt')
         .selectComboBoxRowNumber('ReceiptType',4,0)
-        .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
+        .selectComboBoxRowNumber('Vendor',1,0)
+        .selectComboBoxRowNumber('Location',1,0)
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','Smoke - LTI - 01','strItemNo')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100000')
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
+        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Smoke_LB')
-        .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'Smoke_LB')
-        .verifyGridData('InventoryReceipt', 1, 'colGross', '100000')
-        .verifyGridData('InventoryReceipt', 1, 'colNet', '100000')
-        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000000')
+        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
         .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
-        .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'ICSmoke - SL')
+        .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
 
         .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
-        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        .enterGridData('LotTracking', 1, 'colLotQuantity', '100000')
-        .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100000')
+        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','LB','strUnitMeasure')
+        .enterGridData('LotTracking', 1, 'colLotQuantity', '100')
+        .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100')
         .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
-        .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100000')
-        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'Smoke_LB')
-        .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'ICSmoke - SL')
+        .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100')
+        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'LB')
+        .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
 
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblGrossWgt').text;
-            if (total == 'Gross: 100,000.00') {
-                t.ok(true, 'Gross is correct.');
-            }
-            else {
-                t.ok(false, 'Gross is incorrect.');
-            }
-            next();
-        })
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblNetWgt').text;
-            if (total == 'Net: 100,000.00') {
-                t.ok(true, 'Net is correct.');
-            }
-            else {
-                t.ok(false, 'Net is incorrect.');
-            }
-            next();
-        })
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblTotal').text;
-            if (total == 'Total: 1,000,000.00') {
-                t.ok(true, 'Total is correct.');
-            }
-            else {
-                t.ok(false, 'Total is incorrect.');
-            }
-            next();
-        })
+        //Calculate Charge Amount
+        .clickTab('FreightInvoice')
+        .selectGridComboBoxRowValue('Charges',1,'strItemNo','FRT','strItemNo')
+        .selectGridComboBoxRowNumber('Charges',1,'colCostMethod',2)
+        .selectGridComboBoxRowValue('Charges',1,'strCurrency','USD','strCurrency')
+        .enterGridData('Charges', 1, 'colRate', '10')
+        .clickGridCheckBox('Charges',0, 'strItemNo', 'FRT', 'ysnAccrue', true)
 
-        .clickButton('PostPreview')
-        .waitUntilLoaded('cmcmrecaptransaction')
-        .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000000')
-        .clickButton('Post')
-        .addResult('Successfully Posted',3000)
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',3000)
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',3000)
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .displayText('===== Create Direct Inventory Receipt for Lotted Item=====')
+        .selectGridComboBoxRowValue('Charges',2,'strItemNo','FRT','strItemNo')
+        .selectGridComboBoxRowNumber('Charges',2,'colCostMethod',1)
+        .selectGridComboBoxRowValue('Charges',2,'strCurrency','USD','strCurrency')
+        .enterGridData('Charges', 2, 'colRate', '0.5')
+        .selectGridComboBoxRowValue('Charges',2,'strCostUOM','LB','strCostUOM')
+        .selectGridComboBoxRowNumber('Charges',2,'colChargeUOM',4)
+        .clickGridCheckBox('Charges',1, 'strItemNo', 'FRT', 'ysnAccrue', true)
+
+        .selectGridComboBoxRowValue('Charges',3,'strItemNo','FRT','strItemNo')
+        .selectGridComboBoxRowNumber('Charges',3,'colCostMethod',3)
+        .selectGridComboBoxRowValue('Charges',3,'strCurrency','USD','strCurrency')
+        .enterGridData('Charges', 3, 'colChargeAmount', '30')
+        .clickGridCheckBox('Charges',2, 'strItemNo', 'FRT', 'ysnAccrue', true)
 
 
-        //region Scenario 3.3. Create Direct Inventory Shipment for Non Lotted Item
-        .displayText('=====  Scenario 3.3. Create Direct Inventory Shipment for Non Lotted Item  =====')
-        .clickMenuScreen('Inventory Shipments','Screen')
+
+        .clickButton('CalculateCharges')
         .waitUntilLoaded()
-        .clickButton('New')
-        .waitUntilLoaded('icinventoryshipment')
-        .selectComboBoxRowNumber('OrderType',4,0)
-        .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
-        .selectComboBoxRowValue('FreightTerms', 'Truck', 'FreightTerms',1)
-        .selectComboBoxRowValue('ShipFromAddress', '0001 - Fort Wayne', 'ShipFromAddress',1)
-        .selectComboBoxRowNumber('ShipToAddress',1,0)
-
-        .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo','Smoke - NLTI - 01','strItemNo')
-        .selectGridComboBoxRowValue('InventoryShipment',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        .enterGridData('InventoryShipment', 1, 'colQuantity', '100')
+        .waitUntilLoaded()
+        .waitUntilLoaded()
+        .verifyGridData('Charges', 1, 'colChargeAmount', '100')
+        .verifyGridData('Charges', 2, 'colChargeAmount', '50')
+        .verifyGridData('Charges', 3, 'colChargeAmount', '30')
 
 
-        .verifyGridData('InventoryShipment', 1, 'colUnitPrice', '14')
-        .verifyGridData('InventoryShipment', 1, 'colOwnershipType', 'Own')
-        .verifyGridData('InventoryShipment', 1, 'colSubLocation', 'Raw Station')
-        .verifyGridData('InventoryShipment', 1, 'colStorageLocation', 'ICSmoke - SL')
-        .verifyGridData('InventoryShipment', 1, 'colLineTotal', '1400')
-
-
+        //Post IR
         .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
-        .addResult('Successfully Posted',1500)
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',2000)
         .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded('')
-        .displayText('===== Create Direct Inventory Shipment for Non Lotted Item Done=====')
-        //endregion
-
-        //region Scenario 3.4. Create Direct Inventory Shipment for Lotted Item
-        .displayText('=====  Scenario 3.4. Create Direct Inventory Shipment for Lotted Item  =====')
-        .clickButton('New')
-        .waitUntilLoaded('icinventoryshipment')
-        .selectComboBoxRowNumber('OrderType',4,0)
-        .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
-        .selectComboBoxRowValue('FreightTerms', 'Truck', 'FreightTerms',1)
-        .selectComboBoxRowValue('ShipFromAddress', '0001 - Fort Wayne', 'ShipFromAddress',1)
-        .selectComboBoxRowNumber('ShipToAddress',1,0)
-
-        .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo','Smoke - LTI - 01','strItemNo')
-        .selectGridComboBoxRowValue('InventoryShipment',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        .enterGridData('InventoryShipment', 1, 'colQuantity', '100')
-        .verifyGridData('InventoryShipment', 1, 'colUnitPrice', '14')
-        .verifyGridData('InventoryShipment', 1, 'colOwnershipType', 'Own')
-        .verifyGridData('InventoryShipment', 1, 'colSubLocation', 'Raw Station')
-        .verifyGridData('InventoryShipment', 1, 'colStorageLocation', 'ICSmoke - SL')
-        .verifyGridData('InventoryShipment', 1, 'colLineTotal', '1400')
-
-        .selectGridComboBoxRowValue('LotTracking',1,'strLotId','LOT-01','strLotId')
-        .enterGridData('LotTracking', 1, 'colShipQty', '100')
-        .verifyGridData('LotTracking', 1, 'colLotUOM', 'Smoke_LB')
-        .verifyGridData('LotTracking', 1, 'colGrossWeight', '100')
-        .verifyGridData('LotTracking', 1, 'colTareWeight', '0')
-        .verifyGridData('LotTracking', 1, 'colNetWeight', '100')
-        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'Smoke_LB')
-
-        .clickButton('PostPreview')
-        .waitUntilLoaded('cmcmrecaptransaction')
-        .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
-        .clickButton('Post')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',1500)
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .displayText('===== Create Direct Inventory Shipment for Non Lotted Item Done=====')
-        //endregion
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('=====  Scenario 3 Done: IR with Charges  =====')
 
 
-        //region Scenario 3.5. Create Inventory Transfer for Non Lotted Item Shipment Not Required Location to Location
-        .displayText('===== Scenario 3.5. Create Inventory Transfer for Non Lotted Item Shipment Not Required Location to Location =====')
+        //Create Direct IS for Non Lotted Item
+        .displayText('===== Scenario 4: Create Direct IS for Non Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addDirectISNonLotted (t,next, 1, 3, 1, 'Smoke - NLTI - 01','LB', 100)
+        })
+
+
+        //Create Direct IS for Non Lotted Item
+        .displayText('===== Scenario 5: Create Direct IS for Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addDirectISLotted (t,next, 1, 3, 1, 'Smoke - LTI - 01','LB', 100, 'LOT-01')
+        })
+
+
+        //region Scenario 6. Create Inventory Transfer for Non Lotted Item Shipment Not Required Location to Location
+        .displayText('===== Scenario 6. Create Inventory Transfer for Non Lotted Item Shipment Not Required Location to Location =====')
+        .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Inventory Transfers','Screen')
         .waitUntilLoaded()
         .clickButton('New')
@@ -253,14 +335,14 @@ StartTest (function (t) {
         .verifyData('Combo Box','TransferType','Location to Location')
         .verifyData('Combo Box','FromLocation','0001 - Fort Wayne')
         .verifyData('Combo Box','SourceType','None')
-        .selectComboBoxRowValue('ToLocation', '0002 - Indianapolis', 'ToLocation',1)
+        .selectComboBoxRowNumber('ToLocation',2,0)
         .enterData('Text Field','Description','Test Transfer')
 
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','Smoke - NLTI - 01','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','ICSmoke - SL','strFromStorageLocationName')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
-        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'Smoke_LB')
+        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
         .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
@@ -278,51 +360,159 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded('')
-        .displayText('===== Create Inventory Transfer for Non Lotted Item Shipment Not Required Done =====')
+        .displayText('===== Scenario 6. Create Inventory Transfer for Non Lotted Item Shipment Not Required Location to Location Done=====')
         //endregion
 
-//        //region Scenario 3.6. Create Inventory Transfer for Lotted Item Shipment Not Required Location to Location
-//        .displayText('===== Scenario 3.6. Create Inventory Transfer for Lotted Item Shipment Not Required Location to Location=====')
-//        .clickMenuScreen('Inventory Transfers','Screen')
-//        .waitUntilLoaded()
-//        .clickButton('New')
-//        .waitUntilLoaded('icinventorytransfer')
-//        .verifyData('Combo Box','TransferType','Location to Location')
-//        .verifyData('Combo Box','FromLocation','0001 - Fort Wayne')
-//        .verifyData('Combo Box','SourceType','None')
-//        .selectComboBoxRowValue('ToLocation', '0002 - Indianapolis', 'ToLocation',1)
-//        .enterData('Text Field','Description','Test Transfer')
-//
-//        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','Smoke - LTI - 01','strItemNo')
-//        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
-//        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','ICSmoke - SL','strFromStorageLocationName')
-//        .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
-//        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'Smoke_LB')
-//        .selectGridComboBoxRowValue('InventoryTransfer',1,'strLotNumber','LOT-01','strLotNumber')
-//        .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
-//        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
-//        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
-//
-//        .clickButton('PostPreview')
-//        .waitUntilLoaded('cmcmrecaptransaction')
-//        .waitUntilLoaded('')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0002-000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
-//        .clickButton('Post')
-//        .waitUntilLoaded('')
-//        .addResult('Successfully Posted',1500)
-//        .waitUntilLoaded('')
-//        .clickButton('Close')
-//        .waitUntilLoaded('')
-//        .displayText('===== Create Inventory Transfer for Lotted Item Shipment Not Required Done =====')
-//        //endregion
+
+        //region Scenario 7. Create Inventory Transfer for Lotted Item Shipment Not Required Location to Location
+        .displayText('===== Scenario 7. Create Inventory Transfer for Lotted Item Shipment Not Required Location to Location=====')
+        .clickMenuScreen('Inventory Transfers','Screen')
+        .waitUntilLoaded()
+        .clickButton('New')
+        .waitUntilLoaded('icinventorytransfer')
+        .verifyData('Combo Box','TransferType','Location to Location')
+        .verifyData('Combo Box','FromLocation','0001 - Fort Wayne')
+        .verifyData('Combo Box','SourceType','None')
+        .selectComboBoxRowNumber('ToLocation',2,0)
+        .enterData('Text Field','Description','Test Transfer')
+
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','Smoke - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
+        .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
+        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strLotNumber','LOT-01','strLotNumber')
+        .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
+
+        .clickButton('PostPreview')
+        .waitUntilLoaded('cmcmrecaptransaction')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0002-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',1500)
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('===== Scenario 7. Create Inventory Transfer for Lotted Item Shipment Not Required Location to Location Done =====')
+        //endregion
+
+
+        //region Scenario 8. Create Inventory Transfer for Lotted Item Shipment Required Different Location
+        .displayText('===== Scenario 8. Create Inventory Transfer for Lotted Item Shipment Required Location to Location =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Inventory Transfers','Screen')
+        .waitUntilLoaded()
+        .clickButton('New')
+        .waitUntilLoaded('icinventorytransfer')
+        .verifyData('Combo Box','TransferType','Location to Location')
+        .verifyData('Combo Box','FromLocation','0001 - Fort Wayne')
+        .verifyData('Combo Box','SourceType','None')
+        .selectComboBoxRowNumber('ToLocation',2,0)
+        .clickCheckBox('ShipmentRequired', true)
+        .enterData('Text Field','Description','Test Transfer')
+
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','Smoke - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
+        .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strLotNumber','LOT-01','strLotNumber')
+        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
+        .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
+
+        .clickButton('PostPreview')
+        .waitUntilLoaded('cmcmrecaptransaction')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',1500)
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded('')
+
+        .clickMenuScreen('Inventory Receipts','Screen')
+        .waitUntilLoaded()
+        .clickButton('New')
+        .waitUntilLoaded('icinventoryreceipt')
+        .selectComboBoxRowNumber('ReceiptType',3,0)
+        .selectComboBoxRowNumber('Transferor',1,0)
+        .doubleClickSearchRowValue('Smoke - LTI - 01', 'strItemNo', 1)
+        .waitUntilLoaded('')
+        .verifyData('Combo Box','ReceiptType','Transfer Order')
+        .verifyData('Combo Box','Transferor','0001 - Fort Wayne')
+        .verifyData('Combo Box','Location','0002 - Indianapolis')
+        .verifyData('Combo Box','Currency','USD')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'Smoke - LTI - 01')
+        .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
+        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
+        .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Indy')
+        .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'Indy Storage')
+
+        .selectGridRowNumber('InventoryReceipt', [1])
+
+        .waitTillLoaded()
+        .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
+        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','LB','strUnitMeasure')
+        .enterGridData('LotTracking', 1, 'colLotQuantity', '100')
+        .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100')
+        .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
+        .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100')
+        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'LB')
+        .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'Indy Storage')
+
+
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                grid = win.down('#grdInventoryReceipt'),
+                total = grid.down('#lblTotal').text;
+            if (total == 'Total: 1,000.00') {
+                t.ok(true, 'Total is correct.');
+            }
+            else {
+                t.ok(false, 'Total is incorrect.');
+            }
+            next();
+        })
+
+        .clickButton('PostPreview')
+        .waitUntilLoaded('cmcmrecaptransaction')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0002-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',2000)
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('===== Scenario 8: Create Inventory Transfer for Non Lotted Item Shipment Required Location to Location Done =====')
+        //endregion
 
 
 
-        //region Scenario 3.7. Inventory Adjustment Quantity Change Non Lotted Item
-        .displayText('===== Scenario 3.7. Inventory Adjustment Quantity Change Non Lotted Item=====')
+        //region Scenario 9. Inventory Adjustment Quantity Change Non Lotted Item
+        .displayText('===== Scenario 9. Inventory Adjustment Quantity Change Non Lotted Item=====')
+        .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Inventory Adjustments','Screen')
         .waitUntilLoaded()
         .clickButton('New')
@@ -349,11 +539,11 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded('')
-        .displayText('===== Create Inventory Transfer for Non Lotted Item Shipment Not Required Done =====')
+        .displayText('===== Scenario 9. Inventory Adjustment Quantity Change Non Lotted Item Done =====')
         //endregion
 
-        //region Scenario 3.8. Inventory Adjustment Quantity Change Lotted Item
-        .displayText('===== Scenario 3.8. Inventory Adjustment Quantity Change Lotted Item=====')
+        //region Scenario 10. Inventory Adjustment Quantity Change Lotted Item
+        .displayText('===== Scenario 10. Inventory Adjustment Quantity Change Lotted Item =====')
         .clickMenuScreen('Inventory Adjustments','Screen')
         .waitUntilLoaded()
         .clickButton('New')
@@ -363,10 +553,10 @@ StartTest (function (t) {
         .enterData('Text Field','Description','Test Quantity Change')
 
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','Smoke - LTI - 01','strItemNo')
-        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strSubLocation','Raw Station','strSubLocation')
-        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strStorageLocation','ICSmoke - SL','strStorageLocation')
-        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strLotNumber','LOT-01','strLotNumber')
+        .selectGridComboBoxRowNumber('InventoryAdjustment',1,'colLotNumber',1)
         .enterGridData('InventoryAdjustment', 1, 'colAdjustByQuantity', '100')
+        .verifyGridData('InventoryAdjustment', 1, 'colSubLocation', 'Raw Station')
+        .verifyGridData('InventoryAdjustment', 1, 'colStorageLocation', 'RM Storage')
         .verifyGridData('InventoryAdjustment', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryAdjustment', 1, 'colNewUnitCost', '10')
 
@@ -383,19 +573,66 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded('')
-        .displayText('===== Create Inventory Transfer for Non Lotted Item Shipment Not Required Done =====')
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('===== Scenario 10. Inventory Adjustment Quantity Change Lotted Item =====')
+        //endregion
+
+
+        //region Scenario 11. Inventory Adjustment Lot Move Lotted Item
+        .displayText('===== Scenario 11. Inventory Adjustment Quantity Change Lotted Item =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Inventory Adjustments','Screen')
+        .waitUntilLoaded()
+        .clickButton('New')
+        .waitUntilLoaded('icinventoryadjustment')
+        .verifyData('Combo Box','Location','0001 - Fort Wayne')
+        .selectComboBoxRowNumber('AdjustmentType',8,0)
+        .enterData('Text Field','Description','Test Lot Move')
+
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','Smoke - LTI - 01','strItemNo')
+        .selectGridComboBoxRowNumber('InventoryAdjustment',1,'colLotNumber',1)
+        .enterGridData('InventoryAdjustment', 1, 'colAdjustByQuantity', '-100')
+        .verifyGridData('InventoryAdjustment', 1, 'colSubLocation', 'Raw Station')
+        .verifyGridData('InventoryAdjustment', 1, 'colStorageLocation', 'RM Storage')
+        .verifyGridData('InventoryAdjustment', 1, 'colUnitCost', '10')
+        .verifyGridData('InventoryAdjustment', 1, 'colNewUnitCost', '10')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strNewLocation','0002 - Indianapolis','strNewLocation')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strNewSubLocation','Indy','strNewSubLocation')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strNewStorageLocation','Indy Storage','strNewStorageLocation')
+
+        .clickButton('PostPreview')
+        .waitUntilLoaded('cmcmrecaptransaction')
+
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0002-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .verifyGridData('RecapTransaction', 3, 'colRecapAccountId', '16040-0001-000')
+        .verifyGridData('RecapTransaction', 3, 'colRecapDebit', '1000')
+        .verifyGridData('RecapTransaction', 4, 'colRecapAccountId', '16040-0002-000')
+        .verifyGridData('RecapTransaction', 4, 'colRecapCredit', '1000')
+
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',1000)
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('===== Scenario 11. Inventory Adjustment Quantity Change Lotted Item Done =====')
         //endregion
 
 
 
-
-        //region Scenario 9. Inventory Count - Lock Inventory
-        .displayText('===== Scenario  9. Inventory Count - Lock Inventory =====')
+        //region Scenario 12. Inventory Count - Lock Inventory
+        .displayText('===== Scenario  12. Inventory Count - Lock Inventory =====')
+        .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Inventory Count','Screen')
         .clickButton('New')
         .waitUntilLoaded()
-        .selectComboBoxRowValue('Category', 'Gas', 'Category',1)
-        .selectComboBoxRowValue('Commodity', 'Gasoline', 'Commodity',1)
+        .selectComboBoxRowNumber('Category',1,0)
+        .selectComboBoxRowNumber('Commodity',3,0)
         .clickButton('Fetch')
         .waitUntilLoaded()
         .verifyGridData('PhysicalCount', 1, 'colItem', '87G')
@@ -405,15 +642,18 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .clickButton('Close')
         .waitUntilLoaded()
-        .clickButton('LockInventory')
-        .waitUntilLoaded()
         .isControlVisible('tlb',
         [
             'PrintVariance'
             , 'LockInventory'
             , 'Post'
-            , 'PostPreview'
+            , 'Recap'
         ], true)
+        .waitUntilLoaded()
+        .clickButton('LockInventory')
+        .waitUntilLoaded()
+        .waitUntilLoaded()
+        .waitUntilLoaded()
         .clickButton('Close')
         .waitUntilLoaded()
 
@@ -422,8 +662,9 @@ StartTest (function (t) {
         .clickButton('New')
         .waitUntilLoaded('icinventoryreceipt')
         .selectComboBoxRowNumber('ReceiptType',4,0)
-        .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
+        .selectComboBoxRowNumber('Vendor',1,0)
+        .selectComboBoxRowNumber('Location',1,0)
+
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','87G','strItemNo')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','Gallon','strUnitMeasure')
         .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
@@ -445,18 +686,20 @@ StartTest (function (t) {
 
         .clickButton('PostPreview')
         .waitUntilLoaded('')
-        .addResult('Clicking Recap',5000)
+        .addResult('Clicking Recap',3000)
         .waitUntilLoaded('')
         .waitUntilLoaded('')
-        .verifyMessageBox('iRely i21','Inventory Count is ongoing for Item 87G and is locked under Location 0001 - Fort Wayne.','ok','error')
         .clickMessageBoxButton('ok')
         .waitUntilLoaded('')
         .clickButton('Close')
-        .displayText('===== Scenario 8. Inventory Count - Lock Inventory Done =====')
-//        //endregion
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('===== Scenario  12. Inventory Count - Lock Inventory =====')
+        //endregion
 
-        //region Scenario 9. Add new Storage Measurement Reading with 1 item only.
-        .displayText('===== Scenario 1. Add new Storage Measurement Reading with 1 item only. ====')
+
+        //region Scenario 13. Add new Storage Measurement Reading with 1 item only.
+        .displayText('===== Scenario 13. Add new Storage Measurement Reading with 1 item only. ====')
+        .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Storage Measurement Reading','Screen')
         .waitUntilLoaded()
         .clickButton('Close')
@@ -465,10 +708,10 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .clickButton('New')
         .waitUntilLoaded()
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectGridComboBoxRowValue('StorageMeasurementReading',1,'strCommodity','Smoke Commodity','strCommodity')
+        .selectComboBoxRowNumber('Location',1,0)
+        .selectGridComboBoxRowValue('StorageMeasurementReading',1,'strCommodity','Soybean Oil','strCommodity')
         .selectGridComboBoxRowValue('StorageMeasurementReading',1,'strItemNo','Smoke - LTI - 01','strItemNo')
-        .selectGridComboBoxRowValue('StorageMeasurementReading',1,'strStorageLocationName','ICSmoke - SL','strStorageLocationName')
+        .selectGridComboBoxRowValue('StorageMeasurementReading',1,'strStorageLocationName','RM Storage','strStorageLocationName')
         .waitUntilLoaded()
         .verifyGridData('StorageMeasurementReading', 1, 'colSubLocation', 'Raw Station')
         .enterGridData('StorageMeasurementReading', 1, 'dblAirSpaceReading', '20')
@@ -477,10 +720,11 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .clickButton('Close')
         .waitUntilLoaded()
-        .displayText('===== Add new Storage Measurement Reading with 1 item only Done. ====')
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('===== Scenario 13. Add new Storage Measurement Reading with 1 item only. Done ====')
 
 
-        .displayText('=====  Add IC Transactions Done====')
+
         .done();
 
 })

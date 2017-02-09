@@ -52,11 +52,11 @@ StartTest (function (t) {
         //Adding Stock to Items
         .displayText('===== Adding Stocks to Created items =====')
         .addFunction(function(next){
-            commonIC.addDirectIRNonLotted(t,next, 'ABC Trucking', '0001 - Fort Wayne','NLTI - 01', 'LB', 100, 10)
+            commonIC.addDirectIRNonLotted (t,next, 4, 1, 'NLTI - 01','LB', 1000, 10)
         })
 
         .addFunction(function(next){
-            commonIC.addDirectIRLotted(t,next, 'ABC Trucking', '0001 - Fort Wayne','LTI - 01', 'LB', 100, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+            commonIC.addDirectIRLotted (t,next, 4, 1, 'LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
         })
         .displayText('===== Adding Stocks to Created Done =====')
 
