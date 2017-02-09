@@ -661,3 +661,47 @@ BEGIN
 	WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Contract' 
 END
 GO
+
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unapproved Contract' AND [strType] = N'Quality Sample')
+BEGIN
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+	SELECT [strReminder]        =        N'Unapproved Contract',
+			[strType]        	=        N'Quality Sample',
+			[strMessage]		=        N'{0} {1} {2} unapproved.',
+			[strQuery]  		=        N'	SELECT CA.intSampleId
+											FROM vyuQMSampleContractAlert CA
+											JOIN tblCTEventRecipient ER ON ER.intEventId = CA.intEventId
+											WHERE ER.intEntityId = {0}',
+			[strNamespace]       =        N'Quality.view.QualityAlerts?activeTab=Unapproved', 
+			[intSort]            =        22
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET	[strMessage] = N'{0} {1} {2} unapproved.'
+	WHERE [strReminder] = N'Unapproved Contract' AND [strType] = N'Quality Sample' 
+END
+GO
+
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unapproved FOB Contract' AND [strType] = N'Quality Sample')
+BEGIN
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+	SELECT [strReminder]        =        N'Unapproved FOB Contract',
+			[strType]        	=        N'Quality Sample',
+			[strMessage]		=        N'{0} {1} {2} unapproved.',
+			[strQuery]  		=        N'	SELECT CA.intSampleId
+											FROM vyuQMSampleFOBContractAlert CA
+											JOIN tblCTEventRecipient ER ON ER.intEventId = CA.intEventId
+											WHERE ER.intEntityId = {0}',
+			[strNamespace]       =        N'Quality.view.QualityAlerts?activeTab=UnapprovedFOB', 
+			[intSort]            =        23
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET	[strMessage] = N'{0} {1} {2} unapproved.'
+	WHERE [strReminder] = N'Unapproved FOB Contract' AND [strType] = N'Quality Sample' 
+END
+GO
