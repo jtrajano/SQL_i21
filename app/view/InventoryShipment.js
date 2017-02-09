@@ -145,6 +145,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
+                                        hidden: true,
                                         itemId: 'btnPostPreview',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Post Preview'
@@ -2184,6 +2185,14 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 ]
                                             }
                                         ]
+                                    },
+                                    {
+                                        xtype: 'glrecaptab',
+                                        itemId: 'pgePostPreview',
+                                        title: 'Post Preview',
+                                        listeners: {
+                                            beforeshow: 'onPnlRecapBeforeShow'
+                                        }
                                     },
                                     {
                                         xtype: 'panel',

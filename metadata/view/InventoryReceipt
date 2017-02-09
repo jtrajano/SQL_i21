@@ -7168,7 +7168,7 @@
                             "userConfig": {
                                 "bodyPadding": null,
                                 "designer|createAlias": "glrecaptab",
-                                "itemId": "pnlPostPreview",
+                                "itemId": "pgePostPreview",
                                 "layout": null,
                                 "title": "Post Preview"
                             },
