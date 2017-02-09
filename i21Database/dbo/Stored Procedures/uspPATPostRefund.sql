@@ -119,40 +119,6 @@ BEGIN
 	INSERT INTO @GLEntries
 	SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @intAPClearingId, @batchId)
 
----------------------FORCE BALANCING------------------------------------------------
---check out of balance 
---offset discrepancy
-SELECT @dblDiff = SUM(dblDebit) - SUM(dblCredit) FROM @GLEntries
--- long term, there has to be a setup for adjustment
--- for now, we adjust by force :)
-IF @dblDiff <> 0
-BEGIN
-	IF @dblDiff <0 -- credit is higher than debit
-		BEGIN
-			WITH UpdateListView AS (
-				SELECT TOP 1 *
-				FROM @GLEntries 
-				WHERE strTransactionType = 'General Reserve' 
-				AND dblDebit >0
-			)
-			UPDATE UpdateListView
-			SET dblDebit = dblDebit + ABS(@dblDiff)
-				
-		END
-	ELSE -- debit is higher than credit
-		BEGIN
-			WITH UpdateListView AS (
-				SELECT TOP 1 *
-				FROM @GLEntries 
-				WHERE strTransactionType = 'Undistributed Equity' 
-				AND dblCredit > 0
-			)
-			UPDATE UpdateListView
-			SET dblCredit = dblCredit + ABS(@dblDiff)
-				
-		END
-
-END
 ----------------------------------------------------------------------------------
 
 END
@@ -161,45 +127,12 @@ BEGIN
 	INSERT INTO @GLEntries
 	SELECT * FROM dbo.fnPATReverseGLRefundEntries(@validRefundIds, DEFAULT, @intUserId)
 
----------------------FORCE BALANCING REVERSE--------------------------------------
---check out of balance 
---offset discrepancy
-SELECT @dblDiff = SUM(dblCredit) - SUM(dblDebit) FROM @GLEntries
--- long term, there has to be a setup for adjustment
--- for now, we adjust by force :)
-IF @dblDiff <> 0
-BEGIN
-	IF @dblDiff <0 -- debit is higher than debit
-		BEGIN
-			WITH UpdateListView AS (
-				SELECT TOP 1 *
-				FROM @GLEntries 
-				WHERE strTransactionType = 'General Reserve' 
-				AND dblCredit > 0
-			)
-			UPDATE UpdateListView
-			SET dblCredit = dblCredit + ABS(@dblDiff)
-				
-		END
-	ELSE -- credit is higher than credit
-		BEGIN
-			WITH UpdateListView AS (
-				SELECT TOP 1 *
-				FROM @GLEntries 
-				WHERE strTransactionType = 'Undistributed Equity' 
-				AND dblDebit >0
-			)
-			UPDATE UpdateListView
-			SET dblDebit = dblDebit + ABS(@dblDiff)
-				
-		END
-
-END
 ----------------------------------------------------------------------------------
 
 END
 
 BEGIN TRY
+	SELECT * FROM @GLEntries
 	EXEC uspGLBookEntries @GLEntries, @ysnPosted
 END TRY
 BEGIN CATCH

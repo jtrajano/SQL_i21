@@ -34,9 +34,9 @@ SELECT	Total.intCustomerId,
 			RRD.intPatronageCategoryId,
 			dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume ELSE 0 END,
 			dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume ELSE 0 END,
-			dblRefundAmount = (RRD.dblRate * dblVolume) ,
-			dblCashRefund = (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) ,
-			dbLessFWT = (RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (CompLoc.dblWithholdPercent/100) ,
+			dblRefundAmount = ROUND((RRD.dblRate * dblVolume), 2) ,
+			dblCashRefund = ROUND((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100), 2) ,
+			dbLessFWT = ROUND((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (CompLoc.dblWithholdPercent/100),2) ,
 			dblLessServiceFee = ComPref.dblServiceFee
 			FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
@@ -70,14 +70,14 @@ SELECT	NEWID() AS id,
 		dtmLastActivityDate,
 		strTaxCode,
 		ysnEligibleRefund = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
-		dblTotalPurchases = SUM(ROUND(dblTotalPurchases, 2)),
-		dblTotalSales = SUM(ROUND(dblTotalSales, 2)),
-		dblRefundAmount = SUM(ROUND(dblRefundAmount, 2)),
-		dblEquityRefund = SUM(ROUND(dblEquityRefund, 2)),
-		dblCashRefund = SUM(ROUND(dblCashRefund, 2)),
-		dblLessFWT = SUM(ROUND(dblLessFWT, 2)),
+		dblTotalPurchases = SUM(dblTotalPurchases),
+		dblTotalSales = SUM(dblTotalSales),
+		dblRefundAmount = SUM(dblRefundAmount),
+		dblEquityRefund = SUM(dblEquityRefund),
+		dblCashRefund = SUM(dblCashRefund),
+		dblLessFWT = SUM(dblLessFWT),
 		dblLessServiceFee,
-		dblCheckAmount = SUM(ROUND(dblCashRefund, 2)) - SUM(ROUND(dblLessFWT, 2)) - dblLessServiceFee
+		dblCheckAmount = SUM(dblCashRefund) - SUM(dblLessFWT) - dblLessServiceFee
 	FROM Refund
 	CROSS APPLY ComPref
 	GROUP BY	intCustomerId,
