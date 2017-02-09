@@ -306,6 +306,21 @@ IF @Refresh = 'true'
 		SELECT TOP 1 @HasResult = intId from @TFTransaction
 		IF(@HasResult IS NULL AND @IsEdi = 'false')
 			BEGIN
-				INSERT INTO tblTFTransaction (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)
-				VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), NULL,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+				INSERT INTO tblTFTransaction 
+						(uniqTransactionGuid, 
+						intTaxAuthorityId, 
+						strFormCode, 
+						strProductCode, 
+						dtmDate,
+						dtmReportingPeriodBegin,
+						dtmReportingPeriodEnd, 
+						leaf)
+				VALUES(@Guid, 
+						0, 
+						(SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 
+						'No record found.',
+						GETDATE(), 
+						@DateFrom, 
+						@DateTo, 
+						1)
 			END

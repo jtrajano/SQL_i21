@@ -7,10 +7,6 @@
 
 AS
 
-DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM vyuTFGetTransaction WHERE strFormCode = @FormCodeParam)
-IF (@FCode IS NOT NULL)
-BEGIN
-
 --HEADER
 DECLARE @TA INT
 DECLARE @TPName NVARCHAR(250)
@@ -502,4 +498,3 @@ DECLARE @EIN NVARCHAR(50)
 					BEGIN
 						UPDATE tblTFTransactionSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
 					END
-END

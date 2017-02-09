@@ -6,7 +6,7 @@ SELECT Trans.intTransactionId
 	, Trans.intReportingComponentId
 	, RC.intTaxAuthorityId
 	, RC.strTaxAuthorityCode
-	, RC.strFormCode
+	, strFormCode = CASE WHEN RC.strFormCode IS NULL THEN Trans.strFormCode ELSE RC.strFormCode END
 	, RC.strFormName
 	, RC.strScheduleCode
 	, RC.strScheduleName

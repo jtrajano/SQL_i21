@@ -18,17 +18,6 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	DECLARE @FCode NVARCHAR(10)
-	SELECT TOP 1 @FCode = strFormCode
-	FROM vyuTFGetTransaction
-	WHERE strFormCode = @FormCodeParam
-		AND uniqTransactionGuid = @Guid
-
-	IF (ISNULL(@FCode, '') = '')
-	BEGIN
-		RETURN
-	END
-
 	DECLARE @TA INT
 		, @TACode NVARCHAR(5)
 		--SUMMARY VARIABLES

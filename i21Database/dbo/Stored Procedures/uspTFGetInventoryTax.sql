@@ -457,18 +457,14 @@ BEGIN TRY
 	IF (NOT EXISTS(SELECT TOP 1 1 FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid) AND @IsEdi = 0)
 	BEGIN
 		INSERT INTO tblTFTransaction (uniqTransactionGuid
-			, intTaxAuthorityId
 			, strFormCode
-			, intProductCodeId
 			, strProductCode
 			, dtmDate
 			, dtmReportingPeriodBegin
 			, dtmReportingPeriodEnd
 			, leaf)
 		VALUES(@Guid
-			, NULL
 			, (SELECT TOP 1 strFormCode FROM tblTFReportingComponent WHERE intReportingComponentId = @RCId)
-			, NULL
 			, 'No record found.'
 			, GETDATE()
 			, @DateFrom
