@@ -5017,6 +5017,7 @@
     <Build Include="dbo\Views\vyuQMSampleFOBContractAlert.sql" />
     <None Include="Scripts\Post-Deployment\CT\4_EventConfiguration.sql" />
     <Build Include="dbo\Tables\tblRKArchBlendDemand.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherForPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
