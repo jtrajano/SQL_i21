@@ -37,7 +37,7 @@ BEGIN TRY
 	DECLARE @intTaskRecordId INT
 	DECLARE @dblTotalTaskWeight NUMERIC(18, 6)
 	DECLARE @dblLineItemWeight NUMERIC(18, 6)
-			,@intCategoryId int
+		,@intCategoryId INT
 	DECLARE @tblTaskGenerated TABLE (
 		intTaskRecordId INT Identity(1, 1)
 		,intItemId INT
@@ -49,9 +49,10 @@ BEGIN TRY
 		,@intEntityCustomerId INT
 		,@intItemOwnerId INT
 		,@ysnPickByItemOwner BIT
-		,@intPackagingCategoryId int
-		,@strPackagingCategory nvarchar(50)
-		,@intPMCategoryId int
+		,@intPackagingCategoryId INT
+		,@strPackagingCategory NVARCHAR(50)
+		,@intPMCategoryId INT
+		,@strPickByFullPallet NVARCHAR(50)
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
@@ -61,9 +62,18 @@ BEGIN TRY
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intAttributeId = @intPackagingCategoryId
 
-	Select @intPMCategoryId=intCategoryId 
-	From tblICCategory
-	Where strCategoryCode =@strPackagingCategory
+	SELECT @intPMCategoryId = intCategoryId
+	FROM tblICCategory
+	WHERE strCategoryCode = @strPackagingCategory
+
+	SELECT @strPickByFullPallet = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intAttributeId = 92
+		AND strAttributeValue <> ''
+
+	IF @strPickByFullPallet IS NULL
+		OR @strPickByFullPallet = ''
+		SELECT @strPickByFullPallet = 'False'
 
 	SELECT @intReceivedLife = 0
 		,@ysnPickByItemOwner = 0
@@ -120,7 +130,7 @@ BEGIN TRY
 			,intWeightUOMId INT
 			,ysnStrictTracking BIT
 			,intLotId INT
-			,intCategoryId int
+			,intCategoryId INT
 			)
 		DECLARE @tblLot TABLE (
 			intLotRecordId INT Identity(1, 1)
@@ -173,7 +183,7 @@ BEGIN TRY
 			,intWeightUOMId
 			,ysnStrictTracking
 			,intLotId
-			,intCategoryId 
+			,intCategoryId
 			)
 		SELECT DISTINCT oh.intOrderHeaderId
 			,oli.intOrderDetailId
@@ -194,7 +204,7 @@ BEGIN TRY
 			,oli.intWeightUOMId
 			,i.ysnStrictFIFO
 			,oli.intLotId
-			,i.intCategoryId 
+			,i.intCategoryId
 		FROM tblMFOrderHeader oh
 		JOIN tblMFOrderDetail oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
 		JOIN tblICItem i ON i.intItemId = oli.intItemId
@@ -214,7 +224,8 @@ BEGIN TRY
 			SET @ysnStrictTracking = NULL
 			SET @dblQty = NULL
 			SET @intLineItemLotId = NULL
-			Select @intCategoryId=NULL
+
+			SELECT @intCategoryId = NULL
 
 			DELETE
 			FROM @tblLot
@@ -225,7 +236,7 @@ BEGIN TRY
 				,@dblRequiredWeight = dblRequiredWeight
 				,@ysnStrictTracking = ysnStrictTracking
 				,@intLineItemLotId = intLotId
-				,@intCategoryId =intCategoryId 
+				,@intCategoryId = intCategoryId
 			FROM @tblLineItem I
 			WHERE intItemRecordId = @intItemRecordId
 
@@ -851,12 +862,13 @@ BEGIN TRY
 				FROM @tblLot
 				WHERE intLotRecordId = @intLotRecordId
 
-				If @intCategoryId<>@intPMCategoryId and @strOrderType = 'WO PROD STAGING'
-				Begin
+				IF @strPickByFullPallet = 'True'
+					AND @strOrderType = 'WO PROD STAGING'
+				BEGIN
 					EXEC [uspMFCreatePickTask] @intOrderHeaderId = @intOrderHeaderId
 						,@intLotId = @intLotId
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
-						,@intItemId=@intItemId
+						,@intItemId = @intItemId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblWeght
 
@@ -864,9 +876,8 @@ BEGIN TRY
 					BEGIN
 						BREAK;
 					END
-				End
-
-				IF (@dblRemainingLotWeight > @dblRequiredWeight)
+				END
+				ELSE IF (@dblRemainingLotWeight > @dblRequiredWeight)
 					AND (@dblRequiredWeight > (@dblRemainingLotWeight / 2))
 				BEGIN
 					SET @dblPutbackQty = @dblRemainingLotQty - @dblRequiredQty
@@ -877,7 +888,7 @@ BEGIN TRY
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
 						,@dblSplitAndPickWeight = @dblRequiredWeight
 						,@intTaskTypeId = 2
-						,@intItemId=@intItemId
+						,@intItemId = @intItemId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight
 
@@ -892,7 +903,7 @@ BEGIN TRY
 					EXEC [uspMFCreatePickTask] @intOrderHeaderId = @intOrderHeaderId
 						,@intLotId = @intLotId
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
-						,@intItemId=@intItemId
+						,@intItemId = @intItemId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblWeght
 
@@ -915,7 +926,7 @@ BEGIN TRY
 							,@intEntityUserSecurityId = @intEntityUserSecurityId
 							,@dblSplitAndPickWeight = @dblRemainingLotWeight
 							,@intTaskTypeId = 2
-							,@intItemId=@intItemId
+							,@intItemId = @intItemId
 
 						SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight
 					END
@@ -926,7 +937,7 @@ BEGIN TRY
 							,@intEntityUserSecurityId = @intEntityUserSecurityId
 							,@dblSplitAndPickWeight = @dblRequiredWeight
 							,@intTaskTypeId = 2
-							,@intItemId=@intItemId
+							,@intItemId = @intItemId
 
 						SET @dblRequiredWeight = @dblRequiredWeight - @dblWeght
 					END

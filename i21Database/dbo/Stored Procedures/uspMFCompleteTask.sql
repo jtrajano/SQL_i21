@@ -1,14 +1,13 @@
-﻿CREATE PROCEDURE uspMFCompleteTask
-		@intOrderHeaderId INT,
-		@intUserId INT,
-		@intTaskId INT = NULL
-AS 
+﻿CREATE PROCEDURE uspMFCompleteTask @intOrderHeaderId INT
+	,@intUserId INT
+	,@intTaskId INT = NULL
+AS
 BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @intNewSubLocationId INT
 	DECLARE @intNewStorageLocationId INT
 	DECLARE @dblMoveQty NUMERIC(38, 20)
-	DECLARE @intMoveItemUOMId int
+	DECLARE @intMoveItemUOMId INT
 	DECLARE @blnValidateLotReservation BIT = 0
 	DECLARE @blnInventoryMove BIT = 0
 	DECLARE @intLotId INT
@@ -20,49 +19,88 @@ BEGIN TRY
 	DECLARE @strOrderNo NVARCHAR(100)
 	DECLARE @intRemainingTasks INT
 	DECLARE @intOrderDetailId INT
-	DECLARE @tblTasks TABLE 
-		(intTaskRecordId INT Identity(1, 1)
+	DECLARE @tblTasks TABLE (
+		intTaskRecordId INT Identity(1, 1)
 		,intTaskId INT
-		,intOrderHeaderId INT)
+		,intOrderHeaderId INT
+		)
+	DECLARE @strShipmentNo NVARCHAR(100)
+		,@intShipmentItemId INT
+		,@intLotItemId INT
+		,@dblLotQty NUMERIC(18, 6)
+		,@dblLotWeight NUMERIC(18, 6)
+		,@strOrderType NVARCHAR(50)
 
-BEGIN TRANSACTION
+	BEGIN TRANSACTION
 
-	SELECT @strOrderNo = strOrderNo
-	FROM tblMFOrderHeader
+	SELECT @strOrderNo = OH.strOrderNo
+		,@strOrderType = OT.strOrderType
+	FROM tblMFOrderHeader OH
+	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
-	IF ISNULL(@intTaskId,0) <> 0 
+	IF ISNULL(@intTaskId, 0) <> 0
 	BEGIN
-		SELECT @intNewSubLocationId = SL.intSubLocationId,
-			   @intNewStorageLocationId = T.intToStorageLocationId,
-			   @dblMoveQty = T.dblPickQty,
-			   @intMoveItemUOMId = T.intItemUOMId,
-			   @blnValidateLotReservation = 1,
-			   @blnInventoryMove = 0,
-			   @intLotId = intLotId
-		FROM tblMFTask T
-		JOIN tblICStorageLocation SL ON T.intToStorageLocationId = SL.intStorageLocationId
-		WHERE T.intTaskId = @intTaskId
+		IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+		BEGIN
+			SELECT @intNewSubLocationId = SL.intSubLocationId
+				,@intNewStorageLocationId = T.intToStorageLocationId
+				,@dblMoveQty = T.dblPickQty / (
+					CASE 
+						WHEN T.dblWeightPerQty = 0
+							THEN 1
+						ELSE T.dblWeightPerQty
+						END
+					)
+				,@blnValidateLotReservation = 1
+				,@blnInventoryMove = 0
+				,@intLotId = intLotId
+			FROM tblMFTask T
+			JOIN tblICStorageLocation SL ON T.intToStorageLocationId = SL.intStorageLocationId
+			WHERE T.intTaskId = @intTaskId
 
-		SELECT @strLotNumber = strLotNumber
-			,@intItemId = intItemId
-			,@intLotLocationId = intLocationId
-		FROM tblICLot
-		WHERE intLotId = @intLotId
-		
+			SELECT @strLotNumber = strLotNumber
+				,@intItemId = intItemId
+				,@intLotLocationId = intLocationId
+				,@intMoveItemUOMId = intItemUOMId
+			FROM tblICLot
+			WHERE intLotId = @intLotId
+		END
+		ELSE
+		BEGIN
+			BEGIN
+				SELECT @intNewSubLocationId = SL.intSubLocationId
+					,@intNewStorageLocationId = T.intToStorageLocationId
+					,@dblMoveQty = T.dblPickQty
+					,@intMoveItemUOMId = T.intItemUOMId
+					,@blnValidateLotReservation = 1
+					,@blnInventoryMove = 0
+					,@intLotId = intLotId
+				FROM tblMFTask T
+				JOIN tblICStorageLocation SL ON T.intToStorageLocationId = SL.intStorageLocationId
+				WHERE T.intTaskId = @intTaskId
+
+				SELECT @strLotNumber = strLotNumber
+					,@intItemId = intItemId
+					,@intLotLocationId = intLocationId
+				FROM tblICLot
+				WHERE intLotId = @intLotId
+			END
+		END
+
 		SELECT @intOrderDetailId = intOrderDetailId
 		FROM tblMFOrderDetail
 		WHERE intOrderHeaderId = @intOrderHeaderId
 			AND intItemId = @intItemId
 
-		EXEC uspMFLotMove  @intLotId = @intLotId
-						  ,@intNewSubLocationId = @intNewSubLocationId
-						  ,@intNewStorageLocationId = @intNewStorageLocationId
-						  ,@dblMoveQty = @dblMoveQty
-						  ,@intMoveItemUOMId = @intMoveItemUOMId
-						  ,@intUserId = @blnValidateLotReservation
-						  ,@blnValidateLotReservation = 1
-						  ,@blnInventoryMove = @blnInventoryMove
+		EXEC uspMFLotMove @intLotId = @intLotId
+			,@intNewSubLocationId = @intNewSubLocationId
+			,@intNewStorageLocationId = @intNewStorageLocationId
+			,@dblMoveQty = @dblMoveQty
+			,@intMoveItemUOMId = @intMoveItemUOMId
+			,@intUserId = @blnValidateLotReservation
+			,@blnValidateLotReservation = 1
+			,@blnInventoryMove = @blnInventoryMove
 
 		SELECT TOP 1 @intNewLotId = intLotId
 		FROM tblICLot
@@ -90,7 +128,7 @@ BEGIN TRANSACTION
 			,strPickedFrom
 			)
 		VALUES (
-			 @intOrderHeaderId
+			@intOrderHeaderId
 			,@strOrderNo
 			,@intTaskId
 			,@intLotId
@@ -101,7 +139,6 @@ BEGIN TRANSACTION
 			,'Handheld'
 			)
 
-
 		INSERT INTO tblMFOrderManifest (
 			intConcurrencyId
 			,intOrderDetailId
@@ -111,8 +148,8 @@ BEGIN TRANSACTION
 			,intLastUpdateId
 			,dtmLastUpdateOn
 			)
-		VALUES ( 
-			 1
+		VALUES (
+			1
 			,@intOrderDetailId
 			,@intOrderHeaderId
 			,@intNewLotId
@@ -120,8 +157,48 @@ BEGIN TRANSACTION
 			,@intUserId
 			,GetDate()
 			)
+
+		IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+		BEGIN
+			SELECT @strShipmentNo = NULL
+				,@intShipmentItemId = NULL
+				,@intLotItemId = NULL
+				,@dblLotQty = NULL
+				,@dblLotWeight = NULL
+
+			SELECT @dblLotQty = dblQty
+				,@intLotItemId = intItemId
+				,@dblLotWeight = dblWeight
+			FROM tblICLot
+			WHERE intLotId = @intNewLotId
+
+			SELECT @strShipmentNo = strReferenceNo
+			FROM dbo.tblMFOrderHeader
+			WHERE intOrderHeaderId = @intOrderHeaderId
+
+			SELECT @intShipmentItemId = intInventoryShipmentItemId
+			FROM tblICInventoryShipmentItem i
+			JOIN tblICInventoryShipment s ON i.intInventoryShipmentId = s.intInventoryShipmentId
+			WHERE s.strShipmentNumber = @strShipmentNo
+				AND intItemId = @intLotItemId
+
+			INSERT INTO tblICInventoryShipmentItemLot (
+				intInventoryShipmentItemId
+				,intLotId
+				,dblQuantityShipped
+				,dblGrossWeight
+				,dblTareWeight
+				)
+			VALUES (
+				@intShipmentItemId
+				,@intNewLotId
+				,@dblLotQty
+				,@dblLotWeight
+				,0
+				)
+		END
 	END
-	ELSE 
+	ELSE
 	BEGIN
 		INSERT INTO @tblTasks (
 			intTaskId
@@ -131,12 +208,12 @@ BEGIN TRANSACTION
 			,intOrderHeaderId
 		FROM tblMFTask
 		WHERE intOrderHeaderId = @intOrderHeaderId
-		And intTaskStateId <>4
+			AND intTaskStateId <> 4
 
 		SELECT @intMinTaskRecordId = MIN(intTaskRecordId)
 		FROM @tblTasks
 
-		WHILE ISNULL(@intMinTaskRecordId,0) <> 0
+		WHILE ISNULL(@intMinTaskRecordId, 0) <> 0
 		BEGIN
 			SET @intTaskId = NULL
 
@@ -144,44 +221,72 @@ BEGIN TRANSACTION
 			FROM @tblTasks
 			WHERE intTaskRecordId = @intMinTaskRecordId
 
-			SELECT @intNewSubLocationId = NULL,
-					@intNewStorageLocationId = NULL,
-					@dblMoveQty = NULL,
-					@intMoveItemUOMId = NULL,
-					@blnValidateLotReservation = 1,
-					@blnInventoryMove = 0,
-					@intLotId = NULL
+			SELECT @intNewSubLocationId = NULL
+				,@intNewStorageLocationId = NULL
+				,@dblMoveQty = NULL
+				,@intMoveItemUOMId = NULL
+				,@blnValidateLotReservation = 1
+				,@blnInventoryMove = 0
+				,@intLotId = NULL
 
-			SELECT @intNewSubLocationId = SL.intSubLocationId,
-					@intNewStorageLocationId = T.intToStorageLocationId,
-					@dblMoveQty = T.dblPickQty,
-					@intMoveItemUOMId = T.intItemUOMId,
-					@blnValidateLotReservation = 1,
-					@blnInventoryMove = 0,
-					@intLotId = intLotId
-			FROM tblMFTask T
-			JOIN tblICStorageLocation SL ON T.intToStorageLocationId = SL.intStorageLocationId
-			WHERE T.intTaskId = @intTaskId
+			IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+			BEGIN
+				SELECT @intNewSubLocationId = SL.intSubLocationId
+					,@intNewStorageLocationId = T.intToStorageLocationId
+					,@dblMoveQty = T.dblPickQty / (
+						CASE 
+							WHEN T.dblWeightPerQty = 0
+								THEN 1
+							ELSE T.dblWeightPerQty
+							END
+						)
+					,@blnValidateLotReservation = 1
+					,@blnInventoryMove = 0
+					,@intLotId = intLotId
+				FROM tblMFTask T
+				JOIN tblICStorageLocation SL ON T.intToStorageLocationId = SL.intStorageLocationId
+				WHERE T.intTaskId = @intTaskId
 
-			SELECT @strLotNumber = strLotNumber
-				,@intItemId = intItemId
-				,@intLotLocationId = intLocationId
-			FROM tblICLot
-			WHERE intLotId = @intLotId
+				SELECT @strLotNumber = strLotNumber
+					,@intItemId = intItemId
+					,@intLotLocationId = intLocationId
+					,@intMoveItemUOMId = intItemUOMId
+				FROM tblICLot
+				WHERE intLotId = @intLotId
+			END
+			ELSE
+			BEGIN
+				SELECT @intNewSubLocationId = SL.intSubLocationId
+					,@intNewStorageLocationId = T.intToStorageLocationId
+					,@dblMoveQty = T.dblPickQty
+					,@intMoveItemUOMId = T.intItemUOMId
+					,@blnValidateLotReservation = 1
+					,@blnInventoryMove = 0
+					,@intLotId = intLotId
+				FROM tblMFTask T
+				JOIN tblICStorageLocation SL ON T.intToStorageLocationId = SL.intStorageLocationId
+				WHERE T.intTaskId = @intTaskId
+
+				SELECT @strLotNumber = strLotNumber
+					,@intItemId = intItemId
+					,@intLotLocationId = intLocationId
+				FROM tblICLot
+				WHERE intLotId = @intLotId
+			END
 
 			SELECT @intOrderDetailId = intOrderDetailId
 			FROM tblMFOrderDetail
 			WHERE intOrderHeaderId = @intOrderHeaderId
 				AND intItemId = @intItemId
 
-			EXEC uspMFLotMove  @intLotId = @intLotId
-							  ,@intNewSubLocationId = @intNewSubLocationId
-							  ,@intNewStorageLocationId = @intNewStorageLocationId
-							  ,@dblMoveQty = @dblMoveQty
-							  ,@intMoveItemUOMId = @intMoveItemUOMId
-							  ,@intUserId = @blnValidateLotReservation
-							  ,@blnValidateLotReservation = 1
-							  ,@blnInventoryMove = @blnInventoryMove
+			EXEC uspMFLotMove @intLotId = @intLotId
+				,@intNewSubLocationId = @intNewSubLocationId
+				,@intNewStorageLocationId = @intNewStorageLocationId
+				,@dblMoveQty = @dblMoveQty
+				,@intMoveItemUOMId = @intMoveItemUOMId
+				,@intUserId = @blnValidateLotReservation
+				,@blnValidateLotReservation = 1
+				,@blnInventoryMove = @blnInventoryMove
 
 			SELECT TOP 1 @intNewLotId = intLotId
 			FROM tblICLot
@@ -209,7 +314,7 @@ BEGIN TRANSACTION
 				,strPickedFrom
 				)
 			VALUES (
-				 @intOrderHeaderId
+				@intOrderHeaderId
 				,@strOrderNo
 				,@intTaskId
 				,@intLotId
@@ -229,8 +334,8 @@ BEGIN TRANSACTION
 				,intLastUpdateId
 				,dtmLastUpdateOn
 				)
-			VALUES ( 
-			     1
+			VALUES (
+				1
 				,@intOrderDetailId
 				,@intOrderHeaderId
 				,@intNewLotId
@@ -239,12 +344,52 @@ BEGIN TRANSACTION
 				,GetDate()
 				)
 
+			IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+			BEGIN
+				SELECT @strShipmentNo = NULL
+					,@intShipmentItemId = NULL
+					,@intLotItemId = NULL
+					,@dblLotQty = NULL
+					,@dblLotWeight = NULL
+
+				SELECT @dblLotQty = dblQty
+					,@intLotItemId = intItemId
+					,@dblLotWeight = dblWeight
+				FROM tblICLot
+				WHERE intLotId = @intNewLotId
+
+				SELECT @strShipmentNo = strReferenceNo
+				FROM dbo.tblMFOrderHeader
+				WHERE intOrderHeaderId = @intOrderHeaderId
+
+				SELECT @intShipmentItemId = intInventoryShipmentItemId
+				FROM tblICInventoryShipmentItem i
+				JOIN tblICInventoryShipment s ON i.intInventoryShipmentId = s.intInventoryShipmentId
+				WHERE s.strShipmentNumber = @strShipmentNo
+					AND intItemId = @intLotItemId
+
+				INSERT INTO tblICInventoryShipmentItemLot (
+					intInventoryShipmentItemId
+					,intLotId
+					,dblQuantityShipped
+					,dblGrossWeight
+					,dblTareWeight
+					)
+				VALUES (
+					@intShipmentItemId
+					,@intNewLotId
+					,@dblLotQty
+					,@dblLotWeight
+					,0
+					)
+			END
+
 			SELECT @intMinTaskRecordId = MIN(intTaskRecordId)
-			FROM @tblTasks WHERE intTaskRecordId > @intMinTaskRecordId
+			FROM @tblTasks
+			WHERE intTaskRecordId > @intMinTaskRecordId
 		END
 	END
 
-	
 	SELECT @intRemainingTasks = COUNT(*)
 	FROM tblMFTask
 	WHERE intOrderHeaderId = @intOrderHeaderId
@@ -257,14 +402,23 @@ BEGIN TRANSACTION
 		WHERE intOrderHeaderId = @intOrderHeaderId
 	END
 
-COMMIT TRANSACTION
+	COMMIT TRANSACTION
 END TRY
+
 BEGIN CATCH
 	ROLLBACK TRANSACTION
+
 	SET @strErrMsg = ERROR_MESSAGE()
+
 	IF @strErrMsg != ''
 	BEGIN
 		SET @strErrMsg = 'uspMFCompleteTask: ' + @strErrMsg
-		RAISERROR (@strErrMsg, 16, 1, 'WITH NOWAIT')
+
+		RAISERROR (
+				@strErrMsg
+				,16
+				,1
+				,'WITH NOWAIT'
+				)
 	END
 END CATCH

@@ -1,9 +1,11 @@
-﻿CREATE PROCEDURE uspMFWarehouseReleaseLot (@strXML NVARCHAR(MAX)
-	,@strFGReleaseMailTOAddress NVARCHAR(MAX)=NULL OUTPUT
-	,@strFGReleaseMailCCAddress NVARCHAR(MAX)=NULL OUTPUT
-	,@strSubject VARCHAR(MAX)=NULL OUTPUT
-	,@strBody NVARCHAR(MAX)=NULL OUTPUT
-	,@ysnBuildEMailContent bit=1)
+﻿CREATE PROCEDURE uspMFWarehouseReleaseLot (
+	@strXML NVARCHAR(MAX)
+	,@strFGReleaseMailTOAddress NVARCHAR(MAX) = NULL OUTPUT
+	,@strFGReleaseMailCCAddress NVARCHAR(MAX) = NULL OUTPUT
+	,@strSubject VARCHAR(MAX) = NULL OUTPUT
+	,@strBody NVARCHAR(MAX) = NULL OUTPUT
+	,@ysnBuildEMailContent BIT = 1
+	)
 AS
 BEGIN TRY
 	DECLARE @intLotId INT
@@ -47,16 +49,17 @@ BEGIN TRY
 		,@dblAdjustByQuantity NUMERIC(38, 20)
 		,@intAttributeIdByBatch INT
 		,@strAttributeValueByBatch NVARCHAR(50)
-		,@intCategoryId int
-		,@intReleaseStatusId int
+		,@intCategoryId INT
+		,@intReleaseStatusId INT
 	DECLARE @intManufacturingCellId INT
 		,@intLotCreatedShiftId INT
 		,@dtmBusinessDate DATETIME
 		,@intShiftActivityId INT
 		,@intShiftActivityStatusId INT
+		,@strAttributeValueByWorkOrder NVARCHAR(50)
 
 	SELECT @dtmCurrentDate = GETDATE()
-	
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
@@ -66,7 +69,7 @@ BEGIN TRY
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@intUserId = intUserId
 		,@strComment = strComment
-		,@intReleaseStatusId=intReleaseStatusId
+		,@intReleaseStatusId = intReleaseStatusId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intLotId INT
 			,strGTINCaseBarCode NVARCHAR(50)
@@ -74,7 +77,7 @@ BEGIN TRY
 			,intManufacturingProcessId INT
 			,intUserId INT
 			,strComment NVARCHAR(MAX)
-			,intReleaseStatusId int
+			,intReleaseStatusId INT
 			)
 
 	IF @intLotId = 0
@@ -82,18 +85,6 @@ BEGIN TRY
 	BEGIN
 		RAISERROR (
 				80020
-				,11
-				,1
-				)
-
-		RETURN
-	END
-
-	IF @strGTINCaseBarCode = ''
-		OR @strGTINCaseBarCode IS NULL
-	BEGIN
-		RAISERROR (
-				51058
 				,11
 				,1
 				)
@@ -126,7 +117,33 @@ BEGIN TRY
 
 	IF @strAttributeValueByBatch = 'True'
 	BEGIN
-		SELECT @dblReleaseQty=dblQty FROM dbo.tblICLot WHERE intLotId=@intLotId
+		SELECT @dblReleaseQty = dblQty
+		FROM dbo.tblICLot
+		WHERE intLotId = @intLotId
+	END
+
+	SELECT @strAttributeValueByWorkOrder = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 91
+
+	IF (
+			@strGTINCaseBarCode = ''
+			OR @strGTINCaseBarCode IS NULL
+			)
+		AND (
+			@strAttributeValueByWorkOrder = 'False'
+			OR @strAttributeValueByWorkOrder = ''
+			)
+	BEGIN
+		RAISERROR (
+				51058
+				,11
+				,1
+				)
+
+		RETURN
 	END
 
 	--IF NOT EXISTS (
@@ -142,7 +159,6 @@ BEGIN TRY
 	--			,@strLotNumber
 	--			)
 	--END
-
 	IF @dblQty = 0
 		OR EXISTS (
 			SELECT 1
@@ -196,7 +212,7 @@ BEGIN TRY
 		,@strGTIN = strGTIN
 		,@intLayerPerPallet = intLayerPerPallet
 		,@intUnitPerLayer = intUnitPerLayer
-		,@intCategoryId=intCategoryId
+		,@intCategoryId = intCategoryId
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -238,7 +254,6 @@ BEGIN TRY
 	--			,1
 	--			)
 	--END
-
 	SELECT @CurrentDate = Convert(CHAR, @dtmCurrentDate, 108)
 
 	SELECT @intShiftId = intShiftId
@@ -274,7 +289,7 @@ BEGIN TRY
 			-- Parameters for the new values: 
 			,@dblAdjustByQuantity = @dblAdjustByQuantity
 			,@dblNewUnitCost = NULL
-			,@intItemUOMId=@intItemUOMId
+			,@intItemUOMId = @intItemUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
@@ -333,17 +348,16 @@ BEGIN TRY
 
 		--EXEC dbo.uspSMGetStartingNumber 33
 		--	,@intBatchId OUTPUT
-
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-					,@intItemId = @intItemId
-					,@intManufacturingId = NULL
-					,@intSubLocationId = @intSubLocationId
-					,@intLocationId = @intLocationId
-					,@intOrderTypeId = NULL
-					,@intBlendRequirementId = NULL
-					,@intPatternCode = 33
-					,@ysnProposed = 0
-					,@strPatternString = @intBatchId OUTPUT
+			,@intItemId = @intItemId
+			,@intManufacturingId = NULL
+			,@intSubLocationId = @intSubLocationId
+			,@intLocationId = @intLocationId
+			,@intOrderTypeId = NULL
+			,@intBlendRequirementId = NULL
+			,@intPatternCode = 33
+			,@ysnProposed = 0
+			,@strPatternString = @intBatchId OUTPUT
 
 		EXEC dbo.uspWHCreateSKUByLot @strUserName = @strUserName
 			,@intCompanyLocationSubLocationId = @intLocationId
@@ -410,7 +424,8 @@ BEGIN TRY
 
 	EXEC sp_xml_removedocument @idoc
 
-	IF @intReleaseStatusId=2 and @ysnBuildEMailContent=1
+	IF @intReleaseStatusId = 2
+		AND @ysnBuildEMailContent = 1
 	BEGIN
 		SELECT @strFGReleaseMailTOAddress = strFGReleaseMailTOAddress
 			,@strFGReleaseMailCCAddress = strFGReleaseMailCCAddress
@@ -420,16 +435,15 @@ BEGIN TRY
 		SELECT @strSubject = 'FG Release List: ' + CONVERT(NVARCHAR, @dtmCurrentDate, 100)
 
 		SET @strBody = N'<H2>FG Release List</H2>' + N'<table border="1" bgcolor ="rgb(192, 255, 255)">' + N'<tr><th width="175">Lot No</th><th width="175">Item Name</th>' + N'<th width="850">Status</th></tr>' + CAST((
-		SELECT td = @strLotNumber
-			,''
-			,td = @strItemNo
-			,''
-			,td = 'Hold'
-		FOR XML PATH('tr')
-			,TYPE
-		) AS NVARCHAR(MAX)) + N'</table>';
+					SELECT td = @strLotNumber
+						,''
+						,td = @strItemNo
+						,''
+						,td = 'Hold'
+					FOR XML PATH('tr')
+						,TYPE
+					) AS NVARCHAR(MAX)) + N'</table>';
 	END
-
 END TRY
 
 BEGIN CATCH
