@@ -35,9 +35,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.grid.column.Date',
         'Ext.form.field.Checkbox',
         'Ext.form.field.Time',
-        'Ext.toolbar.Paging',
-        'Inventory.ux.GridUnitMeasureColumn',
-        'Inventory.ux.GridUnitMeasureField'
+        'Ext.toolbar.Paging'
     ],
 
     height: 700,
