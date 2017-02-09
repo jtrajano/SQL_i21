@@ -111,7 +111,11 @@ OUTER APPLY (
 	WHERE G.strTransactionForm = 'Bill'
 	AND A.strBillId = G.strTransactionId AND A.intBillId = G.intTransactionId
 	AND G.ysnIsUnposted = 0
-	AND H.intAccountCategoryId = (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Account')
+	AND H.intAccountCategoryId IN (
+		SELECT intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Account'
+		UNION ALL
+		SELECT intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'Vendor Prepayments'
+	)
 	GROUP BY G.intAccountId
 ) GLData
 OUTER APPLY (
