@@ -225,6 +225,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtDefaultNucleusGroupId',
                                                     fieldLabel: 'Default Nucleus Group ID',
                                                     labelWidth: 165,
@@ -232,6 +233,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtTargetGrossProfitPercent',
                                                     fieldLabel: 'Target Gross Profit %',
                                                     labelWidth: 165,
@@ -240,6 +242,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    currencyField: true,
                                                     itemId: 'txtTargetInventoryAtCost',
                                                     fieldLabel: 'Target Inventory at Cost',
                                                     labelWidth: 165,
@@ -248,6 +251,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    currencyField: true,
                                                     itemId: 'txtCostOfInventoryAtBom',
                                                     fieldLabel: 'Cost of Inventory at BOM',
                                                     labelWidth: 165,
@@ -256,6 +260,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtLowGrossMarginPercentAlert',
                                                     fieldLabel: 'Low Gross Margin % Alert',
                                                     labelWidth: 165,
@@ -264,6 +269,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtHighGrossMarginPercentAlert',
                                                     fieldLabel: 'High Gross Margin % Alert',
                                                     labelWidth: 165,
@@ -471,6 +477,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtDefaultMinimumAge',
                                                     maxWidth: 225,
                                                     fieldLabel: 'Default Minimum Age',
