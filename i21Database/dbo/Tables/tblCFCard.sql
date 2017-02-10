@@ -70,6 +70,12 @@ ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFVehicle];
 
 
 GO
+ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFVehicle];
+
+
+
+
+GO
 
 
 
@@ -108,4 +114,19 @@ ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFVehicle];
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCFCard_intCardId]
     ON [dbo].[tblCFCard]([intCardId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFCard_intNetworkId]
+    ON [dbo].[tblCFCard]([intNetworkId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFCard_intCardId]
+    ON [dbo].[tblCFCard]([intCardId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFCard_intAccountId]
+    ON [dbo].[tblCFCard]([intAccountId] ASC);
 

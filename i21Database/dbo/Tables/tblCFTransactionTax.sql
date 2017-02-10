@@ -17,3 +17,20 @@
 
 
 
+
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransactionTax_intTransactionTaxId]
+    ON [dbo].[tblCFTransactionTax]([intTransactionTaxId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransactionTax_intTransactionId]
+    ON [dbo].[tblCFTransactionTax]([intTransactionId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransactionTax_intTaxCodeId]
+    ON [dbo].[tblCFTransactionTax]([intTaxCodeId] ASC);
+
