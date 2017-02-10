@@ -26,12 +26,12 @@ AS
 		FROM
 		(
 				SELECT	SY.intAssignFuturesToContractSummaryId,
-						SY.intContractDetailId,
+						ISNULL(SY.intContractDetailId,CD.intContractDetailId)	AS	intContractDetailId,
 						FT.strInternalTradeNo,
 						FT.dtmTransactionDate,
 						MA.strFutMarketName,
 						MO.strFutureMonth,
-						CAST(ISNULL(SY.intHedgedLots,0) AS NUMERIC(18, 6))+ISNULL(SY.dblAssignedLots,0) 						AS	dblLots,
+						CAST(ISNULL(SY.intHedgedLots,0) AS NUMERIC(18, 6))+ISNULL(SY.dblAssignedLots,0) 					AS	dblLots,
 						FT.dblPrice,
 						dbo.fnCTGetLastSettlementPrice(FT.intFutureMarketId,FT.intFutureMonthId)							AS	dblLatestPrice,
 						dbo.fnCTGetBrokerageCommission(FT.intBrokerageAccountId,FT.intFutureMarketId,FT.dtmTransactionDate) AS	dblCommission,
@@ -43,6 +43,7 @@ AS
 				JOIN	tblRKFutOptTransaction				FT	ON	FT.intFutOptTransactionId	=	SY.intFutOptTransactionId
 				JOIN	tblRKFutureMarket					MA	ON	MA.intFutureMarketId		=	FT.intFutureMarketId
 				JOIN	tblRKFuturesMonth					MO	ON	MO.intFutureMonthId			=	FT.intFutureMonthId
-				JOIN	tblSMCurrency						CY	ON	CY.intCurrencyID			=	FT.intCurrencyId
+				JOIN	tblSMCurrency						CY	ON	CY.intCurrencyID			=	FT.intCurrencyId		LEFT
+				JOIN	tblCTContractDetail					CD	ON	CD.intContractHeaderId		=	SY.intContractHeaderId
 		)t
 	)o
