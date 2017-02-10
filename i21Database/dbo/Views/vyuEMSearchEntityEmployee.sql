@@ -5,7 +5,7 @@ SELECT
 		a.intEntityId,   
 		a.strEntityNo, 
 		a.strName,  
-		g.strPhone,  
+		strPhone = j.strPhone,   
 		e.strAddress,  
 		e.strCity,  
 		e.strState,  
@@ -50,3 +50,5 @@ SELECT
 			on f.intEntityContactId = g.intEntityId  
 		left join tblPRWorkersCompensation h
 			on h.intWorkersCompensationId = c.intWorkersCompensationId
+		left join tblEMEntityPhoneNumber j
+			on g.intEntityId = j.intEntityId
