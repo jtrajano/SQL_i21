@@ -820,6 +820,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             ]
         });
 
+        var cepItem = grdInventoryShipment.getPlugin('cepItem');
+        if (cepItem) {
+            cepItem.on({
+                edit: me.onItemValidateEdit,
+                scope: me
+            });
+        }        
+
         win.context.data.on({
             currentrecordchanged: me.currentRecordChanged,
             scope: win
@@ -3011,6 +3019,27 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             }
         });
     },    
+
+    onItemValidateEdit: function (editor, context, eOpts) {
+        var win = editor.grid.up('window');
+        var me = win.controller;
+        var vw = win.viewModel;
+        //var currentShipment = vw.data.current;
+
+        // If editing the foreign unit price, change the unit price as well. 
+        if (context.field === 'dblForeignUnitPrice') {
+            if (context.record) {
+                var dblForeignUnitPrice = context.value;
+                var dblForexRate = context.record.get('dblForexRate');
+
+                dblForeignUnitPrice = Ext.isNumeric(dblForeignUnitPrice) ? dblForeignUnitPrice : 0;
+                dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+
+                context.record.set('dblUnitPrice', dblForeignUnitPrice * dblForexRate);
+            }
+        }       
+    },
+    
 
     init: function(application) {
         this.control({
