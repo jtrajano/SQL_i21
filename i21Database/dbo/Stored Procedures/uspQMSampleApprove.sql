@@ -38,6 +38,8 @@ BEGIN TRY
 	DECLARE @intSampleControlPointId INT
 	DECLARE @intSeqNo INT
 	DECLARE @strMainLotNumber NVARCHAR(50)
+	DECLARE @strApprovalBase NVARCHAR(50)
+	DECLARE @strContainerNumber NVARCHAR(100)
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -66,9 +68,19 @@ BEGIN TRY
 		,@intSampleItemId = S.intItemId
 		,@intSampleControlPointId = ST.intControlPointId
 		,@intCurrentLotStatusId = S.intLotStatusId
+		,@strApprovalBase = ISNULL(ST.strApprovalBase, '')
+		,@strContainerNumber = S.strContainerNumber
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	WHERE S.intSampleId = @intSampleId
+
+	IF @strApprovalBase = ''
+	BEGIN
+		IF @intProductTypeId = 11 -- Parent Lot
+			SET @strApprovalBase = 'Parent Lot'
+		ELSE IF @intProductTypeId = 6 -- Lot
+			SET @strApprovalBase = 'Lot'
+	END
 
 	SELECT @ysnRequireCustomerApproval = ISNULL(ysnRequireCustomerApproval, 0)
 	FROM tblICItem
@@ -225,12 +237,12 @@ BEGIN TRY
 		END
 	END
 
-	IF @intProductTypeId = 6 -- Lot
+	IF (
+			@intProductTypeId = 6
+			OR @intProductTypeId = 11
+			)
+		AND (@strApprovalBase <> '')
 	BEGIN
-		SELECT @strMainLotNumber = strLotNumber
-		FROM tblICLot
-		WHERE intLotId = @intProductValueId
-
 		DECLARE @LotData TABLE (
 			intSeqNo INT IDENTITY(1, 1)
 			,intLotId INT
@@ -242,24 +254,101 @@ BEGIN TRY
 			,intLotStatusId INT
 			)
 
-		INSERT INTO @LotData (
-			intLotId
-			,strLotNumber
-			,intItemId
-			,intLocationId
-			,intSubLocationId
-			,intStorageLocationId
-			,intLotStatusId
-			)
-		SELECT intLotId
-			,strLotNumber
-			,intItemId
-			,intLocationId
-			,intSubLocationId
-			,intStorageLocationId
-			,intLotStatusId
-		FROM dbo.tblICLot
-		WHERE strLotNumber = @strMainLotNumber
+		SELECT @strMainLotNumber = strLotNumber
+		FROM tblICLot
+		WHERE intLotId = @intProductValueId
+
+		IF @strApprovalBase = 'Lot'
+		BEGIN
+			INSERT INTO @LotData (
+				intLotId
+				,strLotNumber
+				,intItemId
+				,intLocationId
+				,intSubLocationId
+				,intStorageLocationId
+				,intLotStatusId
+				)
+			SELECT intLotId
+				,strLotNumber
+				,intItemId
+				,intLocationId
+				,intSubLocationId
+				,intStorageLocationId
+				,intLotStatusId
+			FROM tblICLot
+			WHERE strLotNumber = @strMainLotNumber
+		END
+		ELSE IF @strApprovalBase = 'Parent Lot'
+		BEGIN
+			INSERT INTO @LotData (
+				intLotId
+				,strLotNumber
+				,intItemId
+				,intLocationId
+				,intSubLocationId
+				,intStorageLocationId
+				,intLotStatusId
+				)
+			SELECT intLotId
+				,strLotNumber
+				,intItemId
+				,intLocationId
+				,intSubLocationId
+				,intStorageLocationId
+				,intLotStatusId
+			FROM tblICLot
+			WHERE intParentLotId = @intProductValueId
+		END
+		ELSE IF @strApprovalBase = 'Container'
+		BEGIN
+			IF @intProductTypeId = 6
+			BEGIN
+				INSERT INTO @LotData (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+					)
+				SELECT L.intLotId
+					,L.strLotNumber
+					,L.intItemId
+					,L.intLocationId
+					,L.intSubLocationId
+					,L.intStorageLocationId
+					,L.intLotStatusId
+				FROM tblICLot L
+				JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+				WHERE L.strLotNumber = @strMainLotNumber
+					AND RIL.strContainerNo = @strContainerNumber
+			END
+			ELSE IF @intProductTypeId = 11
+			BEGIN
+				INSERT INTO @LotData (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+					)
+				SELECT L.intLotId
+					,L.strLotNumber
+					,L.intItemId
+					,L.intLocationId
+					,L.intSubLocationId
+					,L.intStorageLocationId
+					,L.intLotStatusId
+				FROM tblICLot L
+				JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+				WHERE L.intParentLotId = @intProductValueId
+					AND RIL.strContainerNo = @strContainerNumber
+			END
+		END
 
 		SELECT @intSeqNo = MIN(intSeqNo)
 		FROM @LotData
@@ -307,88 +396,6 @@ BEGIN TRY
 
 			SELECT @intSeqNo = MIN(intSeqNo)
 			FROM @LotData
-			WHERE intSeqNo > @intSeqNo
-		END
-	END
-
-	IF @intProductTypeId = 11 -- Parent Lot
-	BEGIN
-		DECLARE @ParentLotData TABLE (
-			intSeqNo INT IDENTITY(1, 1)
-			,intLotId INT
-			,strLotNumber NVARCHAR(50)
-			,intItemId INT
-			,intLocationId INT
-			,intSubLocationId INT
-			,intStorageLocationId INT
-			,intLotStatusId INT
-			)
-
-		INSERT INTO @ParentLotData (
-			intLotId
-			,strLotNumber
-			,intItemId
-			,intLocationId
-			,intSubLocationId
-			,intStorageLocationId
-			,intLotStatusId
-			)
-		SELECT intLotId
-			,strLotNumber
-			,intItemId
-			,intLocationId
-			,intSubLocationId
-			,intStorageLocationId
-			,intLotStatusId
-		FROM dbo.tblICLot
-		WHERE intParentLotId = @intProductValueId
-
-		SELECT @intSeqNo = MIN(intSeqNo)
-		FROM @ParentLotData
-
-		WHILE (@intSeqNo > 0)
-		BEGIN
-			SELECT @intLotId = intLotId
-				,@strLotNumber = strLotNumber
-				,@intItemId = intItemId
-				,@intLocationId = intLocationId
-				,@intSubLocationId = intSubLocationId
-				,@intStorageLocationId = intStorageLocationId
-				,@intCurrentLotStatusId = intLotStatusId
-			FROM @ParentLotData
-			WHERE intSeqNo = @intSeqNo
-
-			IF @intCurrentLotStatusId = 4 -- Pre-Sanitized
-			BEGIN
-				IF @ysnChangeLotStatusOnApproveforPreSanitizeLot = 0
-					SET @intLotStatusId = @intCurrentLotStatusId
-			END
-
-			IF EXISTS (
-					SELECT *
-					FROM tblQMControlPointLotStatus
-					WHERE intCurrentLotStatusId = @intCurrentLotStatusId
-						AND intControlPointId = @intSampleControlPointId
-						AND ysnApprove = 1
-					)
-			BEGIN
-				SELECT @intLotStatusId = intLotStatusId
-				FROM tblQMControlPointLotStatus
-				WHERE intCurrentLotStatusId = @intCurrentLotStatusId
-					AND intControlPointId = @intSampleControlPointId
-					AND ysnApprove = 1
-			END
-
-			IF @intCurrentLotStatusId <> @intLotStatusId
-				AND @intSampleControlPointId <> 14
-			BEGIN
-				EXEC uspMFSetLotStatus @intLotId = @intLotId
-					,@intNewLotStatusId = @intLotStatusId
-					,@intUserId = @intLastModifiedUserId
-			END
-
-			SELECT @intSeqNo = MIN(intSeqNo)
-			FROM @ParentLotData
 			WHERE intSeqNo > @intSeqNo
 		END
 	END
