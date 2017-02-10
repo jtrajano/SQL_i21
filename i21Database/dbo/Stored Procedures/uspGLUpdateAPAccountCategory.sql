@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspGLUpdateAPAccountCategory]
+﻿--GL-3191 
+CREATE PROCEDURE [dbo].[uspGLUpdateAPAccountCategory]
 AS
 DECLARE @intLength INT
 DECLARE @apLength INT
@@ -25,13 +26,14 @@ DECLARE @intPayablesCategory INT
 DECLARE @intLiabilityGroup INT
 
 SELECT @intLiabilityGroup = intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Liability'
-SELECT @intPayablesGroup = intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Payables'
+--SELECT @intPayablesGroup = intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Payables'
 SELECT @intPayablesCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Account'
 
 UPDATE 
 	Segment 
 SET 
-	intAccountGroupId = @intPayablesGroup,	intAccountCategoryId = @intPayablesCategory
+	--intAccountGroupId = @intPayablesGroup,	
+	intAccountCategoryId = @intPayablesCategory
 FROM 
 	tblGLAccountSegment Segment 
 	JOIN @tblAP B ON Segment.strCode = B.strCode 
@@ -39,14 +41,14 @@ FROM
 WHERE 
 	Segment.intAccountGroupId = @intLiabilityGroup AND C.intAccountStructureId = @intPrimary
 
-UPDATE 
-	Account
-SET 
-	intAccountGroupId = @intPayablesGroup
-FROM 
-	tblGLAccount Account
-	JOIN tblGLCOACrossReference COA ON Account.intAccountId  = inti21Id
-	JOIN apcbkmst E ON E.apcbk_gl_ap = COA.strExternalId
+--UPDATE 
+--	Account
+--SET 
+--	intAccountGroupId = @intPayablesGroup
+--FROM 
+--	tblGLAccount Account
+--	JOIN tblGLCOACrossReference COA ON Account.intAccountId  = inti21Id
+--	JOIN apcbkmst E ON E.apcbk_gl_ap = COA.strExternalId
 
 
 
