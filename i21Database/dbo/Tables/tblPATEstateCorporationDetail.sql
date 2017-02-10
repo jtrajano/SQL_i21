@@ -12,5 +12,5 @@
 	[intConcurrencyId] INT NULL DEFAULT 0
 
     CONSTRAINT [PK_tblPATEstateCorporationDetail] PRIMARY KEY ([intEstateCorporationDetailId]), 
-    CONSTRAINT [FK_tblPATEstateCorporationDetail_tblPATEstateCorporation] FOREIGN KEY ([intEstateCorporationId]) REFERENCES [tblPATEstateCorporation]([intEstateCorporationId]) 
+    CONSTRAINT [FK_tblPATEstateCorporationDetail_tblPATEstateCorporation] FOREIGN KEY ([intEstateCorporationId]) REFERENCES [tblPATEstateCorporation]([intEstateCorporationId]) ON DELETE CASCADE
 )
