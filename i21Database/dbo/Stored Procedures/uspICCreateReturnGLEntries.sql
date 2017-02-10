@@ -1,4 +1,4 @@
-﻿alter PROCEDURE [dbo].[uspICCreateReturnGLEntries]
+﻿CREATE PROCEDURE [dbo].[uspICCreateReturnGLEntries]
 	@strBatchId AS NVARCHAR(20)
 	,@AccountCategory_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
