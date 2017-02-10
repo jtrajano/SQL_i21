@@ -279,7 +279,17 @@ Ext.define('Inventory.view.CommodityViewController', {
             ]
         });
 
+        var grdUOM = win.down('#grdUom');
+        var colUnitQty = _.findWhere(grdUOM.columns, function(c) { return c.itemId === 'colUnitQty'; });
+        colUnitQty.onGetDecimalPlaces = me.onGetDecimalPlaces;
+
         return win.context;
+    },
+
+    onGetDecimalPlaces: function(record) {
+        if(record && record.get('tblICUnitMeasure'))
+            return record.get('tblICUnitMeasure').intDecimalPlaces;
+        return null;
     },
 
     show : function(config) {

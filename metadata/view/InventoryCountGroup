@@ -10,7 +10,7 @@
         "defaultFocus": null,
         "designer|userAlias": "inventorycountgroup",
         "designer|userClassName": "InventoryCountGroup",
-        "height": 350,
+        "height": 359,
         "hidden": false,
         "icon": null,
         "layout": "fit",
@@ -21,7 +21,7 @@
         "minimizable": null,
         "reference": null,
         "title": "Inventory Count Group",
-        "width": 466
+        "width": 473
     },
     "name": "ContractDocument1",
     "designerId": "91b8f386-0350-4266-9ceb-f8c80198ac34",
@@ -311,11 +311,22 @@
                                                 "margin": null,
                                                 "maxLength": null,
                                                 "name": null,
+                                                "quantityField": true,
                                                 "tabIndex": null,
                                                 "width": null
                                             },
                                             "name": "MyNumberField4",
-                                            "designerId": "93ed1e36-5c50-42cf-8d0c-ba95f8cae522"
+                                            "configAlternates": {
+                                                "quantityField": "boolean"
+                                            },
+                                            "designerId": "93ed1e36-5c50-42cf-8d0c-ba95f8cae522",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "quantityField",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.form.field.Checkbox",
@@ -441,7 +452,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging17",
+                    "name": "statusbarpaging15",
                     "designerId": "5f645857-eb50-4702-8a6e-970a15d31272",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

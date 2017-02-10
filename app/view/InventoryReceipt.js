@@ -35,9 +35,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.grid.column.Date',
         'Ext.form.field.Checkbox',
         'Ext.form.field.Time',
-        'Ext.toolbar.Paging',
-        'Inventory.ux.GridUnitMeasureColumn',
-        'Inventory.ux.GridUnitMeasureField'
+        'Ext.toolbar.Paging'
     ],
 
     height: 700,
@@ -502,6 +500,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
+                                                                        quantityField: true,
                                                                         hidden: true,
                                                                         itemId: 'txtBlanketReleaseNumber',
                                                                         fieldLabel: 'Blanket Release No',
@@ -720,6 +719,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
+                                                                        quantityField: true,
                                                                         itemId: 'txtShiftNumber',
                                                                         fieldLabel: 'Shift Number',
                                                                         labelWidth: 95,
@@ -819,6 +819,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         items: [
                                                                                             {
                                                                                                 xtype: 'numberfield',
+                                                                                                quantityField: true,
                                                                                                 tabIndex: -1,
                                                                                                 itemId: 'txtWeightLossMsgValue',
                                                                                                 fieldLabel: 'Wgt or Vol Gain/Loss:',
@@ -1197,16 +1198,15 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'unitmeasurecolumn',
-                                                                                itemId: 'colUOMQtyToReceive',
-                                                                                text: 'Qty to Receive',
-                                                                                width: 100,
-                                                                                align: 'right',
-                                                                                dataIndex: 'dblOpenReceive',
                                                                                 decimalPrecisionField: 'intItemUOMDecimalPlaces',
                                                                                 displayField: 'strUnitMeasure',
+                                                                                itemId: 'colUOMQtyToReceive',
+                                                                                width: 200,
+                                                                                align: 'right',
+                                                                                dataIndex: 'dblOpenReceive',
+                                                                                text: 'Qty to Receive',
                                                                                 editor: {
                                                                                     xtype: 'gridunitmeasurefield',
-                                                                                    itemId: 'gumReceiveQty',
                                                                                     valueField: 'intUnitMeasureId',
                                                                                     updateField: 'intUnitMeasureId',
                                                                                     lookupValueField: 'intItemUnitMeasureId',
@@ -1282,9 +1282,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             displayField: 'strUnitMeasure',
                                                                                             valueField: 'strUnitMeasure'
                                                                                         }
-                                                                                    }
+                                                                                    },
+                                                                                    itemId: 'gumReceiveQty'
                                                                                 }
-                                                                            },                                                  
+                                                                            },
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 dataType: 'numeric',
@@ -1297,6 +1298,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 format: '0,000',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
+                                                                                    quantityField: true,
                                                                                     itemId: 'txtLoadToReceive',
                                                                                     allowDecimals: false,
                                                                                     decimalPrecision: 0,
@@ -1317,6 +1319,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 format: '0,000.000###',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
+                                                                                    currencyField: true,
                                                                                     itemId: 'txtUnitCost',
                                                                                     decimalPrecision: 6,
                                                                                     minValue: 0
@@ -1425,6 +1428,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Gross',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
+                                                                                    quantityField: true,
                                                                                     itemId: 'txtGross',
                                                                                     minValue: 0
                                                                                 }
@@ -1437,6 +1441,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Net',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
+                                                                                    quantityField: true,
                                                                                     itemId: 'txtNet'
                                                                                 }
                                                                             },
@@ -1656,6 +1661,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Unit Retail',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
+                                                                                    quantityField: true,
                                                                                     itemId: 'txtUnitRetail',
                                                                                     minValue: 0
                                                                                 }
@@ -1984,7 +1990,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 dataIndex: 'dblQuantity',
                                                                                 text: 'Quantity',
                                                                                 editor: {
-                                                                                    xtype: 'numberfield'
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true
                                                                                 }
                                                                             },
                                                                             {
@@ -1997,7 +2004,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Gross',
                                                                                 format: '0,000.##',
                                                                                 editor: {
-                                                                                    xtype: 'numberfield'
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true
                                                                                 }
                                                                             },
                                                                             {
@@ -2010,7 +2018,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Tare',
                                                                                 format: '0,000.##',
                                                                                 editor: {
-                                                                                    xtype: 'numberfield'
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true
                                                                                 }
                                                                             },
                                                                             {
@@ -2087,7 +2096,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Units/Pallet',
                                                                                 format: '0,000.##',
                                                                                 editor: {
-                                                                                    xtype: 'numberfield'
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true
                                                                                 }
                                                                             },
                                                                             {
@@ -2125,7 +2135,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Stated Gross Per Unit',
                                                                                 format: '0,000.##',
                                                                                 editor: {
-                                                                                    xtype: 'numberfield'
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true
                                                                                 }
                                                                             },
                                                                             {
@@ -2138,7 +2149,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Stated Tare Per Unit',
                                                                                 format: '0,000.##',
                                                                                 editor: {
-                                                                                    xtype: 'numberfield'
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true
                                                                                 }
                                                                             },
                                                                             {
@@ -2597,6 +2609,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numericfield',
+                                                                            currencyField: true,
                                                                             modelValidation: true
                                                                         }
                                                                     },
@@ -2646,6 +2659,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         format: '0,000.00####',
                                                                         editor: {
                                                                             xtype: 'numericfield',
+                                                                            currencyField: true,
                                                                             modelValidation: true
                                                                         }
                                                                     },
@@ -2801,6 +2815,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'numericfield',
+                                                                        currencyField: true,
                                                                         itemId: 'txtCalculatedAmount',
                                                                         fieldLabel: 'Calculated Amount',
                                                                         labelWidth: 130,
@@ -2808,6 +2823,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numericfield',
+                                                                        currencyField: true,
                                                                         itemId: 'txtInvoiceAmount',
                                                                         fieldLabel: 'Invoice Amount',
                                                                         labelWidth: 130,
@@ -2815,6 +2831,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numericfield',
+                                                                        currencyField: true,
                                                                         itemId: 'txtDifference',
                                                                         fieldLabel: 'Difference',
                                                                         labelWidth: 130,
@@ -2822,6 +2839,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numericfield',
+                                                                        quantityField: true,
                                                                         itemId: 'txtInvoiceMargin',
                                                                         fieldLabel: 'Invoice Margin %',
                                                                         labelWidth: 130,
@@ -2847,6 +2865,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
+                                                                        quantityField: true,
                                                                         itemId: 'txtCheckNo',
                                                                         fieldLabel: 'Check No',
                                                                         labelWidth: 130,
@@ -3017,6 +3036,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     },
                                                     {
                                                         xtype: 'numberfield',
+                                                        quantityField: true,
                                                         itemId: 'txtActualTempReading',
                                                         fieldLabel: 'Actual Temp Reading (F)',
                                                         labelWidth: 145,

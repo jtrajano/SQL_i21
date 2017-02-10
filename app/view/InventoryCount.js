@@ -903,7 +903,8 @@ Ext.define('Inventory.view.InventoryCount', {
                                             text: 'No of Pallets',
                                             format: '0,000.00####',
                                             editor: {
-                                                xtype: 'numberfield'
+                                                xtype: 'numberfield',
+                                                quantityField: true
                                             }
                                         },
                                         {
@@ -913,7 +914,8 @@ Ext.define('Inventory.view.InventoryCount', {
                                             text: 'Qty Per Pallet',
                                             format: '0,000.00####',
                                             editor: {
-                                                xtype: 'numberfield'
+                                                xtype: 'numberfield',
+                                                quantityField: true
                                             }
                                         },
                                         {
@@ -923,7 +925,8 @@ Ext.define('Inventory.view.InventoryCount', {
                                             text: 'Physical Count',
                                             format: '0,000.00####',
                                             editor: {
-                                                xtype: 'numberfield'
+                                                xtype: 'numberfield',
+                                                quantityField: true
                                             }
                                         },
                                         {

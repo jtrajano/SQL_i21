@@ -5,7 +5,9 @@ Ext.define('Inventory.controller.Inventory', {
     extend: 'i21.controller.Module',
     alias: 'controller.inventory',
     requires: [
-        'Inventory.Utils'
+        'Inventory.Utils',
+        'Inventory.ux.GridUnitMeasureColumn',
+        'Inventory.ux.GridUnitMeasureField'
     ],
     singleton: true,
 
