@@ -5016,6 +5016,10 @@
     <Build Include="dbo\Stored Procedures\GetDefaultData.sql" />
     <Build Include="dbo\Functions\fnGetDebitForeign.sql" />
     <Build Include="dbo\Functions\fnGetCreditForeign.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherForPayment.sql" />
+    <Build Include="dbo\Functions\fnICDescribeSoldStock.sql" />
+    <Build Include="dbo\Functions\fnGetDebitFunctional.sql" />
+    <Build Include="dbo\Functions\fnGetCreditFunctional.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
