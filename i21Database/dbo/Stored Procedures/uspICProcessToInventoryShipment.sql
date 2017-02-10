@@ -71,7 +71,7 @@ BEGIN TRY
 		, intLineNo						= SODetail.intSalesOrderDetailId
 		, intSubLocationId				= COALESCE(SODetail.intSubLocationId, StorageLocation.intSubLocationId, ItemLocation.intSubLocationId)
 		, intStorageLocationId			= ISNULL(SODetail.intStorageLocationId, ItemLocation.intStorageLocationId)
-		, intCurrencyId					= 1
+		, intCurrencyId					= SO.[intCurrencyId] 
 		, intWeightUOMId				= NULL
 		, dblUnitPrice					= SODetail.dblPrice
 		, intDockDoorId					= NULL
