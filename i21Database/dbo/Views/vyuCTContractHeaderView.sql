@@ -38,7 +38,8 @@ AS
 			YR.strCropYear,					TM.strTermCode,										
 																		
 			CASE WHEN strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName	END	AS	strINCOLocation,
-			dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses
+			dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses,
+			isnull(CH.ysnMultiplePriceFixation,0) as ysnMultiplePriceFixation
 			
 	FROM	tblCTContractHeader					CH	
 	jOIN	vyuCTContractHeaderNotMapped		NM	ON	NM.intContractHeaderId				=		CH.intContractHeaderId
