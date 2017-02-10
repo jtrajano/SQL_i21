@@ -736,6 +736,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                         },
                                                                         {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             itemId: 'txtMinimumAge',
                                                                             fieldLabel: 'Minimum Age',
                                                                             labelWidth: 140,
@@ -789,6 +790,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                         },
                                                                         {
                                                                             xtype: 'numericfield',
+                                                                            quantityField: true,
                                                                             itemId: 'txtItemTypeSubcode',
                                                                             fieldLabel: 'Item Type Subcode',
                                                                             labelWidth: 140,
@@ -826,6 +828,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                         },
                                                                         {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             itemId: 'txtFreightRate',
                                                                             fieldLabel: 'Freight Rate',
                                                                             labelWidth: 140,
@@ -931,6 +934,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                         },
                                                         {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'txtReorderPoint',
                                                             fieldLabel: 'Reorder Point',
                                                             labelWidth: 140,
@@ -939,6 +943,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                         },
                                                         {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'txtMinOrder',
                                                             fieldLabel: 'Min Order',
                                                             labelWidth: 140,
@@ -947,6 +952,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                         },
                                                         {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'txtSuggestedQty',
                                                             fieldLabel: 'Suggested Qty',
                                                             labelWidth: 140,
@@ -955,6 +961,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                         },
                                                         {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'txtLeadTime',
                                                             fieldLabel: 'Lead Time (Days)',
                                                             labelWidth: 140,

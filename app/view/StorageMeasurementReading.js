@@ -384,7 +384,8 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                         align: 'right',
                                                         text: 'Air Space Reading',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
@@ -394,7 +395,8 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                         align: 'right',
                                                         text: 'Cash Price',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            currencyField: true
                                                         }
                                                     },
                                                     {

@@ -293,6 +293,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                         format: '0,000.000000000000000',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'txtConvertToStock',
                                                             decimalPrecision: 20
                                                         }

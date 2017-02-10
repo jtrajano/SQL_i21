@@ -301,6 +301,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                                 },
                                                 {
                                                     xtype: 'numeric',
+                                                    quantityField: true,
                                                     itemId: 'txtBuildQuantity',
                                                     fieldLabel: 'Build Quantity',
                                                     labelWidth: 85,
@@ -482,6 +483,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                         },
                                         {
                                             xtype: 'numbercolumn',
+                                            currencyField: true,
                                             itemId: 'colCost',
                                             width: 85,
                                             align: 'right',

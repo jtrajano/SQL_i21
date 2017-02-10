@@ -1233,7 +1233,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         text: 'Quantity',
                                                                         format: '0,000.##',
                                                                         editor: {
-                                                                            xtype: 'numeric'
+                                                                            xtype: 'numeric',
+                                                                            quantityField: true
                                                                         }
                                                                     },
                                                                     {
@@ -1246,7 +1247,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         text: 'Unit Price',
                                                                         format: '0,000.00####',
                                                                         editor: {
-                                                                            xtype: 'numeric'
+                                                                            xtype: 'numeric',
+                                                                            currencyField: true
                                                                         }
                                                                     },
                                                                     {
@@ -1727,7 +1729,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         text: 'Ship Qty',
                                                                         format: '0,000.##',
                                                                         editor: {
-                                                                            xtype: 'numeric'
+                                                                            xtype: 'numeric',
+                                                                            quantityField: true
                                                                         }
                                                                     },
                                                                     {
@@ -1751,7 +1754,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         dataIndex: 'dblGrossWeight',
                                                                         text: 'Gross',
                                                                         editor: {
-                                                                            xtype: 'numberfield'
+                                                                            xtype: 'numberfield',
+                                                                            quantityField: true
                                                                         }
                                                                     },
                                                                     {
@@ -1761,7 +1765,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         dataIndex: 'dblTareWeight',
                                                                         text: 'Tare',
                                                                         editor: {
-                                                                            xtype: 'numberfield'
+                                                                            xtype: 'numberfield',
+                                                                            quantityField: true
                                                                         }
                                                                     },
                                                                     {
@@ -2040,7 +2045,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         text: 'Rate',
                                                         format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numericfield'
+                                                            xtype: 'numericfield',
+                                                            currencyField: true
                                                         }
                                                     },
                                                     {
@@ -2086,7 +2092,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         itemId: 'colChargeAmount',
                                                         text: 'Amount',
                                                         editor: {
-                                                            xtype: 'numericfield'
+                                                            xtype: 'numericfield',
+                                                            currencyField: true
                                                         }
                                                     },
                                                     {

@@ -1508,10 +1508,21 @@
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtMinimumAge",
                                                                                 "labelWidth": 140,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": null,
+                                                                                "quantityField": true
                                                                             },
                                                                             "name": "MyNumberField5",
-                                                                            "designerId": "994125be-90c0-427a-8d9b-75443be05a7c"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "994125be-90c0-427a-8d9b-75443be05a7c",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         },
                                                                         {
                                                                             "type": "Ext.form.field.Checkbox",
@@ -1628,10 +1639,21 @@
                                                                                 "fieldLabel": "Item Type Subcode",
                                                                                 "itemId": "txtItemTypeSubcode",
                                                                                 "labelWidth": 140,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": null,
+                                                                                "quantityField": true
                                                                             },
                                                                             "name": "MyNumberField69",
-                                                                            "designerId": "bd760983-d036-4495-bf49-b3a48ade377b"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "bd760983-d036-4495-bf49-b3a48ade377b",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 }
@@ -1696,6 +1718,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "currencyField": true,
                                                                                 "fieldLabel": "Freight Rate",
                                                                                 "fieldStyle": "text-align:right",
                                                                                 "hideTrigger": true,
@@ -1704,7 +1727,17 @@
                                                                                 "layout|flex": null
                                                                             },
                                                                             "name": "MyNumberField4",
-                                                                            "designerId": "aa23044b-3c43-4cbe-a561-e2e1647e0844"
+                                                                            "configAlternates": {
+                                                                                "currencyField": "boolean"
+                                                                            },
+                                                                            "designerId": "aa23044b-3c43-4cbe-a561-e2e1647e0844",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "currencyField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -1888,10 +1921,21 @@
                                                                 "hideTrigger": true,
                                                                 "itemId": "txtReorderPoint",
                                                                 "labelWidth": 140,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "quantityField": true
                                                             },
                                                             "name": "MyNumberField3",
-                                                            "designerId": "6bdcb8e9-b5a8-4745-a1b4-10adf4e822a9"
+                                                            "configAlternates": {
+                                                                "quantityField": "boolean"
+                                                            },
+                                                            "designerId": "6bdcb8e9-b5a8-4745-a1b4-10adf4e822a9",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "quantityField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Number",
@@ -1906,10 +1950,21 @@
                                                                 "hideTrigger": true,
                                                                 "itemId": "txtMinOrder",
                                                                 "labelWidth": 140,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "quantityField": true
                                                             },
                                                             "name": "MyNumberField2",
-                                                            "designerId": "06884e2c-cf02-4b89-b0bc-64e8597cdafe"
+                                                            "configAlternates": {
+                                                                "quantityField": "boolean"
+                                                            },
+                                                            "designerId": "06884e2c-cf02-4b89-b0bc-64e8597cdafe",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "quantityField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Number",
@@ -1924,10 +1979,21 @@
                                                                 "hideTrigger": true,
                                                                 "itemId": "txtSuggestedQty",
                                                                 "labelWidth": 140,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "quantityField": true
                                                             },
                                                             "name": "MyNumberField",
-                                                            "designerId": "2e57e615-b411-4d8c-ba8a-9bae31dfc416"
+                                                            "configAlternates": {
+                                                                "quantityField": "boolean"
+                                                            },
+                                                            "designerId": "2e57e615-b411-4d8c-ba8a-9bae31dfc416",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "quantityField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Number",
@@ -1942,10 +2008,21 @@
                                                                 "hideTrigger": true,
                                                                 "itemId": "txtLeadTime",
                                                                 "labelWidth": 140,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "quantityField": true
                                                             },
                                                             "name": "MyNumberField1",
-                                                            "designerId": "041d6c95-c1e7-4c14-a4fb-d2a68eb8fdff"
+                                                            "configAlternates": {
+                                                                "quantityField": "boolean"
+                                                            },
+                                                            "designerId": "041d6c95-c1e7-4c14-a4fb-d2a68eb8fdff",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "quantityField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.ComboBox",
@@ -2108,7 +2185,7 @@
                         "itemId": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging113",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
