@@ -27,6 +27,7 @@ DECLARE @intContractHeaderId INT
 DECLARE @intMinRowNo INT
 DECLARE @intLoadId INT
 DECLARE @intReceiptId INT
+DECLARE @strDeliveryType NVARCHAR(50)
 
 Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -46,7 +47,8 @@ Declare @tblAcknowledgement AS TABLE
 	strTrackingNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strPOItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strLineItemBatchNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	strDeliveryItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	strDeliveryItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strDeliveryType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 )
 
 Declare @tblMessage AS Table
@@ -56,7 +58,7 @@ Declare @tblMessage AS Table
 )
 
 	Insert Into @tblAcknowledgement(strMesssageType,strStatus,strStatusCode,strStatusDesc,strStatusType,
-	strParam,strRefNo,strTrackingNo,strPOItemNo,strLineItemBatchNo,strDeliveryItemNo)
+	strParam,strRefNo,strTrackingNo,strPOItemNo,strLineItemBatchNo,strDeliveryItemNo,strDeliveryType)
 	SELECT 
 	 MESTYP_LNG
 	,[STATUS]
@@ -69,6 +71,7 @@ Declare @tblMessage AS Table
 	,PO_ITEM
 	,CHARG
 	,DEL_ITEM
+	,Z1PA1
 	FROM OPENXML(@idoc, 'ZALEAUD01/IDOC/E1ADHDR/E1STATE/E1PRTOB/Z1PRTOB', 2) WITH (
 			 MESTYP_LNG NVARCHAR(50)	'../../../MESTYP_LNG'
 			,[STATUS] NVARCHAR(50)		'../../STATUS'
@@ -81,6 +84,7 @@ Declare @tblMessage AS Table
 			,PO_ITEM NVARCHAR(50)		
 			,CHARG NVARCHAR(50)			
 			,DEL_ITEM  NVARCHAR(50)		
+			,Z1PA1	NVARCHAR(50)
 			)
 
 Select @intMinRowNo=MIN(intRowNo) From @tblAcknowledgement
@@ -98,8 +102,12 @@ Begin
 		@strTrackingNo = strTrackingNo,
 		@strPOItemNo = strPOItemNo,
 		@strLineItemBatchNo = strLineItemBatchNo,
-		@strDeliveryItemNo = strDeliveryItemNo
+		@strDeliveryItemNo = strDeliveryItemNo,
+		@strDeliveryType = strDeliveryType	
 		From @tblAcknowledgement Where intRowNo=@intMinRowNo
+
+	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')='U'
+		Set @strMesssageType='DESADV'
 
 	--PO Create
 	If @strMesssageType='PORDCR1'
@@ -157,7 +165,6 @@ Begin
 	End
 
 	--Shipment
-	DESADV:
 	If @strMesssageType='DESADV'
 	Begin
 		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
@@ -196,12 +203,6 @@ Begin
 	--Receipt
 	If @strMesssageType='WHSCON'
 	Begin
-		If Exists (Select 1 From tblLGLoad Where strLoadNumber=@strRefNo)
-		Begin
-			Set @strMesssageType='DESADV'
-			GOTO DESADV
-		End
-
 		Select @intReceiptId=r.intInventoryReceiptId
 		From tblICInventoryReceipt r 
 		Where r.strReceiptNumber=@strRefNo
