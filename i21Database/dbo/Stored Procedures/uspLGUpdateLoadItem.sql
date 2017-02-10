@@ -15,6 +15,7 @@ DECLARE @ErrMsg      NVARCHAR(MAX);
 DECLARE @strItemType NVARCHAR(MAX);
 DECLARE @intContractTypeId INT; 
 DECLARE @intCount INT, @intItemId INT, @intItemUOMId INT;
+DECLARE @ysnUpdateVesselInfo BIT
 
 BEGIN TRY
 	IF (IsNull(@intContractDetailId, 0) = 0)
@@ -25,10 +26,27 @@ BEGIN TRY
 
 	SELECT @intContractTypeId = CT.intContractTypeId, @intItemId=CT.intItemId, @intItemUOMId=CT.intItemUOMId FROM vyuCTContractDetailView CT WHERE CT.intContractDetailId=@intContractDetailId
 	SELECT @strItemType = Item.strType FROM tblICItem Item WHERE Item.intItemId = @intItemId
+	SELECT @ysnUpdateVesselInfo = ysnUpdateVesselInfo FROM tblLGCompanyPreference
 	SELECT @intCount = COUNT(LD.intLoadDetailId) FROM tblLGLoadDetail LD  
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		WHERE LD.intPContractDetailId = @intContractDetailId
 		AND LD.intItemId <> @intItemId
+
+	IF @ysnUpdateVesselInfo = 1
+	BEGIN
+		UPDATE	LO
+		SET		LO.strOriginPort		=	LC.strCity,
+				LO.strDestinationPort	=	DC.strCity
+		FROM	tblLGLoad			LO 
+		JOIN	tblLGLoadDetail		LD	ON	LD.intLoadId	=	LO.intLoadId 
+		JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	ISNULL(LD.intSContractDetailId,LD.intPContractDetailId)
+		JOIN	tblSMCity			LC	ON	LC.intCityId	=	CD.intLoadingPortId
+		JOIN	tblSMCity			DC	ON	DC.intCityId	=	CD.intDestinationPortId
+		WHERE	(LD.intSContractDetailId = @intContractDetailId 
+		OR		LD.intPContractDetailId = @intContractDetailId)
+		AND		LC.strCity	IS NOT NULL 
+		AND		DC.strCity	IS NOT NULL 
+	END
 
 	IF (@strItemType = 'Bundle' AND @intContractTypeId = 1 AND @intCount > 0)
 	BEGIN

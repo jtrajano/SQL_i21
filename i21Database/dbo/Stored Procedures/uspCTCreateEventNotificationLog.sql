@@ -15,8 +15,11 @@ BEGIN
 	INSERT INTO @ContractEventId
 	SELECT CAST(Item AS INT) FROM dbo.fnSplitString(@strContractEventId,',')
 	
-	IF NOT EXISTS(SELECT * FROM @ContractEventId)
+	IF NOT EXISTS(SELECT * FROM @ContractEventId WHERE intContractEventId > 0)
 	BEGIN
+		INSERT	INTO tblCTEventNotificationLog
+		(dtmNotified,strMailContent,strMailTo,strNotificationStatus,strStatusMessage,intConcurrencyId)
+		SELECT	GETDATE(),@strMailContent,@strMailTo,@strNotificationStatus,@strStatusMessage,1
 		RETURN
 	END
 	

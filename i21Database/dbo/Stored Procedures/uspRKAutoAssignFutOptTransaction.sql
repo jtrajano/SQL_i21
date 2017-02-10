@@ -61,6 +61,7 @@ BEGIN
 					AND case when isnull(ysnMultiplePriceFixation,0)= 1 then ch.intContractHeaderId else cd.intContractDetailId end not in(SELECT 
 														 case when isnull(ysnMultiplePriceFixation,0)= 1 then intContractHeaderId else intContractDetailId end
 														FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId=@intLFutOptTransactionId)
+														AND case when isnull(ysnMultiplePriceFixation,1)= 1 then  ISNULL(ch.intContractHeaderId,0)  else ISNULL(cd.intContractDetailId,0) end <> 0
 
 				END
 
@@ -80,6 +81,8 @@ BEGIN
 						AND case when isnull(ysnMultiplePriceFixation,0)= 1 then ch.intContractHeaderId else cd.intContractDetailId end not in(SELECT 
 												case when isnull(ysnMultiplePriceFixation,0)= 1 then intContractHeaderId else intContractDetailId end
 											FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId=@intSFutOptTransactionId)	
+						AND case when isnull(ysnMultiplePriceFixation,1)= 1 then  ISNULL(ch.intContractHeaderId,0)  else ISNULL(cd.intContractDetailId,0) end <> 0
+
 				END
 			END
 		END

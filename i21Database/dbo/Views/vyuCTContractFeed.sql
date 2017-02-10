@@ -31,7 +31,7 @@ AS
 												'ContractManagement.view.Amendments')AND 
 							AP.strStatus = 'Submitted'
 					ORDER BY intApprovalId DESC
-			) AP ON AP.intRecordId = CD.intContractDetailId											LEFT
+			) AP ON AP.intRecordId = CD.intContractHeaderId											LEFT
 	JOIN	tblEMEntity	AE	ON	AE.intEntityId	=	AP.intSubmittedById
 	JOIN	tblEMEntity	UE	ON	UE.intEntityId	=	ISNULL(CH.intLastModifiedById,CH.intCreatedById)LEFT
 	JOIN	tblAPVendor	VE	ON	VE.intEntityVendorId	=	CH.intEntityId
