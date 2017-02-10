@@ -294,7 +294,7 @@ BEGIN
 										OR (intInventoryShipmentItemId is null OR intSalesOrderDetailId is null))
 			                            THEN dblQtyShipped * @dblSplitPercent  ELSE 0 END)
 								,[dblQtyShipped] * @dblSplitPercent
-								,[dblDiscount]	  * @dblSplitPercent
+								,[dblDiscount]	  
 								,[dblPrice]      --* @dblSplitPercent -- AR-2505
 								,[dblTotalTax]   * @dblSplitPercent
 								,[dblTotal]      * @dblSplitPercent
