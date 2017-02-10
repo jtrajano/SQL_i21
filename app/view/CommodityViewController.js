@@ -279,7 +279,17 @@ Ext.define('Inventory.view.CommodityViewController', {
             ]
         });
 
+        var grdUOM = win.down('#grdUom');
+        var colUnitQty = _.findWhere(grdUOM.columns, function(c) { return c.itemId === 'colUnitQty'; });
+        colUnitQty.onGetDecimalPlaces = me.onGetDecimalPlaces;
+
         return win.context;
+    },
+
+    onGetDecimalPlaces: function(record) {
+        if(record && record.get('tblICUnitMeasure'))
+            return record.get('tblICUnitMeasure').intDecimalPlaces;
+        return null;
     },
 
     show : function(config) {
@@ -309,6 +319,29 @@ Ext.define('Inventory.view.CommodityViewController', {
         }
     },
 
+    onUOMUnitQty: function(editor, newValue, oldValue) {
+        var selection = editor.up('grid').getSelectionModel().selected;
+        var decimals = 2;
+
+        if(selection && selection.items && selection.items.length > 0) {
+            if(selection.items[0].data.tblICUnitMeasure) {
+                if(selection.items[0].data.tblICUnitMeasure.data)
+                    decimals = selection.items[0].data.tblICUnitMeasure.data.intDecimalPlaces;
+                else
+                    decimals = selection.items[0].data.tblICUnitMeasure.intDecimalPlaces;
+                    
+                if(iRely.Functions.isEmpty(decimals))
+                    decimals = 2;
+                var format = "";
+                for (var i = 0; i < decimals; i++)
+                    format += "0";
+                
+                var formatted = numeral(newValue).format('0,0.[' + format + ']');
+                editor.setValue(formatted);
+            }
+        }
+    },
+
     onUOMSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -318,9 +351,20 @@ Ext.define('Inventory.view.CommodityViewController', {
         var plugin = grid.getPlugin('cepUOM');
         var current = plugin.getActiveRecord();
         var uomConversion = win.viewModel.storeInfo.uomConversion;
-
+        
         if (combo.column.itemId === 'colUOMCode')
         {
+            var colUOMUnitQty = _.findWhere(grid.getColumns(), { itemId: 'colUOMUnitQty' });
+            if(colUOMUnitQty) {
+                var editor = colUOMUnitQty.getEditor();
+                var decimals = records[0].get('intDecimalPlaces');                
+                var format = "";
+                for (var i = 0; i < decimals; i++)
+                    format += "0";
+                var formatted = numeral(current.get('dblUnitQty')).format('0,0.[' + format + ']');
+                editor.setValue(formatted);
+            }
+
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
             current.set('tblICUnitMeasure', records[0]);
 
@@ -467,6 +511,9 @@ Ext.define('Inventory.view.CommodityViewController', {
             },
             "#cboAccountId": {
                 select: this.onAccountSelect
+            },
+            "#txtUOMUnitQty": {
+                change: this.onUOMUnitQty
             },
             "#colUOMStockUnit": {
                 beforecheckchange: this.onUOMStockUnitCheckChange

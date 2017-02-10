@@ -187,12 +187,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnUnpost: {
                 hidden: '{hideUnpostButton}'
             },
-            btnPostPreview: {
-                hidden: '{hidePostButton}'
-            },
-            btnUnpostPreview: {
-                hidden: '{hideUnpostButton}'    
-            },
+            // btnPostPreview: {
+            //     hidden: '{hidePostButton}'
+            // },
+            // btnUnpostPreview: {
+            //     hidden: '{hideUnpostButton}'    
+            // },
             btnInvoice: {
                 hidden: '{!current.ysnPosted}'
             },
@@ -559,11 +559,26 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colUnitCost: 'dblUnitCost',
                 colUnitPrice: {
                     dataIndex: 'dblUnitPrice',
+                    hidden: '{hideFunctionalCurrencyColumn}',
                     editor: {
                         readOnly: '{disableFieldInShipmentGrid}'
                     }
                 },
-                colLineTotal: 'dblLineTotal',
+                colForeignUnitPrice: {
+                    dataIndex: 'dblForeignUnitPrice',
+                    hidden: '{hideForeignColumn}',
+                    editor: {
+                        readOnly: '{disableFieldInShipmentGrid}'
+                    }
+                },                
+                colLineTotal: {
+                    dataIndex: 'dblLineTotal',
+                    hidden: '{hideFunctionalCurrencyColumn}',
+                },
+                colForeignLineTotal: {
+                    dataIndex:  'dblForeignLineTotal',
+                    hidden: '{hideForeignColumn}'
+                },
                 colNotes: 'strNotes',
                 colForexRateType: {
                     dataIndex: 'strForexRateType',
@@ -1119,6 +1134,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     current.set('strOrderUOM', records[0].get('strItemUOM'));
                     current.set('dblQtyOrdered', records[0].get('dblDetailQuantity'));
                     current.set('dblUnitPrice', records[0].get('dblCashPrice'));
+                    current.set('dblForeignUnitPrice', records[0].get('dblCashPrice'));
                     current.set('intOwnershipType', 1);
                     current.set('strOwnershipType', 'Own');
 
@@ -1144,6 +1160,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     current.set('strOrderUOM', records[0].get('strUnitMeasure'));
                     current.set('dblQtyOrdered', records[0].get('dblQtyOrdered'));
                     current.set('dblUnitPrice', records[0].get('dblPrice'));
+                    current.set('dblForeignUnitPrice', records[0].get('dblPrice'));
                     current.set('intOwnershipType', 1);
                     current.set('strOwnershipType', 'Own');
 
@@ -1188,6 +1205,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intItemUOMId', records[0].get('intIssueUOMId'));
             current.set('strUnitMeasure', records[0].get('strIssueUOM'));
             current.set('dblUnitPrice', records[0].get('dblIssueSalePrice'));
+            current.set('dblForeignUnitPrice', records[0].get('dblIssueSalePrice'));
             current.set('dblItemUOMConvFactor', records[0].get('dblIssueUOMConvFactor'));
             current.set('strUnitType', records[0].get('strIssueUOMType'));
             current.set('intOwnershipType', 1);
@@ -1210,6 +1228,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('dblItemUOMConv', records[0].get('dblUnitQty'));
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitPrice', records[0].get('dblSalePrice'));
+            current.set('dblForeignUnitPrice', records[0].get('dblSalePrice'));
             current.set('intItemUOMId', records[0].get('intItemUnitMeasureId'));
         }
         else if (combo.itemId === 'cboSubLocation') {
@@ -1259,20 +1278,27 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strForexRateType', records[0].get('strCurrencyExchangeRateType'));
             current.set('dblForexRate', null);
 
-            // me.getForexRate(
-            //     win.viewModel.data.current.get('intCurrencyId'),
-            //     current.get('intForexRateTypeId'),
-            //     win.viewModel.data.current.get('dtmShipDate'),
-            //     function(successResult){
-            //         if (successResult && successResult.length > 0){
-            //             current.set('dblForexRate', successResult[0].dblRate);
-            //         }
-            //     },
-            //     function(failureResult){
-            //         var jsonData = Ext.decode(failureResult.responseText);
-            //         iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
-            //     }
-            // );            
+            iRely.Functions.getForexRate(
+                win.viewModel.data.current.get('intCurrencyId'),
+                current.get('intForexRateTypeId'),
+                win.viewModel.data.current.get('dtmShipDate'),
+                function(successResponse){
+                    if (successResponse && successResponse.length > 0){
+                        var dblRate = successResponse[0].dblRate;
+                        var dblUnitPrice = current.get('dblUnitPrice');
+
+                        dblRate = Ext.isNumeric(dblRate) ? dblRate : 0;
+                        dblUnitPrice = Ext.isNumeric(dblUnitPrice) ? dblUnitPrice : 0;
+
+                        current.set('dblForexRate', dblRate);
+                        current.set('dblForeignUnitPrice', dblRate != 0 ? dblUnitPrice / dblRate : dblUnitPrice);                        
+                    }
+                },
+                function(failureResponse){
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            );                       
         }        
         
     },
@@ -1378,41 +1404,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 ]
             });
         }
-    },
-
-    onPostClick: function(button, e, eOpts) {
-        var me = this;
-        var win = button.up('window');
-        var context = win.context;
-
-        var doPost = function() {
-            var strShipmentNumber = me.getCurrentValue('strShipmentNumber');
-            var posted = me.getCurrentValue('ysnPosted');
-
-            var options = {
-                postURL             : '../Inventory/api/InventoryShipment/Ship',
-                strTransactionId    : strShipmentNumber,
-                isPost              : !posted,
-                isRecap             : false,
-                callback            : me.onAfterShip,
-                scope               : me
-            };
-
-            CashManagement.common.BusinessRules.callPostRequest(options);
-        };
-
-        // If there is no data change, do the post.
-        if (!context.data.hasChanges()){
-            doPost();
-            return;
-        }
-
-        // Save has data changes first before doing the post.
-        context.data.saveRecord({
-            successFn: function() {
-                doPost();
-            }
-        });
     },
 
     onRecapClick: function(button, e, eOpts) {
@@ -2193,7 +2184,22 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (combo.itemId === 'cboChargeForexRateType') {
             current.set('intForexRateTypeId', records[0].get('intCurrencyExchangeRateTypeId'));
             current.set('strForexRateType', records[0].get('strCurrencyExchangeRateType'));
-            current.set('dblForexRate', 0.00);
+            current.set('dblForexRate', null);
+
+            iRely.Functions.getForexRate(
+                win.viewModel.data.current.get('intCurrencyId'),
+                current.get('intForexRateTypeId'),
+                win.viewModel.data.current.get('dtmShipDate'),
+                function(successResponse){
+                    if (successResponse && successResponse.length > 0){
+                        current.set('dblForexRate', successResponse[0].dblRate);
+                    }
+                },
+                function(failureResponse){
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            );                
         }           
     },
 
@@ -2514,6 +2520,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                         //dblQtyOrdered: lot.get('dblSalesOrderedQty'),
                                                         dblQtyOrdered: lot.get('dblDetailQuantity'),
                                                         dblUnitPrice: lot.get('dblCashPrice'),
+                                                        dblForeignUnitPrice: lot.get('dblCashPrice'),
                                                         intOwnershipType: lot.get('intOwnershipType'),
                                                         strOwnershipType: lot.get('strOwnershipType'),
                                                         intSubLocationId: lot.get('intSubLocationId'),
@@ -2580,6 +2587,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 intItemUOMId: order.get('intItemUOMId'),
                                 intWeightUOMId: order.get('intWeightUOMId'),
                                 dblUnitPrice: order.get('dblUnitPrice'),
+                                dblForeignUnitPrice: order.get('dblUnitPrice'),
                                 strItemNo: order.get('strItemNo'),
                                 strUnitMeasure: order.get('strItemUOM'),
                                 strWeightUOM: order.get('strWeightUOM'),
@@ -2917,47 +2925,92 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },      
 
-    getForexRate: function(currencyId, forexRateTypeId, date, successFn, failureFn){
-        ic.utils.ajax({
-            url: '../i21/api/CurrencyExchangeRate/GetCurrencyExchangeRateDetail',
-            params:{
-                currencyId: currencyId,
-                rateTypeId: forexRateTypeId,
-                validFromDate: date
-            },
-            method: 'get'  
-        })
-        .subscribe(
-            function(successResponse) {
-                if (successFn){
-                    successFn(successResponse);
-                }
-            }
-            , function(failureResponse) {
-                if (failureFn){
-                    failureFn(failureResponse);
-                }
-            }
-        );
-    },    
-
     onCurrencyDrilldown: function (combo) {
         iRely.Functions.openScreen('i21.view.Currency', { viewConfig: { modal: true } });
     },   
 
-    // onCurrencySelect: function (combo, records, eOpts) {
-    //     if (records.length <= 0)
-    //         return;
+    onPnlRecapBeforeShow: function(component, eOpts){
+        var me = this;
+        var win = component.up('window');
+        var context = win.context;
 
-    //     var win = combo.up('window');
-    //     var current = win.viewModel.data.current;
+        var doRecap = function (currentRecord){
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryShipment/Ship',
+                params:{
+                    strTransactionId: currentRecord.get('strShipmentNumber'),
+                    isPost: currentRecord.get('ysnPosted') ? false : true,
+                    isRecap: true
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    var postResult = Ext.decode(successResponse.responseText);
+                    var batchId = postResult.data.strBatchId;
+                    if (batchId) {
+                        me.bindRecapGrid(batchId);
+                    }                    
+                }
+                ,function(failureResponse) {
+                    // Show Post Preview failed.
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            )
+        };    
 
-    //     if (current) {
-    //         var subCurrencyCents = records[0].get('intSubCurrencyCent');
-    //         subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
-    //         current.set('intSubCurrencyCents', subCurrencyCents);
-    //     }
-    // },    
+        // If there is no data change, calculate the charge and do the recap. 
+        if (!context.data.hasChanges()) {
+            doRecap(win.viewModel.data.current);
+        }
+
+        // Save has data changes first before anything else. 
+        context.data.saveRecord({
+            successFn: function () {
+                doRecap(win.viewModel.data.current);             
+            }
+        });
+    }, 
+
+    onPostClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doPost = function (currentRecord){
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryShipment/Ship',
+                params:{
+                    strTransactionId: currentRecord.get('strShipmentNumber'),
+                    isPost: currentRecord.get('ysnPosted') ? false : true,
+                    isRecap: false
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    me.onAfterShip(true);
+                }
+                ,function(failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    me.onAfterShip(false, jsonData.message.statusText);
+                }
+            )
+        };    
+
+        // If there is no data change, calculate the charge and do the recap. 
+        if (!context.data.hasChanges()) {
+            doPost(win.viewModel.data.current);
+        }
+
+        // Save has data changes first before anything else. 
+        context.data.saveRecord({
+            successFn: function () {
+                doPost(win.viewModel.data.current);             
+            }
+        });
+    },    
 
     init: function(application) {
         this.control({

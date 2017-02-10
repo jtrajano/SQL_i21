@@ -5,7 +5,9 @@ Ext.define('Inventory.controller.Inventory', {
     extend: 'i21.controller.Module',
     alias: 'controller.inventory',
     requires: [
-        'Inventory.Utils'
+        'Inventory.Utils',
+        'Inventory.ux.GridUnitMeasureColumn',
+        'Inventory.ux.GridUnitMeasureField'
     ],
     singleton: true,
 
@@ -92,6 +94,7 @@ Ext.define('Inventory.controller.Inventory', {
     init: function() {
         Ext.Loader.loadScript("../Inventory/app/lib/underscore.js");
         Ext.Loader.loadScript("../Inventory/app/lib/rx.all.js");
+        Ext.Loader.loadScript("../Inventory/app/lib/numeraljs/numeral.js");
         
         Ext.Ajax.request({
             timeout: 120000,

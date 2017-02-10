@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IInventoryShipmentBl : IBusinessLayer<tblICInventoryShipment>
     {
-        SaveResult PostTransaction(Common.Posting_RequestModel shipment, bool isRecap);
+        Common.GLPostResult PostTransaction(Common.Posting_RequestModel shipment, bool isRecap);
         SaveResult ProcessInvoice(int shipmentId, out int? newInvoice);
         SaveResult CalculateCharges(int shipmentId);
         void SetUser(int UserId);

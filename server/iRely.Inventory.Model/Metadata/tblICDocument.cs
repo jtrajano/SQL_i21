@@ -18,9 +18,11 @@ namespace iRely.Inventory.Model
         public int? intDocumentType { get; set; }
         public int? intCommodityId { get; set; }
         public bool ysnStandard { get; set; }
-        
+        public int? intCertificationId { get; set; }
+
         public ICollection<tblICItemContractDocument> tblICItemContractDocuments { get; set; }
         public tblICCommodity tblICCommodity { get; set; }
+        public tblICCertification tblICCertification { get; set; }
     }
 
     public class DocumentVM
@@ -33,6 +35,9 @@ namespace iRely.Inventory.Model
         public string strCommodity { get; set; }
         public bool ysnStandard { get; set; }
         public string strDocumentType { get; set; }
+        public string strCertificationName { get; set; }
+        public string strCertificationCode { get; set; }
+        public string strCertificationIdName { get; set; }
     }
 
 }

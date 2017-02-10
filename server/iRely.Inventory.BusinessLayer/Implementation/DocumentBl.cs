@@ -29,7 +29,10 @@ namespace iRely.Inventory.BusinessLayer
                     intCommodityId = p.intCommodityId,
                     strCommodity = p.tblICCommodity.strCommodityCode,
                     ysnStandard = p.ysnStandard,
-                    strDocumentType = p.intDocumentType == 1 ? "Contract" : p.intDocumentType == 2 ? "Bill Of Lading" : p.intDocumentType == 3 ? "Container" : ""
+                    strDocumentType = p.intDocumentType == 1 ? "Contract" : p.intDocumentType == 2 ? "Bill Of Lading" : p.intDocumentType == 3 ? "Container" : "",
+                    strCertificationName = p.tblICCertification.strCertificationName,
+                    strCertificationCode = p.tblICCertification.strCertificationCode,
+                    strCertificationIdName = p.tblICCertification.strCertificationIdName
                 })
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intDocumentId").ToListAsync();

@@ -15,48 +15,76 @@ namespace iRely.Inventory.Model
 {
     public partial class InventoryEntities : DbContext
     {
-        public void PostInventoryReceipt(bool ysnRecap, string transactionId, int entityId) 
+        public string PostInventoryReceipt(bool ysnRecap, string transactionId, int entityId) 
         {
+            var strBatchId = new SqlParameter("@strBatchId", SqlDbType.NVarChar);
+            strBatchId.Size = 40;
+            strBatchId.Direction = ParameterDirection.Output;
+
             this.Database.ExecuteSqlCommand(
-                "dbo.uspICPostInventoryReceipt @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId",
+                "dbo.uspICPostInventoryReceipt @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId, @strBatchId OUTPUT",
                 new SqlParameter("@ysnPost", true),
                 new SqlParameter("@ysnRecap", ysnRecap),
                 new SqlParameter("@strTransactionId", transactionId),
-                new SqlParameter("@intEntityUserSecurityId", entityId)
-            );            
+                new SqlParameter("@intEntityUserSecurityId", entityId),
+                strBatchId
+            );
+
+            return (string)strBatchId.Value; 
         }
 
-        public void UnpostInventoryReceipt(bool ysnRecap, string transactionId, int entityId)
+        public string UnpostInventoryReceipt(bool ysnRecap, string transactionId, int entityId)
         {
+            var strBatchId = new SqlParameter("@strBatchId", SqlDbType.NVarChar);
+            strBatchId.Size = 40;
+            strBatchId.Direction = ParameterDirection.Output;
+
             this.Database.ExecuteSqlCommand(
-                "dbo.uspICPostInventoryReceipt @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId",
+                "dbo.uspICPostInventoryReceipt @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId, @strBatchId OUTPUT",
                 new SqlParameter("@ysnPost", false),
                 new SqlParameter("@ysnRecap", ysnRecap),
                 new SqlParameter("@strTransactionId", transactionId),
-                new SqlParameter("@intEntityUserSecurityId", entityId)
+                new SqlParameter("@intEntityUserSecurityId", entityId),
+                strBatchId
             );
+
+            return (string)strBatchId.Value;
         }
 
-        public void PostInventoryReturn(bool ysnRecap, string transactionId, int entityId)
+        public string PostInventoryReturn(bool ysnRecap, string transactionId, int entityId)
         {
+            var strBatchId = new SqlParameter("@strBatchId", SqlDbType.NVarChar);
+            strBatchId.Size = 40;
+            strBatchId.Direction = ParameterDirection.Output;
+
             this.Database.ExecuteSqlCommand(
-                "dbo.uspICPostInventoryReturn @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId",
+                "dbo.uspICPostInventoryReturn @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId, @strBatchId OUTPUT",
                 new SqlParameter("@ysnPost", true),
                 new SqlParameter("@ysnRecap", ysnRecap),
                 new SqlParameter("@strTransactionId", transactionId),
-                new SqlParameter("@intEntityUserSecurityId", entityId)
+                new SqlParameter("@intEntityUserSecurityId", entityId),
+                strBatchId
             );
+
+            return (string)strBatchId.Value;
         }
 
-        public void UnpostInventoryReturn(bool ysnRecap, string transactionId, int entityId)
+        public string UnpostInventoryReturn(bool ysnRecap, string transactionId, int entityId)
         {
+            var strBatchId = new SqlParameter("@strBatchId", SqlDbType.NVarChar);
+            strBatchId.Size = 40;
+            strBatchId.Direction = ParameterDirection.Output;
+
             this.Database.ExecuteSqlCommand(
-                "dbo.uspICPostInventoryReturn @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId",
+                "dbo.uspICPostInventoryReturn @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId, @strBatchId OUTPUT",
                 new SqlParameter("@ysnPost", false),
                 new SqlParameter("@ysnRecap", ysnRecap),
                 new SqlParameter("@strTransactionId", transactionId),
-                new SqlParameter("@intEntityUserSecurityId", entityId)
+                new SqlParameter("@intEntityUserSecurityId", entityId),
+                strBatchId
             );
+
+            return (string)strBatchId.Value;
         }
     }
 }

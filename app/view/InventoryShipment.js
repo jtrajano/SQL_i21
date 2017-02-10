@@ -145,6 +145,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
+                                        hidden: true,
                                         itemId: 'btnPostPreview',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Post Preview'
@@ -321,7 +322,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 flex: 1,
                                                                 itemId: 'txtReferenceNumber',
                                                                 margin: '0 5 0 0',
-                                                                fieldLabel: 'Reference Number',
+                                                                fieldLabel: 'Ref. Number',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 150
                                                             },
@@ -330,7 +331,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 flex: 1,
                                                                 itemId: 'dtmRequestedArrival',
                                                                 margin: '0 5 0 0',
-                                                                fieldLabel: 'Requested Arrival',
+                                                                fieldLabel: 'Req. Arrival',
                                                                 labelAlign: 'top'
                                                             },
                                                             {
@@ -364,7 +365,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 flex: 0.8,
                                                                 itemId: 'cboFreightTerms',
                                                                 margin: '0 5 0 0',
-                                                                fieldLabel: 'Freight Terms',
+                                                                fieldLabel: 'Frt. Terms',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110,
                                                                 displayField: 'strFreightTerm',
@@ -1251,6 +1252,21 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         dataType: 'numeric',
+                                                                        hidden: true,
+                                                                        itemId: 'colForeignUnitPrice',
+                                                                        width: 120,
+                                                                        align: 'right',
+                                                                        dataIndex: 'dblForeignUnitPrice',
+                                                                        text: 'Foreign Unit Price',
+                                                                        format: '0,000.00####',
+                                                                        editor: {
+                                                                            xtype: 'numeric'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        dataType: 'numeric',
+                                                                        hidden: true,
                                                                         itemId: 'colUnitCost',
                                                                         width: 81,
                                                                         align: 'right',
@@ -1266,6 +1282,15 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         align: 'right',
                                                                         dataIndex: 'dblUnitPrice',
                                                                         text: 'Line Total'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        dataType: 'numeric',
+                                                                        itemId: 'colForeignLineTotal',
+                                                                        width: 120,
+                                                                        align: 'right',
+                                                                        dataIndex: 'dblForeignLineTotal',
+                                                                        text: 'Foreign Line Total'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -1303,9 +1328,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        dataIndex: 'dblForexRate',
                                                                         itemId: 'colForexRate',
                                                                         width: 85,
+                                                                        dataIndex: 'dblForexRate',
                                                                         text: 'Forex Rate'
                                                                     },
                                                                     {
@@ -1970,9 +1995,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'strForexRateType',
                                                         itemId: 'colChargeForexRateType',
                                                         width: 150,
+                                                        dataIndex: 'strForexRateType',
                                                         text: 'Forex Rate Type',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -2184,6 +2209,14 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 ]
                                             }
                                         ]
+                                    },
+                                    {
+                                        xtype: 'glrecaptab',
+                                        itemId: 'pgePostPreview',
+                                        title: 'Post Preview',
+                                        listeners: {
+                                            beforeshow: 'onPnlRecapBeforeShow'
+                                        }
                                     },
                                     {
                                         xtype: 'panel',

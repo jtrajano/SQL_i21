@@ -290,6 +290,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
+                                "hidden": true,
                                 "icon": null,
                                 "itemId": "btnPostPreview",
                                 "layout|flex": null,
@@ -670,7 +671,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": null,
-                                                        "fieldLabel": "Reference Number",
+                                                        "fieldLabel": "Ref. Number",
                                                         "itemId": "txtReferenceNumber",
                                                         "labelAlign": "top",
                                                         "labelWidth": 150,
@@ -691,7 +692,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Requested Arrival",
+                                                        "fieldLabel": "Req. Arrival",
                                                         "itemId": "dtmRequestedArrival",
                                                         "labelAlign": "top",
                                                         "layout|flex": 1,
@@ -742,7 +743,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strFreightTerm",
-                                                        "fieldLabel": "Freight Terms",
+                                                        "fieldLabel": "Frt. Terms",
                                                         "itemId": "cboFreightTerms",
                                                         "labelAlign": "top",
                                                         "labelWidth": 110,
@@ -1918,7 +1919,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter110",
+                                                                    "name": "filter15",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2534,9 +2535,52 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "align": "right",
+                                                                "dataIndex": "dblForeignUnitPrice",
+                                                                "dataType": "numeric",
+                                                                "format": "0,000.00####",
+                                                                "hidden": true,
+                                                                "itemId": "colForeignUnitPrice",
+                                                                "text": "Foreign Unit Price",
+                                                                "width": 120
+                                                            },
+                                                            "name": "MyNumberColumn2",
+                                                            "designerId": "1bfbde08-5c6c-461e-bc28-e041c975b75a",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "dataType",
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|createAlias": "numeric"
+                                                                    },
+                                                                    "name": "MyNumberField16",
+                                                                    "designerId": "0483d611-44a5-4401-ba55-378ac2a4a84f"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "dblUnitPrice",
                                                                 "dataType": "numeric",
                                                                 "format": "0,000.00####",
+                                                                "hidden": true,
                                                                 "itemId": "colUnitCost",
                                                                 "text": "Unit Cost",
                                                                 "width": 81
@@ -2568,6 +2612,31 @@
                                                             },
                                                             "name": "MyNumberColumn7",
                                                             "designerId": "c53a85ff-e4c1-4d8b-baa0-f307aacb903d",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "dataType",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": "right",
+                                                                "dataIndex": "dblForeignLineTotal",
+                                                                "dataType": "numeric",
+                                                                "itemId": "colForeignLineTotal",
+                                                                "text": "Foreign Line Total",
+                                                                "width": 120
+                                                            },
+                                                            "name": "MyNumberColumn1",
+                                                            "designerId": "676b31e2-354c-4da6-9ae7-6fe80921fa1e",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",
@@ -3246,7 +3315,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter111",
+                                                                    "name": "filter16",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3820,7 +3889,7 @@
                                                         "layout|flex": null,
                                                         "width": 198
                                                     },
-                                                    "name": "filter112",
+                                                    "name": "filter17",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4672,6 +4741,50 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": null,
+                                "designer|createAlias": "glrecaptab",
+                                "itemId": "pgePostPreview",
+                                "layout": null,
+                                "title": "Post Preview"
+                            },
+                            "name": "MyPanel13",
+                            "designerId": "ad32c622-f511-4d9a-be8e-bdf212136321",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "TabConfig16",
+                                    "designerId": "9655a910-861f-4660-b4ff-ee174fc51ba9"
+                                },
+                                {
+                                    "type": "viewcontrollereventbinding",
+                                    "reference": {
+                                        "name": "listeners",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fn": "onPnlRecapBeforeShow",
+                                        "name": "beforeshow",
+                                        "scope": "me"
+                                    },
+                                    "name": "onPnlRecapBeforeShow",
+                                    "designerId": "882f73eb-013c-4611-8ca9-a61f10a57dd6"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "bodyPadding": null,
                                 "itemId": "pgeAuditLog",
                                 "layout": "fit",
                                 "title": "Audit Log"
@@ -4717,7 +4830,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

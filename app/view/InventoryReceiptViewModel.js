@@ -32,7 +32,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'ContractManagement.store.ContractHeaderViewBuffered',
         'Logistics.store.BufferedShipmentReceiptContracts',
         'Inventory.store.BufferedReceiptItemView',
-        'i21.store.CurrencyExchangeRateTypeBuffered'
+        'i21.store.CurrencyExchangeRateTypeBuffered',
+        'GeneralLedger.controls.RecapTab'
     ],
 
     data: {

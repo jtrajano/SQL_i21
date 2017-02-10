@@ -10,7 +10,7 @@
         "defaultFocus": null,
         "designer|userAlias": "iccontractdocument",
         "designer|userClassName": "ContractDocument",
-        "height": 284,
+        "height": 309,
         "hidden": false,
         "icon": null,
         "layout": "fit",
@@ -426,6 +426,59 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "{",
+                                                    "                                                                                    dataIndex: 'intCertificationId',",
+                                                    "                                                                                    dataType: 'numeric',",
+                                                    "                                                                                    hidden: true",
+                                                    "                                                                                },",
+                                                    "                                                                                {",
+                                                    "                                                                                    dataIndex: 'strCertificationName',",
+                                                    "                                                                                    dataType: 'string',",
+                                                    "                                                                                    text: 'Certification Name',",
+                                                    "                                                                                    flex: 1",
+                                                    "                                                                                }",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "designer|displayName": null,
+                                                "displayField": "strCertificationName",
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Certification",
+                                                "itemId": "cboCertification",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 105,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "valueField": "intCertificationId",
+                                                "width": 170
+                                            },
+                                            "name": "MyComboBox",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "d48cc32b-6fc0-4e83-8598-33813ee5ba24",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
                                             "type": "Ext.form.field.Checkbox",
                                             "reference": {
                                                 "name": "items",
@@ -463,7 +516,7 @@
                         "itemId": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "402098fb-f9d8-4138-b21f-ad603c46de1f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

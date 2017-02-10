@@ -46,17 +46,41 @@ namespace iRely.Inventory.WebApi
         {
             var result = _bl.PostReceive(receipt, receipt.isRecap);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            if (result.HasError)
             {
-                data = receipt,
-                success = !result.HasError,
-                message = new
+                return Request.CreateResponse(HttpStatusCode.Conflict, new
                 {
-                    statusText = result.Exception.Message,
-                    status = result.Exception.Error,
-                    button = result.Exception.Button.ToString()
-                }
-            });
+                    data = new
+                    {
+                        strBatchId = result.strBatchId,
+                        strTransactionId = receipt.strTransactionId
+                    },
+                    success = false,
+                    message = new
+                    {
+                        statusText = result.Exception.Message,
+                        status = result.Exception.Error,
+                        button = result.Exception.Button.ToString()
+                    }
+                });
+            }
+            else {
+                return Request.CreateResponse(HttpStatusCode.Accepted, new
+                {
+                    data = new
+                    {
+                        strBatchId = result.strBatchId,
+                        strTransactionId = receipt.strTransactionId
+                    },
+                    success = true,
+                    message = new
+                    {
+                        statusText = result.Exception.Message,
+                        status = result.Exception.Error,
+                        button = result.Exception.Button.ToString()
+                    }
+                });
+            }            
         }
 
         [HttpPost]
@@ -65,17 +89,42 @@ namespace iRely.Inventory.WebApi
         {
             var result = _bl.PostReturn(receipt, receipt.isRecap);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            if (result.HasError)
             {
-                data = receipt,
-                success = !result.HasError,
-                message = new
+                return Request.CreateResponse(HttpStatusCode.Conflict, new
                 {
-                    statusText = result.Exception.Message,
-                    status = result.Exception.Error,
-                    button = result.Exception.Button.ToString()
-                }
-            });
+                    data = new
+                    {
+                        strBatchId = result.strBatchId,
+                        strTransactionId = receipt.strTransactionId
+                    },
+                    success = false,
+                    message = new
+                    {
+                        statusText = result.Exception.Message,
+                        status = result.Exception.Error,
+                        button = result.Exception.Button.ToString()
+                    }
+                });
+            }
+            else
+            {
+                return Request.CreateResponse(HttpStatusCode.Accepted, new
+                {
+                    data = new
+                    {
+                        strBatchId = result.strBatchId,
+                        strTransactionId = receipt.strTransactionId
+                    },
+                    success = true,
+                    message = new
+                    {
+                        statusText = result.Exception.Message,
+                        status = result.Exception.Error,
+                        button = result.Exception.Button.ToString()
+                    }
+                });
+            }
         }
 
         [HttpGet]

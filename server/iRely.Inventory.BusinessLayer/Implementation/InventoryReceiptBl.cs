@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using iRely.Inventory.Model;
+using iRely.Inventory.BusinessLayer;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -378,72 +379,92 @@ namespace iRely.Inventory.BusinessLayer
             return saveResult;
         }
 
-        public SaveResult PostReceive(Common.Posting_RequestModel receipt, bool isRecap)
+        public Common.GLPostResult PostReceive(Common.Posting_RequestModel receipt, bool isRecap)
         {
+            var glPostResult = new Common.GLPostResult();
+            glPostResult.Exception = new ServerException(); 
+
             // Save the record first 
             var result = _db.Save(false);
 
             if (result.HasError)
             {
-                return result;
+                glPostResult.BaseException = result.BaseException;
+                glPostResult.Exception = result.Exception;
+                glPostResult.HasError = result.HasError;
+                glPostResult.RowsAffected = result.RowsAffected;
+                //glPostResult.strBatchId = null; 
+
+                return glPostResult;
             }
 
             // Post the receipt transaction 
-            var postResult = new SaveResult();
             try
             {
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                string strBatchId; 
                 if (receipt.isPost)
                 {
-                    db.PostInventoryReceipt(isRecap, receipt.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = db.PostInventoryReceipt(isRecap, receipt.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 else
                 {
-                    db.UnpostInventoryReceipt(isRecap, receipt.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = db.UnpostInventoryReceipt(isRecap, receipt.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
-                postResult.HasError = false;
+                glPostResult.HasError = false;
+                glPostResult.strBatchId = strBatchId; 
             }
             catch (Exception ex)
             {
-                postResult.BaseException = ex;
-                postResult.HasError = true;
-                postResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+                glPostResult.BaseException = ex;
+                glPostResult.HasError = true;
+                glPostResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
             }
-            return postResult;
+            return glPostResult;
         }
 
-        public SaveResult PostReturn(Common.Posting_RequestModel receipt, bool isRecap)
+        public Common.GLPostResult PostReturn(Common.Posting_RequestModel receipt, bool isRecap)
         {
+            var glPostResult = new Common.GLPostResult();
+            glPostResult.Exception = new ServerException();
+
             // Save the record first 
             var result = _db.Save(false);
 
             if (result.HasError)
             {
-                return result;
+                glPostResult.BaseException = result.BaseException;
+                glPostResult.Exception = result.Exception;
+                glPostResult.HasError = result.HasError;
+                glPostResult.RowsAffected = result.RowsAffected;
+                glPostResult.strBatchId = null;
+
+                return glPostResult;
             }
 
             // Post the receipt transaction 
-            var postResult = new SaveResult();
             try
             {
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                string strBatchId;
                 if (receipt.isPost)
                 {
-                    db.PostInventoryReturn(isRecap, receipt.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = db.PostInventoryReturn(isRecap, receipt.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 else
                 {
-                    db.UnpostInventoryReturn(isRecap, receipt.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = db.UnpostInventoryReturn(isRecap, receipt.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
-                postResult.HasError = false;
+                glPostResult.HasError = false;
+                glPostResult.strBatchId = strBatchId;
             }
             catch (Exception ex)
             {
-                postResult.BaseException = ex;
-                postResult.HasError = true;
-                postResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+                glPostResult.BaseException = ex;
+                glPostResult.HasError = true;
+                glPostResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
             }
-            return postResult;
+            return glPostResult;
         }
 
         public async Task<SearchResult> SearchReceiptItems(GetParameter param)

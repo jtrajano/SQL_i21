@@ -22,6 +22,10 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICCommodity)
                 .WithMany(p => p.tblICDocuments)
                 .HasForeignKey(p => p.intCommodityId);
+
+            this.HasOptional(p => p.tblICCertification)
+                .WithMany(p => p.tblICDocuments)
+                .HasForeignKey(p => p.intCertificationId);
         }
     }
 }

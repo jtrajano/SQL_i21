@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using iRely.Inventory.Model;
+using iRely.Inventory.BusinessLayer; 
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -13,8 +14,10 @@ namespace iRely.Inventory.BusinessLayer
     {
         SaveResult ProcessBill(int receiptId, out int? newBill);
         SaveResult CalculateCharges(int receiptId);
-        SaveResult PostReceive(Common.Posting_RequestModel receipt, bool isRecap);
-        SaveResult PostReturn(Common.Posting_RequestModel receipt, bool isRecap);
+        //SaveResult PostReceive(Common.Posting_RequestModel receipt, bool isRecap);
+        //SaveResult PostReturn(Common.Posting_RequestModel receipt, bool isRecap);
+        Common.GLPostResult PostReceive(Common.Posting_RequestModel receipt, bool isRecap);
+        Common.GLPostResult PostReturn(Common.Posting_RequestModel receipt, bool isRecap);
         void SetUser(int UserId);
         Task<SearchResult> SearchReceiptItems(GetParameter param);
         Task<SearchResult> SearchReceiptItemView(GetParameter param);
