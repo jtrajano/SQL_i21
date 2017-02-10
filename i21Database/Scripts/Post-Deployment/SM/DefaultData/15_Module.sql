@@ -1169,6 +1169,16 @@ GO
 	ELSE
 	UPDATE tblSMModule SET strVersionStart = '', strVersionEnd = '16.2' WHERE strApplicationName = 'i21' AND strModule = 'Grain'
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Fixed Assets')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
+	SELECT [intModuleId]					=		113,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Fixed Assets',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		113,
+		   [strPrefix]						=		N'FA'
+
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO

@@ -17,6 +17,9 @@ DECLARE @intBatchId INT = 0
 
 SELECT TOP 1 @intBatchId =  ISNULL(MAX(intBatchId),0) + 1 from tblCMBankFileGenerationLog
 
+DELETE FROM tblCMBankFileGenerationLog
+WHERE intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
+
 BEGIN 
 INSERT INTO tblCMBankFileGenerationLog
 (

@@ -1,31 +1,46 @@
 ﻿CREATE VIEW [dbo].[vyuAPVoucherForPayment]
 AS
-SELECT 
+SELECT DISTINCT
 	strTransactionType		=	'Voucher',
 	strTransactionId		=	A.strBillId,
 	strTransactionDate		=	A.dtmDate,
 	strTransactionDueDate	=	A.dtmDueDate,
 	strVendorName			=	B2.strName,
-	strCommodity			=	'',
-	strLineOfBusiness		=	'',
-	strLocation				=	'',
+	strCommodity			=	CC.strDescription,
+	strLineOfBusiness		=	CT.strDescription,
+	strLocation				=	EL.strLocationName,
 	strTicket				=	'',
-	strContractNumber		=	'',
-	strItemId				=	'',
-	dblQuantity				=	0,
+	strContractNumber		=	CH.strContractNumber,
+	strItemId				=	strName,
+	dblQuantity				=	BD.dblQtyReceived,
 	dblUnitPrice			=	0,
-	dblAmount				=	0,
-	intCurrencyId			=	0,
-	intForexRateType		=	0,
-	dblForexRate			=	0,
-	dblHistoricAmount		=	0,
-	dblNewForexRate			=	0,
-	dblNewAmount			=	0,
-	dblUnrealizedDebitGain	=	0,
-	dblUnrealizedCreditGain	=	0,
-	dblDebit				=	0,
-	dblCredit				=	0
+	dblAmount				=	A.dblTotal,
+	intCurrencyId			=	A.intCurrencyId,
+	intForexRateType		=	BD.intCurrencyExchangeRateTypeId,
+	dblForexRate			=	BD.dblRate,
+	dblHistoricAmount		=	A.dblTotal * BD.dblRate,
+	dblNewForexRate			=	0, --Calcuate By GL
+	dblNewAmount			=	0, --Calcuate By GL
+	dblUnrealizedDebitGain	=	0, --Calcuate By GL
+	dblUnrealizedCreditGain	=	0, --Calcuate By GL
+	dblDebit				=	0, --Calcuate By GL
+	dblCredit				=	0  --Calcuate By GL
 FROM tblAPBill A
+INNER JOIN tblAPBillDetail BD
+	ON BD.intBillId = A.intBillId
 INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityVendorId = B2.intEntityId) 
 	ON A.intEntityVendorId = B.intEntityVendorId
+LEFT JOIN dbo.tblEMEntityLocation EL
+	ON EL.intEntityLocationId = A.intShipFromId
+LEFT JOIN dbo.tblCTContractHeader CH 
+	ON CH.intContractHeaderId = BD.intContractHeaderId
+LEFT JOIN tblICItem IT
+	ON BD.intItemId = IT.intItemId
+LEFT JOIN dbo.tblICCategory CT
+	ON IT.intCategoryId = CT.intCategoryId
+LEFT JOIN dbo.tblICCommodity CC
+	ON CC.intCommodityId = IT.intCommodityId
+LEFT JOIN dbo.tblSMCurrency H1 
+	ON H1.intCurrencyID = A.intCurrencyId
 WHERE A.ysnPosted = 1 AND A.ysnPaid = 0
+
