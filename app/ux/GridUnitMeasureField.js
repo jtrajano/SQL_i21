@@ -18,7 +18,7 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
 
     config: {
         defaultDecimals: 6,
-        prevUOM: null
+        modifiedRows: []
     },
 
     initComponent: function() {
@@ -116,6 +116,8 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
                 selection.set(me.getDisplayField(), display);
             selection.set(column.decimalPrecisionField, decimals);
             selection.intDecimalPlacesInternal = decimals;
+            me.addOrUpdateDecimalPlaces(selection.internalId, decimals);
+
             me.updateExtraFields(selection, records[0]);
             var n = me.setupQuantity(txt, txt.getValue(), decimals);
             var oldValue = txt.getValue();
@@ -158,12 +160,36 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
         /* Get internal decimal places. Often has value from columns overriden onGetDecimalPlaces method */
         if(!iRely.Functions.isEmpty(data.intDecimalPlacesInternal))
             decimals = data.intDecimalPlacesInternal;
+        
+        /* If UOM changed, get the updated decimal places */
+        var ud = me.getUpdatedDecimalPlaces(data);
+        if(!iRely.Functions.isEmpty(ud))
+            decimals = ud;
 
         /* Get the actual decimal places bound to the record. */
         if(!iRely.Functions.isEmpty(data.get(decimalField)))
             decimals = data.get(decimalField);
 
         return decimals;
+    },
+
+    getUpdatedDecimalPlaces: function(data) {
+        var me = this;
+        var id = data.internalId;
+        var found = _.findWhere(me.modifiedRows, { id: id });
+        if(found)
+            return found.decimalPlaces;
+        return null;
+    },
+
+    addOrUpdateDecimalPlaces: function(id, decimals) {
+        var me = this;
+        var found = _.findWhere(me.modifiedRows, { id: id });
+        if(found) {
+            found.decimalPlaces = decimals;
+        } else {
+            me.modifiedRows.push({ id: id, decimalPlaces: decimals });
+        }
     },
 
     getSelectedDecimals: function(cbo) {

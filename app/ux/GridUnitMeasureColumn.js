@@ -4,12 +4,12 @@ Ext.define('Inventory.ux.GridUnitMeasureColumn', {
 
     getDecimals: function(me, record, decimalField) {
         var decimal = 6;
-        if(record && record.get(decimalField))
+        if(record && !iRely.Functions.isEmpty(record.get(decimalField)))
             decimal = record.get(decimalField);
 
         if(me.onGetDecimalPlaces) {
             var custom = me.onGetDecimalPlaces(record);
-            decimal = custom ? custom : decimal;
+            decimal = !iRely.Functions.isEmpty(custom) ? custom : decimal;
         }
         record.intDecimalPlacesInternal = decimal;
         return decimal;
@@ -24,9 +24,9 @@ Ext.define('Inventory.ux.GridUnitMeasureColumn', {
         var qty = 0.000000;
         var uom = "";
                 
-        if(record.get(qtyField))
+        if(!iRely.Functions.isEmpty(record.get(qtyField)))
             qty = record.get(qtyField);
-        if(record.get(uomField))
+        if(!iRely.Functions.isEmpty(record.get(uomField)))
             uom = record.get(uomField);
 
         var decimalField = me.decimalPrecisionField ? me.decimalPrecisionField : 'intDecimalPlaces';

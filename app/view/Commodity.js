@@ -548,11 +548,6 @@ Ext.define('Inventory.view.Commodity', {
                                                                 dataIndex: 'dblUnitQty',
                                                                 text: 'Unit Qty',
                                                                 flex: 1,
-                                                                onGetDecimalPlaces: function(record) {
-                                                                    if(record && record.get('tblICUnitMeasure'))
-                                                                        return record.get('tblICUnitMeasure').intDecimalPlaces;
-                                                                    return null;
-                                                                },
                                                                 editor: {
                                                                     xtype: 'gridunitmeasurefield',
                                                                     valueField: 'intUnitMeasureId',
