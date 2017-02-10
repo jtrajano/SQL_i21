@@ -464,6 +464,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     },
                                                                     {
                                                                         xtype: 'numeric',
+                                                                        currencyField: true,
                                                                         itemId: 'txtTaxAmount',
                                                                         fieldLabel: 'Tax Amount',
                                                                         labelWidth: 120,
@@ -931,6 +932,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         format: '0,000.##',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             width: 100
                                                         }
                                                     },
@@ -1040,7 +1042,8 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         text: 'Cost',
                                                         format: '0,000.##',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            currencyField: true
                                                         }
                                                     },
                                                     {

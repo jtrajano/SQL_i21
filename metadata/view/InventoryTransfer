@@ -1053,6 +1053,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "currencyField": true,
                                                                 "designer|createAlias": "numeric",
                                                                 "fieldLabel": "Tax Amount",
                                                                 "hideTrigger": true,
@@ -1062,7 +1063,17 @@
                                                                 "readOnly": true
                                                             },
                                                             "name": "MyNumberField13",
-                                                            "designerId": "756f07b2-5987-4b4a-8343-8df11dc46c76"
+                                                            "configAlternates": {
+                                                                "currencyField": "boolean"
+                                                            },
+                                                            "designerId": "756f07b2-5987-4b4a-8343-8df11dc46c76",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "currencyField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 }
@@ -1172,7 +1183,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter120",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1874,10 +1885,21 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "quantityField": true,
                                                         "width": 100
                                                     },
                                                     "name": "MyNumberField",
-                                                    "designerId": "d0c2d56f-2f2d-4e31-afab-34b0961cd6e3"
+                                                    "configAlternates": {
+                                                        "quantityField": "boolean"
+                                                    },
+                                                    "designerId": "d0c2d56f-2f2d-4e31-afab-34b0961cd6e3",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -2094,8 +2116,21 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "currencyField": true
+                                                    },
                                                     "name": "MyNumberField4",
-                                                    "designerId": "a50b6383-555d-48f5-9688-cecbf0b546d0"
+                                                    "configAlternates": {
+                                                        "currencyField": "boolean"
+                                                    },
+                                                    "designerId": "a50b6383-555d-48f5-9688-cecbf0b546d0",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "currencyField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -2317,7 +2352,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging19",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
