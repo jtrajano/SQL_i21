@@ -1009,11 +1009,22 @@
                                                                 "layout|flex": null,
                                                                 "layout|margins": null,
                                                                 "name": null,
+                                                                "quantityField": true,
                                                                 "readOnly": null,
                                                                 "width": null
                                                             },
                                                             "name": "MyNumberField10",
-                                                            "designerId": "95a0c35e-af2c-4c86-aaa2-780ab85f242b"
+                                                            "configAlternates": {
+                                                                "quantityField": "boolean"
+                                                            },
+                                                            "designerId": "95a0c35e-af2c-4c86-aaa2-780ab85f242b",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "quantityField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Text",
@@ -1515,17 +1526,24 @@
                                                                 "layout|margins": null,
                                                                 "margin": null,
                                                                 "name": null,
+                                                                "quantityField": true,
                                                                 "width": null
                                                             },
                                                             "name": "MyNumberField",
                                                             "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean"
+                                                                "alwaysDisplayDecimals": "boolean",
+                                                                "quantityField": "boolean"
                                                             },
                                                             "designerId": "5a2ae183-66a7-46a2-ab91-6f6c790fef52",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",
                                                                     "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "quantityField",
                                                                     "type": "string"
                                                                 }
                                                             ]
@@ -1748,6 +1766,7 @@
                                                                                         "itemId": "txtWeightLossMsgValue",
                                                                                         "labelWidth": 120,
                                                                                         "layout|flex": null,
+                                                                                        "quantityField": true,
                                                                                         "readOnly": true,
                                                                                         "readOnlyCls": null,
                                                                                         "tabIndex": -1,
@@ -1758,7 +1777,17 @@
                                                                                         "width": null
                                                                                     },
                                                                                     "name": "MyNumberField1",
-                                                                                    "designerId": "db399a20-19e2-4ee7-a199-addee148f115"
+                                                                                    "configAlternates": {
+                                                                                        "quantityField": "boolean"
+                                                                                    },
+                                                                                    "designerId": "db399a20-19e2-4ee7-a199-addee148f115",
+                                                                                    "customConfigs": [
+                                                                                        {
+                                                                                            "group": "(Custom Properties)",
+                                                                                            "name": "quantityField",
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    ]
                                                                                 }
                                                                             ]
                                                                         },
@@ -1772,7 +1801,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter15",
+                                                                            "name": "filter112",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2428,10 +2457,21 @@
                                                                                 "allowDecimals": false,
                                                                                 "decimalPrecision": 0,
                                                                                 "itemId": "txtLoadToReceive",
-                                                                                "minValue": 0
+                                                                                "minValue": 0,
+                                                                                "quantityField": true
                                                                             },
                                                                             "name": "MyNumberField15",
-                                                                            "designerId": "46c05c3b-099d-4567-86c4-01bf9cc1f99a"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "46c05c3b-099d-4567-86c4-01bf9cc1f99a",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -2483,12 +2523,23 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "currencyField": true,
                                                                                 "decimalPrecision": 6,
                                                                                 "itemId": "txtUnitCost",
                                                                                 "minValue": 0
                                                                             },
                                                                             "name": "MyNumberField12",
-                                                                            "designerId": "21443f4e-1088-4fc0-abfb-03d159b6eeb5"
+                                                                            "configAlternates": {
+                                                                                "currencyField": "boolean"
+                                                                            },
+                                                                            "designerId": "21443f4e-1088-4fc0-abfb-03d159b6eeb5",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "currencyField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -2694,10 +2745,21 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "itemId": "txtGross",
-                                                                                "minValue": 0
+                                                                                "minValue": 0,
+                                                                                "quantityField": true
                                                                             },
                                                                             "name": "MyNumberField13",
-                                                                            "designerId": "2bb24e83-8518-4551-92b2-30f14c4199ca"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "2bb24e83-8518-4551-92b2-30f14c4199ca",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -2735,10 +2797,21 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
-                                                                                "itemId": "txtNet"
+                                                                                "itemId": "txtNet",
+                                                                                "quantityField": true
                                                                             },
                                                                             "name": "MyNumberField13",
-                                                                            "designerId": "c4314fa1-98c8-4431-853e-04ff985393f2"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "c4314fa1-98c8-4431-853e-04ff985393f2",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -3203,10 +3276,21 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "itemId": "txtUnitRetail",
-                                                                                "minValue": 0
+                                                                                "minValue": 0,
+                                                                                "quantityField": true
                                                                             },
                                                                             "name": "MyNumberField13",
-                                                                            "designerId": "843fb0c3-698d-43cc-8058-9d69203b3b49"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "843fb0c3-698d-43cc-8058-9d69203b3b49",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -3653,7 +3737,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter16",
+                                                                            "name": "filter113",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3982,8 +4066,21 @@
                                                                                 "type": "object"
                                                                             },
                                                                             "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "quantityField": true
+                                                                            },
                                                                             "name": "MyNumberField44",
-                                                                            "designerId": "a1f57ed2-6965-4714-baf6-8fe3c07224f3"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "a1f57ed2-6965-4714-baf6-8fe3c07224f3",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -4020,8 +4117,21 @@
                                                                                 "type": "object"
                                                                             },
                                                                             "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "quantityField": true
+                                                                            },
                                                                             "name": "MyNumberField45",
-                                                                            "designerId": "eb833694-f040-4548-bf73-f5d5ba022903"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "eb833694-f040-4548-bf73-f5d5ba022903",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -4058,8 +4168,21 @@
                                                                                 "type": "object"
                                                                             },
                                                                             "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "quantityField": true
+                                                                            },
                                                                             "name": "MyNumberField46",
-                                                                            "designerId": "788020fe-085c-4788-a9fa-89c55a36f54e"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "788020fe-085c-4788-a9fa-89c55a36f54e",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -4236,8 +4359,21 @@
                                                                                 "type": "object"
                                                                             },
                                                                             "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "quantityField": true
+                                                                            },
                                                                             "name": "MyNumberField49",
-                                                                            "designerId": "d19c1b59-8d96-4359-b1b3-02549ba71aa1"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "d19c1b59-8d96-4359-b1b3-02549ba71aa1",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -4331,8 +4467,21 @@
                                                                                 "type": "object"
                                                                             },
                                                                             "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "quantityField": true
+                                                                            },
                                                                             "name": "MyNumberField50",
-                                                                            "designerId": "67a1dceb-a7fb-450d-ad86-6c0c12fa3be1"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "67a1dceb-a7fb-450d-ad86-6c0c12fa3be1",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -4369,8 +4518,21 @@
                                                                                 "type": "object"
                                                                             },
                                                                             "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "quantityField": true
+                                                                            },
                                                                             "name": "MyNumberField51",
-                                                                            "designerId": "bc0670c3-2384-440a-8af1-0d65cf44d834"
+                                                                            "configAlternates": {
+                                                                                "quantityField": "boolean"
+                                                                            },
+                                                                            "designerId": "bc0670c3-2384-440a-8af1-0d65cf44d834",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -5047,7 +5209,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter17",
+                                                                    "name": "filter114",
                                                                     "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5446,11 +5608,22 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "currencyField": true,
                                                                         "designer|createAlias": "numericfield",
                                                                         "modelValidation": true
                                                                     },
                                                                     "name": "MyNumberField60",
-                                                                    "designerId": "deaa7036-c826-4da4-ad4d-ef151babc91c"
+                                                                    "configAlternates": {
+                                                                        "currencyField": "boolean"
+                                                                    },
+                                                                    "designerId": "deaa7036-c826-4da4-ad4d-ef151babc91c",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "currencyField",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
                                                         },
@@ -5551,11 +5724,22 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "currencyField": true,
                                                                         "designer|createAlias": "numericfield",
                                                                         "modelValidation": true
                                                                     },
                                                                     "name": "MyNumberField61",
-                                                                    "designerId": "2eeba050-620f-45cf-bce8-33840e54938d"
+                                                                    "configAlternates": {
+                                                                        "currencyField": "boolean"
+                                                                    },
+                                                                    "designerId": "2eeba050-620f-45cf-bce8-33840e54938d",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "currencyField",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
                                                         },
@@ -5945,6 +6129,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "currencyField": true,
                                                                 "designer|createAlias": "numericfield",
                                                                 "fieldLabel": "Calculated Amount",
                                                                 "itemId": "txtCalculatedAmount",
@@ -5954,7 +6139,17 @@
                                                                 "width": null
                                                             },
                                                             "name": "MyNumberField6",
-                                                            "designerId": "6712db11-55eb-43b0-ba55-09fefe369f6d"
+                                                            "configAlternates": {
+                                                                "currencyField": "boolean"
+                                                            },
+                                                            "designerId": "6712db11-55eb-43b0-ba55-09fefe369f6d",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "currencyField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Number",
@@ -5964,6 +6159,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "currencyField": true,
                                                                 "designer|createAlias": "numericfield",
                                                                 "fieldLabel": "Invoice Amount",
                                                                 "hideTrigger": true,
@@ -5974,7 +6170,17 @@
                                                                 "width": null
                                                             },
                                                             "name": "MyNumberField5",
-                                                            "designerId": "50cbf859-6d9c-45da-ac9a-b56db227ec66"
+                                                            "configAlternates": {
+                                                                "currencyField": "boolean"
+                                                            },
+                                                            "designerId": "50cbf859-6d9c-45da-ac9a-b56db227ec66",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "currencyField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Number",
@@ -5984,6 +6190,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "currencyField": true,
                                                                 "designer|createAlias": "numericfield",
                                                                 "fieldLabel": "Difference",
                                                                 "itemId": "txtDifference",
@@ -5993,7 +6200,17 @@
                                                                 "width": null
                                                             },
                                                             "name": "MyNumberField7",
-                                                            "designerId": "c3f8deb9-81ca-402f-93a2-7bd669f8050a"
+                                                            "configAlternates": {
+                                                                "currencyField": "boolean"
+                                                            },
+                                                            "designerId": "c3f8deb9-81ca-402f-93a2-7bd669f8050a",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "currencyField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Number",
@@ -6008,14 +6225,23 @@
                                                                 "itemId": "txtInvoiceMargin",
                                                                 "labelWidth": 130,
                                                                 "name": null,
+                                                                "quantityField": true,
                                                                 "readOnly": true,
                                                                 "width": null
                                                             },
                                                             "name": "MyNumberField8",
                                                             "configAlternates": {
-                                                                "decimalToDisplay": "number"
+                                                                "decimalToDisplay": "number",
+                                                                "quantityField": "boolean"
                                                             },
-                                                            "designerId": "1031199f-6b77-4f15-8201-9772a2bf44c2"
+                                                            "designerId": "1031199f-6b77-4f15-8201-9772a2bf44c2",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "quantityField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },
@@ -6078,11 +6304,22 @@
                                                                 "itemId": "txtCheckNo",
                                                                 "labelWidth": 130,
                                                                 "name": null,
+                                                                "quantityField": true,
                                                                 "readOnly": null,
                                                                 "width": null
                                                             },
                                                             "name": "MyNumberField4",
-                                                            "designerId": "f7e93eca-4ce8-4116-84e5-b0810d05b95f"
+                                                            "configAlternates": {
+                                                                "quantityField": "boolean"
+                                                            },
+                                                            "designerId": "f7e93eca-4ce8-4116-84e5-b0810d05b95f",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "quantityField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Date",
@@ -6213,7 +6450,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter115",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6505,11 +6742,22 @@
                                                 "layout|flex": null,
                                                 "layout|margins": null,
                                                 "name": null,
+                                                "quantityField": true,
                                                 "readOnly": null,
                                                 "width": null
                                             },
                                             "name": "MyNumberField19",
-                                            "designerId": "4d801de0-ce7f-4544-b9bf-3fe3419bf741"
+                                            "configAlternates": {
+                                                "quantityField": "boolean"
+                                            },
+                                            "designerId": "4d801de0-ce7f-4544-b9bf-3fe3419bf741",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "quantityField",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         }
                                     ]
                                 },
@@ -6682,7 +6930,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter19",
+                                                    "name": "filter116",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -7293,7 +7541,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging17",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
