@@ -317,9 +317,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= DebitForeign.Value 
+		,dblDebitForeign			= CreditForeign.Value
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CreditForeign.Value
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -448,9 +448,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= DebitForeign.Value 
+		,dblDebitForeign			= CreditForeign.Value
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CreditForeign.Value
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -575,9 +575,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= DebitForeign.Value 
+		,dblDebitForeign			= CreditForeign.Value
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CreditForeign.Value
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 

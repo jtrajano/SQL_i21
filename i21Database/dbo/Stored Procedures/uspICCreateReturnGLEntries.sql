@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICCreateReturnGLEntries]
+﻿alter PROCEDURE [dbo].[uspICCreateReturnGLEntries]
 	@strBatchId AS NVARCHAR(20)
 	,@AccountCategory_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
@@ -154,13 +154,13 @@ BEGIN
 	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
 			AND EXISTS (
 				SELECT	TOP 1 1 
-				FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
-							ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-				WHERE	TRANS.strBatchId = @strBatchId
+				FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+							ON t.intTransactionTypeId = TransType.intTransactionTypeId
+				WHERE	t.strBatchId = @strBatchId
 						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoNegative, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock)
-						AND TRANS.intItemId = ISNULL(@intRebuildItemId, TRANS.intItemId) 
-						AND TRANS.intItemId = Item.intItemId
-						AND TRANS.dblQty * TRANS.dblCost + TRANS.dblValue <> 0
+						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+						AND t.intItemId = Item.intItemId
+						AND t.dblQty * t.dblCost + t.dblValue <> 0
 			)
 	
 	IF @intItemId IS NOT NULL 
@@ -202,6 +202,13 @@ FROM	dbo.tblICInventoryTransactionType TransType
 WHERE	TransType.strName = 'Inventory Receipt'
 ;
 
+-- Get the functional currency
+BEGIN 
+	DECLARE @intFunctionalCurrencyId AS INT
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+END 
+;
+
 -- Generate the G/L Entries for Inventory Transactions 
 WITH ForGLEntries_CTE (
 	dtmDate
@@ -220,30 +227,32 @@ WITH ForGLEntries_CTE (
 	,strInventoryTransactionTypeName
 	,strTransactionForm
 	,strDescription
+	,dblForexRate
 )
 AS 
 (
 	-- regular inventory transaction 
-	SELECT	TRANS.dtmDate
-			,TRANS.intItemId
-			,TRANS.intItemLocationId
-			,TRANS.intTransactionId
-			,TRANS.strTransactionId
-			,TRANS.dblQty
-			,TRANS.dblUOMQty
-			,TRANS.dblCost
-			,TRANS.dblValue
-			,TRANS.intTransactionTypeId
-			,ISNULL(TRANS.intCurrencyId, @DefaultCurrencyId) intCurrencyId
-			,TRANS.dblExchangeRate
-			,TRANS.intInventoryTransactionId
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId
+			,t.intTransactionId
+			,t.strTransactionId
+			,t.dblQty
+			,t.dblUOMQty
+			,t.dblCost
+			,t.dblValue
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @DefaultCurrencyId) intCurrencyId
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = @strTransactionForm
-			,TRANS.strDescription
-	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
-				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-	WHERE	TRANS.strBatchId = @strBatchId
-			AND TRANS.intItemId = ISNULL(@intRebuildItemId, TRANS.intItemId) 
+			,t.strDescription
+			,t.dblForexRate
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+	WHERE	t.strBatchId = @strBatchId
+			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 	-- inventory return 
 	UNION ALL 
 	SELECT	dtmDate	= r.dtmReceiptDate
@@ -262,6 +271,7 @@ AS
 			,ty.strTransactionType
 			,ty.strTransactionForm 
 			,strDescription = NULL  
+			,t.dblForexRate
 	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryReturned rtn
 				ON rtn.intInventoryTransactionId = t.intInventoryTransactionId
 			INNER JOIN tblICInventoryReceipt r
@@ -308,12 +318,12 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
-		,dblForeignRate				= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 FROM	ForGLEntries_CTE  
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -333,6 +343,19 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)				
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) CreditForeign
+
 WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				@InventoryTransactionTypeId_WriteOffSold
 				, @InventoryTransactionTypeId_RevalueSold
@@ -367,12 +390,12 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
-		,dblForeignRate				= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -386,6 +409,18 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)				
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) CreditForeign
 WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				@InventoryTransactionTypeId_WriteOffSold
 				, @InventoryTransactionTypeId_RevalueSold
@@ -423,12 +458,12 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
-		,dblForeignRate				= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -442,6 +477,18 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)				
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) CreditForeign
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		AND (Debit.Value <> 0 OR Credit.Value <> 0)
 UNION ALL 
@@ -471,12 +518,12 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
-		,dblForeignRate				= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -490,6 +537,18 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)				
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) CreditForeign
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		AND (Debit.Value <> 0 OR Credit.Value <> 0)
 
@@ -523,12 +582,12 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
-		,dblForeignRate				= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -542,6 +601,18 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)				
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) CreditForeign
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
 		AND (Debit.Value <> 0 OR Credit.Value <> 0)
 UNION ALL 
@@ -571,12 +642,12 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
-		,dblForeignRate				= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -590,6 +661,18 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)				
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) CreditForeign
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @InventoryTransactionTypeId_AutoNegative
 		AND (Debit.Value <> 0 OR Credit.Value <> 0)
 ;

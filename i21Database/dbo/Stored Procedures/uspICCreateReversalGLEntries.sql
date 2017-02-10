@@ -135,9 +135,9 @@ BEGIN
 			,strTransactionForm			= GLEntries.strTransactionForm
 			,strModuleName				= GLEntries.strModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= GLEntries.dblDebitForeign 
+			,dblDebitForeign			= GLEntries.dblCreditForeign
 			,dblDebitReport				= GLEntries.dblDebitReport
-			,dblCreditForeign			= GLEntries.dblCreditForeign
+			,dblCreditForeign			= GLEntries.dblDebitForeign 
 			,dblCreditReport			= GLEntries.dblCreditReport
 			,dblReportingRate			= GLEntries.dblReportingRate
 			,dblForeignRate				= GLEntries.dblForeignRate
@@ -204,6 +204,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
+			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
 
 	UNION ALL 
 	SELECT	
@@ -248,6 +249,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
+			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
 END
 ;
 
