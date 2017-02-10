@@ -26,7 +26,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'Logistics.store.PickedLots',
         'Grain.store.BufferedStorageTakeOut',
         'ContractManagement.store.WeightGradeBuffered',
-        'i21.store.CurrencyExchangeRateTypeBuffered'
+        'i21.store.CurrencyExchangeRateTypeBuffered',
+        'GeneralLedger.controls.RecapTab'
     ],
 
     data: {

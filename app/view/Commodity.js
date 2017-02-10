@@ -188,6 +188,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'numberfield',
                                                                         flex: 1,
+                                                                        quantityField: true,
                                                                         itemId: 'txtDecimalsOnDpr',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Decimals on DPR',
@@ -230,6 +231,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'numberfield',
+                                                                        quantityField: true,
                                                                         itemId: 'txtConsolidateFactor',
                                                                         width: 280,
                                                                         fieldLabel: 'Consolidate Factor',
@@ -256,6 +258,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'numberfield',
+                                                                        currencyField: true,
                                                                         itemId: 'txtPriceChecksMin',
                                                                         width: 280,
                                                                         fieldLabel: 'Price Checks - Min',
@@ -266,6 +269,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'numberfield',
                                                                         flex: 1,
+                                                                        currencyField: true,
                                                                         itemId: 'txtPriceChecksMax',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Max',
@@ -479,6 +483,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'numberfield',
                                                                         flex: 1,
+                                                                        quantityField: true,
                                                                         itemId: 'txtMaximumUnder',
                                                                         margin: '0 0 0 15',
                                                                         fieldLabel: 'Max Under',
@@ -489,6 +494,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'numberfield',
                                                                         flex: 1,
+                                                                        quantityField: true,
                                                                         itemId: 'txtMaximumOver',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Max Over',
@@ -1192,6 +1198,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 text: 'Delta %',
                                                                 editor: {
                                                                     xtype: 'numberfield',
+                                                                    quantityField: true,
                                                                     formItemCls: 'txtDeltaPercent'
                                                                 }
                                                             }
@@ -1287,7 +1294,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         align: 'right',
                                                         text: 'Min Value',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
@@ -1297,7 +1305,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         align: 'right',
                                                         text: 'Max Value',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
@@ -1307,7 +1316,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         align: 'right',
                                                         text: 'Discount Basis',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
@@ -1317,7 +1327,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         align: 'right',
                                                         text: 'Discount',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            currencyField: true
                                                         }
                                                     },
                                                     {

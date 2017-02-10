@@ -1339,10 +1339,21 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "itemId": "numAdjustByQuantity"
+                                                        "itemId": "numAdjustByQuantity",
+                                                        "quantityField": true
                                                     },
                                                     "name": "MyNumberField49",
-                                                    "designerId": "73d42251-a876-40a1-bbef-a0cba5a5318c"
+                                                    "configAlternates": {
+                                                        "quantityField": "boolean"
+                                                    },
+                                                    "designerId": "73d42251-a876-40a1-bbef-a0cba5a5318c",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -1381,10 +1392,21 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "itemId": "numNewQuantity"
+                                                        "itemId": "numNewQuantity",
+                                                        "quantityField": true
                                                     },
                                                     "name": "MyNumberField49",
-                                                    "designerId": "23f6df49-e2c2-40d3-963e-63f17227de5f"
+                                                    "configAlternates": {
+                                                        "quantityField": "boolean"
+                                                    },
+                                                    "designerId": "23f6df49-e2c2-40d3-963e-63f17227de5f",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -1505,10 +1527,21 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "itemId": "numNewSplitLotQuantity"
+                                                        "itemId": "numNewSplitLotQuantity",
+                                                        "quantityField": true
                                                     },
                                                     "name": "MyNumberField49",
-                                                    "designerId": "02be6c52-f9e5-4457-b383-29f8b9174aca"
+                                                    "configAlternates": {
+                                                        "quantityField": "boolean"
+                                                    },
+                                                    "designerId": "02be6c52-f9e5-4457-b383-29f8b9174aca",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -1684,10 +1717,21 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldStyle": null,
-                                                        "itemId": "numNewNetWeight"
+                                                        "itemId": "numNewNetWeight",
+                                                        "quantityField": true
                                                     },
                                                     "name": "MyNumberField2",
-                                                    "designerId": "5df18040-0248-457f-8718-8d0a98b19ee0"
+                                                    "configAlternates": {
+                                                        "quantityField": "boolean"
+                                                    },
+                                                    "designerId": "5df18040-0248-457f-8718-8d0a98b19ee0",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -1778,10 +1822,21 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "currencyField": true,
                                                         "itemId": "numNewUnitCost"
                                                     },
                                                     "name": "MyNumberField",
-                                                    "designerId": "a3e74a0c-53d1-4c38-9beb-38b5e655eaa1"
+                                                    "configAlternates": {
+                                                        "currencyField": "boolean"
+                                                    },
+                                                    "designerId": "a3e74a0c-53d1-4c38-9beb-38b5e655eaa1",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "currencyField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },

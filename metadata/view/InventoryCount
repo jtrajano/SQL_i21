@@ -1756,10 +1756,21 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "designer|createAlias": "numberfield"
+                                                        "designer|createAlias": "numberfield",
+                                                        "quantityField": true
                                                     },
                                                     "name": "MyNumberField",
-                                                    "designerId": "3c30554f-1ce7-4633-bdab-6d5d8e4e6484"
+                                                    "configAlternates": {
+                                                        "quantityField": "boolean"
+                                                    },
+                                                    "designerId": "3c30554f-1ce7-4633-bdab-6d5d8e4e6484",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -1788,10 +1799,21 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "designer|createAlias": "numberfield"
+                                                        "designer|createAlias": "numberfield",
+                                                        "quantityField": true
                                                     },
                                                     "name": "MyNumberField1",
-                                                    "designerId": "8803e313-8e82-4a1c-9b24-d3573e32f25f"
+                                                    "configAlternates": {
+                                                        "quantityField": "boolean"
+                                                    },
+                                                    "designerId": "8803e313-8e82-4a1c-9b24-d3573e32f25f",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -1819,8 +1841,21 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "quantityField": true
+                                                    },
                                                     "name": "MyNumberField2",
-                                                    "designerId": "a6efb44e-583c-4659-9c72-75abf8486179"
+                                                    "configAlternates": {
+                                                        "quantityField": "boolean"
+                                                    },
+                                                    "designerId": "a6efb44e-583c-4659-9c72-75abf8486179",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },

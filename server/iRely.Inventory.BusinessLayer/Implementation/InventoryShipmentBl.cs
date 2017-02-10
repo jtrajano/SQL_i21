@@ -207,38 +207,48 @@ namespace iRely.Inventory.BusinessLayer
             base.Add(entity);
         }
 
-        public SaveResult PostTransaction(Common.Posting_RequestModel shipment, bool isRecap)
+        public Common.GLPostResult PostTransaction(Common.Posting_RequestModel shipment, bool isRecap)
         {
+            var glPostResult = new Common.GLPostResult();
+            glPostResult.Exception = new ServerException();
+
             // Save the record first 
             var result = _db.Save(false);
 
             if (result.HasError)
             {
-                return result;
+                glPostResult.BaseException = result.BaseException;
+                glPostResult.Exception = result.Exception;
+                glPostResult.HasError = result.HasError;
+                glPostResult.RowsAffected = result.RowsAffected;
+                //glPostResult.strBatchId = null; 
+
+                return glPostResult;
             }
 
             // Post the receipt transaction 
-            var postResult = new SaveResult();
             try
             {
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                string strBatchId;
                 if (shipment.isPost)
                 {
-                    db.PostInventoryShipment(isRecap, shipment.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = db.PostInventoryShipment(isRecap, shipment.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 else
                 {
-                    db.UnPostInventoryShipment(isRecap, shipment.strTransactionId, iRely.Common.Security.GetEntityId());
+                    strBatchId = db.UnPostInventoryShipment(isRecap, shipment.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
-                postResult.HasError = false;
+                glPostResult.HasError = false;
+                glPostResult.strBatchId = strBatchId;
             }
             catch (Exception ex)
             {
-                postResult.BaseException = ex;
-                postResult.HasError = true;
-                postResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+                glPostResult.BaseException = ex;
+                glPostResult.HasError = true;
+                glPostResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
             }
-            return postResult;
+            return glPostResult;
         }
 
         public async Task<SearchResult> SearchShipmentItems(GetParameter param)

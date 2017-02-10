@@ -18,7 +18,8 @@ Ext.define('Inventory.view.ContractDocumentViewModel', {
     alias: 'viewmodel.iccontractdocument',
 
     requires: [
-        'Inventory.store.BufferedCommodity'
+        'Inventory.store.BufferedCommodity',
+        'Inventory.store.BufferedCertification'
     ],
 
     stores: {
@@ -45,6 +46,9 @@ Ext.define('Inventory.view.ContractDocumentViewModel', {
                 name: 'intDocumentType',
                 name: 'strDescription'
             }
+        },
+        certification: {
+            type: 'icbufferedcertification'
         }
     }
 
