@@ -18,16 +18,16 @@ BEGIN TRY
 	,@strXml
 
 	DECLARE @tblItem TABLE (
-	 strItemNo NVARCHAR(50)
+	 strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dtmCreatedDate DATETIME
-	,strCreatedBy nvarchar(50)
+	,strCreatedBy nvarchar(50) COLLATE Latin1_General_CI_AS
 	,dtmModifiedDate DATETIME
-	,strModifiedBy NVARCHAR(50)
-	,strMarkForDeletion NVARCHAR(50)
-	,strItemType NVARCHAR(50)
-	,strStockUOM NVARCHAR(50)
-	,strSKUItemNo NVARCHAR(50)
-	,strShortName NVARCHAR(250)
+	,strModifiedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strMarkForDeletion NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strItemType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strStockUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strSKUItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strShortName NVARCHAR(250) COLLATE Latin1_General_CI_AS
 	)
 
 	DECLARE @tblItemUOM TABLE (
@@ -74,7 +74,7 @@ BEGIN TRY
 
 	Update @tblItem Set strShortName=x.MAKTX
 		FROM OPENXML(@idoc, 'MATMAS03/IDOC/E1MARAM/E1MAKTM', 2) WITH (
-			  MATNR NVARCHAR(50) '../MATNR'
+			  MATNR NVARCHAR(50) COLLATE Latin1_General_CI_AS '../MATNR'
 			 ,MAKTX NVARCHAR(50)
 			 ,SPRAS NVARCHAR(50)) x
 			 Join @tblItem i on x.MATNR=i.strItemNo
@@ -94,14 +94,26 @@ BEGIN TRY
 
 	Begin Tran
 
+	--ZCOM
 	--Add to Staging tables
 	Insert into tblIPItemStage(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription)
 	Select strItemNo,dtmCreatedDate,strCreatedBy,dtmModifiedDate,strModifiedBy,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END,strItemType,strStockUOM,strSKUItemNo,strShortName
-	From @tblItem
+	From @tblItem Where (RIGHT(strItemNo,8) like '496%' OR RIGHT(strItemNo,8) like '491%') AND strItemType='ZCOM'
 
 	Insert Into tblIPItemUOMStage(intStageItemId,strItemNo,strUOM,dblNumerator,dblDenominator)
 	Select i.intStageItemId,i.strItemNo,strUOM,dblNumerator,dblDenominator
 	From @tblItemUOM iu Join tblIPItemStage i on iu.strItemNo=i.strItemNo
+	Where (RIGHT(iu.strItemNo,8) like '496%' OR RIGHT(iu.strItemNo,8) like '491%') AND strItemType='ZCOM'
+
+	--ZMPN
+	Insert into tblIPItemStage(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription)
+	Select strItemNo,dtmCreatedDate,strCreatedBy,dtmModifiedDate,strModifiedBy,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END,strItemType,strStockUOM,strSKUItemNo,strShortName
+	From @tblItem Where strItemType='ZMPN'
+
+	Insert Into tblIPItemUOMStage(intStageItemId,strItemNo,strUOM,dblNumerator,dblDenominator)
+	Select i.intStageItemId,i.strItemNo,strUOM,dblNumerator,dblDenominator
+	From @tblItemUOM iu Join tblIPItemStage i on iu.strItemNo=i.strItemNo
+	Where i.strItemType='ZMPN'
 
 	Commit Tran
 

@@ -83,18 +83,18 @@ If @strMsgType='PreShipment Sample'
 
 If @strMsgType='LSP Receipt'
 	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName)
-	SELECT  intStageReceiptId,'WHSCON','53','Success','S','Goods Receipt Number',strDeliveryNo,strDeliveryNo,'','tblIPReceiptArchive','intStageReceiptId','strImportStatus'
+	SELECT  intStageReceiptId,'WHSCON','53','Success','S','Goods Receipt Number',strDeliveryNo,strExternalRefNo,'','tblIPReceiptArchive','intStageReceiptId','strImportStatus'
 	FROM tblIPReceiptArchive Where ISNULL(strImportStatus,'')<>'Ack Sent'
 	UNION
-	SELECT  intStageReceiptId,'WHSCON','51','Success','E','Goods Receipt Number',strDeliveryNo,strDeliveryNo,'','tblIPReceiptError','intStageReceiptId','strImportStatus'
+	SELECT  intStageReceiptId,'WHSCON','51','Success','E','Goods Receipt Number',strDeliveryNo,strExternalRefNo,'','tblIPReceiptError','intStageReceiptId','strImportStatus'
 	FROM tblIPReceiptError Where ISNULL(strImportStatus,'')<>'Ack Sent'
 
 If @strMsgType='LSP ETA'
 	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName)
-	SELECT  intStageShipmentETAId,'WHSCON','53','Success','S','Goods Receipt Number',strDeliveryNo,strDeliveryNo,'','tblIPShipmentETAArchive','intStageShipmentETAId','strImportStatus'
+	SELECT  intStageShipmentETAId,'WHSCON','53','Success','S','Delivery Number',strDeliveryNo,strDeliveryNo,'','tblIPShipmentETAArchive','intStageShipmentETAId','strImportStatus'
 	FROM tblIPShipmentETAArchive Where ISNULL(strImportStatus,'')<>'Ack Sent'
 	UNION
-	SELECT  intStageShipmentETAId,'WHSCON','51','Success','E','Goods Receipt Number',strDeliveryNo,strDeliveryNo,'','tblIPShipmentETAError','intStageShipmentETAId','strImportStatus'
+	SELECT  intStageShipmentETAId,'WHSCON','51','Success','E','Delivery Number',strDeliveryNo,strDeliveryNo,'','tblIPShipmentETAError','intStageShipmentETAId','strImportStatus'
 	FROM tblIPShipmentETAError Where ISNULL(strImportStatus,'')<>'Ack Sent'
 
 

@@ -79,10 +79,13 @@ Begin
 			--Lots
 			Insert into tblICInventoryReceiptItemLot (intInventoryReceiptItemId,strLotNumber,intSubLocationId,intStorageLocationId,dblQuantity,
 			intItemUnitMeasureId,dblCost,dblGrossWeight,dblTareWeight,intConcurrencyId,strContainerNo)
-			Select ri.intInventoryReceiptItemId,c.strContainerNumber,ri.intSubLocationId,ri.intStorageLocationId,ri.dblNet,
+			Select ri.intInventoryReceiptItemId,CASE WHEN UPPER(cd.strCommodityCode)='COFFEE' THEN c.strContainerNumber ELSE NULL END,
+			ri.intSubLocationId,ri.intStorageLocationId,ri.dblNet,
 			ri.intWeightUOMId,ri.dblUnitCost,ri.dblNet,0,1,c.strContainerNumber
 			From tblICInventoryReceiptItem ri 
 			Join tblLGLoadContainer c on ri.intContainerId=c.intLoadContainerId
+			Join tblICItem i on ri.intItemId=i.intItemId
+			JOin tblICCommodity cd on cd.intCommodityId=i.intCommodityId
 			Where ri.intInventoryReceiptId=@intReceiptId
 
 			--Post Receipt

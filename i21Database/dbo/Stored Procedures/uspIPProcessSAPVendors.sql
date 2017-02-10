@@ -83,6 +83,9 @@ Begin Tran
 
 If ISNULL(@intEntityId,0)=0 --Create
 Begin
+	If @ysnDeleted=1
+		RaisError('Vendor does not exist for deletion.',16,1)
+
 	If ISNULL(@intTermId,0)=0
 		RaisError('Term not found.',16,1)
 
@@ -227,7 +230,7 @@ Begin --Update
 		Update tblEMEntityLocation Set strLocationName=@strCity,strCity=@strCity Where intEntityLocationId=@intEntityLocationId
 
 	If ISNULL(@strCountry,'/')<>'/'
-		Update tblEMEntityLocation Set strCountry=(Select strCountry From tblSMCountry Where strISOCode=@strCountry) Where intEntityLocationId=@intEntityLocationId
+		Update tblEMEntityLocation Set strCountry=(Select TOP 1 strCountry From tblSMCountry Where strISOCode=@strCountry) Where intEntityLocationId=@intEntityLocationId
 
 	If ISNULL(@strZipCode,'/')<>'/'
 		Update tblEMEntityLocation Set strZipCode=@strZipCode Where intEntityLocationId=@intEntityLocationId
@@ -277,7 +280,7 @@ Begin --Update
 
 	--Add Phone
 	Insert Into tblEMEntityPhoneNumber(intEntityId,strPhone,intCountryId)
-	Select t1.intEntityId,t2.strPhone,(Select TOP 1 intCountryID From tblSMCountry Where strCountry=(Select strCountry From tblEMEntityLocation Where intEntityLocationId=@intEntityLocationId)) 
+	Select t1.intEntityId,t2.strPhone,(Select TOP 1 intCountryID From tblSMCountry Where strCountry=(Select TOP 1 strCountry From tblEMEntityLocation Where intEntityLocationId=@intEntityLocationId)) 
 	From
 	(Select ROW_NUMBER() OVER(ORDER BY intEntityId ASC) AS intRowNo,* from @tblEntityContactIdOutput) t1
 	Join

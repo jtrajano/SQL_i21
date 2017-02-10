@@ -108,6 +108,11 @@ BEGIN TRY
 			,TELF1 NVARCHAR(50)
 	)
 
+	--if contact name not there use acc no as contact name
+	Insert Into @tblVendorContact(strAccountNo,strFirstName,strLastName,strPhone)
+	Select strAccountNo,strAccountNo,'',''
+	From @tblVendor Where strAccountNo NOT IN (Select strAccountNo From @tblVendorContact)
+
 	Begin Tran
 
 	--Add to Staging tables
