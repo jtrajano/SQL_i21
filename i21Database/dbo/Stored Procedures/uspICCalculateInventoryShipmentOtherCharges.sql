@@ -47,6 +47,9 @@ BEGIN
 	WHERE intInventoryShipmentId = @intInventoryShipmentId
 END 
 
+-- Get the default currency ID
+DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+
 -- Calculate the cost method for "Per Unit"
 BEGIN 
 	INSERT INTO dbo.tblICInventoryShipmentChargePerItem (
@@ -152,11 +155,19 @@ BEGIN
 			,[intInventoryShipmentItemId]	= ShipmentItem.intInventoryShipmentItemId
 			,[intChargeId]					= Charge.intChargeId
 			,[intEntityVendorId]			= Charge.intEntityVendorId
-			,[dblCalculatedAmount]			= ROUND (
+			,[dblCalculatedAmount]			= 
+											ROUND (
 												(ISNULL(Charge.dblRate, 0) / 100)
-												* ISNULL(ShipmentItem.dblQuantity * ShipmentItem.dblUnitPrice, 0) 
+												*	ISNULL(ShipmentItem.dblQuantity, 0) 
+												*	CASE 
+														WHEN ISNULL(Shipment.intCurrencyId, @DefaultCurrencyId) <> @DefaultCurrencyId THEN 
+															ISNULL(ShipmentItem.dblForeignUnitPrice, 0)
+														ELSE 
+															ISNULL(ShipmentItem.dblUnitPrice, 0)
+													END
 												, 2
 											)
+
 			,[intContractId]				= Charge.intContractId
 			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocatePriceBy]			= Charge.strAllocatePriceBy
@@ -166,6 +177,8 @@ BEGIN
 				ON ShipmentItem.intInventoryShipmentId = Charge.intInventoryShipmentId
 			INNER JOIN dbo.tblICItem Item 
 				ON Item.intItemId = Charge.intChargeId				
+			INNER JOIN tblICInventoryShipment Shipment 
+				ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	WHERE	ShipmentItem.intInventoryShipmentId = @intInventoryShipmentId
 			AND Charge.strCostMethod = @COST_METHOD_PERCENTAGE
 			AND (
