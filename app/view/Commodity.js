@@ -28,11 +28,11 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.form.field.ComboBox',
         'Ext.form.field.Date',
         'Ext.grid.Panel',
-        'Ext.grid.column.Number',
         'Ext.grid.column.Check',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
+        'Ext.grid.column.Number',
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
     ],
@@ -542,50 +542,22 @@ Ext.define('Inventory.view.Commodity', {
                                                         ],
                                                         columns: [
                                                             {
-                                                                xtype: 'gridcolumn',
-                                                                itemId: 'colUOMCode',
-                                                                dataIndex: 'strFieldName',
-                                                                text: 'UOM',
-                                                                flex: 3,
-                                                                editor: {
-                                                                    xtype: 'gridcombobox',
-                                                                    columns: [
-                                                                        {
-                                                                            dataIndex: 'intUnitMeasureId',
-                                                                            dataType: 'numeric',
-                                                                            text: 'Unit Of Measure ID',
-                                                                            hidden: true
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'strUnitMeasure',
-                                                                            dataType: 'string',
-                                                                            text: 'Unit Measure',
-                                                                            flex: 1
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'strUnitType',
-                                                                            dataType: 'string',
-                                                                            text: 'Unit Type',
-                                                                            flex: 1
-                                                                        }
-                                                                    ],
-                                                                    itemId: 'cboUOM',
-                                                                    displayField: 'strUnitMeasure',
-                                                                    valueField: 'strUnitMeasure'
-                                                                }
-                                                            },
-                                                            {
-                                                                xtype: 'numbercolumn',
-                                                                itemId: 'colUOMUnitQty',
+                                                                xtype: 'unitmeasurecolumn',
+                                                                itemId: 'colUnitQty',
                                                                 align: 'right',
-                                                                dataIndex: 'strFieldName',
+                                                                dataIndex: 'dblUnitQty',
                                                                 text: 'Unit Qty',
-                                                                flex: 3,
-                                                                format: '0,000.000000##',
+                                                                flex: 1,
+                                                                onGetDecimalPlaces: function(record) {
+                                                                    if(record && record.get('tblICUnitMeasure'))
+                                                                        return record.get('tblICUnitMeasure').intDecimalPlaces;
+                                                                    return null;
+                                                                },
                                                                 editor: {
-                                                                    xtype: 'numberfield',
-                                                                    fieldStyle: 'text-align:right',
-                                                                    hideTrigger: true
+                                                                    xtype: 'gridunitmeasurefield',
+                                                                    valueField: 'intUnitMeasureId',
+                                                                    displayField: 'strUnitMeasure',
+                                                                    itemId: 'gumUnitQty'
                                                                 }
                                                             },
                                                             {

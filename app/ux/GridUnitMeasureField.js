@@ -1,22 +1,31 @@
 /**
  * @author Wendell Wayne H. Estrada
  * @copyright 2017 iRely Philippines
+ * http://inet.irelyserver.com/display/INV/Grid+Unit+of+Measure+Field
  */
 Ext.define('Inventory.ux.GridUnitMeasureField', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.gridunitmeasurefield',
     mixins: {
-        field: 'Ext.form.field.Field'
+        field: 'Ext.form.field.Field',
+        observable : 'Ext.util.Observable'
+    },
+
+    constructor : function(config){
+        this.callParent([config]);
+        this.mixins.observable.constructor.call(this, config);
     },
 
     config: {
-        defaultDecimals: 6
+        defaultDecimals: 6,
+        prevUOM: null
     },
 
     initComponent: function() {
         this.callParent(arguments);
         var me = this;
         me.flex = 1;
+        me.layout = 'fit';
         var panel = me.items.items[0];
         var cbo = panel.items.items[1];
         var txt = panel.items.items[0];
@@ -27,11 +36,7 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
         this.setupTextboxEvents(txt);
     },
 
-    constructor: function(config) {
-        this.callParent([config]);
-    },
-
-    getValue : function(){
+    getValue: function(){
         var me = this;
         var panel = me.items.items[0];
         var cbo = panel.items.items[1];
@@ -54,9 +59,13 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
         var grid = me.column.container.component.grid;
         var selection = grid.selection;
 
-        var selectedDecimals = me.getSelectedDecimals(cbo);
-        var decimals = me.getBoundDecimals(me, selection);
-        decimals = selectedDecimals ? selectedDecimals : decimals;
+        var selectedDecimal = me.getSelectedDecimals(cbo);
+        var boundDecimal = me.getBoundDecimals(me, selection);
+        decimals = !iRely.Functions.isEmpty(selectedDecimal) ? selectedDecimal : boundDecimal;
+
+        /* Fallback to default decimal places */
+        decimals = !iRely.Functions.isEmpty(decimals) ? decimals : me.defaultDecimals;
+
         return decimals;
     },
 
@@ -77,8 +86,8 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
         
         cbo.setValue(currentValue.id);
         cbo.setRawValue(currentValue.uom);
-
-        var n = me.setupQuantity(txt, currentValue.quantity, me.getExpectedDecimals());
+        var decimals = me.getExpectedDecimals();
+        var n = me.setupQuantity(txt, currentValue.quantity, decimals);
         txt.setValue(n ? n.precisionValue : currentValue.quantity);
     },
 
@@ -99,18 +108,19 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
             var value = records[0].get(me.getLookupValueField());
             var display = records[0].get(me.getLookupDisplayField());
             var decimals = records[0].get(me.getLookupDecimalPrecisionField());
-            decimals = decimals ? decimals : me.defaultDecimals;
+            decimals = !iRely.Functions.isEmpty(decimals) ? decimals : me.defaultDecimals;
 
-            if(value)
+            if(!iRely.Functions.isEmpty(value))
                 selection.set(me.getUpdateField(), value);
-            if(display)
+            if(!iRely.Functions.isEmpty(display))
                 selection.set(me.getDisplayField(), display);
             selection.set(column.decimalPrecisionField, decimals);
-            
+            selection.intDecimalPlacesInternal = decimals;
             me.updateExtraFields(selection, records[0]);
             var n = me.setupQuantity(txt, txt.getValue(), decimals);
             var oldValue = txt.getValue();
             txt.setValue(n ? n.precisionValue : oldValue);
+            me.fireEvent('onUOMSelect', records);
         }
     },
 
@@ -120,10 +130,11 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
         var cbo = panel.items.items[1];
         var txt = panel.items.items[0];
 
-        txt.setDecimalPrecision(this.defaultDecimals ? this.defaultDecimals : 6);
-        txt.setDecimalToDisplay(this.defaultDecimals ? this.defaultDecimals : 6);
+        txt.setDecimalPrecision(!iRely.Functions.isEmpty(this.defaultDecimals) ? this.defaultDecimals : 6);
+        txt.setDecimalToDisplay(!iRely.Functions.isEmpty(this.defaultDecimals) ? this.defaultDecimals : 6);
         cbo.setValue(null);
         cbo.setRawValue(null);
+        cbo.selection = null;
     },
 
     updateExtraFields: function(currentRecord, lookupRecord) {
@@ -142,22 +153,30 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
         var decimalField = 'intDecimalPlaces';
         if(me.column.config.decimalPrecisionField)
             decimalField = me.column.config.decimalPrecisionField;
-        var decimals = 6;
-        if(data.get(decimalField))
+        var decimals = null;
+
+        /* Get internal decimal places. Often has value from columns overriden onGetDecimalPlaces method */
+        if(!iRely.Functions.isEmpty(data.intDecimalPlacesInternal))
+            decimals = data.intDecimalPlacesInternal;
+
+        /* Get the actual decimal places bound to the record. */
+        if(!iRely.Functions.isEmpty(data.get(decimalField)))
             decimals = data.get(decimalField);
-        if(!decimals)
-            decimals = me.defaultDecimals;
+
         return decimals;
     },
 
     getSelectedDecimals: function(cbo) {
         var me = this;
+        var decimals = null;
+
         if(cbo.selection) {
-            var decimals = cbo.selection.get(me.getLookupDecimalPrecisionField());
-            if(decimals)
-                return decimals;
+            var selectedDecimal = cbo.selection.get(me.getLookupDecimalPrecisionField());
+            if(!iRely.Functions.isEmpty(selectedDecimal))
+                decimals = selectedDecimal;
+            var value = cbo.selection.get(me.getLookupValueField());
         }
-        return null;
+        return decimals;
     },
 
     setupCombobox: function(me, cbo) {
@@ -173,21 +192,7 @@ Ext.define('Inventory.ux.GridUnitMeasureField', {
         this.setupStore(me, cbo);
     },
 
-    getNumberDecimalPlacesNoTrailing: function(value, decimals) {
-        var num = this.getPrecisionNumberObject(value, decimals);
-        return num.decimalPlaces ? num.decimalPlaces : 6;
-    },
-
-    getPrecisionNumber: function(value, decimals) {
-        var num = this.getPrecisionNumberObject(value, decimals);
-        if(!num)
-            return value;
-        return num.precisionValue ? num.precisionValue : value;
-    },
-
     getPrecisionNumberObject: function(value, decimals) {
-        if(!decimals)
-            decimals = this.defaultDecimals ? this.defaultDecimals : 6;
         var zeroes = "";
         for(var i = 0; i < decimals; i++) {
             zeroes += "0";

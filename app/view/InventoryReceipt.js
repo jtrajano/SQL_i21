@@ -1195,16 +1195,15 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'unitmeasurecolumn',
-                                                                                itemId: 'colUOMQtyToReceive',
-                                                                                text: 'Qty to Receive',
-                                                                                width: 100,
-                                                                                align: 'right',
-                                                                                dataIndex: 'dblOpenReceive',
                                                                                 decimalPrecisionField: 'intItemUOMDecimalPlaces',
                                                                                 displayField: 'strUnitMeasure',
+                                                                                itemId: 'colUOMQtyToReceive',
+                                                                                width: 200,
+                                                                                align: 'right',
+                                                                                dataIndex: 'dblOpenReceive',
+                                                                                text: 'Qty to Receive',
                                                                                 editor: {
                                                                                     xtype: 'gridunitmeasurefield',
-                                                                                    itemId: 'gumReceiveQty',
                                                                                     valueField: 'intUnitMeasureId',
                                                                                     updateField: 'intUnitMeasureId',
                                                                                     lookupValueField: 'intItemUnitMeasureId',
@@ -1280,9 +1279,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             displayField: 'strUnitMeasure',
                                                                                             valueField: 'strUnitMeasure'
                                                                                         }
-                                                                                    }
+                                                                                    },
+                                                                                    itemId: 'gumReceiveQty'
                                                                                 }
-                                                                            },                                                  
+                                                                            },
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 dataType: 'numeric',
