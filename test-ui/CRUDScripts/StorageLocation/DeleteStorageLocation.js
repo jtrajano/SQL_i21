@@ -36,14 +36,9 @@ StartTest (function (t) {
 
         //region Scenario 3: Delete Multiple Storage Location
         .displayText('=====  Scenario 3: Delete Multiple Storage Location =====')
-        .selectSearchRowNumber([44,45,46])
+        .selectSearchRowNumber([45,46])
         .clickButton('OpenSelected')
         .waitUntilLoaded('icstorageunit')
-        .clickButton('Delete')
-        .waitUntilLoaded()
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded()
         .clickButton('Delete')
         .waitUntilLoaded()
         .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')

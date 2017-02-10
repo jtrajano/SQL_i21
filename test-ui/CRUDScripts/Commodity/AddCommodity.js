@@ -123,6 +123,7 @@ StartTest (function (t) {
         .clickMessageBoxButton('ok')
         .enterData('Text Field','CommodityCode','AAA - Commodity 4')
         .clickButton('Save')
+        .clearTextFilter('FilterGrid')
         .clickButton('Close')
 
         //endregion

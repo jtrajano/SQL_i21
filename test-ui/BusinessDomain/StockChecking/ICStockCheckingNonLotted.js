@@ -6,15 +6,18 @@ StartTest (function (t) {
         .displayText('===== Pre-setup Add New Lotted Item =====')
         //Add Lotted Item
         .addFunction(function(next){
+            commonIC.addCommodity (t,next, 'SC - Commodity - 02', 'Test Commodity Description')
+        })
+        .addFunction(function(next){
             commonIC.addInventoryItem
             (t,next,
                 'SC - NLTI - 01'
                 , 'Test Lotted Item For Other Charges'
+                , 'Grains'
+                , 'SC - Commodity - 02'
                 , 4
-//                , 'Grains'
-//                , 'SC - Commodity - 01'
-//                , 'LB'
-//                , 'LB'
+                , 'LB'
+                , 'LB'
                 , 10
                 , 10
                 , 40

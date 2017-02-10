@@ -21,7 +21,7 @@ Ext.define('Inventory.CommonIC', {
      */
 
 
-    addInventoryItem: function (t,next, item, itemdesc, lottrack, priceLC, priceSC, priceAC) {
+    addInventoryItem: function (t,next, item, itemdesc, category, commodity,lottrack, saleuom, receiveuom,priceLC, priceSC, priceAC) {
         new iRely.FunctionalTest().start(t, next)
 
             .clickMenuFolder('Inventory','Folder')
@@ -34,10 +34,10 @@ Ext.define('Inventory.CommonIC', {
 
             .enterData('Text Field','ItemNo', item)
             .enterData('Text Field','Description', itemdesc)
-            .selectComboBoxRowNumber('Category',9,0)
-            .selectComboBoxRowNumber('Commodity',12,0)
-            //.selectComboBoxRowValue('Category', category, 'cboCategory',1)
-            //.selectComboBoxRowValue('Commodity', commodity, 'strCommodityCode',1)
+//            .selectComboBoxRowNumber('Category',9,0)
+//            .selectComboBoxRowNumber('Commodity',12,0)
+            .selectComboBoxRowValue('Category', category, 'cboCategory',1)
+            .selectComboBoxRowValue('Commodity', commodity, 'strCommodityCode',1)
             .selectComboBoxRowNumber('LotTracking', lottrack)
 
             .clickTab('Setup')
@@ -64,10 +64,10 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowNumber('Location',1,0)
             .selectComboBoxRowNumber('SubLocation',4,0)
             .selectComboBoxRowNumber('StorageLocation',1,0)
-//            .selectComboBoxRowValue('SubLocation', 'Raw Station', 'intSubLocationId',0)
-//            .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'intStorageLocationId',0)
-//            .selectComboBoxRowValue('IssueUom', saleuom, 'strUnitMeasure')
-//            .selectComboBoxRowValue('ReceiveUom', receiveuom, 'strUnitMeasure')
+            .selectComboBoxRowValue('SubLocation', 'Raw Station', 'intSubLocationId',0)
+            .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'intStorageLocationId',0)
+            .selectComboBoxRowValue('IssueUom', saleuom, 'strUnitMeasure')
+            .selectComboBoxRowValue('ReceiveUom', receiveuom, 'strUnitMeasure')
             .clickButton('Save')
             .waitUntilLoaded()
             .verifyStatusMessage('Saved')
@@ -76,13 +76,13 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('AddLocation')
             .waitUntilLoaded('')
             .selectComboBoxRowNumber('Location',2,0)
-            .selectComboBoxRowNumber('SubLocation',1,0)
-            .selectComboBoxRowNumber('StorageLocation',1,0)
-//            .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
-//            .selectComboBoxRowValue('SubLocation', 'Indy', 'SubLocation',0)
-//            .selectComboBoxRowValue('StorageLocation', 'Indy Storage', 'StorageLocation',0)
-//            .selectComboBoxRowValue('IssueUom', saleuom, 'IssueUom',0)
-//            .selectComboBoxRowValue('ReceiveUom', receiveuom, 'ReceiveUom',0)
+//            .selectComboBoxRowNumber('SubLocation',1,0)
+//            .selectComboBoxRowNumber('StorageLocation',1,0)
+            .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
+            .selectComboBoxRowValue('SubLocation', 'Indy', 'SubLocation',0)
+            .selectComboBoxRowValue('StorageLocation', 'Indy Storage', 'StorageLocation',0)
+            .selectComboBoxRowValue('IssueUom', saleuom, 'IssueUom',0)
+            .selectComboBoxRowValue('ReceiveUom', receiveuom, 'ReceiveUom',0)
             .clickButton('Save')
             .waitUntilLoaded()
             .verifyStatusMessage('Saved')
@@ -238,10 +238,9 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('New')
             .waitUntilLoaded('icinventoryreceipt')
             .selectComboBoxRowNumber('ReceiptType',4,0)
-            .selectComboBoxRowNumber('Vendor',vendor,0)
-            //.selectComboBoxRowValue('Vendor', 'ABC Trucking', vendor,1)
-            .selectComboBoxRowNumber('Location',location,0)
-            //.selectComboBoxRowValue('Location', location, 'Location',0)
+            .selectComboBoxRowValue('Vendor', vendor, 'Vendor',1)
+            .selectComboBoxRowNumber('Location', location,0)
+//            .selectComboBoxRowValue('Location', location, 'Location',1)
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure',receiptuom,'strUnitMeasure')
             .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', qtytoreceive)
@@ -289,10 +288,10 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('New')
             .waitUntilLoaded('icinventoryreceipt')
             .selectComboBoxRowNumber('ReceiptType',4,0)
-            .selectComboBoxRowNumber('Vendor',vendor,0)
-            //.selectComboBoxRowValue('Vendor', 'ABC Trucking', vendor,1)
+//            .selectComboBoxRowNumber('Vendor',vendor,0)
+            .selectComboBoxRowValue('Vendor', vendor, 'Vendor',1)
             .selectComboBoxRowNumber('Location',location,0)
-            //.selectComboBoxRowValue('Location', location, 'Location',0)
+//            .selectComboBoxRowValue('Location', location, 'Location',0)
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure',receiptuom,'strUnitMeasure')
             .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', qtytoreceive)
@@ -338,7 +337,7 @@ Ext.define('Inventory.CommonIC', {
      * Add Direct Inventory Shipment for Non Lotted Item
      *
      */
-    addDirectISNonLotted: function (t,next, customer, freight, fromlocation,itemno,uom, quantity) {
+    addDirectISNonLotted: function (t,next, customer, freight, currency,fromlocation,itemno,uom, quantity) {
         var linetotal =  quantity * 10;
         new iRely.FunctionalTest().start(t, next)
 
@@ -350,10 +349,10 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('New')
             .waitUntilLoaded('icinventoryshipment')
             .selectComboBoxRowNumber('OrderType',4,0)
-            .selectComboBoxRowNumber('Customer',customer,0)
-            .selectComboBoxRowNumber('FreightTerms', freight,0)
-            .selectComboBoxRowNumber('Currency', 6,0)
-            .selectComboBoxRowNumber('ShipFromAddress', fromlocation,0)
+            .selectComboBoxRowValue('Customer', customer, 'Customer',1)
+            .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
+            .selectComboBoxRowValue('Currency', currency, 'FreightTerms',1)
+            .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
             .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
@@ -386,7 +385,7 @@ Ext.define('Inventory.CommonIC', {
      *
      */
 
-    addDirectISLotted: function (t,next, customer, freight, fromlocation,itemno,uom, quantity, lotno) {
+    addDirectISLotted: function (t,next, customer, freight, currency,fromlocation,itemno,uom, quantity, lotno) {
         var linetotal =  quantity * 10;
         new iRely.FunctionalTest().start(t, next)
 
@@ -398,10 +397,10 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('New')
             .waitUntilLoaded('icinventoryshipment')
             .selectComboBoxRowNumber('OrderType',4,0)
-            .selectComboBoxRowNumber('Customer',customer,0)
-            .selectComboBoxRowNumber('FreightTerms', freight,0)
-            .selectComboBoxRowNumber('Currency', 6,0)
-            .selectComboBoxRowNumber('ShipFromAddress', fromlocation,0)
+            .selectComboBoxRowValue('Customer', customer, 'Customer',1)
+            .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
+            .selectComboBoxRowValue('Currency', currency, 'FreightTerms',1)
+            .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
             .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
@@ -519,8 +518,8 @@ Ext.define('Inventory.CommonIC', {
             .enterData('Text Field','ItemNo', item)
             .selectComboBoxRowNumber('Type',6,0)
             .enterData('Text Field','Description', description)
-            .selectComboBoxRowNumber('Category',4,0)
-//            .selectComboBoxRowValue('Category', 'Other Charges', 'Category',0)
+//            .selectComboBoxRowNumber('Category',4,0)
+            .selectComboBoxRowValue('Category', 'Other Charges', 'Category',0)
             .displayText('===== Setup Item UOM=====')
             .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','LB','strUnitMeasure')
             .enterGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')

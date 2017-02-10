@@ -39,6 +39,7 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('UnitType',6,0)
         .verifyStatusMessage('Edited')
         .clickButton('Save')
+        .waitUntilLoaded()
         .verifyStatusMessage('Saved')
         .clickButton('Close')
 
@@ -158,13 +159,13 @@ StartTest (function (t) {
         //Add Category
         .displayText('===== Scenario 4: Add Category =====')
         .addFunction(function(next){
-            commonIC.addCategory (t,next, 'Smoke Category', 'Test Smoke Category Description', 2)
+            commonIC.addCategory (t,next, 'SC - Category - 01', 'Test Smoke Category Description', 2)
         })
 
         //Add Commodity
         .displayText('===== Scenario 6: Add Commodity =====')
         .addFunction(function(next){
-            commonIC.addCommodity (t,next, 'Smoke Commodity', 'Test Smoke Commodity Description')
+            commonIC.addCommodity (t,next, 'SC - Commodity - 01', 'Test Smoke Commodity Description')
         })
 
         //Add Lotted Item
@@ -174,11 +175,11 @@ StartTest (function (t) {
             (t,next,
                 'Smoke - LTI - 01'
                 , 'Test Lotted Item For Other Smoke Testing'
+                , 'SC - Category - 01'
+                , 'SC - Commodity - 01'
                 , 3
-//                , 'Grains'
-//                , 'SC - Commodity - 01'
-//                , 'LB'
-//                , 'LB'
+                , 'LB'
+                , 'LB'
                 , 10
                 , 10
                 , 40
@@ -192,11 +193,11 @@ StartTest (function (t) {
             (t,next,
                 'Smoke - NLTI - 01'
                 , 'Test Non Lotted Item Smoke Testing'
+                , 'SC - Category - 01'
+                , 'SC - Commodity - 01'
                 , 4
-//                , 'Grains'
-//                , 'SC - Commodity - 01'
-//                , 'LB'
-//                , 'LB'
+                , 'LB'
+                , 'LB'
                 , 10
                 , 10
                 , 40

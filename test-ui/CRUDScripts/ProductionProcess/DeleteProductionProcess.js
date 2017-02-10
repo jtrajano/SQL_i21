@@ -1,35 +1,35 @@
 StartTest (function (t) {
     new iRely.FunctionalTest().start(t)
 
-        //region Scenario 1: Delete Unused Feed Stock UOM
+        //region Scenario 1: Delete Unused Production Process
         .displayText('===== NOTE!!! You can only execute this script when you finish executing Add Fuel Category up to Add Fuel type Script =====')
-        .displayText('=====  Scenario 1: Delete Unused Feed Stock UOM =====')
+        .displayText('=====  Scenario 1: Delete Unused Production Process =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Fuel Types','Screen')
         .waitUntilLoaded()
 
-        .clickButton('FeedStockUOM')
-        .waitUntilLoaded('icfeedstockuom')
+        .clickButton('ProductionProcess')
+        .waitUntilLoaded('icprocesscode')
         .selectGridRowNumber('GridTemplate',[1])
         .clickButton('Delete')
-        .verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
+        //.verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
         .clickMessageBoxButton('yes')
         .waitUntilLoaded('')
         .clickButton('Save')
         .waitUntilLoaded()
         .clickButton('Close')
         .waitUntilLoaded()
-        .displayText('=====  Scenario 1: Delete Unused Feed Stock UOM Done=====')
+        .displayText('=====  Scenario 1: Delete Unused Production Process Done=====')
         //endregion
 
-        //region Scenario 2: Delete Used Feed Stock UOM
-        .displayText('=====  Scenario 2: Delete Used Feed Stock UOM =====')
+        //region Scenario 2: Delete Used Production Process
+        .displayText('=====  Scenario 2: Delete Used Production Process =====')
 
-        .clickButton('FeedStockUOM')
-        .waitUntilLoaded('icfeedstockuom')
+        .clickButton('ProductionProcess')
+        .waitUntilLoaded('icprocesscode')
         .selectGridRowNumber('GridTemplate',[2])
         .clickButton('Delete')
-        .verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
+        //.verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
         .clickMessageBoxButton('yes')
         .waitUntilLoaded('')
         .clickButton('Save')
@@ -39,23 +39,23 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded()
-        .displayText('=====  Scenario 2: Delete Used Feed Stock UOM Done=====')
+        .displayText('=====  Scenario 2: Delete Used Production Process Done=====')
         //endregion
 
-        //region Scenario 3: Delete Multiple Feed Stock UOM
-        .displayText('=====  Scenario 3: Delete Multiple Feed Stock UOM =====')
-        .clickButton('FeedStockUOM')
-        .waitUntilLoaded('icfeedstockuom')
+        //region Scenario 3: Delete Multiple Production Process
+        .displayText('=====  Scenario 3: Delete Multiple Production Process =====')
+        .clickButton('ProductionProcess')
+        .waitUntilLoaded('icprocesscode')
         .selectGridRowNumber('GridTemplate',[1,3])
         .clickButton('Delete')
-        .verifyMessageBox('iRely i21','You are about to delete 3 rows.<br/>Are you sure you want to continue?','yesno', 'question')
+        //.verifyMessageBox('iRely i21','You are about to delete 3 rows.<br/>Are you sure you want to continue?','yesno', 'question')
         .clickMessageBoxButton('yes')
         .waitUntilLoaded('')
         .clickButton('Save')
         .waitUntilLoaded()
         .clickButton('Close')
         .waitUntilLoaded()
-        .displayText('=====  Scenario 3: Delete Multiple Feed Stock UOM Done=====')
+        .displayText('=====  Scenario 3: Delete Multiple Production Process Done=====')
         //endregion
 
 

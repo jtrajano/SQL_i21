@@ -1,4 +1,5 @@
 StartTest (function (t) {
+    var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
         //region Scenario 1. Create Direct Inventory Receipt for Non Lotted Item
@@ -10,8 +11,9 @@ StartTest (function (t) {
         .waitUntilLoaded('icinventoryreceipt')
         .selectComboBoxRowNumber('ReceiptType',4,0)
         .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
-        .selectComboBoxRowValue('Location', 'The Manchester Company, Inc.', 'Location',0)
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','CORN','strItemNo')
+        .selectComboBoxRowNumber('Location', 1,0)
+//        .selectComboBoxRowValue('Location', 'The Manchester Company, Inc.', 'Location',0)
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','NLTI - 100','strItemNo')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
         .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100000')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
@@ -74,12 +76,14 @@ StartTest (function (t) {
 
         //region Scenario 2. Create Direct Inventory Receipt for Lotted Item
         .displayText('=====  Scenario 2. Create Direct IR for Lotted Item  =====')
+        .clickMenuScreen('Inventory Receipts','Screen')
         .clickButton('New')
         .waitUntilLoaded('icinventoryreceipt')
         .selectComboBoxRowNumber('ReceiptType',4,0)
         .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','LTI - 02','strItemNo')
+        .selectComboBoxRowNumber('Location', 1,0)
+//        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','LTI - 100','strItemNo')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
         .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100000')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
@@ -160,7 +164,7 @@ StartTest (function (t) {
         .waitUntilLoaded('appurchaseorder')
         .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)
         .waitUntilLoaded('')
-        .selectGridComboBoxRowValue('Items',1,'strItemNo','NLTI - 02','strItemNo')
+        .selectGridComboBoxRowValue('Items',1,'strItemNo','NLTI - 100','strItemNo')
         .selectGridComboBoxRowValue('Items',1,'strUOM','LB','strUOM')
         .enterGridData('Items', 1, 'colQtyOrdered', '100')
         .verifyGridData('Items', 1, 'colTotal', '1000')
@@ -172,7 +176,7 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .verifyData('Combo Box','ReceiptType','Purchase Order')
         .verifyData('Combo Box','Vendor','ABC Trucking')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 100')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -221,7 +225,7 @@ StartTest (function (t) {
         .waitUntilLoaded('appurchaseorder')
         .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)
         .waitUntilLoaded('')
-        .selectGridComboBoxRowValue('Items',1,'strItemNo','LTI - 02','strItemNo')
+        .selectGridComboBoxRowValue('Items',1,'strItemNo','LTI - 100','strItemNo')
         .selectGridComboBoxRowValue('Items',1,'strUOM','LB','strUOM')
         .enterGridData('Items', 1, 'colQtyOrdered', '100')
         .verifyGridData('Items', 1, 'colTotal', '1000')
@@ -233,7 +237,7 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .verifyData('Combo Box','ReceiptType','Purchase Order')
         .verifyData('Combo Box','Vendor','ABC Trucking')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 100')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -318,7 +322,7 @@ StartTest (function (t) {
         .waitUntilLoaded('appurchaseorder')
         .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)
         .waitUntilLoaded('')
-        .selectGridComboBoxRowValue('Items',1,'strItemNo','NLTI - 02','strItemNo')
+        .selectGridComboBoxRowValue('Items',1,'strItemNo','NLTI - 100','strItemNo')
         .selectGridComboBoxRowValue('Items',1,'strUOM','LB','strUOM')
         .enterGridData('Items', 1, 'colQtyOrdered', '100')
         .verifyGridData('Items', 1, 'colTotal', '1000')
@@ -340,7 +344,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','ReceiptType','Purchase Order')
         .verifyData('Combo Box','Vendor','ABC Trucking')
         .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 100')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -381,115 +385,17 @@ StartTest (function (t) {
         .displayText('===== Create Purchase Order Inventory Receipt for Non Lotted Item "Process Button" Done=====')
 
 
-        //region Scenario 6. Create Purchase Order Inventory Receipt for  Lotted Item "Process Button"
-        .displayText('=====  Scenario 6. Create PO to IR "Process Button" for Lotted Item  =====')
+
+
+        //region Scenario 6. Create Purchase Order Inventory Receipt for  Lotted Item "Add Orders Screen"
+        .displayText('=====  Scenario 6. Create PO to IR "Add Orders Screen" for Lotted Item =====')
         .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
         .clickMenuScreen('Purchase Orders','Screen')
         .clickButton('New')
         .waitUntilLoaded('appurchaseorder')
         .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)
         .waitUntilLoaded('')
-        .selectGridComboBoxRowValue('Items',1,'strItemNo','LTI - 02','strItemNo')
-        .selectGridComboBoxRowValue('Items',1,'strUOM','LB','strUOM')
-        .enterGridData('Items', 1, 'colQtyOrdered', '100')
-        .verifyGridData('Items', 1, 'colTotal', '1000')
-        .clickButton('Save')
-        .waitUntilLoaded('')
-        .clickButton('Process')
-        .addResult('Processing PO to IR',1000)
-        .waitUntilLoaded('icinventoryreceipt')
-        .waitUntilLoaded('')
-        .verifyData('Combo Box','ReceiptType','Purchase Order')
-        .verifyData('Combo Box','Vendor','ABC Trucking')
-        .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 02')
-        .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
-        .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
-        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-        .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
-        .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
-
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM','LB','strWeightUOM')
-        .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
-        .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
-        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-        .waitUntilLoaded('')
-
-
-        .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
-        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','LB','strUnitMeasure')
-        .enterGridData('LotTracking', 1, 'colLotQuantity', '100')
-        .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100')
-        .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
-        .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100')
-        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'LB')
-        .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
-
-       .addFunction(function (next){
-           var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblGrossWgt').text;
-           if (total == 'Gross: 100.00') {
-               t.ok(true, 'Gross is correct.');
-           }
-           else {
-               t.ok(false, 'Grossl is incorrect.');
-           }
-           next();
-       })
-       .addFunction(function (next){
-           var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblNetWgt').text;
-           if (total == 'Net: 100.00') {
-               t.ok(true, 'Net is correct.');
-           }
-           else {
-               t.ok(false, 'Net is incorrect.');
-           }
-           next();
-       })
-       .addFunction(function (next){
-           var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
-               t.ok(true, 'Total is correct.');
-           }
-           else {
-               t.ok(false, 'Total is incorrect.');
-           }
-           next();
-       })
-
-        .clickButton('PostPreview')
-        .waitUntilLoaded('cmcmrecaptransaction')
-        .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
-        .clickButton('Post')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',2000)
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
-        .displayText('===== Create Purchase Order Inventory Receipt for Lotted Item "Process Button" Done=====')
-
-
-        //region Scenario 7. Create Purchase Order Inventory Receipt for  Lotted Item "Add Orders Screen"
-        .displayText('=====  Scenario 7. Create PO to IR "Add Orders Screen" for Lotted Item =====')
-        .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
-        .clickMenuScreen('Purchase Orders','Screen')
-        .clickButton('New')
-        .waitUntilLoaded('appurchaseorder')
-        .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)
-        .waitUntilLoaded('')
-        .selectGridComboBoxRowValue('Items',1,'strItemNo','LTI - 02','strItemNo')
+        .selectGridComboBoxRowValue('Items',1,'strItemNo','LTI - 100','strItemNo')
         .selectGridComboBoxRowValue('Items',1,'strUOM','LB','strUOM')
         .enterGridData('Items', 1, 'colQtyOrdered', '100')
         .verifyGridData('Items', 1, 'colTotal', '1000')
@@ -512,7 +418,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','ReceiptType','Purchase Order')
         .verifyData('Combo Box','Vendor','ABC Trucking')
         .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 100')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -590,15 +496,15 @@ StartTest (function (t) {
         .displayText('===== Create Purchase Order Inventory Receipt for Lotted Item "Process Button" Done=====')
 
 
-        //region Scenario 8. Create Purchase Contract Inventory Receipt for Non Lotted Item "Process Button"
-        .displayText('=====  Scenario 8. Create Purchase Contract Inventory Receipt for Non Lotted Item "Process Button"  =====')
+        //region Scenario 7. Create Purchase Contract Inventory Receipt for Non Lotted Item "Process Button"
+        .displayText('=====  Scenario 7. Create Purchase Contract Inventory Receipt for Non Lotted Item "Process Button"  =====')
         .clickMenuFolder('Contract Management','Folder')
         .clickMenuScreen('Contracts','Screen')
         .clickButton('New')
         .waitUntilLoaded('ctcontract')
         .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
         .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',1)
+        .selectComboBoxRowValue('Commodity', 'TestCorn', 'Commodity',1)
         .enterData('Text Field','Quantity','100')
         .selectComboBoxRowValue('CommodityUOM', 'LB', 'CommodityUOM',1)
         .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
@@ -613,7 +519,7 @@ StartTest (function (t) {
             .done();
         })
         .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectComboBoxRowValue('Item', 'NLTI - 02', 'Item',1)
+        .selectComboBoxRowValue('Item', 'NLTI - 100', 'Item',1)
         .selectComboBoxRowValue('NetWeightUOM', 'LB', 'NetWeightUOM',1)
         .verifyData('Text Field','NetWeight','100.0000')
         .verifyData('Combo Box','PricingType','Cash')
@@ -631,7 +537,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','ReceiptType','Purchase Contract')
         .verifyData('Combo Box','Vendor','ABC Trucking')
         .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 100')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -680,7 +586,7 @@ StartTest (function (t) {
         .waitUntilLoaded('ctcontract')
         .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
         .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',1)
+        .selectComboBoxRowValue('Commodity', 'TestCorn', 'Commodity',1)
         .enterData('Text Field','Quantity','100')
         .selectComboBoxRowValue('CommodityUOM', 'LB', 'CommodityUOM',1)
         .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
@@ -695,7 +601,7 @@ StartTest (function (t) {
             .done();
           })
         .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectComboBoxRowValue('Item', 'LTI - 02', 'Item',1)
+        .selectComboBoxRowValue('Item', 'LTI - 100', 'Item',1)
         .selectComboBoxRowValue('NetWeightUOM', 'LB', 'NetWeightUOM',1)
         .verifyData('Text Field','NetWeight','100.0000')
         .verifyData('Combo Box','PricingType','Cash')
@@ -713,7 +619,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','ReceiptType','Purchase Contract')
         .verifyData('Combo Box','Vendor','ABC Trucking')
         .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 100')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -800,7 +706,7 @@ StartTest (function (t) {
         .waitUntilLoaded('ctcontract')
         .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
         .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',1)
+        .selectComboBoxRowValue('Commodity', 'TestCorn', 'Commodity',1)
         .enterData('Text Field','Quantity','100')
         .selectComboBoxRowValue('CommodityUOM', 'LB', 'CommodityUOM',1)
         .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
@@ -815,7 +721,7 @@ StartTest (function (t) {
             .done();
         })
         .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectComboBoxRowValue('Item', 'NLTI - 02', 'Item',1)
+        .selectComboBoxRowValue('Item', 'NLTI - 100', 'Item',1)
         .selectComboBoxRowValue('NetWeightUOM', 'LB', 'NetWeightUOM',1)
         .verifyData('Text Field','NetWeight','100.0000')
         .verifyData('Combo Box','PricingType','Cash')
@@ -845,7 +751,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','ReceiptType','Purchase Contract')
         .verifyData('Combo Box','Vendor','ABC Trucking')
         .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 100')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -894,7 +800,7 @@ StartTest (function (t) {
         .waitUntilLoaded('ctcontract')
         .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
         .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',1)
+        .selectComboBoxRowValue('Commodity', 'TestCorn', 'Commodity',1)
         .enterData('Text Field','Quantity','100')
         .selectComboBoxRowValue('CommodityUOM', 'LB', 'CommodityUOM',1)
         .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
@@ -909,7 +815,7 @@ StartTest (function (t) {
             .done();
         })
         .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectComboBoxRowValue('Item', 'LTI - 02', 'Item',1)
+        .selectComboBoxRowValue('Item', 'LTI - 100', 'Item',1)
         .selectComboBoxRowValue('NetWeightUOM', 'LB', 'NetWeightUOM',1)
         .verifyData('Text Field','NetWeight','100.0000')
         .verifyData('Combo Box','PricingType','Cash')
@@ -939,7 +845,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','ReceiptType','Purchase Contract')
         .verifyData('Combo Box','Vendor','ABC Trucking')
         .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 100')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -1003,7 +909,7 @@ StartTest (function (t) {
         .waitUntilLoaded('ctcontract')
         .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
         .selectComboBoxRowValue('Customer', 'The Scoular Company', 'Customer',1)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',1)
+        .selectComboBoxRowValue('Commodity', 'TestCorn', 'Commodity',1)
         .enterData('Text Field','Quantity','100')
         .selectComboBoxRowValue('CommodityUOM', 'LB', 'CommodityUOM',1)
         .selectComboBoxRowValue('Position', 'On Shipment', 'Position',1)
@@ -1018,7 +924,7 @@ StartTest (function (t) {
             .done();
          })
         .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectComboBoxRowValue('Item', 'LTI - 02', 'Item',1)
+        .selectComboBoxRowValue('Item', 'LTI - 100', 'Item',1)
         .selectComboBoxRowValue('NetWeightUOM', 'LB', 'NetWeightUOM',1)
         .verifyData('Text Field','NetWeight','100.0000')
         .verifyData('Combo Box','PricingType','Cash')
@@ -1076,7 +982,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','ReceiptType','Purchase Contract')
         .verifyData('Combo Box','Vendor','The Scoular Company')
         .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 100')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -1140,7 +1046,7 @@ StartTest (function (t) {
         .waitUntilLoaded('ctcontract')
         .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
         .selectComboBoxRowValue('Customer', 'The Mill Feed Co.', 'Customer',1)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',1)
+        .selectComboBoxRowValue('Commodity', 'TestCorn', 'Commodity',1)
         .enterData('Text Field','Quantity','100')
         .selectComboBoxRowValue('CommodityUOM', 'LB', 'CommodityUOM',1)
         .selectComboBoxRowValue('Position', 'On Shipment', 'Position',1)
@@ -1155,7 +1061,7 @@ StartTest (function (t) {
             .done();
          })
         .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectComboBoxRowValue('Item', 'NLTI - 02', 'Item',1)
+        .selectComboBoxRowValue('Item', 'NLTI - 100', 'Item',1)
         .selectComboBoxRowValue('NetWeightUOM', 'LB', 'NetWeightUOM',2)
         .verifyData('Text Field','NetWeight','100.0000')
         .verifyData('Combo Box','PricingType','Cash')
@@ -1213,7 +1119,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','ReceiptType','Purchase Contract')
         .verifyData('Combo Box','Vendor','The Mill Feed Co.')
         .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 100')
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -1266,7 +1172,7 @@ StartTest (function (t) {
         .doubleClickSearchRowValue('Direct', 'strOrderType', 2)
         .waitUntilLoaded('icinventoryreceipt')
         .addResult('Successfully Opened',4000)
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100000')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
@@ -1346,6 +1252,8 @@ StartTest (function (t) {
         .clearTextFilter('FilterGrid')
         .displayText('===== Update Inventory Receipt Done=====')
         //endregion
-        .done();
+
+
+       .done();
 
 })

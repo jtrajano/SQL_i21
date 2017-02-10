@@ -7,25 +7,25 @@ StartTest (function (t) {
 
         //Add Category
         .addFunction(function(next){
-            commonIC.addCategory (t,next, 'Category-1', 'Test Category Description', 2)
+            commonIC.addCategory (t,next, 'Category-4', 'Test Category Description', 2)
         })
 
         //Add Commodity
         .addFunction(function(next){
-            commonIC.addCommodity (t,next, 'Commodity-1', 'Test Commodity Description')
+            commonIC.addCommodity (t,next, 'Commodity-4', 'Test Commodity Description')
         })
 
         //Add Non Lotted Item
         .addFunction(function(next){
             commonIC.addInventoryItem
             (t,next,
-                'NLTI - 01'
+                'NLTI - 04'
                 , 'Test Non Lotted Item Description'
+                , 'Category-4'
+                , 'Commodity-4'
                 , 4
-//                , 'Category-1'
-//                , 'Commodity-1'
-//                , 'LB'
-//                , 'LB'
+                , 'LB'
+                , 'LB'
                 , 10
                 , 10
                 , 40
@@ -36,13 +36,13 @@ StartTest (function (t) {
         .addFunction(function(next){
             commonIC.addInventoryItem
             (t,next,
-                'LTI - 01'
+                'LTI - 04'
                 , 'Test Lotted Item Description'
+                , 'Category-4'
+                , 'Commodity-4'
                 , 3
-//                , 'Category-1'
-//                , 'Commodity-1'
-//                , 'LB'
-//                , 'LB'
+                , 'LB'
+                , 'LB'
                 , 10
                 , 10
                 , 40
@@ -52,11 +52,11 @@ StartTest (function (t) {
         //Adding Stock to Items
         .displayText('===== Adding Stocks to Created items =====')
         .addFunction(function(next){
-            commonIC.addDirectIRNonLotted (t,next, 4, 1, 'NLTI - 01','LB', 1000, 10)
+            commonIC.addDirectIRNonLotted (t,next, 'ABC Trucking', 1, 'NLTI - 04','LB', 1000, 10)
         })
 
         .addFunction(function(next){
-            commonIC.addDirectIRLotted (t,next, 4, 1, 'LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+            commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'LTI - 04','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
         })
         .displayText('===== Adding Stocks to Created Done =====')
 

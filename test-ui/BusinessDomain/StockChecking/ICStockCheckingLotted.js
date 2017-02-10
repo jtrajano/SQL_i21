@@ -3,6 +3,11 @@ StartTest (function (t) {
     new iRely.FunctionalTest().start(t)
 
         //region PreCondition
+        //Add Commodity
+        .addFunction(function(next){
+            commonIC.addCommodity (t,next, 'SC - Commodity - 01', 'Test Commodity Description')
+        })
+
         .displayText('===== Pre-setup Add New Lotted Item =====')
         //Add Lotted Item
         .addFunction(function(next){
@@ -10,16 +15,17 @@ StartTest (function (t) {
             (t,next,
                 'SC - LTI - 15'
                 , 'Test Lotted Item For Other Charges'
+                , 'Grains'
+                , 'SC - Commodity - 01'
                 , 3
-//                , 'Grains'
-//                , 'SC - Commodity - 01'
-//                , 'LB'
-//                , 'LB'
+                , 'LB'
+                , 'LB'
                 , 10
                 , 10
                 , 40
             )
         })
+        //endregion
 
         //region Scenario 1: FULL CYCLE Stock Checking
         .displayText('===== FULL CYCLE Stock Checking =====')

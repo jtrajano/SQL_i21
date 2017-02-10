@@ -9,11 +9,11 @@ StartTest (function (t) {
         .addFunction(function(next){
             commonICST.openICScreens (t,next)
         })
-
+        .displayText('===== Start IC Open Screens Done =====')
 
         //IC Add Maintenance Screens
-        .displayText('===== Start IC Add Maintenance =====')
-        //region Scenario 1: Add New Storage Location
+        .displayText('===== IC Add Maintenance Screens =====')
+                //region Scenario 1: Add New Storage Location
         .displayText('===== Scenario 1: Adding New Storage Location. =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Storage Locations','Screen')
@@ -167,13 +167,13 @@ StartTest (function (t) {
         //Add Category
         .displayText('===== Scenario 4: Add Category =====')
         .addFunction(function(next){
-            commonIC.addCategory (t,next, 'Smoke Category', 'Test Smoke Category Description', 2)
+            commonIC.addCategory (t,next, 'SC - Category - 01', 'Test Smoke Category Description', 2)
         })
 
         //Add Commodity
         .displayText('===== Scenario 6: Add Commodity =====')
         .addFunction(function(next){
-            commonIC.addCommodity (t,next, 'Smoke Commodity', 'Test Smoke Commodity Description')
+            commonIC.addCommodity (t,next, 'SC - Commodity - 01', 'Test Smoke Commodity Description')
         })
 
         //Add Lotted Item
@@ -183,11 +183,11 @@ StartTest (function (t) {
             (t,next,
                 'Smoke - LTI - 01'
                 , 'Test Lotted Item For Other Smoke Testing'
+                , 'SC - Category - 01'
+                , 'SC - Commodity - 01'
                 , 3
-//                , 'Grains'
-//                , 'SC - Commodity - 01'
-//                , 'LB'
-//                , 'LB'
+                , 'LB'
+                , 'LB'
                 , 10
                 , 10
                 , 40
@@ -201,31 +201,32 @@ StartTest (function (t) {
             (t,next,
                 'Smoke - NLTI - 01'
                 , 'Test Non Lotted Item Smoke Testing'
+                , 'SC - Category - 01'
+                , 'SC - Commodity - 01'
                 , 4
-//                , 'Grains'
-//                , 'SC - Commodity - 01'
-//                , 'LB'
-//                , 'LB'
+                , 'LB'
+                , 'LB'
                 , 10
                 , 10
                 , 40
             )
         })
+        .displayText('===== IC Add Maintenance Screens Done =====')
 
 
-        //IC Add Transactions
-        .displayText('===== Start IC Add Transactions =====')
-         //Create Direct IR for Non Lotted Item
+        //IC Add Transactiion Screens
+        .displayText('===== IC Add Transactiion Screens =====')
+              //Create Direct IR for Non Lotted Item
         .displayText('===== Scenario 1: Create Direct IR for Non Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectIRNonLotted (t,next, 4, 1, 'Smoke - NLTI - 01','LB', 1000, 10)
+            commonIC.addDirectIRNonLotted (t,next, 'ABC Trucking', 1, 'Smoke - NLTI - 01','LB', 1000, 10)
         })
 
 
         //Create Direct IR for Lotted Item
         .displayText('===== Scenario 2: Create Direct IR for Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectIRLotted (t,next, 4, 1, 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+            commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
         })
 
         //Create Direct IR for Lotted Item with other charges
@@ -314,14 +315,14 @@ StartTest (function (t) {
         //Create Direct IS for Non Lotted Item
         .displayText('===== Scenario 4: Create Direct IS for Non Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectISNonLotted (t,next, 1, 3, 1, 'Smoke - NLTI - 01','LB', 100)
+            commonIC.addDirectISNonLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne','Smoke - NLTI - 01','LB', 100)
         })
 
 
         //Create Direct IS for Non Lotted Item
         .displayText('===== Scenario 5: Create Direct IS for Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectISLotted (t,next, 1, 3, 1, 'Smoke - LTI - 01','LB', 100, 'LOT-01')
+            commonIC.addDirectISLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 100, 'LOT-01')
         })
 
 
@@ -449,7 +450,7 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('ReceiptType',3,0)
         .selectComboBoxRowNumber('Transferor',1,0)
         .doubleClickSearchRowValue('Smoke - LTI - 01', 'strItemNo', 1)
-        .waitUntilLoaded('')
+        .waitUntilLoaded('icinventoryreceipt')
         .verifyData('Combo Box','ReceiptType','Transfer Order')
         .verifyData('Combo Box','Transferor','0001 - Fort Wayne')
         .verifyData('Combo Box','Location','0002 - Indianapolis')
@@ -722,6 +723,7 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .clickMenuFolder('Inventory','Folder')
         .displayText('===== Scenario 13. Add new Storage Measurement Reading with 1 item only. Done ====')
+        .displayText('===== IC Add Transactiion Screens Done=====')
 
 
 

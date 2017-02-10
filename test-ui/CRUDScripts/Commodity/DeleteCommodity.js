@@ -43,7 +43,7 @@ StartTest (function (t) {
 
         //region Scenario 3: Delete Multiple UnUsed Commodity
         .displayText('=====  Scenario 3: Delete Multiple UnUsed Commodity =====')
-        .selectSearchRowNumber([17,18])
+        .selectSearchRowNumber([18,19])
         .clickButton('OpenSelected')
         .waitUntilLoaded()
         .clickButton('Delete')

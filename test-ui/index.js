@@ -95,13 +95,13 @@ Harness.start(
     },
 
     {
-        group: 'CRUD Scripts',
+        group: 'CRUDScripts',
         items: [
             {
                 group: 'Item',
                 items: [
                     {
-                        url: 'Item/AddInventory.js?v='+version,
+                        url: 'CRUDScripts/Item/AddInventory.js?v='+version,
                         title: 'AddInventory',
                         preload: [
                             functionalTest
@@ -109,7 +109,7 @@ Harness.start(
                     },
 
                     {
-                        url: 'Item/DeleteInventory.js?v='+version,
+                        url: 'CRUDScripts/Item/DeleteInventory.js?v='+version,
                         title: 'DeleteInventory',
                         preload: [
                             functionalTest
@@ -121,14 +121,14 @@ Harness.start(
             { group: 'Commodity',
                 items: [
                     {
-                        url: 'Commodity/AddCommodity.js?v='+version,
+                        url: 'CRUDScripts/Commodity/AddCommodity.js?v='+version,
                         title: 'AddCommodity',
                         preload: [
                             functionalTest
                         ]
                     },
                     {
-                        url: 'Commodity/DeleteCommodity.js?v='+version,
+                        url: 'CRUDScripts/Commodity/DeleteCommodity.js?v='+version,
                         title: 'DeleteCommodity',
                         preload: [
                             functionalTest
@@ -140,14 +140,14 @@ Harness.start(
             { group: 'Category',
                 items: [
                     {
-                        url: 'Category/AddCategory.js?v='+version,
+                        url: 'CRUDScripts/Category/AddCategory.js?v='+version,
                         title: 'AddCategory',
                         preload: [
                             functionalTest
                         ]
                     },
                     {
-                        url: 'Category/DeleteCategory.js?v='+version,
+                        url: 'CRUDScripts/Category/DeleteCategory.js?v='+version,
                         title: 'DeleteCategory',
                         preload: [
                             functionalTest
@@ -159,14 +159,14 @@ Harness.start(
             { group: 'FuelCategory',
                 items: [
                     {
-                        url: 'FuelCategory/AddFuelCategory.js?v='+version,
+                        url: 'CRUDScripts/FuelCategory/AddFuelCategory.js?v='+version,
                         title: 'AddFuelCategory',
                         preload: [
                             functionalTest
                         ]
                     },
                     {
-                        url: 'FuelCategory/DeleteFuelCategory.js?v='+version,
+                        url: 'CRUDScripts/FuelCategory/DeleteFuelCategory.js?v='+version,
                         title: 'DeleteFuelCategory',
                         preload: [
                             functionalTest
@@ -178,14 +178,14 @@ Harness.start(
             { group: 'FeedStock',
                 items: [
                     {
-                        url: 'FeedStock/AddFeedStock.js?v='+version,
+                        url: 'CRUDScripts/FeedStock/AddFeedStock.js?v='+version,
                         title: 'AddFeedStock',
                         preload: [
                             functionalTest
                         ]
                     },
                     {
-                        url: 'FeedStock/DeleteFeedStock.js?v='+version,
+                        url: 'CRUDScripts/FeedStock/DeleteFeedStock.js?v='+version,
                         title: 'DeleteFeedStock',
                         preload: [
                             functionalTest
@@ -197,14 +197,14 @@ Harness.start(
             { group: 'FuelCode',
                 items: [
                     {
-                        url: 'FuelCode/AddFuelCode.js?v='+version,
+                        url: 'CRUDScripts/FuelCode/AddFuelCode.js?v='+version,
                         title: 'AddFuelCode',
                         preload: [
                             functionalTest
                         ]
                     },
                     {
-                        url: 'FuelCode/DeleteFuelCode.js?v='+version,
+                        url: 'CRUDScripts/FuelCode/DeleteFuelCode.js?v='+version,
                         title: 'DeleteFuelCode',
                         preload: [
                             functionalTest
@@ -216,14 +216,14 @@ Harness.start(
             { group: 'ProductionProcess',
                 items: [
                     {
-                        url: 'ProductionProcess/AddProductionProcess.js?v='+version,
+                        url: 'CRUDScripts/ProductionProcess/AddProductionProcess.js?v='+version,
                         title: 'AddProductionProcess',
                         preload: [
                             functionalTest
                         ]
                     },
                     {
-                        url: 'ProductionProcess/DeleteProductionProcess.js?v='+version,
+                        url: 'CRUDScripts/ProductionProcess/DeleteProductionProcess.js?v='+version,
                         title: 'DeleteProductionProcess',
                         preload: [
                             functionalTest
@@ -235,14 +235,14 @@ Harness.start(
             { group: 'FeedStockUOM',
                 items: [
                     {
-                        url: 'FeedStockUOM/AddFeedStockUOM.js?v='+version,
+                        url: 'CRUDScripts/FeedStockUOM/AddFeedStockUOM.js?v='+version,
                         title: 'AddFeedStockUOM',
                         preload: [
                             functionalTest
                         ]
                     },
                     {
-                        url: 'FeedStockUOM/DeleteFeedStockUOM.js?v='+version,
+                        url: 'CRUDScripts/FeedStockUOM/DeleteFeedStockUOM.js?v='+version,
                         title: 'DeleteFeedStockUOM',
                         preload: [
                             functionalTest
@@ -254,14 +254,14 @@ Harness.start(
             { group: 'FuelType',
                 items: [
                     {
-                        url: 'FuelType/AddFuelType.js?v='+version,
+                        url: 'CRUDScripts/FuelType/AddFuelType.js?v='+version,
                         title: 'AddFuelType',
                         preload: [
                             functionalTest
                         ]
                     },
                     {
-                        url: 'FuelType/DeleteFuelType.js?v='+version,
+                        url: 'CRUDScripts/FuelType/DeleteFuelType.js?v='+version,
                         title: 'DeleteFuelType',
                         preload: [
                             functionalTest
@@ -273,7 +273,7 @@ Harness.start(
             { group: 'InventoryUOM',
                 items: [
                     {
-                        url: 'InventoryUOM/AddInventoryUOM.js?v='+version,
+                        url: 'CRUDScripts/InventoryUOM/AddInventoryUOM.js?v='+version,
                         title: 'AddInventoryUOM',
 
                         preload: [
@@ -281,7 +281,7 @@ Harness.start(
                         ]
                     },
                     {
-                        url: 'InventoryUOM/DeleteInventoryUOM.js?v='+version,
+                        url: 'CRUDScripts/InventoryUOM/DeleteInventoryUOM.js?v='+version,
                         title: 'DeleteInventoryUOM',
 
                         preload: [
@@ -294,14 +294,14 @@ Harness.start(
             { group: 'StorageLocation',
                 items: [
                     {
-                        url: 'StorageLocation/AddStorageLocation.js?v='+version,
+                        url: 'CRUDScripts/StorageLocation/AddStorageLocation.js?v='+version,
                         title: 'AddStorageLocation',
                         preload: [
                             functionalTest
                         ]
                     },
                     {
-                        url: 'StorageLocation/DeleteStorageLocation.js?v='+version,
+                        url: 'CRUDScripts/StorageLocation/DeleteStorageLocation.js?v='+version,
                         title: 'DeleteStorageLocation',
                         preload: [
                             functionalTest
@@ -313,17 +313,27 @@ Harness.start(
             { group: 'InventoryReceipt',
                 items: [
                     {
-                        url: 'InventoryReceipt/AddInventoryReceipt.js?v='+version,
-                        title: 'AddInventoryReceipt',
+                        url: 'CRUDScripts/InventoryReceipt/PreSetup.js?v='+version,
+                        title: 'PreSetup',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     },
                     {
-                        url: 'InventoryReceipt/DeleteInventoryReceipt.js?v='+version,
+                        url: 'CRUDScripts/InventoryReceipt/AddInventoryReceipt.js?v='+version,
+                        title: 'AddInventoryReceipt',
+                        preload: [
+                            functionalTest,
+                            commonIC
+                        ]
+                    },
+                    {
+                        url: 'CRUDScripts/InventoryReceipt/DeleteInventoryReceipt.js?v='+version,
                         title: 'DeleteInventoryReceipt',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     }
                 ]
@@ -332,17 +342,19 @@ Harness.start(
             { group: 'InventoryShipment',
                 items: [
                     {
-                        url: 'InventoryShipment/AddInventoryShipment.js?v='+version,
+                        url: 'CRUDScripts/InventoryShipment/AddInventoryShipment.js?v='+version,
                         title: 'AddInventoryShipment',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     },
                     {
-                        url: 'InventoryShipment/DeleteInventoryShipment.js?v='+version,
+                        url: 'CRUDScripts/InventoryShipment/DeleteInventoryShipment.js?v='+version,
                         title: 'DeleteInventoryShipment',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     }
                 ]
@@ -351,17 +363,19 @@ Harness.start(
             { group: 'InventoryTransfer',
                 items: [
                     {
-                        url: 'InventoryTransfer/AddInventoryTransfer.js?v='+version,
+                        url: 'CRUDScripts/InventoryTransfer/AddInventoryTransfer.js?v='+version,
                         title: 'AddInventoryTransfer',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     },
                     {
-                        url: 'InventoryTransfer/DeleteInventoryTransfer.js?v='+version,
+                        url: 'CRUDScripts/InventoryTransfer/DeleteInventoryTransfer.js?v='+version,
                         title: 'DeleteInventoryTransfer',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     }
                 ]
@@ -370,17 +384,19 @@ Harness.start(
             { group: 'InventoryAdjustment',
                 items: [
                     {
-                        url: 'InventoryAdjustment/AddInventoryAdjustment.js?v='+version,
+                        url: 'CRUDScripts/InventoryAdjustment/AddInventoryAdjustment.js?v='+version,
                         title: 'AddInventoryAdjustment',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     },
                     {
-                        url: 'InventoryAdjustment/DeleteInventoryAdjustment.js?v='+version,
+                        url: 'CRUDScripts/InventoryAdjustment/DeleteInventoryAdjustment.js?v='+version,
                         title: 'DeleteInventoryAdjustment',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     }
                 ]
@@ -389,17 +405,19 @@ Harness.start(
             { group: 'InventoryCount',
                 items: [
                     {
-                        url: 'InventoryCount/AddInventoryCount.js?v='+version,
+                        url: 'CRUDScripts/InventoryCount/AddInventoryCount.js?v='+version,
                         title: 'AddInventoryCount',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     },
                     {
-                        url: 'InventoryCount/DeleteInventoryCount.js?v='+version,
+                        url: 'CRUDScripts/InventoryCount/DeleteInventoryCount.js?v='+version,
                         title: 'DeleteInventoryCount',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     }
                 ]
@@ -408,17 +426,19 @@ Harness.start(
             { group: 'StorageMeasurementReading',
                 items: [
                     {
-                        url: 'StorageMeasurementReading/AddSMR.js?v='+version,
+                        url: 'CRUDScripts/StorageMeasurementReading/AddSMR.js?v='+version,
                         title: 'AddSMR',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     },
                     {
-                        url: 'StorageMeasurementReading/DeleteSMR.js?v='+version,
+                        url: 'CRUDScripts/StorageMeasurementReading/DeleteSMR.js?v='+version,
                         title: 'DeleteSMR',
                         preload: [
-                            functionalTest
+                            functionalTest,
+                            commonIC
                         ]
                     }
                 ]
@@ -433,14 +453,24 @@ Harness.start(
 
             {
                 group: 'InventoryReceipt',
-                items: [
+                items:
+                 [
 
                     {
                         group: 'DirectInventoryReceipt',
                         items: [
                             {
-                                url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR1.js?v=' + version,
-                                title: 'DirectIR-Scen.1&2',
+                                url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR1-2.js?v=' + version,
+                                title: 'DirectIR-Scen.1-2',
+                                preload: [
+                                    functionalTest,
+                                    commonIC
+
+                                ]
+                            },
+                            {
+                                url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR3-7.js?v=' + version,
+                                title: 'DirectIR-Scen.3-7',
                                 preload: [
                                     functionalTest,
                                     commonIC
@@ -450,8 +480,8 @@ Harness.start(
 
                         ]
                     }
-                        ]
 
+                 ]
 
             },
             {

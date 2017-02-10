@@ -7,14 +7,14 @@ StartTest (function (t) {
         //Create Direct IR for Non Lotted Item
         .displayText('===== Scenario 1: Create Direct IR for Non Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectIRNonLotted (t,next, 4, 1, 'Smoke - NLTI - 01','LB', 1000, 10)
+            commonIC.addDirectIRNonLotted (t,next, 'ABC Trucking', 1, 'Smoke - NLTI - 01','LB', 1000, 10)
         })
 
 
         //Create Direct IR for Lotted Item
         .displayText('===== Scenario 2: Create Direct IR for Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectIRLotted (t,next, 4, 1, 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+            commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
         })
 
         //Create Direct IR for Lotted Item with other charges
@@ -103,14 +103,14 @@ StartTest (function (t) {
         //Create Direct IS for Non Lotted Item
         .displayText('===== Scenario 4: Create Direct IS for Non Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectISNonLotted (t,next, 1, 3, 1, 'Smoke - NLTI - 01','LB', 100)
+            commonIC.addDirectISNonLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne','Smoke - NLTI - 01','LB', 100)
         })
 
 
         //Create Direct IS for Non Lotted Item
         .displayText('===== Scenario 5: Create Direct IS for Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectISLotted (t,next, 1, 3, 1, 'Smoke - LTI - 01','LB', 100, 'LOT-01')
+            commonIC.addDirectISLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 100, 'LOT-01')
         })
 
 
