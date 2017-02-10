@@ -14,6 +14,7 @@ SELECT   Load.intLoadId
 		,Load.intDriverEntityId
 		,Load.intDispatcherId
         ,Load.strExternalLoadNumber
+		,Load.strExternalShipmentNumber
         ,strType = CASE WHEN Load.intPurchaseSale = 1 THEN 
 						'Inbound' 
 						ELSE 
@@ -76,6 +77,8 @@ SELECT   Load.intLoadId
 		,LoadDetail.strLoadDirectionMsg
 		,LoadDetail.ysnUpdateLoadDirections
 		,LoadDetail.ysnPrintLoadDirections
+		,LoadDetail.strExternalShipmentItemNumber
+		,LoadDetail.strExternalBatchNo
         ,intGenerateReferenceNumber = GLoad.intReferenceNumber
         ,intNumberOfLoads = GLoad.intNumberOfLoads
 
