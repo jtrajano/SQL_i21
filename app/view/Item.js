@@ -519,6 +519,7 @@ Ext.define('Inventory.view.Item', {
                                                         format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             validateOnChange: false,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true,
@@ -534,6 +535,7 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Short UPC',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'txtShortUPCCode',
                                                             allowDecimals: false,
                                                             allowExponential: false
@@ -579,6 +581,7 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Length',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
@@ -593,6 +596,7 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Width',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
@@ -607,6 +611,7 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Height',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
@@ -657,6 +662,7 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Volume',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
@@ -707,6 +713,7 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Weight',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true,
                                                             minValue: 0
@@ -757,6 +764,7 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Max Qty',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
@@ -1243,6 +1251,7 @@ Ext.define('Inventory.view.Item', {
                                                                             },
                                                                             {
                                                                                 xtype: 'numericfield',
+                                                                                quantityField: true,
                                                                                 itemId: 'txtPercentDenaturant',
                                                                                 fieldLabel: '% Denaturant',
                                                                                 labelWidth: 125,
@@ -1329,6 +1338,7 @@ Ext.define('Inventory.view.Item', {
                                                                             },
                                                                             {
                                                                                 xtype: 'numberfield',
+                                                                                quantityField: true,
                                                                                 itemId: 'txtMixOrder',
                                                                                 fieldLabel: 'Mix Order',
                                                                                 labelWidth: 115,
@@ -1483,18 +1493,21 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numericfield',
+                                                                        quantityField: true,
                                                                         itemId: 'txtUserGroupFee',
                                                                         fieldLabel: 'User Group Fee %',
                                                                         labelWidth: 125
                                                                     },
                                                                     {
                                                                         xtype: 'numericfield',
+                                                                        quantityField: true,
                                                                         itemId: 'txtWgtTolerance',
                                                                         fieldLabel: 'Wgt Tolerance %',
                                                                         labelWidth: 125
                                                                     },
                                                                     {
                                                                         xtype: 'numericfield',
+                                                                        quantityField: true,
                                                                         itemId: 'txtOverReceiveTolerance',
                                                                         fieldLabel: 'Over Receive Tolerance %',
                                                                         labelWidth: 125
@@ -1517,6 +1530,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numericfield',
+                                                                        currencyField: true,
                                                                         itemId: 'txtMaintenanceRate',
                                                                         fieldLabel: 'Rate',
                                                                         labelWidth: 125
@@ -1671,6 +1685,7 @@ Ext.define('Inventory.view.Item', {
                                                                             },
                                                                             {
                                                                                 xtype: 'numberfield',
+                                                                                quantityField: true,
                                                                                 itemId: 'txtCaseQty',
                                                                                 fieldLabel: 'Case Qty',
                                                                                 labelWidth: 90,
@@ -1694,6 +1709,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     {
                                                                                         xtype: 'numberfield',
                                                                                         flex: 1,
+                                                                                        currencyField: true,
                                                                                         itemId: 'txtTaxExempt',
                                                                                         margin: '0 5 0 0',
                                                                                         fieldLabel: 'Tax Exempt',
@@ -1890,6 +1906,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 text: 'Contract Price',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
+                                                                                    currencyField: true,
                                                                                     fieldStyle: 'text-align:right',
                                                                                     hideTrigger: true
                                                                                 }
@@ -2039,6 +2056,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                     {
                                                                                                         xtype: 'numeric',
                                                                                                         flex: 2,
+                                                                                                        quantityField: true,
                                                                                                         itemId: 'txtLifeTime',
                                                                                                         modelValidation: true,
                                                                                                         fieldLabel: 'Life Time',
@@ -2059,6 +2077,7 @@ Ext.define('Inventory.view.Item', {
                                                                                             },
                                                                                             {
                                                                                                 xtype: 'numeric',
+                                                                                                quantityField: true,
                                                                                                 itemId: 'txtReceiveLife',
                                                                                                 modelValidation: true,
                                                                                                 fieldLabel: 'Receive Life',
@@ -2276,6 +2295,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                             {
                                                                                                                 xtype: 'numberfield',
                                                                                                                 flex: 1.4,
+                                                                                                                quantityField: true,
                                                                                                                 itemId: 'txtWeight',
                                                                                                                 fieldLabel: 'Weight',
                                                                                                                 labelWidth: 125,
@@ -2310,6 +2330,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                             {
                                                                                                                 xtype: 'numberfield',
                                                                                                                 flex: 1,
+                                                                                                                quantityField: true,
                                                                                                                 itemId: 'txtInnerUnits',
                                                                                                                 margin: '0 0 0 5',
                                                                                                                 fieldLabel: 'Inner Units',
@@ -2330,6 +2351,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                             {
                                                                                                                 xtype: 'numberfield',
                                                                                                                 flex: 1.4,
+                                                                                                                quantityField: true,
                                                                                                                 itemId: 'txtLayersPerPallet',
                                                                                                                 fieldLabel: 'Layers per Pallet',
                                                                                                                 labelWidth: 125,
@@ -2339,6 +2361,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                             {
                                                                                                                 xtype: 'numberfield',
                                                                                                                 flex: 1,
+                                                                                                                quantityField: true,
                                                                                                                 itemId: 'txtUnitsPerLayer',
                                                                                                                 margin: '0 0 0 5',
                                                                                                                 fieldLabel: 'Units per Layer',
@@ -2350,6 +2373,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                     },
                                                                                                     {
                                                                                                         xtype: 'numberfield',
+                                                                                                        quantityField: true,
                                                                                                         itemId: 'txtStandardPalletRatio',
                                                                                                         fieldLabel: 'Std. Pallet Ratio (%)',
                                                                                                         labelWidth: 125,
@@ -2382,6 +2406,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                     },
                                                                                                     {
                                                                                                         xtype: 'numberfield',
+                                                                                                        quantityField: true,
                                                                                                         itemId: 'txtMaxWeightPerPack',
                                                                                                         fieldLabel: 'Max Wgt Per Pack',
                                                                                                         labelWidth: 125,
@@ -2449,6 +2474,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
+                                                                                        quantityField: true,
                                                                                         itemId: 'txtBlendWeight',
                                                                                         fieldLabel: 'Blend Weight',
                                                                                         labelWidth: 125,
@@ -2456,6 +2482,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
+                                                                                        quantityField: true,
                                                                                         itemId: 'txtNetWeight',
                                                                                         fieldLabel: 'Net Weight',
                                                                                         labelWidth: 125,
@@ -2463,6 +2490,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
+                                                                                        quantityField: true,
                                                                                         itemId: 'txtUnitsPerCase',
                                                                                         fieldLabel: 'Units Per Case',
                                                                                         labelWidth: 125,
@@ -2470,6 +2498,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
+                                                                                        quantityField: true,
                                                                                         itemId: 'txtQuarantineDuration',
                                                                                         fieldLabel: 'Quarantine Duration',
                                                                                         labelWidth: 125,
@@ -2533,6 +2562,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
+                                                                                        quantityField: true,
                                                                                         itemId: 'txtCaseWeight',
                                                                                         fieldLabel: 'Case Weight',
                                                                                         labelWidth: 125,
@@ -2590,6 +2620,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 items: [
                                                                                     {
                                                                                         xtype: 'numberfield',
+                                                                                        quantityField: true,
                                                                                         itemId: 'txtRiskScore',
                                                                                         fieldLabel: 'Risk Score',
                                                                                         labelWidth: 130,
@@ -2597,6 +2628,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
+                                                                                        quantityField: true,
                                                                                         itemId: 'txtDensity',
                                                                                         fieldLabel: 'Density',
                                                                                         labelWidth: 130,
@@ -2634,6 +2666,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
+                                                                                        quantityField: true,
                                                                                         itemId: 'txtMinimumStockWeeks',
                                                                                         fieldLabel: 'Minmum Stock Weeks',
                                                                                         labelWidth: 130,
@@ -2641,6 +2674,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
+                                                                                        quantityField: true,
                                                                                         itemId: 'txtFullContainerSize',
                                                                                         fieldLabel: 'Full Container Size',
                                                                                         labelWidth: 130,
@@ -2737,6 +2771,7 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1,
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -2949,6 +2984,7 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1,
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -2962,6 +2998,7 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1,
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -2975,6 +3012,7 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1,
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -3489,6 +3527,7 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1,
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -3687,6 +3726,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numericfield',
+                                                                        currencyField: true,
                                                                         itemId: 'txtAmount',
                                                                         fieldLabel: 'Amount',
                                                                         labelWidth: 150,
@@ -3997,6 +4037,7 @@ Ext.define('Inventory.view.Item', {
                                                                             },
                                                                             {
                                                                                 xtype: 'numericfield',
+                                                                                quantityField: true,
                                                                                 itemId: 'txtDefaultPercentFull',
                                                                                 fieldLabel: 'Default % Full',
                                                                                 labelWidth: 110,
@@ -4187,7 +4228,8 @@ Ext.define('Inventory.view.Item', {
                                                         flex: 0.8,
                                                         format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            currencyField: true
                                                         }
                                                     },
                                                     {
@@ -4201,6 +4243,7 @@ Ext.define('Inventory.view.Item', {
                                                         format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            currencyField: true,
                                                             itemId: 'txtStandardCost'
                                                         }
                                                     },
@@ -4214,7 +4257,8 @@ Ext.define('Inventory.view.Item', {
                                                         flex: 0.8,
                                                         format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            currencyField: true
                                                         }
                                                     },
                                                     {
@@ -4226,7 +4270,8 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'EOM Cost',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            currencyField: true
                                                         }
                                                     },
                                                     {
@@ -4254,6 +4299,7 @@ Ext.define('Inventory.view.Item', {
                                                         format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            currencyField: true,
                                                             decimalPrecision: 6
                                                         }
                                                     },
@@ -4268,6 +4314,7 @@ Ext.define('Inventory.view.Item', {
                                                         format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            currencyField: true,
                                                             decimalPrecision: 6
                                                         }
                                                     },
@@ -4280,7 +4327,8 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'MSRP',
                                                         flex: 0.8,
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            currencyField: true
                                                         }
                                                     }
                                                 ],
@@ -4488,6 +4536,7 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Min Qty',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -4501,6 +4550,7 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Max Qty',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -4528,6 +4578,7 @@ Ext.define('Inventory.view.Item', {
                                                                         format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true,
                                                                             decimalPrecision: 6
@@ -4542,6 +4593,7 @@ Ext.define('Inventory.view.Item', {
                                                                         format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true,
                                                                             decimalPrecision: 6
@@ -4568,6 +4620,7 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Comm Amount/Percent',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -4741,6 +4794,7 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Discount Units',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -4768,6 +4822,7 @@ Ext.define('Inventory.view.Item', {
                                                                         format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             itemId: 'txtSpecialPricingDiscount',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true,
@@ -4784,6 +4839,7 @@ Ext.define('Inventory.view.Item', {
                                                                         format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             itemId: 'txtSpecialPricingUnitPrice',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true,
@@ -4827,6 +4883,7 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Disc thru Qty',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -4840,6 +4897,7 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Disc thru Amt',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -4853,6 +4911,7 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Accum. Qty',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -4866,6 +4925,7 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Accum. Amount',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -5082,6 +5142,7 @@ Ext.define('Inventory.view.Item', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'numberfield',
+                                                                        quantityField: true,
                                                                         itemId: 'txtGaShrinkFactor',
                                                                         fieldLabel: 'GA Shrink Factor',
                                                                         fieldStyle: 'text-align:right',
@@ -5387,7 +5448,8 @@ Ext.define('Inventory.view.Item', {
                                                                         dataIndex: 'number',
                                                                         text: 'Last Cost',
                                                                         editor: {
-                                                                            xtype: 'numberfield'
+                                                                            xtype: 'numberfield',
+                                                                            currencyField: true
                                                                         }
                                                                     },
                                                                     {
@@ -5398,7 +5460,8 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Standard Cost',
                                                                         flex: 1,
                                                                         editor: {
-                                                                            xtype: 'numberfield'
+                                                                            xtype: 'numberfield',
+                                                                            currencyField: true
                                                                         }
                                                                     },
                                                                     {
@@ -5409,7 +5472,8 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Average Cost',
                                                                         flex: 1,
                                                                         editor: {
-                                                                            xtype: 'numberfield'
+                                                                            xtype: 'numberfield',
+                                                                            currencyField: true
                                                                         }
                                                                     },
                                                                     {
@@ -5420,7 +5484,8 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'End of Month Cost',
                                                                         flex: 1,
                                                                         editor: {
-                                                                            xtype: 'numberfield'
+                                                                            xtype: 'numberfield',
+                                                                            currencyField: true
                                                                         }
                                                                     }
                                                                 ],
@@ -5551,6 +5616,7 @@ Ext.define('Inventory.view.Item', {
                                                         flex: 1,
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
@@ -5720,6 +5786,7 @@ Ext.define('Inventory.view.Item', {
                                                         flex: 1,
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
@@ -5987,6 +6054,7 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Quantity',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
@@ -6039,6 +6107,7 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Price',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            currencyField: true,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
@@ -6283,6 +6352,7 @@ Ext.define('Inventory.view.Item', {
                                                                         format: '0000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             allowDecimals: false,
                                                                             allowExponential: false
                                                                         }
