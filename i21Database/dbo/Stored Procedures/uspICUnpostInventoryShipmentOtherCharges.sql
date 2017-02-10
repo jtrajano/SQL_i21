@@ -188,27 +188,6 @@ BEGIN
 	END 
 	;
 
-	---- Check for missing Other Charge Asset 
-	--BEGIN 
-	--	SET @strItemNo = NULL
-	--	SET @intItemId = NULL
-
-	--	SELECT	TOP 1 
-	--			@intItemId = Item.intItemId 
-	--			,@strItemNo = Item.strItemNo
-	--	FROM	dbo.tblICItem Item INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
-	--				ON Item.intItemId = ChargesGLAccounts.intChargeId
-	--	WHERE	ChargesGLAccounts.intOtherChargeAsset IS NULL 			
-			
-	--	IF @intItemId IS NOT NULL 
-	--	BEGIN 
-	--		-- {Item} is missing a GL account setup for {Account Category} account category.
-	--		RAISERROR(80008, 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeAsset) 	
-	--		RETURN;
-	--	END 
-	--END 
-	--;
-
 	-- Log the g/l account used in this batch. 
 	INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (
 			intItemId
@@ -288,8 +267,8 @@ BEGIN
 	-- Vendor: Blank
 	-- Price: No
 	--
-	-- Dr...... Other Charge Income
-	-- Cr..................... Other Charge Expense
+	-- Dr...... Other Charge Expense
+	-- Cr..................... Other Charge Income 
 	-------------------------------------------------------------------------------------------
 	SELECT	
 			dtmDate						= ForGLEntries_CTE.dtmDate
@@ -308,7 +287,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
-			,ysnIsUnposted				= 1
+			,ysnIsUnposted				= 0
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -322,7 +301,7 @@ BEGIN
 			,dblCreditForeign			= NULL 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
-			,dblForeignRate				= NULL
+			,dblForeignRate				= NULL 
 	FROM	ForGLEntries_CTE  
 			INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
@@ -333,7 +312,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 
 			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 0
-	
+
 	UNION ALL 
 	SELECT	
 			dtmDate						= ForGLEntries_CTE.dtmDate
@@ -352,7 +331,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
-			,ysnIsUnposted				= 1
+			,ysnIsUnposted				= 0
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -366,7 +345,7 @@ BEGIN
 			,dblCreditForeign			= NULL 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
-			,dblForeignRate				= NULL
+			,dblForeignRate				= NULL 
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -376,194 +355,6 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 
 			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 0
-
-	-------------------------------------------------------------------------------------------
-	-- Accrue: Yes
-	-- Vendor: Specified
-	-- Price: No
-	--
-	-- Dr...... AP Clearing
-	-- Cr..................... Other Charge Expense
-	-------------------------------------------------------------------------------------------
-	UNION ALL
-	SELECT	
-			dtmDate						= ForGLEntries_CTE.dtmDate
-			,strBatchId					= @strBatchId
-			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Credit.Value
-			,dblCredit					= Debit.Value
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
-			,strCode					= @strCode
-			,strReference				= '' 
-			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
-			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
-			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
-			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
-			,strTransactionId			= ForGLEntries_CTE.strTransactionId
-			,intTransactionId			= ForGLEntries_CTE.intTransactionId
-			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
-			,strModuleName				= @ModuleName
-			,intConcurrencyId			= 1
-			,dblDebitForeign			= NULL 
-			,dblDebitReport				= NULL 
-			,dblCreditForeign			= NULL 
-			,dblCreditReport			= NULL 
-			,dblReportingRate			= NULL 
-			,dblForeignRate				= NULL
-	FROM	ForGLEntries_CTE  
-			INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
-				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
-				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
-			INNER JOIN dbo.tblGLAccount GLAccount
-				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense -- Other Charge Expense
-			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
-			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 
-			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 0
-
-	UNION ALL 
-	SELECT	
-			dtmDate						= ForGLEntries_CTE.dtmDate
-			,strBatchId					= @strBatchId
-			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Debit.Value
-			,dblCredit					= Credit.Value
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
-			,strCode					= @strCode
-			,strReference				= '' 
-			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
-			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
-			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
-			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
-			,strTransactionId			= ForGLEntries_CTE.strTransactionId
-			,intTransactionId			= ForGLEntries_CTE.intTransactionId
-			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
-			,strModuleName				= @ModuleName
-			,intConcurrencyId			= 1
-			,dblDebitForeign			= NULL 
-			,dblDebitReport				= NULL 
-			,dblCreditForeign			= NULL 
-			,dblCreditReport			= NULL 
-			,dblReportingRate			= NULL 
-			,dblForeignRate				= NULL
-	FROM	ForGLEntries_CTE INNER JOIN @ItemGLAccounts ItemGLAccounts
-				ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
-				AND ForGLEntries_CTE.intItemLocationId = ItemGLAccounts.intItemLocationId
-			INNER JOIN dbo.tblGLAccount GLAccount
-				ON GLAccount.intAccountId = ItemGLAccounts.intContraInventoryId -- AP Clearing
-			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
-			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1
-			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 0
-	-------------------------------------------------------------------------------------------
-	-- Accrue: Yes
-	-- Vendor: Specified
-	-- Price: Yes
-	--
-	-- Dr...... AP Clearing
-	-- Cr..................... Other Charge Expense
-	-------------------------------------------------------------------------------------------
-	UNION ALL 
-	SELECT	
-			dtmDate						= ForGLEntries_CTE.dtmDate
-			,strBatchId					= @strBatchId
-			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Credit.Value
-			,dblCredit					= Debit.Value
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
-			,strCode					= @strCode
-			,strReference				= '' 
-			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
-			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
-			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
-			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
-			,strTransactionId			= ForGLEntries_CTE.strTransactionId
-			,intTransactionId			= ForGLEntries_CTE.intTransactionId
-			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
-			,strModuleName				= @ModuleName
-			,intConcurrencyId			= 1
-			,dblDebitForeign			= NULL 
-			,dblDebitReport				= NULL 
-			,dblCreditForeign			= NULL 
-			,dblCreditReport			= NULL 
-			,dblReportingRate			= NULL 
-			,dblForeignRate				= NULL
-	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
-				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
-				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
-			INNER JOIN dbo.tblGLAccount GLAccount
-				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense -- Other Charge Expense
-			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
-			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 
-			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 1
-
-	UNION ALL 
-	SELECT	
-			dtmDate						= ForGLEntries_CTE.dtmDate
-			,strBatchId					= @strBatchId
-			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Debit.Value
-			,dblCredit					= Credit.Value
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
-			,strCode					= @strCode
-			,strReference				= '' 
-			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
-			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
-			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
-			,ysnIsUnposted				= 1
-			,intUserId					= NULL 
-			,intEntityId				= @intEntityUserSecurityId 
-			,strTransactionId			= ForGLEntries_CTE.strTransactionId
-			,intTransactionId			= ForGLEntries_CTE.intTransactionId
-			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
-			,strModuleName				= @ModuleName
-			,intConcurrencyId			= 1
-			,dblDebitForeign			= NULL 
-			,dblDebitReport				= NULL 
-			,dblCreditForeign			= NULL 
-			,dblCreditReport			= NULL 
-			,dblReportingRate			= NULL 
-			,dblForeignRate				= NULL
-   FROM	ForGLEntries_CTE INNER JOIN @ItemGLAccounts ItemGLAccounts
-				ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
-				AND ForGLEntries_CTE.intItemLocationId = ItemGLAccounts.intItemLocationId
-			INNER JOIN dbo.tblGLAccount GLAccount
-				ON GLAccount.intAccountId = ItemGLAccounts.intContraInventoryId -- AP Clearing
-			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
-			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 
-			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 1
 END
 
 -- Exit point
