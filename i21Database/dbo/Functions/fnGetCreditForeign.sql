@@ -22,5 +22,5 @@ SELECT Value =
 			WHEN ISNULL(@intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(@forexRate, 0) <> 0 THEN 
 				ROUND(CASE WHEN @value < 0 THEN ABS(@value) / @forexRate ELSE 0 END, 2) 			
 			ELSE
-				ROUND(CASE WHEN @value < 0 THEN @value ELSE 0 END, 2) 
+				ROUND(CASE WHEN @value < 0 THEN ABS(@value) ELSE 0 END, 2) 
 		END 

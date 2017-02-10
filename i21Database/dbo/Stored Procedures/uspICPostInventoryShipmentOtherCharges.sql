@@ -103,33 +103,7 @@ BEGIN
 		GOTO _Exit
 	END 
 END 
-/*
--- Validate 
-BEGIN 
-	-- Price cannot be checked if Accrue is checked for Shipment vendor.
-	SELECT TOP 1 
-			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
-			,@intItemId = Item.intItemId
-	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge OtherCharge
-				ON Shipment.intInventoryShipmentId = OtherCharge.intInventoryShipmentId	
-			INNER JOIN tblICItem Item
-				ON Item.intItemId = OtherCharge.intChargeId
-	WHERE	Shipment.intInventoryShipmentId = @intInventoryShipmentId
-			AND (
-				-- Do not allow if third party or shipment vendor is going to pay the other charge and cost is passed-on to the item cost. 
-				(
-					OtherCharge.ysnPrice = 1
-				)
-			)			
-			
-	IF @intItemId IS NOT NULL 
-	BEGIN 
-		-- The {Other Charge} is shouldered by the shipment vendor and can't be added to the item cost. Please correct the Price or Inventory Cost checkbox.
-		RAISERROR(80065, 11, 1, @strItemNo)
-		GOTO _Exit
-	END 
-END 
-*/
+
 -- Calculate the other charges. 
 BEGIN
 	EXEC dbo.uspICCalculateShipmentOtherCharges
@@ -296,27 +270,6 @@ BEGIN
 		END 
 	END 
 	;
-
-	---- Check for missing Other Charge Asset 
-	--BEGIN 
-	--	SET @strItemNo = NULL
-	--	SET @intItemId = NULL
-
-	--	SELECT	TOP 1 
-	--			@intItemId = Item.intItemId 
-	--			,@strItemNo = Item.strItemNo
-	--	FROM	dbo.tblICItem Item INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
-	--				ON Item.intItemId = ChargesGLAccounts.intChargeId
-	--	WHERE	ChargesGLAccounts.intOtherChargeAsset IS NULL 			
-			
-	--	IF @intItemId IS NOT NULL 
-	--	BEGIN 
-	--		-- {Item} is missing a GL account setup for {Account Category} account category.
-	--		RAISERROR(80008, 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeAsset) 	
-	--		RETURN;
-	--	END 
-	--END 
-	--;
 
 	-- Log the g/l account used in this batch. 
 	INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (
