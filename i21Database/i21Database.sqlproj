@@ -5018,6 +5018,9 @@
     <None Include="Scripts\Post-Deployment\CT\4_EventConfiguration.sql" />
     <Build Include="dbo\Tables\tblRKArchBlendDemand.sql" />
     <Build Include="dbo\Views\vyuAPVoucherForPayment.sql" />
+    <Build Include="dbo\Functions\fnICDescribeSoldStock.sql" />
+    <Build Include="dbo\Functions\fnGetDebitFunctional.sql" />
+    <Build Include="dbo\Functions\fnGetCreditFunctional.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
