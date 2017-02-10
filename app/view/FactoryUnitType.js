@@ -185,6 +185,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtMaxWeight',
                                             fieldLabel: 'Max. Weight',
                                             labelWidth: 90,
@@ -235,6 +236,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtHeight',
                                             fieldLabel: 'Height',
                                             labelWidth: 98,
@@ -243,6 +245,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtDepth',
                                             fieldLabel: 'Depth',
                                             labelWidth: 98,
@@ -251,6 +254,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtWidth',
                                             fieldLabel: 'Width',
                                             labelWidth: 98,
@@ -259,6 +263,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtPalletStack',
                                             fieldLabel: 'Pallet Stack',
                                             labelWidth: 98,
@@ -268,6 +273,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtPalletColumns',
                                             fieldLabel: 'Pallet Columns',
                                             labelWidth: 98,
@@ -277,6 +283,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtPalletRows',
                                             fieldLabel: 'Pallet Rows',
                                             labelWidth: 98,

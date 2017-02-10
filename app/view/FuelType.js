@@ -203,6 +203,7 @@ Ext.define('Inventory.view.FuelType', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtBatchNo',
                                             fieldLabel: 'Batch No',
                                             labelWidth: 165,
@@ -212,6 +213,7 @@ Ext.define('Inventory.view.FuelType', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtEndingRinGallonsForBatch',
                                             fieldLabel: 'Ending RIN Gallons for Batch',
                                             labelWidth: 165,
@@ -324,6 +326,7 @@ Ext.define('Inventory.view.FuelType', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtFeedStockFactor',
                                             fieldLabel: 'Feed Stock Factor',
                                             labelWidth: 165,
@@ -338,6 +341,7 @@ Ext.define('Inventory.view.FuelType', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtPercentOfDenaturant',
                                             fieldLabel: 'Percent of Denaturant',
                                             labelWidth: 165,

@@ -138,7 +138,7 @@ Ext.define('Inventory.view.Category', {
                                     {
                                         xtype: 'panel',
                                         layout: 'fit',
-                                        title: 'Detail',
+                                        title: 'Details',
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'cfgDetails'

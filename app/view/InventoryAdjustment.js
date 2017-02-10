@@ -716,6 +716,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'Adjust Qty By',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'numAdjustByQuantity'
                                                         }
                                                     },
@@ -730,6 +731,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'New Quantity',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'numNewQuantity'
                                                         }
                                                     },
@@ -792,6 +794,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'New Split Lot Qty',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'numNewSplitLotQuantity'
                                                         }
                                                     },
@@ -865,6 +868,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'New Net Weight',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'numNewNetWeight'
                                                         }
                                                     },
@@ -898,6 +902,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'New Unit Cost',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            currencyField: true,
                                                             itemId: 'numNewUnitCost'
                                                         }
                                                     },
