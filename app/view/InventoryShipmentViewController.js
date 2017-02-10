@@ -559,11 +559,26 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colUnitCost: 'dblUnitCost',
                 colUnitPrice: {
                     dataIndex: 'dblUnitPrice',
+                    hidden: '{hideFunctionalCurrencyColumn}',
                     editor: {
                         readOnly: '{disableFieldInShipmentGrid}'
                     }
                 },
-                colLineTotal: 'dblLineTotal',
+                colForeignUnitPrice: {
+                    dataIndex: 'dblForeignUnitPrice',
+                    hidden: '{hideForeignColumn}',
+                    editor: {
+                        readOnly: '{disableFieldInShipmentGrid}'
+                    }
+                },                
+                colLineTotal: {
+                    dataIndex: 'dblLineTotal',
+                    hidden: '{hideFunctionalCurrencyColumn}',
+                },
+                colForeignLineTotal: {
+                    dataIndex:  'dblForeignLineTotal',
+                    hidden: '{hideForeignColumn}'
+                },
                 colNotes: 'strNotes',
                 colForexRateType: {
                     dataIndex: 'strForexRateType',
@@ -1119,6 +1134,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     current.set('strOrderUOM', records[0].get('strItemUOM'));
                     current.set('dblQtyOrdered', records[0].get('dblDetailQuantity'));
                     current.set('dblUnitPrice', records[0].get('dblCashPrice'));
+                    current.set('dblForeignUnitPrice', records[0].get('dblCashPrice'));
                     current.set('intOwnershipType', 1);
                     current.set('strOwnershipType', 'Own');
 
@@ -1144,6 +1160,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     current.set('strOrderUOM', records[0].get('strUnitMeasure'));
                     current.set('dblQtyOrdered', records[0].get('dblQtyOrdered'));
                     current.set('dblUnitPrice', records[0].get('dblPrice'));
+                    current.set('dblForeignUnitPrice', records[0].get('dblPrice'));
                     current.set('intOwnershipType', 1);
                     current.set('strOwnershipType', 'Own');
 
@@ -1188,6 +1205,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intItemUOMId', records[0].get('intIssueUOMId'));
             current.set('strUnitMeasure', records[0].get('strIssueUOM'));
             current.set('dblUnitPrice', records[0].get('dblIssueSalePrice'));
+            current.set('dblForeignUnitPrice', records[0].get('dblIssueSalePrice'));
             current.set('dblItemUOMConvFactor', records[0].get('dblIssueUOMConvFactor'));
             current.set('strUnitType', records[0].get('strIssueUOMType'));
             current.set('intOwnershipType', 1);
@@ -1210,6 +1228,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('dblItemUOMConv', records[0].get('dblUnitQty'));
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitPrice', records[0].get('dblSalePrice'));
+            current.set('dblForeignUnitPrice', records[0].get('dblSalePrice'));
             current.set('intItemUOMId', records[0].get('intItemUnitMeasureId'));
         }
         else if (combo.itemId === 'cboSubLocation') {
@@ -1265,7 +1284,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 win.viewModel.data.current.get('dtmShipDate'),
                 function(successResponse){
                     if (successResponse && successResponse.length > 0){
-                        current.set('dblForexRate', successResponse[0].dblRate);
+                        var dblRate = successResponse[0].dblRate;
+                        var dblUnitPrice = current.get('dblUnitPrice');
+
+                        dblRate = Ext.isNumeric(dblRate) ? dblRate : 0;
+                        dblUnitPrice = Ext.isNumeric(dblUnitPrice) ? dblUnitPrice : 0;
+
+                        current.set('dblForexRate', dblRate);
+                        current.set('dblForeignUnitPrice', dblRate != 0 ? dblUnitPrice / dblRate : dblUnitPrice);                        
                     }
                 },
                 function(failureResponse){
@@ -2494,6 +2520,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                         //dblQtyOrdered: lot.get('dblSalesOrderedQty'),
                                                         dblQtyOrdered: lot.get('dblDetailQuantity'),
                                                         dblUnitPrice: lot.get('dblCashPrice'),
+                                                        dblForeignUnitPrice: lot.get('dblCashPrice'),
                                                         intOwnershipType: lot.get('intOwnershipType'),
                                                         strOwnershipType: lot.get('strOwnershipType'),
                                                         intSubLocationId: lot.get('intSubLocationId'),
@@ -2560,6 +2587,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 intItemUOMId: order.get('intItemUOMId'),
                                 intWeightUOMId: order.get('intWeightUOMId'),
                                 dblUnitPrice: order.get('dblUnitPrice'),
+                                dblForeignUnitPrice: order.get('dblUnitPrice'),
                                 strItemNo: order.get('strItemNo'),
                                 strUnitMeasure: order.get('strItemUOM'),
                                 strWeightUOM: order.get('strWeightUOM'),

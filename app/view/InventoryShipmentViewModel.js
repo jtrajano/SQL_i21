@@ -455,6 +455,28 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                return false;
            }
        },
+       hideForeignColumn: function (get){
+           var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+           var intCurrency = get('current.intCurrencyId');
+
+           if (defaultCurrency && intCurrency){
+               // Return true (hide) if transaction is using a foreign currency. 
+               if (defaultCurrency !== intCurrency)
+                    return false;                 
+           }
+           return true; 
+       },
+       hideFunctionalCurrencyColumn: function (get){
+           var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+           var intCurrency = get('current.intCurrencyId');
+
+           if (defaultCurrency && intCurrency){
+               // Return true (hide) if transaction is using the functional currency
+               if (defaultCurrency == intCurrency)
+                    return false;                 
+           }
+           return true; 
+       },       
        hidePostButton: function(get) {
            var posted = get('current.ysnPosted');
 
