@@ -336,6 +336,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtMinBatchSize',
                                             fieldLabel: 'Min Batch Size',
                                             labelWidth: 110,
@@ -343,6 +344,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            quantityField: true,
                                             itemId: 'txtBatchSize',
                                             fieldLabel: 'Batch Size',
                                             labelWidth: 110,
@@ -551,6 +553,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtPackFactor',
                                                     fieldLabel: 'Pack Factor',
                                                     labelWidth: 105,
@@ -558,6 +561,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtEffectiveDepth',
                                                     fieldLabel: 'Effective Depth',
                                                     labelWidth: 105,
@@ -565,6 +569,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtUnitsPerFoot',
                                                     fieldLabel: 'Units Per Foot',
                                                     labelWidth: 105,
@@ -572,6 +577,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtResidualUnits',
                                                     fieldLabel: 'Residual Units',
                                                     labelWidth: 105,
@@ -592,6 +598,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                             items: [
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtSequence',
                                                     fieldLabel: 'Sequence',
                                                     labelWidth: 105,
@@ -606,6 +613,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtXPosition',
                                                     fieldLabel: 'X Position',
                                                     labelWidth: 105,
@@ -614,6 +622,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtYPosition',
                                                     fieldLabel: 'Y Position',
                                                     labelWidth: 105,
@@ -622,6 +631,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 },
                                                 {
                                                     xtype: 'numberfield',
+                                                    quantityField: true,
                                                     itemId: 'txtZPosition',
                                                     fieldLabel: 'Z Position',
                                                     labelWidth: 105,
