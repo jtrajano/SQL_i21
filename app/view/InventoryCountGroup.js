@@ -27,10 +27,10 @@ Ext.define('Inventory.view.InventoryCountGroup', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 350,
+    height: 359,
     hidden: false,
     minHeight: 350,
-    width: 466,
+    width: 473,
     layout: 'fit',
     collapsible: true,
     title: 'Inventory Count Group',
@@ -143,6 +143,7 @@ Ext.define('Inventory.view.InventoryCountGroup', {
                                         },
                                         {
                                             xtype: 'numericfield',
+                                            quantityField: true,
                                             itemId: 'txtCountsPerYear',
                                             fieldLabel: 'Counts Per Year',
                                             labelWidth: 125,
