@@ -28,6 +28,9 @@ BEGIN TRY
 		,@strAttributeValue NVARCHAR(50)
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
+		,@intPMStageLocationId int
+		,@strPMCategoryCode nvarchar(50)
+		,@intPMCategoryId int
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -106,6 +109,23 @@ BEGIN TRY
 			AND intAttributeId = @intProductionStagingId
 	END
 
+	SELECT @intPMStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 90--PM Production Staging Location
+
+	SELECT @strPMCategoryCode = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 46--Packaging Category
+
+	Select @intPMCategoryId =intCategoryId 
+	from tblICCategory
+	Where strCategoryCode=@strPMCategoryCode
+
+
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
 	WHERE strAttributeName = 'Add yield cost to output item'
@@ -128,11 +148,12 @@ BEGIN TRY
 		,ri.ysnScaled
 		,CASE 
 			WHEN ri.intConsumptionMethodId = 1
-				THEN @intProductionStageLocationId
+				THEN (Case When @intPMCategoryId=intCategoryId then  @intPMStageLocationId Else @intProductionStageLocationId End)
 			ELSE ri.intStorageLocationId
 			END
 		,0
 	FROM dbo.tblMFWorkOrderRecipeItem ri
+	JOIN dbo.tblICItem I on I.intItemId=ri.intItemId
 	WHERE ri.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
@@ -161,13 +182,14 @@ BEGIN TRY
 		,ri.ysnScaled
 		,CASE 
 			WHEN ri.intConsumptionMethodId = 1
-				THEN @intProductionStageLocationId
+				THEN (Case When @intPMCategoryId=intCategoryId then  @intPMStageLocationId Else @intProductionStageLocationId End)
 			ELSE ri.intStorageLocationId
 			END
 		,1
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
 		AND rs.intWorkOrderId = ri.intWorkOrderId
+	JOIN dbo.tblICItem I on I.intItemId=rs.intSubstituteItemId
 	WHERE ri.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
