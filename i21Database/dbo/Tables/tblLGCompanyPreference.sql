@@ -26,6 +26,8 @@
 [intInsuranceLetterReportFormat] INT NULL,
 [intCarrierShipmentOrderReportFormat] INT NULL,
 [ysnAlertApprovedQty] [bit] NULL,
+[ysnUpdateVesselInfo] [bit] NULL,
+[ysnValidateExternalPONo] [bit] NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),

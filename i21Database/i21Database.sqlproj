@@ -5022,6 +5022,7 @@
     <Build Include="dbo\Functions\fnGetDebitFunctional.sql" />
     <Build Include="dbo\Functions\fnGetCreditFunctional.sql" />
     <Build Include="dbo\Stored Procedures\GetDefaultData.sql" />
+    <Build Include="dbo\Views\vyuLGNotifications.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
