@@ -12,6 +12,7 @@ DECLARE @intInventoryReceiptId INT
 DECLARE @intWorkOrderId INT
 DECLARE @strReceiptNumber NVARCHAR(50)
 DECLARE @strLotNumber NVARCHAR(50)
+DECLARE @strContainerNumber NVARCHAR(100)
 
 IF @intProductTypeId = 2 -- Item  
 BEGIN
@@ -134,6 +135,7 @@ BEGIN
 	-- Inventory Receipt / Work Order No
 	SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
 		,@strReceiptNumber = R.strReceiptNumber
+		,@strContainerNumber = RIL.strContainerNo
 	FROM tblICInventoryReceiptItemLot RIL
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
@@ -170,6 +172,7 @@ BEGIN
 		,@intInventoryReceiptId AS intInventoryReceiptId
 		,@intWorkOrderId AS intWorkOrderId
 		,@strReceiptNumber AS strReceiptNumber
+		,@strContainerNumber AS strContainerNumber
 	FROM tblICLot L
 	JOIN tblICItem I ON I.intItemId = L.intItemId
 	JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -196,6 +199,7 @@ BEGIN
 	-- Inventory Receipt / Work Order No
 	SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
 		,@strReceiptNumber = R.strReceiptNumber
+		,@strContainerNumber = RIL.strContainerNo
 	FROM tblICInventoryReceiptItemLot RIL
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
@@ -226,6 +230,7 @@ BEGIN
 		,@intInventoryReceiptId AS intInventoryReceiptId
 		,@intWorkOrderId AS intWorkOrderId
 		,@strReceiptNumber AS strReceiptNumber
+		,@strContainerNumber AS strContainerNumber
 	FROM tblICParentLot PL
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
