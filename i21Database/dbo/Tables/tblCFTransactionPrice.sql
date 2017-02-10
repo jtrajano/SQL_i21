@@ -9,3 +9,15 @@
     CONSTRAINT [FK_tblCFTransactionPrice_tblCFTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblCFTransaction] ([intTransactionId]) ON DELETE CASCADE
 );
 
+
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransactionPrice_intTransactionPriceId]
+    ON [dbo].[tblCFTransactionPrice]([intTransactionPriceId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransactionPrice_intTransactionId]
+    ON [dbo].[tblCFTransactionPrice]([intTransactionId] ASC);
+

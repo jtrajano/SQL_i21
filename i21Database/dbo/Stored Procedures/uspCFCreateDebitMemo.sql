@@ -90,6 +90,7 @@ BEGIN
 		SET @executedLine = 5
 		INSERT INTO @EntriesForInvoice(
 			 [strTransactionType]
+			,[strSCInvoiceNumber]		
 			,[intSalesAccountId]
 			,[strSourceTransaction]
 			,[intSourceId]
@@ -144,7 +145,6 @@ BEGIN
 			,[intTaxGroupId]
 			,[ysnRecomputeTax]
 			,[intSCInvoiceId]
-			,[strSCInvoiceNumber]
 			,[intInventoryShipmentItemId]
 			,[strShipmentNumber]
 			,[intSalesOrderDetailId]
@@ -173,6 +173,7 @@ BEGIN
 		)
 		SELECT
 			 [strTransactionType]					= 'Debit Memo'
+			,[strSCInvoiceNumber]					= ''
 			,[intSalesAccountId]					= @accountId
 			,[strSourceTransaction]					= 'CF Invoice'
 			,[intSourceId]							= 1											-- TEMPORARY
@@ -215,9 +216,9 @@ BEGIN
 			,[strItemDescription]					= NULL
 			,[intItemUOMId]							= NULL
 			,[dblQtyOrdered]						= NULL
-			,[dblQtyShipped]						= SUM(dblQuantity)
+			,[dblQtyShipped]						= 1 -- DEFAULT TO 1
 			,[dblDiscount]							= NULL
-			,[dblPrice]								= dblAccountTotalAmount / SUM(dblQuantity)
+			,[dblPrice]								= dblAccountTotalAmount
 			,[ysnRefreshPrice]						= 0
 			,[strMaintenanceType]					= ''
 			,[strFrequency]							= ''
@@ -227,7 +228,6 @@ BEGIN
 			,[intTaxGroupId]						= NULL
 			,[ysnRecomputeTax]						= 0
 			,[intSCInvoiceId]						= NULL
-			,[strSCInvoiceNumber]					= ''
 			,[intInventoryShipmentItemId]			= NULL
 			,[strShipmentNumber]					= ''
 			,[intSalesOrderDetailId]				= NULL
