@@ -17,7 +17,9 @@ SELECT
 	,CASE WHEN C2.intWeightUOMId > 0 THEN K2.strUnitMeasure
 		WHEN C2.intUnitOfMeasureId > 0 THEN F2.strUnitMeasure
 		ELSE 'Each' END AS strUnitMeasure
-	,C2.dblQtyReceived
+	,CASE WHEN C2.intWeightUOMId > 0 THEN C2.dblNetWeight
+			ELSE C2.dblQtyReceived
+		END AS dblQtyReceived
 	,C2.dblCost
 	,G2.strUnitMeasure AS strCostUOM
 	,C2.dblTotal
