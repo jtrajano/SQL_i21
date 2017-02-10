@@ -49,7 +49,7 @@ FROM
 			,CASE 
 				WHEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId, cd.intPriceUnitMeasureId, cd.intUnitMeasureId, cd.dblDetailQuantity), 0) = 0
 					THEN NULL
-				ELSE (he.dblNetImpactInDefCurrency / dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId, cd.intUnitMeasureId, cd.intPriceUnitMeasureId, cd.dblDetailQuantity))
+				ELSE (he.dblNetImpactInDefCurrency / dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId, cd.intUnitMeasureId, cd.intPriceUnitMeasureId, CASE WHEN cd.ysnMultiplePriceFixation = 1 THEN cd.dblHeaderQuantity ELSE cd.dblDetailQuantity END))
 					*(CASE WHEN cd.ysnSubCurrency=0 THEN 1 ELSE ISNULL(CU.intCent,100) END)
 			 END 
 			 dblNetImpactPer
