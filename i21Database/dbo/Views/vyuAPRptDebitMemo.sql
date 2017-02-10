@@ -11,6 +11,7 @@ SELECT
 	,E.strAccountId
 	,D.strContractNumber
 	,D2.intContractSeq
+	,D2.strERPPONumber
 	,ISNULL(H.strDescription, C2.strMiscDescription) strMiscDescription
 	,ISNULL(H.strItemNo, C2.strMiscDescription) strItemNo
 	,CASE WHEN C2.intWeightUOMId > 0 THEN K2.strUnitMeasure
@@ -18,16 +19,13 @@ SELECT
 		ELSE 'Each' END AS strUnitMeasure
 	,C2.dblQtyReceived
 	,C2.dblCost
-	,CASE --WHEN C2.intWeightUOMId > 0 THEN K2.strUnitMeasure
-		WHEN C2.intWeightUOMId > 0 THEN K2.strUnitMeasure
-		WHEN C2.intUnitOfMeasureId > 0 THEN F2.strUnitMeasure
-		ELSE 'Each' END AS strCostUOM
+	,G2.strUnitMeasure AS strCostUOM
 	,C2.dblTotal
 	,CASE WHEN C2.ysnSubCurrency = 1 THEN I.strCurrency ELSE J.strCurrency END AS strCurrency
 	,L.strName AS strContactName
 	,L.strEmail AS strContactEmail
 	,M.strBillOfLading
-	,ISNULL(N2.strCountry,O.strCountry) AS strCountryOrigin
+	,ISNULL(N2.strCountry,V.strDescription) AS strCountryOrigin
 	,P.strSubLocationName strLPlant
 	,strDateLocation = Q.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 107)
 	,U.strBankName
@@ -57,13 +55,13 @@ LEFT JOIN tblCTContractHeader D INNER JOIN tblCTContractDetail D2 ON D.intContra
 	ON C2.intContractHeaderId = D.intContractHeaderId AND C2.intContractDetailId = D2.intContractDetailId
 LEFT JOIN tblICItemContract N INNER JOIN tblSMCountry N2 ON N.intCountryId = N2.intCountryID
 	ON D2.intItemContractId = N.intItemContractId
+LEFT JOIN tblICCommodityAttribute V ON V.intCommodityAttributeId = H.intOriginId
 LEFT JOIN (tblICItemUOM F INNER JOIN tblICUnitMeasure F2 ON F.intUnitMeasureId = F2.intUnitMeasureId) ON C2.intUnitOfMeasureId = F.intItemUOMId
 LEFT JOIN (tblICItemUOM G INNER JOIN tblICUnitMeasure G2 ON G.intUnitMeasureId = G2.intUnitMeasureId) ON C2.intCostUOMId = G.intItemUOMId
 LEFT JOIN (tblICItemUOM K INNER JOIN tblICUnitMeasure K2 ON K.intUnitMeasureId = K2.intUnitMeasureId) ON C2.intWeightUOMId = K.intItemUOMId
 LEFT JOIN tblSMCurrency J ON A.intCurrencyId = J.intCurrencyID
 LEFT JOIN tblSMCurrency I ON I.intMainCurrencyId = A.intCurrencyId AND I.ysnSubCurrency = 1
-LEFT JOIN tblEMEntity L ON A.intContactId = L.intEntityId
-LEFT JOIN tblSMCountry O ON H.intOriginId = O.intCountryID
+LEFT JOIN tblEMEntity L ON A.intEntityId = L.intEntityId
 LEFT JOIN tblSMCompanyLocationSubLocation P ON D2.intSubLocationId = P.intCompanyLocationSubLocationId
 LEFT JOIN tblSMCompanyLocation Q ON A.intStoreLocationId = Q.intCompanyLocationId
 LEFT JOIN tblCMBankAccount S ON S.intBankAccountId = A.intBankInfoId
