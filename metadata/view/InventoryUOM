@@ -569,10 +569,21 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "decimalPrecision": 20,
-                                                        "itemId": "txtConvertToStock"
+                                                        "itemId": "txtConvertToStock",
+                                                        "quantityField": true
                                                     },
                                                     "name": "MyNumberField",
-                                                    "designerId": "10387d1c-7339-49cb-8056-b7c7553dc68b"
+                                                    "configAlternates": {
+                                                        "quantityField": "boolean"
+                                                    },
+                                                    "designerId": "10387d1c-7339-49cb-8056-b7c7553dc68b",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -632,7 +643,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging111",
                     "designerId": "0065255e-fbbc-413c-8c51-8b3ece401ce4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
