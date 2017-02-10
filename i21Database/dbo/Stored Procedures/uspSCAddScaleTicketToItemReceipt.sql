@@ -343,7 +343,9 @@ IF @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) = 0
 		SET @ysnAccrue = 0
 		SET @ysnPrice = 0
 	END
-ELSE
+IF ISNULL(@intFreightItemId,0) = 0
+	SET @intFreightItemId = 0
+
 	BEGIN
 		IF	ISNULL(@intLoadId,0) != 0 
 			BEGIN
