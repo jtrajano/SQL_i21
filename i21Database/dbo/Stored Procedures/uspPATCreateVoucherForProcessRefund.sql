@@ -40,7 +40,7 @@ CREATE TABLE #tempRefundCustomer(
 	FROM tblPATRefund R
 	INNER JOIN tblPATRefundCustomer RC
 		ON R.intRefundId = RC.intRefundId
-	WHERE R.intRefundId = 2 AND RC.intBillId IS NULL
+	WHERE R.intRefundId = @refundId AND RC.intBillId IS NULL
 
 
 	DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
