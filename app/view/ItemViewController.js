@@ -3305,7 +3305,8 @@ Ext.define('Inventory.view.ItemViewController', {
                     else {
                         return Ext.create('Ext.grid.CellEditor', {
                             field: Ext.widget({
-                                xtype: 'numberfield'
+                                xtype: 'numberfield',
+                                currencyField: true
                             })
                         });
                     }
