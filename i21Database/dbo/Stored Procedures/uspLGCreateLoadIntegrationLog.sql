@@ -40,6 +40,7 @@ BEGIN TRY
 			,dtmScheduledDate
 			,dtmETAPOD
 			,dtmETAPOL
+			,dtmETSPOL
 			,dtmBLDate
 			,strRowState
 			,dtmFeedCreated
@@ -84,6 +85,7 @@ BEGIN TRY
 			,L.dtmScheduledDate
 			,L.dtmETAPOD
 			,L.dtmETAPOL
+			,L.dtmETSPOL
 			,L.dtmBLDate
 			,@strRowState
 			,GETDATE()
@@ -243,6 +245,7 @@ BEGIN TRY
 			,dtmScheduledDate
 			,dtmETAPOD
 			,dtmETAPOL
+			,dtmETSPOL
 			,dtmBLDate
 			,strRowState
 			)
@@ -284,6 +287,7 @@ BEGIN TRY
 			,L.dtmScheduledDate
 			,L.dtmETAPOD
 			,L.dtmETAPOL
+			,L.dtmETSPOL
 			,L.dtmBLDate
 			,@strRowState
 		FROM vyuLGLoadView L

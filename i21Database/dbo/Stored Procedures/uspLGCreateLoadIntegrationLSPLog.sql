@@ -65,6 +65,7 @@ BEGIN TRY
 		,dtmScheduledDate
 		,dtmETAPOD
 		,dtmETAPOL
+		,dtmETSPOL
 		,dtmBLDate
 		,strRowState
 		,dtmFeedCreated
@@ -184,6 +185,7 @@ BEGIN TRY
 		,L.dtmScheduledDate
 		,L.dtmETAPOD
 		,L.dtmETAPOL
+		,L.dtmETSPOL
 		,L.dtmBLDate
 		,'Added'
 		,GETDATE()

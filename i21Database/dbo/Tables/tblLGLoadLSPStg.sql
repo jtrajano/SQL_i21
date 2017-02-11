@@ -43,6 +43,7 @@
 		[dtmScheduledDate] DATETIME, 
 		[dtmETAPOD] DATETIME, 
 		[dtmETAPOL] DATETIME, 
+		[dtmETSPOL] DATETIME, 
 		[dtmBLDate] DATETIME, 
 		[strRowState] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 		[strFeedStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
