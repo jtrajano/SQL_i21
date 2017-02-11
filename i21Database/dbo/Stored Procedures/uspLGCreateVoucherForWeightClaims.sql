@@ -15,6 +15,7 @@ BEGIN TRY
 	DECLARE @strWeightClaimNo NVARCHAR(100)
 	DECLARE @intWeightClaimDetailId INT
 	DECLARE @intCount INT
+	DECLARE @intLoadId INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intWeightClaimRecordId INT Identity(1, 1)
@@ -46,7 +47,7 @@ BEGIN TRY
 		(intItemRecordId INT Identity(1, 1)
 		,intItemId INT)
 
-	SELECT @strWeightClaimNo = strReferenceNumber FROM tblLGWeightClaim WHERE intWeightClaimId = @intWeightClaimId
+	SELECT @strWeightClaimNo = strReferenceNumber, @intLoadId = intLoadId FROM tblLGWeightClaim WHERE intWeightClaimId = @intWeightClaimId
 
 	IF EXISTS (SELECT TOP 1 1
 			   FROM tblAPBill AB
@@ -236,12 +237,20 @@ BEGIN TRY
 			UPDATE tblLGWeightClaimDetail
 			SET intBillId = @intBillId
 			WHERE intWeightClaimId = @intWeightClaimId
+
+			UPDATE tblAPBillDetail
+			SET intLoadId = @intLoadId
+			WHERE intBillId = @intBillId
 		END
 		ELSE 
 		BEGIN
 			UPDATE tblLGWeightClaimDetail
 			SET intBillId = @intBillId
 			WHERE intWeightClaimDetailId = @intWeightClaimDetailId
+			
+			UPDATE tblAPBillDetail
+			SET intLoadId = @intLoadId
+			WHERE intBillId = @intBillId
 		END
 
 		DELETE
