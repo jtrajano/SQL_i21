@@ -26,22 +26,26 @@ SELECT CD.intContractDetailId
 	,ISNULL(CD.dblScheduleQty, 0) AS dblScheduleQty
 	,CH.strCustomerContract
 	,ISNULL(CD.dblBalance, 0) AS dblBalance
-	,CASE 
-		WHEN (
-				(
-					CAST(CASE 
-							WHEN CD.intContractStatusId IN (1,4)
-								THEN 1
-							ELSE 0
-							END AS BIT) = 1
+	,CASE WHEN CP.ysnValidateExternalPONo = 1 AND ISNULL(CD.strERPPONumber,'')= ''
+		THEN CAST(0 AS BIT)
+	ELSE
+		CASE 
+			WHEN (
+					(
+						CAST(CASE 
+								WHEN CD.intContractStatusId IN (1,4)
+									THEN 1
+								ELSE 0
+								END AS BIT) = 1
+						)
+					AND (
+						(ISNULL(CD.dblBalance, 0) - ISNULL(CD.dblScheduleQty, 0) > 0)
+						OR (CH.ysnUnlimitedQuantity = 1)
+						)
 					)
-				AND (
-					(ISNULL(CD.dblBalance, 0) - ISNULL(CD.dblScheduleQty, 0) > 0)
-					OR (CH.ysnUnlimitedQuantity = 1)
-					)
-				)
-			THEN CAST(1 AS BIT)
-		ELSE CAST(0 AS BIT)
+				THEN CAST(1 AS BIT)
+			ELSE CAST(0 AS BIT)
+			END 
 		END AS ysnAllowedToShow
 	,CH.ysnUnlimitedQuantity
 	,CH.ysnLoad
@@ -71,6 +75,7 @@ SELECT CD.intContractDetailId
 	,S.strSubLocationName
 	,S.dblRepresentingQty AS dblContainerQty
 	,intShipmentType = 1
+	,CD.strERPPONumber
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -112,6 +117,7 @@ LEFT JOIN (
 		) t
 	WHERE intRowNum = 1
 	) S ON S.intContractDetailId = CD.intContractDetailId
+CROSS APPLY tblLGCompanyPreference CP
 
 UNION
 
@@ -152,31 +158,35 @@ SELECT CD.intContractDetailId
 			 ), 0) AS dblScheduleQty
 	,CH.strCustomerContract
 	,ISNULL(CD.dblBalance, 0) AS dblBalance
-	,CASE 
-		WHEN (
-				(
-					CAST(CASE 
-							WHEN CD.intContractStatusId IN (1,4)
-								THEN 1
-							ELSE 0
-							END AS BIT) = 1
-					)
-				AND (
-					(
-						ISNULL(CD.dblQuantity, 0) - ISNULL((
-								SELECT SUM(LD.dblQuantity)
-								FROM tblLGLoadDetail LD
-								JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-								WHERE CD.intContractDetailId = (CASE WHEN CH.intContractTypeId = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END)
-									AND L.intShipmentType = 2
-								), 0) > 0
+	,CASE WHEN CP.ysnValidateExternalPONo = 1 AND ISNULL(CD.strERPPONumber,'')= ''
+		THEN CAST(0 AS BIT)
+		ELSE
+			CASE 
+				WHEN (
+						(
+							CAST(CASE 
+									WHEN CD.intContractStatusId IN (1,4)
+										THEN 1
+									ELSE 0
+									END AS BIT) = 1
+							)
+						AND (
+							(
+								ISNULL(CD.dblQuantity, 0) - ISNULL((
+										SELECT SUM(LD.dblQuantity)
+										FROM tblLGLoadDetail LD
+										JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+										WHERE CD.intContractDetailId = (CASE WHEN CH.intContractTypeId = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END)
+											AND L.intShipmentType = 2
+										), 0) > 0
+								)
+							OR (CH.ysnUnlimitedQuantity = 1)
+							)
 						)
-					OR (CH.ysnUnlimitedQuantity = 1)
-					)
-				)
-			THEN CAST(1 AS BIT)
-		ELSE CAST(0 AS BIT)
-		END AS ysnAllowedToShow
+					THEN CAST(1 AS BIT)
+				ELSE CAST(0 AS BIT)
+				END 
+			END AS ysnAllowedToShow
 	,CH.ysnUnlimitedQuantity
 	,CH.ysnLoad
 	,CD.dblQuantityPerLoad
@@ -205,6 +215,7 @@ SELECT CD.intContractDetailId
 	,S.strSubLocationName
 	,S.dblRepresentingQty AS dblContainerQty
 	,intShipmentType = 2
+	,CD.strERPPONumber
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -246,6 +257,7 @@ LEFT JOIN (
 		) t
 	WHERE intRowNum = 1
 	) S ON S.intContractDetailId = CD.intContractDetailId
+CROSS APPLY tblLGCompanyPreference CP
 GROUP BY CD.intContractDetailId
 	,CD.intContractHeaderId
 	,CD.intContractSeq
@@ -296,3 +308,5 @@ GROUP BY CD.intContractDetailId
 	,S.intCompanyLocationSubLocationId
 	,S.strSubLocationName
 	,S.dblRepresentingQty
+	,CD.strERPPONumber
+	,ysnValidateExternalPONo
