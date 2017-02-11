@@ -5013,12 +5013,12 @@
     <Build Include="dbo\Views\vyuQMSampleFOBContractAlert.sql" />
     <None Include="Scripts\Post-Deployment\CT\4_EventConfiguration.sql" />
     <Build Include="dbo\Tables\tblRKArchBlendDemand.sql" />
-    <Build Include="dbo\Stored Procedures\GetDefaultData.sql" />
     <Build Include="dbo\Functions\fnGetDebitForeign.sql" />
     <Build Include="dbo\Functions\fnGetCreditForeign.sql" />
     <Build Include="dbo\Functions\fnICDescribeSoldStock.sql" />
     <Build Include="dbo\Functions\fnGetDebitFunctional.sql" />
     <Build Include="dbo\Functions\fnGetCreditFunctional.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetDefaultData.sql" />
     <Build Include="dbo\Views\vyuLGNotifications.sql" />
     <Build Include="dbo\Views\vyuRKRollCost.sql" />
   </ItemGroup>
