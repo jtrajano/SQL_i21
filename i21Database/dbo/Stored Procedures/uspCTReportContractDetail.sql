@@ -8,6 +8,22 @@ BEGIN TRY
 	
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
+	
+	DECLARE @TotalQuantity DECIMAL(24,10)
+	DECLARE @TotalNetQuantity DECIMAL(24,10)
+	DECLARE @dblNoOfLots NVARCHAR(20)
+
+	DECLARE @IntNoOFUniFormItemUOM INT
+	DECLARE @IntNoOFUniFormNetWeightUOM INT
+		
+	SELECT @IntNoOFUniFormItemUOM=COUNT(DISTINCT intItemUOMId)  FROM tblCTContractDetail WHERE intContractHeaderId= @intContractHeaderId
+	SELECT @IntNoOFUniFormNetWeightUOM=COUNT(DISTINCT intNetWeightUOMId)  FROM tblCTContractDetail WHERE intContractHeaderId= @intContractHeaderId
+
+	SELECT  @dblNoOfLots = dblNoOfLots FROM tblCTContractHeader WHERE intContractHeaderId=@intContractHeaderId
+	SELECT  @TotalQuantity = dblQuantity FROM tblCTContractHeader WHERE intContractHeaderId=@intContractHeaderId
+	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WHERE intContractHeaderId=@intContractHeaderId
+
+
 	SELECT	CD.intContractHeaderId,
 			CD.intContractSeq,
 			CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) strPeriod,
@@ -37,7 +53,18 @@ BEGIN TRY
 			AS  strQuantityDesc,
 			CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
 					WHEN 	CD.intPricingTypeId = 2	THEN LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth + CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0 THEN ' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)' ELSE '' END 	
-			END	AS	strPriceDesc			
+			END	AS	strPriceDesc,
+			CASE 
+			WHEN ISNULL(ysnMultiplePriceFixation,0)=1 THEN
+				CASE 
+					WHEN UM.strUnitType='Quantity' AND @IntNoOFUniFormItemUOM=1 THEN LTRIM(dbo.fnRemoveTrailingZeroes(@TotalQuantity)) + ' bags/ ' + UM.strUnitMeasure+CASE WHEN CD.dblNetWeight IS NOT NULL AND @IntNoOFUniFormNetWeightUOM=1 THEN  ' (' ELSE '' END + ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(@TotalNetQuantity)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') +CASE WHEN U7.strUnitMeasure IS NOT NULL THEN   ')' ELSE '' END  
+					ELSE CASE WHEN @IntNoOFUniFormNetWeightUOM=1 THEN ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(@TotalNetQuantity)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') ELSE '' END
+				END
+			ELSE 
+				NULL 
+			END
+			AS  strTotalDesc,
+			dbo.fnRemoveTrailingZeroes(@dblNoOfLots) AS dblNoOfLots			
 	FROM	tblCTContractDetail CD	
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
 	JOIN	tblICItemUOM		QM	ON	QM.intItemUOMId			=	CD.intItemUOMId			LEFT
