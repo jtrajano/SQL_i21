@@ -122,6 +122,10 @@ Begin
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='Success',strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')='Awt Ack'
 
+			--update the PO Details in modified sequences
+			Update tblCTContractFeed Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
+			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')=''
+
 			Insert Into @tblMessage(strMessageType,strMessage)
 			Values(@strMesssageType,'Success')
 		End
@@ -229,7 +233,7 @@ Begin
 	Begin
 		If @strStatus IN (52,53) --Success
 		Begin
-			Update tblRKStgMatchPnS Set strStatus='Ack Rcvd',strMessage='Success' Where intMatchNo=@strParam AND ISNULL(strStatus,'')=''
+			Update tblRKStgMatchPnS Set strStatus='Ack Rcvd',strMessage='Success' Where intMatchNo=@strParam AND ISNULL(strStatus,'')='Awt Ack'
 
 			Insert Into @tblMessage(strMessageType,strMessage)
 			Values(@strMesssageType,'Success')
@@ -239,7 +243,7 @@ Begin
 		Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
-			Update tblRKStgMatchPnS Set strStatus='Ack Rcvd',strMessage=@strMessage Where intMatchNo=@strParam AND ISNULL(strStatus,'')=''
+			Update tblRKStgMatchPnS Set strStatus='Ack Rcvd',strMessage=@strMessage Where intMatchNo=@strParam AND ISNULL(strStatus,'')='Awt Ack'
 
 			Insert Into @tblMessage(strMessageType,strMessage)
 			Values(@strMesssageType,@strMessage)
