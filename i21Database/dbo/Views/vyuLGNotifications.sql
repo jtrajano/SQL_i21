@@ -1,10 +1,4 @@
-﻿GO
-IF OBJECT_ID('vyuLGNotifications') IS NOT NULL
-BEGIN
-	DROP VIEW vyuLGNotifications -- SELECT * FROM vyuLGNotifications WHERE strType = 'Contract w/o shipping instruction'
-END
-GO
-CREATE VIEW vyuLGNotifications
+﻿CREATE VIEW vyuLGNotifications
 AS
 SELECT CONVERT(INT, ROW_NUMBER() OVER (
 			ORDER BY strType
@@ -287,4 +281,3 @@ FROM (
 		,tblCTEvent EV
 	WHERE EV.strEventName = 'Contracts w/o TC'
 ) tbl
-GO
