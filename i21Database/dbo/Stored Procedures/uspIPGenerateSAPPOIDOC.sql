@@ -153,6 +153,10 @@ Begin
 		End
 	End
 
+	--Donot generate Modified Idoc if PO No is not there
+	If @strHeaderState='MODIFIED' AND (Select ISNULL(strERPPONumber,'') From tblCTContractFeed Where intContractFeedId=@intMinSeq)=''
+		GOTO NEXT_PO
+
 	Set @strItemXml=''
 	Set @strItemXXml=''
 	Set @strScheduleXml=''
@@ -490,6 +494,7 @@ Begin
 	INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml)
 	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml)
 
+	NEXT_PO:
 	Select @intMinRowNo=Min(intRowNo) From @tblHeader Where intRowNo>@intMinRowNo
 End --End Header Loop
 
