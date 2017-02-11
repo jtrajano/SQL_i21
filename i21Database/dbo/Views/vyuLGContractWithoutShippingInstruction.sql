@@ -7,10 +7,14 @@ SELECT CH.strContractNumber
 	,CD.dtmEndDate
 	,Vendor.strName AS strVendor
 	,Producer.strName AS strProducer
+	,I.strItemNo
+	,C.strCommodityCode
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+JOIN tblICItem I ON I.intItemId = CD.intItemId
+JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
 JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
-JOIN tblEMEntity Producer ON Producer.intEntityId = CH.intProducerId
+LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = CH.intProducerId
 LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = CH.intEntityId
 WHERE CH.intContractTypeId = 1
 	AND CD.intContractDetailId NOT IN (
