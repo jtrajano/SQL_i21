@@ -23,6 +23,12 @@ BEGIN TRY
 			@intLastModifiedUserId	INT,
 			@LastModifiedUserSign      VARBINARY(MAX)
 			
+			DECLARE @TotalQuantity DECIMAL(24,10)
+			DECLARE @TotalNetQuantity DECIMAL(24,10)			
+			DECLARE @IntNoOFUniFormItemUOM INT
+			DECLARE @IntNoOFUniFormNetWeightUOM INT
+			DECLARE @intContractHeaderId INT
+
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
       
@@ -58,6 +64,12 @@ BEGIN TRY
 	SELECT	@intPriceFixationId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intPriceFixationId'
+
+	SELECT  @intContractHeaderId= intContractHeaderId FROM tblCTPriceFixation WHERE intPriceFixationId=@intPriceFixationId
+	SELECT  @IntNoOFUniFormItemUOM=COUNT(DISTINCT intItemUOMId)  FROM tblCTContractDetail WHERE intContractHeaderId= @intContractHeaderId
+	SELECT  @IntNoOFUniFormNetWeightUOM=COUNT(DISTINCT intNetWeightUOMId)  FROM tblCTContractDetail WHERE intContractHeaderId= @intContractHeaderId
+	SELECT  @TotalQuantity = dblQuantity FROM tblCTContractHeader WHERE intContractHeaderId=@intContractHeaderId
+	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WHERE intContractHeaderId=@intContractHeaderId
 	
 	SELECT @intLastModifiedUserId=ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract PC
 	JOIN tblCTPriceFixation PF ON PF.intPriceContractId=PC.intPriceContractId 
@@ -77,7 +89,8 @@ BEGIN TRY
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
 	FROM	tblSMCompanySetup
 	
-	SELECT	PF.intPriceFixationId,
+	SELECT	 DISTINCT 
+			PF.intPriceFixationId,
 			CH.strContractNumber,
 			CH.strCustomerContract,
 			IM.strDescription,
@@ -116,17 +129,25 @@ BEGIN TRY
 			' per ' + FM.strUnitMeasure AS strFXFinalPrice,
 			CASE WHEN CD.intCurrencyExchangeRateId IS NULL THEN NULL ELSE 'Final Price' END AS strFXFinalPriceLabel,
 			CASE 
-				WHEN UM.strUnitType='Quantity' THEN LTRIM(FLOOR(CD.dblQuantity)) + ' bags/ ' + UM.strUnitMeasure+CASE WHEN CD.dblNetWeight IS NOT NULL THEN  ' (' ELSE '' END + ISNULL(LTRIM(FLOOR(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') +CASE WHEN U7.strUnitMeasure IS NOT NULL THEN   ')' ELSE '' END  
-				ELSE ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') 
+			WHEN ISNULL(ysnMultiplePriceFixation,0)=0 THEN
+				CASE 
+					WHEN UM.strUnitType='Quantity' THEN LTRIM(FLOOR(CD.dblQuantity)) + ' bags/ ' + UM.strUnitMeasure+CASE WHEN CD.dblNetWeight IS NOT NULL THEN  ' (' ELSE '' END + ISNULL(LTRIM(FLOOR(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') +CASE WHEN U7.strUnitMeasure IS NOT NULL THEN   ')' ELSE '' END  
+					ELSE ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') 
+				END
+			ELSE
+				CASE 
+						WHEN UM.strUnitType='Quantity' AND @IntNoOFUniFormItemUOM=1 THEN LTRIM(dbo.fnRemoveTrailingZeroes(@TotalQuantity)) + ' bags/ ' + UM.strUnitMeasure+CASE WHEN CD.dblNetWeight IS NOT NULL AND @IntNoOFUniFormNetWeightUOM=1 THEN  ' (' ELSE '' END + ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(@TotalNetQuantity)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') +CASE WHEN U7.strUnitMeasure IS NOT NULL THEN   ')' ELSE '' END  
+						ELSE CASE WHEN @IntNoOFUniFormNetWeightUOM=1 THEN ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(@TotalNetQuantity)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') ELSE '' END
+				END
 			END
 			AS  strQuantityDesc,
 			CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106)+CASE WHEN PO.strPosition IS NOT NULL THEN  ' ('+PO.strPosition+') ' ELSE '' END strPeriodWithPosition,
 			CASE WHEN FLOOR((PF.dblTotalLots-PF.dblLotsFixed))=0 THEN '' ELSE 'Lots to be fixed :' END AS strLotsFixedLabel,
 			LTRIM(FLOOR((PF.dblTotalLots-PF.dblLotsFixed))) AS intLotsUnFixed,
 			LTRIM(CAST(ROUND(PF.dblPriceWORollArb,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strTotalDesc,
-			LTRIM(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strDifferentialDesc,			
+			LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strDifferentialDesc,			
 			CASE WHEN CD.intCurrencyExchangeRateId IS NULL THEN NULL ELSE 'Final Price :' END AS strFXFinalPriceLabelDesc,
-			LTRIM(CAST(ROUND(PF.dblFinalPrice,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' per '+CM.strUnitMeasure strFinalPriceDesc,
+			LTRIM(CAST(ROUND(CD.dblCashPrice,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' per '+CM.strUnitMeasure strFinalPriceDesc,
 			FY.strCurrency + '/' + TY.strCurrency+ ' :' AS strCurrencyExchangeRateDesc,
 			dbo.fnRemoveTrailingZeroes(ROUND(CD.dblRate,2)) AS dblRateDesc,
 			LTRIM(
@@ -139,7 +160,7 @@ BEGIN TRY
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
-	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	PF.intContractDetailId
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractHeaderId			=	CH.intContractHeaderId
 	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
 												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
 	JOIN	tblICItem					IM	ON	IM.intItemId					=	CD.intItemId			LEFT
