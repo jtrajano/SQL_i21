@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[GetDefaultData]
+﻿CREATE PROCEDURE [dbo].[uspCTGetDefaultData]
 	@strType	NVARCHAR(50),
 	@intItemId	INT = NULL
 AS
