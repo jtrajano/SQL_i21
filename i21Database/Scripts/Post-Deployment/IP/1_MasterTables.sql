@@ -136,6 +136,12 @@ BEGIN
     VALUES(3,'SQL Statement')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 0)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(0,'Unassigned')
+END
+GO
 IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 1)
 BEGIN
     INSERT INTO tblIPStepType(intStepTypeId,strName)
