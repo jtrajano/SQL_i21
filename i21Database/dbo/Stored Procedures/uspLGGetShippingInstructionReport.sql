@@ -467,7 +467,7 @@ SELECT TOP 1 L.intLoadId
 	,@strLogisticsCompanyName AS strLogisticsCompanyName
 	,@strLogisticsPrintSignOff AS strLogisticsPrintSignOff
 	,@strPrintableRemarks AS strPrintableRemarks
-	,L.strComments AS strContractText
+	,(SELECT TOP 1 strInboundText FROM tblSMCity WHERE strCity = L.strDestinationPort) AS strContractText
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN intPContractDetailId ELSE intSContractDetailId END
