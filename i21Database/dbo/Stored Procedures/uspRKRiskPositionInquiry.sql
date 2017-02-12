@@ -65,14 +65,14 @@ DECLARE @RollCost as Table (
 DECLARE @dtmCurrentDate datetime 
 SET @dtmCurrentDate = getdate()
 INSERT INTO @RollCost(intRowNumber,strFutMarketName, strCommodityCode, strFutureMonth,intFutureMarketId,intCommodityId,intFutureMonthId,dblWtAvgOpenLongPosition,dblAvgPriceOld,dblLongQty, dblShortQty,dblOriginalQty,dblWtAvgPosition)
-EXEC uspRKRollCost @dtmFromDate='01-01-2001', @dtmToDate= @dtmCurrentDate
+SELECT * FROM  vyuRKRollCost 
        
 BEGIN  
 INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId)  
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,ROUND(dblNoOfContract,@intDecimal) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId FROM(  
   
 SELECT * FROM(  
-  SELECT  DISTINCT case when @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end as Selection,
+  SELECT  DISTINCT CASE WHEN @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end as Selection,
   'a. Unpriced - (Balance to be Priced)' as PriceStatus,'Previous' as strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,CASE WHEN @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
@@ -617,10 +617,10 @@ if (@strRiskView = 'Processor')
 INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,TransactionDate,dblQuantity,TranType) 
 
 SELECT CASE WHEN @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end as Selection,
-		'a. Unpriced - (Balance to be Priced)' as PriceStatus,@strParamFutureMonth strFutureMonth ,
+		'b. Priced / Outright - (Outright position)' as PriceStatus,@strParamFutureMonth strFutureMonth ,
 		strAccountNumber,sum(dblNoOfLot) dblNoOfLot,getdate() TransactionDate,sum(dblNoOfLot) dblQuantity,'Inventory' TranType
 FROM (
-  SELECT 	
+  SELECT distinct	
   'Purchase'+' - '+isnull(ca.strDescription,'') as strAccountNumber,
   iis.dblUnitOnHand dblNoOfLot
   FROM tblICItem ic 
@@ -738,21 +738,21 @@ INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfC
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,sum(dblNoOfContract),strTradeNo,TransactionDate,TranType,CustVendor,sum(dblNoOfLot), sum(dblQuantity)
 ,intContractHeaderId,intFutOptTransactionHeaderId 
 FROM(
-       SELECT  CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END AS Selection,'Net market risk' as PriceStatus,strFutureMonth
+       SELECT  CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END AS Selection,CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END as PriceStatus,strFutureMonth
                      ,case when @strRiskView='Processor' then 'Market Coverage' else 'Market Risk' end as strAccountNumber,sum(dblNoOfContract) dblNoOfContract,
                      strTradeNo, TransactionDate,TranType,CustVendor,sum(dblNoOfLot) dblNoOfLot, sum(dblQuantity)  dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId  
        FROM @List WHERE Selection=case when @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end
                                     and PriceStatus = 'b. Priced / Outright - (Outright position)' 
        GROUP BY strFutureMonth,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
        UNION
-       SELECT  CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END AS Selection,'Net market risk' as PriceStatus,strFutureMonth
+       SELECT  CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END AS Selection,CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END as PriceStatus,strFutureMonth
                      ,CASE WHEN @strRiskView='Processor' then 'Market Coverage' else 'Market Risk' end as strAccountNumber,sum(dblNoOfContract) dblNoOfContract,
                      strTradeNo, TransactionDate,TranType,CustVendor,sum(dblNoOfLot) dblNoOfLot, sum(dblQuantity)  dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId  
        FROM @List WHERE PriceStatus ='F&O' and Selection LIKE ('Total F&O%')
        GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
        
        UNION 
-        SELECT  CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END AS Selection,'Net market risk' as PriceStatus,strFutureMonth
+        SELECT  CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END AS Selection,CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END as PriceStatus,strFutureMonth
                      ,CASE WHEN @strRiskView='Processor' then 'Market Coverage' else 'Market Risk' end as strAccountNumber,sum(dblNoOfContract) dblNoOfContract,
                      strTradeNo, TransactionDate,TranType,CustVendor,sum(dblNoOfLot) dblNoOfLot, sum(dblQuantity)  dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId  
        FROM @List WHERE PriceStatus ='a. Delta %' and Selection = ('Total speciality delta fixed')
@@ -764,7 +764,7 @@ GROUP BY Selection,PriceStatus,strAccountNumber,strFutureMonth,strTradeNo, Trans
 if (@strRiskView = 'Processor')
 BEGIN
 	INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId )  
-	SELECT CASE WHEN @strRiskView='Processor' THEN 'Outright coverage(Weeks)' ELSE 'Outright coverage(Weeks)' END AS Selection,'Net market risk(Weeks)' as PriceStatus,strFutureMonth,strAccountNumber,sum(dblNoOfContract)/@dblForecastWeeklyConsumption,strTradeNo,TransactionDate,TranType,CustVendor,sum(dblNoOfLot), sum(dblQuantity)
+	SELECT CASE WHEN @strRiskView='Processor' THEN 'Outright coverage(Weeks)' ELSE 'Outright coverage(Weeks)' END AS Selection,CASE WHEN @strRiskView='Processor' THEN 'Outright coverage (weeks)' ELSE 'Net market risk(Weeks)' END as PriceStatus,strFutureMonth,strAccountNumber,sum(dblNoOfContract)/@dblForecastWeeklyConsumption,strTradeNo,TransactionDate,TranType,CustVendor,sum(dblNoOfLot), sum(dblQuantity)
 			,intContractHeaderId,intFutOptTransactionHeaderId FROM @List 
 	WHERE Selection=CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
 	GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  

@@ -5020,6 +5020,7 @@
     <Build Include="dbo\Functions\fnGetDebitFunctional.sql" />
     <Build Include="dbo\Functions\fnGetCreditFunctional.sql" />
     <Build Include="dbo\Views\vyuLGNotifications.sql" />
+    <Build Include="dbo\Views\vyuRKRollCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

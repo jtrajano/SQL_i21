@@ -74,12 +74,14 @@ LEFT JOIN tblEMEntity e on e.intEntityId=ch.intProducerId
 
 IF (ISNULL(@ysnVendorProducer,0)=0)
 BEGIN
-
-       SELECT convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum,strVendorName,strRating,
+	select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
+              dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue, dblTotalSpend
+			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,(isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0))  dblPotentialAdditionalVolume, 0 as intConcurrencyId
+			  from (
+       SELECT strVendorName,strRating,
               dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue,
                      CONVERT(NUMERIC(16,2),dblTotalSpend) as dblTotalSpend ,
-                     CONVERT(NUMERIC(16,2),dblShareWithSupplier) as dblShareWithSupplier ,dblMToM,
-                     dblTotalCommittedVolume ,ISNULL(dblTotalSpend,0) dblTotalSpend,dblCompanyExposurePercentage,
+                     CONVERT(NUMERIC(16,2),dblShareWithSupplier) as dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,
                      (dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend,0) = 0 then 1 else dblTotalSpend end) * dblCompanyExposurePercentage a,
                      (dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier,0) = 0 then 1 else dblShareWithSupplier end) *dblSupplierSalesPercentage b,
 
@@ -90,8 +92,7 @@ BEGIN
        THEN (dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend,0) = 0 then 1 else dblTotalSpend end) * dblCompanyExposurePercentage 
        ELSE
               (dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier,0) = 0 then 1 else dblShareWithSupplier end) *dblSupplierSalesPercentage 
-       end dblPotentialAdditionalVolume,
-       0 as intConcurrencyId
+       end dblPotentialAdditionalVolume
        FROM(
        SELECT strEntityName strVendorName,strRiskIndicator strRating,
                      dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue
@@ -154,18 +155,22 @@ BEGIN
                                   ) )t
        GROUP BY strEntityName,strPriOrNotPriOrParPriced,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t1
        GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
-       )t3
+       )t3)t4
 END
 
 ELSE
 
 BEGIN
 
-       SELECT convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum,strVendorName,strRating,
+	select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
+              dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue, dblTotalSpend
+			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,(isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0))  dblPotentialAdditionalVolume, 0 as intConcurrencyId
+			  from (
+       SELECT strVendorName,strRating,
               dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue,
                      CONVERT(NUMERIC(16,2),dblTotalSpend) as dblTotalSpend ,
                      CONVERT(NUMERIC(16,2),dblShareWithSupplier) as dblShareWithSupplier ,dblMToM,
-                     dblTotalCommittedVolume ,ISNULL(dblTotalSpend,0) dblTotalSpend,dblCompanyExposurePercentage,
+                    dblCompanyExposurePercentage,
                      (dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend,0) = 0 then 1 else dblTotalSpend end) * dblCompanyExposurePercentage a,
                      (dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier,0) = 0 then 1 else dblShareWithSupplier end) *dblSupplierSalesPercentage b,
        
@@ -241,5 +246,5 @@ BEGIN
                                   WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' ) )t
        GROUP BY strEntityName,strPriOrNotPriOrParPriced,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t1
        GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
-       )t3
+       )t3)t4
 END

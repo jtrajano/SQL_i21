@@ -172,7 +172,7 @@ END AS dblAdjustedContractPrice,
                   cd.strPricingType,
                   
                              isnull(CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(cd.dblBasis,0) ELSE 0 END,0) dblContractBasis,
-
+							 
                   (CASE WHEN cd.intPricingTypeId=1 THEN
                   (SELECT     (isnull(dblFutures,0)) 
                         FROM tblCTContractDetail  cdv                         
@@ -181,12 +181,10 @@ END AS dblAdjustedContractPrice,
                   (SELECT avgLot/intTotLot FROM(
                         SELECT      sum(isnull(pfd.[dblNoOfLots],0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(pfd.[dblNoOfLots],0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
                         FROM tblCTContractDetail  cdv
-                        JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
-                                                AND cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
-                                                                                   and cdv.intContractStatusId <> 3
+                        LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
                         LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId and intPricingTypeId<>1
-                        and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
-                        AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10))t) end
+                        and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId                        
+						where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId <> 3)t) end
                   ) as dblFutures ,
                 
                   (SELECT avgLot FROM(
@@ -364,12 +362,11 @@ convert(decimal(24,6),
                   (SELECT avgLot/intTotLot FROM(
                         SELECT      sum(isnull(pfd.[dblNoOfLots],0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(pfd.[dblNoOfLots],0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
                         FROM tblCTContractDetail  cdv
-                        JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId  and cdv.intContractStatusId <> 3
-                                                AND cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
+                        LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
                         LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId and intPricingTypeId<>1
-                        and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
-                        AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10))t) end
-                  ) dblFutures ,
+                        and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId                        
+						where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId <> 3)t) end
+                  ) as dblFutures ,
                 
                   (SELECT avgLot FROM(
                         SELECT
@@ -523,20 +520,19 @@ convert(decimal(24,6),
                   cd.intPricingTypeId,
                   cd.strPricingType,
                   isnull(CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(cd.dblBasis,0) ELSE 0 END,0) dblContractBasis,
-                  (CASE WHEN cd.intPricingTypeId=1 THEN
+                 (CASE WHEN cd.intPricingTypeId=1 THEN
                   (SELECT     (isnull(dblFutures,0)) 
                         FROM tblCTContractDetail  cdv                         
-                        WHERE intPricingTypeId=1 AND cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId  and cdv.intContractStatusId <> 3) 
+                        WHERE intPricingTypeId=1 and cdv.intContractStatusId <> 3 AND cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId) 
                   ELSE 
                   (SELECT avgLot/intTotLot FROM(
                         SELECT      sum(isnull(pfd.[dblNoOfLots],0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(pfd.[dblNoOfLots],0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
                         FROM tblCTContractDetail  cdv
-                        JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
-                                                AND cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId   and cdv.intContractStatusId <> 3
+                        LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
                         LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId and intPricingTypeId<>1
-                        and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
-                        AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10))t) end
-                  ) dblFutures ,
+                        and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId                        
+						where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId <> 3)t) end
+                  ) as dblFutures  ,
                 
                   (SELECT avgLot FROM(
                         SELECT
@@ -680,21 +676,19 @@ convert(decimal(24,6),
                   cd.intPricingTypeId,
                   cd.strPricingType,
                   isnull(CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(cd.dblBasis,0) ELSE 0 END,0) dblContractBasis,
-                  (CASE WHEN cd.intPricingTypeId=1 THEN
+                 (CASE WHEN cd.intPricingTypeId=1 THEN
                   (SELECT     (isnull(dblFutures,0)) 
                         FROM tblCTContractDetail  cdv                         
-                        WHERE intPricingTypeId=1 AND cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId  and cdv.intContractStatusId <> 3) 
+                        WHERE intPricingTypeId=1 and cdv.intContractStatusId <> 3 AND cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId) 
                   ELSE 
                   (SELECT avgLot/intTotLot FROM(
                         SELECT      sum(isnull(pfd.[dblNoOfLots],0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(pfd.[dblNoOfLots],0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
                         FROM tblCTContractDetail  cdv
-                        LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId  and cdv.intContractStatusId <> 3
+                        LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
                         LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId and intPricingTypeId<>1
-                        and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
-                        AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
-                        WHERE cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
-                  )t) end
-                  ) dblFutures ,
+                        and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId                        
+						where cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId and cdv.intContractStatusId <> 3)t) end
+                  ) as dblFutures ,
                   (SELECT avgLot FROM(
                         SELECT
                               sum(isnull(pfd.[dblNoOfLots],0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(pfd.[dblNoOfLots],0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot

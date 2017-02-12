@@ -15,7 +15,8 @@ SELECT
 		PCT.intContractDetailId,
 		PCT.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,intCommodityUnitMeasureId as intUnitMeasureId 
 FROM tblLGLoad L 
-JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId and ysnPosted=1
+JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId and ysnPosted=1 AND L.intShipmentStatus = 3
 JOIN vyuCTContractDetailView PCT ON PCT.intContractDetailId = LD.intPContractDetailId
-JOIN tblEMEntity e on e.intEntityId=PCT.intEntityId 
+JOIN tblEMEntity e on e.intEntityId=PCT.intEntityId
+
 GO
