@@ -6,7 +6,7 @@ SELECT i.intM2MInquiryId,i.strRecordName,b.dtmM2MBasisDate,p.dtmPriceDate,m.strU
 	   i.dtmTransactionUpTo,i.strRateType,cc.strCommodityCode,cl.strLocationName,z.strMarketZoneCode
 FROM tblRKM2MInquiry i
 JOIN tblRKM2MBasis b on i.intM2MBasisId=b.intM2MBasisId
-JOIN tblRKFuturesSettlementPrice p on i.intFutureSettlementPriceId=p.intFutureSettlementPriceId
+LEFT JOIN tblRKFuturesSettlementPrice p on i.intFutureSettlementPriceId=p.intFutureSettlementPriceId
 JOIN tblICUnitMeasure m on m.intUnitMeasureId=i.intUnitMeasureId
 JOIN tblICUnitMeasure m1 on m1.intUnitMeasureId=i.intPriceItemUOMId
 JOIN tblSMCurrency c on c.intCurrencyID=i.intCurrencyId

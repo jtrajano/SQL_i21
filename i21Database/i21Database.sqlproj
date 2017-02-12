@@ -5024,6 +5024,7 @@
     <Build Include="dbo\Stored Procedures\uspCTGetDefaultData.sql" />
     <Build Include="dbo\Views\vyuLGNotifications.sql" />
     <Build Include="dbo\Views\vyuARMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuRKRollCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
