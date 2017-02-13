@@ -3,5 +3,6 @@
 SELECT
 	[intWeightGradeId]
 	,[strWeightGradeDesc]
+	,[intOriginDest]
 FROM
 	tblCTWeightGrade
