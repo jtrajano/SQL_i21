@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblGLRevalue](
 	[intConsolidationId] [int] IDENTITY(1,1) NOT NULL,
-	[intFiscalPeriod] [int] NOT NULL,
+	[intGLFiscalYearPeriodId] [int] NOT NULL,
 	[dtmReverseDate] [date] NOT NULL,
 	[intFunctionalCurrencyId] [int] NOT NULL,
 	[strTransactionType] [nvarchar](20) COLLATE Latin1_General_CI_AS NOT NULL,
@@ -14,10 +14,6 @@
 
 GO
 
-ALTER TABLE [dbo].[tblGLRevalue]  WITH CHECK ADD  CONSTRAINT [FK_tblGLRevalue_tblGLFiscalYearPeriod] FOREIGN KEY([intFiscalPeriod])
-REFERENCES [dbo].[tblGLFiscalYearPeriod] ([intGLFiscalYearPeriodId])
-GO
 
-ALTER TABLE [dbo].[tblGLRevalue] CHECK CONSTRAINT [FK_tblGLRevalue_tblGLFiscalYearPeriod]
-GO
+
 
