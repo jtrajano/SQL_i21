@@ -21,7 +21,8 @@ BEGIN TRY
 			strLocationName,
 			intContractHeaderId,
 			strRemark,
-			strItemUOM strDetailUnitMeasure
+			strItemUOM strDetailUnitMeasure,
+			strPriceUOM + ' ' + strCurrency AS strPriceUOMWithCurrency
 	FROM	vyuCTContractDetailView DV
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 	
