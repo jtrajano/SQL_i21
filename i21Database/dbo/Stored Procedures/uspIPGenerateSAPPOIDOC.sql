@@ -187,7 +187,7 @@ Begin
 			@strItemNo					= strItemNo  ,
 			@strStorageLocation			= strStorageLocation , --STGE_LOC 
 			@dblQuantity				= dblNetWeight,
-			@strQuantityUOM				= strNetWeightUOM , --PO_UNIT
+			@strQuantityUOM				= (Select TOP 1 ISNULL(strSymbol,strUnitMeasure) From tblICUnitMeasure Where strUnitMeasure = strNetWeightUOM) , --PO_UNIT
 			@dblCashPrice				= dblCashPrice, --NET_PRICE
 			@dblUnitCashPrice			= dblUnitCashPrice, --PRICE_UNIT 
 			@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate, --DELIVERY_DATE 
@@ -196,7 +196,7 @@ Begin
 			@dtmEndDate					= dtmEndDate, --VPER_END
 			@dblBasis					= dblBasis, --COND_VALUE,
 			@strCurrency				= strCurrency ,--CURRENCY 
-			@strPriceUOM				= strPriceUOM , --COND_UNIT 
+			@strPriceUOM				= (Select TOP 1 ISNULL(strSymbol,strUnitMeasure) From tblICUnitMeasure Where strUnitMeasure = strPriceUOM) , --COND_UNIT 
 			@strRowState				= strRowState ,
 			@strFeedStatus				= strFeedStatus,
 			@strContractItemNo			= strContractItemNo
