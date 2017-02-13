@@ -113,7 +113,7 @@ BEGIN TRY
 	BEGIN
 		UPDATE LI
 		SET intBondStatusId = @intLotStatusId
-		FROM dbo.tblICLot AS L 
+		FROM dbo.tblICLot AS L
 		JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
 		JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
 		WHERE RIL.strContainerNo = @strContainerNumber
@@ -250,6 +250,7 @@ BEGIN TRY
 		END
 	END
 
+	-- Sample Approve by Container in Sample Type / Approve by Lot / Parent Lot based on Company Preference
 	IF (
 			@intProductTypeId = 6
 			OR @intProductTypeId = 11
@@ -267,12 +268,12 @@ BEGIN TRY
 			,intLotStatusId INT
 			)
 
-		SELECT @strMainLotNumber = strLotNumber
-		FROM tblICLot
-		WHERE intLotId = @intProductValueId
-
 		IF @strApprovalBase = 'Lot'
 		BEGIN
+			SELECT @strMainLotNumber = strLotNumber
+			FROM tblICLot
+			WHERE intLotId = @intProductValueId
+
 			INSERT INTO @LotData (
 				intLotId
 				,strLotNumber
@@ -315,50 +316,25 @@ BEGIN TRY
 		END
 		ELSE IF @strApprovalBase = 'Container'
 		BEGIN
-			IF @intProductTypeId = 6
-			BEGIN
-				INSERT INTO @LotData (
-					intLotId
-					,strLotNumber
-					,intItemId
-					,intLocationId
-					,intSubLocationId
-					,intStorageLocationId
-					,intLotStatusId
-					)
-				SELECT L.intLotId
-					,L.strLotNumber
-					,L.intItemId
-					,L.intLocationId
-					,L.intSubLocationId
-					,L.intStorageLocationId
-					,L.intLotStatusId
-				FROM tblICLot L
-				JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
-				WHERE RIL.strContainerNo = @strContainerNumber
-			END
-			ELSE IF @intProductTypeId = 11
-			BEGIN
-				INSERT INTO @LotData (
-					intLotId
-					,strLotNumber
-					,intItemId
-					,intLocationId
-					,intSubLocationId
-					,intStorageLocationId
-					,intLotStatusId
-					)
-				SELECT L.intLotId
-					,L.strLotNumber
-					,L.intItemId
-					,L.intLocationId
-					,L.intSubLocationId
-					,L.intStorageLocationId
-					,L.intLotStatusId
-				FROM tblICLot L
-				JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
-				WHERE RIL.strContainerNo = @strContainerNumber
-			END
+			INSERT INTO @LotData (
+				intLotId
+				,strLotNumber
+				,intItemId
+				,intLocationId
+				,intSubLocationId
+				,intStorageLocationId
+				,intLotStatusId
+				)
+			SELECT L.intLotId
+				,L.strLotNumber
+				,L.intItemId
+				,L.intLocationId
+				,L.intSubLocationId
+				,L.intStorageLocationId
+				,L.intLotStatusId
+			FROM tblICLot L
+			JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+			WHERE RIL.strContainerNo = @strContainerNumber
 		END
 
 		SELECT @intSeqNo = MIN(intSeqNo)
