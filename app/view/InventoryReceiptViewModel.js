@@ -679,7 +679,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             if (get('current.ysnPosted') || get('current.ysnOrigin')) {
                 return true;
             }
-            else if (iRely.Functions.isEmpty(get('current.intEntityVendorId')) || iRely.Functions.isEmpty(get('current.intLocationId'))) {
+            else if ((iRely.Functions.isEmpty(get('current.intEntityVendorId')) && get('current.strReceiptType') !== 'Transfer Order') || iRely.Functions.isEmpty(get('current.intLocationId'))) {
                 return true;
             }
             else {
