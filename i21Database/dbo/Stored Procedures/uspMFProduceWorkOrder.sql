@@ -42,6 +42,9 @@ BEGIN
 		,@intCategoryId INT
 		,@intItemTypeId INT
 		,@intProductId INT
+		,@intParentLotId1 INT
+		,@strParentLotNumber1 NVARCHAR(50)
+		,@strParentLotNumber2 NVARCHAR(50)
 
 	SELECT @dtmCreated = Getdate()
 
@@ -199,7 +202,11 @@ BEGIN
 			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intItemId
-				And intItemTypeId IN (2,4,5)
+				AND intItemTypeId IN (
+					2
+					,4
+					,5
+					)
 			)
 	BEGIN
 		SELECT @intCategoryId = intCategoryId
@@ -245,7 +252,11 @@ BEGIN
 		SET dblOutputQuantity = dblOutputQuantity + @dblProduceQty
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intItemId
-			And intItemTypeId IN (2,4,5)
+			AND intItemTypeId IN (
+				2
+				,4
+				,5
+				)
 	END
 
 	DECLARE @intAttributeTypeId INT
@@ -262,6 +273,39 @@ BEGIN
 	IF @intAttributeTypeId = 2
 		OR @ysnPostProduction = 1
 	BEGIN
+		IF EXISTS (
+				SELECT *
+				FROM tblICLot
+				WHERE strLotNumber = @strLotNumber
+				)
+		BEGIN
+			SELECT @intParentLotId1 = intParentLotId
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+
+			SELECT @strParentLotNumber1 = strParentLotNumber
+			FROM tblICParentLot
+			WHERE intParentLotId = @intParentLotId1
+
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+				,@intItemId = @intItemId
+				,@intManufacturingId = NULL
+				,@intSubLocationId = NULL
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 78
+				,@ysnProposed = 0
+				,@strPatternString = @strParentLotNumber2 OUTPUT
+				,@intShiftId = @intShiftId
+				,@dtmDate = @dtmProductionDate
+
+			IF @strParentLotNumber1 <> @strParentLotNumber2
+			BEGIN
+				SELECT @strParentLotNumber = @strParentLotNumber1 + ' / ' + @strParentLotNumber2
+			END
+		END
+
 		EXEC uspMFPostProduction 1
 			,0
 			,@intWorkOrderId
@@ -367,6 +411,6 @@ BEGIN
 
 	UPDATE tblMFWorkOrderProducedLot
 	SET intLotId = @intLotId
-		,strParentLotNumber = @strParentLotNumber
+		,strParentLotNumber = IsNULL(@strParentLotNumber2, @strParentLotNumber)
 	WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 END
