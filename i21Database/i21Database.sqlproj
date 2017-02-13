@@ -5027,6 +5027,7 @@
     <Build Include="dbo\Views\vyuRKRollCost.sql" />
     <Build Include="dbo\Tables\tblGLRevalue.sql" />
     <Build Include="dbo\Tables\tblGLRevalueDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerAccountStatusCodes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

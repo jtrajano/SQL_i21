@@ -23,7 +23,8 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@ysnIncludeBudget			AS BIT
 		,@ysnPrintOnlyPastDue		AS BIT
 		,@xmlDocumentId				AS INT
-		,@query						AS NVARCHAR(MAX)		
+		,@query						AS NVARCHAR(MAX)
+		,@queryBudget               AS NVARCHAR(MAX)
 		,@joinQuery                 AS NVARCHAR(MAX) = ''
 		,@filter					AS NVARCHAR(MAX) = ''
 		,@fieldname					AS NVARCHAR(50)
@@ -86,6 +87,7 @@ DECLARE @temp_statement_table TABLE(
     ,[dblInvoiceTotal]			NUMERIC(18,6)
     ,[intPaymentId]				INT
     ,[strRecordNumber]			NVARCHAR(100)
+	,[strTransactionType]		NVARCHAR(100)
     ,[strPaymentInfo]			NVARCHAR(100)
     ,[dtmDatePaid]				DATETIME
     ,[dblPayment]				NUMERIC(18,6)
@@ -96,6 +98,7 @@ DECLARE @temp_statement_table TABLE(
     ,[strFullAddress]			NVARCHAR(MAX)
     ,[strCompanyName]			NVARCHAR(MAX)
     ,[strCompanyAddress]		NVARCHAR(MAX)
+	,[dblARBalance]				NUMERIC(18,6)
 )
 
 DECLARE @temp_cf_table TABLE(
@@ -163,7 +166,7 @@ IF @dtmDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 	
-DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
+DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
 
 SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
 
@@ -181,7 +184,7 @@ BEGIN
 END
 
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, @strLocationName 
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityCustomerId
@@ -197,17 +200,20 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END
 	  , intPaymentId		= ISNULL(P.intPaymentId, PCREDITS.intPaymentId)
 	  , strRecordNumber		= ISNULL(P.strRecordNumber, PCREDITS.strRecordNumber)
+	  , strTransactionType  = I.strTransactionType
 	  , strPaymentInfo	    = ''PAYMENT REF: '' + P.strPaymentInfo
 	  , dtmDatePaid			= ISNULL(P.dtmDatePaid, PCREDITS.dtmDatePaid)
 	  , dblPayment			= ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) - ISNULL(PD.dblInterest, 0)
 	  , dblBalance			= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
 	  , strSalespersonName  = ESP.strName
-	  , strAccountStatusCode = ACS.strAccountStatusCode
+	  , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityCustomerId)
 	  , strLocationName		= CL.strLocationName
 	  , strFullAddress		= [dbo].fnARFormatCustomerAddress('''', '''', C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	  , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	  , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
+	  , dblARBalance		= CUST.dblARBalance
 FROM vyuARCustomer C
+	INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
 	LEFT JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1
 	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityCustomerId
 		AND I.ysnPosted  = 1		
@@ -226,8 +232,7 @@ FROM vyuARCustomer C
 		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
 	LEFT JOIN tblSMTerm T ON T.intTermID = I.intTermId	
 	LEFT JOIN tblEMEntity ESP ON C.intSalespersonId = ESP.intEntityId	
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
-	LEFT JOIN (tblARCustomerAccountStatus CAS INNER JOIN tblARAccountStatus ACS ON CAS.intAccountStatusId = ACS.intAccountStatusId) ON CAS.intEntityCustomerId = C.intEntityCustomerId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId	
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 ) MainQuery'
 
@@ -238,6 +243,66 @@ END
 
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
+
+IF @ysnIncludeBudget = 1
+    BEGIN
+        SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
+            'SELECT intEntityCustomerId         = C.intEntityCustomerId 
+			      , strCustomerNumber           = C.strCustomerNumber
+				  , strCustomerName             = C.strName
+				  , dblCreditLimit              = C.dblCreditLimit
+				  , intInvoiceId				= CB.intCustomerBudgetId
+			      , strInvoiceNumber			= ''Budget for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101) 
+				  , strBOLNumber                = NULL
+				  , dtmDate						= dtmBudgetDate
+				  , dtmDueDate					= DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate))
+				  , dtmShipDate					= CB.intCustomerBudgetId
+				  , dblInvoiceTotal				= dblBudgetAmount
+				  , intPaymentId				= NULL
+				  , strRecordNumber				= ''Budget for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
+				  , strTransactionType			= ''Customer Budget''
+				  , strPaymentInfo				= NULL
+				  , dtmDatePaid					= NULL
+				  , dblPayment					= dblAmountPaid
+				  , dblBalance					= dblBudgetAmount - dblAmountPaid
+				  , strSalespersonName			= NULL
+				  , strAccountStatusCode		= dbo.fnARGetCustomerAccountStatusCodes(C.intEntityCustomerId)
+				  , strLocationName				= NULL
+				  , strFullAddress				= NULL
+				  , strCompanyName				= NULL
+				  , strCompanyAddress			= NULL
+				  , dblARBalance				= CUST.dblARBalance
+            FROM tblARCustomerBudget CB
+                INNER JOIN vyuARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId
+                INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId    
+            WHERE CB.dtmBudgetDate BETWEEN @dtmDateFrom AND @dtmDateTo
+              AND CB.dblAmountPaid < CB.dblBudgetAmount '
+
+        SET @filter = ''
+
+        DELETE FROM @temp_xml_table WHERE [fieldname] = 'strLocationName'
+
+        WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
+            BEGIN
+                SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
+                SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
+    
+                DELETE FROM @temp_xml_table WHERE id = @id
+
+                IF EXISTS(SELECT 1 FROM @temp_xml_table)
+                BEGIN
+                    SET @filter = @filter + ' AND '
+                END
+            END
+        
+        IF ISNULL(@filter,'') != ''
+        BEGIN
+            SET @queryBudget = @queryBudget + ' WHERE ' + @filter
+        END    
+
+        INSERT INTO @temp_statement_table
+        EXEC sp_executesql @queryBudget
+    END
 
 MERGE INTO tblARStatementOfAccount AS Target
 USING (SELECT strCustomerNumber, @dtmDateTo, SUM(ISNULL(dblBalance, 0))
@@ -252,6 +317,21 @@ UPDATE SET dtmLastStatementDate = Source.dtmLastStatementDate, dblLastStatement 
 WHEN NOT MATCHED BY TARGET THEN
 INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
 VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
+
+IF @ysnPrintOnlyPastDue = 1
+    BEGIN
+        DELETE FROM @temp_statement_table WHERE dtmDueDate <= @dtmDateTo
+        UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
+    END
+
+IF @ysnPrintZeroBalance = 0
+    BEGIN
+        DELETE FROM @temp_statement_table WHERE dblARBalance = 0
+        DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
+    END
+
+IF @ysnPrintCreditBalance = 0
+    DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')  
 
 INSERT INTO @temp_cf_table
 (
@@ -342,8 +422,7 @@ INNER JOIN @temp_aging_table AS AGINGREPORT
 	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN tblARCustomer CUSTOMER 
 	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-WHERE AGINGREPORT.dblTotalAR <> 0
-AND CUSTOMER.strStatementFormat = 'Payment Activity'
+WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
 AND STATEMENTREPORT.intInvoiceId NOT IN (SELECT intInvoiceId FROM @temp_cf_table)
 
 UNION ALL
@@ -396,6 +475,5 @@ INNER JOIN (SELECT
 				, dtmInvoiceDate 
 			FROM 
 				@temp_cf_table) CFReportTable ON STATEMENTREPORT.intInvoiceId = CFReportTable.intInvoiceId
-WHERE AGINGREPORT.dblTotalAR <> 0
-AND CUSTOMER.strStatementFormat = 'Payment Activity'
+WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
 AND STATEMENTREPORT.intInvoiceId IN (SELECT intInvoiceId FROM @temp_cf_table)
