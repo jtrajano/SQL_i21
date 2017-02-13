@@ -48,7 +48,6 @@ SELECT
 				THEN ISNULL(LogisticsView.strLoadNumber, '')
 			WHEN Receipt.intSourceType = 3 -- Transport
 				THEN LoadReceipt.strTransaction 
-				THEN ISNULL(TransportView_New.strTransaction, TransportView_Old.strTransaction) 
 			WHEN Receipt.intSourceType = 4 -- Settle Storage
 				THEN ISNULL(vyuGRStorageSearchView.strStorageTicketNumber, '') 
 			ELSE NULL
