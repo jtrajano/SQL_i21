@@ -637,7 +637,7 @@ BEGIN
 				FROM tblICItem
 				WHERE intItemId = @getItemId
 
-				-- Cost UOM is invalid for item {Item}.
+				-- Cost UOM is invalid or missing for item {Item}.
 				RAISERROR(80122, 11, 1, @getItem);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
