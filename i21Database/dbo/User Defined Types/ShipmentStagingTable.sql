@@ -31,6 +31,7 @@
 	dtmFreeTime DATETIME NULL,
 	strReceivedBy NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	strComment NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	intCurrencyId INT NULL,
 
 	-- Details
 	-- Required Field for Details
@@ -48,7 +49,7 @@
 	intLineNo INT NULL,
 	intSubLocationId INT NULL,
 	intStorageLocationId INT NULL,
-	intCurrencyId INT NULL,
+	intItemCurrencyId INT NULL,
 	intWeightUOMId INT NULL,
 	dblUnitPrice NUMERIC(38, 20) NULL,
 	intDockDoorId INT NULL,

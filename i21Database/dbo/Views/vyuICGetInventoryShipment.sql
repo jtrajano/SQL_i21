@@ -176,6 +176,7 @@ SELECT Shipment.intInventoryShipmentId
 	
 	WHEN Location.strUseLocationAddress = 'Letterhead' 
 	THEN '' END AS strCompanyAddress
+	, Shipment.intCurrencyId
 FROM tblICInventoryShipment Shipment
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Shipment.intShipFromLocationId
 	LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = Shipment.intEntityCustomerId	
