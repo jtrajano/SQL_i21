@@ -5087,7 +5087,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                 { xtype: 'numbercolumn', dataIndex: 'dblGross', text: 'Gross', width: 100, dataType: 'float' },
                 { xtype: 'numbercolumn', dataIndex: 'dblNet', text: 'Net', width: 100, dataType: 'float' }
-
             ];
             search.title = "Add Orders";
             search.showNew = false;
