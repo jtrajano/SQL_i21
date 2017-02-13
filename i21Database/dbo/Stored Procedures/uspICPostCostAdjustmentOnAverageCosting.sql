@@ -319,7 +319,7 @@ BEGIN
 				,@dblValue								= @AdjustmentValue
 				,@dblSalesPrice							= 0
 				,@intCurrencyId							= @intCurrencyId 
-				,@dblExchangeRate						= @dblExchangeRate
+				--,@dblExchangeRate						= @dblExchangeRate
 				,@intTransactionId						= @intTransactionId
 				,@intTransactionDetailId				= @intTransactionDetailId
 				,@strTransactionId						= @strTransactionId
@@ -446,7 +446,7 @@ BEGIN
 					,@dblValue								= @AdjustmentValue
 					,@dblSalesPrice							= 0
 					,@intCurrencyId							= @intCurrencyId 
-					,@dblExchangeRate						= @dblExchangeRate
+					--,@dblExchangeRate						= @dblExchangeRate
 					,@intTransactionId						= @intTransactionId
 					,@intTransactionDetailId				= @intTransactionDetailId
 					,@strTransactionId						= @strTransactionId
@@ -576,7 +576,7 @@ BEGIN
 		,@dblValue								= @AdjustmentValue
 		,@dblSalesPrice							= 0
 		,@intCurrencyId							= @intCurrencyId 
-		,@dblExchangeRate						= @dblExchangeRate
+		--,@dblExchangeRate						= @dblExchangeRate
 		,@intTransactionId						= @intTransactionId
 		,@intTransactionDetailId				= @intTransactionDetailId
 		,@strTransactionId						= @strTransactionId

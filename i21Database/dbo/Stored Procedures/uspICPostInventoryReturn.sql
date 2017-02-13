@@ -357,6 +357,8 @@ BEGIN
 				,intStorageLocationId
 				,strActualCostId
 				,intInTransitSourceLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -470,7 +472,7 @@ BEGIN
 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
-				,dblExchangeRate = 1  
+				,dblExchangeRate = ISNULL(DetailItem.dblForexRate, 1) 
 				,intTransactionId = Header.intInventoryReceiptId  
 				,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
 				,strTransactionId = Header.strReceiptNumber  
@@ -480,6 +482,8 @@ BEGIN
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,strActualCostId = Header.strActualCostId
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
+				,intForexRateTypeId = DetailItem.intForexRateTypeId
+				,dblForexRate = DetailItem.dblForexRate
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -627,6 +631,8 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 				,intInTransitSourceLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -739,7 +745,7 @@ BEGIN
 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
-				,dblExchangeRate = 1  
+				,dblExchangeRate = ISNULL(DetailItem.dblForexRate, 1)   
 				,intTransactionId = Header.intInventoryReceiptId  
 				,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
 				,strTransactionId = Header.strReceiptNumber  
@@ -748,6 +754,8 @@ BEGIN
 				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
+				,intForexRateTypeId = DetailItem.intForexRateTypeId
+				,dblForexRate = DetailItem.dblForexRate
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 					
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -1000,6 +1008,13 @@ BEGIN
 				AND Receipt.strReceiptNumber = @strTransactionId				
 	END
 END   
+
+-- Clean up the recap data. 
+BEGIN 
+	UPDATE @GLEntries
+	SET dblDebitForeign = ISNULL(dblDebitForeign, 0)
+		,dblCreditForeign = ISNULL(dblCreditForeign, 0) 
+END 
 
 --------------------------------------------------------------------------------------------  
 -- If RECAP is TRUE, 

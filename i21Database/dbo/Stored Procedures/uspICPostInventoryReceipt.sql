@@ -533,7 +533,7 @@ BEGIN
 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
-				,dblExchangeRate = 1  
+				,dblExchangeRate = ISNULL(DetailItem.dblForexRate, 1)   
 				,intTransactionId = Header.intInventoryReceiptId  
 				,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
 				,strTransactionId = Header.strReceiptNumber  
@@ -1131,6 +1131,13 @@ BEGIN
 				AND Receipt.strReceiptNumber = @strTransactionId				
 	END 	
 END   
+
+-- Clean up the recap data. 
+BEGIN 
+	UPDATE @GLEntries
+	SET dblDebitForeign = ISNULL(dblDebitForeign, 0)
+		,dblCreditForeign = ISNULL(dblCreditForeign, 0) 
+END 
 
 -- Update the In-Transit Outbound for Transfer Order
 IF @ysnRecap = 0

@@ -24,7 +24,7 @@ CREATE PROCEDURE [dbo].[uspICPostLotInTransit]
 	,@intFobPointId AS TINYINT 
 	,@intInTransitSourceLocationId AS INT 
 	,@intForexRateTypeId AS INT
-	,@dblForexRateType AS NUMERIC(38, 20)
+	,@dblForexRate AS NUMERIC(38, 20)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -171,7 +171,7 @@ BEGIN
 					,@intFobPointId = @intFobPointId
 					,@intInTransitSourceLocationId = @intInTransitSourceLocationId
 					,@intForexRateTypeId = @intForexRateTypeId
-					,@dblForexRateType = @dblForexRateType
+					,@dblForexRate = @dblForexRate
 
 			-- Insert the record the the Lot-out table
 			INSERT INTO dbo.tblICInventoryLotOut (
@@ -269,7 +269,7 @@ BEGIN
 				,@intFobPointId = @intFobPointId	
 				,@intInTransitSourceLocationId = @intInTransitSourceLocationId	
 				,@intForexRateTypeId = @intForexRateTypeId
-				,@dblForexRateType = @dblForexRateType
+				,@dblForexRate = @dblForexRate
 
 		-- Repeat call on uspICIncreaseStockInLot until @dblAddQty is completely distributed to the negative cost Lot buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
@@ -343,7 +343,7 @@ BEGIN
 							,@intFobPointId = @intFobPointId
 							,@intInTransitSourceLocationId = @intInTransitSourceLocationId
 							,@intForexRateTypeId = @intForexRateTypeId
-							,@dblForexRateType = @dblForexRateType
+							,@dblForexRate = @dblForexRate
 				END 
 			END
 			

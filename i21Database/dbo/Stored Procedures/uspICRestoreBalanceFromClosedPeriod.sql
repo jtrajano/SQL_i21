@@ -346,7 +346,7 @@ BEGIN
 					,@dblValue = @valueDifference
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId
-					,@dblExchangeRate = @dblExchangeRate
+					--,@dblExchangeRate = @dblExchangeRate
 					,@intTransactionId = @intTransactionId
 					,@intTransactionDetailId = @intTransactionDetailId
 					,@strTransactionId = @strTransactionId
@@ -714,7 +714,7 @@ BEGIN
 					,@dblValue = @valueDifference
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId
-					,@dblExchangeRate = @dblExchangeRate
+					--,@dblExchangeRate = @dblExchangeRate
 					,@intTransactionId = @intTransactionId
 					,@intTransactionDetailId = @intTransactionDetailId
 					,@strTransactionId = @strTransactionId

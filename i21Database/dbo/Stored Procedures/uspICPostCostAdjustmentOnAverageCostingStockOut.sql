@@ -183,7 +183,7 @@ BEGIN
 			,@dblValue								= @InvAdjustValue
 			,@dblSalesPrice							= 0
 			,@intCurrencyId							= @tOut_intCurrencyId
-			,@dblExchangeRate						= @tOut_dblExchangeRate
+			--,@dblExchangeRate						= @tOut_dblExchangeRate
 			,@intTransactionId						= @intVoucherId
 			,@intTransactionDetailId				= @intVoucherDetailId 
 			,@strTransactionId						= @strVoucherId
@@ -255,7 +255,7 @@ BEGIN
 			,@dblValue								= @InvAdjustValue
 			,@dblSalesPrice							= 0
 			,@intCurrencyId							= @tOut_intCurrencyId
-			,@dblExchangeRate						= @tOut_dblExchangeRate
+			--,@dblExchangeRate						= @tOut_dblExchangeRate
 			,@intTransactionId						= @intVoucherId
 			,@intTransactionDetailId				= @intVoucherDetailId 
 			,@strTransactionId						= @strVoucherId
