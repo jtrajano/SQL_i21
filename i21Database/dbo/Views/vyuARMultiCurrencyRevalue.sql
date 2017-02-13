@@ -17,6 +17,7 @@ SELECT DISTINCT
 	,dblAmount					= ARID.dblTotal
 	,intCurrencyId				= ARI.intCurrencyId
 	,intForexRateType			= ARID.intCurrencyExchangeRateTypeId
+	,strForexRateType			= SMCERT.strCurrencyExchangeRateType 
 	,dblForexRate				= ARID.dblCurrencyExchangeRate
 	,dblHistoricAmount			= ARID.dblTotal * ARID.dblCurrencyExchangeRate
 	,dblNewForexRate			= 0 --Calcuate By GL
@@ -39,6 +40,9 @@ INNER JOIN
 LEFT JOIN
 	tblEMEntityLocation EMEL
 		ON ARI.intShipToLocationId = EMEL.intEntityLocationId
+LEFT JOIN
+	tblSMCurrencyExchangeRateType SMCERT
+		ON ARID.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 LEFT JOIN
 	tblICItem ICI
 		ON ARID.intItemId = ICI.intItemId
