@@ -2,8 +2,7 @@ StartTest (function (t) {
     var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
-  
-        
+
         //region Scenario 1. Create Direct Inventory Receipt for Non Lotted Item then Delete IR
         .displayText('=====  Scenario 1. Create Direct Inventory Receipt for Non Lotted Item then Delete IR =====')
         .displayText('=====  Creating Direct Inventory Receipt for DNLTI - 01 =====')
@@ -61,7 +60,7 @@ StartTest (function (t) {
             next();
         })
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -97,9 +96,11 @@ StartTest (function (t) {
         .displayText('===== Delete Non Lotted Inventory Receipt  =====')
         .clickMenuScreen('Inventory Receipts','Screen')
         .waitUntilLoaded()
-        .doubleClickSearchRowValue('Direct', 'strOrderType', 1)
+        .selectSearchRowNumber([1])
+        .clickButton('OpenSelected')
+//        .doubleClickSearchRowValue('Direct', 'strOrderType', 1)
         .waitUntilLoaded()
-        .waitUntilLoaded('icinventoryreceipt')
+        .waitUntilLoaded('')
         .addResult('Successfully Opened',4000)
         .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'DNLTI - 01')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
@@ -108,9 +109,10 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-        .clickButton('Receive')
-        .waitUntilLoaded('icinventoryreceipt')
+        .clickButton('Unpost')
+        .waitUntilLoaded('')
         .addResult('Successfully Unposted',2000)
+        .waitUntilLoaded('')
         .clickButton('Delete')
         .waitUntilLoaded()
         .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
@@ -204,7 +206,7 @@ StartTest (function (t) {
             next();
         })
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -240,18 +242,20 @@ StartTest (function (t) {
         .displayText('===== Delete Non Lotted Inventory Receipt  =====')
         .clickMenuScreen('Inventory Receipts','Screen')
         .waitUntilLoaded()
-        .doubleClickSearchRowValue('Direct', 'strOrderType', 1)
+        .selectSearchRowNumber([1])
+        .clickButton('OpenSelected')
+//        .doubleClickSearchRowValue('Direct', 'strOrderType', 1)
         .waitUntilLoaded()
         .waitUntilLoaded('icinventoryreceipt')
         .addResult('Successfully Opened',4000)
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'DNLTI - 02')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'DLTI - 02')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100000')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000000')
-        .clickButton('Receive')
+        .clickButton('Unpost')
         .waitUntilLoaded('icinventoryreceipt')
         .addResult('Successfully Unposted',2000)
         .clickButton('Delete')
@@ -265,7 +269,7 @@ StartTest (function (t) {
         //Check ON hand stock of the item
         .displayText('=====  Checking ON Hand Stock of the item =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('DNLTI - 02', 'strItemNo', 1)
+        .doubleClickSearchRowValue('DLTI - 01', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -281,9 +285,137 @@ StartTest (function (t) {
         //endregion
 
 
-//        //region Scenario 3. Create Purchase Order Inventory Receipt for Non Lotted Item "Process Button" then Delete the IR.
-//        .displayText('=====  Scenario 3. Create Purchase Order Inventory Receipt for Non Lotted Item "Process Button" then Delete the IR. =====')
-//        .clickMenuFolder('Purchasing','Folder')
+        //region Scenario 3. Create Purchase Order Inventory Receipt for Non Lotted Item "Process Button" then Delete the IR.
+        .displayText('=====  Scenario 3. Create Purchase Order Inventory Receipt for Non Lotted Item "Process Button" then Delete the IR. =====')
+        .clickMenuFolder('Purchasing','Folder')
+        .clickMenuScreen('Purchase Orders','Screen')
+        .clickButton('New')
+        .waitUntilLoaded('appurchaseorder')
+        .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)
+        .waitUntilLoaded('')
+        .selectGridComboBoxRowValue('Items',1,'strItemNo','DNLTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('Items',1,'strUOM','LB','strUOM')
+        .enterGridData('Items', 1, 'colQtyOrdered', '100')
+        .verifyGridData('Items', 1, 'colTotal', '1000')
+        .clickButton('Save')
+        .waitUntilLoaded('')
+        .clickButton('Process')
+        .addResult('Processing PO to IR',1000)
+        .waitUntilLoaded('icinventoryreceipt')
+        .waitUntilLoaded('')
+        .verifyData('Combo Box','ReceiptType','Purchase Order')
+        .verifyData('Combo Box','Vendor','ABC Trucking')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'DNLTI - 01')
+        .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
+        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
+        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
+        .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
+        .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
+
+        .addFunction(function (next){
+            var win =  Ext.WindowManager.getActive(),
+                total = win.down('#lblTotal').text;
+            if (total == 'Total: 1,000.00') {
+                t.ok(true, 'Total is correct.');
+            }
+            else {
+                t.ok(false, 'Total is incorrect.');
+            }
+            next();
+        })
+
+        .clickButton('PostPreview')
+        .waitUntilLoaded('cmcmrecaptransaction')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',2000)
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        .clickMenuFolder('Purchasing','Folder')
+        .displayText('===== Create Purchase Order Inventory Receipt for Non Lotted Item "Process Button" Done=====')
+
+        //Check On Hand Stock of the Item
+        .displayText('=====  Checking ON Hand Stock of the item =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Items','Screen')
+        .doubleClickSearchRowValue('DNLTI - 01', 'strItemNo', 1)
+        .waitUntilLoaded('icitem')
+        .clickTab('Stock')
+        .waitUntilLoaded()
+        .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
+        //.verifyGridData('Stock', 1, 'colStockUOM', 'LB')
+        .verifyGridData('Stock', 1, 'colStockOnHand', '100')
+        .displayText('=====  On Hand Stock is Correct! =====')
+        .clickButton('Close')
+        .waitUntilLoaded()
+        .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+
+
+        //Delete IR
+        .displayText('===== Delete Non Lotted Inventory Receipt  =====')
+        .clickMenuScreen('Inventory Receipts','Screen')
+        .waitUntilLoaded()
+         .selectSearchRowNumber([1])
+        .clickButton('OpenSelected')
+        .waitUntilLoaded()
+        .waitUntilLoaded('icinventoryreceipt')
+        .addResult('Successfully Opened',4000)
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'DNLTI - 01')
+        .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
+        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
+        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
+        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
+        .clickButton('Unpost')
+        .waitUntilLoaded('')
+        .addResult('Successfully Unposted',2000)
+        .clickButton('Delete')
+        .waitUntilLoaded()
+        .addResult('',2000)
+        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded()
+        .displayText('===== Non Lotted Item Successfully Deleted=====')
+        .clearTextFilter('FilterGrid')
+
+        //Check ON hand stock of the item
+        .displayText('=====  Checking ON Hand Stock of the item =====')
+        .clickMenuScreen('Items','Screen')
+        .doubleClickSearchRowValue('DNLTI - 01', 'strItemNo', 1)
+        .waitUntilLoaded('icitem')
+        .clickTab('Stock')
+        .waitUntilLoaded()
+        .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
+        //.verifyGridData('Stock', 1, 'colStockUOM', 'LB')
+        .verifyGridData('Stock', 1, 'colStockOnOrder', '100')
+        .verifyGridData('Stock', 1, 'colStockOnHand', '0')
+        .displayText('=====  On Hand Stock is Correct! =====')
+        .clickButton('Close')
+        .waitUntilLoaded()
+        .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('=====  Create Purchase Order Inventory Receipt for Non Lotted Item "Process Button" then Delete the IR. Done =====')
+        //endregion
+
+
+        //region Scenario 4. Create Purchase Order Inventory Receipt for Non Lotted Item "Add Orders Button" then Delete the IR.
+        .displayText('=====  Scenario 4. Create Purchase Order Inventory Receipt for Non Lotted Item "Add Orders Button" then Delete the IR. =====')
+
+//        .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
 //        .clickMenuScreen('Purchase Orders','Screen')
 //        .clickButton('New')
 //        .waitUntilLoaded('appurchaseorder')
@@ -295,120 +427,9 @@ StartTest (function (t) {
 //        .verifyGridData('Items', 1, 'colTotal', '1000')
 //        .clickButton('Save')
 //        .waitUntilLoaded('')
-//        .clickButton('Process')
-//        .addResult('Processing PO to IR',1000)
-//        .waitUntilLoaded('icinventoryreceipt')
-//        .waitUntilLoaded('')
-//        .verifyData('Combo Box','ReceiptType','Purchase Order')
-//        .verifyData('Combo Box','Vendor','ABC Trucking')
-//        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'DNLTI - 01')
-//        .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
-//        .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
-//        .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-//        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
-//        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
-//        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-//        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
-//        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-//        .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
-//        .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
-//
-//        .addFunction(function (next){
-//            var win =  Ext.WindowManager.getActive(),
-//                total = win.down('#lblTotal').text;
-//            if (total == 'Total: 1,000.00') {
-//                t.ok(true, 'Total is correct.');
-//            }
-//            else {
-//                t.ok(false, 'Total is incorrect.');
-//            }
-//            next();
-//        })
-//
-//        .clickButton('Recap')
-//        .waitUntilLoaded('cmcmrecaptransaction')
-//        .waitUntilLoaded('')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
-//        .clickButton('Post')
-//        .waitUntilLoaded('')
-//        .addResult('Successfully Posted',2000)
-//        .waitUntilLoaded('')
 //        .clickButton('Close')
 //        .waitUntilLoaded('')
-//        .clickMenuFolder('Purchasing','Folder')
-//        .displayText('===== Create Purchase Order Inventory Receipt for Non Lotted Item "Process Button" Done=====')
-//
-//        //Check On Hand Stock of the Item
-//        .displayText('=====  Checking ON Hand Stock of the item =====')
-//        .clickMenuFolder('Inventory','Folder')
-//        .clickMenuScreen('Items','Screen')
-//        .doubleClickSearchRowValue('DNLTI - 01', 'strItemNo', 1)
-//        .waitUntilLoaded('icitem')
-//        .clickTab('Stock')
-//        .waitUntilLoaded()
-//        .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
-//        //.verifyGridData('Stock', 1, 'colStockUOM', 'LB')
-//        .verifyGridData('Stock', 1, 'colStockOnHand', '100')
-//        .displayText('=====  On Hand Stock is Correct! =====')
-//        .clickButton('Close')
-//        .waitUntilLoaded()
-//        .clearTextFilter('FilterGrid')
-//        .waitUntilLoaded()
-//
-//
-//        //Delete IR
-//        .displayText('===== Delete Non Lotted Inventory Receipt  =====')
-//        .clickMenuScreen('Inventory Receipts','Screen')
-//        .waitUntilLoaded()
-//        .doubleClickSearchRowValue('Purchase Order', 'strOrderType', 1)
-//        .waitUntilLoaded()
-//        .waitUntilLoaded('icinventoryreceipt')
-//        .addResult('Successfully Opened',4000)
-//        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'DNLTI - 01')
-//        .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-//        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
-//        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
-//        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-//        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
-//        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-//        .clickButton('Receive')
-//        .waitUntilLoaded('')
-//        .addResult('Successfully Unposted',2000)
-//        .clickButton('Delete')
-//        .waitUntilLoaded()
-//        .addResult('',2000)
-//        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
-//        .clickMessageBoxButton('yes')
-//        .waitUntilLoaded()
-//        .displayText('===== Non Lotted Item Successfully Deleted=====')
-//        .clearTextFilter('FilterGrid')
-//
-//        //Check ON hand stock of the item
-//        .displayText('=====  Checking ON Hand Stock of the item =====')
-//        .clickMenuScreen('Items','Screen')
-//        .doubleClickSearchRowValue('DNLTI - 01', 'strItemNo', 1)
-//        .waitUntilLoaded('icitem')
-//        .clickTab('Stock')
-//        .waitUntilLoaded()
-//        .verifyGridData('Stock', 1, 'colStockLocation', '0001 - Fort Wayne')
-//        //.verifyGridData('Stock', 1, 'colStockUOM', 'LB')
-//        .verifyGridData('Stock', 1, 'colStockOnOrder', '100')
-//        .verifyGridData('Stock', 1, 'colStockOnHand', '0')
-//        .displayText('=====  On Hand Stock is Correct! =====')
-//        .clickButton('Close')
-//        .waitUntilLoaded()
-//        .clearTextFilter('FilterGrid')
-//        .waitUntilLoaded()
-//        .clickMenuFolder('Inventory','Folder')
-//        .displayText('=====  Create Purchase Order Inventory Receipt for Non Lotted Item "Process Button" then Delete the IR. Done =====')
-//        //endregion
-
-
-        //region Scenario 4. Create Purchase Order Inventory Receipt for Non Lotted Item "Add Orders Button" then Delete the IR.
-        .displayText('=====  Scenario 4. Create Purchase Order Inventory Receipt for Non Lotted Item "Add Orders Button" then Delete the IR. =====')
+//        .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Inventory Receipts','Screen')
         .clickButton('New')
@@ -445,7 +466,7 @@ StartTest (function (t) {
             next();
         })
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -482,7 +503,9 @@ StartTest (function (t) {
         .displayText('===== Delete Non Lotted Inventory Receipt  =====')
         .clickMenuScreen('Inventory Receipts','Screen')
         .waitUntilLoaded()
-        .doubleClickSearchRowValue('Purchase Order', 'strOrderType', 1)
+        .selectSearchRowNumber([1])
+        .clickButton('OpenSelected')
+//        .doubleClickSearchRowValue('Purchase Order', 'strOrderType', 1)
         .waitUntilLoaded()
         .waitUntilLoaded('icinventoryreceipt')
         .addResult('Successfully Opened',4000)
@@ -493,7 +516,7 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-        .clickButton('Receive')
+        .clickButton('Unpost')
         .waitUntilLoaded('')
         .addResult('Successfully Unposted',2000)
         .clickButton('Delete')
@@ -524,7 +547,6 @@ StartTest (function (t) {
         .clickMenuFolder('Inventory','Folder')
         .displayText('=====  Create Purchase Order Inventory Receipt for Non Lotted Item "Add Orders Button" then Delete the IR. Done =====')
         //endregion
-
 
 
         //region Scenario 5. Create Purchase Contract Inventory Receipt for Non Lotted Item "Process Button" then Delete the IR
@@ -590,7 +612,7 @@ StartTest (function (t) {
             next();
         })
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -631,7 +653,8 @@ StartTest (function (t) {
         .displayText('===== Delete Non Lotted Inventory Receipt  =====')
         .clickMenuScreen('Inventory Receipts','Screen')
         .waitUntilLoaded()
-        .doubleClickSearchRowValue('Purchase Contract', 'strOrderType', 1)
+         .selectSearchRowNumber([1])
+        .clickButton('OpenSelected')
         .waitUntilLoaded()
         .waitUntilLoaded('icinventoryreceipt')
         .addResult('Successfully Opened',4000)
@@ -642,7 +665,7 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-        .clickButton('Receive')
+        .clickButton('Unpost')
         .waitUntilLoaded('')
         .addResult('Successfully Unposted',2000)
         .clickButton('Delete')
@@ -715,7 +738,7 @@ StartTest (function (t) {
             next();
         })
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -753,7 +776,8 @@ StartTest (function (t) {
         .displayText('===== Delete Non Lotted Inventory Receipt  =====')
         .clickMenuScreen('Inventory Receipts','Screen')
         .waitUntilLoaded()
-        .doubleClickSearchRowValue('Purchase Contract', 'strOrderType', 1)
+        .selectSearchRowNumber([1])
+        .clickButton('OpenSelected')
         .waitUntilLoaded()
         .waitUntilLoaded('icinventoryreceipt')
         .addResult('Successfully Opened',4000)
@@ -764,7 +788,7 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-        .clickButton('Receive')
+        .clickButton('Unpost')
         .waitUntilLoaded('')
         .addResult('Successfully Unposted',2000)
         .clickButton('Delete')

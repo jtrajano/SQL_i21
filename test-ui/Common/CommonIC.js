@@ -250,8 +250,8 @@ Ext.define('Inventory.CommonIC', {
             .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'LB')
             .verifyGridData('InventoryReceipt', 1, 'colLineTotal', linetotal)
 
-            .clickButton('PostPreview')
-            .waitUntilLoaded('cmcmrecaptransaction')
+            .clickTab('PostPreview')
+            .waitUntilLoaded('')
             .waitUntilLoaded('')
             .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
             .verifyGridData('RecapTransaction', 1, 'colRecapDebit', linetotal)
@@ -311,8 +311,8 @@ Ext.define('Inventory.CommonIC', {
             .verifyGridData('LotTracking', 1, 'colLotStorageLocation', storagelocation)
 
 
-            .clickButton('PostPreview')
-            .waitUntilLoaded('cmcmrecaptransaction')
+            .clickTab('PostPreview')
+            .waitUntilLoaded('')
             .waitUntilLoaded('')
             .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
             .verifyGridData('RecapTransaction', 1, 'colRecapDebit', linetotal)
@@ -551,7 +551,7 @@ Ext.define('Inventory.CommonIC', {
             .displayText('===== Other Charge Item Created =====')
             .done();
 
-    },
+    }
 
 
 

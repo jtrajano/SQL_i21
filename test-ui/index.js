@@ -341,6 +341,15 @@ Harness.start(
 
             { group: 'InventoryShipment',
                 items: [
+
+                    {
+                        url: 'CRUDScripts/InventoryShipment/PreSetup.js?v='+version,
+                        title: 'PreSetup',
+                        preload: [
+                            functionalTest,
+                            commonIC
+                        ]
+                    },
                     {
                         url: 'CRUDScripts/InventoryShipment/AddInventoryShipment.js?v='+version,
                         title: 'AddInventoryShipment',

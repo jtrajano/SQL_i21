@@ -6,13 +6,12 @@ StartTest (function (t) {
 
         //Add Category
         .addFunction(function(next){
-            commonIC.addCategory (t,next, 'TestGrains', 'Test Category Description', 2)
+            commonIC.addCategory (t,next, 'TestGrains2', 'Test Category Description', 2)
         })
-
 
         .displayText('=== Creating Commodity ===')
         .addFunction(function(next){
-            commonIC.addCommodity (t,next, 'TestCorn', 'Test Commodity Description')
+            commonIC.addCommodity (t,next, 'TestCorn2', 'Test Commodity Description')
         })
         .displayText('=== Commodity Created ===')
 
@@ -20,10 +19,10 @@ StartTest (function (t) {
         .addFunction(function(next){
             commonIC.addInventoryItem
             (t,next,
-                'NLTI - 100'
+                'ISNLTI - 01'
                 , 'Test Non Lotted Item Description'
-                , 'TestGrains'
-                , 'TestCorn'
+                , 'TestGrains2'
+                , 'TestCorn2'
                 , 4
                 , 'LB'
                 , 'LB'
@@ -37,10 +36,10 @@ StartTest (function (t) {
         .addFunction(function(next){
             commonIC.addInventoryItem
             (t,next,
-                'LTI - 100'
+                'ISLTI - 01'
                 , 'Test Lotted Item Description'
-                , 'TestGrains'
-                , 'TestCorn'
+                , 'TestGrains2'
+                , 'TestCorn2'
                 , 3
                 , 'LB'
                 , 'LB'
@@ -54,9 +53,9 @@ StartTest (function (t) {
         .addFunction(function(next){
             commonIC.addInventoryItem
             (t,next,
-                'DNLTI - 01'
+                'ISDNLTI - 01'
                 , 'Test Non Lotted Item Description'
-                , 'Grains'
+                , 'TestGrains2'
                 , 'TestCorn'
                 , 4
                 , 'LB'
@@ -71,9 +70,9 @@ StartTest (function (t) {
         .addFunction(function(next){
             commonIC.addInventoryItem
             (t,next,
-                'DLTI - 01'
+                'ISDLTI - 01'
                 , 'Test Lotted Item Description'
-                , 'Grains'
+                , 'TestGrains2'
                 , 'TestCorn'
                 , 3
                 , 'LB'
@@ -83,6 +82,23 @@ StartTest (function (t) {
                 , 40
             )
         })
+
+
+        //Adding Stock to Items
+        .displayText('===== Adding Stocks to Created items =====')
+        .addFunction(function(next){
+            commonIC.addDirectIRNonLotted (t,next, 'ABC Trucking', 1, 'ISNLTI - 01','LB', 10000, 10)
+        })
+
+        .addFunction(function(next){
+            commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'ISLTI - 01','LB', 10000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+        })
+        .displayText('===== Adding Stocks to Created Done =====')
+
+
+        .displayText('===== Pre-setup done =====')
+
+
         //endregion
 
         .done();
