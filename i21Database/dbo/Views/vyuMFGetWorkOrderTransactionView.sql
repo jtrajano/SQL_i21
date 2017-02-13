@@ -72,6 +72,8 @@ SELECT W.intWorkOrderId
 	,1 AS intSequenceNo
 	,'' AS strBatchId
 	,O.intOwnerId 
+	,PL.strParentLotNumber
+	,Convert(nvarchar(50),'') As strSpecialPalletId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -83,6 +85,7 @@ JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intMan
 LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WI.intBusinessShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WI.intItemId
 JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
+JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 JOIN dbo.tblICItemUOM IIU ON IIU.intItemUOMId = WI.intItemUOMId
 JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WI.intShiftId
@@ -169,6 +172,8 @@ SELECT W.intWorkOrderId
 	,1 AS intSequenceNo
 	,WI.strBatchId
 	,O.intOwnerId
+	,PL.strParentLotNumber
+	,Convert(nvarchar(50),'') As strSpecialPalletId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 Left JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intBatchId = WI.intBatchId
@@ -181,6 +186,7 @@ JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intMan
 LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WP.intBusinessShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WI.intItemId
 JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
+JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 JOIN dbo.tblICItemUOM IIU ON IIU.intItemUOMId = WI.intItemUOMId
 JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WI.intShiftId
@@ -265,6 +271,8 @@ SELECT W.intWorkOrderId
 	,2 AS intSequenceNo
 	,'' AS strBatchId
 	,O.intOwnerId
+	,PL.strParentLotNumber
+	,Convert(nvarchar(50),'') As strSpecialPalletId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -276,6 +284,7 @@ JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intMan
 LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WI.intBusinessShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WI.intItemId
 JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
+JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 JOIN dbo.tblICItemUOM IIU ON IIU.intItemUOMId = WI.intItemUOMId
 JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WI.intShiftId
@@ -362,6 +371,8 @@ SELECT W.intWorkOrderId
 	,3 AS intSequenceNo
 	,WP.strBatchId 
 	,O.intOwnerId
+	,PL.strParentLotNumber
+	,L1.strLotNumber AS strSpecialPalletId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -373,6 +384,7 @@ JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intMan
 LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WP.intBusinessShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WP.intItemId
 JOIN dbo.tblICLot L ON L.intLotId = WP.intLotId
+JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 JOIN dbo.tblICItemUOM IIU ON IIU.intItemUOMId = WP.intItemUOMId
 JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WP.intShiftId
@@ -383,6 +395,7 @@ LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
 Left JOIN dbo.tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
+LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = WP.intSpecialPalletLotId
 WHERE WP.ysnProductionReversed = 0
 
 UNION
@@ -459,6 +472,8 @@ SELECT W.intWorkOrderId
 	,4 AS intSequenceNo
 	,WP.strBatchId
 	,O.intOwnerId
+	,PL.strParentLotNumber
+	,L1.strLotNumber AS strSpecialPalletId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -470,6 +485,7 @@ JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intMan
 LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WP.intBusinessShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WP.intItemId
 JOIN dbo.tblICLot L ON L.intLotId = WP.intLotId
+JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 JOIN dbo.tblICItemUOM IIU ON IIU.intItemUOMId = WP.intItemUOMId
 JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WP.intShiftId
@@ -480,4 +496,5 @@ LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
 Left JOIN dbo.tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
+LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = WP.intSpecialPalletLotId
 WHERE WP.ysnProductionReversed = 1
