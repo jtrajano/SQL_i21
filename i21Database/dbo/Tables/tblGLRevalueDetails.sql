@@ -8,7 +8,7 @@
 	[strVendorName] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCommodity] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strLineOfBusiness] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strLocation] [nvarchar](50) NCOLLATE Latin1_General_CI_AS NOT NULL,
+	[strLocation] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTicket] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strContractId] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strItem] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
