@@ -2470,7 +2470,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
                 {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', hidden: true },
                 {dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hidden: true },
-                {dataIndex: 'intSourceId', text: 'intSourceId', width: 100, dataType: 'numeric', hidden: true }
+                {dataIndex: 'intSourceId', text: 'intSourceId', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'intCurrencyId', text: 'Currency Id', hidden: true, dataType: 'numeric' },
+                { dataIndex: 'intFreightTermId', text: 'Freight Term Id', hidden: true, dataType: 'numeric' },
+                { dataIndex: 'intShipToLocationId', text: 'Ship To Location Id', hidden: true, dataType: 'numeric' }
             ];
             search.title = "Add Orders";
             search.showNew = false;
@@ -2583,6 +2586,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             });
                         }
                         else {
+                            if(iRely.Functions.isEmpty(currentVM.get('intCurrencyId'))) 
+                                currentVM.set('intCurrencyId', order.get('intCurrencyId'));
+                            if(iRely.Functions.isEmpty(currentVM.get('intFreightTermId'))) 
+                                currentVM.set('intFreightTermId', order.get('intFreightTermId'));
+                            if(iRely.Functions.isEmpty(currentVM.get('intShipToLocationId'))) 
+                                currentVM.set('intShipToLocationId', order.get('intShipToLocationId'));
+
                             var newRecord = {
                                 intInventoryShipmentId: currentVM.get('intInventoryShipmentId'),
                                 intOrderId: order.get('intOrderId'),
@@ -2619,7 +2629,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 strDestinationGrades: order.get('strDestinationGrades'),
                                 intDestinationWeightId: order.get('intDestinationWeightId'),
                                 strDestinationWeights: order.get('strDestinationWeights'),
-
                                 strOwnershipType: 'Own',
                                 intOwnershipType: 1,
                                 intCommodityId: order.get('intCommodityId')
