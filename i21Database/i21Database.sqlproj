@@ -5028,6 +5028,7 @@
     <Build Include="dbo\Tables\tblGLRevalue.sql" />
     <Build Include="dbo\Tables\tblGLRevalueDetails.sql" />
     <Build Include="dbo\Functions\fnARGetCustomerAccountStatusCodes.sql" />
+    <Build Include="dbo\Views\vyuCTMultiCurrencyRevalue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
