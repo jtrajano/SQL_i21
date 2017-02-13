@@ -215,7 +215,7 @@ ELSE
 				,intLastModifiedUserId = @intUserId
 		FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 					ON F.strTransactionId = TMP.strTransactionId
-		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK)		
+		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK, @DIRECT_DEPOSIT)		
 				-- Condition #1:
 				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		
