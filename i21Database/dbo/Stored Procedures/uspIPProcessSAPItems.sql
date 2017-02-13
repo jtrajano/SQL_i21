@@ -123,8 +123,16 @@ Begin
 	Select @intItemId,um.intUnitMeasureId,iu.dblNumerator/iu.dblDenominator,CASE When iu.strUOM=@strStockUOM THEN 1 ELSE 0 End,1,1  
 	From tblIPItemUOMStage iu 
 	Join tblIPSAPUOM su on iu.strUOM=su.strSAPUOM 
-	Join tblICUnitMeasure um on su.stri21UOM=um.strUnitMeasure
+	Join tblICUnitMeasure um on su.stri21UOM=um.strSymbol
 	Where strItemNo=@strItemNo AND iu.intStageItemId=@intStageItemId
+
+	--if stock uom is KG then add TO as one of the uom
+	If (Select UPPER(strSymbol) From tblICUnitMeasure Where UPPER(strUnitMeasure) = UPPER(dbo.fnIPConvertSAPUOMToi21(@strStockUOM)))='KG'
+	Begin
+		If Not Exists (Select 1 From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where iu.intItemId=@intItemId AND um.strSymbol='TO')
+			Insert Into tblICItemUOM(intItemId,intUnitMeasureId,dblUnitQty,ysnStockUnit,ysnAllowPurchase,ysnAllowSale)
+			Select TOP 1 @intItemId,intUnitMeasureId,1000,0,1,1 From tblICUnitMeasure Where strSymbol='TO'
+	End
 
 	Insert Into tblICItemLocation(intItemId,intLocationId,intCostingMethod,intAllowNegativeInventory)
 	Select @intItemId,cl.intCompanyLocationId,1,3
@@ -153,13 +161,13 @@ Begin --Update
 	Select @intItemId,um.intUnitMeasureId,iu.dblNumerator/iu.dblDenominator,CASE When iu.strUOM=@strStockUOM THEN 1 ELSE 0 End,1,1  
 	From tblIPItemUOMStage iu 
 	Join tblIPSAPUOM su on iu.strUOM=su.strSAPUOM 
-	Join tblICUnitMeasure um on su.stri21UOM=um.strUnitMeasure
+	Join tblICUnitMeasure um on su.stri21UOM=um.strSymbol
 	Where strItemNo=@strItemNo AND iu.intStageItemId=@intStageItemId
 
 	Update iu Set iu.dblUnitQty=st.dblNumerator/st.dblDenominator 
 	From tblICItemUOM iu 
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-	Join tblIPSAPUOM su on um.strUnitMeasure=su.stri21UOM
+	Join tblIPSAPUOM su on um.strSymbol=su.stri21UOM
 	Join tblIPItemUOMStage st on st.strUOM=su.strSAPUOM
 	Where intItemId=@intItemId AND st.intStageItemId=@intStageItemId
 End
@@ -169,7 +177,7 @@ End
 
 	--Move to Archive
 	Insert into tblIPItemArchive(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription)
-	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strShortName
+	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription
 	From tblIPItemStage Where intStageItemId=@intStageItemId
 
 	Select @intNewStageItemId=SCOPE_IDENTITY()
@@ -195,7 +203,7 @@ BEGIN CATCH
 
 	--Move to Error
 	Insert into tblIPItemError(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strErrorMessage,strImportStatus)
-	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strShortName,@ErrMsg,'Failed'
+	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,@ErrMsg,'Failed'
 	From tblIPItemStage Where intStageItemId=@intStageItemId
 
 	Select @intNewStageItemId=SCOPE_IDENTITY()

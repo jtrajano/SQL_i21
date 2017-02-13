@@ -77,7 +77,7 @@ BEGIN TRY
 	From tblRKStgBlendDemand bp Join tblICItem i on bp.strItemName=i.strItemNo
 	Join tblSMCompanyLocationSubLocation sl on bp.strSubLocation=sl.strSubLocationName
 	Join tblICItemUOM iu on i.intItemId=iu.intItemId
-	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId AND um.strUnitMeasure=bp.strUOM
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId AND um.strSymbol=bp.strUOM
 	Where sl.intCompanyLocationId=@intLocationId
 END TRY
 
