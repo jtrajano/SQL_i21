@@ -34,8 +34,8 @@ FROM (
 		WHERE CD.intContractDetailId NOT IN (
 				SELECT CASE 
 						WHEN L.intPurchaseSale = 1
-							THEN LD.intPContractDetailId
-						ELSE LD.intSContractDetailId
+							THEN ISNULL(LD.intPContractDetailId,0)
+						ELSE ISNULL(LD.intSContractDetailId,0)
 						END
 				FROM tblLGLoadDetail LD
 				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -121,7 +121,7 @@ FROM (
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE L.intLoadId NOT IN (
 				SELECT intLoadId
-				FROM tblLGLoadDocuments
+				FROM tblLGLoadDocuments WHERE ISNULL(ysnReceived,0) = 1
 				)
 			AND CH.intContractTypeId = 1
 		) t
@@ -167,12 +167,12 @@ FROM (
 			AND CH.intContractTypeId = 1
 		) t
 		,tblCTEvent EV
-	WHERE t.intDayToShipment <= EV.intDaysToRemind
+	WHERE t.intDayToShipment >= EV.intDaysToRemind
 		AND EV.strEventName = 'Contract Without Weight Claim'
 	
 	UNION ALL
 	
-	SELECT t.*
+	SELECT DISTINCT t.*
 		,EV.intEventId
 	FROM (
 		SELECT 5 intDataSeq
@@ -206,7 +206,7 @@ FROM (
 			AND CH.intContractTypeId = 1
 		) t
 		,tblCTEvent EV
-	WHERE t.intDayToShipment < EV.intDaysToRemind
+	WHERE t.intDayToShipment > EV.intDaysToRemind
 		AND EV.strEventName = 'Weight Claims w/o Debit Note'
 
 	UNION ALL
