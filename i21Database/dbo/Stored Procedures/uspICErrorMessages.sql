@@ -565,7 +565,7 @@ SET @strmessage = 'Gross/Net UOM is invalid for item %s.'
 EXEC sp_addmessage 80121,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80122) EXEC sp_dropmessage 80122, 'us_english'	
-SET @strmessage = 'Cost UOM is invalid for item %s.'
+SET @strmessage = 'Cost UOM is invalid or missing for item %s.'
 EXEC sp_addmessage 80122,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80123) EXEC sp_dropmessage 80123, 'us_english'	
