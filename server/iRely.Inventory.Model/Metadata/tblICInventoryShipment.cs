@@ -168,6 +168,7 @@ namespace iRely.Inventory.Model
         public string strComment { get; set; }
         public bool? ysnPosted { get; set; }
         public int? intWarehouseInstructionHeaderId { get; set; }
+        public int? intCurrencyId { get; set; }
 
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
     }
@@ -1429,6 +1430,9 @@ namespace iRely.Inventory.Model
         public int? intDestinationWeightId { get; set; }
         public string strDestinationWeights { get; set; }
         public string strDestinationGrades { get; set; }
+        public int? intCurrencyId { get; set; }
+        public int? intFreightTermId { get; set; }
+        public int? intShipToLocationId { get; set; }
     }
 
     public class vyuICShipmentInvoice
