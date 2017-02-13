@@ -107,9 +107,10 @@ BEGIN
 										ELSE
 											CAST(C.intNextDeliveryDegreeDay AS NVARCHAR(20))
 										END) 
-					,dblDailyUse = (CASE WHEN H.strCurrentSeason = ''Summer'' THEN C.dblSummerDailyUse
-									WHEN H.strCurrentSeason = ''Winter'' THEN  C.dblWinterDailyUse
-									ELSE COALESCE(C.dblWinterDailyUse,0) End) 
+					,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= H.intBeginSummerMonth AND  MONTH(GETDATE()) < H.intBeginWinterMonth
+										THEN ISNULL(C.dblSummerDailyUse,0.0) 
+										ELSE ISNULL(C.dblWinterDailyUse,0.0)
+									END) 
 					, strFillGroupCode = ISNULL( I.strFillGroupCode,'''') 
 					, strFillGroupDescription = I.strDescription
 					, ysnFillGroupActive = I.ysnActive
@@ -261,9 +262,10 @@ BEGIN
 									ELSE
 										CAST(C.intNextDeliveryDegreeDay AS NVARCHAR(20))
 									END) 
-				,dblDailyUse = (CASE WHEN H.strCurrentSeason = ''Summer'' THEN C.dblSummerDailyUse
-								WHEN H.strCurrentSeason = ''Winter'' THEN  C.dblWinterDailyUse
-								ELSE Coalesce(C.dblWinterDailyUse,0) End) 
+				,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= H.intBeginSummerMonth AND  MONTH(GETDATE()) < H.intBeginWinterMonth
+									THEN ISNULL(C.dblSummerDailyUse,0.0) 
+									ELSE ISNULL(C.dblWinterDailyUse,0.0)
+								END)
 				, strFillGroupCode = ISNULL( I.strFillGroupCode,'''')
 				, strFillGroupDescription = I.strDescription
 				, ysnFillGroupActive = I.ysnActive
