@@ -68,6 +68,8 @@ BEGIN
 				,dblLatitude = B.dblLatitude
 				,intCustomerId = B.intCustomerID
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
+				,dblCustomerBalance = ISNULL(D.dblFutureCurrent, 0.0)
+				,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -133,6 +135,8 @@ BEGIN
 				,dblLatitude = B.dblLatitude
 				,intCustomerId = B.intCustomerID
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
+				,dblCustomerBalance = ISNULL(K.dblTotalDue, 0.0)
+				,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -150,6 +154,8 @@ BEGIN
 				ON A.intUserID = H.intEntityUserSecurityId
 			LEFT JOIN tblSMCompanyLocation I
 				ON B.intLocationId = I.intCompanyLocationId
+			LEFT JOIN vyuARCustomerInquiryReport K
+				ON D.intEntityId = K.intEntityCustomerId
 			WHERE ISNULL(A.strOrderNumber,'''') <> ''''
 		')
 	END
