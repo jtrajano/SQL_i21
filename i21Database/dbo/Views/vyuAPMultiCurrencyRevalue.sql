@@ -17,14 +17,15 @@ SELECT DISTINCT
 	dblAmount				=	A.dblTotal,
 	intCurrencyId			=	A.intCurrencyId,
 	intForexRateType		=	BD.intCurrencyExchangeRateTypeId,
+	strForexRateType		=	CER.strCurrencyExchangeRateType,
 	dblForexRate			=	BD.dblRate,
 	dblHistoricAmount		=	A.dblTotal * BD.dblRate,
-	dblNewForexRate			=	0, --Calcuate By GL
-	dblNewAmount			=	0, --Calcuate By GL
-	dblUnrealizedDebitGain	=	0, --Calcuate By GL
-	dblUnrealizedCreditGain	=	0, --Calcuate By GL
-	dblDebit				=	0, --Calcuate By GL
-	dblCredit				=	0  --Calcuate By GL
+	dblNewForexRate         =    0, --Calcuate By GL
+    dblNewAmount            =    0, --Calcuate By GL
+    dblUnrealizedDebitGain  =    0, --Calcuate By GL
+    dblUnrealizedCreditGain =    0, --Calcuate By GL
+    dblDebit                =    0, --Calcuate By GL
+    dblCredit               =    0  --Calcuate By GL
 FROM tblAPBill A
 INNER JOIN tblAPBillDetail BD
 	ON BD.intBillId = A.intBillId
@@ -40,7 +41,7 @@ LEFT JOIN dbo.tblICCategory CT
 	ON IT.intCategoryId = CT.intCategoryId
 LEFT JOIN dbo.tblICCommodity CC
 	ON CC.intCommodityId = IT.intCommodityId
-LEFT JOIN dbo.tblSMCurrency H1 
-	ON H1.intCurrencyID = A.intCurrencyId
+LEFT JOIN dbo.tblSMCurrencyExchangeRateType CER
+	ON CER.intCurrencyExchangeRateTypeId = BD.intCurrencyExchangeRateTypeId
 WHERE A.ysnPosted = 1 AND A.ysnPaid = 0
 
