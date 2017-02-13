@@ -5013,6 +5013,7 @@
     <None Include="Scripts\Post-Deployment\CT\4_EventConfiguration.sql" />
     <Build Include="dbo\Tables\tblRKArchBlendDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetDefaultData.sql" />
+    <Build Include="dbo\Views\vyuCTMultiCurrencyRevalue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
