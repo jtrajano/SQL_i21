@@ -572,7 +572,7 @@ BEGIN
 						,@dblValue								= @AutoNegativeAmount
 						,@dblSalesPrice							= 0
 						,@intCurrencyId							= NULL
-						,@dblExchangeRate						= 1
+						--,@dblExchangeRate						= 1
 						,@intTransactionId						= @intTransactionId
 						,@intTransactionDetailId				= @intTransactionDetailId
 						,@strTransactionId						= @strTransactionId

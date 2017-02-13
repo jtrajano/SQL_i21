@@ -370,6 +370,8 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
@@ -418,7 +420,9 @@ BEGIN
 				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
 				,intLotId                   = Lot.intLotId
 				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
-				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
+				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId)
+				,intForexRateTypeId			= DetailItem.intForexRateTypeId
+				,dblForexRate				= 1		 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -510,6 +514,8 @@ BEGIN
 					,[intSourceTransactionDetailId]
 					,[intFobPointId]
 					,[intInTransitSourceLocationId]
+					,[intForexRateTypeId]
+					,[dblForexRate]
 			)
 			SELECT
 					[intItemId] 
@@ -533,6 +539,8 @@ BEGIN
 					,[intTransactionDetailId] 
 					,[intFobPointId] = @intFobPointId
 					,[intInTransitSourceLocationId] = t.intItemLocationId
+					,[intForexRateTypeId] = t.intForexRateTypeId
+					,[dblForexRate] = t.dblForexRate
 			FROM	tblICInventoryTransaction t 
 			WHERE	t.strTransactionId = @strTransactionId
 					AND t.ysnIsUnposted = 0 
@@ -607,6 +615,8 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
@@ -645,6 +655,8 @@ BEGIN
 				,intLotId                   = Lot.intLotId
 				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
 				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
+				,intForexRateTypeId			= DetailItem.intForexRateTypeId
+				,dblForexRate				= 1		 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -837,6 +849,13 @@ BEGIN
 	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END
 
 	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
+END 
+
+-- Clean up the recap data. 
+BEGIN 
+	UPDATE @GLEntries
+	SET dblDebitForeign = ISNULL(dblDebitForeign, 0)
+		,dblCreditForeign = ISNULL(dblCreditForeign, 0) 
 END 
 
 --------------------------------------------------------------------------------------------  
