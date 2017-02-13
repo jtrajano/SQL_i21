@@ -609,8 +609,7 @@ BEGIN
 
 		SELECT TOP 1 @getItemId = RawData.intItemId
 		FROM	@ReceiptEntries RawData 	   
-		WHERE ((RawData.dblNet > 0 OR RawData.dblGross > 0) AND (RawData.intGrossNetUOMId IS NULL OR RawData.intGrossNetUOMId < 1)) OR 
-			  (RawData.intGrossNetUOMId > 0 AND (RawData.intGrossNetUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId)))
+		WHERE RawData.intGrossNetUOMId > 0 AND (RawData.intGrossNetUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId))
 
 		IF @getItemId > 0
 			BEGIN
@@ -618,7 +617,7 @@ BEGIN
 				FROM tblICItem
 				WHERE intItemId = @getItemId
 
-				-- Gross/Net UOM is invalid or missing for item {Item}.
+				-- Gross/Net UOM is invalid for item {Item}.
 				RAISERROR(80121, 11, 1, @getItem);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
@@ -630,8 +629,7 @@ BEGIN
 
 		SELECT TOP 1 @getItemId = RawData.intItemId
 		FROM	@ReceiptEntries RawData 	   
-		WHERE RawData.dblCost > 0
-			  AND (RawData.intCostUOMId IS NULL OR RawData.intCostUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId))
+		WHERE RawData.intCostUOMId > 0 AND RawData.intCostUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId)
 
 		IF @getItemId > 0
 			BEGIN
@@ -639,7 +637,7 @@ BEGIN
 				FROM tblICItem
 				WHERE intItemId = @getItemId
 
-				-- Cost UOM is invalid or missing for item {Item}.
+				-- Cost UOM is invalid for item {Item}.
 				RAISERROR(80122, 11, 1, @getItem);
 				ROLLBACK TRANSACTION;
 				GOTO _Exit;
@@ -1005,6 +1003,7 @@ BEGIN
 			END
 
 		-- Validate Cost UOM Id
+		-- Cost UOM Id is required if Cost Method is 'Per Unit'
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
@@ -1971,6 +1970,11 @@ BEGIN
 				) Detail
 					ON Receipt.intInventoryReceiptId = Detail.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
+
+		-- Update Cost UOM Id if null
+		UPDATE tblICInventoryReceiptItem
+		SET intCostUOMId = intUnitMeasureId
+		WHERE dblUnitCost > 0 AND intCostUOMId IS NULL
 
 		-- Calculate the other charges
 		BEGIN 			
