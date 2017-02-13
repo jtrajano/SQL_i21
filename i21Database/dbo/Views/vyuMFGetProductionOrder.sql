@@ -21,7 +21,7 @@ SELECT IsNULL(BR.intBlendRequirementId, 0) AS intBlendRequirementId
 	,W.strComment
 	,W.intLocationId
 	,W.intConcurrencyId
-	,ISNULL(CD.dtmCalendarDate, W.dtmExpectedDate) dtmPlannedDate
+	,ISNULL(CD.dtmCalendarDate, W.dtmPlannedDate) dtmPlannedDate
 	,ISNULL(Round(SWD.dblPlannedQty, 0), W.dblQuantity) dblPlannedQty
 	,S.intShiftId
 	,S.strShiftName AS strPlannedShiftName
@@ -55,7 +55,7 @@ LEFT JOIN dbo.tblMFSchedule S1 ON S1.intScheduleId = SW1.intScheduleId
 LEFT JOIN tblMFScheduleCalendarDetail CD ON CD.intCalendarDetailId = SWD.intCalendarDetailId
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = IsNULL(SWD.intPlannedShiftId,W.intPlannedShiftId)
 LEFT JOIN dbo.tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
-	AND SW.dtmPlannedDate = ISNULL(CD.dtmCalendarDate, W.dtmExpectedDate)
+	AND SW.dtmPlannedDate = ISNULL(CD.dtmCalendarDate, W.dtmPlannedDate)
 	AND CASE 
 		WHEN ISNULL(SW.intPlannnedShiftId, 0) = 0
 			THEN ISNULL(SWD.intPlannedShiftId, 0)

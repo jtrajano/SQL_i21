@@ -85,6 +85,7 @@ BEGIN TRY
 	IF @ysnRequireCustomerApproval = 1
 		AND @intProductTypeId = 6
 		AND @intSampleControlPointId = 14
+		AND @strApprovalBase = 'Lot'
 	BEGIN
 		UPDATE tblMFLotInventory
 		SET intBondStatusId = @intLotStatusId
@@ -93,6 +94,7 @@ BEGIN TRY
 	ELSE IF @ysnRequireCustomerApproval = 1
 		AND @intProductTypeId = 11
 		AND @intSampleControlPointId = 14
+		AND @strApprovalBase = 'Parent Lot'
 	BEGIN
 		UPDATE LI
 		SET intBondStatusId = @intLotStatusId
@@ -100,6 +102,17 @@ BEGIN TRY
 		JOIN dbo.tblICLot AS L ON PL.intParentLotId = L.intParentLotId
 			AND PL.intParentLotId = @intProductValueId
 		JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
+	END
+	ELSE IF @ysnRequireCustomerApproval = 1
+		AND @intSampleControlPointId = 14
+		AND @strApprovalBase = 'Container'
+	BEGIN
+		UPDATE LI
+		SET intBondStatusId = @intLotStatusId
+		FROM dbo.tblICLot AS L 
+		JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
+		JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+		WHERE RIL.strContainerNo = @strContainerNumber
 	END
 
 	-- Wholesome Sweetener -- JIRA QC-240
@@ -317,8 +330,7 @@ BEGIN TRY
 					,L.intLotStatusId
 				FROM tblICLot L
 				JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
-				WHERE L.strLotNumber = @strMainLotNumber
-					AND RIL.strContainerNo = @strContainerNumber
+				WHERE RIL.strContainerNo = @strContainerNumber
 			END
 			ELSE IF @intProductTypeId = 11
 			BEGIN
@@ -340,8 +352,7 @@ BEGIN TRY
 					,L.intLotStatusId
 				FROM tblICLot L
 				JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
-				WHERE L.intParentLotId = @intProductValueId
-					AND RIL.strContainerNo = @strContainerNumber
+				WHERE RIL.strContainerNo = @strContainerNumber
 			END
 		END
 
