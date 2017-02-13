@@ -3642,7 +3642,7 @@ Ext.define('Inventory.view.ItemViewController', {
         if (current) {
             if (!iRely.Functions.isEmpty(current.get('intCommodityId')) && grid.getStore().data.length <= 1) {
                 var cbo = win.down('#cboCommodity');
-                var store = win.viewModel.storeInfo.commodityList;
+                var store = cbo.getStore();
                 if (store) {
                     var commodity = store.findRecord(cbo.valueField, cbo.getValue());
                     if (commodity) {
