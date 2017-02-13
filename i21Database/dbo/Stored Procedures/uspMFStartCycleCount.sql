@@ -26,7 +26,7 @@ BEGIN TRY
 		,@TRANCOUNT INT
 		,@intProductionStagingId INT
 		,@intProductionStageLocationId INT
-		,@intPMStageLocationId int 
+		,@intPMStageLocationId INT
 
 	SELECT @TRANCOUNT = @@TRANCOUNT
 
@@ -375,6 +375,7 @@ BEGIN TRY
 		,intItemUOMId INT
 		,intCategoryId INT
 		,intMainItemId INT
+		,intRecipeItemId INT
 		)
 	DECLARE @tblICFinalItem TABLE (
 		intItemId INT
@@ -385,12 +386,13 @@ BEGIN TRY
 		,intItemUOMId INT
 		,intCategoryId INT
 		,intMainItemId INT
+		,intRecipeItemId INT
 		)
 	DECLARE @dblProduceQty NUMERIC(38, 20)
 		,@intProduceUOMId INT
 		,@strPackagingCategory NVARCHAR(50)
 		,@intPackagingCategoryId INT
-		,@intPMCategoryId int
+		,@intPMCategoryId INT
 
 	SELECT @dblProduceQty = SUM(dblPhysicalCount)
 		,@intProduceUOMId = MIN(intPhysicalItemUOMId)
@@ -416,9 +418,9 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intPackagingCategoryId
 
-	Select @intPMCategoryId=intCategoryId 
-	From tblICCategory
-	Where strCategoryCode =@strPackagingCategory
+	SELECT @intPMCategoryId = intCategoryId
+	FROM tblICCategory
+	WHERE strCategoryCode = @strPackagingCategory
 
 	IF @dblProduceQty IS NOT NULL
 	BEGIN
@@ -431,6 +433,7 @@ BEGIN TRY
 			,intItemUOMId
 			,intCategoryId
 			,intMainItemId
+			,intRecipeItemId
 			)
 		SELECT ri.intItemId
 			,ri.intConsumptionMethodId
@@ -457,6 +460,7 @@ BEGIN TRY
 			,ri.intItemUOMId
 			,I.intCategoryId
 			,NULL
+			,ri.intRecipeItemId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -509,6 +513,7 @@ BEGIN TRY
 			,IU.intItemUOMId
 			,I.intCategoryId
 			,RSI.intItemId
+			,RI.intRecipeItemId
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
@@ -568,6 +573,7 @@ BEGIN TRY
 			,intItemUOMId
 			,intCategoryId
 			,intMainItemId
+			,intRecipeItemId
 			)
 		SELECT ri.intItemId
 			,ri.intConsumptionMethodId
@@ -606,6 +612,7 @@ BEGIN TRY
 			,ri.intItemUOMId
 			,I.intCategoryId
 			,NULL
+			,ri.intRecipeItemId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -670,6 +677,7 @@ BEGIN TRY
 			,IU.intItemUOMId
 			,I.intCategoryId
 			,RSI.intItemId
+			,RI.intRecipeItemId
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
@@ -710,6 +718,7 @@ BEGIN TRY
 		,intItemUOMId
 		,intCategoryId
 		,intMainItemId
+		,intRecipeItemId
 		)
 	SELECT intItemId
 		,intConsumptionMethodId
@@ -719,6 +728,7 @@ BEGIN TRY
 		,intItemUOMId
 		,intCategoryId
 		,intMainItemId
+		,intRecipeItemId
 	FROM @tblICItem
 	GROUP BY intItemId
 		,intConsumptionMethodId
@@ -727,6 +737,7 @@ BEGIN TRY
 		,intItemUOMId
 		,intCategoryId
 		,intMainItemId
+		,intRecipeItemId
 
 	IF @ysnIncludeOutputItem = 1
 	BEGIN
@@ -786,7 +797,7 @@ BEGIN TRY
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
-		AND intAttributeId = 90--PM Staging Location
+		AND intAttributeId = 90 --PM Staging Location
 
 	DECLARE @tblMFQtyInProductionStagingLocation TABLE (
 		intItemId INT
@@ -794,6 +805,7 @@ BEGIN TRY
 		,dblOpeningQty NUMERIC(18, 6)
 		,dblQtyInProdStagingLocation NUMERIC(18, 6)
 		,intCategoryId INT
+		,dblRequiredQty NUMERIC(18, 6)
 		)
 	DECLARE @tblMFLot TABLE (
 		intItemId INT
@@ -816,15 +828,18 @@ BEGIN TRY
 		AND L.intLotStatusId = 1
 		AND L.dtmExpiryDate > GETDATE()
 		AND L.dblQty > 0
-		AND (L.intStorageLocationId = CASE 
-			WHEN I.intConsumptionMethodId = 2
-				THEN I.intStorageLocationId
-			ELSE @intProductionStageLocationId
-			END OR L.intStorageLocationId = CASE 
-			WHEN I.intConsumptionMethodId = 2
-				THEN I.intStorageLocationId
-			ELSE @intPMStageLocationId
-			END)
+		AND (
+			L.intStorageLocationId = CASE 
+				WHEN I.intConsumptionMethodId = 2
+					THEN I.intStorageLocationId
+				ELSE @intProductionStageLocationId
+				END
+			OR L.intStorageLocationId = CASE 
+				WHEN I.intConsumptionMethodId = 2
+					THEN I.intStorageLocationId
+				ELSE @intPMStageLocationId
+				END
+			)
 	GROUP BY I.intItemId
 		,I.intItemUOMId
 
@@ -850,6 +865,7 @@ BEGIN TRY
 		,dblOpeningQty
 		,dblQtyInProdStagingLocation
 		,intCategoryId
+		,dblRequiredQty
 		)
 	SELECT I.intItemId
 		,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(I.dblRequiredQty, 0)
@@ -860,9 +876,116 @@ BEGIN TRY
 			END
 		,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
 		,I.intCategoryId
+		,IsNULL(I.dblRequiredQty, 0)
 	FROM @tblICFinalItem I
 	LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
 	LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+	WHERE I.intItemId IN (
+			SELECT Max(intItemId)
+			FROM @tblICFinalItem
+			GROUP BY intRecipeItemId
+			HAVING count(intRecipeItemId) = 1
+			)
+
+	DECLARE @dblRequiredQty DECIMAL(38, 20)
+		,@dblQty DECIMAL(38, 20)
+		,@intPrevRecipeItemId INT
+		,@intRecipeItemId INT
+		,@intItemId1 INT
+
+	SELECT @intPrevRecipeItemId = 0
+
+	SELECT @intItemId1 = MIN(intItemId)
+	FROM @tblICFinalItem I
+	WHERE I.intItemId NOT IN (
+			SELECT Max(intItemId)
+			FROM @tblICFinalItem
+			GROUP BY intRecipeItemId
+			HAVING count(intRecipeItemId) = 1
+			)
+
+	WHILE @intItemId1 IS NOT NULL
+	BEGIN
+		SELECT @dblQty = 0
+
+		SELECT @dblQty = IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
+			,@dblRequiredQty = CASE 
+				WHEN @intPrevRecipeItemId <> intRecipeItemId
+					THEN IsNULL(I.dblRequiredQty, 0)
+				ELSE @dblRequiredQty
+				END
+			,@intRecipeItemId = intRecipeItemId
+		FROM @tblICFinalItem I
+		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
+		WHERE I.intItemId = @intItemId1
+
+		IF @dblQty >= @dblRequiredQty
+		BEGIN
+			INSERT INTO @tblMFQtyInProductionStagingLocation (
+				intItemId
+				,dblQtyInProductionStagingLocation ---System Qty
+				,dblOpeningQty
+				,dblQtyInProdStagingLocation
+				,intCategoryId
+				,dblRequiredQty
+				)
+			SELECT I.intItemId
+				,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - @dblRequiredQty
+				,CASE 
+					WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
+						THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+					ELSE 0
+					END
+				,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
+				,I.intCategoryId
+				,@dblRequiredQty
+			FROM @tblICFinalItem I
+			LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
+			LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+			WHERE I.intItemId = @intItemId1
+
+			SELECT @dblRequiredQty = 0
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblMFQtyInProductionStagingLocation (
+				intItemId
+				,dblQtyInProductionStagingLocation ---System Qty
+				,dblOpeningQty
+				,dblQtyInProdStagingLocation
+				,intCategoryId
+				,dblRequiredQty
+				)
+			SELECT I.intItemId
+				,0
+				,CASE 
+					WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
+						THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+					ELSE 0
+					END
+				,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
+				,I.intCategoryId
+				,@dblQty
+			FROM @tblICFinalItem I
+			LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
+			LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+			WHERE I.intItemId = @intItemId1
+
+			SELECT @dblRequiredQty = @dblRequiredQty - @dblQty
+		END
+
+		SELECT @intPrevRecipeItemId = @intRecipeItemId
+
+		SELECT @intItemId1 = MIN(intItemId)
+		FROM @tblICFinalItem I
+		WHERE I.intItemId NOT IN (
+				SELECT Max(intItemId)
+				FROM @tblICFinalItem
+				GROUP BY intRecipeItemId
+				HAVING count(intRecipeItemId) = 1
+				)
+			AND I.intItemId > @intItemId1
+	END
 
 	DELETE
 	FROM @tblICFinalItem
@@ -932,14 +1055,22 @@ BEGIN TRY
 			FROM @tblMFQtyInProductionStagingLocation PS
 			WHERE PS.intItemId = I.intItemId
 			)
-		,I.dblRequiredQty
+		,(
+			SELECT MAX(PS.dblRequiredQty)
+			FROM @tblMFQtyInProductionStagingLocation PS
+			WHERE PS.intItemId = I.intItemId
+			) dblRequiredQty
 		,(
 			SELECT SUM(PS.dblQtyInProductionStagingLocation)
 			FROM @tblMFQtyInProductionStagingLocation PS
 			WHERE PS.intItemId = I.intItemId
 			)
 		,I.intItemUOMId
-		,Case When I.intCategoryId =@intPMCategoryId Then  @intPMStageLocationId Else @intProductionStageLocationId End
+		,CASE 
+			WHEN I.intCategoryId = @intPMCategoryId
+				THEN @intPMStageLocationId
+			ELSE @intProductionStageLocationId
+			END
 		,@intUserId
 		,@dtmCurrentDateTime
 		,@intUserId

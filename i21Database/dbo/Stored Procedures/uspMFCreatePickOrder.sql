@@ -498,18 +498,17 @@ BEGIN TRY
 
 			SELECT @intItemId = intItemId
 				,@dblQty = dblQty
-				,@dblRequiredQty = dblQty
+				,@dblRequiredQty = dblRequiredQty
 				,@intItemUOMId = intItemUOMId
 				,@intStagingLocationId =intStagingLocationId 
 			FROM @OrderDetailInformation
 			WHERE intLineNo = @intLineNo
 
-			SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)) - IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intItemUOMId, @intItemUOMId, T.dblQty)), 0)
+			SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 			JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 				AND R.strInternalCode = 'STOCK'
-			LEFT JOIN dbo.tblMFTask T ON T.intLotId = L.intLotId
 			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 				AND BS.strPrimaryStatus = 'Active'
@@ -517,6 +516,14 @@ BEGIN TRY
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
 				AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+				And L.intStorageLocationId NOT IN (
+				SELECT intStageLocationId
+				FROM @tblMFStageLocation
+				)
+
+			--Select @dblAvailableQty=@dblAvailableQty- IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(OD.intItemUOMId, @intItemUOMId, OD.dblRequiredQty )), 0)
+			--from tblMFOrderDetail OD 
+			--Where OD.intItemId = @intItemId and OD.intOrderHeaderId in (Select OH.intOrderHeaderId from tblMFOrderHeader OH Where OH.intOrderStatusId <>10)
 
 			IF @dblAvailableQty IS NULL
 				OR @dblAvailableQty < 0
@@ -525,7 +532,7 @@ BEGIN TRY
 
 				DELETE
 				FROM @OrderDetailInformation
-				WHERE intLineNo = @intLineNo
+				WHERE intLineNo = @intLineNo and dblQty=dblRequiredQty 
 			END
 
 			IF @dblQty - @dblAvailableQty > 0
@@ -535,6 +542,7 @@ BEGIN TRY
 				UPDATE @OrderDetailInformation
 				SET dblQty = @dblAvailableQty
 					,dblWeight = @dblAvailableQty
+					,dblRequiredQty =dblRequiredQty -dblQty+@dblAvailableQty
 				WHERE intLineNo = @intLineNo
 
 				DECLARE @tblSubstituteItem TABLE (
@@ -586,12 +594,11 @@ BEGIN TRY
 
 					SELECT @dblAvailableQty = 0
 
-					SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)) - IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intItemUOMId, @intItemUOMId, T.dblQty)), 0)
+					SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)) 
 					FROM dbo.tblICLot L
 					JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 						AND R.strInternalCode = 'STOCK'
-					LEFT JOIN dbo.tblMFTask T ON T.intLotId = L.intLotId
 					JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 					JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'
@@ -600,6 +607,16 @@ BEGIN TRY
 						AND L.intLocationId = @intLocationId
 						AND LS.strPrimaryStatus = 'Active'
 						AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+						And L.intStorageLocationId NOT IN (
+											SELECT intStageLocationId
+											FROM @tblMFStageLocation
+											)
+
+
+					--Select @dblAvailableQty=@dblAvailableQty- IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(OD.intItemUOMId, @intItemUOMId, OD.dblRequiredQty )), 0)
+					--from tblMFOrderDetail OD 
+					--Where OD.intItemId = @intItemId and OD.intOrderHeaderId in (Select OH.intOrderHeaderId from tblMFOrderHeader OH Where OH.intOrderStatusId <>10)
+
 
 					IF @dblAvailableQty IS NULL
 					BEGIN
@@ -620,6 +637,7 @@ BEGIN TRY
 							,dblWeight
 							,intWeightUOMId
 							,dblWeightPerUnit
+							,dblRequiredQty 
 							,intUnitsPerLayer
 							,intLayersPerPallet
 							,intPreferenceId
@@ -635,6 +653,7 @@ BEGIN TRY
 							,@dblQty
 							,@intSubstituteItemUOMId
 							,1
+							,@dblQty
 							,ISNULL(NULL, intUnitPerLayer)
 							,ISNULL(NULL, intLayerPerPallet)
 							,(
@@ -665,6 +684,7 @@ BEGIN TRY
 							,dblWeight
 							,intWeightUOMId
 							,dblWeightPerUnit
+							,dblRequiredQty 
 							,intUnitsPerLayer
 							,intLayersPerPallet
 							,intPreferenceId
@@ -680,6 +700,7 @@ BEGIN TRY
 							,@dblAvailableQty
 							,@intSubstituteItemUOMId
 							,1
+							,@dblAvailableQty
 							,ISNULL(NULL, intUnitPerLayer)
 							,ISNULL(NULL, intLayerPerPallet)
 							,(
@@ -776,9 +797,9 @@ BEGIN TRY
 		RETURN
 	END
 
-	DELETE
-	FROM @OrderDetailInformation
-	WHERE dblQty <= 0
+	--DELETE
+	--FROM @OrderDetailInformation
+	--WHERE dblQty <= 0
 
 	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
 

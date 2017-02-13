@@ -208,7 +208,7 @@ BEGIN TRY
 		FROM tblMFOrderHeader oh
 		JOIN tblMFOrderDetail oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
 		JOIN tblICItem i ON i.intItemId = oli.intItemId
-		WHERE oh.intOrderHeaderId = @intOrderHeaderId
+		WHERE oh.intOrderHeaderId = @intOrderHeaderId and oli.dblQty >0
 
 		SELECT @intItemRecordId = MIN(intItemRecordId)
 		FROM @tblLineItem
@@ -1035,7 +1035,7 @@ BEGIN TRY
 	FROM tblMFOrderDetail OD
 	LEFT JOIN tblMFTask T ON OD.intItemId = T.intItemId
 		AND OD.intOrderHeaderId = T.intOrderHeaderId
-	WHERE OD.intOrderHeaderId = @intOrderHeaderId
+	WHERE OD.intOrderHeaderId = @intOrderHeaderId and OD.dblQty >0
 	GROUP BY OD.intItemId
 		,OD.dblWeight
 
