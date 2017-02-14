@@ -301,3 +301,39 @@ BEGIN
 		,1)
 END
 GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblCTEvent WHERE strEventName = 'Sample Notification to Supervisors')
+BEGIN
+	INSERT INTO tblCTEvent (
+		[strEventName]
+		,[strEventDescription]
+		,[intActionId]
+		,[strAlertType]
+		,[strNotificationType]
+		,[ysnSummarized]
+		,[ysnActive]
+		,[intDaysToRemind]
+		,[strReminderCondition]
+		,[intAlertFrequency]
+		,[strSubject]
+		,[strMessage]
+		,[intConcurrencyId]
+		)
+	VALUES (
+		'Sample Notification to Supervisors'
+		,'Sample Notification to Supervisors'
+		,NULL
+		,'Event'
+		,'Both'
+		,0
+		,1
+		,1
+		,''
+		,NULL
+		,'Sample No: {SampleNumber}'
+		,'Name: {PropertyName}
+Value: {Value}
+Result: {Result}'
+		,1
+		)
+END
+GO

@@ -5020,6 +5020,7 @@
     <Build Include="dbo\Views\vyuQMSampleStaticPropertiesResult.sql" />
     <Build Include="dbo\Views\vyuAPRptWeightClaimDM.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaimDM.sql" />
+    <Build Include="dbo\Views\vyuQMSampleStaticPropertiesResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
