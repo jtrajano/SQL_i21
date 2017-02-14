@@ -6391,7 +6391,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
     },
-    
+
+    onItemForexRateTypeChange: function (control, newForexRateType, oldValue, eOpts) {
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && !(newForexRateType)) {
+            current.set('dblForexRate', null);
+        }
+    },    
+
+    onChargeForexRateTypeChange: function (control, newForexRateType, oldValue, eOpts) {
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepCharges');
+        var current = plugin.getActiveRecord();
+        if (current && !(newForexRateType)) {
+            current.set('dblForexRate', null);
+        }
+    },    
 
     init: function (application) {
         this.control({
@@ -6625,10 +6644,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 select: this.onChargeSelect
             },
             "#cboForexRateType": {
-                select: this.onReceiptItemSelect
+                select: this.onReceiptItemSelect,
+                change: this.onItemForexRateTypeChange
             },
             "#cboChargeForexRateType": {
-                select: this.onChargeSelect
+                select: this.onChargeSelect,
+                change: this.onChargeForexRateTypeChange
             }
 
         })
