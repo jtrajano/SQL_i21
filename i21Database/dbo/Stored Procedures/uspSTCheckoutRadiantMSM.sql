@@ -138,15 +138,15 @@ FROM    @xml.nodes('//b:MiscellaneousSummaryMovement/b:MSMDetail/b:MSMSalesTotal
 
 
 	--Update TenderTransactionsCount
-	Update i21163001.dbo.tblSTCheckoutHeader
+	Update dbo.tblSTCheckoutHeader
 	SET dblCustomerCount = (S.TenderTransactionsCount)
 	FROM
 	(SELECT 
 		SUM(TenderTransactionsCount) as TenderTransactionsCount
     FROM #Temp ST
-    JOIN i21163001.dbo.tblSTPaymentOption PO ON PO.intRegisterMop = ST.TenderSubCode
-    JOIN i21163001.dbo.tblSTStore Store ON Store.intStoreId = PO.intStoreId
-	JOIN i21163001.dbo.tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
+    JOIN dbo.tblSTPaymentOption PO ON PO.intRegisterMop = ST.TenderSubCode
+    JOIN dbo.tblSTStore Store ON Store.intStoreId = PO.intStoreId
+	JOIN dbo.tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
     WHERE ST.TenderSubCode <> ''
 	AND Store.intStoreId = @intStoreId  
 	AND intCheckoutId = @intCheckoutId) as S
