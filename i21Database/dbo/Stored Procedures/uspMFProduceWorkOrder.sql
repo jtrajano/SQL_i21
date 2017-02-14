@@ -45,6 +45,8 @@ BEGIN
 		,@intParentLotId1 INT
 		,@strParentLotNumber1 NVARCHAR(50)
 		,@strParentLotNumber2 NVARCHAR(50)
+		,@intSpecialPalletItemId INT
+		,@intSpecialPalletCategoryId INT
 
 	SELECT @dtmCreated = Getdate()
 
@@ -413,4 +415,122 @@ BEGIN
 	SET intLotId = @intLotId
 		,strParentLotNumber = IsNULL(@strParentLotNumber2, @strParentLotNumber)
 	WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
+
+	IF @intSpecialPalletLotId IS NOT NULL
+	BEGIN
+		INSERT INTO dbo.tblMFWorkOrderConsumedLot (
+			intWorkOrderId
+			,intItemId
+			,intLotId
+			,dblQuantity
+			,intItemUOMId
+			,dblIssuedQuantity
+			,intItemIssuedUOMId
+			,intBatchId
+			,intSequenceNo
+			,dtmCreated
+			,intCreatedUserId
+			,dtmLastModified
+			,intLastModifiedUserId
+			,intShiftId
+			,dtmActualInputDateTime
+			,intStorageLocationId
+			,intSubLocationId
+			)
+		SELECT @intWorkOrderId
+			,intItemId
+			,intLotId
+			,(
+				CASE 
+					WHEN L.intWeightUOMId IS NOT NULL
+						THEN L.dblWeight
+					ELSE L.dblQty
+					END
+				)
+			,ISNULL(intWeightUOMId, intItemUOMId)
+			,(
+				CASE 
+					WHEN L.intWeightUOMId IS NOT NULL
+						THEN L.dblWeight
+					ELSE L.dblQty
+					END
+				)
+			,ISNULL(intWeightUOMId, intItemUOMId)
+			,NULL AS intBatchId
+			,1
+			,@dtmCreated
+			,@intUserId
+			,@dtmCreated
+			,@intUserId
+			,@intBusinessShiftId
+			,@dtmBusinessDate
+			,intStorageLocationId
+			,intSubLocationId
+		FROM dbo.tblICLot L
+		WHERE intLotId = @intSpecialPalletLotId
+
+		SELECT @intSpecialPalletItemId = intItemId
+		FROM dbo.tblICLot L
+		WHERE intLotId = @intSpecialPalletLotId
+
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblMFProductionSummary
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND intItemId = @intSpecialPalletItemId
+					AND intItemTypeId IN (
+						1
+						,3
+						)
+				)
+		BEGIN
+			SELECT @intSpecialPalletCategoryId = intCategoryId
+			FROM tblICItem
+			WHERE intItemId = @intSpecialPalletItemId
+
+			INSERT INTO tblMFProductionSummary (
+				intWorkOrderId
+				,intItemId
+				,dblOpeningQuantity
+				,dblOpeningOutputQuantity
+				,dblOpeningConversionQuantity
+				,dblInputQuantity
+				,dblConsumedQuantity
+				,dblOutputQuantity
+				,dblOutputConversionQuantity
+				,dblCountQuantity
+				,dblCountOutputQuantity
+				,dblCountConversionQuantity
+				,dblCalculatedQuantity
+				,intCategoryId
+				,intItemTypeId
+				)
+			SELECT @intWorkOrderId
+				,@intSpecialPalletItemId
+				,0
+				,0
+				,0
+				,0
+				,1
+				,0
+				,0
+				,0
+				,0
+				,0
+				,0
+				,@intSpecialPalletCategoryId
+				,1
+		END
+		ELSE
+		BEGIN
+			UPDATE tblMFProductionSummary
+			SET dblConsumedQuantity = dblConsumedQuantity + 1
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intItemId = @intSpecialPalletItemId
+				AND intItemTypeId IN (
+					1
+					,3
+					)
+		END
+	END
 END

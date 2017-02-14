@@ -29,7 +29,7 @@ BEGIN TRY
 		,@dtmDate DATETIME
 		,@intTransactionDetailId INT
 		,@strLotTracking NVARCHAR(50)
-
+		,@intSpecialPalletLotId INT
 	DECLARE @GLEntriesForOtherCost TABLE (
 		dtmDate DATETIME
 		,intItemId INT
@@ -78,7 +78,7 @@ BEGIN TRY
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
-		SELECT @strLotTracking = strLotTracking
+	SELECT @strLotTracking = strLotTracking
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -94,7 +94,7 @@ BEGIN TRY
 	FROM tblMFWorkOrderProducedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 		--AND intLotId = @intLotId
-		And intBatchId=@intBatchId
+		AND intBatchId = @intBatchId
 
 	--IF EXISTS (
 	--		SELECT *
@@ -109,15 +109,13 @@ BEGIN TRY
 	--			,11
 	--			,1
 	--			)
-
 	--	RETURN
 	--END
-
 	IF EXISTS (
 			SELECT *
 			FROM tblMFWorkOrderProducedLot
 			WHERE intWorkOrderId = @intWorkOrderId
-				AND intBatchId=@intBatchId
+				AND intBatchId = @intBatchId
 				AND ysnProductionReversed = 1
 			)
 	BEGIN
@@ -136,7 +134,8 @@ BEGIN TRY
 			WHERE intLotId = @intLotId
 				AND intLotStatusId = 2
 			)
-		AND @ysnForceUndo = 0 AND @strLotTracking = 'Yes'
+		AND @ysnForceUndo = 0
+		AND @strLotTracking = 'Yes'
 	BEGIN
 		RAISERROR (
 				51139
@@ -153,7 +152,8 @@ BEGIN TRY
 			WHERE intLotId = @intLotId
 				AND dblQty = 0
 			)
-		AND @ysnForceUndo = 0 AND @strLotTracking = 'Yes'
+		AND @ysnForceUndo = 0
+		AND @strLotTracking = 'Yes'
 	BEGIN
 		RAISERROR (
 				90017
@@ -415,14 +415,23 @@ BEGIN TRY
 		,dtmLastModified = GETDATE()
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
-	And intBatchId=@intBatchId
+		AND intBatchId = @intBatchId
 
 	SELECT @dblQuantity = dblQuantity
 		,@intItemUOMId = intItemUOMId
 		,@dblPhysicalCount = dblPhysicalCount
+		,@intSpecialPalletLotId = intSpecialPalletLotId
 	FROM tblMFWorkOrderProducedLot
 	WHERE intWorkOrderId = @intWorkOrderId
-	And intBatchId=@intBatchId
+		AND intBatchId = @intBatchId
+
+	IF @intSpecialPalletLotId IS NOT NULL
+	BEGIN
+		DELETE
+		FROM tblMFWorkOrderConsumedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intLotId = @intSpecialPalletLotId
+	END
 
 	UPDATE tblMFWorkOrder
 	SET dblProducedQuantity = isnull(dblProducedQuantity, 0) - (

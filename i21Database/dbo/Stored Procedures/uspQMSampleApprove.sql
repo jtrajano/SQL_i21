@@ -111,12 +111,21 @@ BEGIN TRY
 		AND @intSampleControlPointId = 14
 		AND @strApprovalBase = 'Container'
 	BEGIN
-		UPDATE LI
-		SET intBondStatusId = @intLotStatusId
-		FROM dbo.tblICLot AS L
-		JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
-		JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
-		WHERE RIL.strContainerNo = @strContainerNumber
+		IF @strContainerNumber <> ''
+		BEGIN
+			UPDATE LI
+			SET intBondStatusId = @intLotStatusId
+			FROM dbo.tblICLot AS L
+			JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
+			JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+			WHERE RIL.strContainerNo = @strContainerNumber
+		END
+		ELSE
+		BEGIN
+			UPDATE tblMFLotInventory
+			SET intBondStatusId = @intLotStatusId
+			WHERE intLotId = @intProductValueId
+		END
 	END
 
 	-- Wholesome Sweetener -- JIRA QC-240
