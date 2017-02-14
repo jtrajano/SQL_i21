@@ -533,4 +533,12 @@ BEGIN
 END
 GO
 
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTAction WHERE intActionId = 3)
+BEGIN
+	INSERT INTO tblCTAction(strActionName, strInternalCode, intConcurrencyId, strRoute)
+	VALUES('Sample Notification to Supervisors','Sample Notification to Supervisors',1,'Quality.view.QualitySample?routeId=')
+END
+GO
+
 PRINT('Contract 1_MasterTables End')
