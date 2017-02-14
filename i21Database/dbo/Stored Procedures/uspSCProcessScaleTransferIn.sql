@@ -90,9 +90,9 @@ BEGIN TRY
 			--Detail
 			,intItemId					= SC.intItemId
 			,intItemLocationId			= SC.intProcessingLocationId
-			,intItemUOMId				= ItemUOM.intItemUOMId
+			,intItemUOMId				= SC.intItemUOMIdTo
 			,intGrossNetUOMId			= 0
-			,intCostUOMId				= NULL
+			,intCostUOMId				= SC.intItemUOMIdTo
 			,intContractHeaderId		= NULL
 			,intContractDetailId		= NULL
 			,dtmDate					= SC.dtmTicketDateTime
@@ -148,7 +148,7 @@ BEGIN TRY
 			,[ysnInventoryCost]					= 0
 			,[strCostMethod]					= 'Per Unit'
 			,[dblRate]							= RE.dblFreightRate
-			,[intCostUOMId]						= RE.intItemUOMId
+			,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, RE.intItemUOMId)
 			,[intOtherChargeEntityVendorId]		= @intHaulerId
 			,[dblAmount]						= 0
 			,[strAllocateCostBy]				=  NULL
