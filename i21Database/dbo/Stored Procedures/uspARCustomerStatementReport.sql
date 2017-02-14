@@ -381,7 +381,19 @@ INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
 VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 --- Without CF Report
-SELECT STATEMENTREPORT.strReferenceNumber
+SELECT MAINREPORT.* 
+	  ,dblCreditAvailable							= MAINREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+	  ,dbl0Days										= ISNULL(AGINGREPORT.dbl0Days, 0)
+	  ,dbl10Days									= ISNULL(AGINGREPORT.dbl10Days, 0)
+	  ,dbl30Days									= ISNULL(AGINGREPORT.dbl30Days, 0)
+	  ,dbl60Days									= ISNULL(AGINGREPORT.dbl60Days, 0)
+	  ,dbl90Days									= ISNULL(AGINGREPORT.dbl90Days, 0)
+	  ,dbl91Days									= ISNULL(AGINGREPORT.dbl91Days, 0)
+	  ,dblCredits									= ISNULL(AGINGREPORT.dblCredits, 0)
+	  ,dblPrepayments								= ISNULL(AGINGREPORT.dblPrepayments, 0)
+FROM
+(SELECT STATEMENTREPORT.strReferenceNumber
+      ,STATEMENTREPORT.intEntityCustomerId
       ,STATEMENTREPORT.strTransactionType
 	  ,STATEMENTREPORT.dtmDueDate
 	  ,STATEMENTREPORT.dtmDate
@@ -395,16 +407,7 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,STATEMENTREPORT.strCustomerNumber
 	  ,STATEMENTREPORT.strName
 	  ,STATEMENTREPORT.strBOLNumber
-	  ,STATEMENTREPORT.dblCreditLimit
-	  ,dblCreditAvailable							= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-	  ,dbl0Days										= ISNULL(AGINGREPORT.dbl0Days, 0)
-	  ,dbl10Days									= ISNULL(AGINGREPORT.dbl10Days, 0)
-	  ,dbl30Days									= ISNULL(AGINGREPORT.dbl30Days, 0)
-	  ,dbl60Days									= ISNULL(AGINGREPORT.dbl60Days, 0)
-	  ,dbl90Days									= ISNULL(AGINGREPORT.dbl90Days, 0)
-	  ,dbl91Days									= ISNULL(AGINGREPORT.dbl91Days, 0)
-	  ,dblCredits									= ISNULL(AGINGREPORT.dblCredits, 0)
-	  ,dblPrepayments								= ISNULL(AGINGREPORT.dblPrepayments, 0)
+	  ,STATEMENTREPORT.dblCreditLimit	  
 	  ,STATEMENTREPORT.strFullAddress
 	  ,STATEMENTREPORT.strStatementFooterComment	  
 	  ,STATEMENTREPORT.strCompanyName
@@ -412,17 +415,13 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,dtmAsOfDate									= @dtmDateTo
 	  ,blbLogo										= dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
-INNER JOIN @temp_aging_table AS AGINGREPORT
-	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-INNER JOIN tblARCustomer CUSTOMER 
-	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-WHERE (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)
-AND strReferenceNumber NOT IN (SELECT strInvoiceNumber FROM @temp_cf_table)
+WHERE strReferenceNumber NOT IN (SELECT strInvoiceNumber FROM @temp_cf_table)
 
 UNION ALL
 
 --- With CF Report
 SELECT strReferenceNumber							= CFReportTable.strInvoiceReportNumber
+      ,STATEMENTREPORT.intEntityCustomerId
       ,STATEMENTREPORT.strTransactionType
 	  ,dtmDueDate									= CFReportTable.dtmInvoiceDate
 	  ,dtmDate										= CFReportTable.dtmInvoiceDate
@@ -436,16 +435,7 @@ SELECT strReferenceNumber							= CFReportTable.strInvoiceReportNumber
 	  ,STATEMENTREPORT.strCustomerNumber
 	  ,STATEMENTREPORT.strName
 	  ,STATEMENTREPORT.strBOLNumber
-	  ,STATEMENTREPORT.dblCreditLimit
-	  ,dblCreditAvailable							= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-	  ,dbl0Days										= SUM(ISNULL(AGINGREPORT.dbl0Days, 0))
-	  ,dbl10Days									= SUM(ISNULL(AGINGREPORT.dbl10Days, 0))
-	  ,dbl30Days									= SUM(ISNULL(AGINGREPORT.dbl30Days, 0))
-	  ,dbl60Days									= SUM(ISNULL(AGINGREPORT.dbl60Days, 0))
-	  ,dbl90Days									= SUM(ISNULL(AGINGREPORT.dbl90Days, 0))
-	  ,dbl91Days									= SUM(ISNULL(AGINGREPORT.dbl91Days, 0))
-	  ,dblCredits									= SUM(ISNULL(AGINGREPORT.dblCredits, 0))
-	  ,dblPrepayments								= SUM(ISNULL(AGINGREPORT.dblPrepayments, 0))
+	  ,STATEMENTREPORT.dblCreditLimit	  
 	  ,STATEMENTREPORT.strFullAddress
 	  ,STATEMENTREPORT.strStatementFooterComment	  
 	  ,STATEMENTREPORT.strCompanyName
@@ -453,10 +443,6 @@ SELECT strReferenceNumber							= CFReportTable.strInvoiceReportNumber
 	  ,dtmAsOfDate									= @dtmDateTo
 	  ,blbLogo										= dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
-INNER JOIN @temp_aging_table AS AGINGREPORT
-	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-INNER JOIN tblARCustomer CUSTOMER 
-	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 INNER JOIN (SELECT 
 				intInvoiceId
 				, strInvoiceNumber
@@ -464,17 +450,22 @@ INNER JOIN (SELECT
 				, dtmInvoiceDate 
 			FROM 
 				@temp_cf_table) CFReportTable ON STATEMENTREPORT.strReferenceNumber = CFReportTable.strInvoiceNumber
-WHERE (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)
-AND strReferenceNumber IN (SELECT strInvoiceNumber FROM @temp_cf_table)
+WHERE strReferenceNumber IN (SELECT strInvoiceNumber FROM @temp_cf_table)
 GROUP BY CFReportTable.strInvoiceReportNumber
-      ,STATEMENTREPORT.strTransactionType
-	  ,CFReportTable.dtmInvoiceDate
-	  ,STATEMENTREPORT.strCustomerNumber
-	  ,STATEMENTREPORT.strName
-	  ,STATEMENTREPORT.strBOLNumber
-	  ,STATEMENTREPORT.dblCreditLimit
-	  ,AGINGREPORT.dblTotalAR
-	  ,STATEMENTREPORT.strFullAddress
-	  ,STATEMENTREPORT.strStatementFooterComment	  
-	  ,STATEMENTREPORT.strCompanyName
-	  ,STATEMENTREPORT.strCompanyAddress
+       , CFReportTable.dtmInvoiceDate
+	   , STATEMENTREPORT.strTransactionType	  
+	   , STATEMENTREPORT.strCustomerNumber
+	   , STATEMENTREPORT.strName
+	   , STATEMENTREPORT.strBOLNumber
+	   , STATEMENTREPORT.dblCreditLimit	  
+	   , STATEMENTREPORT.strFullAddress
+	   , STATEMENTREPORT.strStatementFooterComment	  
+	   , STATEMENTREPORT.strCompanyName
+	   , STATEMENTREPORT.strCompanyAddress
+	   , STATEMENTREPORT.intEntityCustomerId)
+AS MAINREPORT
+INNER JOIN @temp_aging_table AS AGINGREPORT
+	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+INNER JOIN tblARCustomer CUSTOMER 
+	ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+WHERE (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)
