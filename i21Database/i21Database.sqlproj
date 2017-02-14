@@ -5031,6 +5031,8 @@
     <Build Include="dbo\Views\vyuCTMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuEMEntityOnGroup.sql" />
     <Build Include="dbo\Views\vyuQMSampleStaticPropertiesResult.sql" />
+    <Build Include="dbo\Views\vyuAPRptWeightClaimDM.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptWeightClaimDM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

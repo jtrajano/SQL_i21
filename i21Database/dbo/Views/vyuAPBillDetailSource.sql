@@ -50,7 +50,7 @@ AS
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
-	WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1
+	WHERE A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return') AND A.ysnPosted = 1
 	) Items
 	ON (A.intPurchaseDetailId = Items.intPurchaseDetailId AND A.intInventoryReceiptItemId IS NULL)
 	OR (A.intInventoryReceiptItemId = Items.intInventoryReceiptItemId AND A.intPurchaseDetailId IS NULL)
