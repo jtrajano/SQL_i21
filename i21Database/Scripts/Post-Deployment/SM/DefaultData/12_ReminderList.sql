@@ -705,3 +705,219 @@ BEGIN
 	WHERE [strReminder] = N'Unapproved FOB Contract' AND [strType] = N'Quality Sample' 
 END
 GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strType] = N'Contract w/o shipping instruction')
+BEGIN
+DECLARE @intMaxSortOrder INT
+SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+
+	INSERT INTO [tblSMReminderList] (
+		[strReminder]
+		,[strType]
+		,[strMessage]
+		,[strQuery]
+		,[strNamespace]
+		,[intSort]
+		)
+	SELECT [strReminder]	= N''
+		,[strType]			= N'Contract w/o shipping instruction'
+		,[strMessage]		= N'{0} Contracts are w/o shipping instruction.'
+		,[strQuery]			= N' SELECT intContractHeaderId
+							  FROM vyuLGNotifications vyu
+							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+							  WHERE vyu.strType = ''Contracts w/o shipping instruction'' AND ER.intEntityId = {0}'
+		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20shipping%20instruction'
+		,[intSort]			= ISNULL(@intMaxSortOrder,0)+1
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET [strMessage] = N'{0} Contracts are w/o shipping instruction.'
+	WHERE [strReminder] = N''
+		AND [strType] = N'Contract w/o shipping instruction'
+END
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strType] = N'Contracts w/o shipping advice')
+BEGIN
+DECLARE @intMaxSortOrder INT
+SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+	INSERT INTO [tblSMReminderList] (
+		[strReminder]
+		,[strType]
+		,[strMessage]
+		,[strQuery]
+		,[strNamespace]
+		,[intSort]
+		)
+	SELECT [strReminder]	= N''
+		,[strType]			= N'Contracts w/o shipping advice'
+		,[strMessage]		= N'{0} Contracts are w/o shipping advice.'
+		,[strQuery]			= N' SELECT intContractHeaderId
+							  FROM vyuLGNotifications vyu
+							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+							  WHERE vyu.strType = ''Contracts w/o shipping advice'' AND ER.intEntityId = {0}'
+		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20shipping%20advice'
+		,[intSort]			= @intMaxSortOrder+1
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET [strMessage] = N'{0} Contracts are w/o shipping advice.'
+	WHERE [strReminder] = N''
+		AND [strType] = N'Contracts without Shipping Advice'
+END
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strType] = N'Contracts w/o document')
+BEGIN
+DECLARE @intMaxSortOrder INT
+SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+
+	INSERT INTO [tblSMReminderList] (
+		[strReminder]
+		,[strType]
+		,[strMessage]
+		,[strQuery]
+		,[strNamespace]
+		,[intSort]
+		)
+	SELECT [strReminder]	= N''
+		,[strType]			= N'Contracts w/o document'
+		,[strMessage]		= N'{0} Contracts are w/o document.'
+		,[strQuery]			= N' SELECT intContractHeaderId
+							  FROM vyuLGNotifications vyu
+							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+							  WHERE vyu.strType = ''Contracts w/o document'' AND ER.intEntityId = {0}'
+		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20document'
+		,[intSort]			= @intMaxSortOrder+1
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET [strMessage] = N'{0} Contracts are w/o document.'
+	WHERE [strReminder] = N''
+		AND [strType] = N'Contracts w/o document'
+END
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strType] = N'Contracts w/o weight claim')
+BEGIN
+DECLARE @intMaxSortOrder INT
+SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+
+	INSERT INTO [tblSMReminderList] (
+		[strReminder]
+		,[strType]
+		,[strMessage]
+		,[strQuery]
+		,[strNamespace]
+		,[intSort]
+		)
+	SELECT [strReminder]	= N''
+		,[strType]			= N'Contracts w/o weight claim'
+		,[strMessage]		= N'{0} Contracts are w/o weight claim.'
+		,[strQuery]			= N' SELECT intContractHeaderId
+							  FROM vyuLGNotifications vyu
+							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+							  WHERE vyu.strType = ''Contracts w/o weight claim'' AND ER.intEntityId = {0}'
+		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20weight%20claim'
+		,[intSort]			= ISNULL(@intMaxSortOrder,0)+1
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET [strMessage] = N'{0} Contracts are w/o weight claim.'
+	WHERE [strReminder] = N''
+		AND [strType] = N'Contracts w/o weight claim'
+END
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strType] = N'Weight claims w/o debit note')
+BEGIN
+DECLARE @intMaxSortOrder INT
+SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+
+	INSERT INTO [tblSMReminderList] (
+		[strReminder]
+		,[strType]
+		,[strMessage]
+		,[strQuery]
+		,[strNamespace]
+		,[intSort]
+		)
+	SELECT [strReminder]	= N''
+		,[strType]			= N'Weight claims w/o debit note'
+		,[strMessage]		= N'{0} Weight claims are w/o debit note.'
+		,[strQuery]			= N' SELECT intContractHeaderId
+							  FROM vyuLGNotifications vyu
+							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+							  WHERE vyu.strType = ''Weight claims w/o debit note'' AND ER.intEntityId = {0}'
+		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Weight%20claim%20w%2Fo%20debit%20note'
+		,[intSort]			= @intMaxSortOrder+1
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET [strMessage] = N'{0} Weight claims are w/o debit note.'
+	WHERE [strReminder] = N''
+		AND [strType] = N'Weight claims w/o debit note'
+END
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strType] = N'Contracts w/o TC')
+BEGIN
+DECLARE @intMaxSortOrder INT
+SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+
+	INSERT INTO [tblSMReminderList] (
+		[strReminder]
+		,[strType]
+		,[strMessage]
+		,[strQuery]
+		,[strNamespace]
+		,[intSort]
+		)
+	SELECT [strReminder]	= N''
+		,[strType]			= N'Contracts w/o TC'
+		,[strMessage]		= N'{0} Contracts are w/o TC.'
+		,[strQuery]			= N' SELECT intContractHeaderId
+							  FROM vyuLGNotifications vyu
+							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+							  WHERE vyu.strType = ''Contracts w/o TC'' AND ER.intEntityId = {0}'
+		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%20TC'
+		,[intSort]			= @intMaxSortOrder+1
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET [strMessage] = N'{0} Contracts are w/o TC.'
+	WHERE [strReminder] = N''
+		AND [strType] = N'Contracts w/o TC'
+END
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strType] = N'Contracts w/o 4C')
+BEGIN
+DECLARE @intMaxSortOrder INT
+SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+
+	INSERT INTO [tblSMReminderList] (
+		[strReminder]
+		,[strType]
+		,[strMessage]
+		,[strQuery]
+		,[strNamespace]
+		,[intSort]
+		)
+	SELECT [strReminder]	= N''
+		,[strType]			= N'Contracts w/o 4C'
+		,[strMessage]		= N'{0} Contracts are w/o 4C.'
+		,[strQuery]			= N' SELECT intContractHeaderId
+							  FROM vyuLGNotifications vyu
+							  JOIN tblCTEventRecipient ER ON ER.intEventId = vyu.intEventId
+							  WHERE vyu.strType = ''Contracts w/o 4C'' AND ER.intEntityId = {0}'
+		,[strNamespace]		= N'Logistics.view.LogisticsAlerts?activeTab=Contract%20w%2Fo%204C'
+		,[intSort]			= @intMaxSortOrder+1
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET [strMessage] = N'{0} Contracts are w/o 4C.'
+	WHERE [strReminder] = N''
+		AND [strType] = N'Contracts w/o 4C'
+END
+GO
