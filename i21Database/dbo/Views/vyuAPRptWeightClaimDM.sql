@@ -119,7 +119,7 @@ FROM
 		,dblNetShippedWeight	=	0
 		,dblWeightLoss			=	0
 		,dblFranchiseWeight		=	0
-		,dblClaimAmount			=	0
+		,dblClaimAmount			=	DM.dblTotal
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
