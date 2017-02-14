@@ -6217,6 +6217,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var me = this;
         var win = component.up('window');
         var context = win.context;
+        var pnlLotTracking = win.down('#pnlLotTracking');
+        var grdInventoryReceipt = win.down('#grdInventoryReceipt');
+
+        //Hide Lot Tracking Grid
+        pnlLotTracking.setVisible(false);
+
+        //Deselect all rows in Item Grid
+        grdInventoryReceipt.getSelectionModel().deselectAll();       
 
         var doRecap = function (currentRecord){
             ic.utils.ajax({
