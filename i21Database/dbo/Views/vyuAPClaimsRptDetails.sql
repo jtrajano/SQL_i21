@@ -5,6 +5,8 @@ AS
 			,A.intTransactionType
 			,Bill.dblCost
 			,Bill.dblBillCost
+			,A.dblTotal
+			,B.dblWeightLoss 
 			,ISNULL(SUM(Container.dblGrossShippedWeight), SUM(B.dblWeight)) AS dblGrossShippedWeight
 		    ,ISNULL(SUM(Container.dblNetShippedWeight), SUM(B.dblNetShippedWeight)) AS dblNetShippedWeight
 			,ISNULL(SUM(Container.dblTareShippedWeight), 0) AS dblTareShippedWeight
@@ -38,8 +40,8 @@ AS
 			,A.intShipToId
 			,L.dblTotal + L.dblTax AS dblPrepaidTotal
 			,M.strVendorId
-			,M.intGLAccountExpenseId AS intAccountId
-			,M3.strAccountId
+			,ISNULL(M.intGLAccountExpenseId,GLA.intAccountId) AS intAccountId
+			,ISNULL(M3.strAccountId,GLA.strAccountId) AS strAccountId
 			,ISNULL(Item.strDescription, B.strMiscDescription) strMiscDescription
 			,M3.strDescription AS strAccountDesc
 			,M2.strName
@@ -58,6 +60,7 @@ AS
 			,A.strComment
 			,I.strWeightGradeDesc
 			,N.strCurrency
+			,E.strERPPONumber
 		FROM tblAPBill A
 		INNER JOIN tblAPBillDetail B 
 			ON A.intBillId = B.intBillId
@@ -65,6 +68,8 @@ AS
 			ON B2.intUnitMeasureId = B3.intUnitMeasureId) ON (CASE WHEN B.dblNetWeight > 0 THEN B.intWeightUOMId WHEN B.intCostUOMId > 0 THEN B.intCostUOMId ELSE B.intUnitOfMeasureId END) =		B2.intItemUOMId
 		INNER JOIN (tblAPVendor M INNER JOIN tblEMEntity M2 
 			ON M.intEntityVendorId = M2.intEntityId LEFT JOIN tblGLAccount M3 ON M.intGLAccountExpenseId = M3.intAccountId) ON A.intEntityVendorId = M.intEntityVendorId
+		LEFT JOIN tblGLAccount GLA
+			ON GLA.intAccountId = B.intAccountId
 		LEFT JOIN tblICInventoryReceiptItem C2 
 			ON B.intInventoryReceiptItemId = C2.intInventoryReceiptItemId
 		LEFT JOIN tblICInventoryReceipt D 
@@ -155,6 +160,7 @@ AS
 				 ,A.intTransactionType
 				 ,Bill.dblCost
 				 ,Bill.dblBillCost
+				 ,A.dblTotal
 				 ,B.intUnitOfMeasureId
 				 ,B.strMiscDescription
 				 ,UOM.strUnitMeasure
@@ -186,6 +192,8 @@ AS
 				 ,M.strVendorId
 				 ,M.intGLAccountExpenseId 
 				 ,M3.strAccountId
+				 ,GLA.intAccountId
+				 ,GLA.strAccountId
 				 ,M3.strDescription
 				 ,M2.strName
 				 ,M2.str1099Form
@@ -207,3 +215,5 @@ AS
 				 ,N.strCurrency
 				 ,ContainerDetails.strContainerNumber
 				 ,B.ysnSubCurrency
+				 ,E.strERPPONumber
+				 ,B.dblWeightLoss

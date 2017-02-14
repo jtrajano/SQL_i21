@@ -52,16 +52,20 @@ FROM (
 			THEN SUM(dblNetShippedWeight) * (dblFranchise / 100)
 		ELSE 0 END AS dblFranchiseWeight,		
 		(SUM(dblNetShippedWeight) - SUM(dblNetQtyReceived) - SUM(dblNetShippedWeight) * (dblFranchise / 100)) dblClaimQuantity,
-		(SUM(dblAmountPaid) - SUM(dblAppliedPrepayment)) AS dblTotalClaimAmount,
+		ISNULL((SUM(dblAmountPaid) - SUM(dblAppliedPrepayment)),0) AS dblTotalClaimAmount,
 		0.00000 dblDamageQty,
 		0.00000 dblAdjustments,
+		dblTotal,
 		dblCost,
 		dblQtyReceived,
 		dblCostUnitQty,
 		dblWeightUnitQty,
 		dblContractItemQty,
 		dblPrepaidTotal,
+		dblWeightLoss AS dblDetailWeightLoss,
 		strUnitMeasure AS strUOM,
+		strCostUOM,
+		strgrossNetUOM,
 		strContractNumber,
 		strDescription,
 		strAccountId,
@@ -85,10 +89,6 @@ FROM (
 		intShipToId,
 		intAccountId,
 		intContractSeq,
-		--strBankAccountNo,
-		--strBankName,
-		--strBankAddress,
-		--strNotes,
 		strContainerNumber,
 		strWeightGradeDesc,
 		strMiscDescription,
@@ -96,68 +96,15 @@ FROM (
 		intCent,
 		intCurrencyId,
 		strCostCurrency,
-		ysnSubCurrency
+		ysnSubCurrency,
+		strERPPONumber
 	FROM (
 		SELECT *
-			-- A.intBillId
-			--,A.intTransactionType
-			--,A.dblCost
-			--,A.dblBillCost
-			--,A.dblGrossShippedWeight
-		 --   ,A.dblNetShippedWeight
-			--,A.dblTareShippedWeight
-			--,A.dblNetQtyReceived
-			--,A.dblGrossQtyReceived
-			--,A.dblAppliedPrepayment
-			--,A.dblQtyReceived
-			--,A.dblQtyBillCreated
-			--,A.intUnitOfMeasureId
-			--,A.strUnitMeasure
-			--,A.intCostUOMId
-			--,A.strCostUOM
-			--,A.intWeightUOMId
-			--,A.strgrossNetUOM
-			--,A.dblCostUnitQty
-			--,A.dblWeightUnitQty 
-			--,A.dblUnitQty 
-			--,A.strItemNo
-			--,A.intItemId
-			--,A.intContractDetailId
-			--,A.intContractHeaderId
-			--,A.intContractSeq
-			--,A.dblAmountPaid
-			--,A.dblContractItemQty
-			--,A.strContractNumber
-			--,A.dblFranchise
-			--,A.intEntityVendorId
-			--,A.intShipToId
-			--,A.dblPrepaidTotal
-			--,A.strVendorId
-			--,A.intAccountId
-			--,A.strAccountId
-			--,A.strBillId
-			--,A.strAccountDesc
-			--,A.strMiscDescription
-			--,A.strName
-			--,A.str1099Form
-			--,A.str1099Type
-			--,A.strDescription
-			--,A.intCent
-			--,A.intCurrencyId
-			--,A.strCostCurrency
-			--,A.ysnSubCurrency
-			--,A.strContainerNumber
-			--,A.strWeightGradeDesc
-			--,A.strVendorOrderNumber
-			--,A.strBillOfLading
-			--,A.strCurrency
-			--,A.dtmDueDate
-			--,A.dtmDate
-			--,A.strComment
 		FROM [vyuAPClaimsRptDetails] A
-		
 	) tmpClaim
-	GROUP BY dblCost,
+	GROUP BY 
+		dblTotal,
+		dblCost,
 		dblCostUnitQty,
 		dblWeightUnitQty,
 		dblQtyReceived,
@@ -167,6 +114,7 @@ FROM (
 		dblPrepaidTotal,
 		dtmDueDate,
 		dtmDate,
+		dblWeightLoss,
 		intTransactionType,
 		intBillId,
 		intCostUOMId,
@@ -184,6 +132,8 @@ FROM (
 		intContractSeq,
 		strBillId,
 		strUnitMeasure,
+		strCostUOM,
+		strgrossNetUOM,
 		strItemNo,
 		strContractNumber,
 		strVendorId,		
@@ -197,30 +147,33 @@ FROM (
 		strVendorOrderNumber,
 		strBillOfLading,		
 		strCurrency,
-		--strBankAccountNo,
-		--strBankName,
-		--strBankAddress,		
-		--strNotes,
 		strContainerNumber,
 		strWeightGradeDesc,
 		strComment,
 		intCent,
 		strCostCurrency,
-		ysnSubCurrency
+		ysnSubCurrency,
+		strERPPONumber
 ) Claim
 INNER JOIN tblAPBill A
 	ON A.intBillId = Claim.intBillId
 LEFT JOIN tblICItemContract ItemContract INNER JOIN tblSMCountry ItemContractCountry ON ItemContract.intCountryId = ItemContractCountry.intCountryID
 	ON Claim.intItemContractId = ItemContract.intItemContractId
-LEFT JOIN tblICCommodityAttribute CommodityAttr ON CommodityAttr.intCommodityAttributeId = Claim.intOriginCountryId
-LEFT JOIN tblEMEntity CreatedBy ON A.intEntityId = CreatedBy.intEntityId
-LEFT JOIN tblSMCompanyLocation VoucherLocation ON VoucherLocation.intCompanyLocationId = A.intStoreLocationId
-LEFT JOIN tblSMTerm Term ON A.intTermsId = Term.intTermID
-LEFT JOIN tblCMBankAccount BankAccount ON BankAccount.intBankAccountId = A.intBankInfoId
-LEFT JOIN tblCMBank Bank ON BankAccount.intBankId = Bank.intBankId
+LEFT JOIN tblICCommodityAttribute CommodityAttr 
+	ON CommodityAttr.intCommodityAttributeId = Claim.intOriginCountryId
+LEFT JOIN tblEMEntity CreatedBy 
+	ON A.intEntityId = CreatedBy.intEntityId
+LEFT JOIN tblSMCompanyLocation VoucherLocation 
+	ON VoucherLocation.intCompanyLocationId = A.intStoreLocationId
+LEFT JOIN tblSMTerm Term 
+	ON A.intTermsId = Term.intTermID
+LEFT JOIN tblCMBankAccount BankAccount 
+	ON BankAccount.intBankAccountId = A.intBankInfoId
+LEFT JOIN tblCMBank Bank 
+	ON BankAccount.intBankId = Bank.intBankId
 WHERE 1= CASE WHEN Claim.dblPrepaidTotal IS NULL THEN 1 ELSE 
 			CASE WHEN Claim.dblQtyBillCreated = Claim.dblContractItemQty THEN 1 ELSE 0 END--make sure we fully billed the contract item
 		END
 AND 1 = CASE WHEN Claim.intTransactionType = 11 AND Claim.dblWeightLoss > 0 THEN 1 
-			WHEN Claim.intTransactionType = 3 THEN 1
+			 WHEN Claim.intTransactionType = 3 THEN 1
 		ELSE 0 END -- Make sure the weight loss is greater then the tolerance if weight claim
