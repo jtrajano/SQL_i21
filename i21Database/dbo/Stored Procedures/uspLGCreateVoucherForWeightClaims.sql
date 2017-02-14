@@ -19,6 +19,7 @@ BEGIN TRY
 	DECLARE @intCurrencyId INT
 	DECLARE @ysnSubCurrency BIT
 	DECLARE @dblClaimAmount NUMERIC(18,6)
+	DECLARE @dblNetWeight NUMERIC(18,6)
 
 	DECLARE @voucherDetailData TABLE 
 		(intWeightClaimRecordId INT Identity(1, 1)
@@ -28,6 +29,7 @@ BEGIN TRY
 		,intPartyEntityId INT
 		,dblNetShippedWeight DECIMAL(18, 6)
 		,dblWeightLoss DECIMAL(18, 6)
+		,dblNetWeight DECIMAL(18, 6) 
 		,dblFranchiseWeight DECIMAL(18, 6)
 		,dblQtyReceived DECIMAL(18, 6)
 		,dblCost DECIMAL(18, 6)
@@ -99,6 +101,7 @@ BEGIN TRY
 		  ,intPartyEntityId
 		  ,dblNetShippedWeight
 		  ,dblWeightLoss
+		  ,dblNetWeight
 		  ,dblFranchiseWeight
 		  ,dblQtyReceived
 		  ,dblCost
@@ -119,6 +122,7 @@ BEGIN TRY
 		,WCD.intPartyEntityId
 		,WCD.dblFromNet AS dblNetShippedWeight
 		,WCD.dblWeightLoss AS dblWeightLoss
+		,WCD.dblWeightLoss AS dblNetWeight
 		,WCD.dblFranchiseWt AS dblFranchiseWeight
 		,(WCD.dblWeightLoss - WCD.dblFranchiseWt) AS dblQtyReceived
 		--,CASE 
@@ -209,7 +213,8 @@ BEGIN TRY
 		SELECT @intCount = COUNT(*) FROM @voucherDetailData WHERE intPartyEntityId = @intVendorEntityId
 
 		SELECT @intWeightClaimDetailId = intWeightClaimDetailId,
-			   @dblClaimAmount = dblClaimAmount
+			   @dblClaimAmount = dblClaimAmount,
+			   @dblNetWeight = dblNetWeight
 		FROM @voucherDetailData 
 		WHERE intPartyEntityId = @intVendorEntityId
 
@@ -265,7 +270,9 @@ BEGIN TRY
 				intCurrencyId = @intCurrencyId,
 				ysnSubCurrency = @ysnSubCurrency,
 				dblClaimAmount = @dblClaimAmount,
-				dblTotal = @dblClaimAmount
+				dblTotal = @dblClaimAmount,
+				dbl1099 = @dblClaimAmount,
+				dblNetWeight = @dblNetWeight
 			WHERE intBillId = @intBillId
 		END
 		ELSE 
@@ -279,7 +286,9 @@ BEGIN TRY
 				intCurrencyId = @intCurrencyId,
 				ysnSubCurrency = @ysnSubCurrency,
 				dblClaimAmount = @dblClaimAmount,
-				dblTotal = @dblClaimAmount
+				dblTotal = @dblClaimAmount,
+				dbl1099 = @dblClaimAmount,
+				dblNetWeight = @dblNetWeight
 			WHERE intBillId = @intBillId
 		END
 
