@@ -14,6 +14,22 @@ strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 
 CreatedBy.strName AS strContactName,
 CreatedBy.strEmail AS strContactEmail,
 strDateLocation = VoucherLocation.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 107),
+Term.strTerm,
+A.strRemarks,
+Bank.strBankName,
+BankAccount.strBankAccountHolder,
+BankAccount.strIBAN,
+BankAccount.strSWIFT,
+Bank.strCountry + ', ' + Bank.strCity + ' ' + Bank.strState AS strBankAddress,
+(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
+	(	
+	  SELECT TOP 1
+	  intAttachmentId
+	  FROM tblSMAttachment
+	  WHERE strScreen = 'SystemManager.CompanyPreference'
+	  AND strComment = 'Footer'
+	  ORDER BY intAttachmentId DESC
+	)) AS strFooter,
 Claim.* 
 FROM (
 	SELECT
@@ -199,6 +215,9 @@ LEFT JOIN tblICItemContract ItemContract INNER JOIN tblSMCountry ItemContractCou
 LEFT JOIN tblICCommodityAttribute CommodityAttr ON CommodityAttr.intCommodityAttributeId = Claim.intOriginCountryId
 LEFT JOIN tblEMEntity CreatedBy ON A.intEntityId = CreatedBy.intEntityId
 LEFT JOIN tblSMCompanyLocation VoucherLocation ON VoucherLocation.intCompanyLocationId = A.intStoreLocationId
+LEFT JOIN tblSMTerm Term ON A.intTermsId = Term.intTermID
+LEFT JOIN tblCMBankAccount BankAccount ON BankAccount.intBankAccountId = A.intBankInfoId
+LEFT JOIN tblCMBank Bank ON BankAccount.intBankId = Bank.intBankId
 WHERE 1= CASE WHEN Claim.dblPrepaidTotal IS NULL THEN 1 ELSE 
 			CASE WHEN Claim.dblQtyBillCreated = Claim.dblContractItemQty THEN 1 ELSE 0 END--make sure we fully billed the contract item
 		END
