@@ -20,7 +20,7 @@ Ext.define('Inventory.CommonIC', {
      * @returns {iRely.TestEngine}
      */
 
-
+    //Add Inventory Item Negative Inventory No
     addInventoryItem: function (t,next, item, itemdesc, category, commodity,lottrack, saleuom, receiveuom,priceLC, priceSC, priceAC) {
         new iRely.FunctionalTest().start(t, next)
 
@@ -115,6 +115,108 @@ Ext.define('Inventory.CommonIC', {
             .done();
 
     },
+
+    //Add Inventory Item Negative Inventory Yes
+    addInventoryItemNegative: function (t,next, item, itemdesc, category, commodity,lottrack, saleuom, receiveuom,priceLC, priceSC, priceAC) {
+        new iRely.FunctionalTest().start(t, next)
+
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Items','Screen')
+            .waitUntilLoaded()
+            .clickButton('New')
+            .waitUntilLoaded('icitem')
+            .verifyScreenShown('icitem')
+            .verifyStatusMessage('Ready')
+
+            .enterData('Text Field','ItemNo', item)
+            .enterData('Text Field','Description', itemdesc)
+//            .selectComboBoxRowNumber('Category',9,0)
+//            .selectComboBoxRowNumber('Commodity',12,0)
+            .selectComboBoxRowValue('Category', category, 'cboCategory',1)
+            .selectComboBoxRowValue('Commodity', commodity, 'strCommodityCode',1)
+            .selectComboBoxRowNumber('LotTracking', lottrack)
+
+            .clickTab('Setup')
+            .clickButton('AddRequiredAccounts')
+            .verifyGridData('GlAccounts', 1, 'colGLAccountCategory', 'AP Clearing')
+            .verifyGridData('GlAccounts', 2, 'colGLAccountCategory', 'Inventory')
+            .verifyGridData('GlAccounts', 3, 'colGLAccountCategory', 'Cost of Goods')
+            .verifyGridData('GlAccounts', 4, 'colGLAccountCategory', 'Sales Account')
+            .verifyGridData('GlAccounts', 5, 'colGLAccountCategory', 'Inventory In-Transit')
+            .verifyGridData('GlAccounts', 6, 'colGLAccountCategory', 'Inventory Adjustment')
+
+            .selectGridComboBoxRowValue('GlAccounts', 1, 'strAccountId', '21000-0000-000', 'strAccountId')
+            .selectGridComboBoxRowValue('GlAccounts', 2, 'strAccountId', '16000-0000-000', 'strAccountId')
+            .selectGridComboBoxRowValue('GlAccounts', 3, 'strAccountId', '50000-0000-000', 'strAccountId')
+            .selectGridComboBoxRowValue('GlAccounts', 4, 'strAccountId', '40010-0001-006', 'strAccountId')
+            .selectGridComboBoxRowValue('GlAccounts', 5, 'strAccountId', '16050-0000-000', 'strAccountId')
+            .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16040-0000-000', 'strAccountId')
+
+            .addResult('======== Setup GL Accounts Successful ========')
+
+            .clickTab('Location')
+            .clickButton('AddLocation')
+            .waitUntilLoaded('icitemlocation')
+            .selectComboBoxRowNumber('Location',1,0)
+            .selectComboBoxRowNumber('SubLocation',4,0)
+            .selectComboBoxRowNumber('StorageLocation',1,0)
+            .selectComboBoxRowValue('SubLocation', 'Raw Station', 'intSubLocationId',0)
+            .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'intStorageLocationId',0)
+            .selectComboBoxRowValue('IssueUom', saleuom, 'strUnitMeasure')
+            .selectComboBoxRowValue('ReceiveUom', receiveuom, 'strUnitMeasure')
+            .selectComboBoxRowNumber('NegativeInventory',1,0)
+            .clickButton('Save')
+            .waitUntilLoaded()
+            .verifyStatusMessage('Saved')
+            .clickButton('Close')
+
+            .clickButton('AddLocation')
+            .waitUntilLoaded('')
+            .selectComboBoxRowNumber('Location',2,0)
+//            .selectComboBoxRowNumber('SubLocation',1,0)
+//            .selectComboBoxRowNumber('StorageLocation',1,0)
+            .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
+            .selectComboBoxRowValue('SubLocation', 'Indy', 'SubLocation',0)
+            .selectComboBoxRowValue('StorageLocation', 'Indy Storage', 'StorageLocation',0)
+            .selectComboBoxRowValue('IssueUom', saleuom, 'IssueUom',0)
+            .selectComboBoxRowValue('ReceiveUom', receiveuom, 'ReceiveUom',0)
+            .selectComboBoxRowNumber('NegativeInventory',1,0)
+            .clickButton('Save')
+            .waitUntilLoaded()
+            .verifyStatusMessage('Saved')
+            .clickButton('Close')
+
+            .clickTab('Other')
+            .clickCheckBox('TankRequired', true)
+            .clickCheckBox('AvailableForTm', true)
+
+            .displayText('===== Setup Item Pricing=====')
+            .clickTab('Pricing')
+            .waitUntilLoaded('')
+            .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
+            .enterGridData('Pricing', 1, 'dblLastCost', priceLC)
+            .enterGridData('Pricing', 1, 'dblStandardCost', priceSC)
+            .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
+            .enterGridData('Pricing', 1, 'dblAmountPercent', priceAC)
+
+            .verifyGridData('Pricing', 2, 'strLocationName', '0002 - Indianapolis')
+            .enterGridData('Pricing', 2, 'dblLastCost', priceLC)
+            .enterGridData('Pricing', 2, 'dblStandardCost', priceSC)
+            .selectGridComboBoxRowNumber('Pricing', 2, 'strPricingMethod',3)
+            .enterGridData('Pricing', 2, 'dblAmountPercent', priceAC)
+            .clickButton('Save')
+            .waitUntilLoaded()
+            .verifyStatusMessage('Saved')
+            .clickButton('Close')
+            .clickMenuFolder('Inventory','Folder')
+            .displayText('===== Item Created =====')
+            .done();
+
+    },
+
+
+
+
 
     /**
      * Add Commodity

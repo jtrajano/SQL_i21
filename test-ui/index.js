@@ -494,6 +494,39 @@ Harness.start(
 
             },
             {
+                group: 'InventoryShipment',
+                items:
+                    [
+
+                        {
+                            group: 'DirectInventoryShipment',
+                            items: [
+                                {
+                                    url: 'BusinessDomain/InventoryShipment/DirectInventoryShipment/PreSetup.js?v=' + version,
+                                    title: 'PreSetup',
+                                    preload: [
+                                        functionalTest,
+                                        commonIC
+
+                                    ]
+                                },
+                                {
+                                    url: 'BusinessDomain/InventoryShipment/DirectInventoryShipment/DirectIS1-2.js?v=' + version,
+                                    title: 'DirectIS-Scen.1-2',
+                                    preload: [
+                                        functionalTest,
+                                        commonIC
+
+                                    ]
+                                }
+
+                            ]
+                        }
+
+                    ]
+
+            },
+            {
                 group: 'StockChecking',
                 items: [
                     {
