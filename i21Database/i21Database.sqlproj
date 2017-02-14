@@ -2844,6 +2844,9 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnLIFO.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultDecimal.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostAutoNegative.sql">
+    <Build Include="dbo\Views\vyuAPRptWeightClaimDM.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptWeightClaimDM.sql" />
+
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Tables\tblARServiceChargeRecap.sql" />

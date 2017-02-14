@@ -466,7 +466,7 @@ BEGIN
 		SELECT 
 			K.dblNetWt AS dblNet
 		FROM tblLGLoadContainer K
-		WHERE 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2
+		WHERE 1 = (CASE WHEN (A.strReceiptType = 'Purchase Contract' OR A.strReceiptType = 'Inventory Return') AND A.intSourceType = 2
 							AND K.intLoadContainerId = B.intContainerId 
 						THEN 1
 						ELSE 0 END)
