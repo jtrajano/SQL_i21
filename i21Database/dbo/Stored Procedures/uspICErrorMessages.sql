@@ -525,7 +525,7 @@ SET @strmessage = 'Voucher is no longer needed. All items have Voucher.'
 EXEC sp_addmessage 80111,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80112) EXEC sp_dropmessage 80112, 'us_english'	
-SET @strmessage = 'Unable to unpost the Inventory Receipt. It has an Inventory Return in %s.'
+SET @strmessage = 'Unable to unpost the Inventory Receipt because it was returned. Please check %s.'
 EXEC sp_addmessage 80112,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80113) EXEC sp_dropmessage 80113, 'us_english'	
