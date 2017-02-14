@@ -5021,6 +5021,7 @@
     <Build Include="dbo\Stored Procedures\uspCTGetDefaultData.sql" />
     <Build Include="dbo\Views\vyuLGNotifications.sql" />
     <Build Include="dbo\Views\vyuRKRollCost.sql" />
+    <Build Include="dbo\Views\vyuEMEntityOnGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
