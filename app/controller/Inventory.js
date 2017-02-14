@@ -7,7 +7,10 @@ Ext.define('Inventory.controller.Inventory', {
     requires: [
         'Inventory.Utils',
         'Inventory.ux.GridUnitMeasureColumn',
-        'Inventory.ux.GridUnitMeasureField'
+        'Inventory.ux.GridUnitMeasureField',
+        'Inventory.ux.GridUOMCellEditor',
+        'Inventory.ux.GridUOMColumn',
+        'Inventory.ux.GridUOMField'
     ],
     singleton: true,
 
