@@ -180,11 +180,11 @@ BEGIN
 		-- Validate Vendor Id --
 		DECLARE @valueEntityId INT
 
-		IF EXISTS ( SELECT *
-				    FROM @DataForReceiptHeader RawHeaderData
-					WHERE RawHeaderData.intId = @intId AND RTRIM(LTRIM(LOWER(RawHeaderData.ReceiptType))) != 'transfer order'
-						  AND RawHeaderData.Vendor NOT IN (SELECT intEntityId FROM tblEMEntity)
-				  )
+		SELECT @valueEntityId = RawHeaderData.Vendor
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = @valueEntityId)
 			BEGIN
 				-- Vendor Id is invalid or missing.
 				RAISERROR(80135, 11, 1);
@@ -195,11 +195,11 @@ BEGIN
 		-- Validate Ship From Id --
 		DECLARE @valueShipFromId INT
 
-		IF EXISTS ( SELECT *
-					FROM @DataForReceiptHeader RawHeaderData
-					WHERE RawHeaderData.intId = @intId AND RTRIM(LTRIM(LOWER(RawHeaderData.ReceiptType))) != 'transfer order'
-					      AND RawHeaderData.ShipFrom NOT IN (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = RawHeaderData.Vendor)
-				  )
+		SELECT @valueShipFromId = RawHeaderData.ShipFrom
+		FROM @DataForReceiptHeader RawHeaderData
+		WHERE RawHeaderData.intId = @intId
+
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityLocation WHERE intEntityId = @valueEntityId AND intEntityLocationId = @valueShipFromId)
 			BEGIN
 				-- Ship From Id is invalid or missing.
 				RAISERROR(80136, 11, 1);
@@ -569,7 +569,6 @@ BEGIN
 		SELECT TOP 1 @valueSubLocationId = RawData.intSubLocationId, @getItemId = RawData.intItemId
 		FROM	@ReceiptEntries	RawData
 		WHERE RawData.intSubLocationId NOT IN (SELECT intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationId = RawData.intLocationId)
-		      AND RTRIM(LTRIM(LOWER(RawData.strReceiptType))) != 'transfer order'
 
 		IF @valueSubLocationId > 0
 			BEGIN
@@ -836,7 +835,6 @@ BEGIN
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
 		FROM @OtherCharges RawData
 		WHERE RawData.intEntityVendorId IS NULL OR RawData.intEntityVendorId NOT IN (SELECT intEntityId FROM tblEMEntity)
-			  AND RTRIM(LTRIM(LOWER(RawData.strReceiptType))) != 'transfer order'
 
 		IF @valueChargeId > 0
 			BEGIN
@@ -917,7 +915,6 @@ BEGIN
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
 		FROM @OtherCharges RawData
 		WHERE RawData.intShipFromId IS NULL OR RawData.intShipFromId NOT IN (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = RawData.intEntityVendorId)
-			  AND RTRIM(LTRIM(LOWER(RawData.strReceiptType))) != 'transfer order'
 
 		IF @valueChargeId > 0
 			BEGIN
