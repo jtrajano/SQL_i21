@@ -28,43 +28,43 @@ SELECT
 ,transactions.*
 FROM 
 (
-	SELECT --Weight Claim original
-		strConractNumber		=	ContractHeader.strContractNumber
-		,strMiscDescription		=	Item.strDescription
-		,strItemNo				=	Item.strItemNo
-		,strBillOfLading		=	Receipt.strBillOfLading
-		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
-		,strAccountId			=	DetailAccount.strAccountId
-		,strCurrency			=	MainCurrency.strCurrency
-		,strUOM					=	QtyUOMDetails.strUnitMeasure
-		,strCostUOM				=	CASE WHEN WCOrigDetails.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure ELSE QtyUOMDetails.strUnitMeasure END
-		,strLPlant				=	LPlant.strSubLocationName
-		,intContractSeqId		=	ContractDetail.intContractSeq
-		,intBillId				=	WCOrig.intBillId
-		,dblQtyReceived			=	WCOrigDetails.dblQtyReceived
-		,dblCost				=	WCOrigDetails.dblCost
-		,dblTotal				=	WCOrigDetails.dblTotal
-	FROM tblAPBill WCOrig
-	INNER JOIN tblAPBillDetail WCOrigDetails ON WCOrig.intBillId = WCOrigDetails.intBillId
-	INNER JOIN tblICItem Item ON Item.intItemId = WCOrigDetails.intItemId
-	INNER JOIN (tblICItemUOM QtyUOM INNER JOIN tblICUnitMeasure QtyUOMDetails ON QtyUOM.intUnitMeasureId = QtyUOMDetails.intUnitMeasureId) 
-			ON (CASE WHEN WCOrigDetails.intWeightUOMId > 0 THEN WCOrigDetails.intWeightUOMId WHEN WCOrigDetails.intCostUOMId > 0 THEN WCOrigDetails.intCostUOMId ELSE WCOrigDetails.intUnitOfMeasureId END) = QtyUOM.intItemUOMId
-	INNER JOIN (tblCTContractDetail ContractDetail INNER JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId)
-			ON WCOrigDetails.intContractDetailId = ContractDetail.intContractDetailId
-	INNER JOIN tblICInventoryReceiptItem ReceiptDetail INNER JOIN tblICInventoryReceipt Receipt ON ReceiptDetail.intInventoryReceiptId = Receipt.intInventoryReceiptId
-			ON ReceiptDetail.intInventoryReceiptItemId = WCOrigDetails.intInventoryReceiptItemId
-	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = WCOrigDetails.intAccountId
-	INNER JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = WCOrig.intCurrencyId
-	LEFT JOIN (tblICItemUOM ItemCostUOM INNER JOIN tblICUnitMeasure ItemCostUOMMeasure ON ItemCostUOM.intUnitMeasureId = ItemCostUOMMeasure.intUnitMeasureId) 
-			ON WCOrigDetails.intCostUOMId = ItemCostUOM.intItemUOMId
-	LEFT JOIN tblICItemContract ItemContract INNER JOIN tblSMCountry ItemOriginCountry ON ItemContract.intCountryId = ItemOriginCountry.intCountryID
-			ON ContractDetail.intItemContractId = ItemContract.intItemContractId
-	LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = Item.intOriginId
-	LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
-	WHERE WCOrig.intTransactionType = 11
-	UNION ALL --Weight Claim 2nd Version from weight claim screen
+	--SELECT --Weight Claim original
+	--	strContractNumber		=	ContractHeader.strContractNumber
+	--	,strMiscDescription		=	Item.strDescription
+	--	,strItemNo				=	Item.strItemNo
+	--	,strBillOfLading		=	Receipt.strBillOfLading
+	--	,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
+	--	,strAccountId			=	DetailAccount.strAccountId
+	--	,strCurrency			=	MainCurrency.strCurrency
+	--	,strUOM					=	QtyUOMDetails.strUnitMeasure
+	--	,strCostUOM				=	CASE WHEN WCOrigDetails.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure ELSE QtyUOMDetails.strUnitMeasure END
+	--	,strLPlant				=	LPlant.strSubLocationName
+	--	,intContractSeqId		=	ContractDetail.intContractSeq
+	--	,intBillId				=	WCOrig.intBillId
+	--	,dblQtyReceived			=	WCOrigDetails.dblQtyReceived
+	--	,dblCost				=	WCOrigDetails.dblCost
+	--	,dblTotal				=	WCOrigDetails.dblTotal
+	--FROM tblAPBill WCOrig
+	--INNER JOIN tblAPBillDetail WCOrigDetails ON WCOrig.intBillId = WCOrigDetails.intBillId
+	--INNER JOIN tblICItem Item ON Item.intItemId = WCOrigDetails.intItemId
+	--INNER JOIN (tblICItemUOM QtyUOM INNER JOIN tblICUnitMeasure QtyUOMDetails ON QtyUOM.intUnitMeasureId = QtyUOMDetails.intUnitMeasureId) 
+	--		ON (CASE WHEN WCOrigDetails.intWeightUOMId > 0 THEN WCOrigDetails.intWeightUOMId WHEN WCOrigDetails.intCostUOMId > 0 THEN WCOrigDetails.intCostUOMId ELSE WCOrigDetails.intUnitOfMeasureId END) = QtyUOM.intItemUOMId
+	--INNER JOIN (tblCTContractDetail ContractDetail INNER JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId)
+	--		ON WCOrigDetails.intContractDetailId = ContractDetail.intContractDetailId
+	--INNER JOIN tblICInventoryReceiptItem ReceiptDetail INNER JOIN tblICInventoryReceipt Receipt ON ReceiptDetail.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	--		ON ReceiptDetail.intInventoryReceiptItemId = WCOrigDetails.intInventoryReceiptItemId
+	--INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = WCOrigDetails.intAccountId
+	--INNER JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = WCOrig.intCurrencyId
+	--LEFT JOIN (tblICItemUOM ItemCostUOM INNER JOIN tblICUnitMeasure ItemCostUOMMeasure ON ItemCostUOM.intUnitMeasureId = ItemCostUOMMeasure.intUnitMeasureId) 
+	--		ON WCOrigDetails.intCostUOMId = ItemCostUOM.intItemUOMId
+	--LEFT JOIN tblICItemContract ItemContract INNER JOIN tblSMCountry ItemOriginCountry ON ItemContract.intCountryId = ItemOriginCountry.intCountryID
+	--		ON ContractDetail.intItemContractId = ItemContract.intItemContractId
+	--LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = Item.intOriginId
+	--LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
+	--WHERE WCOrig.intTransactionType = 11
+	--UNION ALL --Weight Claim 2nd Version from weight claim screen
 	SELECT
-		strConractNumber		=	ContractHeader.strContractNumber
+		strContractNumber		=	ContractHeader.strContractNumber
 		,strMiscDescription		=	Item.strDescription
 		,strItemNo				=	Item.strItemNo
 		,strBillOfLading		=	'' --GET FROM LOAD
@@ -76,9 +76,13 @@ FROM
 		,strLPlant				=	LPlant.strSubLocationName
 		,intContractSeqId		=	ContractDetail.intContractSeq
 		,intBillId				=	WC2.intBillId
-		,dblQtyReceived			=	WC2Details.dblQtyReceived
+		,dblQtyReceived			=	CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetWeight ELSE WC2Details.dblQtyReceived END
 		,dblCost				=	WC2Details.dblCost
 		,dblTotal				=	WC2Details.dblTotal
+		,dblNetShippedWeight	=	WC2Details.dblNetShippedWeight
+		,dblWeightLoss			=	WC2Details.dblNetShippedWeight - WC2Details.dblQtyReceived
+		,dblFranchiseWeight		=	WC2Details.dblFranchiseWeight
+		,dblClaimAmount			=	WC2Details.dblClaimAmount
 	FROM tblAPBill WC2
 	INNER JOIN tblAPBillDetail WC2Details ON WC2.intBillId = WC2Details.intBillId
 	INNER JOIN tblICItem Item ON Item.intItemId = WC2Details.intItemId
@@ -97,7 +101,7 @@ FROM
 	WHERE WC2.intTransactionType = 11
 	UNION ALL -- DEBIT MEMO
 	SELECT
-		strConractNumber		=	ContractHeader.strContractNumber
+		strContractNumber		=	ContractHeader.strContractNumber
 		,strMiscDescription		=	Item.strDescription
 		,strItemNo				=	Item.strItemNo
 		,strBillOfLading		=	Receipt.strBillOfLading
@@ -112,6 +116,10 @@ FROM
 		,dblQtyReceived			=	CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight ELSE DMDetails.dblQtyReceived END
 		,dblCost				=	DMDetails.dblCost
 		,dblTotal				=	DMDetails.dblTotal
+		,dblNetShippedWeight	=	0
+		,dblWeightLoss			=	0
+		,dblFranchiseWeight		=	0
+		,dblClaimAmount			=	0
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
