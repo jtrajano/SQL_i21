@@ -11,3 +11,15 @@ JOIN tblICRestriction R1 ON R1.intRestrictionId = SL.intRestrictionId
 WHERE L.intLotStatusId = 1 -- Active
 	AND L.dtmExpiryDate >= GetDate()
 	AND L.dblQty > 0
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblMFWorkOrderProducedLot WP
+		WHERE WP.intSpecialPalletLotId = L.intLotId
+			AND WP.ysnProductionReversed = 0
+		)
+	AND SL.intStorageLocationId IN (
+		SELECT PA.strAttributeValue
+		FROM dbo.tblMFManufacturingProcessAttribute PA
+		WHERE PA.intAttributeId = 90
+			AND PA.strAttributeValue <> ''
+		)

@@ -232,6 +232,13 @@ BEGIN TRY
 	WHERE intTransactionId = @intWorkOrderId
 		AND strTransactionId = @strWorkOrderNo
 
+	Update WC
+	Set intBatchId =@intBatchId
+	FROM tblMFWorkOrderConsumedLot WC
+	JOIN tblMFWorkOrderProducedLot WP on WP.intWorkOrderId=WC.intWorkOrderId and WP.intSpecialPalletLotId =WC.intLotId
+	WHERE WC.intWorkOrderId = @intWorkOrderId
+		AND intSpecialPalletLotId is not null and WC.intBatchId is null
+
 	INSERT INTO @tblItem (
 		intItemId
 		,dblReqQty

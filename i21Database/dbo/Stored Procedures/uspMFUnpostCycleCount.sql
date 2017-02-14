@@ -257,6 +257,7 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
+			AND intItemId NOT IN (Select intItemId from tblMFWorkOrderProducedLot Where intWorkOrderId = @intWorkOrderId and intSpecialPalletLotId is not null)
 
 		UPDATE tblMFProductionSummary
 		SET dblConsumedQuantity = 0
