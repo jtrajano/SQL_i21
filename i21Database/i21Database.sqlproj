@@ -5014,7 +5014,6 @@
     <Build Include="dbo\Tables\tblRKArchBlendDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetDefaultData.sql" />
     <Build Include="dbo\Views\vyuCTMultiCurrencyRevalue.sql" />
-    <Build Include="dbo\Views\vyuEMEntityOnGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
