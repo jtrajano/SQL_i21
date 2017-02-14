@@ -365,6 +365,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     return posted;
             }
         },
+        pgePreviewTitle: function(get) {
+            var posted = get('current.ysnPosted');
+            if (posted){
+                return 'Unpost Preview';
+            }
+            else 
+                return 'Post Preview';
+        },
         hideUnpostButton: function(get) {
             var posted = get('current.ysnPosted');
             switch (get('current.intSourceType')) {
