@@ -1052,8 +1052,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             txtActualTempReading: {
                 value: '{current.dblActualTempReading}',
                 readOnly: '{isReceiptReadonly}'
+            },
+            pgePostPreview: {
+                title: '{pgePreviewTitle}'
             }
-
         }
     },
 

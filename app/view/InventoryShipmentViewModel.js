@@ -448,64 +448,69 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                 return true;
         },
         disableFieldInShipmentGrid: function (get) {
-           if (iRely.Functions.isEmpty(get('grdInventoryShipment.selection.strItemNo'))) {
-               return true;
-           }
-           else {
-               return false;
-           }
-       },
-       hideForeignColumn: function (get){
-           var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
-           var intCurrency = get('current.intCurrencyId');
+            if (iRely.Functions.isEmpty(get('grdInventoryShipment.selection.strItemNo'))) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
+        hideForeignColumn: function (get){
+            var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+            var intCurrency = get('current.intCurrencyId');
 
-           if (defaultCurrency && intCurrency){
-               // Return true (hide) if transaction is using a foreign currency. 
-               if (defaultCurrency !== intCurrency)
+            if (defaultCurrency && intCurrency){
+                // Return true (hide) if transaction is using a foreign currency. 
+                if (defaultCurrency !== intCurrency)
                     return false;                 
-           }
-           return true; 
-       },
-       hideFunctionalCurrencyColumn: function (get){
-           var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
-           var intCurrency = get('current.intCurrencyId');
+            }
+            return true; 
+        },
+        hideFunctionalCurrencyColumn: function (get){
+            var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+            var intCurrency = get('current.intCurrencyId');
 
-           if (defaultCurrency && intCurrency){
-               // Return true (hide) if transaction is using the functional currency
-               if (defaultCurrency == intCurrency)
+            if (defaultCurrency && intCurrency){
+                // Return true (hide) if transaction is using the functional currency
+                if (defaultCurrency == intCurrency)
                     return false;                 
-           }
-           return true; 
-       },       
-       hidePostButton: function(get) {
-           var posted = get('current.ysnPosted');
+            }
+            return true; 
+        },       
+        hidePostButton: function(get) {
+            var posted = get('current.ysnPosted');
 
-           switch (get('current.intSourceType')) {
+            switch (get('current.intSourceType')) {
                 case 1: // Scale  
                     return true; 
                 default:  
                     return posted;  
             }   
-       },
+        },
+        hideUnpostButton: function(get) {
+            var posted = get('current.ysnPosted');
 
-       hideUnpostButton: function(get) {
-           var posted = get('current.ysnPosted');
-
-           switch (get('current.intSourceType')) {
+            switch (get('current.intSourceType')) {
                 case 1: // Scale  
                     return true; 
                 default:  
                     return !posted;  
             }   
-       },
-
+        },
+        pgePreviewTitle: function(get) {
+            var posted = get('current.ysnPosted');
+            if (posted)
+                return 'Unpost Preview';            
+            else 
+                return 'Post Preview';
+        },
         checkHidePostUnpost: function(get) {
             // Hide the Post & Unpost buttons if:
             switch (get('current.intSourceType')) {
-                case 1: // Scale  
-                    return true; 
-                default:  
-                    return false;  
+            case 1: // Scale  
+                return true; 
+            default:  
+                return false;  
             }              
         }       
     }

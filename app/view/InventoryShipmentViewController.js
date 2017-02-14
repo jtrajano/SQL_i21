@@ -760,6 +760,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colChargeForexRate: {
                     dataIndex: 'dblForexRate' 
                 }
+            },
+            pgePostPreview: {
+                title: '{pgePreviewTitle}'
             }
         }
     },
