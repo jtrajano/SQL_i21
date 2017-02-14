@@ -86,6 +86,7 @@ DECLARE @temp_statement_table TABLE(
 	,[dblAmountDue]					NUMERIC(18,6)
 	,[dblPastDue]					NUMERIC(18,6)
 	,[dblMonthlyBudget]				NUMERIC(18,6)
+	,[dblRunningBalance]			NUMERIC(18,6)
 	,[strCustomerNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,[strName]						NVARCHAR(100)
 	,[strBOLNumber]					NVARCHAR(100)
@@ -203,6 +204,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 						ELSE 0
 					END
 	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](C.intEntityCustomerId, I.dtmDate), 0)
+	 , dblRunningBalance = SUM(CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)) OVER (PARTITION BY I.intEntityCustomerId ORDER BY I.intInvoiceId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 	 , C.strCustomerNumber
 	 , C.strName
 	 , I.strBOLNumber
@@ -257,6 +259,7 @@ IF @ysnIncludeBudget = 1
 				  , dblAmountDue				= dblBudgetAmount - dblAmountPaid
 				  , dblPastDue					= dblBudgetAmount - dblAmountPaid
 				  , dblMonthlyBudget			= dblBudgetAmount
+				  , dblRunningBalance			= SUM(dblBudgetAmount - dblAmountPaid) OVER (PARTITION BY C.intEntityCustomerId ORDER BY intCustomerBudgetId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 				  , strCustomerNumber			= C.strCustomerNumber
 				  , strName						= C.strName
 				  , strBOLNumber				= NULL
@@ -388,6 +391,7 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,STATEMENTREPORT.dblAmountDue
 	  ,STATEMENTREPORT.dblPastDue
 	  ,STATEMENTREPORT.dblMonthlyBudget
+	  ,STATEMENTREPORT.dblRunningBalance
 	  ,STATEMENTREPORT.strCustomerNumber
 	  ,STATEMENTREPORT.strName
 	  ,STATEMENTREPORT.strBOLNumber
@@ -428,6 +432,7 @@ SELECT strReferenceNumber							= CFReportTable.strInvoiceReportNumber
 	  ,dblAmountDue									= SUM(STATEMENTREPORT.dblAmountDue)
 	  ,dblPastDue									= SUM(STATEMENTREPORT.dblPastDue)
 	  ,dblMonthlyBudget								= SUM(STATEMENTREPORT.dblMonthlyBudget)
+	  ,dblRunningBalance							= SUM(STATEMENTREPORT.dblRunningBalance)
 	  ,STATEMENTREPORT.strCustomerNumber
 	  ,STATEMENTREPORT.strName
 	  ,STATEMENTREPORT.strBOLNumber
