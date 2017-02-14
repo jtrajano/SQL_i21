@@ -20,17 +20,20 @@ BEGIN TRY
 	SELECT TOP 1 @InvoiceId =  intInvoiceId FROM tblARInvoice
 	WHERE intMeterReadingId = @MeterReadingId
 
-	UPDATE tblARInvoice
-	SET intMeterReadingId = NULL
-		, intConcurrencyId	= intConcurrencyId + 1
-	WHERE intInvoiceId = @InvoiceId
-		AND ISNULL(ysnPosted, 0) <> 1
+	IF (ISNULL(@InvoiceId, '') <> '')
+	BEGIN
+		UPDATE tblARInvoice
+		SET intMeterReadingId = NULL
+			, intConcurrencyId	= intConcurrencyId + 1
+		WHERE intInvoiceId = @InvoiceId
+			AND ISNULL(ysnPosted, 0) <> 1
 
-	UPDATE tblMBMeterReading
-	SET intInvoiceId = NULL
-	WHERE intMeterReadingId = @MeterReadingId
+		UPDATE tblMBMeterReading
+		SET intInvoiceId = NULL
+		WHERE intMeterReadingId = @MeterReadingId
 
-	EXEC uspARDeleteInvoice @InvoiceId, @UserId
+		EXEC uspARDeleteInvoice @InvoiceId, @UserId
+	END
 
 END TRY
 BEGIN CATCH
