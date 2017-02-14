@@ -24,7 +24,7 @@ SET ANSI_WARNINGS OFF
 DECLARE
 	@intLotId AS INT
 	,@strItemNo AS NVARCHAR(50)
-	,@dblAdjustQtyBy AS NUMERIC(38, 20)
+	,@dblAdjustQtyBy AS NUMERIC(38, 20) = 0
 	,@intItemLocationId AS INT
 	,@tempEachLotQty AS NUMERIC(38,20)
 	,@tempAdjustQtyBy AS NUMERIC(38,20)
@@ -207,6 +207,9 @@ BEGIN
 				AND StockUOM.intItemLocationId = @intItemLocationId 
 				AND StockUOM.intSubLocationId = @intSubLocationId 
 
+		IF @dblAdjustQtyBy IS NULL 
+			SET @dblAdjustQtyBy = @dblNewQty
+
 		IF @dblAdjustQtyBy = 0 
 			GOTO _Exit
 
@@ -245,6 +248,9 @@ BEGIN
 					)
 				END
 
+			IF @dblAdjustQtyBy IS NULL 
+				SET @dblAdjustQtyBy = @dblNewQty
+
 			IF @dblAdjustQtyBy = 0 
 				GOTO _Exit
 
@@ -261,6 +267,9 @@ BEGIN
 					AND StockUOM.intItemUOMId = @intItemUOMId
 					AND StockUOM.intItemLocationId = @intItemLocationId 
 					AND StockUOM.intSubLocationId = @intSubLocationId 
+
+			IF @dblAdjustQtyBy IS NULL 
+				SET @dblAdjustQtyBy = @dblNewQty;
 
 			IF @dblAdjustQtyBy = 0 
 				GOTO _Exit
