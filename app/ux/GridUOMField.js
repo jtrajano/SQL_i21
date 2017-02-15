@@ -25,11 +25,14 @@ Ext.define('Inventory.ux.GridUOMField', {
         uom: null,
         txtQuantity: undefined,
         cboUom: undefined,
-        store: undefined
+        store: undefined,
+        DEFAULT_DECIMALS: 6
     },
 
     initComponent: function() {
         var me = this;
+        me.flex = 1;
+        me.layout = 'fit';
         me.callParent(arguments);
         me.initField();
         me.initControls();
@@ -109,6 +112,7 @@ Ext.define('Inventory.ux.GridUOMField', {
         txtQuantity.on('keypress', function(field, event) {
             if(event.keyCode === 13) {
                 plugin.completeEdit();
+                event.stopEvent();
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -135,10 +139,38 @@ Ext.define('Inventory.ux.GridUOMField', {
     },
 
     getValue: function(){
+        var me = this,
+            plugin = me.getEditingPlugin(),
+            activeRecord = null,
+            newValue = me.value;
+        
+        if(me.isEditorComponent) {
+            newValue = me.txtQuantity.getValue();
+            if(plugin) {
+                activeRecord = plugin.context.record;
+                var strUOM = activeRecord.get(me.getDisplayField());
+                var intUOM = activeRecord.get(me.getValueField());
+                var decimals = me.getUomDecimals(intUOM);
+                var po = me.getPrecisionNumberObject(newValue, decimals);
+                if(po) {
+                    newValue = po.precisionValue;
+                }
+            }
+        }
+
+        me.value = newValue;
+        return newValue;
+    },
+
+    resetValues: function() {
         var me = this;
-        if(me.isEditorComponent)
-            return me.txtQuantity.getValue();
-        return me.value;
+
+        me.txtQuantity.setDecimalPrecision(!iRely.Functions.isEmpty(me.DEFAULT_DECIMALS) ? me.DEFAULT_DECIMALS : 6);
+        me.txtQuantity.setDecimalToDisplay(!iRely.Functions.isEmpty(me.DEFAULT_DECIMALS) ? me.DEFAULT_DECIMALS : 6);
+        me.txtQuantity.setValue(null);
+        me.cboUom.setValue(null);
+        me.cboUom.setRawValue(null);
+        me.cboUom.selection = null;
     },
 
     setValue: function(value) {
@@ -146,23 +178,60 @@ Ext.define('Inventory.ux.GridUOMField', {
             store = me.store,
             activeRecord = null,
             plugin = me.getEditingPlugin();
+        me.resetValues();
 
         if(plugin) {
             activeRecord = plugin.context.record;
         }
 
-        /* Set quantity */
-        me.txtQuantity.setValue(value);
+        // Reload uom store if has a pending request and re-initialize value and precision.
+        if(me.store.hasPendingLoad()) {
+            me.store.load({
+                callback: function(records, op, success) {
+                    me.setValue(value);
+                }
+            });
+        }
 
-        /* Set UOM */
+        var newValue = value;
+
+        // Count decimal places based on UOM and set text decimal precision
         if(activeRecord) {
             var strUOM = activeRecord.get(me.getDisplayField());
             var intUOM = activeRecord.get(me.getValueField());
             me.cboUom.setValue(intUOM);
             me.cboUom.setRawValue(strUOM);
+
+            var decimals = me.getUomDecimals(intUOM);
+            newValue = me.setupDecimalPrecision(value, decimals, false);
         }
-        me.value = value;
+        
+        me.value = newValue;
+        me.txtQuantity.setValue(newValue);
+
         return me;
+    },
+
+    setupDecimalPrecision: function(value, decimals, removeTrailingZeroes) {
+        var me = this;
+        var po = me.getPrecisionNumberObject(value, decimals);
+        if(po) {
+            me.txtQuantity.setDecimalPrecision(po.precision);
+            me.txtQuantity.setDecimalToDisplay(removeTrailingZeroes ? po.decimalPlaces : po.precision); 
+            return po.precisionValue;
+        }
+        return value;
+    },
+
+    getUomDecimals: function(id) {
+        var me = this;
+        var index = me.store.findExact(me.getLookupValueField(), id);
+        var record = me.store.getAt(index);
+        if(record) {
+            var decimals = record.get(me.getLookupDecimalPrecisionField());
+            return me.isNullOrEmpty(decimals) ? me.DEFAULT_DECIMALS : decimals;
+        }
+        return me.DEFAULT_DECIMALS;
     },
 
     // getErrors: function(value) {
