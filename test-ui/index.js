@@ -140,7 +140,7 @@ Harness.start(
             { group: 'Category',
                 items: [
                     {
-                        url: 'CRUDScripts/Category/AddCategory.js?v='+version,
+                        url: 'CRUDScripts/Category/17xAddCategory.js?v='+version,
                         title: 'AddCategory',
                         preload: [
                             functionalTest
@@ -581,6 +581,21 @@ Harness.start(
                     {
                         url: 'BusinessDomain/OtherCharges/CalculateChargesByCostMethod.js?v=' + version,
                         title: 'CalculateChargesByCostMethod',
+                        preload: [
+                            functionalTest,
+                            commonIC
+
+                        ]
+                    }
+
+                ]
+            },
+            {
+                group: 'Category',
+                items: [
+                    {
+                        url: 'BusinessDomain/Category/17xAddCategory.js?v=' + version,
+                        title: '17xAddCategory',
                         preload: [
                             functionalTest,
                             commonIC
