@@ -947,7 +947,7 @@ BEGIN
 	LEFT OUTER JOIN ptctlmst PT 
 		ON  PT.ptctl_key = 3
 	where [intCompanyLocationId] not in (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
-										 where [strPricingLevelName] COLLATE Latin1_General_CI_AS = PT.pt3cf_prc1 COLLATE Latin1_General_CI_AS) 
+										 where [strPricingLevelName] COLLATE Latin1_General_CI_AS = PT.pt3cf_prc2 COLLATE Latin1_General_CI_AS) 
 
 	--PRICE LEVEL 3
 	INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
@@ -965,7 +965,7 @@ BEGIN
 	LEFT OUTER JOIN ptctlmst PT 
 		ON  PT.ptctl_key = 3
 	where [intCompanyLocationId] not in (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
-										 where [strPricingLevelName] COLLATE Latin1_General_CI_AS = PT.pt3cf_prc1 COLLATE Latin1_General_CI_AS)   
+										 where [strPricingLevelName] COLLATE Latin1_General_CI_AS = PT.pt3cf_prc3 COLLATE Latin1_General_CI_AS)   
   END'
   )
 END
