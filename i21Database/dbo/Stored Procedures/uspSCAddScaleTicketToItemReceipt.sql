@@ -1149,7 +1149,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN 0
 																	END
 								,[intCostUOMId]						= ContractCost.intItemUOMId
-								,[intOtherChargeEntityVendorId]		= @intHaulerId
+								,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
 								,[dblAmount]						= CASE
 																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN RE.dblFreightRate
@@ -1226,11 +1226,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[ysnAccrue]						= ContractCost.ysnAccrue
 						,[ysnPrice]							= ContractCost.ysnPrice
 						FROM tblCTContractCost ContractCost
-						LEFT JOIN @ReceiptStagingTable RE
-						ON RE.intContractDetailId = ContractCost.intContractDetailId
-						WHERE ContractCost.intItemId = @intFreightItemId
-						AND RE.intContractDetailId IS NOT NULL
-						AND ContractCost.dblRate != 0;
+						LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
+						WHERE ContractCost.intItemId = @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0;
 					END
 				INSERT INTO @OtherCharges
 				(
