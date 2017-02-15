@@ -80,7 +80,7 @@ FROM
 		,dblCost				=	WC2Details.dblCost
 		,dblTotal				=	WC2Details.dblTotal
 		,dblNetShippedWeight	=	WC2Details.dblNetShippedWeight
-		,dblWeightLoss			=	WC2Details.dblNetShippedWeight - WC2Details.dblQtyReceived
+		,dblWeightLoss			=	dblWeightLoss--WC2Details.dblNetShippedWeight - WC2Details.dblQtyReceived
 		,dblLandedWeight		=	CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetWeight ELSE WC2Details.dblQtyReceived END
 		,dblFranchiseWeight		=	WC2Details.dblFranchiseWeight
 		,dblClaimAmount			=	WC2Details.dblClaimAmount
