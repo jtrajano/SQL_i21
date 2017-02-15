@@ -129,7 +129,7 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	C.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	CAST(B.dblAmountApplied / CASE WHEN Rate.dblRate > 0 AND 3 != A.intCurrencyId THEN Rate.dblRate ELSE 1 END AS DECIMAL(18,2)),
+		[dblCredit]						=	CAST(B.dblAmountApplied / CASE WHEN Rate.dblRate > 0 AND @SYSTEM_CURRENCY != A.intCurrencyId THEN Rate.dblRate ELSE 1 END AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	C.strReference,
@@ -178,7 +178,7 @@ BEGIN
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=	CAST(
 												
-												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal 
+												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal - CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
 														ELSE
 															CASE	WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 																	ELSE 
@@ -248,11 +248,6 @@ BEGIN
 				FROM tblAPBillDetailTax D
 				WHERE D.intBillDetailId = B.intBillDetailId
 				GROUP BY D.intBillDetailId
-				--SELECT 
-				--	SUM(D.dblTax) dblTotalICTax
-				--FROM tblICInventoryReceiptItemTax D
-				--WHERE D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-				--GROUP BY D.intInventoryReceiptItemId
 			) Taxes
 			OUTER APPLY (
 				SELECT dblTotal = CAST (
@@ -455,7 +450,7 @@ BEGIN
 														 WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax)  --COST ADJUSTMENT
 													END 
 												ELSE (CASE  WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax)
-														WHEN B.dblRate > 0 THEN  CAST(SUM(D.dblTax) / CASE WHEN 3 != A.intCurrencyId THEN B.dblRate ELSE 1 END AS DECIMAL(18,2))
+														WHEN B.dblRate > 0 THEN  CAST(SUM(D.dblTax) / CASE WHEN @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END AS DECIMAL(18,2))
 														ELSE SUM(D.dblTax) END) * (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END)
 											END	),			
 		[dblCredit]						=	(CASE WHEN B.dblOldCost IS NOT NULL THEN (CASE WHEN B.dblOldCost = 0 THEN 0 --AP-2458
@@ -511,7 +506,7 @@ BEGIN
 	AND D.dblTax != 0
 	AND 1 = (
 		--create tax only from item receipt if it is adjusted / Cost is Adjusted
-		CASE WHEN B.intInventoryReceiptItemId IS NOT NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NOT NULL THEN 0 --AP-2792
+		CASE WHEN B.intInventoryReceiptItemId IS NOT NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL THEN 0 --AP-2792
 		ELSE 1 END
 	)
 	GROUP BY A.dtmDate
