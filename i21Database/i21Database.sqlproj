@@ -5033,6 +5033,8 @@
     <Build Include="dbo\Views\vyuQMSampleStaticPropertiesResult.sql" />
     <Build Include="dbo\Views\vyuAPRptWeightClaimDM.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaimDM.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMUpdateSiteGPSById.sql" />
+    <Build Include="dbo\User Defined Types\TMGPSUpdateByIdTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
