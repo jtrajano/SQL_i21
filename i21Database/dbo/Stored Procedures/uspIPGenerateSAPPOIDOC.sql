@@ -324,7 +324,10 @@ Begin
 				Else
 					Set @strItemXml += '<FREE_ITEM>'	+ ' '	+ '</FREE_ITEM>'
 				Set @strItemXml += '<CONF_CTRL>'	+ 'SL08'							+ '</CONF_CTRL>'
-				Set @strItemXml += '<VEND_PART>'	+ ''			+ '</VEND_PART>'
+				If UPPER(@strCommodityCode)='COFFEE'
+					Set @strItemXml += '<VEND_PART>'	+ ISNULL(@strTerm,'')			+ '</VEND_PART>'
+				Else
+					Set @strItemXml += '<VEND_PART>'	+ ''			+ '</VEND_PART>'
 				Set @strItemXml += '<PO_PRICE>'		+ '1'	+ '</PO_PRICE>'
 				Set @strItemXml +=	'</E1BPMEPOITEM>'
 
@@ -350,7 +353,9 @@ Begin
 				Set @strItemXXml += '<PRICE_UNIT>'	+ 'X'		+ '</PRICE_UNIT>'
 				Set @strItemXXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
 				Set @strItemXXml += '<CONF_CTRL>'		+ 'X'	+ '</CONF_CTRL>'
-				If @strTerm IS NOT NULL
+				If @strTerm IS NOT NULL AND UPPER(@strCommodityCode)='COFFEE'
+					Set @strItemXXml += '<VEND_PART>'	+ 'X'		+ '</VEND_PART>'
+				Else
 					Set @strItemXXml += '<VEND_PART>'	+ ' '		+ '</VEND_PART>'
 				Set @strItemXXml += '<PO_PRICE>'			+ 'X'		+ '</PO_PRICE>'
 				Set @strItemXXml +=	'</E1BPMEPOITEMX>'

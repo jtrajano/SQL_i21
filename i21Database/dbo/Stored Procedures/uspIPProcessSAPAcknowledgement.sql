@@ -94,9 +94,9 @@ Begin
 	Select 
 		@strMesssageType = strMesssageType,
 		@strStatus = strStatus,
-		@strStatusCode = strStatusCode,
-		@strStatusDesc = strStatusDesc,
-		@strStatusType = strStatusType,
+		@strStatusCode = ISNULL(strStatusCode,''),
+		@strStatusDesc = ISNULL(strStatusDesc,''),
+		@strStatusType = ISNULL(strStatusType,''),
 		@strParam = strParam,
 		@strRefNo = strRefNo,
 		@strTrackingNo = strTrackingNo,
@@ -119,8 +119,9 @@ Begin
 			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo 
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId=@strTrackingNo
 
+			--For Added Contract
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='Success',strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
-			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')='Awt Ack'
+			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')
 
 			--update the PO Details in modified sequences
 			Update tblCTContractFeed Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
@@ -150,7 +151,7 @@ Begin
 		If @strStatus IN (52,53) --Success
 		Begin
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='Success'
-			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND strFeedStatus='Awt Ack'
+			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND strFeedStatus IN ('Awt Ack','Ack Rcvd')
 
 			Insert Into @tblMessage(strMessageType,strMessage)
 			Values(@strMesssageType,'Success')
@@ -173,20 +174,31 @@ Begin
 	Begin
 		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
 
-		If Exists(Select 1 From tblLGLoad Where intLoadShippingInstructionId=@intLoadId)
+		If ISNULL(@strDeliveryType,'')='U' AND Exists(Select 1 From tblLGLoad Where intLoadShippingInstructionId=@intLoadId)
 			Select TOP 1 @intLoadId=intLoadId From tblLGLoad Where intLoadShippingInstructionId=@intLoadId
 
 		If @strStatus IN (52,53) --Success
 		Begin
-			Update tblLGLoad  Set strExternalShipmentNumber=@strParam
-			Where intLoadId=@intLoadId
+			If ISNULL(@strDeliveryType,'')='U' --Update
+			Begin
+				Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success'
+				Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')
+			End
+			Else
+			Begin --Create
+				Update tblLGLoad  Set strExternalShipmentNumber=@strParam
+				Where intLoadId=@intLoadId
 
-			Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo And intLoadId=@intLoadId
+				Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo And intLoadId=@intLoadId
 
-			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success',strExternalShipmentNumber=@strParam
-			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
+				Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success',strExternalShipmentNumber=@strParam
+				Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')
 
-			Update tblLGLoadDetailStg Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo AND intLoadId=@intLoadId
+				Update tblLGLoadDetailStg Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo AND intLoadId=@intLoadId
+
+				--update the delivery Details in modified loads
+				Update tblLGLoadStg Set strExternalShipmentNumber=@strParam Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')=''
+			End
 
 			Insert Into @tblMessage(strMessageType,strMessage)
 			Values(@strMesssageType,'Success')
