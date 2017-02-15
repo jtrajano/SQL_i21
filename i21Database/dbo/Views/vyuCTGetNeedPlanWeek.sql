@@ -7,5 +7,5 @@ FROM
 							   ELSE LTRIM(intWeek)
 						  END 
 	+'-'+LTRIM(intYear) AS strNeedPlan
-	FROM tblRKStgBlendDemand
+	FROM tblRKStgBlendDemand WHERE dblQuantity >0 
 )t

@@ -103,7 +103,7 @@ BEGIN
 		  END
 		  + '.' + RIGHT(Stg.[intYear], 2)
 		FROM tblRKStgBlendDemand Stg
-		JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId=@IntCommodityId
+		JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId=@IntCommodityId AND Stg.dblQuantity >0
 		WHERE (Stg.intWeek >= @IntWeekId AND Stg.intYear >= @IntYear)
 		   OR (Stg.intYear > @IntYear)
 		ORDER BY 1, 2
@@ -157,12 +157,13 @@ BEGIN
 		
 		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan(intItemId,strItemName,strItemDescription,[intSubLocationId],[strSubLocationName],[First'+ @strColumnName + '],[End'+ @strColumnName + '])
 							 SELECT Item.intItemId,Item.strItemNo,Item.strDescription,SLOC.intCompanyLocationSubLocationId,ISNULL(SLOC.strSubLocationName,''''),
-							 CASE WHEN DATEPART(dd,dtmNeedDate)<16 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,Stg.intUOMId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity1 
-							,CASE WHEN DATEPART(dd,dtmNeedDate)>15 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,Stg.intUOMId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity2 
+							 CASE WHEN DATEPART(dd,dtmNeedDate)<16 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity1 
+							,CASE WHEN DATEPART(dd,dtmNeedDate)>15 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity2 
 							FROM tblRKStgBlendDemand Stg
+							JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId=Stg.intUOMId AND ItemUOM.intItemId=Stg.intItemId
 							JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId='+LTRIM(@IntCommodityId)+'
 							JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=Stg.intSubLocationId							
-							WHERE MONTH(dtmNeedDate)='+LTRIM(@intMonthKey)+' AND YEAR(dtmNeedDate)='+LTRIM(@intYearKey)
+							WHERE Stg.dblQuantity >0 AND MONTH(dtmNeedDate)='+LTRIM(@intMonthKey)+' AND YEAR(dtmNeedDate)='+LTRIM(@intYearKey)
 
 		EXEC (@SqlInsert)
 
@@ -185,7 +186,7 @@ BEGIN
 		
 		SET @SqlSelect ='SELECT  
 						 [intItemId]
-						,[strItemName]
+						,RIGHT([strItemName],8) AS [strItemName]
 						,[strItemDescription]
 						,[intSubLocationId]
 						,[strSubLocationName]'
