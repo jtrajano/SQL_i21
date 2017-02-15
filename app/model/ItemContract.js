@@ -21,10 +21,10 @@ Ext.define('Inventory.model.ItemContract', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
-                            extraParams: { include: 'tblICItemContractDocuments.tblICDocument, tblICItemLocation.vyuICGetItemLocation' },
+                           // extraParams: { include: 'tblICItemContractDocuments.tblICDocument' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemContract/Get'
+                                read: '../Inventory/api/ItemContract/Search'
                             },
                             reader: {
                                 type: 'json',

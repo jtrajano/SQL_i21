@@ -2,6 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,5 +21,63 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
+
+        public override async Task<SearchResult> Search(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICItemContract>()
+                .Include(p => p.tblICItemLocation)
+                .Include(p => p.tblSMCountry)
+                .Select(p => new ContractItemVM
+                {
+                    strLocationName = p.tblICItemLocation.vyuICGetItemLocation.strLocationName,
+                    intItemContractId = p.intItemContractId,
+                    intItemId = p.intItemId,
+                    intItemLocationId = p.intItemLocationId,
+                    strContractItemNo = p.strContractItemNo,
+                    strContractItemName = p.strContractItemName,
+                    intCountryId = p.intCountryId,
+                    strGrade = p.strGrade,
+                    strGradeType = p.strGradeType,
+                    strGarden = p.strGarden,
+                    dblYieldPercent = p.dblYieldPercent,
+                    dblTolerancePercent = p.dblTolerancePercent,
+                    dblFranchisePercent = p.dblFranchisePercent,
+                    intSort = p.intSort,
+                    strCountry = p.tblSMCountry.strCountry,
+                })
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
+
+        public async Task<SearchResult> GetContractDocument(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICItemContractDocument>()
+                .Include(p => p.tblICDocument)
+                .Select(p => new ContractDocumentVM
+                {
+                    intItemContractDocumentId = p.intItemContractDocumentId,
+                    intItemContractId = p.intItemContractId,
+                    intDocumentId = p.intDocumentId,
+                    intSort = p.intSort,
+                    strDocumentName = p.tblICDocument.strDocumentName
+                 })
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemContractId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
+
     }
 }

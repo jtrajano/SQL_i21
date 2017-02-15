@@ -11,6 +11,6 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IItemContractBl : IBusinessLayer<tblICItemContract>
     {
-
+        Task<SearchResult> GetContractDocument(GetParameter param);
     }
 }

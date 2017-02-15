@@ -71,4 +71,32 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemContractDocument> tblICItemContractDocuments { get; set; }
 
     }
+
+    public class ContractItemVM
+    {
+        public string strLocationName { get; set; }
+        public int intItemContractId { get; set; }
+        public int intItemId { get; set; }
+        public int? intItemLocationId { get; set; }
+        public string strContractItemNo { get; set; }
+        public string strContractItemName { get; set; }
+        public int? intCountryId { get; set; }
+        public string strGrade { get; set; }
+        public string strGradeType { get; set; }
+        public string strGarden { get; set; }
+        public decimal? dblYieldPercent { get; set; }
+        public decimal? dblTolerancePercent { get; set; }
+        public decimal? dblFranchisePercent { get; set; }
+        public int? intSort { get; set; }
+        public string strCountry { get; set; }
+    }
+
+    public class ContractDocumentVM
+    {
+        public int intItemContractDocumentId { get; set; }
+        public int intItemContractId { get; set; }
+        public int? intDocumentId { get; set; }
+        public int intSort { get; set; }
+        public string strDocumentName { get; set; }
+    }
 }

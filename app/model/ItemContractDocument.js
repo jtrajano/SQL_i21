@@ -20,9 +20,30 @@ Ext.define('Inventory.model.ItemContractDocument', {
                     storeConfig: {
                         complete: true,
                         sortOnLoad: true,
+                        autoLoad: true,
                         sorters: {
                             direction: 'DESC',
                             property: 'intSort'
+                        },
+                        proxy: {
+                            api: {
+                                read: '../Inventory/api/ItemContract/GetContractDocument',
+                            },
+                            type: 'rest',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            },
+                            writer: {
+                                type: 'json',
+                                allowSingle: false
+                            },
+                            sortOnLoad: true,
+                            sorters: {
+                                direction: 'DESC',
+                                property: 'intSort'
+                            }
                         }
                     }
                 }
