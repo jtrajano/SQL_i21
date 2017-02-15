@@ -2222,7 +2222,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         itemId: 'pgePostPreview',
                                         title: 'Post Preview',
                                         listeners: {
-                                            beforeshow: 'onPnlRecapBeforeShow'
+                                            show: 'onPnlRecapBeforeShow'
                                         }
                                     },
                                     {
