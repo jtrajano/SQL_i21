@@ -314,6 +314,22 @@ BEGIN TRY
 	   ,dblAmountDue = @dblAmountDueForBill
 	WHERE intBillId = @intBillId
 
+	UPDATE BD
+	SET intCurrencyId = WCD.intCurrencyId
+		,ysnSubCurrency = 1
+		,dblClaimAmount = WCD.dblClaimAmount
+		,dblTotal = WCD.dblClaimAmount
+		,dbl1099 = WCD.dblClaimAmount
+		,dblNetWeight = WCD.dblWeightLoss
+		,intLoadId = WC.intLoadId
+	FROM tblAPBill B
+	JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
+	JOIN tblLGLoad LD ON LD.intLoadId = BD.intLoadId
+	JOIN tblLGWeightClaim WC ON WC.intLoadId = BD.intLoadId
+	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
+	WHERE WCD.intContractDetailId = BD.intContractDetailId
+		AND WC.intWeightClaimId = @intWeightClaimId
+
 END TRY
 
 BEGIN CATCH
