@@ -11,7 +11,6 @@
 	[dblFedWithholdingPercentage] [numeric](18, 6) NULL,
 	[strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnPosted] BIT NULL DEFAULT 0,
-	[ysnVoucherProcessed] BIT NULL DEFAULT 0,
 	[ysnPrinted] BIT NULL DEFAULT 0,
 	[intConcurrencyId] [int] NULL DEFAULT 0, 
 	CONSTRAINT [PK_tblPATRefund] PRIMARY KEY ([intRefundId])
