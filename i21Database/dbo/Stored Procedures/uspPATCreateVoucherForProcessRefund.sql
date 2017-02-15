@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATCreateVoucherForProcessRefund]
 	@refundId INT = NULL,
+	@refundCustomerIds NVARCHAR(MAX) = NULL,
 	@intUserId INT = NULL,
 	@successfulCount INT = 0 OUTPUT,
 	@strErrorMessage NVARCHAR(MAX) = NULL OUTPUT,
@@ -15,33 +16,52 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 
-CREATE TABLE #tempRefundCustomer(
-	[intRefundId] INT,
-	[strRefundNo] NVARCHAR(50),
-	[dblServiceFee] NUMERIC(18,6),
-	[intRefundCustomerId] INT,
-	[intCustomerId] INT,
-	[dblRefundAmount] NUMERIC(18,6),
-	[dblCashRefund] NUMERIC(18,6),
-	[ysnQualified] BIT,
-	[intBillId] INT
-)
+	CREATE TABLE #tempRefundCustomer(
+		[intRefundId] INT,
+		[strRefundNo] NVARCHAR(50),
+		[dblServiceFee] NUMERIC(18,6),
+		[intRefundCustomerId] INT,
+		[intCustomerId] INT,
+		[dblRefundAmount] NUMERIC(18,6),
+		[dblCashRefund] NUMERIC(18,6),
+		[ysnQualified] BIT,
+		[intBillId] INT
+	)
 
-	INSERT INTO #tempRefundCustomer
-	SELECT	R.intRefundId,
-			R.strRefundNo,
-			R.dblServiceFee,
-			RC.intRefundCustomerId,
-			RC.intCustomerId,
-			RC.dblRefundAmount,
-			RC.dblCashRefund,
-			RC.ysnQualified,
-			RC.intBillId
-	FROM tblPATRefund R
-	INNER JOIN tblPATRefundCustomer RC
-		ON R.intRefundId = RC.intRefundId
-	WHERE R.intRefundId = @refundId AND RC.intBillId IS NULL
-
+	IF(@refundCustomerIds = 'all')
+	BEGIN
+		INSERT INTO #tempRefundCustomer
+		SELECT	R.intRefundId,
+				R.strRefundNo,
+				R.dblServiceFee,
+				RC.intRefundCustomerId,
+				RC.intCustomerId,
+				RC.dblRefundAmount,
+				RC.dblCashRefund,
+				RC.ysnQualified,
+				RC.intBillId
+		FROM tblPATRefund R
+		INNER JOIN tblPATRefundCustomer RC
+			ON R.intRefundId = RC.intRefundId
+		WHERE R.intRefundId = @refundId AND RC.intBillId IS NULL
+	END
+	ELSE
+	BEGIN
+		INSERT INTO #tempRefundCustomer
+		SELECT	R.intRefundId,
+				R.strRefundNo,
+				R.dblServiceFee,
+				RC.intRefundCustomerId,
+				RC.intCustomerId,
+				RC.dblRefundAmount,
+				RC.dblCashRefund,
+				RC.ysnQualified,
+				RC.intBillId
+		FROM tblPATRefund R
+		INNER JOIN tblPATRefundCustomer RC
+			ON R.intRefundId = RC.intRefundId
+		WHERE RC.intRefundCustomerId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@refundCustomerIds))
+	END
 
 	DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
 	DECLARE @dtmDate DATETIME = GETDATE();
@@ -132,8 +152,6 @@ CREATE TABLE #tempRefundCustomer(
 		RAISERROR (@strErrorMessage , @intErrorSeverity, @intErrorState, @intErrorNumber)
 		GOTO Post_Rollback
 	END CATCH
-	
-	UPDATE tblPATRefund SET ysnVoucherProcessed = 1 WHERE intRefundId = @refundId;
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
