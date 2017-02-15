@@ -291,17 +291,6 @@ BEGIN TRY
 					OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId))
 				)tblTransactions
 		END
-	
-		-- RETRIEVE TAX CATEGORY BASED ON RECEIPT ITEM ID/S
-		SELECT ROW_NUMBER() OVER(ORDER BY tblSMTaxCode.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria DESC) AS intId
-			, tblSMTaxCode.intTaxCodeId
-			, tblTFReportingComponentCriteria.strCriteria
-		INTO #tmpTaxCategory
-		FROM tblSMTaxCode
-		INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
-		INNER JOIN tblTFReportingComponentCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
-		WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
-		
 
 		DECLARE @intReceiptTransactionId INT
 			, @intTaxCategoryId INT
@@ -309,6 +298,16 @@ BEGIN TRY
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpReceiptTransaction) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
 		BEGIN
+			-- RETRIEVE TAX CATEGORY BASED ON RECEIPT ITEM ID/S
+			SELECT ROW_NUMBER() OVER(ORDER BY tblSMTaxCode.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria DESC) AS intId
+				, tblSMTaxCode.intTaxCodeId
+				, tblTFReportingComponentCriteria.strCriteria
+			INTO #tmpTaxCategory
+			FROM tblSMTaxCode
+			INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
+			INNER JOIN tblTFReportingComponentCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
+			WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
+
 			SELECT TOP 1 @intReceiptTransactionId = intId, @InventoryReceiptItemId = intInventoryReceiptItemId FROM #tmpReceiptTransaction
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTaxCategory) -- LOOP ON TAX CATEGORY
@@ -354,12 +353,12 @@ BEGIN TRY
 					DROP TABLE #tmpReceiptItem
 				END
 				DELETE FROM #tmpTaxCategory WHERE intId = @intTaxCategoryId
-			END
-			
+			END			
 			DELETE FROM #tmpReceiptTransaction WHERE intId = @intReceiptTransactionId
-		END
 
-		DROP TABLE #tmpTaxCategory
+			DROP TABLE #tmpTaxCategory
+		END
+		
 		DROP TABLE #tmpReceiptTransaction
 			
 		IF (@ReportingComponentId <> '')

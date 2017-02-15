@@ -348,18 +348,17 @@ BEGIN TRY
 			)tblTransactions
 		END
 	
-		-- RETRIEVE TAX CATEGORY BASED ON RECEIPT ITEM ID/S
-		SELECT DISTINCT tblSMTaxCode.intTaxCodeId
-			, tblTFReportingComponentCriteria.strCriteria
-		INTO #tmpTaxCategory
-		FROM tblSMTaxCode
-		INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
-		INNER JOIN tblTFReportingComponentCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
-		WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
-
-		
 		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInvoiceDetail) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
 		BEGIN
+			-- RETRIEVE TAX CATEGORY BASED ON RECEIPT ITEM ID/S
+			SELECT DISTINCT tblSMTaxCode.intTaxCodeId
+				, tblTFReportingComponentCriteria.strCriteria
+			INTO #tmpTaxCategory
+			FROM tblSMTaxCode
+			INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
+			INNER JOIN tblTFReportingComponentCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
+			WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
+
 			SELECT TOP 1 @InvoiceDetailId = intInvoiceDetailId FROM @tmpInvoiceDetail
 			
 			WHILE EXISTS (SELECT TOP 1 1 FROM #tmpTaxCategory) -- LOOP ON TAX CATEGORY
@@ -381,16 +380,14 @@ BEGIN TRY
 				BEGIN
 					DELETE FROM @tmpInvoiceTransaction WHERE intInvoiceDetailId = @InvoiceDetailId								 
 					BREAK
-				END
-				
+				END				
 				DELETE FROM #tmpTaxCategory WHERE intTaxCodeId = @TaxCodeId AND strCriteria = @TaxCriteria
-			END
-								 
+			END								 
 			DELETE FROM @tmpInvoiceDetail WHERE intInvoiceDetailId = @InvoiceDetailId
+
+			DROP TABLE #tmpTaxCategory
 		END
-
-		DROP TABLE #tmpTaxCategory
-
+				
 		--INVENTORY TRANSFER
 		IF EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '= 0') 
 		BEGIN
