@@ -20,6 +20,8 @@ BEGIN TRY
 	DECLARE @ysnSubCurrency BIT
 	DECLARE @dblClaimAmount NUMERIC(18,6)
 	DECLARE @dblNetWeight NUMERIC(18,6)
+	DECLARE @dblTotalForBill NUMERIC(18,6)
+	DECLARE @dblAmountDueForBill NUMERIC(18,6)
 
 	DECLARE @voucherDetailData TABLE 
 		(intWeightClaimRecordId INT Identity(1, 1)
@@ -170,6 +172,8 @@ BEGIN TRY
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = WCD.intPriceItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	WHERE WC.intWeightClaimId = @intWeightClaimId
+		AND ISNULL(WCD.ysnNoClaim, 0) = 0
+		AND ISNULL(WCD.dblClaimAmount,0) > 0
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intPartyEntityId
@@ -299,6 +303,17 @@ BEGIN TRY
 		FROM @distinctVendor
 		WHERE intRecordId > @intMinRecord
 	END
+
+	SELECT @dblTotalForBill = SUM(dblTotal)
+		  ,@dblAmountDueForBill = SUM(dblClaimAmount)
+	FROM tblAPBillDetail
+	WHERE intBillId = @intBillId
+
+	UPDATE tblAPBill
+	SET dblTotal = @dblTotalForBill
+	   ,dblAmountDue = @dblAmountDueForBill
+	WHERE intBillId = @intBillId
+
 END TRY
 
 BEGIN CATCH

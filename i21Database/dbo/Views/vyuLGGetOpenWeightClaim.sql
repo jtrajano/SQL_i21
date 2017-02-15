@@ -14,6 +14,8 @@ FROM (
 	CD.intContractSeq,
 	strEntityName = EM.strName,
 	intEntityId = EM.intEntityId,
+	intPartyEntityId = (CASE WHEN ISNULL(CH.ysnClaimsToProducer,0) = 1 THEN EMP.intEntityId ELSE EM.intEntityId END),
+	strPaidTo = (CASE WHEN ISNULL(CH.ysnClaimsToProducer,0) = 1 THEN EMP.strName ELSE EM.strName END),
 	Load.intLoadId,
 	Load.strLoadNumber,
 	Load.dtmScheduledDate,
@@ -71,7 +73,12 @@ FROM (
 	CD.intContractDetailId,
 	WC.strReferenceNumber,
 	WC.dtmTransDate,
-	WC.dtmActualWeighingDate
+	WC.dtmActualWeighingDate,
+	I.strItemNo,
+	C.strCommodityCode,
+	CONI.strContractItemNo,
+	CONI.strContractItemName,
+	OG.strCountry AS strOrigin
 
 FROM tblLGLoad Load
 JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Load.intWeightUnitMeasureId
@@ -81,7 +88,13 @@ JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE Load.intPurchaseSal
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
+JOIN tblEMEntity EMP ON EMP.intEntityId = CH.intProducerId
 JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId 
+JOIN tblICItem I ON I.intItemId = CD.intItemId
+JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+LEFT JOIN tblICCommodityAttribute CA ON	CA.intCommodityAttributeId	= I.intOriginId
+LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
+LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId
 LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
 LEFT JOIN (
 		SELECT SUM(ReceiptItem.dblNet) dblNet, ReceiptItem.intSourceId, ReceiptItem.intLineNo, ReceiptItem.intOrderId 
@@ -90,4 +103,5 @@ LEFT JOIN (
 	) RI ON RI.intSourceId = LD.intLoadDetailId AND RI.intLineNo = LD.intPContractDetailId AND RI.intOrderId = CH.intContractHeaderId AND Load.intPurchaseSale = 1
 LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = Load.intLoadId
 WHERE Load.intShipmentStatus = CASE Load.intPurchaseSale WHEN  1 THEN 4 ELSE 6 END AND IsNull(WC.intWeightClaimId, 0) = 0
+	AND CA.strType = 'Origin'
 ) t1

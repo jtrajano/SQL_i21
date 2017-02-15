@@ -25,6 +25,7 @@ SELECT
 	WD.intPriceItemUOMId,
 	WD.ysnNoClaim,
 	WD.intContractDetailId,
+	WC.dtmClaimValidTill,
 	Load.strLoadNumber,
 	Load.dtmScheduledDate,
 	Load.strBLNumber,
@@ -41,7 +42,15 @@ SELECT
 	AD.ysnSeqSubCurrency,
 	dblSeqPriceInWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM((SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId),AD.intSeqPriceUOMId,AD.dblSeqPrice),
 	WC.ysnPosted,
-	WC.dtmPosted
+	WC.dtmPosted,
+	I.strItemNo,
+	C.strCommodityCode,
+	CONI.strContractItemNo,
+	CONI.strContractItemName,
+	OG.strCountry AS strOrigin,
+	BILL.strBillId,
+	BILL.intBillId
+
 
 FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WD ON WD.intWeightClaimId = WC.intWeightClaimId
@@ -53,8 +62,14 @@ JOIN tblCTContractDetail CD ON CD.intContractDetailId = WD.intContractDetailId
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId 
+JOIN tblICItem I ON I.intItemId = CD.intItemId
+JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
+LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId
 LEFT JOIN tblSMCurrency SM ON SM.intCurrencyID = WD.intCurrencyId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = WD.intPriceItemUOMId
 LEFT JOIN tblEMEntity PTEM ON PTEM.intEntityId = WD.intPartyEntityId
+LEFT JOIN tblAPBill BILL ON BILL.intBillId = WD.intBillId
 
 
