@@ -7492,7 +7492,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fn": "onPnlRecapBeforeShow",
-                                        "name": "beforeshow",
+                                        "name": "show",
                                         "scope": "me"
                                     },
                                     "name": "onPnlRecapBeforeShow",

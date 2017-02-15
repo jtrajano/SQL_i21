@@ -3278,7 +3278,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                             itemId: 'tabPostPreview'
                                         },
                                         listeners: {
-                                            beforeshow: 'onPnlRecapBeforeShow'
+                                            show: 'onPnlRecapBeforeShow'
                                         }
                                     },
                                     {
