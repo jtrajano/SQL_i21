@@ -113,16 +113,23 @@ Begin
 		@strExternalDeliveryNumber	=	strExternalShipmentNumber, 
 		@dtmScheduledDate			=   dtmScheduledDate,
 		@strFeedStatus				=	strFeedStatus,
-		@dtmETAPOD					=	dtmETAPOD
+		@dtmETAPOD					=	dtmETAPOD,
+		@strHeaderRowState			=	strRowState
 	From tblLGLoadStg Where intLoadStgId=@intMinHeader
 
 	Select TOP 1 @strVendorAccountNo=v.strVendorAccountNum 
 	From tblLGLoadDetail ld Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityId Where intLoadId = @intLoadId
 
-	If ISNULL(@strExternalDeliveryNumber,'')<>''
+	--If ISNULL(@strExternalDeliveryNumber,'')<>''
+	--	Set @strHeaderRowState='MODIFIED'
+	--Else
+	--	Set @strHeaderRowState='ADDED'
+
+	If (Select intLoadShippingInstructionId From tblLGLoad Where intLoadId=@intLoadId AND intShipmentType=1) is not null
 		Set @strHeaderRowState='MODIFIED'
-	Else
-		Set @strHeaderRowState='ADDED'
+
+	If UPPER(@strHeaderRowState)='MODIFIED' AND ISNULL(@strExternalDeliveryNumber,'')=''
+		GOTO NEXT_SHIPMENT
 
 	Set @strXml =  '<DELVRY07>'
 	Set @strXml += '<IDOC BEGIN="1">'
@@ -402,6 +409,7 @@ Begin
 	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml)
 	VALUES(@intMinHeader,CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml)
 
+	NEXT_SHIPMENT:
 	Select @intMinHeader=Min(intLoadStgId) From tblLGLoadStg Where intLoadStgId>@intMinHeader AND ISNULL(strFeedStatus,'')=''
 End --Loop Header End
 Select * From @tblOutput ORDER BY intRowNo
