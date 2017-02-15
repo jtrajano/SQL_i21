@@ -43,6 +43,7 @@ AS
 		,[dtmAsOfDate]				DATETIME
 		,[strSalespersonName]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,[intCompanyLocationId]		INT
+		,[strSourceTransaction]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	)
 	DECLARE @zeroDecimal		NUMERIC(18, 6) = 0
 	      , @dblMinimumSC		NUMERIC(18, 6) = 0
