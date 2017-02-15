@@ -761,7 +761,7 @@ BEGIN TRY
 				, @DateFrom
 				, @DateTo
 				, 1
-			FROM @tmpInvoiceTransaction
+			FROM @tmpInvoiceTransaction ORDER BY strProductCode
 		END
 		ELSE
 		BEGIN

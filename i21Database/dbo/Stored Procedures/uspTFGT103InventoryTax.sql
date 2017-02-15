@@ -294,7 +294,7 @@ IF @Refresh = 'true'
 							, strOriginState
 							, strDestinationState
 							, 1
-						FROM @TFTransaction
+						FROM @TFTransaction ORDER BY strProductCode
 					END
 					ELSE
 					BEGIN

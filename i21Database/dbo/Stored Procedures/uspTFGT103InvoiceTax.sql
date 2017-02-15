@@ -461,7 +461,7 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 																				@DateFrom,
 																				@DateTo,
 																				1
-																				FROM @TFTransaction
+																				FROM @TFTransaction ORDER BY strProductCode
 							END
 						ELSE
 							BEGIN
