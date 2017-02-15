@@ -279,7 +279,7 @@ BEGIN TRY
 			,[intStorageTypeId]		= @intGRStorageId
 			,[intCompanyLocationId]= SC.intProcessingLocationId
 			,[intTicketId]= SC.intTicketId
-			,[intDiscountScheduleId]= SC.intDiscountId
+			,[intDiscountScheduleId]= SC.intDiscountSchedule
 			,[dblTotalPriceShrink]= 0
 			,[dblTotalWeightShrink]= 0 
 			,[dblOriginalBalance]= @dblNetUnits
