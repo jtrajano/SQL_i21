@@ -76,11 +76,12 @@ FROM
 		,strLPlant				=	LPlant.strSubLocationName
 		,intContractSeqId		=	ContractDetail.intContractSeq
 		,intBillId				=	WC2.intBillId
-		,dblQtyReceived			=	CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetWeight ELSE WC2Details.dblQtyReceived END
+		,dblQtyReceived			=	WC2Details.dblWeightLoss - WC2Details.dblFranchiseWeight--CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetWeight ELSE WC2Details.dblQtyReceived END
 		,dblCost				=	WC2Details.dblCost
 		,dblTotal				=	WC2Details.dblTotal
 		,dblNetShippedWeight	=	WC2Details.dblNetShippedWeight
 		,dblWeightLoss			=	WC2Details.dblNetShippedWeight - WC2Details.dblQtyReceived
+		,dblLandedWeight		=	CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetWeight ELSE WC2Details.dblQtyReceived END
 		,dblFranchiseWeight		=	WC2Details.dblFranchiseWeight
 		,dblClaimAmount			=	WC2Details.dblClaimAmount
 	FROM tblAPBill WC2
@@ -118,6 +119,7 @@ FROM
 		,dblTotal				=	DMDetails.dblTotal
 		,dblNetShippedWeight	=	0
 		,dblWeightLoss			=	0
+		,dblLandedWeight		=	0
 		,dblFranchiseWeight		=	0
 		,dblClaimAmount			=	DM.dblTotal
 	FROM tblAPBill DM
