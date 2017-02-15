@@ -22,11 +22,34 @@ Ext.define('Inventory.ux.GridUOMField', {
     },
 
     config: {
-        uom: null,
-        txtQuantity: undefined,
-        cboUom: undefined,
-        store: undefined,
         DEFAULT_DECIMALS: 6
+    },
+
+    txtQuantity: undefined,
+    
+    cboUom: undefined,
+    
+    store: undefined,
+
+    modifiedRows: [],
+
+    syncModifiedRow: function(id, data) {
+        var me = this;
+        var found = _.findWhere(me.modifiedRows, { id: id });
+        if(found) {
+            found.data = _.extend(found.data, data);
+        } else {
+            me.modifiedRows.push({
+                id: id,
+                data: data
+            });
+        }
+    },
+
+    getModifiedRow: function(id) {
+        var me = this;
+        var found = _.findWhere(me.modifiedRows, { id: id });
+        return found;
     },
 
     initComponent: function() {
@@ -106,15 +129,45 @@ Ext.define('Inventory.ux.GridUOMField', {
 
     setupEvents: function() {
         var me = this,
-            txtQuantity = me.txtQuantity,
             plugin = me.getEditingPlugin();
-        
-        txtQuantity.on('keypress', function(field, event) {
+
+        me.txtQuantity.on('keypress', function(field, event) {
             if(event.keyCode === 13) {
                 plugin.completeEdit();
                 event.stopEvent();
                 event.preventDefault();
                 event.stopPropagation();
+            }
+        });
+
+        me.txtQuantity.on('blur', function(field, event) {
+            me.setValue(field.lastValue, true);
+        });
+
+        me.cboUom.on('select', function(combo, records, options) {
+            if(records.length > 0) {
+                var activeRecord = null;
+                if(plugin) {
+                    activeRecord = plugin.context.record;
+                }
+                if(activeRecord) {
+                    me.updateRequiredFields(activeRecord, records[0]);
+                    me.updateExtraFields(activeRecord, records[0]);
+                }
+
+                me.setValue(me.txtQuantity.getValue());
+                if(activeRecord) {
+                    var param = {
+                        id: activeRecord.internalId,
+                        data: {
+                            intUOMId: records[0].get(me.getLookupValueField()),
+                            strUOMId: records[0].get(me.getLookupDisplayField()),
+                            intDecimals: records[0].get(me.getLookupDecimalPrecisionField())
+                        }
+                    };
+                    me.syncModifiedRow(param.id, param.data);
+                }
+                me.fireEvent('onUOMSelect', records);
             }
         });
     },
@@ -148,12 +201,20 @@ Ext.define('Inventory.ux.GridUOMField', {
             newValue = me.txtQuantity.getValue();
             if(plugin) {
                 activeRecord = plugin.context.record;
-                var strUOM = activeRecord.get(me.getDisplayField());
-                var intUOM = activeRecord.get(me.getValueField());
-                var decimals = me.getUomDecimals(intUOM);
-                var po = me.getPrecisionNumberObject(newValue, decimals);
-                if(po) {
-                    newValue = po.precisionValue;
+                if(activeRecord) {
+                    var strUOM = activeRecord.get(me.getDisplayField());
+                    var intUOM = activeRecord.get(me.getValueField());
+
+                    // if(me.cboUom.selection) {
+                    //     strUOM = me.cboUom.getRawValue();
+                    //     intUOM = me.cboUom.getValue();
+                    // }
+
+                    var decimals = me.getUomDecimals(intUOM);
+                    var po = me.getPrecisionNumberObject(newValue, decimals);
+                    if(po) {
+                        newValue = po.precisionValue;
+                    }
                 }
             }
         }
@@ -173,13 +234,12 @@ Ext.define('Inventory.ux.GridUOMField', {
         me.cboUom.selection = null;
     },
 
-    setValue: function(value) {
+    setValue: function(value, removeTrailingZeroes) {
         var me = this,
             store = me.store,
             activeRecord = null,
             plugin = me.getEditingPlugin();
-        me.resetValues();
-
+                
         if(plugin) {
             activeRecord = plugin.context.record;
         }
@@ -196,20 +256,60 @@ Ext.define('Inventory.ux.GridUOMField', {
         var newValue = value;
 
         // Count decimal places based on UOM and set text decimal precision
-        if(activeRecord) {
-            var strUOM = activeRecord.get(me.getDisplayField());
-            var intUOM = activeRecord.get(me.getValueField());
-            me.cboUom.setValue(intUOM);
-            me.cboUom.setRawValue(strUOM);
+        if(plugin) {
+            activeRecord = plugin.context.record;
+            if(activeRecord) {
+                var strUOM = activeRecord.get(me.getDisplayField());
+                var intUOM = activeRecord.get(me.getValueField());
 
-            var decimals = me.getUomDecimals(intUOM);
-            newValue = me.setupDecimalPrecision(value, decimals, false);
+                // if(me.cboUom.selection) {
+                //     strUOM = me.cboUom.getRawValue();
+                //     intUOM = me.cboUom.getValue();
+                // }
+
+                // var modifiedRecord = me.getModifiedRow(activeRecord.internalId);
+                // if(modifiedRecord) {
+                //     intUOM = modifiedRecord.data.intUOMId;
+                //     strUOM = modifiedRecord.data.strUOM;
+                // }
+
+                me.cboUom.setValue(intUOM);
+                me.cboUom.setRawValue(strUOM);
+                
+                me.setComboboxSelection(intUOM);
+                var decimals = me.getUomDecimals(intUOM);
+                newValue = me.setupDecimalPrecision(value, decimals, removeTrailingZeroes);
+            }
         }
         
         me.value = newValue;
         me.txtQuantity.setValue(newValue);
 
         return me;
+    },
+
+    updateRequiredFields: function(currentRecord, lookupRecord) {
+        var me = this;
+        var value = lookupRecord.get(me.getLookupValueField());
+        var display = lookupRecord.get(me.getLookupDisplayField());
+
+        if(!me.isNullOrEmpty(value))
+            currentRecord.set(me.getUpdateField(), value);
+
+        if(!me.isNullOrEmpty(display))
+            currentRecord.set(me.getDisplayField(), display);
+    },
+
+    updateExtraFields: function(currentRecord, lookupRecord) {
+        var me = this;
+        if(me.extraUpdateFields) {
+            _.each(me.extraUpdateFields, function(f) {
+                if(f.sourceField && f.lookupField) {
+                    var rec = lookupRecord.get(f.lookupField);
+                    currentRecord.set(f.sourceField, rec);
+                }
+            });
+        }
     },
 
     setupDecimalPrecision: function(value, decimals, removeTrailingZeroes) {
@@ -223,6 +323,15 @@ Ext.define('Inventory.ux.GridUOMField', {
         return value;
     },
 
+    setComboboxSelection: function(id) {
+        var me = this;
+        var index = me.store.findExact(me.getLookupValueField(), id);
+        var record = me.store.getAt(index);
+        if(record) {
+            me.cboUom.setSelection(record);
+        }
+    },
+
     getUomDecimals: function(id) {
         var me = this;
         var index = me.store.findExact(me.getLookupValueField(), id);
@@ -234,12 +343,11 @@ Ext.define('Inventory.ux.GridUOMField', {
         return me.DEFAULT_DECIMALS;
     },
 
-    // getErrors: function(value) {
-    //     var me = this,
-    //         errors = [];
-    //     errors.push("Invalid quantity uom.");
-    //     return errors;
-    // },
+    getErrors: function(value) {
+        var me = this,
+            errors = [];
+        return errors;
+    },
 
     getGrid: function() {
         var me = this;
