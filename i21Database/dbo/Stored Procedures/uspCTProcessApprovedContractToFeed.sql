@@ -64,7 +64,9 @@ BEGIN TRY
 				strContractNumber,			strERPPONumber,				intContractSeq,			strItemNo,
 				strStorageLocation,			dblQuantity,				dblCashPrice,			strQuantityUOM,
 				dtmPlannedAvailabilityDate,	dblBasis,					strCurrency,			dblUnitCashPrice,	
-				strPriceUOM,				@strRowState,				dtmContractDate,		dtmStartDate,	
+				strPriceUOM,				
+				CASE WHEN intContractStatusId = 3 THEN 'Delete' ELSE @strRowState END,				
+				dtmContractDate,			dtmStartDate,	
 				dtmEndDate,					GETDATE(),					strSubmittedBy,			strSubmittedByNo,
 				strOrigin,					dblNetWeight,				strNetWeightUOM,		strVendorAccountNum,
 				strTermCode,				strContractItemNo,			strContractItemName,	strERPItemNumber,			
@@ -79,14 +81,16 @@ BEGIN TRY
 		FROM	tblCTApprovedContract 
 		WHERE	intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId <> @intApprovedContractId 
 		ORDER BY intApprovedContractId DESC
-		SELECT @strRowState= 'Modified'
-		DELETE FROM tblCTApprovedContract WHERE intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId	< @intPrevApprovedContractId
-		GOTO INSERTBLOCK
-		/*
+
+		
 		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intApprovedContractId,'intApprovedById,dtmApproved', @strModifiedColumns OUTPUT
 
 		IF ISNULL(@strModifiedColumns,'') <> ''
-		BEGIN
+		BEGIN	
+				SELECT @strRowState= 'Modified'
+				DELETE FROM tblCTApprovedContract WHERE intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId	< @intPrevApprovedContractId
+				GOTO INSERTBLOCK
+				/*
 				IF OBJECT_ID('tempdb..#Modified') IS NOT NULL  	
 					DROP TABLE #Modified
 
@@ -122,8 +126,9 @@ BEGIN TRY
 										WHERE	intContractDetailId = @intContractDetailId'
 					EXEC sp_executesql @strSQL,N'@intContractDetailId INT', @intContractDetailId =  @intContractDetailId
 				END
+				*/
 		END
-		*/
+		
 	END
 END TRY
 
