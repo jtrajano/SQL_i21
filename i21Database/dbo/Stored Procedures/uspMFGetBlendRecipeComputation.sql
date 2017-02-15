@@ -22,7 +22,7 @@ AS
 	   (
 		 intRowNo INT IDENTITY(1, 1)
 		,intPropertyId INT
-		,strPropertyName NVARCHAR(50)
+		,strPropertyName NVARCHAR(100)
 		,intProductId INT
 		,dblMinValue NUMERIC(18,6)
 		,dblMaxValue NUMERIC(18,6)
@@ -37,7 +37,7 @@ AS
 	    ,intTestId INT
 		,strTestName NVARCHAR(50)
 		,intPropertyId INT
-		,strPropertyName NVARCHAR(50)
+		,strPropertyName NVARCHAR(100)
 		,dblComputedValue NUMERIC(18,6)
 		,dblMinValue NUMERIC(18,6)
 		,dblMaxValue NUMERIC(18,6)
@@ -51,7 +51,7 @@ AS
 	    ,intTestId INT
 		,strTestName NVARCHAR(50)
 		,intPropertyId INT
-		,strPropertyName NVARCHAR(50)
+		,strPropertyName NVARCHAR(100)
 		,dblComputedValue NUMERIC(18,6)
 		,dblMinValue NUMERIC(18,6)
 		,dblMaxValue NUMERIC(18,6)

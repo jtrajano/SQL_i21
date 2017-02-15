@@ -21,7 +21,7 @@ BEGIN
 	-- Create temp table #tmpGetQMInspectionResult
 	BEGIN
 		CREATE TABLE #tmpGetQMInspectionResult (
-			strPropertyName NVARCHAR(50)
+			strPropertyName NVARCHAR(100)
 			,intPropertyId INT
 			,strPropertyValue NVARCHAR(10)
 			,intSequenceNo INT

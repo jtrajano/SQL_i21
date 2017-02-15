@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblMFQAProperty]
 (
 	[intQAPropertyId] INT NOT NULL IDENTITY, 
-    [strPropertyName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strPropertyName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDescription] NVARCHAR(500) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strAnalysisType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDataType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strListName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 

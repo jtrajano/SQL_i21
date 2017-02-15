@@ -62,7 +62,7 @@ BEGIN TRY
 		,@intProductTypeId INT
 
 	Declare @intPropertyId INT
-			,@strPropertyName NVARCHAR(50)
+			,@strPropertyName NVARCHAR(100)
 			,@dblMinValue NUMERIC(38,20)
 			,@dblMaxValue NUMERIC(38,20)
 			,@dblMedian NUMERIC(38,20)
@@ -201,7 +201,7 @@ BEGIN TRY
     ( 
 		intRowNo		INT IDENTITY(1,1),
 		intPropertyId	INT,
-		strPropertyName NVARCHAR(50),  
+		strPropertyName NVARCHAR(100),  
 		intProductId	INT,
 		dblMinValue     NUMERIC(38,20), 
 		dblMaxValue     NUMERIC(38,20), 
