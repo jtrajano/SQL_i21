@@ -12,7 +12,7 @@ AS
 			CD.strPriceUOM,					CH.dtmContractDate,			CD.dtmStartDate,		CD.dtmEndDate,
 			CD.dblNetWeight,				CD.strNetWeightUOM,			VE.strVendorAccountNum,	AE.intEntityId					AS intSubmittedById,
 			CH.strTermCode,					CD.strContractItemNo,		CD.strContractItemName,	AE.strName						AS strSubmittedBy,
-			CD.strERPItemNumber,			CD.strERPBatchNumber,		ISNULL(AE.strExternalERPId,UE.strExternalERPId)			AS strSubmittedByNo,
+			CD.strERPItemNumber,			CD.strERPBatchNumber,		CD.intContractStatusId,	ISNULL(AE.strExternalERPId,UE.strExternalERPId)			AS strSubmittedByNo,
 			OG.strCountry	AS strOrigin
 			
 	FROM	vyuCTContractSequence	CD
