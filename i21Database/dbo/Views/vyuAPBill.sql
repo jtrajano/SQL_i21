@@ -22,7 +22,7 @@ SELECT
 	B1.strName,
 	C.strAccountId,
 	Payment.strPaymentInfo,
-	Payment.strBankAccountNo,
+	dbo.fnAESDecryptASym(Payment.strBankAccountNo) AS strBankAccountNo,
 	Payment.ysnCleared,
 	Payment.dtmDateReconciled,
 	F.strUserName AS strUserId,
