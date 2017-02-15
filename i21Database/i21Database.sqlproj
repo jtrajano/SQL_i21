@@ -5022,6 +5022,7 @@
     <Build Include="dbo\Views\vyuLGNotifications.sql" />
     <Build Include="dbo\Views\vyuRKRollCost.sql" />
     <Build Include="dbo\Views\vyuEMEntityOnGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTBeforeSavePriceContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

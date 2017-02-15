@@ -35,47 +35,17 @@ BEGIN TRY
 			@strAction					NVARCHAR(50) = '',
 			@intOutputId				INT
 
-
-	IF @strXML = 'Delete'
-	BEGIN
-		SET	@strAction = @strXML
-		SET @Condition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
-		EXEC [dbo].[uspCTGetTableDataInXML] 'tblCTPriceFixation', @Condition, @strXML OUTPUT,null,'intPriceFixationId,intContractHeaderId,intContractDetailId,''Delete'' AS strRowState'
-	END
-
-	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXML      
-
-	IF OBJECT_ID('tempdb..#ProcessFixation') IS NOT NULL  	
-		DROP TABLE #ProcessFixation	
-
-	SELECT  ROW_NUMBER() OVER(ORDER BY strRowState) intUniqueId,
-			* 
-	INTO	#ProcessFixation
-	FROM OPENXML(@idoc,'tblCTPriceFixations/tblCTPriceFixation',2)          
-	WITH
-	(
-		intPriceFixationId	INT,
-		strRowState			NVARCHAR(50)
-	)      
-
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
 
-	SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessFixation
+	SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId	
 
-	WHILE ISNULL(@intUniqueId,0) > 0
+	WHILE ISNULL(@intPriceFixationId,0) > 0
 	BEGIN
-		SELECT	@intPriceFixationId		=	NULL,
-				@strRowState			=	NULL,
-				@intPriceFixationDetailId = NULL
-
-		SELECT	@intPriceFixationId		=	intPriceFixationId,
-				@strRowState			=	strRowState
-		FROM	#ProcessFixation 
-		WHERE	intUniqueId				=	 @intUniqueId
+		SELECT	@intPriceFixationDetailId = NULL
 		
 		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
 		
-		WHILE	ISNULL(@intPriceFixationDetailId,0) > 0 AND @strAction <> 'Delete'
+		WHILE	ISNULL(@intPriceFixationDetailId,0) > 0
 		BEGIN
 		
 			SELECT	@intFutOptTransactionId	=	FD.intFutOptTransactionId,	
@@ -106,7 +76,7 @@ BEGIN TRY
 			APPLY	fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) TS
 			WHERE	FD.intPriceFixationDetailId	=	@intPriceFixationDetailId
 
-			IF @ysnHedge = 1 AND @strRowState <> 'Delete' AND @strXML <> 'Delete'
+			IF @ysnHedge = 1
 			BEGIN
 				SET @strXML = '<root>'
 				IF ISNULL(@intFutOptTransactionId,0) > 0
@@ -142,19 +112,13 @@ BEGIN TRY
 				IF ISNULL(@intFutOptTransactionId,0) = 0
 					UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intOutputId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 			END
-			
-			IF @strRowState = 'Delete' AND ISNULL(@intFutOptTransactionId,0) > 0
-			BEGIN
-				UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = NULL WHERE intPriceFixationDetailId = @intPriceFixationDetailId
-				EXEC uspRKDeleteAutoHedge @intFutOptTransactionId
-			END
 			 
 			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
 		END
 		
 		EXEC uspCTPriceFixationSave @intPriceFixationId,@strRowState,@intUserId
 
-		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessFixation WHERE intUniqueId > @intUniqueId
+		SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId	AND intPriceFixationId > @intPriceFixationId
 	END
 END TRY
 
