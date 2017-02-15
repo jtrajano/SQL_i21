@@ -466,11 +466,20 @@ Harness.start(
                  [
 
                      {
-                         group: 'DirectInventoryReceipt',
+                         group: 'OpenIRScreen',
                          items: [
                              {
                                  url: 'BusinessDomain/InventoryReceipt/OpenIRScreen/IROpenSearchScreen.js?v=' + version,
                                  title: 'IROpenSearchScreen',
+                                 preload: [
+                                     functionalTest,
+                                     commonIC
+
+                                 ]
+                             },
+                             {
+                                 url: 'BusinessDomain/InventoryReceipt/OpenIRScreen/IROpenNewIRScreen.js?v=' + version,
+                                 title: 'IROpenNewScreen',
                                  preload: [
                                      functionalTest,
                                      commonIC
