@@ -46,16 +46,16 @@ BEGIN TRY
 		,@strColorValue NVARCHAR(10)
 		,@strReworkCommentsValue NVARCHAR(10)
 		,@intPropertyId1 INT
-		,@strPropertyName1 NVARCHAR(50)
+		,@strPropertyName1 NVARCHAR(100)
 		,@strPropertyValue1 NVARCHAR(50)
 		,@intPropertyId2 INT
-		,@strPropertyName2 NVARCHAR(50)
+		,@strPropertyName2 NVARCHAR(100)
 		,@strPropertyValue2 NVARCHAR(50)
 		,@intPropertyId3 INT
-		,@strPropertyName3 NVARCHAR(50)
+		,@strPropertyName3 NVARCHAR(100)
 		,@strPropertyValue3 NVARCHAR(50)
 		,@intPropertyId4 INT
-		,@strPropertyName4 NVARCHAR(50)
+		,@strPropertyName4 NVARCHAR(100)
 		,@strPropertyValue4 NVARCHAR(50)
 
 	SELECT @intLotId = intLotId
