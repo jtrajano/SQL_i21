@@ -65,6 +65,8 @@ SELECT C.intManufacturingCellId
 	,SL.intSubLocationId 
 	,BR.strDemandNo
 	,W.intCountStatusId
+	,I.intLayerPerPallet
+	,I.intUnitPerLayer
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
