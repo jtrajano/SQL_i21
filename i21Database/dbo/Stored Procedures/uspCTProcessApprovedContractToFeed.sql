@@ -77,19 +77,29 @@ BEGIN TRY
 	END 
 	ELSE
 	BEGIN
-		SELECT	TOP 1 @intPrevApprovedContractId =  intApprovedContractId 
-		FROM	tblCTApprovedContract 
-		WHERE	intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId <> @intApprovedContractId 
-		ORDER BY intApprovedContractId DESC
+		SELECT TOP 1 @intPrevApprovedContractId =  intApprovedContractId 
+        FROM   tblCTApprovedContract 
+        WHERE  intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId <> @intApprovedContractId 
+        ORDER BY intApprovedContractId DESC
 
-		
-		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intApprovedContractId,'intApprovedById,dtmApproved', @strModifiedColumns OUTPUT
+              
+        EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intApprovedContractId,'intApprovedById,dtmApproved', @strModifiedColumns OUTPUT
 
-		IF ISNULL(@strModifiedColumns,'') <> ''
-		BEGIN	
-				SELECT @strRowState= 'Modified'
-				DELETE FROM tblCTApprovedContract WHERE intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId	< @intPrevApprovedContractId
-				GOTO INSERTBLOCK
+        IF ISNULL(@strModifiedColumns,'') <> ''
+        BEGIN  
+            IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND strRowState = 'Modified' AND ISNULL(strFeedStatus,'') IN (''))
+            BEGIN
+                DELETE FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId
+				SELECT TOP 1 @intLastFeedId =  intContractFeedId FROM tblCTContractFeed WHERE intContractDetailId = ISNULL(@intContractDetailId,0) ORDER BY intContractFeedId DESC
+            END
+            SELECT @strRowState= 'Modified'
+            IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND strRowState = 'Added' AND ISNULL(strMessage,'Success') <> 'Success')
+            BEGIN
+				SELECT @strRowState= 'Added'
+            END
+            DELETE FROM tblCTApprovedContract WHERE intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId      < @intPrevApprovedContractId
+            GOTO INSERTBLOCK
+
 				/*
 				IF OBJECT_ID('tempdb..#Modified') IS NOT NULL  	
 					DROP TABLE #Modified
