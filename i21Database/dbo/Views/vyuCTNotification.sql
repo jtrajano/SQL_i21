@@ -77,6 +77,7 @@ AS
 		JOIN tblICCommodityUnitMeasure CUOM ON CUOM.intCommodityUnitMeasureId=CH.intCommodityUOMId
 		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId=CUOM.intUnitMeasureId
 		WHERE CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus='Submitted')
+		AND   CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE strERPPONumber IS NULL)
 
 	)t
 
