@@ -2,16 +2,16 @@
 (
 	@IntFromItemUOMId	INT,
 	@intToItemUOMId		INT,
-	@dblQty				NUMERIC(38,20)
+	@dblQty				NUMERIC(26,16)
 )
-RETURNS NUMERIC(38,20)
+RETURNS NUMERIC(26,16)
 AS 
 BEGIN 
-	DECLARE	@result					NUMERIC(38,20),
+	DECLARE	@result					NUMERIC(26,16),
 			@intItemId				INT,
 			@IntFromUnitMeasureId	INT,
 			@intToUnitMeasureId		INT,
-			@dblUnitQtyTo			NUMERIC(38,20)
+			@dblUnitQtyTo			NUMERIC(26,16)
 
 	SELECT	@intItemId = intItemId,@IntFromUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @IntFromItemUOMId
 	SELECT	@intToUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intToItemUOMId
