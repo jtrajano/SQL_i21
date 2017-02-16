@@ -46,7 +46,8 @@ BEGIN
 	DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
 	DECLARE @SYSTEM_CURRENCY NVARCHAR(25) = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)
 	DECLARE @OtherChargeTaxes AS NUMERIC(18, 6),
-			@ReceiptId as INT;
+			@ReceiptId as INT,
+			@VendorId AS INT;
 	DECLARE @tmpTransacions TABLE (
 		[intTransactionId] [int] PRIMARY KEY,
 		UNIQUE (intTransactionId)
@@ -55,7 +56,7 @@ BEGIN
 
 	-- Get Total Value of Other Charges Taxes
 	 SELECT @ReceiptId = IRI.intInventoryReceiptId
-	 FROM tblAPBillDetail APB
+	 	 FROM tblAPBillDetail APB
 	 INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = APB.intInventoryReceiptItemId
 	 WHERE APB.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	 --print @ReceiptId
@@ -387,7 +388,9 @@ BEGIN
 																		  WHEN B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal / (CASE WHEN @SYSTEM_CURRENCY != A.intCurrencyId THEN B.dblRate ELSE 1 END)
 																		ELSE B.dblTotal  END) --Get the amount from voucher if NOT inventory cost
 																ELSE D.dblAmount END)
-													END) + CAST(ISNULL(ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) 
+													END) 
+													-- + CAST(ISNULL(ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) 
+													-- commented on AP-3227
 											END AS DECIMAL(18,2)), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
@@ -512,8 +515,9 @@ BEGIN
 	AND A.intTransactionType IN (1,3)
 	AND D.dblTax != 0
 	AND 1 = (
-		--create tax only from item receipt if it is adjusted / Cost is Adjusted
-		CASE WHEN B.intInventoryReceiptItemId IS NOT NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL THEN 0 --AP-2792
+		--create tax only from item receipt if it is adjusted / Cost is Adjusted  / third party vendor tax in other charge of receipt (AP-3227)
+		CASE WHEN B.intInventoryReceiptItemId IS NOT NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL AND B.intInventoryReceiptChargeId IS NULL
+				THEN 0 --AP-2792
 		ELSE 1 END
 	)
 	GROUP BY A.dtmDate
