@@ -923,6 +923,12 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'strAccountCategory',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Account Category',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'intAccountGroupId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Account Group Id',
@@ -941,6 +947,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 }
                                                                             ],
+                                                                            pickerWidth: 630,
                                                                             itemId: 'cboGLAccountId',
                                                                             displayField: 'strAccountId',
                                                                             valueField: 'strAccountId'
