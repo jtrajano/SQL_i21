@@ -110,7 +110,7 @@ BEGIN
 
 		------------------------CREATE GL ENTRIES---------------------
 			INSERT INTO @GLEntries
-			SELECT * FROM [dbo].[fnPATCreateIssueStockGLEntries](@intCustomerStockId, @ysnVoting, @intUserId, @batchId)
+			SELECT * FROM [dbo].[fnPATCreateIssueStockGLEntries](@intCustomerStockId, @intUserId, @batchId)
 
 		END
 		ELSE
@@ -221,7 +221,7 @@ BEGIN
 
 			SELECT 
 				@intCustomerId = tempCS.intCustomerPatronId,
-				@dblFaceValue = tempCS.dblFaceValue,
+				@dblFaceValue = ROUND(tempCS.dblFaceValue,2),
 				@strVenderOrderNumber = tempCS.strCertificateNo,
 				@apClearing = ComPref.intAPClearingGLAccount
 			FROM #tempCustomerStock tempCS
@@ -391,7 +391,7 @@ BEGIN
 				,[dblQtyOrdered]						= 1
 				,[dblQtyShipped]						= 1
 				,[dblDiscount]							= 0
-				,[dblPrice]								= CS.dblFaceValue
+				,[dblPrice]								= ROUND(CS.dblFaceValue,2)
 				,[ysnRefreshPrice]						= 0
 				,[strMaintenanceType]					= ''
 				,[strFrequency]							= ''
