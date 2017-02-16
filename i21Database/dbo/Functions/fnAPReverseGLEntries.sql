@@ -39,7 +39,8 @@ RETURNS @returntable TABLE
     [dblCreditForeign]          NUMERIC (18, 6) NULL,
     [dblCreditReport]           NUMERIC (18, 6) NULL,
     [dblReportingRate]          NUMERIC (18, 6) NULL,
-    [dblForeignRate]            NUMERIC (18, 6) NULL
+    [dblForeignRate]            NUMERIC (18, 6) NULL,
+	[strRateType]				NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
 )
 AS
 BEGIN
@@ -82,6 +83,7 @@ BEGIN
 		,[dblReportingRate]          
 		,[dblForeignRate]            
 		,[intEntityId]
+		,[strRateType]
 	)
 	SELECT	
 		[strTransactionId]
@@ -115,6 +117,7 @@ BEGIN
 		,[dblReportingRate]          
 		,[dblForeignRate]  
 		,[intEntityId] = @intUserId
+		,NULL
 	FROM	tblGLDetail 
 	WHERE	intTransactionId IN (SELECT intId FROM @transactionIds)
 	AND strTransactionForm = @transactionType
