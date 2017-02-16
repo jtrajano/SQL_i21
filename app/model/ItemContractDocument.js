@@ -18,9 +18,8 @@ Ext.define('Inventory.model.ItemContractDocument', {
                 inverse: {
                     role: 'tblICItemContractDocuments',
                     storeConfig: {
-                        complete: true,
                         sortOnLoad: true,
-                        autoLoad: true,
+                        autoLoad: false,
                         sorters: {
                             direction: 'DESC',
                             property: 'intSort'
@@ -34,15 +33,6 @@ Ext.define('Inventory.model.ItemContractDocument', {
                                 type: 'json',
                                 rootProperty: 'data',
                                 messageProperty: 'message'
-                            },
-                            writer: {
-                                type: 'json',
-                                allowSingle: false
-                            },
-                            sortOnLoad: true,
-                            sorters: {
-                                direction: 'DESC',
-                                property: 'intSort'
                             }
                         }
                     }

@@ -21,21 +21,15 @@ Ext.define('Inventory.model.ItemContract', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
-                           // extraParams: { include: 'tblICItemContractDocuments.tblICDocument' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemContract/Search'
+                                read: '../Inventory/api/ItemContract/GetContractItem'
                             },
                             reader: {
                                 type: 'json',
                                 rootProperty: 'data',
                                 messageProperty: 'message'
                             }
-                        },
-                        sortOnLoad: true,
-                        sorters: {
-                            direction: 'DESC',
-                            property: 'intSort'
                         }
                     }
                 }

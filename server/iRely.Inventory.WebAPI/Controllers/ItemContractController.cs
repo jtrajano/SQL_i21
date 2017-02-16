@@ -23,6 +23,13 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
+        [ActionName("GetContractItem")]
+        public async Task<HttpResponseMessage> GetContractItem(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetContractItem(param));
+        }
+
+        [HttpGet]
         [ActionName("GetContractDocument")]
         public async Task<HttpResponseMessage> GetContractDocument(GetParameter param)
         {

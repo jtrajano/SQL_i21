@@ -3909,6 +3909,29 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
     
+    onContractItemSelectionChange: function (selModel, selected, eOpts) {
+        if (selModel) {
+            if (selModel.view == null || selModel.view == 'undefined') {
+                if (selModel.views == 'undefined' || selModel.views == null || selModel.views.length == 0)
+                    return;
+            }
+            var win = selModel.view.grid.up('window');
+            var vm = win.viewModel;
+
+            if (selected.length > 0) {
+                var current = selected[0];
+                   
+                if(!current.phantom && !current.dirty) {
+                    win.down("#grdDocumentAssociation").setLoading("Loading documents...");
+                    current.tblICItemContractDocuments().load({
+                        callback: function(records, operation, success) {
+                            win.down("#grdDocumentAssociation").setLoading(false);
+                        }
+                    });
+                }
+            }
+        }
+    },
 
     init: function(application) {
         this.control({
@@ -4105,6 +4128,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboOwner": {
                 select: this.onOwnerSelect
+            },
+            "#grdContractItem": {
+                selectionchange: this.onContractItemSelectionChange
             }
         });
 
