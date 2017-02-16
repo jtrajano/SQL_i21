@@ -5036,6 +5036,7 @@
     <Build Include="dbo\Stored Procedures\uspTMUpdateSiteGPSById.sql" />
     <Build Include="dbo\User Defined Types\TMGPSUpdateByIdTable.sql" />
     <Build Include="dbo\Stored Procedures\uspCTBeforeSavePriceContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateTMSiteGeocodes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
