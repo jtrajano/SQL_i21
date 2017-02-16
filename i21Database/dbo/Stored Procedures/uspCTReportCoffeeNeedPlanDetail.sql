@@ -50,8 +50,10 @@ BEGIN
 	 )
 
 	  INSERT INTO #tblRequiredColumns ([intMonthKey], [intYearKey], [strColumnName])
-	  SELECT DISTINCT
-		  CASE
+	  SELECT DISTINCT [intMonthKey], [intYearKey], [strColumnName] 
+	  FROM 
+	   (SELECT DISTINCT 
+			CASE
 			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Jan' THEN 1
 			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Feb' THEN 2
 			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Mar' THEN 3
@@ -66,7 +68,7 @@ BEGIN
 			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Dec' THEN 12
 		  END 
 		  [intMonthKey],
-		  Stg.[intYear],
+		  Stg.[intYear] AS [intYearKey],
 		  LEFT(LTRIM(Stg.strPeriod), 3) + ' ' + RIGHT(RTRIM(Stg.strPeriod), 2)
 		  + CHAR(13) + CHAR(10)
 		  + '01.'
@@ -101,11 +103,67 @@ BEGIN
 				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Nov' THEN '11'
 				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Dec' THEN '12'
 		  END
-		  + '.' + RIGHT(Stg.[intYear], 2)
+		  + '.' + RIGHT(Stg.[intYear], 2) AS strColumnName
 		FROM tblRKStgBlendDemand Stg
 		JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId=@IntCommodityId AND Stg.dblQuantity >0
-		WHERE (Stg.intWeek >= @IntWeekId AND Stg.intYear >= @IntYear)
-		   OR (Stg.intYear > @IntYear)
+		WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)=@strNeedPlan
+		UNION
+		SELECT DISTINCT 
+			CASE
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Jan' THEN 1
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Feb' THEN 2
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Mar' THEN 3
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Apr' THEN 4
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'May' THEN 5
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Jun' THEN 6
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Jul' THEN 7
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Aug' THEN 8
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Sep' THEN 9
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Oct' THEN 10
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Nov' THEN 11
+			WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Dec' THEN 12
+		  END 
+		  [intMonthKey],
+		  Stg.[intYear] AS [intYearKey],
+		  LEFT(LTRIM(Stg.strPeriod), 3) + ' ' + RIGHT(RTRIM(Stg.strPeriod), 2)
+		  + CHAR(13) + CHAR(10)
+		  + '01.'
+		  + CASE
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Jan' THEN '01'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Feb' THEN '02'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Mar' THEN '03'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Apr' THEN '04'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'May' THEN '05'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Jun' THEN '06'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Jul' THEN '07'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Aug' THEN '08'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Sep' THEN '09'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Oct' THEN '10'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Nov' THEN '11'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Dec' THEN '12'
+		  END
+		  + '.' + RIGHT(Stg.[intYear], 2)
+		  + ' | ' +
+		  +'16.'
+		  + CASE
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Jan' THEN '01'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Feb' THEN '02'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Mar' THEN '03'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Apr' THEN '04'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'May' THEN '05'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Jun' THEN '06'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Jul' THEN '07'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Aug' THEN '08'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Sep' THEN '09'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Oct' THEN '10'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Nov' THEN '11'
+				WHEN LEFT(LTRIM(Stg.strPeriod), 3) = 'Dec' THEN '12'
+		  END
+		  + '.' + RIGHT(Stg.[intYear], 2) AS strColumnName
+		FROM tblRKArchBlendDemand Stg
+		JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId=@IntCommodityId AND Stg.dblQuantity >0
+		WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)=@strNeedPlan
+		)t
 		ORDER BY 1, 2
 
 	 SELECT TOP 1  @FirstMonth=[strColumnName] FROM #tblRequiredColumns ORDER BY [intColumnKey]
@@ -163,7 +221,16 @@ BEGIN
 							JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId=Stg.intUOMId AND ItemUOM.intItemId=Stg.intItemId
 							JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId='+LTRIM(@IntCommodityId)+'
 							JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=Stg.intSubLocationId							
-							WHERE Stg.dblQuantity >0 AND MONTH(dtmNeedDate)='+LTRIM(@intMonthKey)+' AND YEAR(dtmNeedDate)='+LTRIM(@intYearKey)
+							WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)='''+@strNeedPlan+''' AND Stg.dblQuantity >0 AND MONTH(dtmNeedDate)='+LTRIM(@intMonthKey)+' AND YEAR(dtmNeedDate)='+LTRIM(@intYearKey)+'
+							UNION 
+							SELECT Item.intItemId,Item.strItemNo,Item.strDescription,SLOC.intCompanyLocationSubLocationId,ISNULL(SLOC.strSubLocationName,''''),
+							 CASE WHEN DATEPART(dd,dtmNeedDate)<16 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity1 
+							,CASE WHEN DATEPART(dd,dtmNeedDate)>15 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity2 
+							FROM tblRKArchBlendDemand Stg
+							JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId=Stg.intUOMId AND ItemUOM.intItemId=Stg.intItemId
+							JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId='+LTRIM(@IntCommodityId)+'
+							JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=Stg.intSubLocationId							
+							WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)='''+@strNeedPlan+''' AND Stg.dblQuantity >0 AND MONTH(dtmNeedDate)='+LTRIM(@intMonthKey)+' AND YEAR(dtmNeedDate)='+LTRIM(@intYearKey)
 
 		EXEC (@SqlInsert)
 
