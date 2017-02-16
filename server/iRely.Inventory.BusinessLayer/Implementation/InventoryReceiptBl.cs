@@ -712,15 +712,15 @@ namespace iRely.Inventory.BusinessLayer
             foreach (var ps in param.sort)
             {
                 // Use the direction specified by the caller. 
-                if (ps.property.ToLower() == "strbillid" && ps.direction == "ASC")
+                if (ps.property.ToLower() == "strallvouchers" && ps.direction == "ASC")
                 {
-                    sorts.Add(new SearchSort() { property = "intBillId", direction = "ASC" });
+                    //sorts.Add(new SearchSort() { property = "intBillId", direction = "ASC" });
                     sorts.Add(new SearchSort() { property = "intInventoryReceiptId", direction = "ASC" });
                 }
 
-                else if (ps.property.ToLower() == "strbillid" && ps.direction == "DESC")
+                else if (ps.property.ToLower() == "strallvouchers" && ps.direction == "DESC")
                 {
-                    sorts.Add(new SearchSort() { property = "intBillId", direction = "DESC" });
+                    //sorts.Add(new SearchSort() { property = "intBillId", direction = "DESC" });
                     sorts.Add(new SearchSort() { property = "intInventoryReceiptId", direction = "DESC" });
                 }
 
@@ -737,7 +737,7 @@ namespace iRely.Inventory.BusinessLayer
 
             sorts.AddRange(param.sort.ToList());
             param.sort = sorts;
-
+                        
             var data = await query.ExecuteProjection(param, "intInventoryReceiptId").ToListAsync();
 
             return new SearchResult()
@@ -930,6 +930,26 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync(),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
+        }
+
+        public SaveResult UpdateReceiptVoucher()
+        {
+            SaveResult saveResult = new SaveResult();
+
+            // Populate the Receipt Voucher
+            try
+            {
+                var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                db.PopulateReceiptVoucher();
+                saveResult.HasError = false;
+            }
+            catch (Exception ex)
+            {
+                saveResult.BaseException = ex;
+                saveResult.HasError = true;
+                saveResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return saveResult;
         }
     }
 }

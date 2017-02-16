@@ -279,6 +279,7 @@
     <Compile Include="Stored Procedures\CopyItemLocation.cs" />
     <Compile Include="Stored Procedures\DuplicateCategory.cs" />
     <Compile Include="Stored Procedures\DuplicateStorageLocation.cs" />
+    <Compile Include="Stored Procedures\PopulateReceiptVoucher.cs" />
     <Compile Include="Stored Procedures\LockInventory.cs" />
     <Compile Include="Stored Procedures\DuplicateItem.cs" />
     <Compile Include="Stored Procedures\Posting\PostInventoryCount.cs" />
