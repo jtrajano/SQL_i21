@@ -56,7 +56,9 @@ Declare @intMinHeader				INT,
 		@strLocation				NVARCHAR(50),
 		@strItemDesc				NVARCHAR(250),
 		@strCertificates			NVARCHAR(MAX),
-		@intNoOfContainer			INT
+		@intNoOfContainer			INT,
+		@strPackingDesc				NVARCHAR(50),
+		@dtmETSPOL					DATETIME
 
 Declare @tblDetail AS Table
 (
@@ -128,8 +130,12 @@ Begin
 		@strHeaderUOM				=	strWeightUOM,
 		@dblTotalGross				=	dblTotalGross,
 		@dblTotalNet				=	dblTotalNet,
-		@strLocation				=	strCompanyLocation			
+		@strLocation				=	strCompanyLocation,
+		@dtmETSPOL					=	dtmETSPOL		
 	From tblLGLoadLSPStg Where intLoadStgId=@intMinHeader
+
+	Select TOP 1 @strPackingDesc=ct.strPackingDescription From tblCTContractDetail ct Join tblLGLoadDetail ld on ct.intContractDetailId=ld.intPContractDetailId 
+	Where ld.intLoadId=@intLoadId
 
 	Set @strXml =  '<ZE1EDL43_PH>'
 	Set @strXml += '<IDOC BEGIN="1">'
@@ -143,6 +149,7 @@ Begin
 	Set @strXml += '<E1EDT20 SEGMENT="1">'
 	Set @strXml += '<TKNUM>'	+ ISNULL(@strLoadNumber,'')	+ '</TKNUM>'
 	Set @strXml += '<SHTYP>'	+ 'Z001'			+ '</SHTYP>'
+	Set @strXml += '<SDABW>'	+ ISNULL(@strPackingDesc,'')	+ '</SDABW>'
 
 	Set @strXml += '<E1EDT18 SEGMENT="1">'
 	Set @strXml += '<QUALF>'	+ 'ORI'	+ '</QUALF>'
@@ -217,19 +224,12 @@ Begin
 	Set @strXml +=	'</E1EDL22>'
 
 	Set @strXml += '<E1EDT13 SEGMENT="1">'
-	Set @strXml += '<QUALF>'	+ '003'			+ '</QUALF>'
-	Set @strXml += '<NTANF>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOL,112),'')		+ '</NTANF>'
-	Set @strXml += '<NTANZ>'	+ '000000'		+ '</NTANZ>'
-	Set @strXml += '<NTEND>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOL,112),'')		+ '</NTEND>'
-	Set @strXml += '<NTENZ>'	+ '000000'		+ '</NTENZ>'
-	Set @strXml +=	'</E1EDT13>'
-
-	Set @strXml += '<E1EDT13 SEGMENT="1">'
 	Set @strXml += '<QUALF>'	+ '007'			+ '</QUALF>'
-	Set @strXml += '<NTANF>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOD,112),'')		+ '</NTANF>'
+	Set @strXml += '<NTANF>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOL,112),'')		+ '</NTANF>'
 	Set @strXml += '<NTANZ>'	+ '000000'		+ '</NTANZ>'
 	Set @strXml += '<NTEND>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOD,112),'')		+ '</NTEND>'
 	Set @strXml += '<NTENZ>'	+ '000000'		+ '</NTENZ>'
+	Set @strXml += '<ISDD>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETSPOL,112),'')		+ '</ISDD>'
 	Set @strXml +=	'</E1EDT13>'
 
 	Delete From @tblDetail
@@ -301,6 +301,25 @@ Begin
 			Else
 				Set @strItemXml += '<LFIMG>'  +  '' + '</LFIMG>'
 			Set @strItemXml += '<VRKME>'  +  ISNULL(@strWeightUOM,'') + '</VRKME>' 
+
+			If ISNULL(@ysnBatchSplit,0)=0
+				Set @strItemXml += '<LGMNG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblNetWeight)),'') + '</LGMNG>' 
+			Else
+				Set @strItemXml += '<LGMNG>'  +  '' + '</LGMNG>' 
+
+			Set @strItemXml += '<MEINS>'  +  ISNULL(@strWeightUOM,'') + '</MEINS>' 
+			If ISNULL(@ysnBatchSplit,0)=0
+				Set @strItemXml += '<NTGEW>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblNetWeight)),'') + '</NTGEW>' 
+			Else
+				Set @strItemXml += '<NTGEW>'  +  '' + '</NTGEW>' 
+
+			If ISNULL(@ysnBatchSplit,0)=0
+				Set @strItemXml += '<BRGEW>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblNetWeight)),'') + '</BRGEW>' 
+			Else
+				Set @strItemXml += '<BRGEW>'  +  '' + '</BRGEW>' 
+
+			Set @strItemXml += '<GEWEI>'  +  ISNULL(@strWeightUOM,'') + '</GEWEI>' 
+
 			If ISNULL(@ysnBatchSplit,0)=1
 				Set @strItemXml += '<HIPOS>'  +  ISNULL(@strDeliveryItemNo,'') + '</HIPOS>'
 
@@ -354,6 +373,11 @@ Begin
 							+ '<CHARG>'  +  ISNULL(c.strContainerNumber,'') + '</CHARG>' 
 							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),c.dblNetWt)),'') + '</LFIMG>' 
 							+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(um.strUnitMeasure,'')) + '</VRKME>' 
+							+ '<LGMNG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),c.dblNetWt)),'') + '</LGMNG>' 
+							+ '<MEINS>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(um.strUnitMeasure,'')) + '</MEINS>' 
+							+ '<NTGEW>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),c.dblNetWt)),'') + '</NTGEW>' 
+							+ '<BRGEW>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),c.dblNetWt)),'') + '</BRGEW>' 
+							+ '<GEWEI>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(um.strUnitMeasure,'')) + '</GEWEI>' 
 							+ '<HIPOS>' + ISNULL(@strDeliveryItemNo,'') + '</HIPOS>' 
 
 							+ '<E1EDL19 SEGMENT="1">'

@@ -202,6 +202,14 @@ Begin
 			@strContractItemNo			= strContractItemNo
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
 
+		--Convert price USC to USD
+		If UPPER(@strCurrency)='USC'
+		Begin
+			Set @strCurrency='USD'
+			Set @dblBasis=ISNULL(@dblBasis,0)/100
+			Set @dblCashPrice=ISNULL(@dblCashPrice,0)/100
+		End
+
 		--Find Doc Type
 		If @strContractBasis IN ('FCA','EXW')
 			Set @strDocType='ZHDE'
