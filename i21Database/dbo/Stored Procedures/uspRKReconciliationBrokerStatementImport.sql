@@ -8,7 +8,7 @@
    ,@strStatus nvarchar(50)  OUT
 AS
 --mm dd -yyy
---declare   @dtmFilledDate datetime = '01/30/2017',
+--declare   @dtmFilledDate datetime = '02/16/2017',
 --       @intFutureMarketId   int = 5,
 --       @intCommodityId      int =7,
 --       @intBrokerId  int =1443,
@@ -16,6 +16,7 @@ AS
 --       @intReconciliationBrokerStatementHeaderIdOut int  
 --       ,@strStatus nvarchar(50)  
     
+   
 BEGIN TRY
 
 DECLARE @strDateTimeFormat nvarchar(50)
@@ -326,8 +327,8 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
 
 delete from  @tblTransRec  
-              where Id in (select t1.Id from  @tblTransRec t1
-                                  JOIN @tblFinalRec t on t.strName=t1.strName
+              where Id in (select t1.ImportId from @tblTransRec t
+LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
@@ -388,6 +389,7 @@ delete from  @tblTransRec
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
 
+
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
 SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
           t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
@@ -428,8 +430,8 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
 
 delete from  @tblTransRec  
-              where Id in (select t1.Id from  @tblTransRec t1
-                                  JOIN @tblFinalRec t on t.strName=t1.strName
+              where Id in (select t1.ImportId from  @tblTransRec t
+LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
