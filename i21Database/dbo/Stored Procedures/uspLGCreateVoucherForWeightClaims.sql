@@ -198,7 +198,7 @@ BEGIN TRY
 
 	IF (@total = 0)
 	BEGIN
-		RAISERROR ('Bill process failure #1',11,1);
+		RAISERROR ('Voucher cannot be created if claim amount is zero or ''No Claim'' is ticked.',11,1);
 		RETURN;
 	END
 
