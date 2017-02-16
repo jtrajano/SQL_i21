@@ -1803,11 +1803,18 @@ BEGIN
         ,strSQL
         )
     SELECT 84
-        ,'Line Sample Mandatory'
+        ,'WIP Sample Mandatory'
         ,5
         ,5
         ,0
         ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+ELSE
+
+BEGIN
+	UPDATE tblMFAttribute
+	SET strAttributeName = 'WIP Sample Mandatory'
+	WHERE intAttributeId = 84
 END
 Go
 IF NOT EXISTS (
@@ -1823,11 +1830,19 @@ BEGIN
         ,intAttributeTypeId
         )
     SELECT 85
-        ,'Duration Between Line Sample in Min'
+        ,'Duration Between WIP Sample in Min'
         ,2
         ,5
 END
+ELSE
+
+BEGIN
+	UPDATE tblMFAttribute
+	SET strAttributeName = 'Duration Between WIP Sample in Min'
+	WHERE intAttributeId = 85
+END
 GO
+
 IF NOT EXISTS (
 		SELECT 1
 		FROM tblMFAttribute
@@ -1969,6 +1984,28 @@ BEGIN
         )
     SELECT 92
         ,'Pick By Full Pallet'
+        ,5
+        ,1
+        ,0
+        ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 93
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 93
+        ,'Restrict Produce Qty by Cases per Pallet'
         ,5
         ,1
         ,0
