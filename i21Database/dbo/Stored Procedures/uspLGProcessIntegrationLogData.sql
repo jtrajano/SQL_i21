@@ -21,6 +21,8 @@ BEGIN TRY
 	DECLARE @intLoadStdId INT
 	DECLARE @strShipmentType NVARCHAR(MAX)
 	DECLARE @strErrMsg NVARCHAR(MAX)
+	DECLARE @intLastFeedId INT
+	DECLARE @strRowState NVARCHAR(MAX)
 
 	DECLARE @tblLoadContainerRecord TABLE 
 			(intLoadContainerRecordId INT Identity(1, 1)
@@ -72,6 +74,11 @@ BEGIN TRY
 		SELECT @intMaxLoadLogId = MAX(intLoadLogId)
 		FROM @tblLoadRecord
 		WHERE intLoadId = @intLoadId
+
+		SELECT TOP 1 @intLastFeedId = intLoadStgId
+		FROM tblLGLoadStg
+		WHERE intLoadId = ISNULL(@intLoadId, 0)
+		ORDER BY intLoadStgId DESC
 	
 		SELECT @strShipmentType = CASE L.intShipmentType
 				WHEN 1
@@ -83,6 +90,17 @@ BEGIN TRY
 				ELSE ''
 				END COLLATE Latin1_General_CI_AS 
 		FROM tblLGLoad L WHERE intLoadId = @intLoadId
+
+		IF EXISTS(SELECT 1 FROM tblLGLoadStg WHERE intLoadStgId = @intLastFeedId AND strRowState = 'Modified' AND ISNULL(strFeedStatus,'') IN (''))
+		BEGIN
+			DELETE FROM tblLGLoadStg WHERE intLoadStgId = @intLastFeedId
+			SELECT TOP 1 @intLastFeedId =  intLoadStgId FROM tblLGLoadStg WHERE intLoadId = ISNULL(@intLoadId, 0) ORDER BY intLoadStgId DESC
+		END
+		SELECT @strRowState= 'Modified'
+        IF EXISTS(SELECT 1 FROM tblLGLoadStg WHERE intLoadStgId = @intLastFeedId AND strRowState = 'Added' AND ISNULL(strMessage,'Success') <> 'Success')
+        BEGIN
+			SELECT @strRowState= 'Added'
+        END
 
 		INSERT INTO tblLGLoadStg (
 			intLoadId
@@ -146,7 +164,7 @@ BEGIN TRY
 			,L.dtmETAPOL
 			,L.dtmETSPOL
 			,L.dtmBLDate
-			,'Modified'
+			,@strRowState			
 			,GETDATE()
 		FROM vyuLGLoadView L
 		LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
