@@ -149,7 +149,8 @@ DECLARE  @Id									INT
 		,@FreightTermId							INT
 		,@ShipViaId								INT
 		,@PaymentMethodId						INT
-		,@InvoiceOriginId						NVARCHAR(8)
+		,@InvoiceOriginId						NVARCHAR(25)
+		,@UseOriginIdAsInvoiceNumber			BIT
 		,@PONumber								NVARCHAR(25)
 		,@BOLNumber								NVARCHAR(50)
 		,@DeliverPickup							NVARCHAR(100)
@@ -307,6 +308,7 @@ BEGIN
 		,@ShipViaId						= [intShipViaId]
 		,@PaymentMethodId				= [intPaymentMethodId]
 		,@InvoiceOriginId				= [strInvoiceOriginId]
+		,@UseOriginIdAsInvoiceNumber	= [ysnUseOriginIdAsInvoiceNumber]
 		,@PONumber						= [strPONumber]
 		,@BOLNumber						= [strBOLNumber]
 		,@DeliverPickup					= [strDeliverPickup]
@@ -528,6 +530,7 @@ BEGIN
 			,@ShipViaId						= @ShipViaId
 			,@PaymentMethodId				= @PaymentMethodId
 			,@InvoiceOriginId				= @InvoiceOriginId
+			,@UseOriginIdAsInvoiceNumber	= @UseOriginIdAsInvoiceNumber
 			,@PONumber						= @PONumber
 			,@BOLNumber						= @BOLNumber
 			,@DeliverPickUp					= @DeliverPickup
