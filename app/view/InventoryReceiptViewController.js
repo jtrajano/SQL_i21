@@ -197,27 +197,39 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     },
                     columns: [
                         { dataIndex: 'intInventoryReceiptId', text: 'Inventory Receipt Id', flex: 1, dataType: 'numeric', key: true, hidden: true },
-                        { dataIndex: 'intInventoryReceiptItemId', text: 'Inventory Receipt Item Id', flex: 1, dataType: 'numeric', hidden: true },
-                        { dataIndex: 'strBillId', text: 'Voucher No', flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'string', drillDownText: 'View Voucher', drillDownClick: 'onViewVoucher' },
-                        { dataIndex: 'dtmBillDate', text: 'Voucher Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
-
-                        { dataIndex: 'strVendor', text: 'Vendor', flex: 1, dataType: 'string' },
-                        { dataIndex: 'strLocationName', text: 'Destination', flex: 1, dataType: 'string' },
-                        { dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string' },
-                        { dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
-                        { dataIndex: 'strBillOfLading', text: 'BOL', flex: 1, dataType: 'string' },
-                        { dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string' },
-                        { dataIndex: 'strOrderNumber', text: 'Order No', flex: 1, dataType: 'string' },
-                        { dataIndex: 'strItemDescription', text: 'Product', flex: 1, dataType: 'string' },
-                        { dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        { dataIndex: 'dblQtyToReceive', text: 'Qty Received', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        { dataIndex: 'dblLineTotal', text: 'Receipt Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
-                        { dataIndex: 'dblQtyVouchered', text: 'Qty Vouchered', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        { dataIndex: 'dblVoucherAmount', text: 'Voucher Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
-                        { dataIndex: 'dblQtyToVoucher', text: 'Qty To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        { dataIndex: 'dblAmountToVoucher', text: 'Amount To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' }
+                        { dataIndex: 'intInventoryReceiptItemId', text: 'Inventory Receipt Item Id', flex: 1, dataType: 'numeric', hidden: true },                        
+                        { dataIndex: 'strAllVouchers', text: 'Voucher Nos.', width: 100, dataType: 'string', drillDownText: 'View Voucher', drillDownClick: 'onViewVoucher' },
+                        { dataIndex: 'dtmReceiptDate', text: 'Receipt Date', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'date', xtype: 'datecolumn' },
+                        { dataIndex: 'strVendor', text: 'Vendor', width: 300, dataType: 'string' },
+                        { dataIndex: 'strLocationName', text: 'Destination', width: 200, dataType: 'string' },
+                        { dataIndex: 'strReceiptNumber', text: 'Receipt No', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'string' },
+                        { dataIndex: 'strBillOfLading', text: 'BOL', width: 100, dataType: 'string' },
+                        { dataIndex: 'strReceiptType', text: 'Order Type', width: 120, dataType: 'string' },
+                        { dataIndex: 'strOrderNumber', text: 'Order No', width: 100, dataType: 'string' },
+                        { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
+                        // { dataIndex: 'strItemDescription', text: 'Item Description', flex: 1, dataType: 'string' },
+                        { dataIndex: 'dblUnitCost', text: 'Unit Cost', width: 120, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblReceiptQty', text: 'Receipt Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblVoucherQty', text: 'Voucher Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblReceiptLineTotal', text: 'Receipt Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'  },
+                        { dataIndex: 'dblVoucherLineTotal', text: 'Voucher Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'  },
+                        { dataIndex: 'dblReceiptTax', text: 'Receipt Tax', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'  },
+                        { dataIndex: 'dblVoucherTax', text: 'Voucher Tax', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'  },
+                        { dataIndex: 'dblOpenQty', text: 'Uncleared Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'dblItemsPayable', text: 'Uncleared Items Total', width: 150, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'  },
+                        { dataIndex: 'dblTaxesPayable', text: 'Uncleared Taxes Total', width: 150, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'  },
+                        { dataIndex: 'dtmLastVoucherDate', text: 'Last Voucher Date', width: 120, dataType: 'date', xtype: 'datecolumn' },
+                        { dataIndex: 'strFilterString', text: 'Voucher Nos.', flex: 1, dataType: 'string', required: true, hidden: true }               
+                    ],
+                    buttons: [
+                        {
+                            text: 'Refresh open for voucher',
+                            itemId: 'btnRefreshVoucher',
+                            clickHandler: 'onRefreshVoucherClick',
+                            width: 400
+                        }                        
                     ]
-                }
+                }  
             ]
         },
         binding: {
@@ -241,14 +253,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 disabled: '{current.ysnOrigin}',
                 hidden: '{hideUnpostButton}'
             },
-            // btnPostPreview: {
-            //     disabled: '{current.ysnOrigin}',
-            //     hidden: '{hidePostButton}'
-            // },
-            // btnUnpostPreview: {
-            //     disabled: '{current.ysnOrigin}',
-            //     hidden: '{hideUnpostButton}'
-            // },
             btnReturn: {
                 hidden: '{checkHideReturnButton}'
             },
@@ -1265,6 +1269,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             win = this.getView();
 
         if (config) {
+            // Check from what search tab it is coming from. 
+            var param = config.param;
+            var searchTab = param ? param.searchTab : null;
+            if (searchTab && searchTab == 'Vouchers' && config.action === 'new'){
+                // Exit immediately. Do not auto-create records from the vouchers tab.
+                return; 
+            }
+
             win.show();
 
             var context = me.setupContext({ window: win });
@@ -2622,69 +2634,73 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 iRely.Functions.showErrorDialog('Invalid receipt type. A voucher is not applicable to transfer orders.');
                 return;
             }
-            ic.utils.ajax({
-                url: '../Inventory/api/InventoryReceipt/GetStatusUnitCost',
-                params:{
-                    id: record.get('intInventoryReceiptId')
-                },
-                method: 'get'  
-            })
-            .subscribe(
-                function(successResponse) {
-                    var jsonData = Ext.decode(successResponse.responseText);
-                    var message = jsonData.message;
-                    var receiptStatusId = message.receiptItemsStatusId;
-                    var createNewVoucher = function() {
-                        me.processReceiptToVoucher(record.get('intInventoryReceiptId'), function(data) {
-                            iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
-                                filters: [
-                                    {
-                                        column: 'intBillId',
-                                        value: data.message.BillId
-                                    }
-                                ],
-                                action: 'view',
-                                showAddReceipt: false,
-                                listeners: {
-                                    close: function(e) {
-                                        dashboard.$initParent.grid.controller.reload();  
-                                    }
-                                }                                
-                            });
-                        });
-                    };
-                    //All items have zero cost
-                    if (receiptStatusId == 1) {
-                        iRely.Functions.showCustomDialog('information','ok','Cannot process voucher for items with zero cost.');
-                    }
-                    //Some items have zero cost
-                    else if (receiptStatusId == 2) {
-                        var buttonAction = function (button) {
-                            if (button == 'yes') {
-                                // Create Voucher for receipt containing items with cost and ignore items with zero cost
-                                createNewVoucher();
-                            }
+
+            Ext.Ajax.request({
+                timeout: 120000,
+                url: '../Inventory/api/InventoryReceipt/GetStatusUnitCost?id=' + record.get('intInventoryReceiptId'),
+                method: 'get',
+                success: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    if (jsonData.success)
+                        var receiptStatusId = jsonData.message.receiptItemsStatusId;
+
+                        var createNewVoucher = function() {
+                            me.processReceiptToVoucher(record.get('intInventoryReceiptId'), function(data) {
+                                    iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
+                                        filters: [
+                                            {
+                                                column: 'intBillId',
+                                                value: data.message.BillId
+                                            }
+                                        ],
+                                        action: 'view',
+                                        showAddReceipt: false,
+                                        listeners: {
+                                            close: function(e) {
+                                                dashboard.$initParent.grid.controller.reload();  
+                                            }
+                                        }
+                                    });        
+                                });
                         }
-                        iRely.Functions.showCustomDialog('question','yesno','Items with zero cost will not be processed to voucher. Continue?', buttonAction);
-                    }
-                    //No items have zero cost
-                    else if (receiptStatusId == 3) {
-                        // Create voucher for receipt containing cost for all items
-                        createNewVoucher();
-                    }
+
+                        //All items have zero cost
+                        if (receiptStatusId == 1) {
+                            iRely.Functions.showCustomDialog('information','ok','Cannot process voucher for items with zero cost.');
+                        }
+                        
+                        //Some items have zero cost
+                        else if (receiptStatusId == 2) {
+                            var buttonAction = function (button) {
+                                if (button == 'yes') {
+                                    // Create Voucher for receipt containing items with cost and ignore items with zero cost
+                                    createNewVoucher();
+                                }
+                            }
+
+                            iRely.Functions.showCustomDialog('question','yesno','Items with zero cost will not be processed to voucher. Continue?', buttonAction);
+                        }
+
+                        //No items have zero cost
+                        else if (receiptStatusId == 3) {
+                            // Create voucher for receipt containing cost for all items
+                            createNewVoucher();
+                        }
+
+                },
+                failure: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
                 }
-                ,function(failureResponse) {
-                    var jsonData = Ext.decode(failureResponse.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
-                }
-            );                          
+            });
         }
         else {
+            var vouchers = record.get('strFilterString');
             iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
                 filters: [
                     {
-                        column: 'strBillId',
-                        value: value
+                        column: 'intBillId',
+                        value: vouchers
                     }
                 ],
                 action: 'view',
@@ -6410,7 +6426,40 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (current && !(newForexRateType)) {
             current.set('dblForexRate', null);
         }
-    },    
+    },   
+
+    onRefreshVoucherClick: function (control) {
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryReceipt/UpdateReceiptVoucher',
+            method: 'post'  
+        })
+        .subscribe(
+            function(successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+                var panel = control.up('panel');
+                var grdSearch = panel ? panel.query('#grdSearch') : null;
+
+                if (grdSearch && grdSearch.length > 0){
+                    grdSearch.forEach(function (grid) {
+                        if (grid && grid.url == '../Inventory/api/InventoryReceipt/GetReceiptVouchers'){
+                            var store = grid ? grid.getStore() : null;
+                            if (store){
+                                store.reload({
+                                    callback: function(){
+                                        grid.getView().refresh();
+                                    }
+                                });                    
+                            }
+                        }
+                    }); 
+                }                
+            }
+            , function(failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                iRely.Functions.showErrorDialog(jsonData.message.statusText);
+            }
+        );        
+    },
 
     init: function (application) {
         this.control({

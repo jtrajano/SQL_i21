@@ -820,27 +820,31 @@ namespace iRely.Inventory.Model
             this.HasKey(t => t.intInventoryReceiptItemId);
 
             // Table & Column Mappings
-            this.ToTable("vyuICGetInventoryReceiptVoucher");
+            this.ToTable("vyuICGetInventoryReceiptVoucher2");
             this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
             this.Property(t => t.intInventoryReceiptItemId).HasColumnName("intInventoryReceiptItemId");
+            this.Property(t => t.dtmReceiptDate).HasColumnName("dtmReceiptDate");
             this.Property(t => t.strVendor).HasColumnName("strVendor");
             this.Property(t => t.strLocationName).HasColumnName("strLocationName");
             this.Property(t => t.strReceiptNumber).HasColumnName("strReceiptNumber");
-            this.Property(t => t.dtmReceiptDate).HasColumnName("dtmReceiptDate");
             this.Property(t => t.strBillOfLading).HasColumnName("strBillOfLading");
             this.Property(t => t.strReceiptType).HasColumnName("strReceiptType");
             this.Property(t => t.strOrderNumber).HasColumnName("strOrderNumber");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
-            this.Property(t => t.dblUnitCost).HasColumnName("dblUnitCost").HasPrecision(38, 20);
-            this.Property(t => t.dblQtyToReceive).HasColumnName("dblQtyToReceive").HasPrecision(38, 20);
-            this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
-            this.Property(t => t.dblQtyVouchered).HasColumnName("dblQtyVouchered").HasPrecision(18, 6);
-            this.Property(t => t.dblVoucherAmount).HasColumnName("dblVoucherAmount").HasPrecision(18, 6);
-            this.Property(t => t.dblQtyToVoucher).HasColumnName("dblQtyToVoucher").HasPrecision(38, 20);
-            this.Property(t => t.dblAmountToVoucher).HasColumnName("dblAmountToVoucher").HasPrecision(38, 6);
-            this.Property(t => t.strBillId).HasColumnName("strBillId");
-            this.Property(t => t.dtmBillDate).HasColumnName("dtmBillDate");
-            this.Property(t => t.intBillId).HasColumnName("intBillId");
+            this.Property(t => t.dblUnitCost).HasColumnName("dblUnitCost");
+            this.Property(t => t.dblReceiptQty).HasColumnName("dblReceiptQty");
+            this.Property(t => t.dblVoucherQty).HasColumnName("dblVoucherQty");
+            this.Property(t => t.dblReceiptLineTotal).HasColumnName("dblReceiptLineTotal");
+            this.Property(t => t.dblVoucherLineTotal).HasColumnName("dblVoucherLineTotal");
+            this.Property(t => t.dblReceiptTax).HasColumnName("dblReceiptTax");
+            this.Property(t => t.dblVoucherTax).HasColumnName("dblVoucherTax");
+            this.Property(t => t.dblOpenQty).HasColumnName("dblOpenQty");
+            this.Property(t => t.dblItemsPayable).HasColumnName("dblItemsPayable");
+            this.Property(t => t.dblTaxesPayable).HasColumnName("dblTaxesPayable");
+            this.Property(t => t.dtmLastVoucherDate).HasColumnName("dtmLastVoucherDate");
+            this.Property(t => t.strAllVouchers).HasColumnName("strAllVouchers");
+            this.Property(t => t.strFilterString).HasColumnName("strFilterString");
         }
     }
 

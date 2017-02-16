@@ -311,5 +311,27 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchReceiptCharges(param));
         }
+
+        [HttpPost]
+        [ActionName("UpdateReceiptVoucher")]
+        public HttpResponseMessage UpdateReceiptVoucher()
+        {
+            var result = _bl.UpdateReceiptVoucher();
+
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+
+        }
     }
 }
