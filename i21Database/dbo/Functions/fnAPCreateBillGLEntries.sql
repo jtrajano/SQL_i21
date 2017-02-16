@@ -61,13 +61,15 @@ BEGIN
 	 WHERE APB.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	 --print @ReceiptId
 
+	  SELECT TOP 1 @VendorId = intEntityVendorId FROM tblAPBill WHERE intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+
 	 SELECT @OtherChargeTaxes = SUM(CASE 
 			  WHEN ReceiptCharge.ysnPrice = 1
 			   THEN ISNULL(ReceiptCharge.dblTax,0) * -1
 			  ELSE ISNULL(ReceiptCharge.dblTax,0) 
 			 END )
 	 FROM tblICInventoryReceiptCharge ReceiptCharge
-	 WHERE ReceiptCharge.intInventoryReceiptId = @ReceiptId 
+	 WHERE ReceiptCharge.intInventoryReceiptId = @ReceiptId AND ReceiptCharge.intEntityVendorId = @VendorId --get the charges only for that vendor
 	 --print @OtherChargeTaxes
 
 	INSERT INTO @returntable
@@ -389,8 +391,8 @@ BEGIN
 																		ELSE B.dblTotal  END) --Get the amount from voucher if NOT inventory cost
 																ELSE D.dblAmount END)
 													END) 
-													-- + CAST(ISNULL(ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) 
-													-- commented on AP-3227
+													--+ CAST(ISNULL(ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) 
+													--commented on AP-3227, taxes for other charges should not be added here as it is already part of taxes entries
 											END AS DECIMAL(18,2)), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
