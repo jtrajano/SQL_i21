@@ -28,7 +28,7 @@
     [intFreightTermId]				INT												NULL,
     [intShipViaId]					INT												NULL,
     [intPaymentMethodId]			INT												NULL, 	        
-    [strInvoiceOriginId]			NVARCHAR(8)		COLLATE Latin1_General_CI_AS	NULL,
+    [strInvoiceOriginId]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
     [strPONumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
 	[strBOLNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,     
 	[strDeliverPickup]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,

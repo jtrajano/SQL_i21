@@ -19,7 +19,7 @@
 	,@FreightTermId					INT				= NULL
 	,@ShipViaId						INT				= NULL
 	,@PaymentMethodId				INT				= NULL
-	,@InvoiceOriginId				NVARCHAR(16)	= NULL
+	,@InvoiceOriginId				NVARCHAR(25)	= NULL
 	,@PONumber						NVARCHAR(50)	= ''
 	,@BOLNumber						NVARCHAR(50)	= ''
 	,@DeliverPickUp					NVARCHAR(100)	= NULL
