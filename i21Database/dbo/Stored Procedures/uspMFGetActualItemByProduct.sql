@@ -13,6 +13,8 @@ BEGIN
 		,IU.intItemUOMId
 		,U.intUnitMeasureId
 		,U.strUnitMeasure
+		,I.intLayerPerPallet
+		,I.intUnitPerLayer
 	FROM dbo.tblMFWorkOrderRecipe R
 	JOIN dbo.tblMFWorkOrderRecipeItem RI on RI.intRecipeId=R.intRecipeId and RI.intWorkOrderId=R.intWorkOrderId and RI.intRecipeItemTypeId=2 and R.intWorkOrderId=@intWorkOrderId
 	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId and SI.intWorkOrderId = RI.intWorkOrderId
