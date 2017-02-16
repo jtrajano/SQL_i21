@@ -5038,6 +5038,11 @@
     <Build Include="dbo\Stored Procedures\uspCTBeforeSavePriceContract.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateTMSiteGeocodes.sql" />
     <Build Include="dbo\Views\vyuCMACHFromCustomer.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucher2.sql" />
+    <Build Include="dbo\Tables\tblICSearchReceiptVoucher.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherItems.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPopulateReceiptVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
