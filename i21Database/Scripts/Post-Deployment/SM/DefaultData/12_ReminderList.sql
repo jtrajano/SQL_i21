@@ -649,7 +649,9 @@ BEGIN
 											FROM	tblCTContractHeader CH,	
 													tblCTEvent EV											
 											JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
-											WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') AND EV.strEventName = ''Unsubmitted Contract Alert'' AND ER.intEntityId = {0}
+											WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') 
+											AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE strERPPONumber IS NULL)
+											AND		EV.strEventName  =  ''Unsubmitted Contract Alert'' AND ER.intEntityId = {0}
 											',
 			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Unsubmitted', 
 			[intSort]            =        21
@@ -657,7 +659,15 @@ END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET	[strMessage] = N'{0} {1} {2} Unsubmitted.'
+	SET	[strMessage] = N'{0} {1} {2} Unsubmitted.',
+		[strQuery]=   N'SELECT	intContractHeaderId 
+							FROM	tblCTContractHeader CH,	
+									tblCTEvent EV											
+									JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
+									WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') 
+									AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE strERPPONumber IS NULL)
+									AND		EV.strEventName = ''Unsubmitted Contract Alert'' AND ER.intEntityId = {0}
+										'
 	WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Contract' 
 END
 GO
