@@ -89,6 +89,7 @@ namespace iRely.Inventory.Model
         public decimal? dblFranchisePercent { get; set; }
         public int? intSort { get; set; }
         public string strCountry { get; set; }
+        public int intConcurrencyId { get; set; }
     }
 
     public class ContractDocumentVM
@@ -98,5 +99,6 @@ namespace iRely.Inventory.Model
         public int? intDocumentId { get; set; }
         public int intSort { get; set; }
         public string strDocumentName { get; set; }
+        public int intConcurrencyId { get; set; }
     }
 }

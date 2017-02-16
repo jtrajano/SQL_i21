@@ -22,7 +22,7 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
-        public override async Task<SearchResult> Search(GetParameter param)
+        public async Task<SearchResult> GetContractItem(GetParameter param)
         {
             var query = _db.GetQuery<tblICItemContract>()
                 .Include(p => p.tblICItemLocation)
@@ -44,9 +44,10 @@ namespace iRely.Inventory.BusinessLayer
                     dblFranchisePercent = p.dblFranchisePercent,
                     intSort = p.intSort,
                     strCountry = p.tblSMCountry.strCountry,
+                    intConcurrencyId = p.intConcurrencyId
                 })
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemContractId").ToListAsync();
 
             return new SearchResult()
             {
@@ -66,7 +67,8 @@ namespace iRely.Inventory.BusinessLayer
                     intItemContractId = p.intItemContractId,
                     intDocumentId = p.intDocumentId,
                     intSort = p.intSort,
-                    strDocumentName = p.tblICDocument.strDocumentName
+                    strDocumentName = p.tblICDocument.strDocumentName,
+                    intConcurrencyId = p.intConcurrencyId
                  })
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemContractId").ToListAsync();
