@@ -1,11 +1,13 @@
 ﻿CREATE VIEW [dbo].[vyuCTGetNeedPlanWeek]
 AS
-SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY (SELECT 1))) AS intNeedPlanId,strNeedPlan 
+ SELECT
+ CONVERT(INT,ROW_NUMBER() OVER(ORDER BY (SELECT 1))) AS intNeedPlanId
+,CONVERT(NVARCHAR,dtmImportDate,106) strNeedPlan
 FROM 
-(
-	SELECT DISTINCT CASE WHEN intWeek < 10 THEN '0'+LTRIM(intWeek) 
-							   ELSE LTRIM(intWeek)
-						  END 
-	+'-'+LTRIM(intYear) AS strNeedPlan
-	FROM tblRKStgBlendDemand WHERE dblQuantity >0 
+(   SELECT DISTINCT dtmImportDate FROM 
+	(
+		SELECT DISTINCT dtmImportDate FROM tblRKStgBlendDemand WHERE dblQuantity >0 
+		UNION
+		SELECT DISTINCT dtmImportDate FROM tblRKArchBlendDemand WHERE dblQuantity >0
+	 )t 
 )t
