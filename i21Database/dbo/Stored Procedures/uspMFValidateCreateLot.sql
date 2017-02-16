@@ -63,6 +63,8 @@ BEGIN TRY
 		,@strLineSampleMandatory NVARCHAR(50)
 		,@intDurationBetweenLineSample INT
 		,@dtmStartedDate DATETIME
+		,@intControlPointId INT
+		,@intSampleTypeId INT
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -376,13 +378,13 @@ BEGIN TRY
 		DECLARE @intProductId INT
 			,@dblRequiredQuantity DECIMAL(18, 6)
 			,@intManufacturingProcessId INT
-			,@intManufacturingCellId int
+			,@intManufacturingCellId INT
 
 		SELECT @intProductId = intItemId
 			,@dblRequiredQuantity = dblQuantity
 			,@intManufacturingProcessId = intManufacturingProcessId
 			,@dtmStartedDate = dtmStartedDate
-			,@intManufacturingCellId=intManufacturingCellId 
+			,@intManufacturingCellId = intManufacturingCellId
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -684,6 +686,15 @@ BEGIN TRY
 
 		IF @strLineSampleMandatory = 'True'
 		BEGIN
+			SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+				,@dtmSampleCreated = S.dtmCreated
+			FROM tblQMSample S
+			JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+			WHERE S.intProductTypeId = 12
+				AND S.intProductValueId = @intWorkOrderId
+				AND ST.intControlPointId = 12 --WIP Sample
+			ORDER BY S.dtmLastModified DESC
+
 			SELECT @intDurationBetweenLineSample = strAttributeValue
 			FROM tblMFManufacturingProcessAttribute
 			WHERE intManufacturingProcessId = @intManufacturingProcessId
