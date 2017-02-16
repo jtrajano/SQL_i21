@@ -6,7 +6,8 @@
 Ext.define('Inventory.ux.GridUOMField', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.griduomfield',
-
+    xtype: 'griduomfield',
+    
     mixins: {
         field: 'Ext.form.field.Field',
         observable : 'Ext.util.Observable'
@@ -22,7 +23,8 @@ Ext.define('Inventory.ux.GridUOMField', {
     },
 
     config: {
-        DEFAULT_DECIMALS: 6
+        DEFAULT_DECIMALS: 6,
+        customValue: null
     },
 
     txtQuantity: undefined,
@@ -155,7 +157,7 @@ Ext.define('Inventory.ux.GridUOMField', {
                     me.updateExtraFields(activeRecord, records[0]);
                 }
 
-                me.setValue(me.txtQuantity.getValue());
+                me.setValue(me.txtQuantity.getValue(), true);
                 if(activeRecord) {
                     var param = {
                         id: activeRecord.internalId,
@@ -343,12 +345,6 @@ Ext.define('Inventory.ux.GridUOMField', {
         return me.DEFAULT_DECIMALS;
     },
 
-    getErrors: function(value) {
-        var me = this,
-            errors = [];
-        return errors;
-    },
-
     getGrid: function() {
         var me = this;
         return me.column.container.component.grid;
@@ -476,7 +472,7 @@ Ext.define('Inventory.ux.GridUOMField', {
                             dataIndex: 'intDecimalPlaces',
                             text: 'Decimal Places',
                             flex: 1,
-                            hidden: true
+                            hidden: false
                         }
                     ],
                     dataIndex: 'intUnitMeasureId',

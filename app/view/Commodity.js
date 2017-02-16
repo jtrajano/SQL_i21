@@ -548,17 +548,18 @@ Ext.define('Inventory.view.Commodity', {
                                                         ],
                                                         columns: [
                                                             {
-                                                                xtype: 'unitmeasurecolumn',
+                                                                xtype: 'griduomcolumn',
                                                                 itemId: 'colUnitQty',
                                                                 align: 'right',
                                                                 dataIndex: 'dblUnitQty',
                                                                 text: 'Unit Qty',
                                                                 flex: 1,
                                                                 editor: {
-                                                                    xtype: 'gridunitmeasurefield',
+                                                                    xtype: 'griduomfield',
                                                                     valueField: 'intUnitMeasureId',
                                                                     displayField: 'strUnitMeasure',
-                                                                    itemId: 'gumUnitQty'
+                                                                    itemId: 'gumUnitQty',
+                                                                    readOnly: false
                                                                 }
                                                             },
                                                             {

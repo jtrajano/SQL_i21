@@ -4587,6 +4587,209 @@ Ext.define('iRely.FunctionalTest', {
         return this;
     },
 
+    enterUOMGridData: function(item, row, column, comboColumn, quantity, uom) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next) {
+            var t = this,
+                win = Ext.WindowManager.getActive();
+            if (win) {
+                var grid = item.editingPlugin ? item : win.down('#grd'+item);
+                if (grid) {
+                    var store = grid.store;
+                    grid.editingPlugin.completeEdit();
+
+                    if(row > 0) row = row - 1;
+                    if(store.buffered) {
+                        row = store.data.getAt(row);
+                    }
+                    else {
+                        row = store.getAt(row);
+                    }
+
+                    if(isNaN(column)) {
+                        if (Ext.Array.indexOf(grid.columns, column) === -1) {
+                            column = grid.columns[column] || grid.columnManager.getHeaderById(column) || grid.down('[dataIndex=' + column + ']');
+                        }
+                    }
+                    else{
+                        if (Ext.Array.indexOf(grid.columns, column-1) === -1) {
+                            column = grid.columns[column-1] || grid.columnManager.getHeaderById(column) || grid.down('[dataIndex=' + (column-1) + ']');
+                        }
+                    }
+
+                    if (row && column) {
+                        var plugin = grid.editingPlugin,
+                            cell = plugin.getCell(row, column);
+
+                        if (plugin.clicksToEdit === 1) {
+                            t.click(cell);
+                        } else {
+                            t.doubleClick(cell);
+                        }
+
+                        if (plugin.activeEditor && plugin.activeEditor.field && plugin.activeEditor.field.xtype === 'griduomfield') {
+                            var editor = plugin.activeEditor,
+								field = editor.field,
+                                value = row.get(column.dataIndex);
+
+                            me.logEvent('Entering Quantity on ' + item + ' grid');
+							
+							t.selectText(field.txtQuantity, 0, 50);
+                            t.type(field.txtQuantity, quantity, function() {
+                                row.set(column.dataIndex,quantity);
+								//editor.completeEdit();
+								me.logSuccess('Quantity successfully entered');
+                                //next();
+								var task = new Ext.util.DelayedTask(function () {
+									me.selectUom(me, next, chain, t, editor, item, comboColumn, field.cboUom, uom);
+								});
+								task.delay(1000);
+                            });
+							
+                        } else {
+                            me.logFailed('Editor is not found');
+                            next();
+                        }
+                    } else {
+                        me.logFailed('Cell is not found');
+                        next();
+                    }
+                } else {
+                    me.logFailed('Cell is not found');
+                    next();
+                }
+            } else {
+                me.logFailed('Cell is not found');
+                next();
+            }
+        };
+
+        chain.push(fn);
+        return this;
+    },
+	
+	selectUom: function(me, next, chain, t, editor, item, comboColumn, combo, uom) {
+		if (combo) {
+			var els = (function() {
+					var cell = combo.el.query('.x-trigger-cell'),
+						form = combo.el.query('.x-form-trigger');
+
+					return (cell.length && cell) || (form.length && form);
+				})(),
+				length = els.length,
+				trigger = els[length - 1],
+				store = combo.store;
+
+			me.logEvent('Selecting item on ' + item + ' combobox filtered by ' + uom);
+			t.chain([
+				{
+					action: 'click',
+					target: trigger
+				},
+				{
+					action: 'click',
+					target: combo
+				},
+				function (next) {
+					t.selectText(combo, 0, 50);
+					next();
+				},
+				function (next) {
+					t.type(combo, uom, next);
+				},
+				function (next) {
+					var store = combo.store;
+					
+					var filterRec = store.findExact(comboColumn, uom),
+							record = store.getAt(filterRec),
+							comboGrid1 = combo.picker || combo.getPicker();
+
+					if (typeof(comboGrid1.getView) == "function") {
+						var node1 = comboGrid1.getView().getNode(filterRec);
+						t.click(node1, next);
+					} else {
+						next();
+					}
+				},
+				function (next) {
+					me.logSuccess('UOM has been successfully selected');
+					editor.completeEdit();
+					next();
+				},
+				next
+			]);
+		} else {
+			me.logFailed('Combo Box is not found');
+			next();
+		}
+	},
+
+	verifyUOMGridData: function(item, row, column, quantity, uom, condition) {
+        var me = this,
+            chain = this.chain;
+        var row1 = row;
+
+        var fn = function(next) {
+            var t = this,
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
+
+            me.logEvent('Verifying ' + item + ' grid data');
+
+            if (win) {
+                var grid = item.editingPlugin ? item : win.down('#grd'+item);
+                if (grid) {
+
+                    if(grid.editingPlugin) grid.editingPlugin.completeEdit();
+
+                    var store = grid.store,
+                        row = store.getAt(row1-1);
+
+                    if(isNaN(column)) {
+                        if (Ext.Array.indexOf(grid.columns, column) === -1) {
+                            column = grid.columns[column] || grid.columnManager.getHeaderById(column) || grid.down('[dataIndex=' + column + ']');
+                        }
+                    }
+                    else {
+                        if (Ext.Array.indexOf(grid.columns, column-1) === -1) {
+                            column = grid.columns[column-1] || grid.columnManager.getHeaderById(column) || grid.down('[dataIndex=' + (column-1) + ']');
+                        }
+                    }
+
+                    if (row && column) {
+                        var value = row.get(column.dataIndex);
+						var uomValue = row.get(column.config.editor.displayField);
+                        var result = false;
+                        if(!condition || condition === 'equal') {
+                            result = quantity === value;
+                        }
+                        else if (condition === 'like'){
+                            if(value.toLowerCase().indexOf(quantity.toLowerCase()) != -1){
+                                result = true;
+                            }
+                        }
+                        t.ok(result, result ? quantity + ' Quantity is correct' : quantity + ' Quantity is incorrect');
+						t.ok(uom === uomValue, uom === uomValue ? uom + ' UOM is correct': uom + ' UOM is incorrect');
+                        next();
+                    } else {
+                        me.logFailed('Cell is not found');
+                        next();
+                    }
+                } else {
+                    me.logFailed('Grid is not found');
+                    next();
+                }
+            } else {
+                me.logFailed('Grid is not found');
+                next();
+            }
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
     /**
      * Enters data in the grid.
      *
