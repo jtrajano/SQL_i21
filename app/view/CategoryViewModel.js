@@ -170,7 +170,11 @@ Ext.define('Inventory.view.CategoryViewModel', {
     },
 
     formulas: {
-        otherChargeAcct: function(get) {
+        accountCategoryFilter1: function(get) {
+            var category = get('grdGlAccounts.selection.strAccountCategory');
+            return category;
+        },         
+        accountCategoryFilter2: function(get) {
             var category = get('grdGlAccounts.selection.strAccountCategory');
             
             /** If selected category is Other Charge Income or Other Charge Expenses,
@@ -183,7 +187,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
                 default:
                     return category;
             }
-        },
+        }, 
 
         checkMaterialFee: function(get){
             if (iRely.Functions.isEmpty(get('current.strMaterialFee')) || get('current.strMaterialFee') === 'No'){
