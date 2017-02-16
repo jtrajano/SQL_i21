@@ -711,3 +711,7 @@ EXEC sp_addmessage 80157,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80158) EXEC sp_dropmessage 80158, 'us_english'	
 SET @strmessage = 'The Qty to Return for %s is %s. Total Lot Quantity is %s. The difference is %s.'
 EXEC sp_addmessage 80158,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80159) EXEC sp_dropmessage 80159, 'us_english'	
+SET @strmessage = 'Item: %s, Qty: %s, Cost: %s'
+EXEC sp_addmessage 80159,11,@strmessage,'us_english','False'
