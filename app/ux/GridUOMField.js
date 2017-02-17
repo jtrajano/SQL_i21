@@ -78,7 +78,7 @@ Ext.define('Inventory.ux.GridUOMField', {
         }
 
         me.setupBindings();
-        me.setupFilters();
+        me.setupComboboxFilters();
         me.setupEvents();
         me.setupStore();
         me.loadStore();
@@ -90,31 +90,25 @@ Ext.define('Inventory.ux.GridUOMField', {
         me.cboUom.valueField = me.getValueField();
     },
 
-    setupFilters: function() {
+    setupComboboxFilters: function() {
         var me = this,
             grid = me.getGrid(),
-            cfg = me.storeConfig;
+            cfg = me.storeConfig,
+            activeRecord = null,
+            plugin = me.getEditingPlugin();
             
+        if(plugin) {
+            if(plugin.context)
+                activeRecord = plugin.context.record;
+            else {
+                activeRecord = grid.selection;
+            }
+        }
+
         if(cfg) {
             if(cfg.defaultFilters) {
                 var vm = grid.gridMgr.configuration.viewModel;
-                var filters = _.map(cfg.defaultFilters, function(filter) {
-                    var actualFilter = {};
-                    actualFilter.column = filter.column;
-                    if(filter.source === 'grid') {
-                        actualFilter.value = selection.get(filter.valueField);
-                    } else if (filter.source === 'current') {
-                        if(vm && vm.data.current)
-                            actualFilter.value = vm.data.current.get(filter.valueField);
-                    } else {
-                        if(filter.value)
-                            actualFilter.value = filter.value;
-                    }
-                    actualFilter.conjunction = (filter.conjunction ? filter.conjunction : 'and');
-                    actualFilter.condition = (filter.condition ? filter.condition : 'eq');
-                    return actualFilter;
-                });
-                me.cboUom.defaultFilters = filters;    
+                me.cboUom.defaultFilters = me.createDynamicFilters(cfg.defaultFilters, vm, activeRecord);    
             }
             var cboConfig = cfg.comboBoxConfig;
             if(cboConfig) {
@@ -127,6 +121,67 @@ Ext.define('Inventory.ux.GridUOMField', {
                     me.cboUom.valueField = cboConfig.valueField;
             }
         }
+    },
+
+    createDynamicFilters: function(filters, vm, activeRecord) {
+        var result = _.map(filters, function(filter) {
+            var actualFilter = {};
+            actualFilter.column = filter.column;
+            if(filter.source === 'grid') {
+                if(activeRecord)
+                    actualFilter.value = activeRecord.get(filter.valueField);
+            } else if (filter.source === 'current') {
+                if(vm && vm.data.current)
+                    actualFilter.value = vm.data.current.get(filter.valueField);
+            } else {
+                if(filter.value)
+                    actualFilter.value = filter.value;
+            }
+            actualFilter.conjunction = (filter.conjunction ? filter.conjunction : 'and');
+            actualFilter.condition = (filter.condition ? filter.condition : 'eq');
+            return actualFilter;
+        });
+        return result;
+    },
+
+    setupQueryParams: function() {
+        var me = this,
+            grid = me.getGrid(),
+            vm = grid.gridMgr.configuration.viewModel;
+            activeRecord = null,
+            plugin = me.getEditingPlugin(),
+            cfg = me.storeConfig,
+            cboCfg = (cfg ? cfg.comboBoxConfig : null);
+        
+        if(plugin) {
+            if(plugin.context)
+                activeRecord = plugin.context.record;
+            else {
+                activeRecord = grid.selection;
+            }
+        }
+
+        var dynamicFilters = cfg && cfg.defaultFilter ? me.createDynamicFilters(cfg.defaultFilters, vm, activeRecord) : [],
+            filterParam = cfg && cfg.defaultFilters ? iRely.Functions.encodeFilters(dynamicFilters) : "[]",
+            columnsParam = me.encodeColumnsParam(cfg && cboCfg && cboCfg.columns ? cboCfg.columns : me.cboUom.columns);
+
+        if(cboCfg) {
+            me.store.proxy.extraParams = {
+                filter: filterParam,
+                columns: columnsParam,
+                page: 1,
+                start: 0,
+                limit: 50
+            };
+        }
+    },
+
+    encodeColumnsParam: function(columns) {
+        var cols = "";
+        _.each(columns, function(c) {
+            cols += c.dataIndex + ":";
+        });
+        return cols;
     },
 
     setupEvents: function() {
@@ -175,7 +230,7 @@ Ext.define('Inventory.ux.GridUOMField', {
     },
 
     createStore: function(type, cfg) {
-        return Ext.create(type, cfg ? cfg : { pageSize: 50, autoLoad: false });
+        return Ext.create(type, cfg ? cfg : { pageSize: 50, autoLoad: false, remoteFilter: true });
     },
 
     setupStore: function() {
@@ -185,6 +240,7 @@ Ext.define('Inventory.ux.GridUOMField', {
         if(cfg && cfg.type)
             store = this.createStore(cfg.type);
         me.store = store;
+        me.setupQueryParams();
         me.cboUom.bindStore(me.store);
     },
 
@@ -246,6 +302,7 @@ Ext.define('Inventory.ux.GridUOMField', {
             activeRecord = plugin.context.record;
         }
 
+        me.setupComboboxFilters();
         // Reload uom store if has a pending request and re-initialize value and precision.
         if(me.store.hasPendingLoad()) {
             me.store.load({
@@ -256,7 +313,7 @@ Ext.define('Inventory.ux.GridUOMField', {
         }
 
         var newValue = value;
-
+        me.setupComboboxFilters();
         // Count decimal places based on UOM and set text decimal precision
         if(plugin) {
             activeRecord = plugin.context.record;
@@ -279,6 +336,7 @@ Ext.define('Inventory.ux.GridUOMField', {
                 me.cboUom.setRawValue(strUOM);
                 
                 me.setComboboxSelection(intUOM);
+                //me.setupQueryParams();
                 var decimals = me.getUomDecimals(intUOM);
                 newValue = me.setupDecimalPrecision(value, decimals, removeTrailingZeroes);
             }
@@ -317,9 +375,10 @@ Ext.define('Inventory.ux.GridUOMField', {
     setupDecimalPrecision: function(value, decimals, removeTrailingZeroes) {
         var me = this;
         var po = me.getPrecisionNumberObject(value, decimals);
+        
         if(po) {
             me.txtQuantity.setDecimalPrecision(po.precision);
-            me.txtQuantity.setDecimalToDisplay(removeTrailingZeroes ? po.decimalPlaces : po.precision); 
+            me.txtQuantity.setDecimalToDisplay(removeTrailingZeroes && removeTrailingZeroes !== undefined ? po.decimalPlaces : po.precision); 
             return po.precisionValue;
         }
         return value;
@@ -357,7 +416,9 @@ Ext.define('Inventory.ux.GridUOMField', {
 
     getEditingPlugin: function() {
         var me = this;
-        return me.column.container.component.view.editingPlugin;
+        if(me.column.container.component)
+            return me.column.container.component.view.editingPlugin;
+        return null;
     },
 
     getPrecisionNumberObject: function(value, decimals) {
