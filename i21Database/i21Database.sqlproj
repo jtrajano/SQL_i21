@@ -5030,6 +5030,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherItems.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICPopulateReceiptVoucher.sql" />
+    <Build Include="dbo\Tables\tblICItemSubLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
