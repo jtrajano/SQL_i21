@@ -36,6 +36,7 @@ RETURNS @returnTable TABLE
     [dblCreditReport]           NUMERIC (18, 6) NULL,
     [dblReportingRate]          NUMERIC (18, 6) NULL,
     [dblForeignRate]            NUMERIC (18, 6) NULL,
+	[strRateType]				NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
 )
 BEGIN
@@ -84,6 +85,7 @@ BEGIN
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	0,
+		[strRateType]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].[tblPATCancelEquity] A
 	INNER JOIN tblPATCancelEquityDetail B
@@ -124,6 +126,7 @@ BEGIN
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	0,
+		[strRateType]					=	NULL,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].[tblPATCancelEquity] A
 	INNER JOIN tblPATCancelEquityDetail B
