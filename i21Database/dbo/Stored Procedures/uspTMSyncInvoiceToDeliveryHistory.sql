@@ -542,7 +542,7 @@ BEGIN
 							,ysnAdjustBurnRate = 0
 							,intElapsedDegreeDaysBetweenDeliveries = 0
 							,intElapsedDaysBetweenDeliveries = 0
-							,strSeason = H.strCurrentSeason
+							,strSeason = (CASE WHEN MONTH(C.dtmDate) >= H.intBeginSummerMonth AND  MONTH(C.dtmDate) < H.intBeginWinterMonth THEN 'Summer' ELSE 'Winter' END)
 							,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
 							,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
 							,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft
@@ -737,7 +737,7 @@ BEGIN
 						,ysnAdjustBurnRate = ISNULL(A.ysnAdjustBurnRate,0)
 						,intElapsedDegreeDaysBetweenDeliveries = dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intClockReadingId,null)
 						,intElapsedDaysBetweenDeliveries = @intElapseDays
-						,strSeason = H.strCurrentSeason
+						,strSeason = (CASE WHEN MONTH(C.dtmDate) >= H.intBeginSummerMonth AND  MONTH(C.dtmDate) < H.intBeginWinterMonth THEN 'Summer' ELSE 'Winter' END)
 						,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
 						,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
 						,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft
@@ -1106,7 +1106,7 @@ BEGIN
 			,ysnAdjustBurnRate = A.ysnAdjustBurnRate
 			,intElapsedDegreeDaysBetweenDeliveries = 0
 			,intElapsedDaysBetweenDeliveries = 0
-			,strSeason = H.strCurrentSeason
+			,strSeason = (CASE WHEN MONTH(C.dtmDate) >= H.intBeginSummerMonth AND  MONTH(C.dtmDate) < H.intBeginWinterMonth THEN 'Summer' ELSE 'Winter' END)
 			,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
 			,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
 			,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft

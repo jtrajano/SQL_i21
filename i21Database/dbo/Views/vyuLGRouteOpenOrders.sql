@@ -212,7 +212,7 @@ SELECT
 	,dblPercentLeft = 0.0
 	,dblARBalance = 0.0
 
-FROM vyuTMCustomerConsumptionSiteInfo TMO
+FROM vyuTMCustomerConsumptionSiteInfo TMO WHERE TMO.ysnActive = 1
 
 UNION ALL
 

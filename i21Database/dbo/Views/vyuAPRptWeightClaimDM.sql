@@ -67,7 +67,7 @@ FROM
 		strContractNumber		=	ContractHeader.strContractNumber
 		,strMiscDescription		=	Item.strDescription
 		,strItemNo				=	Item.strItemNo
-		,strBillOfLading		=	'' --GET FROM LOAD
+		,strBillOfLading		=	Loads.strBLNumber --GET FROM LOAD
 		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	MainCurrency.strCurrency
@@ -84,6 +84,7 @@ FROM
 		,dblLandedWeight		=	CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetWeight ELSE WC2Details.dblQtyReceived END
 		,dblFranchiseWeight		=	WC2Details.dblFranchiseWeight
 		,dblClaimAmount			=	WC2Details.dblClaimAmount
+		,strERPPONumber			=	ContractDetail.strERPPONumber
 	FROM tblAPBill WC2
 	INNER JOIN tblAPBillDetail WC2Details ON WC2.intBillId = WC2Details.intBillId
 	INNER JOIN tblICItem Item ON Item.intItemId = WC2Details.intItemId
@@ -99,6 +100,9 @@ FROM
 			ON ContractDetail.intItemContractId = ItemContract.intItemContractId
 	LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = Item.intOriginId
 	LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
+	LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptDetail ON ReceiptDetail.intInventoryReceiptItemId = WC2Details.intInventoryReceiptItemId
+	LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
+	LEFT JOIN tblLGLoad Loads ON Loads.intLoadId = LCointainer.intLoadId
 	WHERE WC2.intTransactionType = 11
 	UNION ALL -- DEBIT MEMO
 	SELECT
@@ -117,11 +121,12 @@ FROM
 		,dblQtyReceived			=	CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight ELSE DMDetails.dblQtyReceived END
 		,dblCost				=	DMDetails.dblCost
 		,dblTotal				=	DMDetails.dblTotal
-		,dblNetShippedWeight	=	0
-		,dblWeightLoss			=	0
-		,dblLandedWeight		=	0
-		,dblFranchiseWeight		=	0
-		,dblClaimAmount			=	DM.dblTotal
+		,dblNetShippedWeight	=	DMDetails.dblNetShippedWeight
+		,dblWeightLoss			=	dblWeightLoss
+		,dblLandedWeight		=	CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight ELSE DMDetails.dblQtyReceived END
+		,dblFranchiseWeight		=	DMDetails.dblFranchiseWeight
+		,dblClaimAmount			=	DMDetails.dblClaimAmount
+		,strERPPONumber			=	ContractDetail.strERPPONumber
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
@@ -149,4 +154,5 @@ LEFT JOIN tblSMCompanyLocation TranLoc ON A.intStoreLocationId = TranLoc.intComp
 LEFT JOIN tblCMBankAccount BankAccount ON BankAccount.intBankAccountId = A.intBankInfoId
 LEFT JOIN tblCMBank Bank ON BankAccount.intBankId = Bank.intBankId
 LEFT JOIN tblSMTerm Term ON A.intTermsId = Term.intTermID
+GO
 

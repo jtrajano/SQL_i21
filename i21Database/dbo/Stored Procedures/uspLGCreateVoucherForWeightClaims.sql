@@ -198,7 +198,7 @@ BEGIN TRY
 
 	IF (@total = 0)
 	BEGIN
-		RAISERROR ('Bill process failure #1',11,1);
+		RAISERROR ('Voucher cannot be created if claim amount is zero or ''No Claim'' is ticked.',11,1);
 		RETURN;
 	END
 
@@ -320,15 +320,18 @@ BEGIN TRY
 		,dblClaimAmount = WCD.dblClaimAmount
 		,dblTotal = WCD.dblClaimAmount
 		,dbl1099 = WCD.dblClaimAmount
-		,dblNetWeight = WCD.dblWeightLoss
+		,dblNetWeight = WCD.dblToNet
 		,intLoadId = WC.intLoadId
+		,intAccountId = IA.intAccountId
 	FROM tblAPBill B
 	JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
 	JOIN tblLGLoad LD ON LD.intLoadId = BD.intLoadId
 	JOIN tblLGWeightClaim WC ON WC.intLoadId = BD.intLoadId
 	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
+	LEFT JOIN tblICItemAccount IA ON IA.intItemId = WCD.intItemId 
 	WHERE WCD.intContractDetailId = BD.intContractDetailId
-		AND WC.intWeightClaimId = @intWeightClaimId
+		AND IA.intAccountCategoryId = 27
+		AND WC.intWeightClaimId = @intWeightClaimId 
 
 END TRY
 

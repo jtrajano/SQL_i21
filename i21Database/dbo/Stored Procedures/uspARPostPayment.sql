@@ -37,9 +37,9 @@ IF @raiseError = 0
 DECLARE @ARReceivablePostData TABLE (
 	intPaymentId			INT PRIMARY KEY,
 	strTransactionId		NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	intWriteOffAccountId	INT,
+	intWriteOffAccountId	INT NULL,
 	intEntityId				INT,
-	intInterestAccountId	INT,
+	intInterestAccountId	INT NULL,
 	UNIQUE (intPaymentId)
 );
 
@@ -64,9 +64,9 @@ DECLARE @ARPrepayment TABLE (
 DECLARE @ZeroPayment TABLE (
 	intPaymentId int PRIMARY KEY,
 	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	intWriteOffAccountId INT,
+	intWriteOffAccountId INT NULL,
 	intEntityId INT,
-	intInterestAccountId INT,
+	intInterestAccountId INT NULL,
 	UNIQUE (intPaymentId)
 );
 
@@ -93,6 +93,11 @@ DECLARE @totalRecords INT
 DECLARE @intWriteOff INT
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 DECLARE @intWriteOffAccount INT
+
+SET @WriteOffAccount = NULL
+SET @IncomeInterestAccount = NULL
+SET @intWriteOff = NULL
+SET @intWriteOffAccount = NULL
 		
 SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 SET @DiscountAccount = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
@@ -1254,7 +1259,7 @@ IF @post = 1
 		
 	IF (@intWriteOff IS NOT NULL)
 		BEGIN 
-			SELECT TOP 1 @intWriteOffAccount = intWriteOffAccountId FROM tblARPayment WHERE intPaymentId IN  (SELECT intPaymentId FROM @ARReceivablePostData)	
+			SET @intWriteOffAccount = (SELECT TOP 1 intWriteOffAccountId FROM tblARPayment WHERE intPaymentId IN  (SELECT intPaymentId FROM @ARReceivablePostData)	AND ISNULL(intWriteOffAccountId,0) <> 0)
 
 			IF (@intWriteOffAccount IS NOT NULL AND @intWriteOffAccount > 0)
 				BEGIN

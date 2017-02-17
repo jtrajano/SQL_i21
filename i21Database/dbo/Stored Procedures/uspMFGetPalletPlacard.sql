@@ -7,6 +7,7 @@ BEGIN
 		,DT.dblPhysicalCount
 		,DT.strUnitMeasure
 		,SUM(DT.dblPhysicalCount) OVER () dblTotalQty
+		,dbo.fnSMGetCompanyLogo('WholesomeSweeteners') as strLogo
 	FROM (
 		SELECT I.strItemNo
 			,I.strDescription

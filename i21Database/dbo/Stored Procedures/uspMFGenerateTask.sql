@@ -173,6 +173,8 @@ BEGIN TRY
 					)
 		END
 
+		Update tblMFOrderDetail Set dblWeight=dblQty Where dblQty>0 and (dblWeight=0 or dblWeight is null)
+
 		INSERT INTO @tblLineItem (
 			intOrderHeaderId
 			,intOrderDetailId
