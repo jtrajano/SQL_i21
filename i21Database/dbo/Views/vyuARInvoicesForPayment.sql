@@ -11,6 +11,8 @@ SELECT
 	,[strTransactionType]		= ARIFP.[strTransactionType]
 	,[strType]					= ARIFP.[strType]
 	,[intEntityCustomerId]		= ARIFP.[intEntityCustomerId]	
+	,[strCustomerName]			= ARIFP.[strCustomerName]
+	,[strCustomerNumber]		= ARIFP.[strCustomerNumber]
 	,[intAccountId]				= ARIFP.[intAccountId]
 	,[intCurrencyId]			= ARIFP.[intCurrencyId]	
 	,[dtmDate]					= ARIFP.[dtmDate]
@@ -41,8 +43,8 @@ SELECT
 	,[dtmTermDueDate]			= SMT.[dtmDueDate]
 	,[dblTermAPR]				= SMT.[dblAPR]
 	,[ysnExcludeForPayment]		= ARIFP.[ysnExcludeForPayment]
-	,[strCustomerName]			= C.[strName]
-	,[strCustomerNumber]		= C.[strCustomerNumber]
+	,[intPaymentMethodId]		= ARIFP.[intPaymentMethodId]	
+	,[strPaymentMethod]			= ARIFP.[strPaymentMethod]
 FROM
 	(
 		SELECT 
@@ -55,6 +57,8 @@ FROM
 			,[strTransactionType]		= ARI.[strTransactionType]
 			,[strType]					= ARI.[strType]
 			,[intEntityCustomerId]		= ARI.[intEntityCustomerId]
+			,[strCustomerName]			= CE.strName
+			,[strCustomerNumber]		= ARC.[strCustomerNumber]
 			,[intCompanyLocationId]		= ARI.[intCompanyLocationId]
 			,[intAccountId]				= ARI.[intAccountId]
 			,[intCurrencyId]			= ARI.[intCurrencyId]	
@@ -81,8 +85,29 @@ FROM
 												THEN CONVERT(BIT, 1)
 											ELSE CONVERT(BIT, 0) 
 										 END)
+			,intPaymentMethodId				= ARC.intPaymentMethodId	
+			,strPaymentMethod				= SMP.strPaymentMethod
 		FROM
 			[tblARInvoice] ARI
+		INNER JOIN
+			(SELECT 
+				strCustomerNumber,
+				intEntityCustomerId,
+				intPaymentMethodId
+			 FROM 
+				dbo.tblARCustomer) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
+		INNER JOIN
+			(SELECT	
+				intEntityId,
+				strName
+			 FROM
+				dbo.tblEMEntity) AS CE ON ARC.[intEntityCustomerId] = CE.intEntityId 
+		LEFT OUTER JOIN
+			(SELECT 
+				intPaymentMethodID,
+				strPaymentMethod
+			 FROM
+				dbo.tblSMPaymentMethod) AS SMP ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
 		LEFT OUTER JOIN 
 			(
 			SELECT
@@ -109,6 +134,8 @@ FROM
 			,[strTransactionType]		= (CASE WHEN APB.[intTransactionType] = 11 THEN 'Weight Claim' WHEN APB.[intTransactionType] = 3 THEN 'Debit Memo' ELSE '' END)
 			,[strType]					= 'Voucher'
 			,[intEntityCustomerId]		= APB.[intEntityVendorId]
+			,[strCustomerName]			= CE.[strName]
+			,[strCustomerNumber]		= APV.[strVendorId]
 			,[intCompanyLocationId]		= APB.intShipToId
 			,[intAccountId]				= APB.[intAccountId]
 			,[intCurrencyId]			= APB.[intCurrencyId]
@@ -130,12 +157,33 @@ FROM
 			,[strCustomerReferences]	= ''
 			,[intTermId]				= APB.[intTermsId]
 			,[ysnExcludeForPayment]		= CONVERT(BIT, 0)
+			,intPaymentMethodId			= APV.intPaymentMethodId	
+			,strPaymentMethod			= SMP.strPaymentMethod
 		FROM
 			tblAPBill APB
 		INNER JOIN
 			tblEMEntityType EMET
 				ON APB.[intEntityVendorId] = EMET.[intEntityId]
-				AND EMET.[strType] = 'Customer'		
+				AND EMET.[strType] = 'Customer'	
+		INNER JOIN
+			(SELECT 				
+				intEntityVendorId,
+				intPaymentMethodId,
+				strVendorId
+			 FROM 
+				dbo.tblAPVendor) AS APV ON APV.[intEntityVendorId] = APB.[intEntityVendorId] 
+		INNER JOIN
+			(SELECT	
+				intEntityId,
+				strName
+			 FROM
+				dbo.tblEMEntity) AS CE ON APV.[intEntityVendorId] = CE.intEntityId 	
+		LEFT OUTER JOIN
+			(SELECT 
+				intPaymentMethodID,
+				strPaymentMethod
+			 FROM
+				dbo.tblSMPaymentMethod) AS SMP ON APV.intPaymentMethodId = SMP.intPaymentMethodID								
 		WHERE
 			[intTransactionType] IN (11,3)
 			AND [ysnPosted] = 1
@@ -165,6 +213,3 @@ LEFT OUTER JOIN
 		tblSMCompanyLocation
 	) SMCL
 		ON ARIFP.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
-LEFT OUTER JOIN
-	vyuARCustomer C
-		ON ARIFP.intEntityCustomerId = C.intEntityCustomerId
