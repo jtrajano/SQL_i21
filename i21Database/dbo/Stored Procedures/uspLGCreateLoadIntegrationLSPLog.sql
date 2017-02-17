@@ -31,6 +31,13 @@ BEGIN TRY
 		,strCompanyLocation
 		,strSubLocation
 		,strLanguage
+		,strWarehouseVendorNo
+		,strWarehouseVendorName
+		,strWarehouseVendorAddress
+		,strWarehouseVendorPostalCode
+		,strWarehouseVendorCity
+		,strWarehouseVendorCountry
+		,strWarehouseVendorAccNo
 		,strVendorName
 		,strVendorAddress
 		,strVendorPostalCode
@@ -73,7 +80,7 @@ BEGIN TRY
 		,dblTotalNet
 		,strWeightUOM
 		)
-	SELECT intLoadId
+	SELECT L.intLoadId
 		,strShipmentType = CASE L.intShipmentType
 			WHEN 1
 				THEN 'Shipment'
@@ -97,6 +104,13 @@ BEGIN TRY
 			WHERE LD.intLoadId = L.intLoadId
 			) strSubLocationName
 		,'EN' strLanguage
+		,strWarehouseVendorNo = WE.strEntityNo
+		,strWarehouseVendorName = WE.strName
+		,strWarehouseVendorAddress = EL.strAddress
+		,strWarehouseVendorPostalCode = EL.strZipCode
+		,strWarehouseVendorCity = EL.strCity
+		,strWarehouseVendorCountry = EL.strCountry
+		,strWarehouseVendorAccNo = A.strVendorAccountNum
 		,(
 			SELECT TOP 1 E.strEntityName
 			FROM tblLGLoadDetail LD
@@ -209,7 +223,12 @@ BEGIN TRY
 	FROM vyuLGLoadView L
 	LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
 	LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
-	WHERE intLoadId = @intLoadId
+	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+	LEFT JOIN tblEMEntity WE ON WE.intEntityId = CLSL.intVendorId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = WE.intEntityId
+	LEFT JOIN tblAPVendor A ON A.intEntityVendorId = WE.intEntityId
+	WHERE L.intLoadId = @intLoadId
 
 	SELECT @intLoadStgId = SCOPE_IDENTITY()
 
