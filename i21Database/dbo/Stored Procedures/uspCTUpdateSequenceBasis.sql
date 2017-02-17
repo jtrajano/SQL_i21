@@ -8,9 +8,9 @@ AS
 
 	SELECT @intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
 
-	IF @intPriceFixationId IS NULL RETURN
-
 	UPDATE tblCTContractDetail SET dblOriginalBasis = @dblNewBasis WHERE intContractDetailId = @intContractDetailId
+
+	IF @intPriceFixationId IS NULL RETURN
 
 	UPDATE	FD
 	SET		FD.dblBasis		 =	@dblNewBasis, 

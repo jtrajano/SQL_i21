@@ -46,6 +46,11 @@ BEGIN TRY
 		
 		EXEC	uspCTSequencePriceChanged @intContractDetailId,null,'Sequence'
 		
+		IF @intPricingTypeId = 2 AND @dblOriginalBasis IS NULL
+		BEGIN
+			UPDATE tblCTContractDetail SET dblOriginalBasis = dblBasis WHERE intContractDetailId = @intContractDetailId
+		END
+
 		IF @dblOriginalBasis IS NOT NULL AND  @dblBasis <> @dblOriginalBasis
 		BEGIN
 			EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis
