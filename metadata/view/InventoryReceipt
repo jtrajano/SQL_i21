@@ -2569,23 +2569,15 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
-                                                                                "currencyField": true,
                                                                                 "decimalPrecision": 6,
                                                                                 "itemId": "txtUnitCost",
                                                                                 "minValue": 0
                                                                             },
                                                                             "name": "MyNumberField12",
                                                                             "configAlternates": {
-                                                                                "currencyField": "boolean"
+                                                                                "currencyField": "binding"
                                                                             },
-                                                                            "designerId": "21443f4e-1088-4fc0-abfb-03d159b6eeb5",
-                                                                            "customConfigs": [
-                                                                                {
-                                                                                    "group": "(Custom Properties)",
-                                                                                    "name": "currencyField",
-                                                                                    "type": "string"
-                                                                                }
-                                                                            ]
+                                                                            "designerId": "21443f4e-1088-4fc0-abfb-03d159b6eeb5"
                                                                         }
                                                                     ]
                                                                 },
@@ -5654,7 +5646,6 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "currencyField": true,
                                                                         "designer|createAlias": "numericfield",
                                                                         "modelValidation": true
                                                                     },
@@ -5662,14 +5653,7 @@
                                                                     "configAlternates": {
                                                                         "currencyField": "boolean"
                                                                     },
-                                                                    "designerId": "deaa7036-c826-4da4-ad4d-ef151babc91c",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "currencyField",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
+                                                                    "designerId": "deaa7036-c826-4da4-ad4d-ef151babc91c"
                                                                 }
                                                             ]
                                                         },
@@ -5770,7 +5754,6 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "currencyField": true,
                                                                         "designer|createAlias": "numericfield",
                                                                         "modelValidation": true
                                                                     },
@@ -5778,14 +5761,7 @@
                                                                     "configAlternates": {
                                                                         "currencyField": "boolean"
                                                                     },
-                                                                    "designerId": "2eeba050-620f-45cf-bce8-33840e54938d",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "currencyField",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
+                                                                    "designerId": "2eeba050-620f-45cf-bce8-33840e54938d"
                                                                 }
                                                             ]
                                                         },

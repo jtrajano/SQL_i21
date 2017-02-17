@@ -1919,7 +1919,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter15",
+                                                                    "name": "filter111",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2530,21 +2530,13 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "currencyField": true,
                                                                         "designer|createAlias": "numeric"
                                                                     },
                                                                     "name": "MyNumberField16",
                                                                     "configAlternates": {
                                                                         "currencyField": "boolean"
                                                                     },
-                                                                    "designerId": "0d637b1d-a899-4b60-affc-e8d277d3f33a",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "currencyField",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
+                                                                    "designerId": "0d637b1d-a899-4b60-affc-e8d277d3f33a"
                                                                 }
                                                             ]
                                                         },
@@ -3337,7 +3329,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter112",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3944,7 +3936,7 @@
                                                         "layout|flex": null,
                                                         "width": 198
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter113",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4345,21 +4337,13 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "currencyField": true,
                                                         "designer|createAlias": "numericfield"
                                                     },
                                                     "name": "MyNumberField60",
                                                     "configAlternates": {
                                                         "currencyField": "boolean"
                                                     },
-                                                    "designerId": "55b6b3a3-0a9f-4607-a0a8-23d11dae3bae",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "currencyField",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "designerId": "55b6b3a3-0a9f-4607-a0a8-23d11dae3bae"
                                                 }
                                             ]
                                         },
@@ -4907,7 +4891,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging13",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
