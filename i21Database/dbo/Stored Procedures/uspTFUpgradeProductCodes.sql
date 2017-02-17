@@ -53,11 +53,13 @@ BEGIN TRY
 			, SOURCE.strDescription
 			, SOURCE.strProductCodeGroup
 			, SOURCE.strNote
-		)
-	WHEN NOT MATCHED BY SOURCE THEN
-		UPDATE
-		SET
-			strNote = 'This Product Code is now obsolete';
+		);
+
+	-- Update existing Product Code associated with Tax Authority Id that is not within Source
+	UPDATE tblTFProductCode
+	SET strNote = 'This Product Code is now obsolete'
+	WHERE intTaxAuthorityId = @TaxAuthorityId
+		AND strProductCode NOT IN (SELECT strProductCode FROM @ProductCodes WHERE intTaxAuthorityId = @TaxAuthorityId)
 
 END TRY
 BEGIN CATCH

@@ -24,7 +24,7 @@ BEGIN TRY
 	END
 
 	MERGE	
-	INTO	tblTFTaxCriteria
+	INTO	tblTFReportingComponentCriteria
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
@@ -44,22 +44,16 @@ BEGIN TRY
 		SET 
 			intTaxCategoryId	= SOURCE.intTaxCategoryId
 			, intReportingComponentId	= SOURCE.intReportingComponentId
-			, strState			= SOURCE.strState
-			, strTaxCategory	= SOURCE.strTaxCategory
 			, strCriteria		= SOURCE.strCriteria
 	WHEN NOT MATCHED THEN 
 		INSERT (
 			intTaxCategoryId
 			, intReportingComponentId
-			, strState
-			, strTaxCategory
 			, strCriteria
 		)
 		VALUES (
 			SOURCE.intTaxCategoryId
 			, SOURCE.intReportingComponentId
-			, SOURCE.strState
-			, SOURCE.strTaxCategory
 			, SOURCE.strCriteria
 		);
 

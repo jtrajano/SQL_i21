@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFUpgradeReportingComponents]
 	@TaxAuthorityCode NVARCHAR(10),
-	@ReportingComponents TFReportingComponents READONLY
+	@ReportingComponent TFReportingComponent READONLY
 
 AS
 
@@ -28,7 +28,7 @@ BEGIN TRY
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
-		SELECT * FROM @ReportingComponents
+		SELECT * FROM @ReportingComponent
 	) AS SOURCE
 		ON TARGET.strFormCode COLLATE Latin1_General_CI_AS = SOURCE.strFormCode COLLATE Latin1_General_CI_AS
 			AND TARGET.strScheduleCode COLLATE Latin1_General_CI_AS = SOURCE.strScheduleCode COLLATE Latin1_General_CI_AS

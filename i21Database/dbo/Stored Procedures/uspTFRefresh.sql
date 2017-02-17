@@ -4,5 +4,5 @@
 
 AS 
 
-DELETE FROM tblTFTransactions --WHERE uniqTransactionGuid = @Guid
-DELETE FROM tblTFTaxReportSummary --WHERE strSummaryGuid = @Guid
+DELETE FROM tblTFTransaction --WHERE uniqTransactionGuid = @Guid
+DELETE FROM tblTFTransactionSummary --WHERE strSummaryGuid = @Guid
