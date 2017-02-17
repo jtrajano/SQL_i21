@@ -19,5 +19,7 @@
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATCustomerStock] PRIMARY KEY ([intCustomerStockId]), 
     CONSTRAINT [FK_tblPATCustomerStock_StockClassification] FOREIGN KEY ([intStockId]) REFERENCES [tblPATStockClassification]([intStockId]),
-	CONSTRAINT [UQ_tblPATCustomerStock_strCertificateNo] UNIQUE ([strCertificateNo])
+	CONSTRAINT [AK_tblPATCustomerStock_strCertificateNo] UNIQUE ([strCertificateNo]),
+	CONSTRAINT [FK_tblPATCustomerStock_tblAPBill] FOREIGN KEY (intBillId) REFERENCES [tblAPBill]([intBillId]) ON DELETE SET NULL,
+	CONSTRAINT [FK_tblPATCustomerStock_tblARInvoice] FOREIGN KEY (intInvoiceId) REFERENCES [tblARInvoice]([intInvoiceId]) ON DELETE SET NULL
 )
