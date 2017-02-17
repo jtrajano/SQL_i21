@@ -623,6 +623,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             value: '{grdInventoryShipment.selection.intOwnershipType}',
                             conjunction: 'and'
                         },
+                        {
+                            column: 'intLotStatusId',
+                            value: 1,
+                            condition: 'eq',
+                            conjunction: 'and'
+                        },
                         // Grade in Commodity Attributes is now obsolete and will be removed.
                         // {
                         //     column: 'intGradeId',
