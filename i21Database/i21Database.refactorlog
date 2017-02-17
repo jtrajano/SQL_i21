@@ -5677,4 +5677,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intARRevaluationId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1862cd9f-7713-4b90-99df-619d8254b56b" ChangeDateTime="02/17/2017 06:26:56">
+    <Property Name="ElementName" Value="[dbo].[tblSTRetailPriceAdjustmentDetail].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRetailPriceAdjustmentDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityId" />
+  </Operation>
 </Operations>
