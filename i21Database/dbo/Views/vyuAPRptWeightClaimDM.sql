@@ -72,6 +72,7 @@ FROM
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	MainCurrency.strCurrency
 		,strUOM					=	QtyUOMDetails.strUnitMeasure
+		,strClaimUOM			=	QtyUOMDetails.strUnitMeasure
 		,strCostUOM				=	CASE WHEN WC2Details.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure ELSE QtyUOMDetails.strUnitMeasure END
 		,strLPlant				=	LPlant.strSubLocationName
 		,intContractSeqId		=	ContractDetail.intContractSeq
@@ -114,6 +115,7 @@ FROM
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	MainCurrency.strCurrency
 		,strUOM					=	QtyUOMDetails.strUnitMeasure
+		,strClaimUOM			=	''
 		,strCostUOM				=	CASE WHEN DMDetails.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure ELSE QtyUOMDetails.strUnitMeasure END
 		,strLPlant				=	LPlant.strSubLocationName
 		,intContractSeqId		=	ContractDetail.intContractSeq
@@ -121,11 +123,11 @@ FROM
 		,dblQtyReceived			=	CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight ELSE DMDetails.dblQtyReceived END
 		,dblCost				=	DMDetails.dblCost
 		,dblTotal				=	DMDetails.dblTotal
-		,dblNetShippedWeight	=	DMDetails.dblNetShippedWeight
-		,dblWeightLoss			=	dblWeightLoss
-		,dblLandedWeight		=	CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight ELSE DMDetails.dblQtyReceived END
-		,dblFranchiseWeight		=	DMDetails.dblFranchiseWeight
-		,dblClaimAmount			=	DMDetails.dblClaimAmount
+		,dblNetShippedWeight	=	0 --DMDetails.dblNetShippedWeight
+		,dblWeightLoss			=	0 --dblWeightLoss
+		,dblLandedWeight		=	0 --CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight ELSE DMDetails.dblQtyReceived END
+		,dblFranchiseWeight		=	0 --DMDetails.dblFranchiseWeight
+		,dblClaimAmount			=	0 --DMDetails.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
@@ -155,4 +157,3 @@ LEFT JOIN tblCMBankAccount BankAccount ON BankAccount.intBankAccountId = A.intBa
 LEFT JOIN tblCMBank Bank ON BankAccount.intBankId = Bank.intBankId
 LEFT JOIN tblSMTerm Term ON A.intTermsId = Term.intTermID
 GO
-
