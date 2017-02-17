@@ -1,10 +1,16 @@
 ﻿PRINT ('Cleanup Tax Form tables')
 
-DELETE FROM tblTFValidOriginState
-WHERE ISNULL(strFilter, '') = ''
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFValidOriginState')
+BEGIN
+	DELETE FROM tblTFValidOriginState
+	WHERE ISNULL(strFilter, '') = ''
+END
 
-
-DELETE FROM tblTFValidDestinationState
-WHERE ISNULL(strStatus, '') = ''
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFValidDestinationState')
+BEGIN
+	DELETE FROM tblTFValidDestinationState
+	WHERE ISNULL(strStatus, '') = ''
+END
 
 GO
+

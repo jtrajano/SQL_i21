@@ -375,6 +375,12 @@ print 'BEGIN POST DEPLOYMENT'
 --:r .\TF\DefaultData\_TaxReportTemplate.sql
 --:r .\TF\DefaultData\_TerminalControlNumber.sql
 --:r .\TF\DefaultData\_IntegrationSystem.sql
+--:r .\TF\DefaultData\_TaxCriteria.sql
+--:r .\TF\DefaultData\_CompanyPreference.sql
+:r .\TF\DefaultData\00_Cleanup.sql
+:r .\TF\DefaultData\01_TaxAuthority.sql
+:r .\TF\DefaultData\IN_Indiana.sql
+:r .\TF\DefaultData\NE_Nebraska.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql

@@ -87,6 +87,7 @@
     <Folder Include="Scripts\Pre-Deployment\20_CF" />
     <Folder Include="Scripts\Pre-Deployment\22_PAT" />
     <Folder Include="Scripts\Pre-Deployment\21_PR" />
+    <Folder Include="Scripts\Pre-Deployment\23_MFT" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -152,6 +153,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\Update_M2M_Computation_Setup.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\9_DropTblSMAlternateApproverGroup.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\10_DropTblSMApproverConfigurationForTransaction.sql" />
+    <None Include="Scripts\Pre-Deployment\23_MFT\Remove_Unused_Tables_FK.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
