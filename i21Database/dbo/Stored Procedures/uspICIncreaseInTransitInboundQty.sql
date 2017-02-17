@@ -48,7 +48,7 @@ WHEN NOT MATCHED THEN
 	)		
 ;
 
--- Do an upsert for the Item Stock UOM table when updating the Reserved Qty
+-- Do an upsert for the Item Stock UOM table when updating the InTransit-Inbound Qty
 MERGE	
 INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
