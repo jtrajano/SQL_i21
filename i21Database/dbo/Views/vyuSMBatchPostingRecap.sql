@@ -38,4 +38,5 @@ FROM
 	INNER JOIN (SELECT [intAccountId], [intAccountGroupId], [strDescription] FROM dbo.tblGLAccount) B ON A.[intAccountId] = B.[intAccountId]
 	INNER JOIN (SELECT [intAccountGroupId], [strAccountGroup] FROM dbo.tblGLAccountGroup) C
 		ON B.[intAccountGroupId] = C.[intAccountGroupId]
+	WHERE [strModuleName] NOT IN ('PAYROLL')
 ) BatchPostingRecap
