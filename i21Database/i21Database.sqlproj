@@ -5046,6 +5046,7 @@
     <Build Include="dbo\Views\vyuTFGetTransactionException.sql" />
     <Build Include="dbo\Views\vyuTFGetTransactionSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateForm73.sql" />
+    <Build Include="dbo\Tables\tblICItemSubLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
