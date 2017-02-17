@@ -39,6 +39,7 @@ BEGIN TRY
 	DECLARE @strMainLotNumber NVARCHAR(50)
 	DECLARE @strApprovalBase NVARCHAR(50)
 	DECLARE @strContainerNumber NVARCHAR(100)
+	DECLARE @strLotAlias NVARCHAR(50)
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -339,6 +340,31 @@ BEGIN TRY
 			FROM tblICLot L
 			JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
 			WHERE RIL.strContainerNo = @strContainerNumber
+		END
+		ELSE IF @strApprovalBase = 'Work Order'
+		BEGIN
+			SELECT @strLotAlias = strLotAlias
+			FROM tblICLot
+			WHERE intLotId = @intProductValueId
+
+			INSERT INTO @LotData (
+				intLotId
+				,strLotNumber
+				,intItemId
+				,intLocationId
+				,intSubLocationId
+				,intStorageLocationId
+				,intLotStatusId
+				)
+			SELECT intLotId
+				,strLotNumber
+				,intItemId
+				,intLocationId
+				,intSubLocationId
+				,intStorageLocationId
+				,intLotStatusId
+			FROM tblICLot
+			WHERE strLotAlias = @strLotAlias
 		END
 
 		SELECT @intSeqNo = MIN(intSeqNo)
