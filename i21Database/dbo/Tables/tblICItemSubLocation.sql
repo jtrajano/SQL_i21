@@ -17,6 +17,7 @@ CREATE TABLE tblICItemSubLocation (
 	intItemId INT NOT NULL,
 	intSubLocationId INT NOT NULL ,
 	[intConcurrencyId] INT NULL DEFAULT ((0)), 
+	CONSTRAINT [PK_tblICItemSubLocation] PRIMARY KEY ([intItemSubLocationId]), 
 	CONSTRAINT [FK_tblICItemSubLocation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblICItemSubLocation_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 	CONSTRAINT [AK_tblICItemSubLocation] UNIQUE ([intItemId], [intSubLocationId])
