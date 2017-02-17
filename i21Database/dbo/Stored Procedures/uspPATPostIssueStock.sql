@@ -269,7 +269,6 @@ BEGIN
 		IF(@ysnPosted = 1)
 		BEGIN
 			DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable;
-			DECLARE @TaxDetails AS LineItemTaxDetailStagingTable;
 
 			INSERT INTO @EntriesForInvoice(
 				[strSourceTransaction]
@@ -346,6 +345,7 @@ BEGIN
 				,[ysnVirtualMeterReading]
 				,[ysnClearDetailTaxes]					
 				,[intTempDetailIdForTaxes]
+				,[intSalesAccountId]
 			)
 			SELECT
 				[strSourceTransaction]					= 'Patronage'
@@ -422,17 +422,18 @@ BEGIN
 				,[ysnVirtualMeterReading]				= NULL
 				,[ysnClearDetailTaxes]					= 1
 				,[intTempDetailIdForTaxes]				= @intCustomerStockId
+				,[intSalesAccountId]					= SADef.intSalesAccount
 
 			FROM tblPATCustomerStock CS
 			INNER JOIN tblARCustomer ARC
 				ON ARC.intEntityCustomerId = CS.intCustomerPatronId
 			INNER JOIN tblEMEntityLocation EML
 				ON EML.intEntityId = CS.intCustomerPatronId
+			CROSS JOIN (SELECT intSalesAccount FROM tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId) SADef
 			WHERE CS.intCustomerStockId = @intCustomerStockId
 
 			EXEC uspARProcessInvoices 
 				@InvoiceEntries = @EntriesForInvoice,
-				@LineItemTaxEntries = @TaxDetails,
 				@UserId = @intUserId,
 				@GroupingOption = 11,
 				@RaiseError		= 1,
