@@ -463,7 +463,7 @@ SELECT TOP 1 L.intLoadId
 	,@strCountry AS strCompanyCountry 
 	,@strPhone AS strCompanyPhone 
 	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
-	,@strFullName AS strUserFullName
+	,@strUserName AS strUserFullName
 	,@strLogisticsCompanyName AS strLogisticsCompanyName
 	,@strLogisticsPrintSignOff AS strLogisticsPrintSignOff
 	,@strPrintableRemarks AS strPrintableRemarks
