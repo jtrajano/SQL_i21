@@ -33,7 +33,7 @@
 	[strContactName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strFaxNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NULL,
- CONSTRAINT [PK_tblTFTaxReportSummary] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_tblTFTransactionSummary] PRIMARY KEY CLUSTERED 
 (
 	[intTransactionSummaryId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
@@ -41,5 +41,5 @@
 
 GO
 
-ALTER TABLE [dbo].[tblTFTransactionSummary] ADD  CONSTRAINT [DF_tblTFTaxReportSummary_intConcurrencyId]  DEFAULT ((1)) FOR [intConcurrencyId]
+ALTER TABLE [dbo].[tblTFTransactionSummary] ADD  CONSTRAINT [DF_tblTFTransactionSummary_intConcurrencyId]  DEFAULT ((1)) FOR [intConcurrencyId]
 GO
