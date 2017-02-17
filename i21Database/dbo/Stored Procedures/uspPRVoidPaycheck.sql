@@ -78,6 +78,7 @@ BEGIN
 
 	UPDATE tblPRPaycheck
 	SET ysnVoid = 1
+		,ysnPrinted = CASE WHEN (ysnDirectDeposit = 1) THEN 0 ELSE ysnPrinted END
 		,strReferenceNo = CASE WHEN (CHARINDEX('Voided', strReferenceNo) > 0) THEN strReferenceNo ELSE 'Voided-' + strReferenceNo END
 		,dtmLastModified = GETDATE()
 		,intLastModifiedUserId = @intUserId
