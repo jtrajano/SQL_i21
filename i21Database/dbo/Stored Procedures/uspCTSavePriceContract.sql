@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCTPriceContractSave]
+﻿CREATE PROCEDURE [dbo].[uspCTSavePriceContract]
 	
 	@intPriceContractId INT,
 	@strXML				NVARCHAR(MAX)
@@ -7,15 +7,15 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg					NVARCHAR(MAX),
-			@idoc					INT,
-			@intUniqueId			INT,
-			@intPriceFixationId		INT,
-			@intContractHeaderId	INT,
-			@intContractDetailId	INT,
-			@intUserId				INT,
-			@strRowState			NVARCHAR(50),
-			@Condition				NVARCHAR(MAX),
+	DECLARE @ErrMsg						NVARCHAR(MAX),
+			@idoc						INT,
+			@intUniqueId				INT,
+			@intPriceFixationId			INT,
+			@intContractHeaderId		INT,
+			@intContractDetailId		INT,
+			@intUserId					INT,
+			@strRowState				NVARCHAR(50),
+			@Condition					NVARCHAR(MAX),
 			@intPriceFixationDetailId	INT,
 			@intFutOptTransactionId		INT,
 			@intBrokerId				INT,
@@ -112,7 +112,14 @@ BEGIN TRY
 				IF ISNULL(@intFutOptTransactionId,0) = 0
 					UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intOutputId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 			END
-			 
+			ELSE
+			BEGIN
+				IF ISNULL(@intFutOptTransactionId,0) > 0
+				BEGIN
+					UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = NULL WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+					EXEC uspRKDeleteAutoHedge @intFutOptTransactionId
+				END
+			END 
 			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
 		END
 		
