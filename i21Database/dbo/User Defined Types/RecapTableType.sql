@@ -30,6 +30,6 @@
 	[dblCreditReport]			NUMERIC (18, 9) NULL,
 	[dblReportingRate]			NUMERIC (18, 9) NULL,
 	[dblForeignRate]			NUMERIC (18, 9) NULL,
-	[strRateType]			    NVARCHAR(50) 
+	[strRateType]			    NVARCHAR(50)	COLLATE Latin1_General_CI_AS NOT NULL
 )
 
