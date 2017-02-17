@@ -1247,8 +1247,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         text: 'Unit Price',
                                                                         format: '0,000.00####',
                                                                         editor: {
-                                                                            xtype: 'numeric',
-                                                                            currencyField: true
+                                                                            xtype: 'numeric'
                                                                         }
                                                                     },
                                                                     {
@@ -2045,8 +2044,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         text: 'Rate',
                                                         format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numericfield',
-                                                            currencyField: true
+                                                            xtype: 'numericfield'
                                                         }
                                                     },
                                                     {

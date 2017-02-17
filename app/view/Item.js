@@ -4235,8 +4235,7 @@ Ext.define('Inventory.view.Item', {
                                                         flex: 0.8,
                                                         format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numberfield',
-                                                            currencyField: true
+                                                            xtype: 'numberfield'
                                                         }
                                                     },
                                                     {
@@ -4250,7 +4249,6 @@ Ext.define('Inventory.view.Item', {
                                                         format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            currencyField: true,
                                                             itemId: 'txtStandardCost'
                                                         }
                                                     },
@@ -4264,8 +4262,7 @@ Ext.define('Inventory.view.Item', {
                                                         flex: 0.8,
                                                         format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numberfield',
-                                                            currencyField: true
+                                                            xtype: 'numberfield'
                                                         }
                                                     },
                                                     {
@@ -4306,7 +4303,6 @@ Ext.define('Inventory.view.Item', {
                                                         format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            currencyField: true,
                                                             decimalPrecision: 6
                                                         }
                                                     },
@@ -4321,7 +4317,6 @@ Ext.define('Inventory.view.Item', {
                                                         format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            currencyField: true,
                                                             decimalPrecision: 6
                                                         }
                                                     },
@@ -4585,7 +4580,6 @@ Ext.define('Inventory.view.Item', {
                                                                         format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
-                                                                            currencyField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true,
                                                                             decimalPrecision: 6
@@ -4600,7 +4594,6 @@ Ext.define('Inventory.view.Item', {
                                                                         format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
-                                                                            currencyField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true,
                                                                             decimalPrecision: 6
@@ -4829,7 +4822,6 @@ Ext.define('Inventory.view.Item', {
                                                                         format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
-                                                                            currencyField: true,
                                                                             itemId: 'txtSpecialPricingDiscount',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true,
@@ -4846,7 +4838,6 @@ Ext.define('Inventory.view.Item', {
                                                                         format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
-                                                                            currencyField: true,
                                                                             itemId: 'txtSpecialPricingUnitPrice',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true,

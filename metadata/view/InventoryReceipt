@@ -1801,7 +1801,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter12",
+                                                                            "name": "filter11",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2569,23 +2569,15 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
-                                                                                "currencyField": true,
                                                                                 "decimalPrecision": 6,
                                                                                 "itemId": "txtUnitCost",
                                                                                 "minValue": 0
                                                                             },
                                                                             "name": "MyNumberField12",
                                                                             "configAlternates": {
-                                                                                "currencyField": "boolean"
+                                                                                "currencyField": "binding"
                                                                             },
-                                                                            "designerId": "21443f4e-1088-4fc0-abfb-03d159b6eeb5",
-                                                                            "customConfigs": [
-                                                                                {
-                                                                                    "group": "(Custom Properties)",
-                                                                                    "name": "currencyField",
-                                                                                    "type": "string"
-                                                                                }
-                                                                            ]
+                                                                            "designerId": "21443f4e-1088-4fc0-abfb-03d159b6eeb5"
                                                                         }
                                                                     ]
                                                                 },
@@ -3783,7 +3775,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter13",
+                                                                            "name": "filter12",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -5255,7 +5247,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter14",
+                                                                    "name": "filter13",
                                                                     "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5654,7 +5646,6 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "currencyField": true,
                                                                         "designer|createAlias": "numericfield",
                                                                         "modelValidation": true
                                                                     },
@@ -5662,14 +5653,7 @@
                                                                     "configAlternates": {
                                                                         "currencyField": "boolean"
                                                                     },
-                                                                    "designerId": "deaa7036-c826-4da4-ad4d-ef151babc91c",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "currencyField",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
+                                                                    "designerId": "deaa7036-c826-4da4-ad4d-ef151babc91c"
                                                                 }
                                                             ]
                                                         },
@@ -5770,7 +5754,6 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "currencyField": true,
                                                                         "designer|createAlias": "numericfield",
                                                                         "modelValidation": true
                                                                     },
@@ -5778,14 +5761,7 @@
                                                                     "configAlternates": {
                                                                         "currencyField": "boolean"
                                                                     },
-                                                                    "designerId": "2eeba050-620f-45cf-bce8-33840e54938d",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "currencyField",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
+                                                                    "designerId": "2eeba050-620f-45cf-bce8-33840e54938d"
                                                                 }
                                                             ]
                                                         },
@@ -6496,7 +6472,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter14",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6976,7 +6952,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter16",
+                                                    "name": "filter15",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -7587,7 +7563,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

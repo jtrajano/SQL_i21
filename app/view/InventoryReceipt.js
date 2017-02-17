@@ -1319,7 +1319,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 format: '0,000.000###',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
-                                                                                    currencyField: true,
                                                                                     itemId: 'txtUnitCost',
                                                                                     decimalPrecision: 6,
                                                                                     minValue: 0
@@ -2609,7 +2608,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numericfield',
-                                                                            currencyField: true,
                                                                             modelValidation: true
                                                                         }
                                                                     },
@@ -2659,7 +2657,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         format: '0,000.00####',
                                                                         editor: {
                                                                             xtype: 'numericfield',
-                                                                            currencyField: true,
                                                                             modelValidation: true
                                                                         }
                                                                     },

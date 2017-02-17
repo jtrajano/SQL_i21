@@ -1042,8 +1042,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         text: 'Cost',
                                                         format: '0,000.##',
                                                         editor: {
-                                                            xtype: 'numberfield',
-                                                            currencyField: true
+                                                            xtype: 'numberfield'
                                                         }
                                                     },
                                                     {

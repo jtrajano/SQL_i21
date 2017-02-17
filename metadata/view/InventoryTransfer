@@ -1183,7 +1183,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter120",
+                                                    "name": "filter114",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2116,21 +2116,11 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
-                                                    "userConfig": {
-                                                        "currencyField": true
-                                                    },
                                                     "name": "MyNumberField4",
                                                     "configAlternates": {
                                                         "currencyField": "boolean"
                                                     },
-                                                    "designerId": "a50b6383-555d-48f5-9688-cecbf0b546d0",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "currencyField",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "designerId": "a50b6383-555d-48f5-9688-cecbf0b546d0"
                                                 }
                                             ]
                                         },
@@ -2352,7 +2342,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging19",
+                    "name": "statusbarpaging14",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
