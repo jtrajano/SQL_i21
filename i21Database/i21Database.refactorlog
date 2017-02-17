@@ -5852,4 +5852,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[tblTFReportingComponentField]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="da10d1cf-2d14-4696-822e-fde43267b698" ChangeDateTime="02/17/2017 04:51:35">
+    <Property Name="ElementName" Value="[dbo].[tblSTRetailPriceAdjustmentDetail].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRetailPriceAdjustmentDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityId" />
+  </Operation>
 </Operations>

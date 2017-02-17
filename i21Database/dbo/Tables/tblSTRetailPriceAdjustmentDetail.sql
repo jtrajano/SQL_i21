@@ -6,7 +6,7 @@
     [strRegion] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
     [strDistrict] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
     [strState] NVARCHAR(2) COLLATE Latin1_General_CI_AS NULL, 
-    [intVendorId] INT NULL, 
+    [intEntityId] INT NULL, 
     [intCategoryId] INT NULL, 
 	[intManufacturerId] INT NULL,
     [intFamilyId] INT NULL, 
@@ -30,11 +30,11 @@
     CONSTRAINT [PK_tblSTRetailPriceAdjustmentDetail] PRIMARY KEY CLUSTERED ([intRetailPriceAdjustmentDetailId] ASC), 
     CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTRetailPriceAdjustment] FOREIGN KEY ([intRetailPriceAdjustmentId]) REFERENCES [tblSTRetailPriceAdjustment]([intRetailPriceAdjustmentId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
-	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblEMEntity] FOREIGN KEY ([intVendorId]) REFERENCES tblEMEntity([intEntityId]), 
+	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]), 
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ,
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]) ,
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTSubcategory_intFamilyId] FOREIGN KEY ([intFamilyId]) REFERENCES [tblSTSubcategory]([intSubcategoryId]), 
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTSubcategory_intClassId] FOREIGN KEY ([intClassId]) REFERENCES [tblSTSubcategory]([intSubcategoryId]), 
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-    CONSTRAINT [AK_tblSTRetailPriceAdjustmentDetail] UNIQUE NONCLUSTERED ([intRetailPriceAdjustmentId],[intCompanyLocationId],[strRegion],[strDistrict],[intVendorId],[intCategoryId],[intFamilyId],[intClassId],[intItemUOMId],[strPriceType]) 
+    CONSTRAINT [AK_tblSTRetailPriceAdjustmentDetail] UNIQUE NONCLUSTERED ([intRetailPriceAdjustmentId],[intCompanyLocationId],[strRegion],[strDistrict],[intEntityId],[intCategoryId],[intFamilyId],[intClassId],[intItemUOMId],[strPriceType]) 
 )
