@@ -6,11 +6,5 @@ BEGIN
 	WHERE ISNULL(strFilter, '') = ''
 END
 
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFValidDestinationState')
-BEGIN
-	DELETE FROM tblTFValidDestinationState
-	WHERE ISNULL(strType, '') = ''
-END
-
 GO
 
