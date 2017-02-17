@@ -17,6 +17,7 @@
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
+	,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
@@ -73,6 +74,7 @@
 	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
+	,@ItemSalesAccountId			INT				= NULL
 AS
 
 BEGIN
@@ -288,6 +290,7 @@ BEGIN TRY
 				,[intStorageScheduleTypeId]				
 				,[intDestinationGradeId]
 				,[intDestinationWeightId]
+				,[strVFDDocumentNumber]
 				,[intConcurrencyId])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
@@ -312,7 +315,7 @@ BEGIN TRY
 				,[ysnBlended]						= @ItemIsBlended
 				,[intAccountId]						= Acct.[intAccountId] 
 				,[intCOGSAccountId]					= Acct.[intCOGSAccountId] 
-				,[intSalesAccountId]				= Acct.[intSalesAccountId]
+				,[intSalesAccountId]				= ISNULL(@ItemSalesAccountId, Acct.[intSalesAccountId])
 				,[intInventoryAccountId]			= Acct.[intInventoryAccountId]
 				,[intServiceChargeAccountId]		= Acct.[intAccountId]
 				,[strMaintenanceType]				= @ItemMaintenanceType
@@ -366,6 +369,7 @@ BEGIN TRY
 				,[intStorageScheduleTypeId]			= @ItemStorageScheduleTypeId
 				,[intDestinationGradeId]			= @ItemDestinationGradeId
 				,[intDestinationWeightId]			= @ItemDestinationWeightId
+				,[strVFDDocumentNumber]				= @ItemVFDDocumentNumber
 				,[intConcurrencyId]					= 0
 			FROM
 				tblICItem IC
