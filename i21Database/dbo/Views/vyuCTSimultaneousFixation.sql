@@ -2,7 +2,7 @@
 
 AS 
 
-SELECT	*,ISNULL(dblFutures,0)+ISNULL(dblBasis,0)+ISNULL(dblAdditionalCost,0) AS dblFinalPrice
+SELECT	*,ISNULL(dblFutures,0)+ISNULL(dblBasis,0)+ISNULL(dblAdditionalCost,0) AS dblFinalPrice,dblBasis - ISNULL(dblRollArb,0) AS dblOriginalBasis
 FROM	
 (
 	SELECT	PF.intPriceFixationId,
@@ -10,7 +10,6 @@ FROM
 			CD.intContractSeq,
 			PF.[dblLotsFixed]/dblHeaderQuantity * dbo.fnCTConvertQuantityToTargetCommodityUOM(QM.intCommodityUnitMeasureId,CD.intCommodityUnitMeasureId,CD.dblDetailQuantity) dblFixedLots,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblFutures) dblFutures,
-			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblOriginalBasis) dblOriginalBasis,
 			PF.dblRollArb,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblBasis) dblBasis,
 			(
