@@ -90,7 +90,7 @@ SET
        [intLocationId] = s.intLocationId
       ,[intVendorId] = s.intVendorId
       ,[strDescription] = s.strDescription
-      ,[intCostingMethod] = s.intCostingMethod
+      ,[intCostingMethod] = CASE WHEN stock.intItemLocationId IS NOT NULL THEN d.intCostingMethod ELSE s.intCostingMethod END
       ,[intAllowNegativeInventory] = s.intAllowNegativeInventory
       ,[intSubLocationId] = s.intSubLocationId
       ,[intStorageLocationId] = s.intStorageLocationId
@@ -148,6 +148,8 @@ SET
       ,[intSort] = s.intSort
 FROM tblICItemLocation d
 	INNER JOIN @Source s ON s.intLocationId = d.intLocationId
+	LEFT OUTER JOIN vyuICGetItemStock stock ON stock.intItemId = d.intItemId
+		AND stock.intItemLocationId = d.intItemLocationId
 WHERE d.intItemId IN (SELECT Value FROM dbo.fnICSplitStringToTable(@strDestinationItemIds, ','))
 
 DECLARE @intItemId INT
