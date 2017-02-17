@@ -4590,7 +4590,7 @@
     <Build Include="dbo\Views\vyuCTGetPriceContractSequence.sql" />
     <Build Include="dbo\Views\vyuCTGridPriceContractFixation.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractFixationDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTPriceContractSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSavePriceContract.sql" />
     <Build Include="dbo\Tables\tblSMLicenseType.sql" />
     <Build Include="dbo\Functions\fnEMGetEntityAreaOfInterest.sql" />
     <Build Include="dbo\Views\vyuPATAdjustmentVolumeDetail.sql" />
