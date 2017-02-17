@@ -41,6 +41,8 @@ SELECT
 	,[dtmTermDueDate]			= SMT.[dtmDueDate]
 	,[dblTermAPR]				= SMT.[dblAPR]
 	,[ysnExcludeForPayment]		= ARIFP.[ysnExcludeForPayment]
+	,[strCustomerName]			= C.[strName]
+	,[strCustomerNumber]		= C.[strCustomerNumber]
 FROM
 	(
 		SELECT 
@@ -163,3 +165,6 @@ LEFT OUTER JOIN
 		tblSMCompanyLocation
 	) SMCL
 		ON ARIFP.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
+LEFT OUTER JOIN
+	vyuARCustomer C
+		ON ARIFP.intEntityCustomerId = C.intEntityCustomerId
