@@ -15,17 +15,17 @@ SELECT
 ,BankAccount.strSWIFT
 ,Term.strTerm
 ,A.strRemarks
-,A.dtmDueDate
-,Bank.strCountry + ', ' + Bank.strCity + ' ' + Bank.strState AS strBankAddress
-,(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
-(	
-	SELECT TOP 1
-	intAttachmentId
-	FROM tblSMAttachment
-	WHERE strScreen = 'SystemManager.CompanyPreference'
-	AND strComment = 'Footer'
-	ORDER BY intAttachmentId DESC
-)) AS strFooter
+,CONVERT(VARCHAR(10), A.dtmDueDate, 101) AS dtmDueDate
+,Bank.strCity + ', ' + Bank.strState +  ' ' + Bank.strCountry AS strBankAddress
+--,(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
+--(	
+--	SELECT TOP 1
+--	intAttachmentId
+--	FROM tblSMAttachment
+--	WHERE strScreen = 'SystemManager.CompanyPreference'
+--	AND strComment = 'Footer'
+--	ORDER BY intAttachmentId DESC
+--)) AS strFooter
 ,transactions.*
 FROM 
 (
@@ -156,42 +156,105 @@ FROM
 	LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
 	WHERE DM.intTransactionType = 3
 	UNION ALL -- Voucher
+	--SELECT
+	--	strContractNumber		=	ContractHeader.strContractNumber
+	--	,strMiscDescription		=	Item.strDescription
+	--	,strItemNo				=	CASE WHEN Item.strType = 'Other Charge' THEN '' ELSE Item.strItemNo END --AP-3233
+	--	,strBillOfLading		=	Receipt.strBillOfLading
+	--	,strCountryOrigin		=	CASE WHEN ContractDetail.intItemId IS NOT NULL THEN ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
+	--									ELSE ''
+	--									END
+	--	,strAccountId			=	DetailAccount.strAccountId
+	--	,strCurrency			=	CASE WHEN DMDetails.ysnSubCurrency > 0 AND SubCurrency.intConcurrencyId > 0
+	--									THEN SubCurrency.strCurrency
+	--								ELSE MainCurrency.strCurrency
+	--								END
+	--	,strConcern				=	''
+	--	,strUOM					=	QtyUOMDetails.strUnitMeasure
+	--	,strClaimUOM			=	''
+	--	,strCostUOM				=	CASE WHEN DMDetails.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure 
+	--									ELSE QtyUOMDetails.strUnitMeasure END
+	--	,strLPlant				=	LPlant.strSubLocationName
+	--	,intContractSeqId		=	ContractDetail.intContractSeq
+	--	,intBillId				=	DM.intBillId
+	--	,dblQtyReceived			=	CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight
+	--								 ELSE DMDetails.dblQtyReceived 
+	--								END
+	--	,dblCost				=	DMDetails.dblCost
+	--	,dblTotal				=	DMDetails.dblTotal
+	--	,dblNetShippedWeight	=	0 --DMDetails.dblNetShippedWeight
+	--	,dblWeightLoss			=	0 --dblWeightLoss
+	--	,dblLandedWeight		=	0 --CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight ELSE DMDetails.dblQtyReceived END
+	--	,dblFranchiseWeight		=	0 --DMDetails.dblFranchiseWeight
+	--	,dblClaimAmount			=	0 --DMDetails.dblClaimAmount
+	--	,strERPPONumber			=	ContractDetail.strERPPONumber
+	--FROM tblAPBill DM
+	--INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
+	--INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
+	--INNER JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = DM.intCurrencyId
+	--LEFT JOIN tblSMCurrency SubCurrency ON DM.intCurrencyId = SubCurrency.intMainCurrencyId AND SubCurrency.ysnSubCurrency = 1
+	--LEFT JOIN tblICItem Item ON Item.intItemId = DMDetails.intItemId
+	--LEFT JOIN (tblICItemUOM QtyUOM INNER JOIN tblICUnitMeasure QtyUOMDetails ON QtyUOM.intUnitMeasureId = QtyUOMDetails.intUnitMeasureId) 
+	--		ON (CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.intWeightUOMId WHEN DMDetails.intCostUOMId > 0 THEN DMDetails.intCostUOMId ELSE DMDetails.intUnitOfMeasureId END) = QtyUOM.intItemUOMId
+	--LEFT JOIN (tblCTContractDetail ContractDetail 
+	--				INNER JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId
+	--					--LEFT JOIN tblCTContractCost ContractCost ON ContractDetail.intContractDetailId = ContractCost.intContractDetailId
+	--					)ON DMDetails.intContractDetailId = ContractDetail.intContractDetailId
+	----LEFT JOIN (tblICItemUOM ContractCostItemUOM INNER JOIN tblICUnitMeasure ContractCostItemMeasure ON ContractCostItemUOM.intUnitMeasureId = ContractCostItemMeasure.intUnitMeasureId)
+	----							ON ContractCostItemUOM.intItemUOMId = ContractCost.intItemUOMId
+	--LEFT JOIN tblICInventoryReceiptItem ReceiptDetail INNER JOIN tblICInventoryReceipt Receipt ON ReceiptDetail.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	--		ON ReceiptDetail.intInventoryReceiptItemId = DMDetails.intInventoryReceiptItemId
+	--LEFT JOIN (tblICItemUOM ItemCostUOM INNER JOIN tblICUnitMeasure ItemCostUOMMeasure ON ItemCostUOM.intUnitMeasureId = ItemCostUOMMeasure.intUnitMeasureId) 
+	--		ON DMDetails.intCostUOMId = ItemCostUOM.intItemUOMId
+	--LEFT JOIN tblICItemContract ItemContract INNER JOIN tblSMCountry ItemOriginCountry ON ItemContract.intCountryId = ItemOriginCountry.intCountryID
+	--		ON ContractDetail.intItemContractId = ItemContract.intItemContractId
+	--LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = Item.intOriginId
+	--LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
+	--WHERE DM.intTransactionType = 1 AND DMDetails.intContractCostId IS NULL
+	--UNION ALL
 	SELECT
 		strContractNumber		=	ContractHeader.strContractNumber
 		,strMiscDescription		=	Item.strDescription
 		,strItemNo				=	CASE WHEN Item.strType = 'Other Charge' THEN '' ELSE Item.strItemNo END --AP-3233
 		,strBillOfLading		=	Receipt.strBillOfLading
-		,strCountryOrigin		=	CASE WHEN ContractDetail.intItemId IS NOT NULL THEN ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
+		,strCountryOrigin		=	CASE WHEN ContractDetail.intItemId > 0 THEN 
+											(CASE WHEN ItemContract.intItemContractId > 0 THEN ItemOriginCountry.strCountry ELSE CommAttr.strDescription END)
 										ELSE ''
 										END
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 												THEN NULL 
+										WHEN DMDetails.intContractDetailId IS NULL  AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL
 										WHEN DMDetails.ysnSubCurrency > 0 AND SubCurrency.intConcurrencyId > 0
 										THEN SubCurrency.strCurrency
 									ELSE MainCurrency.strCurrency
 									END
 		,strConcern				=	''
-		,strUOM					=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
+		,strUOM					=	CASE WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL 
+										WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 												THEN NULL 
 										WHEN ContractCost.intContractCostId > 0 THEN ContractCostItemMeasure.strUnitMeasure
 										ELSE QtyUOMDetails.strUnitMeasure
 										END
 		,strClaimUOM			=	''
-		,strCostUOM				=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
+		,strCostUOM				=	CASE WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL 
+										WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 												THEN NULL
-											WHEN DMDetails.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure ELSE QtyUOMDetails.strUnitMeasure END
+											WHEN DMDetails.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure 
+										ELSE QtyUOMDetails.strUnitMeasure END
 		,strLPlant				=	LPlant.strSubLocationName
 		,intContractSeqId		=	ContractDetail.intContractSeq
 		,intBillId				=	DM.intBillId
 		,dblQtyReceived			=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 												THEN NULL
+										WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL
 										WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight
 									 ELSE DMDetails.dblQtyReceived 
 									END
 		,dblCost				=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 												THEN NULL
-												ELSE DMDetails.dblCost
+											WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL
+										ELSE DMDetails.dblCost
 											END
 		,dblTotal				=	DMDetails.dblTotal
 		,dblNetShippedWeight	=	0 --DMDetails.dblNetShippedWeight
@@ -206,27 +269,29 @@ FROM
 	INNER JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = DM.intCurrencyId
 	LEFT JOIN tblSMCurrency SubCurrency ON DM.intCurrencyId = SubCurrency.intMainCurrencyId AND SubCurrency.ysnSubCurrency = 1
 	LEFT JOIN tblICItem Item ON Item.intItemId = DMDetails.intItemId
-	LEFT JOIN (tblICItemUOM QtyUOM INNER JOIN tblICUnitMeasure QtyUOMDetails ON QtyUOM.intUnitMeasureId = QtyUOMDetails.intUnitMeasureId) 
+	LEFT JOIN (tblICItemUOM QtyUOM LEFT JOIN tblICUnitMeasure QtyUOMDetails ON QtyUOM.intUnitMeasureId = QtyUOMDetails.intUnitMeasureId) 
 			ON (CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.intWeightUOMId WHEN DMDetails.intCostUOMId > 0 THEN DMDetails.intCostUOMId ELSE DMDetails.intUnitOfMeasureId END) = QtyUOM.intItemUOMId
-	LEFT JOIN (tblCTContractDetail ContractDetail INNER JOIN tblCTContractHeader ContractHeader  ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId)
-			ON DMDetails.intContractDetailId = ContractDetail.intContractDetailId
-	LEFT JOIN tblCTContractCost ContractCost ON ContractDetail.intContractDetailId = ContractCost.intContractDetailId
-	LEFT JOIN (tblICItemUOM ContractCostItemUOM INNER JOIN tblICUnitMeasure ContractCostItemMeasure ON ContractCostItemUOM.intUnitMeasureId = ContractCostItemMeasure.intUnitMeasureId)
-			ON ContractCostItemUOM.intItemUOMId = ContractCost.intItemUOMId
-	LEFT JOIN tblICInventoryReceiptItem ReceiptDetail INNER JOIN tblICInventoryReceipt Receipt ON ReceiptDetail.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	LEFT JOIN tblCTContractDetail ContractDetail ON DMDetails.intContractDetailId = ContractDetail.intContractDetailId
+	LEFT JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId
+	LEFT JOIN tblCTContractCost ContractCost ON ContractDetail.intContractDetailId = ContractCost.intContractDetailId AND DMDetails.intContractCostId = ContractCost.intContractCostId
+	LEFT JOIN (tblICItemUOM ContractCostItemUOM LEFT JOIN tblICUnitMeasure ContractCostItemMeasure ON ContractCostItemUOM.intUnitMeasureId = ContractCostItemMeasure.intUnitMeasureId)
+								ON ContractCostItemUOM.intItemUOMId = ContractCost.intItemUOMId
+	LEFT JOIN tblICInventoryReceiptItem ReceiptDetail LEFT JOIN tblICInventoryReceipt Receipt ON ReceiptDetail.intInventoryReceiptId = Receipt.intInventoryReceiptId
 			ON ReceiptDetail.intInventoryReceiptItemId = DMDetails.intInventoryReceiptItemId
-	LEFT JOIN (tblICItemUOM ItemCostUOM INNER JOIN tblICUnitMeasure ItemCostUOMMeasure ON ItemCostUOM.intUnitMeasureId = ItemCostUOMMeasure.intUnitMeasureId) 
+	LEFT JOIN tblICItemUOM ItemCostUOM LEFT JOIN tblICUnitMeasure ItemCostUOMMeasure ON ItemCostUOM.intUnitMeasureId = ItemCostUOMMeasure.intUnitMeasureId
 			ON DMDetails.intCostUOMId = ItemCostUOM.intItemUOMId
-	LEFT JOIN tblICItemContract ItemContract INNER JOIN tblSMCountry ItemOriginCountry ON ItemContract.intCountryId = ItemOriginCountry.intCountryID
+	LEFT JOIN tblICItemContract ItemContract LEFT JOIN tblSMCountry ItemOriginCountry ON ItemContract.intCountryId = ItemOriginCountry.intCountryID
 			ON ContractDetail.intItemContractId = ItemContract.intItemContractId
-	LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = Item.intOriginId
+	LEFT JOIN tblICItem ContractItem ON ContractItem.intItemId = ContractDetail.intItemId
+	LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = ContractItem.intOriginId
 	LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
 	WHERE DM.intTransactionType = 1
 ) transactions
 INNER JOIN tblAPBill A ON transactions.intBillId = A.intBillId
 INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityVendorId = B2.intEntityId)
 	ON A.intEntityVendorId = B.intEntityVendorId
-LEFT JOIN tblEMEntity ContactEntity ON A.intEntityId = ContactEntity.intEntityId
+LEFT JOIN tblEMEntityToContact EntityToContact ON A.intEntityId = EntityToContact.intEntityId
+LEFT JOIN tblEMEntity ContactEntity ON EntityToContact.intEntityContactId = ContactEntity.intEntityId
 LEFT JOIN tblSMCompanyLocation TranLoc ON A.intStoreLocationId = TranLoc.intCompanyLocationId
 LEFT JOIN tblCMBankAccount BankAccount ON BankAccount.intBankAccountId = A.intBankInfoId
 LEFT JOIN tblCMBank Bank ON BankAccount.intBankId = Bank.intBankId
