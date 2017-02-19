@@ -75,7 +75,8 @@ Declare @tblOutput AS Table
 	intRowNo INT IDENTITY(1,1),
 	strReceiptDetailIds NVARCHAR(MAX),
 	strRowState NVARCHAR(50),
-	strXml NVARCHAR(MAX)
+	strXml NVARCHAR(MAX),
+	strReceiptNo NVARCHAR(100)
 )
 
 Select @strReceiptIDOCHeader=dbo.fnIPGetSAPIDOCHeader('RECEIPT')
@@ -250,8 +251,8 @@ Begin
 	Select @strReceiptDetailIds=COALESCE(CONVERT(VARCHAR,@strReceiptDetailIds) + ',', '') + CONVERT(VARCHAR,intInventoryReceiptItemId) 
 	From vyuICGetInventoryReceiptItem Where intInventoryReceiptId=@intMinHeader
 
-	INSERT INTO @tblOutput(strReceiptDetailIds,strRowState,strXml)
-	VALUES(@strReceiptDetailIds,'CREATE',@strXml)
+	INSERT INTO @tblOutput(strReceiptDetailIds,strRowState,strXml,strReceiptNo)
+	VALUES(@strReceiptDetailIds,'CREATE',@strXml,@strReceiptNo)
 
 	Select @intMinHeader=Min(intInventoryReceiptId) From @tblReceiptHeader Where intInventoryReceiptId>@intMinHeader
 End
