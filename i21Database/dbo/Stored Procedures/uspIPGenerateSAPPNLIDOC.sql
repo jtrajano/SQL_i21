@@ -30,7 +30,8 @@ Declare @tblOutput AS Table
 	intRowNo INT IDENTITY(1,1),
 	strStgMatchPnSId NVARCHAR(MAX),
 	strRowState NVARCHAR(50),
-	strXml NVARCHAR(MAX)
+	strXml NVARCHAR(MAX),
+	strMatchNo NVARCHAR(100)
 )
 
 Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('PROFIT AND LOSS')
@@ -119,8 +120,8 @@ Begin
 		Set @strXml += '</IDOC>'
 		Set @strXml +=  '</ACC_DOCUMENT03>'
 
-		INSERT INTO @tblOutput(strStgMatchPnSId,strRowState,strXml)
-		VALUES(@intMinStageId,'CREATE',@strXml)
+		INSERT INTO @tblOutput(strStgMatchPnSId,strRowState,strXml,strMatchNo)
+		VALUES(@intMinStageId,'CREATE',@strXml,@intMatchNo)
 	End
 	Select @intMinStageId=Min(intStgMatchPnSId) From tblRKStgMatchPnS Where intStgMatchPnSId>@intMinStageId
 End

@@ -162,7 +162,8 @@ Begin --Update
 	From tblIPItemUOMStage iu 
 	Join tblIPSAPUOM su on iu.strUOM=su.strSAPUOM 
 	Join tblICUnitMeasure um on su.stri21UOM=um.strSymbol
-	Where strItemNo=@strItemNo AND iu.intStageItemId=@intStageItemId
+	Where strItemNo=@strItemNo AND iu.intStageItemId=@intStageItemId AND 
+	um.intUnitMeasureId NOT IN (Select intUnitMeasureId From tblICItemUOM Where intItemId=@intItemId)
 
 	Update iu Set iu.dblUnitQty=st.dblNumerator/st.dblDenominator 
 	From tblICItemUOM iu 
