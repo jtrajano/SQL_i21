@@ -15,6 +15,7 @@ SELECT
 ,BankAccount.strSWIFT
 ,Term.strTerm
 ,A.strRemarks
+,A.dtmDueDate
 ,Bank.strCountry + ', ' + Bank.strCity + ' ' + Bank.strState AS strBankAddress
 ,(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
 (	
