@@ -12,7 +12,8 @@
 	[ysnActive] BIT NOT NULL CONSTRAINT [DF_tblQMProperty_ysnActive] DEFAULT 1, 
 	[strFormula] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[strFormulaParser] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-	
+	[strDefaultValue] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblQMProperty_strDefaultValue] DEFAULT '',
+	[ysnNotify] bit CONSTRAINT [DF_tblQMProperty_ysnNotify] DEFAULT 0,
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMProperty_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,

@@ -940,3 +940,8 @@ BEGIN
 END
 GO
 */
+Go
+UPDATE tblQMProperty
+SET strDefaultValue = ''
+WHERE strDefaultValue IS NULL
+Go
