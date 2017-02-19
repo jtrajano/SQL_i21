@@ -54,7 +54,9 @@ Declare @tblAcknowledgement AS TABLE
 Declare @tblMessage AS Table
 (
 	strMessageType NVARCHAR(50),
-	strMessage	NVARCHAR(MAX)
+	strMessage	NVARCHAR(MAX),
+	strInfo1 NVARCHAR(50),
+	strInfo2 NVARCHAR(50)
 )
 
 	Insert Into @tblAcknowledgement(strMesssageType,strStatus,strStatusCode,strStatusDesc,strStatusType,
@@ -106,6 +108,9 @@ Begin
 		@strDeliveryType = strDeliveryType	
 		From @tblAcknowledgement Where intRowNo=@intMinRowNo
 
+	If @strMesssageType='DESADV'
+		Set @strDeliveryType=''
+
 	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')='U'
 		Set @strMesssageType='DESADV'
 
@@ -127,8 +132,8 @@ Begin
 			Update tblCTContractFeed Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')=''
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,'Success')
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,'Success',@strRefNo,@strParam)
 		End
 
 		If @strStatus NOT IN (52,53) --Error
@@ -138,8 +143,8 @@ Begin
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')='Awt Ack'
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,@strMessage)
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
 		End
 	End
 
@@ -153,8 +158,8 @@ Begin
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='Success'
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND strFeedStatus IN ('Awt Ack','Ack Rcvd')
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,'Success')
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,'Success',@strRefNo,@strParam)
 		End
 
 		If @strStatus NOT IN (52,53) --Error
@@ -164,8 +169,8 @@ Begin
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND strFeedStatus='Awt Ack'
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,@strMessage)
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
 		End
 	End
 
@@ -200,8 +205,8 @@ Begin
 				Update tblLGLoadStg Set strExternalShipmentNumber=@strParam Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')=''
 			End
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,'Success')
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,'Success',@strRefNo,@strParam)
 		End
 
 		If @strStatus NOT IN (52,53) --Error
@@ -211,8 +216,8 @@ Begin
 			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
 			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,@strMessage)
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
 		End
 	End
 
@@ -227,16 +232,16 @@ Begin
 		Begin
 			Update tblICInventoryReceiptItem  Set ysnExported=1 Where intInventoryReceiptId=@intReceiptId
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,'Success')
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,'Success',@strRefNo,@strParam)
 		End
 
 		If @strStatus NOT IN (52,53) --Error
 		Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,@strMessage)
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
 		End
 	End
 
@@ -247,8 +252,8 @@ Begin
 		Begin
 			Update tblRKStgMatchPnS Set strStatus='Ack Rcvd',strMessage='Success' Where intMatchNo=@strParam AND ISNULL(strStatus,'')='Awt Ack'
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,'Success')
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,'Success',@strRefNo,@strParam)
 		End
 
 		If @strStatus NOT IN (52,53) --Error
@@ -257,8 +262,8 @@ Begin
 
 			Update tblRKStgMatchPnS Set strStatus='Ack Rcvd',strMessage=@strMessage Where intMatchNo=@strParam AND ISNULL(strStatus,'')='Awt Ack'
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,@strMessage)
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
 		End
 	End
 
@@ -272,8 +277,8 @@ Begin
 			Update tblLGLoadLSPStg Set strFeedStatus='Ack Rcvd',strMessage='Success'
 			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,'Success')
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,'Success',@strRefNo,@strParam)
 		End
 
 		If @strStatus NOT IN (52,53) --Error
@@ -283,15 +288,15 @@ Begin
 			Update tblLGLoadLSPStg Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
 			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
 
-			Insert Into @tblMessage(strMessageType,strMessage)
-			Values(@strMesssageType,@strMessage)
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
 		End
 	End
 
 	Select @intMinRowNo=MIN(intRowNo) From @tblAcknowledgement Where intRowNo>@intMinRowNo
 End --Loop End
 
-Select * from @tblMessage
+Select strMessageType,strMessage,ISNULL(strInfo1,'') AS strInfo1,ISNULL(strInfo2,'') AS strInfo2 from @tblMessage
 
 END TRY
 

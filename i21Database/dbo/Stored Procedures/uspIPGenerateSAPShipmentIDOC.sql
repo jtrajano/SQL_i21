@@ -88,7 +88,8 @@ Declare @tblOutput AS Table
 	intRowNo INT IDENTITY(1,1),
 	strLoadStgIds NVARCHAR(MAX),
 	strRowState NVARCHAR(50),
-	strXml NVARCHAR(MAX)
+	strXml NVARCHAR(MAX),
+	strShipmentNo NVARCHAR(100)
 )
 
 Select @strCreateIDOCHeader=dbo.fnIPGetSAPIDOCHeader('SHIPMENT CREATE')
@@ -406,8 +407,8 @@ Begin
 	Set @strXml += '</IDOC>'
 	Set @strXml +=  '</DELVRY07>'
 
-	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml)
-	VALUES(@intMinHeader,CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml)
+	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml,strShipmentNo)
+	VALUES(@intMinHeader,CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,@strLoadNumber)
 
 	NEXT_SHIPMENT:
 	Select @intMinHeader=Min(intLoadStgId) From tblLGLoadStg Where intLoadStgId>@intMinHeader AND ISNULL(strFeedStatus,'')=''

@@ -53,14 +53,16 @@ Declare @intMinSeq					INT,
 		@strScheduleXXml			NVARCHAR(MAX),
 		@strCondXml					NVARCHAR(MAX),
 		@strCondXXml				NVARCHAR(MAX),
-		@strTextXml					NVARCHAR(MAX)
+		@strTextXml					NVARCHAR(MAX),
+		@strSeq						NVARCHAR(MAX)
 
 Declare @tblOutput AS Table
 (
 	intRowNo INT IDENTITY(1,1),
 	strContractFeedIds NVARCHAR(MAX),
 	strRowState NVARCHAR(50),
-	strXml NVARCHAR(MAX)
+	strXml NVARCHAR(MAX),
+	strContractNo NVARCHAR(100)
 )
 
 Declare @tblHeader AS Table
@@ -504,8 +506,8 @@ Begin
 	--Final Xml
 	Set @strXml = @strXmlHeaderStart + @strItemXml + @strItemXXml + @strScheduleXml + @strScheduleXXml + @strCondXml + @strCondXXml + @strTextXml + @strXmlHeaderEnd
 
-	INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml)
-	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml)
+	INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml,strContractNo)
+	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,@strContractNumber)
 
 	NEXT_PO:
 	Select @intMinRowNo=Min(intRowNo) From @tblHeader Where intRowNo>@intMinRowNo
