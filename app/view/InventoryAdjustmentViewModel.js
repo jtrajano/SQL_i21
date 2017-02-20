@@ -16,7 +16,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         'Inventory.store.BufferedItemWeightUOM',
         'Inventory.store.BufferedLotStatus',
         'Inventory.store.BufferedItemStockUOMForAdjustmentView',
-        'Inventory.store.BufferedItemOwner'
+        'Inventory.store.BufferedItemOwner',
+        'Inventory.store.BufferedItemStockUOMView'
     ],
 
     stores: {
@@ -110,6 +111,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         },
         newOwner: {
             type: 'icbuffereditemowner'
+        },
+        fromSubLocation: {
+            type: 'icbuffereditemstockuomview'
         }
     },
 
