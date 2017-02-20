@@ -522,6 +522,20 @@ Harness.start(
                 group: 'InventoryShipment',
                 items:
                     [
+                        {
+                            group: 'OpenISScreen',
+                            items: [
+                                {
+                                    url: 'BusinessDomain/InventoryShipment/OpenISScreen/ISOpenSearchScreen.js?v=' + version,
+                                    title: 'ISOpenSearchScreen',
+                                    preload: [
+                                        functionalTest,
+                                        commonIC
+
+                                    ]
+                                }
+                            ]
+                        },
 
                         {
                             group: 'DirectInventoryShipment',
