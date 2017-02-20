@@ -65,7 +65,7 @@ BEGIN
 				set @strPassword = '1234'
 			
 			declare @dc nvarchar(max)
-			exec uspAESEncrypt @strPassword, @dc output
+			exec uspAESEncryptASym @strPassword, @dc output
 
 
 			insert into [tblEMEntityCredential](intEntityId,strUserName,strPassword,ysnNotEncrypted)
