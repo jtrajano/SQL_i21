@@ -86,13 +86,13 @@ BEGIN
 			--ELSE SPACE(16) END
 		+ SPACE(8) --44-51
 		+ ' ' --Foreign Indicator
-		+ SPACE(40 - LEN(A.strCompanyName)) + dbo.fnTrim(A.strCompanyName) --Position 53-92
+		+ SPACE(40 - LEN(A.strCompanyName)) + dbo.fnTrimX(A.strCompanyName) --Position 53-92
 		+ SPACE(40)
 		+ ' '
 		+ LEFT(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '), 40) + SPACE(40 - LEN(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '))) --Position 134-173
 		+ LEFT(REPLACE(A.strCity, CHAR(13) + CHAR(10), ' '), 40) + SPACE(40 - LEN(REPLACE(A.strCity, CHAR(13) + CHAR(10), ' '))) 
-		+ SPACE(2 - LEN(ISNULL(dbo.fnTrim(A.strState),''))) + dbo.fnTrim(A.strState)  
-		+ SPACE(9 - LEN(ISNULL(dbo.fnTrim(A.strZip),'')))+  dbo.fnTrim(A.strZip) 
+		+ SPACE(2 - LEN(ISNULL(dbo.fnTrimX(A.strState),''))) + dbo.fnTrimX(A.strState)  
+		+ SPACE(9 - LEN(ISNULL(dbo.fnTrimX(A.strZip),'')))+  dbo.fnTrimX(A.strZip) 
 		+ SPACE(15 - LEN(ISNULL(dbo.fnAPRemoveSpecialChars(A.strPhone),''))) + REPLACE(ISNULL(dbo.fnAPRemoveSpecialChars(A.strPhone),''), ' ','') --Position 225-239
 		+ SPACE(260)
 		+ '00000002' --500-507
