@@ -26,6 +26,7 @@ BEGIN TRY
 	DECLARE @strModifiedContainerColumns NVARCHAR(MAX)
 	DECLARE @ysnContainerAddedAlready BIT = 0
 	DECLARE @ysnPosted BIT = 0
+	DECLARE @intShipmentStatus INT
 
 	DECLARE @tblLoadContainerRecord TABLE (
 		intLoadContainerRecordId INT Identity(1, 1)
@@ -71,7 +72,13 @@ BEGIN TRY
 		FROM @tblLoadRecord
 		WHERE intLoadRecordId = @intMinLoadRecordId
 
+		SELECT @ysnPosted = ysnPosted,
+			   @intShipmentStatus = intShipmentStatus
+		FROM tblLGLoad
+		WHERE intLoadId = @intLoadId
 
+		IF (ISNULL(@intShipmentStatus,0) = 4)
+			RETURN;
 
 		SELECT @intMinLoadLogId = MIN(intLoadLogId)
 		FROM @tblLoadRecord
@@ -143,13 +150,6 @@ BEGIN TRY
 		FROM @tblLoadRecord
 		WHERE intLoadRecordId > @intMinLoadRecordId
 	END
-
-	SELECT @ysnPosted = ysnPosted
-	FROM tblLGLoad
-	WHERE intLoadId = @intLoadId
-
-	IF (ISNULL(@ysnPosted,0) = 1)
-		RETURN;
 
 	SELECT @intMinLoadDetailRecordId = MIN(intLoadDetailRecordId)
 	FROM @tblLoadDetailRecord
