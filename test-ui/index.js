@@ -603,6 +603,15 @@ Harness.start(
                         ]
                     },
                     {
+                        url: 'BusinessDomain/Category/17xOpenNewCategoryScreen.js?v=' + version,
+                        title: '17xOpenNewCategoryScreen',
+                        preload: [
+                            functionalTest,
+                            commonIC
+
+                        ]
+                    },
+                    {
                         url: 'BusinessDomain/Category/17xAddCategory.js?v=' + version,
                         title: '17xAddCategory',
                         preload: [
