@@ -4117,15 +4117,7 @@ IF @post = 0
 IF @recap = 1		
 	BEGIN
 		IF @raiseError = 0
-			ROLLBACK TRAN @TransactionName
-
-		DELETE GLDR  
-		FROM 
-			@PostInvoiceData PID  
-		INNER JOIN 
-			dbo.tblGLDetailRecap GLDR 
-				ON (PID.strTransactionId = GLDR.strTransactionId OR PID.intInvoiceId = GLDR.intTransactionId)  
-				AND GLDR.strCode = @CODE  
+			ROLLBACK TRAN @TransactionName		
 
 		DELETE GLDR  
 		FROM 
@@ -4136,68 +4128,7 @@ IF @recap = 1
 				AND GLDR.strCode = @CODE  		   
 		   
 		BEGIN TRY		
-			INSERT INTO dbo.tblGLDetailRecap (  
-			  [dtmDate]  
-			  ,[strBatchId]  
-			  ,[intAccountId]  
-			  ,[dblDebit]  
-			  ,[dblCredit]  
-			  ,[dblDebitUnit]  
-			  ,[dblCreditUnit]  
-			  ,[strDescription]  
-			  ,[strCode]  
-			  ,[strReference]  
-			  ,[intCurrencyId]  
-			  ,[dblExchangeRate]  
-			  ,[dtmDateEntered]  
-			  ,[dtmTransactionDate]  
-			  ,[strJournalLineDescription]  
-			  ,[intJournalLineNo]  
-			  ,[ysnIsUnposted]  
-			  ,[intUserId]  
-			  ,[intEntityId]  
-			  ,[strTransactionId]  
-			  ,[intTransactionId]  
-			  ,[strTransactionType]  
-			  ,[strTransactionForm]  
-			  ,[strModuleName]  
-			  ,[intConcurrencyId]  
-			)  
-			-- RETRIEVE THE DATA FROM THE TABLE VARIABLE.   
-			SELECT [dtmDate]  
-			  ,@batchId  
-			  ,[intAccountId]  
-			  ,[dblDebit]		= Debit.Value
-			  ,[dblCredit]		= Credit.Value 
-			  ,[dblDebit]		= DebitUnit.Value
-			  ,[dblCredit]		= CreditUnit.Value  
-			  ,[strDescription]  
-			  ,[strCode]  
-			  ,[strReference]  
-			  ,[intCurrencyId]  
-			  ,[dblExchangeRate]  
-			  ,[dtmDateEntered]  
-			  ,[dtmTransactionDate]  
-			  ,[strJournalLineDescription]  
-			  ,[intJournalLineNo]  
-			  ,[ysnIsUnposted]  
-			  ,[intUserId]  
-			  ,[intEntityId]  
-			  ,[strTransactionId]  
-			  ,[intTransactionId]  
-			  ,[strTransactionType]  
-			  ,[strTransactionForm]  
-			  ,[strModuleName]  
-			  ,[intConcurrencyId]  
-			FROM 
-				@GLEntries GLEntries
-			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
-			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Credit
-			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
-			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) CreditUnit
-
-
-
+		 
 			INSERT INTO tblGLPostRecap(
 			 [strTransactionId]
 			,[intTransactionId]
