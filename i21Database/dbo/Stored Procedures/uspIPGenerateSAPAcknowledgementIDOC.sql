@@ -26,6 +26,7 @@ DECLARE @strTableName NVARCHAR(100)
 DECLARE @strColumnName NVARCHAR(100)
 DECLARE @strStatusColumnName NVARCHAR(100)
 DECLARE @intId INT
+DECLARE @strPartnerNo NVARCHAR(100)
 
 Declare @tblAcknowledgement AS TABLE
 (
@@ -41,7 +42,8 @@ Declare @tblAcknowledgement AS TABLE
 	strTrackingNo NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strTableName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strColumnName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	strStatusColumnName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	strStatusColumnName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strPartnerNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 
 Declare @tblOutput AS Table
@@ -55,46 +57,44 @@ Declare @tblOutput AS Table
 	strXml NVARCHAR(MAX)
 )
 
-Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('ACKNOWLEDGEMENT')
-
 If @strMsgType='Item'
-	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName)
-	SELECT intStageItemId,'MATMAS','53','Success','S','Material Number',strItemNo,strItemNo,'','tblIPItemArchive','intStageItemId','strImportStatus'
+	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo)
+	SELECT intStageItemId,'MATMAS','53','Success','S','Material Number',strItemNo,strItemNo,'','tblIPItemArchive','intStageItemId','strImportStatus',''
 	FROM tblIPItemArchive Where ISNULL(strImportStatus,'')<>'Ack Sent'
 	UNION
-	SELECT intStageItemId,'MATMAS','51',strErrorMessage,'E','Material Number',strItemNo,strItemNo,'','tblIPItemError','intStageItemId','strImportStatus'
+	SELECT intStageItemId,'MATMAS','51',strErrorMessage,'E','Material Number',strItemNo,strItemNo,'','tblIPItemError','intStageItemId','strImportStatus',''
 	FROM tblIPItemError Where ISNULL(strImportStatus,'')<>'Ack Sent'
 
 If @strMsgType='Vendor'
-	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName)
-	SELECT intStageEntityId,'CREMAS','53','Success','S','Vendor Number',strAccountNo,strAccountNo,'','tblIPEntityArchive','intStageEntityId','strImportStatus'
+	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo)
+	SELECT intStageEntityId,'CREMAS','53','Success','S','Vendor Number',strAccountNo,strAccountNo,'','tblIPEntityArchive','intStageEntityId','strImportStatus',''
 	FROM tblIPEntityArchive Where strEntityType='Vendor' AND ISNULL(strImportStatus,'')<>'Ack Sent'
 	UNION
-	SELECT intStageEntityId,'CREMAS','51',strErrorMessage,'E','Vendor Number',strAccountNo,strAccountNo,'','tblIPEntityError','intStageEntityId','strImportStatus'
+	SELECT intStageEntityId,'CREMAS','51',strErrorMessage,'E','Vendor Number',strAccountNo,strAccountNo,'','tblIPEntityError','intStageEntityId','strImportStatus',''
 	FROM tblIPEntityError Where strEntityType='Vendor' AND ISNULL(strImportStatus,'')<>'Ack Sent'
 
 If @strMsgType='PreShipment Sample'
-	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName)
-	SELECT  intStageSampleId,'QCERT','53','Success','S','Sample Number',strSampleNo,strPONo,strPOItemNo,'tblIPPreShipmentSampleArchive','intStageSampleId','strImportStatus'
+	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo)
+	SELECT  intStageSampleId,'QCERT','53','Success','S','Sample Number',strSampleNo,strPONo,strPOItemNo,'tblIPPreShipmentSampleArchive','intStageSampleId','strImportStatus',''
 	FROM tblIPPreShipmentSampleArchive Where ISNULL(strImportStatus,'')<>'Ack Sent'
 	UNION
-	SELECT intStageSampleId,'QCERT','51',strErrorMessage,'E','Sample Number',strSampleNo,strPONo,strPOItemNo,'tblIPPreShipmentSampleError','intStageSampleId','strImportStatus'
+	SELECT intStageSampleId,'QCERT','51',strErrorMessage,'E','Sample Number',strSampleNo,strPONo,strPOItemNo,'tblIPPreShipmentSampleError','intStageSampleId','strImportStatus',''
 	FROM tblIPPreShipmentSampleError Where ISNULL(strImportStatus,'')<>'Ack Sent'
 
 If @strMsgType='LSP Receipt'
-	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName)
-	SELECT  intStageReceiptId,'WHSCON','53','Success','S','Goods Receipt Number',strDeliveryNo,strExternalRefNo,'','tblIPReceiptArchive','intStageReceiptId','strImportStatus'
+	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo)
+	SELECT  intStageReceiptId,'WHSCON','53','Success','S','Goods Receipt Number',strDeliveryNo,strExternalRefNo,'','tblIPReceiptArchive','intStageReceiptId','strImportStatus',strPartnerNo
 	FROM tblIPReceiptArchive Where ISNULL(strImportStatus,'')<>'Ack Sent'
 	UNION
-	SELECT  intStageReceiptId,'WHSCON','51','Success','E','Goods Receipt Number',strDeliveryNo,strExternalRefNo,'','tblIPReceiptError','intStageReceiptId','strImportStatus'
+	SELECT  intStageReceiptId,'WHSCON','51','Success','E','Goods Receipt Number',strDeliveryNo,strExternalRefNo,'','tblIPReceiptError','intStageReceiptId','strImportStatus',strPartnerNo
 	FROM tblIPReceiptError Where ISNULL(strImportStatus,'')<>'Ack Sent'
 
 If @strMsgType='LSP ETA'
-	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName)
-	SELECT  intStageShipmentETAId,'WHSCON','53','Success','S','Delivery Number',strDeliveryNo,strDeliveryNo,'','tblIPShipmentETAArchive','intStageShipmentETAId','strImportStatus'
+	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo)
+	SELECT  intStageShipmentETAId,'WHSCON','53','Success','S','Delivery Number',strDeliveryNo,strDeliveryNo,'','tblIPShipmentETAArchive','intStageShipmentETAId','strImportStatus',strPartnerNo
 	FROM tblIPShipmentETAArchive Where ISNULL(strImportStatus,'')<>'Ack Sent'
 	UNION
-	SELECT  intStageShipmentETAId,'WHSCON','51','Success','E','Delivery Number',strDeliveryNo,strDeliveryNo,'','tblIPShipmentETAError','intStageShipmentETAId','strImportStatus'
+	SELECT  intStageShipmentETAId,'WHSCON','51','Success','E','Delivery Number',strDeliveryNo,strDeliveryNo,'','tblIPShipmentETAError','intStageShipmentETAId','strImportStatus',strPartnerNo
 	FROM tblIPShipmentETAError Where ISNULL(strImportStatus,'')<>'Ack Sent'
 
 
@@ -114,16 +114,31 @@ Begin
 		@strTableName = strTableName,
 		@strColumnName = strColumnName,
 		@strStatusColumnName = strStatusColumnName,
-		@intId = intId
+		@intId = intId,
+		@strPartnerNo = strPartnerNo
 		From @tblAcknowledgement Where intRowNo=@intMinRowNo
 
 		Set @strXml =  '<ZALEAUD01>'
 		Set @strXml += '<IDOC BEGIN="1">'
 
 		--IDOC Header
-		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
-		Set @strXml +=	@strIDOCHeader
-		Set @strXml +=	'</EDI_DC40>'
+		If ISNULL(@strPartnerNo,'')=''
+		Begin
+			Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('ACKNOWLEDGEMENT')
+
+			Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
+			Set @strXml +=	@strIDOCHeader
+			Set @strXml +=	'</EDI_DC40>'			
+		End
+		Else
+		Begin
+			Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('LSP ACKNOWLEDGEMENT')
+
+			Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
+			Set @strXml +=	@strIDOCHeader
+			Set @strXml += '<RCVPRN>'	+ ISNULL(@strPartnerNo,'')	+ '</RCVPRN>'
+			Set @strXml +=	'</EDI_DC40>'
+		End
 
 		Set @strXml += '<E1ADHDR SEGMENT="1">'
 		Set @strXml += '<MESTYP>'		+ ISNULL(@strMesssageType,'')	+ '</MESTYP>'
