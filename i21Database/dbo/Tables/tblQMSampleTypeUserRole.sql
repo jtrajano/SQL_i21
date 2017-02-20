@@ -11,6 +11,5 @@
 	[dtmLastModified] [datetime] NULL CONSTRAINT [DF_tblQMSampleTypeUserRole_dtmLastModified] DEFAULT GetDate(),
 		
 	CONSTRAINT [PK_tblQMSampleTypeUserRole] PRIMARY KEY ([intSampleTypeUserRoleId]), 
-	CONSTRAINT [FK_tblQMSampleTypeUserRole_tblQMSampleType] FOREIGN KEY ([intSampleTypeId]) REFERENCES [tblQMSampleType]([intSampleTypeId]) ON DELETE CASCADE, 
-	CONSTRAINT [FK_tblQMSampleTypeUserRole_tblSMUserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [tblSMUserRole]([intUserRoleID]) 
+	CONSTRAINT [FK_tblQMSampleTypeUserRole_tblQMSampleType] FOREIGN KEY ([intSampleTypeId]) REFERENCES [tblQMSampleType]([intSampleTypeId]) ON DELETE CASCADE
 )
