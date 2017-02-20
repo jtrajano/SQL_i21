@@ -1380,6 +1380,7 @@ namespace iRely.Inventory.Model
         public int? intDestinationWeightId { get; set; }
         public string strDestinationWeights { get; set; }
         public string strDestinationGrades { get; set; }
+        public int? intCurrencyId { get; set; }
     }
 
     public class vyuICGetShipmentAddSalesOrder

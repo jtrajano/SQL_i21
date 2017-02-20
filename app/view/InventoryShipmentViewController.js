@@ -984,8 +984,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             Inventory.view.InventoryShipmentViewController.getCustomerCurrency(config.dummy.intInventoryShipment.data.intEntityCustomerId, function(success, json) {
                 if(success) {
                     if(json.length > 0) {
-                        record.set('intCurrencyId', json[0].intCurrencyId);
-                        record.set('strCurrency', json[0].strCurrency);
+                        record.set('intCurrencyId', !iRely.Functions.isEmpty(json[0].intCurrencyId) ? json[0].intCurrencyId : json[0].intDefaultCurrencyId);
+                        record.set('strCurrency', !iRely.Functions.isEmpty(json[0].intCurrencyId) ? json[0].strCurrency : json[0].strDefaultCurrency);
+                    } else {
+                        var defaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+                        record.set('intCurrencyId', defaultCurrencyId);
                     }
                     action(record);   
                 } else
@@ -1109,13 +1112,22 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     isHidden = false;
                 }
                 break;
-            case 3:
-                isHidden = true;
-                break;
             default :
+                Inventory.view.InventoryShipmentViewController.getCustomerCurrency(current.get('intEntityCustomerId'), function(success, json) {
+                    if(success) {
+                        if(json.length > 0) {
+                            current.set('intCurrencyId', !iRely.Functions.isEmpty(json[0].intCurrencyId) ? json[0].intCurrencyId : json[0].intDefaultCurrencyId);
+                            current.set('strCurrency', !iRely.Functions.isEmpty(json[0].intCurrencyId) ? json[0].strCurrency : json[0].strDefaultCurrency);
+                        } else {
+                            var defaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+                            current.set('intCurrencyId', defaultCurrencyId);
+                        }
+                    }
+                });
                 isHidden = true;
                 break;
         }
+        
         if (isHidden === false) {
             var btnAddOrders = win.down('#btnAddOrders');
             this.onAddOrderClick(btnAddOrders);
@@ -2174,16 +2186,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('strCostMethod', 'Percentage');
             }
 
-            if(!current.get('intCurrencyId')) {
-                Inventory.view.InventoryShipmentViewController.getCustomerCurrency(current.intInventoryShipment.data.intEntityCustomerId, function(success, json) {
-                    if(success) {
-                        if(json.length > 0) {
-                            current.set('intCurrencyId', json[0].intCurrencyId);
-                            current.set('strCurrency', json[0].strCurrency);
-                        }
+            Inventory.view.InventoryShipmentViewController.getCustomerCurrency(current.intInventoryShipment.data.intEntityCustomerId, function(success, json) {
+                if(success) {
+                    if(json.length > 0) {
+                        current.set('intCurrencyId', !iRely.Functions.isEmpty(json[0].intCurrencyId) ? json[0].intCurrencyId : json[0].intDefaultCurrencyId);
+                        current.set('strCurrency', !iRely.Functions.isEmpty(json[0].intCurrencyId) ? json[0].strCurrency : json[0].strDefaultCurrency);
+                    } else {
+                        var defaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+                        current.set('intCurrencyId', defaultCurrencyId);
                     }
-                });
-            }
+                }
+            });
         }
 
         if (combo.itemId === 'cboChargeCurrency') { 
@@ -2595,11 +2608,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             });
                         }
                         else {
-                            if(iRely.Functions.isEmpty(currentVM.get('intCurrencyId'))) 
+                            if(!iRely.Functions.isEmpty(order.get('intCurrencyId'))) 
                                 currentVM.set('intCurrencyId', order.get('intCurrencyId'));
-                            if(iRely.Functions.isEmpty(currentVM.get('intFreightTermId'))) 
+                            if(!iRely.Functions.isEmpty(order.get('intFreightTermId'))) 
                                 currentVM.set('intFreightTermId', order.get('intFreightTermId'));
-                            if(iRely.Functions.isEmpty(currentVM.get('intShipToLocationId'))) 
+                            if(!iRely.Functions.isEmpty(order.get('intShipToLocationId'))) 
                                 currentVM.set('intShipToLocationId', order.get('intShipToLocationId'));
 
                             var newRecord = {
