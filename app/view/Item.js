@@ -1715,8 +1715,8 @@ Ext.define('Inventory.view.Item', {
                                                                                 items: [
                                                                                     {
                                                                                         xtype: 'numberfield',
-                                                                                        flex: 1,
                                                                                         currencyField: true,
+                                                                                        flex: 1,
                                                                                         itemId: 'txtTaxExempt',
                                                                                         margin: '0 5 0 0',
                                                                                         fieldLabel: 'Tax Exempt',
@@ -2062,8 +2062,8 @@ Ext.define('Inventory.view.Item', {
                                                                                                 items: [
                                                                                                     {
                                                                                                         xtype: 'numeric',
-                                                                                                        flex: 2,
                                                                                                         quantityField: true,
+                                                                                                        flex: 2,
                                                                                                         itemId: 'txtLifeTime',
                                                                                                         modelValidation: true,
                                                                                                         fieldLabel: 'Life Time',
@@ -2301,8 +2301,8 @@ Ext.define('Inventory.view.Item', {
                                                                                                         items: [
                                                                                                             {
                                                                                                                 xtype: 'numberfield',
-                                                                                                                flex: 1.4,
                                                                                                                 quantityField: true,
+                                                                                                                flex: 1.4,
                                                                                                                 itemId: 'txtWeight',
                                                                                                                 fieldLabel: 'Weight',
                                                                                                                 labelWidth: 125,
@@ -2336,8 +2336,8 @@ Ext.define('Inventory.view.Item', {
                                                                                                             },
                                                                                                             {
                                                                                                                 xtype: 'numberfield',
-                                                                                                                flex: 1,
                                                                                                                 quantityField: true,
+                                                                                                                flex: 1,
                                                                                                                 itemId: 'txtInnerUnits',
                                                                                                                 margin: '0 0 0 5',
                                                                                                                 fieldLabel: 'Inner Units',
@@ -2357,8 +2357,8 @@ Ext.define('Inventory.view.Item', {
                                                                                                         items: [
                                                                                                             {
                                                                                                                 xtype: 'numberfield',
-                                                                                                                flex: 1.4,
                                                                                                                 quantityField: true,
+                                                                                                                flex: 1.4,
                                                                                                                 itemId: 'txtLayersPerPallet',
                                                                                                                 fieldLabel: 'Layers per Pallet',
                                                                                                                 labelWidth: 125,
@@ -2367,8 +2367,8 @@ Ext.define('Inventory.view.Item', {
                                                                                                             },
                                                                                                             {
                                                                                                                 xtype: 'numberfield',
-                                                                                                                flex: 1,
                                                                                                                 quantityField: true,
+                                                                                                                flex: 1,
                                                                                                                 itemId: 'txtUnitsPerLayer',
                                                                                                                 margin: '0 0 0 5',
                                                                                                                 fieldLabel: 'Units per Layer',
@@ -4164,7 +4164,6 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                hidden: true,
                                                                 itemId: 'btnInsertPricing',
                                                                 arrowVisible: false,
                                                                 iconCls: 'small-insert',
@@ -4173,7 +4172,6 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                hidden: true,
                                                                 itemId: 'btnDeletePricing',
                                                                 iconCls: 'small-remove',
                                                                 text: 'Remove'
