@@ -594,6 +594,15 @@ Harness.start(
                 group: 'Category',
                 items: [
                     {
+                        url: 'BusinessDomain/Category/17xOpenSearchCategoryScreen.js?v=' + version,
+                        title: '17xOpenSearchCategoryScreen',
+                        preload: [
+                            functionalTest,
+                            commonIC
+
+                        ]
+                    },
+                    {
                         url: 'BusinessDomain/Category/17xAddCategory.js?v=' + version,
                         title: '17xAddCategory',
                         preload: [
@@ -602,7 +611,6 @@ Harness.start(
 
                         ]
                     }
-
                 ]
             }
 

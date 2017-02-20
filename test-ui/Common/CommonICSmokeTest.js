@@ -1533,8 +1533,8 @@ Ext.define('Inventory.CommonICSmokeTest', {
             .displayText('=====  1.8 Open Commodities and Check Screen Fields Done ====')
 
 
-            //Inventory Fuel Types Screen
-            .displayText('=====  1.9 Open Fuel Types and Check Screen Fields ====')
+            //Inventory Categories
+            .displayText('=====  1.9 Open Categories Screen ====')
             .clickMenuScreen('Categories','Screen')
             .waitUntilLoaded()
             .verifySearchToolbarButton({openselected: false, openall: false, close: false})
@@ -1578,6 +1578,7 @@ Ext.define('Inventory.CommonICSmokeTest', {
                 ,'InventoryValuation'
                 ,'StandardUOM'
             ], true)
+
             //Categories Location tab
             .clickTab('Locations')
             .waitUntilLoaded()
