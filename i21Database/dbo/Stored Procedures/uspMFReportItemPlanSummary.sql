@@ -226,6 +226,40 @@ BEGIN
 	ORDER BY strItemNo
 		,strStartingYear
 		,intMonthId
+		INSERT INTO @tblMFItemPlan
+	SELECT DATEPART(Month, InvS.dtmShipDate) intMonthId
+		,DATENAME(Month, InvS.dtmShipDate) dtmShiftStartTime
+		,I.strItemNo
+		,I.strDescription
+		,CL.strLocationName
+		,SUM(InvI.dblQuantity) dblMaxPoundsRequired
+		,I.intItemId
+		,0 dblSafetyStockPounds
+		,0 dblUnPackedPounds
+		,0 dblPoundsAvailable
+		,0 dblTotalPoundsAvailable
+		,'' strWorkInstruction
+		,0 dblRunningTotal
+		,0 dblAvlQtyBreakUp
+		,CL.intCompanyLocationId
+		,0 dblUnpackedBreakUp
+		,0 dblAvlBreakup
+		,DATEPART(YEAR, InvS.dtmShipDate) strStartingYear
+		FROM tblICInventoryShipment InvS
+		JOIN tblICInventoryShipmentItem InvI ON InvI.intInventoryShipmentId = InvS.intInventoryShipmentId
+		JOIN dbo.tblICItem I ON I.intItemId = InvI.intItemId
+		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = InvS.intShipFromLocationId
+		WHERE InvS.ysnPosted = 0
+			AND I.strType = 'Raw Material'
+			AND InvS.dtmShipDate >= @dtmCurrentDate
+		GROUP BY DATEPART(Month, InvS.dtmShipDate) 
+		,DATENAME(Month, InvS.dtmShipDate) 
+		,I.strItemNo
+		,I.strDescription
+		,CL.strLocationName
+		,I.intItemId
+		,CL.intCompanyLocationId
+		,DATEPART(YEAR, InvS.dtmShipDate) 
 	End
 
 	INSERT INTO @tblMFItemPlanSummary

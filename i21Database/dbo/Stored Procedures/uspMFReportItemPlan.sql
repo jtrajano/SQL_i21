@@ -123,7 +123,7 @@ BEGIN
 
 	SELECT @strItemNo = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'Blend'
+	WHERE [fieldname] = 'Item'
 
 	IF @strItemNo = ''
 		OR @strItemNo IS NULL
@@ -383,8 +383,7 @@ BEGIN
 				,strQtyType
 				,intDisplayOrder
 				)
-			SELECT 
-				MC.strCellName
+			SELECT MC.strCellName
 				,W.intWorkOrderId
 				,W.strWorkOrderNo
 				,NULL
@@ -499,7 +498,8 @@ BEGIN
 					,@intPausedStatusId
 					,@intReleaseStatusId
 					,@intStartedStatusId
-					) and W.dblQuantity - W.dblProducedQuantity>0
+					)
+				AND W.dblQuantity - W.dblProducedQuantity > 0
 			GROUP BY MC.strCellName
 				,W.intWorkOrderId
 				,W.strWorkOrderNo
@@ -512,6 +512,53 @@ BEGIN
 			ORDER BY I.strItemNo
 				,W.dtmPlannedDate
 				,W.strWorkOrderNo
+
+			INSERT INTO @tblMFWIPItem (
+				strCellName
+				,intWorkOrderId
+				,strWorkOrderNo
+				,dtmPlannedDateTime
+				,intItemId
+				,strItemNo
+				,strDescription
+				,intCompanyLocationId
+				,strCompanyLocationName
+				,dblItemRequired
+				,strOwner
+				,dtmPlannedDate
+				,strComments
+				,strQtyType
+				,intDisplayOrder
+				)
+			SELECT '' AS strCellName
+				,0 intWorkOrderId
+				,InvS.strShipmentNumber
+				,NULL
+				,I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,InvS.intShipFromLocationId
+				,CL.strLocationName
+				,SUM(InvI.dblQuantity)
+				,'' AS strName
+				,InvS.dtmShipDate
+				,'' strWorkInstruction
+				,'Demand#'
+				,0
+			FROM tblICInventoryShipment InvS
+			JOIN tblICInventoryShipmentItem InvI ON InvI.intInventoryShipmentId = InvS.intInventoryShipmentId
+			JOIN dbo.tblICItem I ON I.intItemId = InvI.intItemId
+			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = InvS.intShipFromLocationId
+			WHERE InvS.ysnPosted = 0
+				AND I.strType = 'Raw Material'
+				AND InvS.dtmShipDate <= @dtmCalendarDate
+			GROUP BY InvS.strShipmentNumber
+				,I.intItemId
+				,I.strItemNo
+				,I.strDescription
+				,InvS.intShipFromLocationId
+				,CL.strLocationName
+				,InvS.dtmShipDate
 		END
 
 		SELECT @intCompanyLocationId = MIN(intCompanyLocationId)
@@ -621,7 +668,8 @@ BEGIN
 	JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
 	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-	JOIN  dbo.tblICLotStatus BS on BS.intLotStatusId =ISNULL(LI.intBondStatusId,1)  and BS.strPrimaryStatus ='Active'
+	JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+		AND BS.strPrimaryStatus = 'Active'
 	WHERE L.intLotStatusId = 1
 		AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 		AND CSL.strSubLocationName <> 'Intrasit'
@@ -655,19 +703,19 @@ BEGIN
 	GROUP BY W.intLocationId
 		,I.intItemId
 
-INSERT INTO @tblMFQtyInProduction
-SELECT R.intLocationId
-	,RI.intItemId
-	,SUM(CASE 
-			WHEN RI.intWeightUOMId IS NULL
-				THEN RI.dblOpenReceive
-			ELSE RI.dblNet
-			END) 
-FROM dbo.tblICInventoryReceiptItem RI
-JOIN dbo.tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-WHERE R.ysnPosted = 0
-GROUP BY R.intLocationId
-	,RI.intItemId
+	INSERT INTO @tblMFQtyInProduction
+	SELECT R.intLocationId
+		,RI.intItemId
+		,SUM(CASE 
+				WHEN RI.intWeightUOMId IS NULL
+					THEN RI.dblOpenReceive
+				ELSE RI.dblNet
+				END)
+	FROM dbo.tblICInventoryReceiptItem RI
+	JOIN dbo.tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	WHERE R.ysnPosted = 0
+	GROUP BY R.intLocationId
+		,RI.intItemId
 
 	UPDATE @tblMFRequiredItemByLocation
 	SET dblQtyInProduction = Q.dblWeight
@@ -1016,7 +1064,7 @@ GROUP BY R.intLocationId
 			ELSE dblQuantity
 			END
 	WHERE strWorkOrderNo LIKE 'Inventory -%'
-		OR strWorkOrderNo LIKE 'Demand Total%'
+		OR strWorkOrderNo LIKE 'Demand Total%' OR strWorkOrderNo = 'Available Inventory'
 
 	UPDATE @tblMFFinalWIPItem
 	SET dtmPlannedDateTime = IsNULL(SW.dtmPlannedStartDate, W.dtmPlannedDate + IsNULL(S.dtmShiftStartTime, 0) + IsNULL(S.intStartOffset, 0))
