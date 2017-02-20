@@ -36,10 +36,12 @@ AS
 			BA.strAccountNumber,
 			MA.strOptMarketName,
 			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') AS strPricingMonth,
-			REPLACE(HO.strFutureMonth,' ','('+HO.strSymbol+') ') AS strHedgeMonth
+			REPLACE(HO.strFutureMonth,' ','('+HO.strSymbol+') ') AS strHedgeMonth,
+			CH.strContractNumber
 
-	FROM tblCTPriceFixationDetail PD
-	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId		LEFT
+	FROM	tblCTPriceFixationDetail PD
+	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId		
+	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId		LEFT
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId					=	PD.intBrokerId				LEFT
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PD.intPricingUOMId			LEFT
 	JOIN	tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId			LEFT
