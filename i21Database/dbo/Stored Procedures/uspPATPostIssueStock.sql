@@ -103,27 +103,24 @@ BEGIN
 END
 ELSE
 BEGIN
-	IF(@ysnVoting = 1)
+	IF(@ysnPosted = 1)
 	BEGIN
-		IF(@ysnPosted = 1)
-		BEGIN
 
-		------------------------CREATE GL ENTRIES---------------------
-			INSERT INTO @GLEntries
-			SELECT * FROM [dbo].[fnPATCreateIssueStockGLEntries](@intCustomerStockId, @intUserId, @batchId)
+	------------------------CREATE GL ENTRIES---------------------
+		INSERT INTO @GLEntries
+		SELECT * FROM [dbo].[fnPATCreateIssueStockGLEntries](@intCustomerStockId, @intUserId, @batchId)
 
-		END
-		ELSE
-		BEGIN
+	END
+	ELSE
+	BEGIN
 
-		------------------------REVERSE GL ENTRIES---------------------
-			INSERT INTO @GLEntries
-			SELECT * FROM [dbo].[fnPATReverseIssueStockGLEntries](@intCustomerStockId, @dateToday, @intUserId, @batchId)
+	------------------------REVERSE GL ENTRIES---------------------
+		INSERT INTO @GLEntries
+		SELECT * FROM [dbo].[fnPATReverseIssueStockGLEntries](@intCustomerStockId, @dateToday, @intUserId, @batchId)
 
-			UPDATE tblGLDetail SET ysnIsUnposted = 1
-			WHERE intTransactionId = @intCustomerStockId 
-				AND strModuleName = N'Patronage' AND strTransactionForm = N'Issue Stock'
-		END
+		UPDATE tblGLDetail SET ysnIsUnposted = 1
+		WHERE intTransactionId = @intCustomerStockId 
+			AND strModuleName = N'Patronage' AND strTransactionForm = N'Issue Stock'
 	END
 END
 BEGIN TRY
