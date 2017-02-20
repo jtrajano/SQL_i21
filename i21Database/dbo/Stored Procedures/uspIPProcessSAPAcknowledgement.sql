@@ -130,6 +130,8 @@ Begin
 			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo,intConcurrencyId=intConcurrencyId+1 
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId=@strTrackingNo
 
+			Update tblCTContractHeader Set intConcurrencyId=intConcurrencyId+1 Where intContractHeaderId=@intContractHeaderId
+
 			--For Added Contract
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='Success',strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')
