@@ -1508,8 +1508,8 @@ BEGIN
 			),
 			(
 				 'Total Amount'
-				,@dblOriginalPrice * @dblQuantity
-				,@dblPrice * @dblQuantity
+				,ROUND(@dblOriginalPrice * @dblQuantity,2)
+				,ROUND(@dblPrice * @dblQuantity,2)
 			)
 		END
 	ELSE
@@ -1532,8 +1532,8 @@ BEGIN
 		),
 		(
 			 'Total Amount'
-			,@dblOriginalPrice * @dblQuantity
-			,(@dblPrice + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity
+			,ROUND(@dblOriginalPrice * @dblQuantity,2)
+			,ROUND((@dblPrice + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
 		)
 		END
 	---------------------------------------------------
