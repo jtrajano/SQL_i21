@@ -5022,6 +5022,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaimDM.sql" />
     <Build Include="dbo\Views\vyuQMSampleStaticPropertiesResult.sql" />
     <Build Include="dbo\Tables\tblIPLSPPartner.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportBasisComponent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

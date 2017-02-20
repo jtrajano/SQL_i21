@@ -37,6 +37,11 @@ AS
 			CD.strERPPONumber,
 			CD.strERPItemNumber,
 			CD.strERPBatchNumber,
+			CD.dblNetWeight,
+
+			IC.strContractItemName,
+			IC.strContractItemNo,
+			U4.strUnitMeasure AS strWeightUOM,
 			IM.strItemNo,						
 			FT.strFreightTerm,				
 			IM.strDescription				AS	strItemDescription,
@@ -91,6 +96,9 @@ AS
 	JOIN	tblICItemUOM					SM	ON	SM.intItemId				=	CD.intItemId				AND														
 													SM.ysnStockUnit				=	1							LEFT
 	JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId		LEFT
+	JOIN	tblICUnitMeasure				U4	ON	U4.intUnitMeasureId			=	WU.intUnitMeasureId			LEFT
+
+	JOIN	tblICItemContract				IC	ON	IC.intItemContractId		=	CD.intItemContractId		LEFT
 	JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
 	JOIN	tblSMShipVia					SV	ON	SV.intEntityShipViaId		=	CD.intShipViaId				LEFT
 	JOIN	tblCTContractOptHeader			OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT
