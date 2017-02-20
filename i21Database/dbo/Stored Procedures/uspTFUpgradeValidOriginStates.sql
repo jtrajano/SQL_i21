@@ -46,7 +46,7 @@ BEGIN TRY
 		SET 
 			intReportingComponentId			= SOURCE.intReportingComponentId
 			, intOriginDestinationStateId	= SOURCE.intOriginDestinationStateId
-			, strType						= SOURCE.strStatus
+			, strType						= SOURCE.strFilter
 
 	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
