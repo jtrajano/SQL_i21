@@ -11,19 +11,26 @@ BEGIN TRY
 		
 	DECLARE @idoc INT
 	DECLARE @ErrMsg nvarchar(max)
+	DECLARE @strPartnerNo nvarchar(100)
 
 	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 	,@strXml
 
-	--Receipt
+	Select @strPartnerNo = RCVPRN 
+	FROM OPENXML(@idoc, 'DELVRY07/IDOC/EDI_DC40', 2) WITH ( 
+		RCVPRN NVARCHAR(100)
+	)
+
+	--ETA
 	INSERT INTO tblIPShipmentETAStage(
 		 strDeliveryNo
 		,dtmETA
+		,strPartnerNo
 		)
 	SELECT   VBELN
-			,CASE WHEN ISDATE(NTANF)=0 THEN NULL ELSE NTANF END
+			,CASE WHEN ISDATE(NTANF)=0 THEN NULL ELSE NTANF END,@strPartnerNo
 	FROM OPENXML(@idoc, 'DELVRY07/IDOC/E1EDL20/E1EDT13', 2) WITH (
 			 VBELN NVARCHAR(100) '../VBELN' 
 			,NTANF DATETIME

@@ -17,7 +17,8 @@ Declare @intMinRowNo int,
 		@strReceiptNo NVARCHAR(50),
 		@intReceiptId INT,
 		@strFinalErrMsg NVARCHAR(MAX)='',
-		@intUserId INT
+		@intUserId INT,
+		@strPartnerNo NVARCHAR(100)
 
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
 
@@ -26,8 +27,11 @@ Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage
 While(@intMinRowNo is not null)
 Begin
 	BEGIN TRY
-		Select @strDeliveryNo=strDeliveryNo,@dtmReceiptDate=dtmReceiptDate
+		Select @strDeliveryNo=strDeliveryNo,@dtmReceiptDate=dtmReceiptDate,@strPartnerNo=strPartnerNo
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
+
+		If NOT EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
+			RaisError('Invalid LSP Partner',16,1)
 
 		If Not Exists (Select 1 From  tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo)
 			RaisError('Invalid Delivery No.',16,1)
@@ -92,8 +96,8 @@ Begin
 			Exec dbo.uspICPostInventoryReceipt 1,0,@strReceiptNo,@intUserId
 											 	
 		--Move to Archive
-		Insert Into tblIPReceiptArchive(strDeliveryNo,strExternalRefNo,dtmReceiptDate,strImportStatus,strErrorMessage)
-		Select strDeliveryNo,strExternalRefNo,dtmReceiptDate,'Success',''
+		Insert Into tblIPReceiptArchive(strDeliveryNo,strExternalRefNo,dtmReceiptDate,strPartnerNo,strImportStatus,strErrorMessage)
+		Select strDeliveryNo,strExternalRefNo,dtmReceiptDate,strPartnerNo,'Success',''
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 
 		Select @intNewStageReceiptId=SCOPE_IDENTITY()
@@ -119,8 +123,8 @@ Begin
 		SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 		----Move to Error
-		Insert Into tblIPReceiptError(strDeliveryNo,strExternalRefNo,dtmReceiptDate,strImportStatus,strErrorMessage)
-		Select strDeliveryNo,strExternalRefNo,dtmReceiptDate,'Failed',@ErrMsg
+		Insert Into tblIPReceiptError(strDeliveryNo,strExternalRefNo,dtmReceiptDate,strPartnerNo,strImportStatus,strErrorMessage)
+		Select strDeliveryNo,strExternalRefNo,dtmReceiptDate,strPartnerNo,'Failed',@ErrMsg
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 
 		Select @intNewStageReceiptId=SCOPE_IDENTITY()
