@@ -108,6 +108,7 @@ BEGIN
 			,[intShipViaId]
 			,[intPaymentMethodId]
 			,[strInvoiceOriginId]
+			,[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]
 			,[strBOLNumber]
 			,[strDeliverPickup]
@@ -190,7 +191,8 @@ BEGIN
 			,[intFreightTermId]						= NULL 
 			,[intShipViaId]							= NULL 
 			,[intPaymentMethodId]					= NULL
-			,[strInvoiceOriginId]					= ''
+			,[strInvoiceOriginId]					= strInvoiceReportNumber
+			,[ysnUseOriginIdAsInvoiceNumber]		= 1
 			,[strPONumber]							= NULL
 			,[strBOLNumber]							= ''
 			,[strDeliverPickup]						= NULL

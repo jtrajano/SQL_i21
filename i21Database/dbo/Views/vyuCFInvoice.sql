@@ -16,3 +16,4 @@ FROM            dbo.tblARInvoice AS INV INNER JOIN
                          dbo.tblARCustomer AS C INNER JOIN
                          dbo.tblEMEntity AS E ON C.intEntityCustomerId = E.intEntityId ON C.intEntityCustomerId = INV.intEntityCustomerId INNER JOIN
                          dbo.tblSMCompanyLocation AS L ON INV.intCompanyLocationId = L.intCompanyLocationId
+
