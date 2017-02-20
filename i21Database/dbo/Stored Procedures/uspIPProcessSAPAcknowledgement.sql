@@ -28,6 +28,7 @@ DECLARE @intMinRowNo INT
 DECLARE @intLoadId INT
 DECLARE @intReceiptId INT
 DECLARE @strDeliveryType NVARCHAR(50)
+DECLARE @strPartnerNo NVARCHAR(100)
 
 Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -58,6 +59,11 @@ Declare @tblMessage AS Table
 	strInfo1 NVARCHAR(50),
 	strInfo2 NVARCHAR(50)
 )
+
+	Select @strPartnerNo = RCVPRN 
+	FROM OPENXML(@idoc, 'ZALEAUD01/IDOC/EDI_DC40', 2) WITH ( 
+		RCVPRN NVARCHAR(100)
+	)
 
 	Insert Into @tblAcknowledgement(strMesssageType,strStatus,strStatusCode,strStatusDesc,strStatusType,
 	strParam,strRefNo,strTrackingNo,strPOItemNo,strLineItemBatchNo,strDeliveryItemNo,strDeliveryType)
@@ -121,7 +127,7 @@ Begin
 
 		If @strStatus IN (52,53) --Success
 		Begin
-			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo 
+			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo,intConcurrencyId=intConcurrencyId+1 
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId=@strTrackingNo
 
 			--For Added Contract
@@ -191,10 +197,10 @@ Begin
 			End
 			Else
 			Begin --Create
-				Update tblLGLoad  Set strExternalShipmentNumber=@strParam
+				Update tblLGLoad  Set strExternalShipmentNumber=@strParam,intConcurrencyId=intConcurrencyId+1
 				Where intLoadId=@intLoadId
 
-				Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo And intLoadId=@intLoadId
+				Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo,intConcurrencyId=intConcurrencyId+1 Where intLoadDetailId=@strTrackingNo And intLoadId=@intLoadId
 
 				Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success',strExternalShipmentNumber=@strParam
 				Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')
@@ -270,27 +276,35 @@ Begin
 	--LSP Shipment
 	If @strMesssageType='SHPMNT'
 	Begin
-		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
-
-		If @strStatus IN (52,53) --Success
+		If EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 		Begin
-			Update tblLGLoadLSPStg Set strFeedStatus='Ack Rcvd',strMessage='Success'
-			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
+			Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
 
-			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
-			Values(@strMesssageType,'Success',@strRefNo,@strParam)
+			If @strStatus IN (52,53) --Success
+			Begin
+				Update tblLGLoadLSPStg Set strFeedStatus='Ack Rcvd',strMessage='Success'
+				Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
+
+				Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+				Values(@strMesssageType,'Success',@strRefNo,@strParam)
+			End
+
+			If @strStatus NOT IN (52,53) --Error
+			Begin
+				Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
+
+				Update tblLGLoadLSPStg Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
+				Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
+
+				Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+				Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
+			End
 		End
-
-		If @strStatus NOT IN (52,53) --Error
+		Else
 		Begin
-			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
-
-			Update tblLGLoadLSPStg Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
-			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
-
-			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
-			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
-		End
+			Insert Into @tblMessage(strMessageType,strMessage)
+			Values(@strMesssageType,'Invalid LSP Partner')
+		End	
 	End
 
 	Select @intMinRowNo=MIN(intRowNo) From @tblAcknowledgement Where intRowNo>@intMinRowNo

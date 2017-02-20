@@ -58,7 +58,9 @@ Declare @intMinHeader				INT,
 		@strCertificates			NVARCHAR(MAX),
 		@intNoOfContainer			INT,
 		@strPackingDesc				NVARCHAR(50),
-		@dtmETSPOL					DATETIME
+		@dtmETSPOL					DATETIME,
+		@strLSPPartnerNo			NVARCHAR(100),
+		@strWarehouseVendorAccNo	NVARCHAR(100)
 
 Declare @tblDetail AS Table
 (
@@ -99,10 +101,11 @@ Declare @tblOutput AS Table
 	intRowNo INT IDENTITY(1,1),
 	strLoadStgIds NVARCHAR(MAX),
 	strRowState NVARCHAR(50),
-	strXml NVARCHAR(MAX)
+	strXml NVARCHAR(MAX),
+	strShipmentNo NVARCHAR(100)
 )
 
-Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('LSP SHIPMENT')
+--Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('LSP SHIPMENT')
 Select @strCompCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL','COMP_CODE')
 
 Select @intMinHeader=Min(intLoadStgId) From tblLGLoadLSPStg Where ISNULL(strFeedStatus,'')=''
@@ -137,12 +140,26 @@ Begin
 	Select TOP 1 @strPackingDesc=ct.strPackingDescription From tblCTContractDetail ct Join tblLGLoadDetail ld on ct.intContractDetailId=ld.intPContractDetailId 
 	Where ld.intLoadId=@intLoadId
 
+	Set @strLSPPartnerNo=''
+	Select TOP 1 @strLSPPartnerNo=strPartnerNo From tblIPLSPPartner Where strWarehouseVendorAccNo=@strWarehouseVendorAccNo
+
+	If ISNULL(@strLSPPartnerNo,'') =''
+	Begin
+		Update tblLGLoadLSPStg Set strFeedStatus='Unprocessed',strMessage='Invalid LSP Partner' Where intLoadStgId=@intLoadStgId
+		GOTO NEXT_SHIPMENT
+	End
+
+	Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('LSP SHIPMENT')
+
 	Set @strXml =  '<ZE1EDL43_PH>'
 	Set @strXml += '<IDOC BEGIN="1">'
 	
 	--IDOC Header
 	Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
 	Set @strXml +=	@strIDOCHeader
+	Set @strXml += '<RCVPRN>'	+ ISNULL(@strLSPPartnerNo,'')	+ '</RCVPRN>'
+	Set @strXml += '<CREDAT>'	+ ISNULL(CONVERT(VARCHAR(10),GETDATE(),112),'')	+ '</CREDAT>'
+	Set @strXml += '<CRETIM>'	+ REPLACE(ISNULL(CONVERT(NVARCHAR(8),GETDATE(),114),''),':','')	+ '</CRETIM>'
 	Set @strXml +=	'</EDI_DC40>'
 	
 	--Header
@@ -458,9 +475,10 @@ Begin
 	Set @strXml += '</IDOC>'
 	Set @strXml +=  '</ZE1EDL43_PH>'
 
-	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml)
-	VALUES(@intMinHeader,'CREATE',@strXml)
+	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml,strShipmentNo)
+	VALUES(@intMinHeader,'CREATE',@strXml,@strLoadNumber)
 
+	NEXT_SHIPMENT:
 	Select @intMinHeader=Min(intLoadStgId) From tblLGLoadLSPStg Where intLoadStgId>@intMinHeader AND ISNULL(strFeedStatus,'')=''
 End --Loop Header End
 Select * From @tblOutput ORDER BY intRowNo

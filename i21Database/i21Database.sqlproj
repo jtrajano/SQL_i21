@@ -5032,6 +5032,7 @@
     <Build Include="dbo\Stored Procedures\uspICPopulateReceiptVoucher.sql" />
     <Build Include="dbo\Tables\tblICItemSubLocation.sql" />
     <Build Include="dbo\Views\vyuQMSampleStaticPropertiesResult.sql" />
+    <Build Include="dbo\Tables\tblIPLSPPartner.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

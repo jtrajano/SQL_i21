@@ -12,15 +12,19 @@ Declare @intMinRowNo int,
 		@ErrMsg NVARCHAR(MAX),
 		@strDeliveryNo NVARCHAR(50),
 		@dtmETA DATETIME,
-		@intLoadId INT
+		@intLoadId INT,
+		@strPartnerNo NVARCHAR(100)
 
 Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage
 
 While(@intMinRowNo is not null)
 Begin
 	BEGIN TRY
-		Select @strDeliveryNo=strDeliveryNo,@dtmETA=dtmETA
+		Select @strDeliveryNo=strDeliveryNo,@dtmETA=dtmETA,@strPartnerNo=strPartnerNo
 		From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
+
+		If NOT EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
+			RaisError('Invalid LSP Partner',16,1)
 
 		If @dtmETA IS NULL
 			RaisError('Invalid ETA',16,1)
@@ -35,8 +39,8 @@ Begin
 		Values(@intLoadId,'ETA POD',@dtmETA,GETDATE()) 
 
 		--Move to Archive
-		Insert Into tblIPShipmentETAArchive(strDeliveryNo,dtmETA,strImportStatus,strErrorMessage)
-		Select strDeliveryNo,dtmETA,'Success',''
+		Insert Into tblIPShipmentETAArchive(strDeliveryNo,dtmETA,strPartnerNo,strImportStatus,strErrorMessage)
+		Select strDeliveryNo,dtmETA,strPartnerNo,'Success',''
 		From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
 
 		Delete From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
@@ -51,8 +55,8 @@ Begin
 		SET @ErrMsg = ERROR_MESSAGE()
 
 		--Move to Error
-		Insert Into tblIPShipmentETAError(strDeliveryNo,dtmETA,strImportStatus,strErrorMessage)
-		Select strDeliveryNo,dtmETA,'Failed',@ErrMsg
+		Insert Into tblIPShipmentETAError(strDeliveryNo,dtmETA,strPartnerNo,strImportStatus,strErrorMessage)
+		Select strDeliveryNo,dtmETA,strPartnerNo,'Failed',@ErrMsg
 		From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
 
 		Delete From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
