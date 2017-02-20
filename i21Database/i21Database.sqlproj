@@ -5046,6 +5046,9 @@
     <Build Include="dbo\Views\vyuTFGetTransactionException.sql" />
     <Build Include="dbo\Views\vyuTFGetTransactionSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateForm73.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentAccountStatusCode.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentVendor.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCustomer.sql" />
     <Build Include="dbo\Tables\tblICItemSubLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportBasisComponent.sql" />
     <Build Include="dbo\Tables\tblIPLSPPartner.sql" />
