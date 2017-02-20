@@ -47,6 +47,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intCompanyLocationId, intEntityI
 	, intDestinationGradeId = ContractView.intGradeId
 	, strDestinationWeights = ContractView.strWeight
 	, intDestinationWeightId = ContractView.intWeightId
+	, intCurrencyId = ContractView.intCurrencyId
 FROM vyuCTContractDetailView ContractView
 WHERE ysnAllowedToShow = 1
 	AND strContractType = 'Sale'
