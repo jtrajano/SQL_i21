@@ -16,8 +16,7 @@ BEGIN TRY
 		,@strXml
 
 	DECLARE @intContractDetailId INT
-		,@dblSampleQty NUMERIC(18, 6)
-		,@strSampleUOM NVARCHAR(50)
+		,@strRepresentingUOM NVARCHAR(50)
 		,@strRefNo NVARCHAR(100)
 		,@strSampleStatus NVARCHAR(30)
 		,@dtmSampleReceivedDate DATETIME
@@ -35,14 +34,14 @@ BEGIN TRY
 		,@dtmCreated DATETIME = GETDATE()
 		,@intUserId INT
 		,@intValidDate INT
-	DECLARE @dblOldSampleQty NUMERIC(18, 6)
-		,@intOldSampleUOMId INT
+	DECLARE @dblOldRepresentingQty NUMERIC(18, 6)
+		,@intOldRepresentingUOMId INT
 		,@strOldRefNo NVARCHAR(100)
 		,@intOldSampleStatusId INT
 		,@strOldSampleNote NVARCHAR(512)
 		,@dtmOldSampleReceivedDate DATETIME
-	DECLARE @dblNewSampleQty NUMERIC(18, 6)
-		,@intNewSampleUOMId INT
+	DECLARE @dblNewRepresentingQty NUMERIC(18, 6)
+		,@intNewRepresentingUOMId INT
 		,@strNewRefNo NVARCHAR(100)
 		,@intNewSampleStatusId INT
 		,@strNewSampleNote NVARCHAR(512)
@@ -66,8 +65,8 @@ BEGIN TRY
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@intContractDetailId = intContractDetailId
-		,@dblSampleQty = dblSampleQty
-		,@strSampleUOM = strSampleUOM
+		,@dblRepresentingQty = dblRepresentingQty
+		,@strRepresentingUOM = strRepresentingUOM
 		,@strRefNo = strRefNo
 		,@strSampleStatus = strSampleStatus
 		,@dtmSampleReceivedDate = dtmSampleReceivedDate
@@ -75,8 +74,8 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strSampleNumber NVARCHAR(30)
 			,intContractDetailId INT
-			,dblSampleQty NUMERIC(18, 6)
-			,strSampleUOM NVARCHAR(50)
+			,dblRepresentingQty NUMERIC(18, 6)
+			,strRepresentingUOM NVARCHAR(50)
 			,strRefNo NVARCHAR(100)
 			,strSampleStatus NVARCHAR(30)
 			,dtmSampleReceivedDate DATETIME
@@ -106,15 +105,15 @@ BEGIN TRY
 							)
 			END
 
-			IF (ISNULL(@strSampleUOM, '') <> '')
+			IF (ISNULL(@strRepresentingUOM, '') <> '')
 			BEGIN
-				SELECT @intSampleUOMId = intUnitMeasureId
+				SELECT @intRepresentingUOMId = intUnitMeasureId
 				FROM tblICUnitMeasure
-				WHERE strUnitMeasure = @strSampleUOM
+				WHERE strUnitMeasure = @strRepresentingUOM
 
-				IF @intSampleUOMId IS NULL
+				IF @intRepresentingUOMId IS NULL
 					RAISERROR (
-							'Sample UOM is not available. '
+							'Representing UOM is not available. '
 							,16
 							,1
 							)
@@ -126,8 +125,8 @@ BEGIN TRY
 
 			BEGIN TRAN
 
-			SELECT @dblOldSampleQty = dblSampleQty
-				,@intOldSampleUOMId = intSampleUOMId
+			SELECT @dblOldRepresentingQty = dblRepresentingQty
+				,@intOldRepresentingUOMId = intRepresentingUOMId
 				,@strOldRefNo = strRefNo
 				,@intOldSampleStatusId = intSampleStatusId
 				,@strOldSampleNote = strSampleNote
@@ -137,15 +136,15 @@ BEGIN TRY
 
 			UPDATE tblQMSample
 			SET intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
-				,dblSampleQty = CASE 
-					WHEN @dblSampleQty IS NOT NULL
-						THEN @dblSampleQty
-					ELSE dblSampleQty
+				,dblRepresentingQty = CASE 
+					WHEN @dblRepresentingQty IS NOT NULL
+						THEN @dblRepresentingQty
+					ELSE dblRepresentingQty
 					END
-				,intSampleUOMId = CASE 
-					WHEN @intSampleUOMId IS NOT NULL
-						THEN @intSampleUOMId
-					ELSE intSampleUOMId
+				,intRepresentingUOMId = CASE 
+					WHEN @intRepresentingUOMId IS NOT NULL
+						THEN @intRepresentingUOMId
+					ELSE intRepresentingUOMId
 					END
 				,strRefNo = CASE 
 					WHEN @strRefNo IS NOT NULL
@@ -190,8 +189,8 @@ BEGIN TRY
 			FROM tblQMSample
 			WHERE intSampleId = @intSampleId
 
-			SELECT @dblNewSampleQty = dblSampleQty
-				,@intNewSampleUOMId = intSampleUOMId
+			SELECT @dblNewRepresentingQty = dblRepresentingQty
+				,@intNewRepresentingUOMId = intRepresentingUOMId
 				,@strNewRefNo = strRefNo
 				,@intNewSampleStatusId = intSampleStatusId
 				,@strNewSampleNote = strSampleNote
@@ -203,11 +202,11 @@ BEGIN TRY
 			BEGIN
 				DECLARE @strDetails NVARCHAR(MAX) = ''
 
-				IF (@dblOldSampleQty <> @dblNewSampleQty)
-					SET @strDetails += '{"change":"dblSampleQty","iconCls":"small-gear","from":"' + LTRIM(@dblOldSampleQty) + '","to":"' + LTRIM(@dblNewSampleQty) + '","leaf":true},'
+				IF (@dblOldRepresentingQty <> @dblNewRepresentingQty)
+					SET @strDetails += '{"change":"dblRepresentingQty","iconCls":"small-gear","from":"' + LTRIM(@dblOldRepresentingQty) + '","to":"' + LTRIM(@dblNewRepresentingQty) + '","leaf":true},'
 
-				IF (@intOldSampleUOMId <> @intNewSampleUOMId)
-					SET @strDetails += '{"change":"intSampleUOMId","iconCls":"small-gear","from":"' + LTRIM(@intOldSampleUOMId) + '","to":"' + LTRIM(@intNewSampleUOMId) + '","leaf":true},'
+				IF (@intOldRepresentingUOMId <> @intNewRepresentingUOMId)
+					SET @strDetails += '{"change":"intRepresentingUOMId","iconCls":"small-gear","from":"' + LTRIM(@intOldRepresentingUOMId) + '","to":"' + LTRIM(@intNewRepresentingUOMId) + '","leaf":true},'
 
 				IF (@strOldRefNo <> @strNewRefNo)
 					SET @strDetails += '{"change":"strRefNo","iconCls":"small-gear","from":"' + LTRIM(@strOldRefNo) + '","to":"' + LTRIM(@strNewRefNo) + '","leaf":true},'
@@ -270,10 +269,10 @@ BEGIN TRY
 				,1
 				)
 
-	IF ISNULL(@strSampleUOM, '') = ''
+	IF ISNULL(@strRepresentingUOM, '') = ''
 	BEGIN
-		SELECT TOP 1 @intSampleUOMId = UOM.intUnitMeasureId
-			,@strSampleUOM = UOM.strUnitMeasure
+		SELECT TOP 1 @intRepresentingUOMId = UOM.intUnitMeasureId
+			,@strRepresentingUOM = UOM.strUnitMeasure
 		FROM tblCTContractDetail CD
 		JOIN tblICItemUOM IUOM ON IUOM.intItemId = CD.intItemId
 			AND IUOM.ysnStockUnit = 1
@@ -282,21 +281,21 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		SELECT @intSampleUOMId = intUnitMeasureId
+		SELECT @intRepresentingUOMId = intUnitMeasureId
 		FROM tblICUnitMeasure
-		WHERE strUnitMeasure = @strSampleUOM
+		WHERE strUnitMeasure = @strRepresentingUOM
 
-		IF @intSampleUOMId IS NULL
+		IF @intRepresentingUOMId IS NULL
 			RAISERROR (
-					'Sample UOM is not available. '
+					'Representing UOM is not available. '
 					,16
 					,1
 					)
 	END
 
-	IF @dblSampleQty IS NULL
+	IF @dblRepresentingQty IS NULL
 		RAISERROR (
-				'Sample Qty cannot be empty. '
+				'Representing Qty cannot be empty. '
 				,16
 				,1
 				)
@@ -307,8 +306,8 @@ BEGIN TRY
 		,@intItemContractId = CD.intItemContractId
 		,@intCountryID = ISNULL(IM.intOriginId, IC.intCountryId) --intCountryId
 		,@intEntityId = CH.intEntityId
-		,@dblRepresentingQty = CD.dblQuantity
-		,@intRepresentingUOMId = CD.intUnitMeasureId
+		--,@dblRepresentingQty = CD.dblQuantity
+		--,@intRepresentingUOMId = CD.intUnitMeasureId
 		,@strCountry = ISNULL(CA.strDescription, CG.strCountry) --strCountry
 		,@intLocationId = CD.intCompanyLocationId
 	FROM tblCTContractDetail CD
@@ -444,8 +443,6 @@ BEGIN TRY
 		,dtmSampleReceivedDate
 		,dtmTestedOn
 		,intTestedById
-		,dblSampleQty
-		,intSampleUOMId
 		,dblRepresentingQty
 		,intRepresentingUOMId
 		,strRefNo
@@ -477,8 +474,6 @@ BEGIN TRY
 		,@dtmSampleReceivedDate
 		,@dtmSampleReceivedDate
 		,@intUserId
-		,@dblSampleQty
-		,@intSampleUOMId
 		,@dblRepresentingQty
 		,@intRepresentingUOMId
 		,@strRefNo
