@@ -33,17 +33,7 @@ AS
   		  ,[strHeaderFooter]
 		  ,[intCharacterLimit]
 		  ,[strMessage]
-		  ,[ysnRecipe]
-		  ,[ysnQuote]
-		  ,[ysnSalesOrder]
-		  ,[ysnPickList]
-		  ,[ysnBOL]
-		  ,[ysnInvoice]
-		  ,[ysnScaleTicket])
-	SELECT @NewDocumentMaintenanceId
-  		  ,[strHeaderFooter]
-		  ,[intCharacterLimit]
-		  ,[strMessage]
+		  ,[blbMessage]
 		  ,[ysnRecipe]
 		  ,[ysnQuote]
 		  ,[ysnSalesOrder]
@@ -51,6 +41,20 @@ AS
 		  ,[ysnBOL]
 		  ,[ysnInvoice]
 		  ,[ysnScaleTicket]
+		  ,[ysnInventoryTransfer])
+	SELECT @NewDocumentMaintenanceId
+  		  ,[strHeaderFooter]
+		  ,[intCharacterLimit]
+		  ,[strMessage]
+		  ,[blbMessage]
+		  ,[ysnRecipe]
+		  ,[ysnQuote]
+		  ,[ysnSalesOrder]
+		  ,[ysnPickList]
+		  ,[ysnBOL]
+		  ,[ysnInvoice]
+		  ,[ysnScaleTicket]
+		  ,[ysnInventoryTransfer]
 	FROM [tblSMDocumentMaintenanceMessage]
 	WHERE [intDocumentMaintenanceId] = @intDocumentMaintenanceId
 
