@@ -211,18 +211,24 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colSubLocation: {
                     dataIndex: 'strSubLocation',
                     editor: {
-                        store: '{subLocation}',
+                        store: '{fromSubLocation}',
                         defaultFilters: [
                             {
-                                column: 'intCompanyLocationId',
+                                column: 'intItemId',
+                                value: '{grdInventoryAdjustment.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
                                 value: '{current.intLocationId}',
                                 conjunction: 'and'
                             },
                             {
-                                column: 'strClassification',
-                                value: 'Inventory',
-                                conjunction: 'and'
-                            }
+                                column: 'dblOnHand',
+                                value: '0',
+                                conjunction: 'and',
+                                condition: 'gt'
+                            },
                         ]
                     }
                 },
@@ -807,13 +813,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         }
         else if (combo.itemId === 'cboSubLocation') {
-            current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
+           /* current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
             me.getStockQuantity(current, win);
-            current.set('intItemUOMId', null);
             current.set('dblItemUOMUnitQty', null);
-            current.set('strItemUOM', null);
-            current.set('strStorageLocation', null);
-            current.set('intStorageLocationId', null);
             current.set('intLotId', null);
             current.set('strLotNumber', null);
             current.set('intNewLotId', null);
@@ -832,7 +834,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('strNewWeightUOM', null);
             current.set('dblWeightPerQty', null);
             current.set('dblNewWeightPerQty', null);
-            current.set('dblLineTotal', 0.00);
+            current.set('dblLineTotal', 0.00);*/
+
+            current.set('strStorageLocation', records[0].get('strStorageLocationName'));
+            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('dblQuantity', records[0].get('dblOnHand'));
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
+            current.set('strItemUOM', records[0].get('strUnitMeasure'));
         }
         else if (combo.itemId === 'cboStorageLocation') {
             current.set('intStorageLocationId', record.get('intStorageLocationId'));
