@@ -15,7 +15,7 @@ Ext.define('Inventory.view.InventoryBaseViewController', {
     saveAndPokeGrid: function(win, grid) {
         var me = this;
         return Ext.bind(function(success, failure) {
-            me.pokeGrid(grid);
+            //me.pokeGrid(grid);
             win.context.data.saveRecord({
                 callbackFn: function(batch, options) {
                     me.pokeGrid(grid);

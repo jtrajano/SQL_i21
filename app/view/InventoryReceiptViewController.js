@@ -2356,11 +2356,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     showSummaryTotals: function (win) {
         var current = win.viewModel.data.current;
-        var lblSubTotal = win.down('#lblSubTotal');
-        var lblTax = win.down('#lblTax');
-        var lblGrossWgt = win.down('#lblGrossWgt');
-        var lblNetWgt = win.down('#lblNetWgt');
-        var lblTotal = win.down('#lblTotal');
+        var txtSubTotal = win.down('#txtSubTotal');
+        var txtTax = win.down('#txtTax');
+        var txtGrossWgt = win.down('#txtGrossWgt');
+        var txtNetWgt = win.down('#txtNetWgt');
+        var txtTotal = win.down('#txtTotal');
 
         var totalAmount = 0;
         var totalTax = 0;
@@ -2384,11 +2384,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         totalTax = totalTax + totalChargesTax;
         var grandTotal = totalAmount + totalCharges + totalTax;
 
-        lblSubTotal.setText('SubTotal: ' + Ext.util.Format.number(totalAmount, '0,000.00'));
-        lblTax.setText('Tax: ' + Ext.util.Format.number(totalTax, '0,000.00'));
-        lblGrossWgt.setText('Gross: ' + Ext.util.Format.number(totalGross, '0,000.00'));
-        lblNetWgt.setText('Net: ' + Ext.util.Format.number(totalNet, '0,000.00'));
-        lblTotal.setText('Total: ' + Ext.util.Format.number(grandTotal, '0,000.00'));
+        if (txtSubTotal) {txtSubTotal.setValue(totalAmount);}
+        if (txtTax) {txtTax.setValue(totalTax);}
+        if (txtGrossWgt) {txtGrossWgt.setValue(totalGross);}
+        if (txtNetWgt) {txtNetWgt.setValue(totalNet);}
+        if (txtTotal) {txtTotal.setValue(grandTotal);}
     },
 
     getTaxableAmount: function (quantity, price, currentItemTax, itemTaxes) {
@@ -2446,7 +2446,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     calculateOtherCharges: function (win) {
         var current = win.viewModel.data.current;
         var totalCharges = 0;
-        var lblCharges = win.down('#lblCharges');
+        var txtCharges = win.down('#txtCharges');
         var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
 
         if (current) {
@@ -2475,19 +2475,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
         }
-        lblCharges.setText('Charges: ' + Ext.util.Format.number(totalCharges, '0,000.00'));
+
+        if (txtCharges) {txtCharges.setValue(totalCharges);}
+
         return totalCharges;
     },
 
     showOtherCharges: function (win) {
         var me = this;
-        var lblCharges = win.down('#lblCharges');
+        var txtCharges = win.down('#txtCharges');
         var totalCharges = me.calculateOtherCharges(win);
 
-        if (lblCharges) {
-            lblCharges.setText('Charges: ' + Ext.util.Format.number(totalCharges, '0,000.00'));
-        }
-
+        if (txtCharges) {txtCharges.setValue(totalCharges);}     
     },
     /*
         convertLotUOMToGross: function(lotCF, weightCF, lotQty){
