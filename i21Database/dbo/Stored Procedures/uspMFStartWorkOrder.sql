@@ -11,6 +11,17 @@ BEGIN TRY
 		,@strItemNo NVARCHAR(MAX)
 		,@intScheduleId int
 		,@strWorkOrderNo nvarchar(50)
+		,@intSampleStatusId INT
+		,@strCellName NVARCHAR(50)
+		,@dtmSampleCreated DATETIME
+		,@strLineSampleMandatory NVARCHAR(50)
+		,@intDurationBetweenLineSample INT
+		,@dtmStartedDate DATETIME
+		,@intControlPointId INT
+		,@intSampleTypeId INT
+		,@intManufacturingCellId int
+		,@intManufacturingProcessId int
+		,@strSampleTypeName nvarchar(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -27,6 +38,8 @@ BEGIN TRY
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
 		,@strWorkOrderNo=strWorkOrderNo 
+		,@intManufacturingCellId=intManufacturingCellId
+		,@intManufacturingProcessId=intManufacturingProcessId
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -88,6 +101,129 @@ BEGIN TRY
 				,@strItemNo
 				)
 	END
+
+	SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+			,@dtmSampleCreated = S.dtmCreated
+		FROM tblQMSample S
+		JOIN tblQMSampleType ST on ST.intSampleTypeId =S.intSampleTypeId 
+		WHERE S.intProductTypeId = 12
+			AND S.intProductValueId = @intWorkOrderId
+			And ST.intControlPointId =11--Line Sample
+		ORDER BY S.dtmLastModified DESC
+
+		IF @intSampleStatusId = 4
+		BEGIN
+			SELECT @strCellName = strCellName
+			FROM tblMFManufacturingCell
+			WHERE intManufacturingCellId = @intManufacturingCellId
+
+			RAISERROR (
+					90022
+					,11
+					,1
+					,@strCellName
+					)
+		END
+		SELECT  @intSampleStatusId=NULL,@dtmSampleCreated=NULL
+
+		SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+			,@dtmSampleCreated = S.dtmCreated
+		FROM tblQMSample S
+		JOIN tblQMSampleType ST on ST.intSampleTypeId =S.intSampleTypeId 
+		WHERE S.intProductTypeId = 12
+			AND S.intProductValueId = @intWorkOrderId
+			And ST.intControlPointId =12--WIP Sample
+		ORDER BY S.dtmLastModified DESC
+
+		IF @intSampleStatusId = 4
+		BEGIN
+			SELECT @strCellName = strCellName
+			FROM tblMFManufacturingCell
+			WHERE intManufacturingCellId = @intManufacturingCellId
+
+			RAISERROR (
+					90022
+					,11
+					,1
+					,@strCellName
+					)
+		END
+
+		SELECT @strLineSampleMandatory = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 84
+
+		IF @strLineSampleMandatory = 'True'
+		BEGIN
+		SELECT  @intSampleStatusId=NULL,@dtmSampleCreated=NULL
+
+			SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+				,@dtmSampleCreated = S.dtmCreated
+			FROM tblQMSample S
+			JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+			WHERE S.intProductTypeId = 12
+				AND S.intProductValueId = @intWorkOrderId
+				AND ST.intControlPointId = 11--WIP Sample
+			ORDER BY S.dtmLastModified DESC
+
+			if @intSampleStatusId is null
+			Select @intSampleStatusId=0
+
+
+			IF @intSampleStatusId<>3
+			BEGIN
+				Select @strSampleTypeName =strSampleTypeName 
+				from tblQMSampleType
+				Where intControlPointId = 11
+
+				SELECT @strCellName = strCellName
+				FROM tblMFManufacturingCell
+				WHERE intManufacturingCellId = @intManufacturingCellId
+
+				RAISERROR (
+						90027
+						,11
+						,1
+						,@strSampleTypeName
+						,@strCellName
+						)
+			END
+
+			SELECT  @intSampleStatusId=NULL,@dtmSampleCreated=NULL
+
+			SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+				,@dtmSampleCreated = S.dtmCreated
+			FROM tblQMSample S
+			JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+			WHERE S.intProductTypeId = 12
+				AND S.intProductValueId = @intWorkOrderId
+				AND ST.intControlPointId = 12 --WIP Sample
+			ORDER BY S.dtmLastModified DESC
+
+			if @intSampleStatusId is null
+			Select @intSampleStatusId=0
+
+
+			IF @intSampleStatusId<>3
+			BEGIN
+				Select @strSampleTypeName =strSampleTypeName 
+				from tblQMSampleType
+				Where intControlPointId = 12
+
+				SELECT @strCellName = strCellName
+				FROM tblMFManufacturingCell
+				WHERE intManufacturingCellId = @intManufacturingCellId
+
+				RAISERROR (
+						90028
+						,11
+						,1
+						,@strSampleTypeName,@strCellName
+						)
+			END
+		END
 
 	UPDATE dbo.tblMFWorkOrder
 	SET intStatusId = 10

@@ -89,12 +89,15 @@ BEGIN
 			,@strPalletId3 NVARCHAR(50)
 			,@intTaskId INT
 			,@intOriginId INT
+			,@intStatusId INT
+			,@intRecipeId INT
 
 		SELECT @dtmPlannedDate = dtmPlannedDate
 			,@intPlannedShiftId = intPlannedShiftId
 			,@intLocationId = intLocationId
 			,@intSubLocationId = intSubLocationId
 			,@intManufacturingProcessId = intManufacturingProcessId
+			,@intStatusId = intStatusId
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intProductValueId
 
@@ -145,31 +148,68 @@ BEGIN
 
 		SELECT @strRawMaterial = ''
 
-		SELECT @strRawMaterial = @strRawMaterial + I.strItemNo + ','
-		FROM tblMFWorkOrderRecipeItem RI
-		JOIN tblICItem I ON I.intItemId = RI.intItemId
-			AND RI.intRecipeItemTypeId = 1
-		WHERE intWorkOrderId = @intProductValueId
-			AND I.intCategoryId <> @intPMCategoryId
-
-		SELECT @strRawMaterial = @strRawMaterial + I.strItemNo + ','
-		FROM tblMFWorkOrderRecipeSubstituteItem RI
-		JOIN tblICItem I ON I.intItemId = RI.intSubstituteItemId
-		WHERE intWorkOrderId = @intProductValueId
-			AND I.intCategoryId <> @intPMCategoryId
-
-		IF @strRawMaterial <> ''
+		IF @intStatusId = 9
 		BEGIN
-			SELECT @strRawMaterial = Left(@strRawMaterial, Len(@strRawMaterial) - 1)
+			SELECT @intRecipeId = intRecipeId
+			FROM tblMFRecipe
+			WHERE intItemId = @intItemId
+				AND intLocationId = @intLocationId
+				AND ysnActive = 1
+
+			SELECT @strRawMaterial = @strRawMaterial + I.strItemNo + ','
+			FROM tblMFRecipeItem RI
+			JOIN tblICItem I ON I.intItemId = RI.intItemId
+				AND RI.intRecipeItemTypeId = 1
+			WHERE RI.intRecipeId = @intRecipeId
+				AND I.intCategoryId <> @intPMCategoryId
+
+			SELECT @strRawMaterial = @strRawMaterial + I.strItemNo + ','
+			FROM tblMFRecipeSubstituteItem RI
+			JOIN tblICItem I ON I.intItemId = RI.intSubstituteItemId
+			WHERE RI.intRecipeId = @intRecipeId
+				AND I.intCategoryId <> @intPMCategoryId
+
+			IF @strRawMaterial <> ''
+			BEGIN
+				SELECT @strRawMaterial = Left(@strRawMaterial, Len(@strRawMaterial) - 1)
+			END
+
+			SELECT @strPackingMaterial = ''
+
+			SELECT @strPackingMaterial = @strPackingMaterial + I.strItemNo + ','
+			FROM tblMFRecipeItem RI
+			JOIN tblICItem I ON I.intItemId = RI.intItemId
+			WHERE RI.intRecipeId = @intRecipeId
+				AND I.intCategoryId = @intPMCategoryId
 		END
+		ELSE
+		BEGIN
+			SELECT @strRawMaterial = @strRawMaterial + I.strItemNo + ','
+			FROM tblMFWorkOrderRecipeItem RI
+			JOIN tblICItem I ON I.intItemId = RI.intItemId
+				AND RI.intRecipeItemTypeId = 1
+			WHERE intWorkOrderId = @intProductValueId
+				AND I.intCategoryId <> @intPMCategoryId
 
-		SELECT @strPackingMaterial = ''
+			SELECT @strRawMaterial = @strRawMaterial + I.strItemNo + ','
+			FROM tblMFWorkOrderRecipeSubstituteItem RI
+			JOIN tblICItem I ON I.intItemId = RI.intSubstituteItemId
+			WHERE intWorkOrderId = @intProductValueId
+				AND I.intCategoryId <> @intPMCategoryId
 
-		SELECT @strPackingMaterial = @strPackingMaterial + I.strItemNo + ','
-		FROM tblMFWorkOrderRecipeItem RI
-		JOIN tblICItem I ON I.intItemId = RI.intItemId
-		WHERE intWorkOrderId = @intProductValueId
-			AND I.intCategoryId = @intPMCategoryId
+			IF @strRawMaterial <> ''
+			BEGIN
+				SELECT @strRawMaterial = Left(@strRawMaterial, Len(@strRawMaterial) - 1)
+			END
+
+			SELECT @strPackingMaterial = ''
+
+			SELECT @strPackingMaterial = @strPackingMaterial + I.strItemNo + ','
+			FROM tblMFWorkOrderRecipeItem RI
+			JOIN tblICItem I ON I.intItemId = RI.intItemId
+			WHERE intWorkOrderId = @intProductValueId
+				AND I.intCategoryId = @intPMCategoryId
+		END
 
 		IF @strPackingMaterial <> ''
 		BEGIN

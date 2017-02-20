@@ -120,3 +120,11 @@ EXEC sp_addmessage 90025,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90026) EXEC sp_dropmessage 90026, 'us_english'	
 SET @strmessage = 'Available qty for item %s is %s which is less than the required qty %s. %s can be produced with the available inputs. Please change the work order quantity and try again.'
 EXEC sp_addmessage 90026,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90027) EXEC sp_dropmessage 90027, 'us_english'	
+SET @strmessage = '%s is not taken for the line %s. Please take the sample and then start the work order'
+EXEC sp_addmessage 90027,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90028) EXEC sp_dropmessage 90028, 'us_english'	
+SET @strmessage = '%s is not taken for the line %s. Please take the sample and then start the work order'
+EXEC sp_addmessage 90028,11,@strmessage,'us_english','False'
