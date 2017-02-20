@@ -4222,6 +4222,72 @@ IF @raiseError = 0
 	COMMIT TRANSACTION
 RETURN 1;
 
+IF @post = 0
+	BEGIN
+		UPDATE ARI
+		SET
+			ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) 
+									THEN @ZeroDecimal 
+									ELSE 
+										ARI.dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
+								END)
+		FROM
+			@PostInvoiceData PID
+		INNER JOIN
+			dbo.tblARInvoice ARI
+				ON PID.intInvoiceId = ARI.intInvoiceId 
+
+		UPDATE ARI
+		SET
+			ARI.ysnPosted				= 0
+			,ARI.ysnPaid				= 0
+			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
+			,ARI.dblDiscount			= @ZeroDecimal
+			,ARI.dblDiscountAvailable	= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
+			,ARI.dblInterest			= @ZeroDecimal
+			,ARI.dblPayment				= ISNULL(dblPayment, @ZeroDecimal)
+			,ARI.dtmPostDate			= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+			,ARI.intConcurrencyId		= ISNULL(ARI.intConcurrencyId,0) + 1
+		FROM
+			@PostInvoiceData PID
+		INNER JOIN
+			dbo.tblARInvoice ARI
+				ON PID.intInvoiceId = ARI.intInvoiceId 		
+	END
+ELSE
+	BEGIN
+		UPDATE ARI
+		SET
+			ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) 
+									THEN @ZeroDecimal 
+									ELSE 
+										ARI.dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
+								END)
+		FROM
+			@PostInvoiceData PID
+		INNER JOIN
+			dbo.tblARInvoice ARI
+				ON PID.intInvoiceId = ARI.intInvoiceId 
+
+		UPDATE ARI						
+		SET
+			ARI.ysnPosted				= 1
+			,ARI.ysnPaid				= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 1 ELSE 0 END)
+			,ARI.dblInvoiceTotal		= ARI.dblInvoiceTotal
+			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
+			,ARI.dblDiscount			= @ZeroDecimal
+			,ARI.dblDiscountAvailable	= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
+			,ARI.dblInterest			= @ZeroDecimal			
+			,ARI.dtmPostDate			= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+			,ARI.intConcurrencyId		= ISNULL(ARI.intConcurrencyId,0) + 1	
+		FROM
+			@PostInvoiceData PID
+		INNER JOIN
+			dbo.tblARInvoice ARI
+				ON PID.intInvoiceId = ARI.intInvoiceId
+	END
+
+
 Do_Rollback:
 	IF @raiseError = 0
 		BEGIN
