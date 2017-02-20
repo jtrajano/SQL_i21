@@ -4670,6 +4670,9 @@
     <Build Include="dbo\Functions\fnGetTrucksRemaining.sql" />
     <Build Include="dbo\Views\vyuTMLastLeakGasCheckTable.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateForm73.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentAccountStatusCode.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentVendor.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
