@@ -833,62 +833,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         xtype: 'filter1'
                                                                                     }
                                                                                 ]
-                                                                            },
-                                                                            {
-                                                                                xtype: 'panel',
-                                                                                dock: 'bottom',
-                                                                                border: false,
-                                                                                maxHeight: 20,
-                                                                                width: 100,
-                                                                                layout: {
-                                                                                    type: 'hbox',
-                                                                                    align: 'stretch',
-                                                                                    pack: 'end'
-                                                                                },
-                                                                                items: [
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'lblSubTotal',
-                                                                                        width: 150,
-                                                                                        text: 'SubTotal'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'lblTax',
-                                                                                        width: 120,
-                                                                                        text: 'Tax'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'lblCharges',
-                                                                                        width: 150,
-                                                                                        text: 'Charges'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'lblGrossWgt',
-                                                                                        width: 150,
-                                                                                        text: 'Gross'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'lblNetWgt',
-                                                                                        width: 150,
-                                                                                        text: 'Net'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'label',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'lblTotal',
-                                                                                        width: 180,
-                                                                                        text: 'Total'
-                                                                                    }
-                                                                                ]
                                                                             }
                                                                         ],
                                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
@@ -2335,6 +2279,73 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         viewConfig: {
                                                                             itemId: 'grvLotTracking'
                                                                         }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'panel',
+                                                                border: false,
+                                                                maxHeight: 30,
+                                                                width: 100,
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'middle',
+                                                                    pack: 'end',
+                                                                    padding: 5
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'numberfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtSubTotal',
+                                                                        fieldLabel: 'Sub Total',
+                                                                        labelWidth: 60,
+                                                                        readOnly: true
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numberfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtTax',
+                                                                        padding: '0 0 0 5',
+                                                                        fieldLabel: 'Tax',
+                                                                        labelWidth: 35,
+                                                                        readOnly: true
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numberfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtCharges',
+                                                                        padding: '0 0 0 5',
+                                                                        fieldLabel: 'Charges',
+                                                                        labelWidth: 50,
+                                                                        readOnly: true
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numberfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtGrossWgt',
+                                                                        padding: '0 0 0 5',
+                                                                        fieldLabel: 'Gross Wgt.',
+                                                                        labelWidth: 65,
+                                                                        readOnly: true
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numberfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtNetWgt',
+                                                                        padding: '0 0 0 5',
+                                                                        fieldLabel: 'Net Wgt.',
+                                                                        labelWidth: 60,
+                                                                        readOnly: true
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numberfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtTotal',
+                                                                        padding: '0 0 0 5',
+                                                                        fieldLabel: 'Total',
+                                                                        labelWidth: 40,
+                                                                        readOnly: true
                                                                     }
                                                                 ]
                                                             }
