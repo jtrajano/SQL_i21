@@ -5033,6 +5033,7 @@
     <Build Include="dbo\Tables\tblICItemSubLocation.sql" />
     <Build Include="dbo\Views\vyuQMSampleStaticPropertiesResult.sql" />
     <Build Include="dbo\Tables\tblIPLSPPartner.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportBasisComponent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
