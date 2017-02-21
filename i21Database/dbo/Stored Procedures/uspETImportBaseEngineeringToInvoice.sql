@@ -89,7 +89,9 @@ BEGIN
 	DECLARE @strSiteBillingBy						NVARCHAR(10)
 	DECLARE @intNewInvoiceDetailId					INT
 	DECLARE @strNewInvoiceNumber					NVARCHAR(25)
-	
+	DECLARE @intSiteTaxId							INT
+	DECLARE @strStatus								NVARCHAR(50)
+
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
 		,strRecordId				NVARCHAR(25)
@@ -191,14 +193,25 @@ BEGIN
 		SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
 
 		--Get Site Id 
-		SET @intSiteId = ( 
-			SELECT TOP 1 intSiteID
-			FROM tblTMCustomer A
+		--SET @intSiteId = ( 
+		--	SELECT TOP 1 intSiteID
+		--	FROM tblTMCustomer A
+		--	INNER JOIN tblTMSite B
+		--		ON A.intCustomerID = B.intCustomerID
+		--	WHERE intCustomerNumber = @intCustomerEntityId
+		--		AND B.intSiteNumber = CAST(@strSiteNumber AS INT)
+		--)
+
+		-- Tax id  Mismatch - IET-99 JAN192017
+		SET @intSiteId = NULL
+		SET @intSiteTaxId = NULL
+
+		SELECT TOP 1 @intSiteId = intSiteID, @intSiteTaxId = intTaxStateID 
+		FROM tblTMCustomer A
 			INNER JOIN tblTMSite B
 				ON A.intCustomerID = B.intCustomerID
 			WHERE intCustomerNumber = @intCustomerEntityId
 				AND B.intSiteNumber = CAST(@strSiteNumber AS INT)
-		)
 
 		IF (ISNULL(@intSiteId,0) = 0)
 		BEGIN
@@ -245,6 +258,12 @@ BEGIN
 		ELSE
 		BEGIN
 			LOGSUCCESS:
+			--@intSiteTaxId is the current site setup 
+			--@intTaxGroupId is the tax from the file
+			IF ISNULL(@intSiteTaxId,0) <> ISNULL(@intTaxGroupId,0)
+				BEGIN
+					SET @strStatus = 'Tax Mismatch'
+				END
 			INSERT INTO @ResultTableLog (
 				strCustomerNumber			
 				,strRecordId			
@@ -265,7 +284,7 @@ BEGIN
 					,dtmDate = @dtmDate					
 					,intLineItem = @intRecordId		
 					,strFileName = ''				
-					,strStatus = 'Created ' + @strNewInvoiceNumber
+					,strStatus = @strStatus
 					,ysnSuccessful = 1
 					,strInvoiceNumber = @strNewInvoiceNumber
 					,strItemNumber = @strItemNumber
