@@ -9,7 +9,7 @@ BEGIN
 	DECLARE @dtmCurrentDate DATETIME
 		,@dtmCurrentDateTime DATETIME
 		,@intDayOfYear INT
-
+		,@intManufacturingProcessId int,@strPackagingCategory nvarchar(50),@intPMCategoryId int
 	SELECT @dtmCurrentDateTime = GETDATE()
 
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
@@ -69,15 +69,31 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+	
+		Select @intManufacturingProcessId=intManufacturingProcessId
+		from tblMFWorkOrder
+		Where intWorkOrderId =@intWorkOrderId 
+
+	SELECT @strPackagingCategory = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 46--Packaging Category
+
+	SELECT @intPMCategoryId = intCategoryId
+	FROM tblICCategory
+	WHERE strCategoryCode = @strPackagingCategory
+
 		SELECT I.strItemNo
 			,I.strDescription
-			,(ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity AS dblCalculatedQuantity
+			,Case When I.intCategoryId =@intPMCategoryId then CEILING((ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity)
+			else (ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity End AS dblCalculatedQuantity
 			,UM.strUnitMeasure
 			,ri.strItemGroupName
 			,ri.dblUpperTolerance
 			,ri.dblLowerTolerance
-			,(ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity AS dblCalculatedUpperTolerance
-			,(ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity AS dblCalculatedLowerTolerance
+			,Case When I.intCategoryId =@intPMCategoryId then (ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity Else  CEILING((ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity) End AS dblCalculatedUpperTolerance
+			,Case When I.intCategoryId =@intPMCategoryId then (ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity Else CEILING((ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity) End AS dblCalculatedLowerTolerance
 			,ri.dblShrinkage
 			,ri.ysnScaled
 			,CM.strName AS strConsumptionMethodName
