@@ -395,7 +395,7 @@ BEGIN TRY
 			WHERE
 				I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 				AND ID.intStorageScheduleTypeId IS NOT NULL
-				AND ID.dblTotal <> @ZeroDecimal
+				AND ID.dblQtyShipped <> @ZeroDecimal
 
 			WHILE EXISTS (SELECT NULL FROM @GrainItems)
 				BEGIN
@@ -649,7 +649,10 @@ END CATCH
 					--	OR
 					--	NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0 AND tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId)
 					--	)
-					AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId AND ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0)
+					AND (
+						NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId AND ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0)
+						OR (SELECT SUM(ABS(tblARInvoiceDetail.dblQtyShipped)) FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId AND ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0) = @ZeroDecimal
+						)
 								
 					
 				--negative amount
@@ -2007,7 +2010,7 @@ IF @post = 1
 																										AND ARI.intCompanyLocationId = ICIS.intLocationId 
 																								WHERE
 																									ARI.intInvoiceId = A.intInvoiceId
-																									AND ARID.dblTotal <> @ZeroDecimal  
+																									AND ARID.dblQtyShipped <> @ZeroDecimal  
 																								)
 																							ELSE 
 																								0
@@ -2036,7 +2039,7 @@ IF @post = 1
 																										AND ARI.intCompanyLocationId = ICIS.intLocationId 
 																								WHERE
 																									ARI.intInvoiceId = A.intInvoiceId
-																									AND ARID.dblTotal <> @ZeroDecimal  
+																									AND ARID.dblQtyShipped <> @ZeroDecimal  
 																								)
 																							END				
 				,strDescription				= A.strComments
@@ -2586,7 +2589,7 @@ IF @post = 1
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
-				--AND B.dblTotal <> @ZeroDecimal 
+				AND B.dblQtyShipped <> @ZeroDecimal 
 
 			--CREDIT SALES - Debit Memo
 			UNION ALL 
@@ -2635,7 +2638,7 @@ IF @post = 1
 					ON B.intItemId = ICIS.intItemId 
 					AND A.intCompanyLocationId = ICIS.intLocationId 
 			WHERE
-				B.dblTotal <> @ZeroDecimal  
+				B.dblQtyShipped <> @ZeroDecimal  
 				AND A.strTransactionType = 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
