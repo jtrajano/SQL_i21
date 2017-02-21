@@ -2397,10 +2397,8 @@ Ext.define('Inventory.view.ItemViewController', {
         });
     },
 
-    afterSave: function(owner, batch, options) {
-        var me = owner;
-        var current = me.getViewModel().get('current');
-        current.tblICItemPricings().load();
+    afterSave: function(win, me, batch, options) {
+        win.view.context.data.reload();
     },
 
     onEditLocationClick: function(button, e, eOpts) {
