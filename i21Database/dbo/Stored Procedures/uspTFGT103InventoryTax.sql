@@ -175,7 +175,12 @@ IF @Refresh = 'true'
 				SET @QueryInventory2 = 'WHERE tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ')
 							 AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 							 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND tblICInventoryReceipt.ysnPosted = 1'
+							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + '  
+							 AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 1) = 0
+								OR tblEMEntity.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 1))
+							 AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 0) = 0
+								OR tblEMEntity.intEntityId NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 0))
+							 AND tblICInventoryReceipt.ysnPosted = 1'
 
 				SET @QueryInvReceiptRecord = @QueryInventory1 + @QueryInventory2
 

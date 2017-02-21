@@ -190,9 +190,19 @@ DECLARE @tblTempInvoiceTransaction TABLE (
 								 tblARAccountStatus ON tblARCustomer.intAccountStatusId = tblARAccountStatus.intAccountStatusId CROSS JOIN
 								 tblSMCompanySetup
 								 WHERE (tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ')) 
-									 AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
+									AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 									 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-									 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND tblARInvoice.ysnPosted = 1'
+									 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' 
+									AND ((SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 1) = 0
+										OR tblARCustomer.intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 1))
+									AND ((SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 0) = 0
+										OR tblARCustomer.intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 0))
+										
+									AND ((SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 1) = 0
+										OR tblARAccountStatus.intAccountStatusId IN (SELECT intAccountStatusId FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 1))
+									AND ((SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 0) = 0
+										OR tblARAccountStatus.intAccountStatusId NOT IN (SELECT intAccountStatusId FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = ' + @RCId + ' AND ysnInclude = 0))
+									AND tblARInvoice.ysnPosted = 1'
 
 							SET @QueryInvoice = @QueryInvoice1 +  @QueryInvoice2
 							DELETE FROM @TFTransaction
