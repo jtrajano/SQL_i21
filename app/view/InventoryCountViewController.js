@@ -1266,6 +1266,30 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         );
     },
 
+    onSubLocationChange: function (control, newValue, oldValue, eOpts) {
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepPhysicalCount');
+        var current = plugin.getActiveRecord();
+        if (current && (newValue === null || newValue === '')) {
+            current.set('dblSystemCount', 0);
+            current.set('intSubLocationId', null);
+        }
+    },
+
+     onStorageLocationChange: function (obj, newValue, oldValue, eOpts) {
+        var me = this;
+        var grid = obj.up('grid');
+        var plugin = grid.getPlugin('cepPhysicalCount');
+        var current = plugin.getActiveRecord();
+        var win = obj.up('window');
+
+         if (current && (newValue === null || newValue === '')) {
+            current.set('intStorageLocationId', null);
+            me.getStockQuantity(current, win);
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboUOM": {
@@ -1302,10 +1326,12 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 select: this.onInventoryCountDetailSelect
             },
             "#cboSubLocation": {
-                select: this.onInventoryCountDetailSelect
+                select: this.onInventoryCountDetailSelect,
+                change: this.onSubLocationChange
             },
             "#cboStorageLocation": {
-                select: this.onInventoryCountDetailSelect
+                select: this.onInventoryCountDetailSelect,
+                change: this.onStorageLocationChange
             },
             "#cboLotNo": {
                 select: this.onInventoryCountDetailSelect
