@@ -12,9 +12,9 @@ SELECT
 , CAR.dblTotalDue
 , CAR.dblAmountPaid
 , CAR.dblInvoiceTotal
-, dblYTDSales				= (SELECT ISNULL(SUM(CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END), 0.000000)
+, dblYTDSales				= (SELECT ISNULL(SUM(CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END), 0.000000)
 								FROM tblARInvoice I	WHERE I.ysnPosted = 1 AND YEAR(I.dtmPostDate) =  DATEPART(year, GETDATE()) AND I.intEntityCustomerId = CAR.intEntityCustomerId)
-, dblLastYearSales			= (SELECT ISNULL(SUM(CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END), 0.000000)
+, dblLastYearSales			= (SELECT ISNULL(SUM(CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END), 0.000000)
 								FROM tblARInvoice I WHERE I.ysnPosted = 1 AND YEAR(I.dtmPostDate) =  DATEPART(year, GETDATE()) - 1 AND I.intEntityCustomerId = CAR.intEntityCustomerId)
 , dblLastPayment			= ISNULL((SELECT TOP 1 ISNULL(dblAmountPaid, 0) FROM tblARPayment WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 1 ORDER BY intPaymentId DESC), 0)
 , dtmLastPaymentDate		= (SELECT TOP 1 dtmDatePaid FROM tblARPayment WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 1 ORDER BY intPaymentId DESC)
@@ -27,7 +27,7 @@ SELECT
 , dblBudgetAmount			= ISNULL(dbo.fnARGetCustomerBudget(CAR.intEntityCustomerId, GETDATE()), 0.000000) 
 , dtmBudgetMonth			= (SELECT TOP 1 dtmBudgetDate FROM tblARCustomerBudget WHERE (GETDATE() >= dtmBudgetDate AND GETDATE() < DATEADD(MONTH, 1, dtmBudgetDate)) AND intEntityCustomerId = CAR.intEntityCustomerId)
 , dblThru					= 0.000000
-, dblPendingInvoice			= (SELECT ISNULL(SUM(CASE WHEN strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 0 AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0))))
+, dblPendingInvoice			= (SELECT ISNULL(SUM(CASE WHEN strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 0 AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0))))
 , dblPendingPayment			= (SELECT ISNULL(SUM(ISNULL(dblAmountPaid ,0)), 0) FROM tblARPayment WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 0)
 , dblCreditLimit			= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = CAR.intEntityCustomerId)
 , dblNextPaymentAmount		= ISNULL(CB.dblBudgetAmount, 0.000000)
