@@ -212,6 +212,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     dataIndex: 'strSubLocation',
                     editor: {
                         store: '{fromSubLocation}',
+                        origValueField: 'intSubLocationId',
+                        origUpdateField: 'intSubLocationId',
                         defaultFilters: [
                             {
                                 column: 'intItemId',
@@ -236,8 +238,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colStorageLocation: {
                     dataIndex: 'strStorageLocation',
                     editor: {
-                        store: '{storageLocation}',
+                        store: '{fromStorageLocation}',
+                        origValueField: 'intStorageLocationId',
+                        origUpdateField: 'intStorageLocationId',
                         defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryAdjustment.selection.intItemId}',
+                                conjunction: 'and'
+                            },
                             {
                                 column: 'intLocationId',
                                 value: '{current.intLocationId}',
@@ -247,6 +256,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 column: 'intSubLocationId',
                                 value: '{grdInventoryAdjustment.selection.intSubLocationId}',
                                 conjunction: 'and'
+                            },
+                            {
+                                column: 'dblOnHand',
+                                value: '0',
+                                conjunction: 'and',
+                                condition: 'gt'
                             }
                         ]
                     }
@@ -813,41 +828,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         }
         else if (combo.itemId === 'cboSubLocation') {
-           /* current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
-            me.getStockQuantity(current, win);
+            current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
+            //me.getStockQuantity(current, win);
             current.set('dblItemUOMUnitQty', null);
-            current.set('intLotId', null);
-            current.set('strLotNumber', null);
-            current.set('intNewLotId', null);
-            current.set('strNewLotNumber', null);
-            current.set('dblAdjustByQuantity', null);
-            current.set('dblNewQuantity', null);
-            current.set('dblNewCost', null);
-            current.set('intNewItemUOMId', null);
-            current.set('dblNewItemUOMUnitQty', null);
-            current.set('strNewItemUOM', null);
-            current.set('dblWeight', null);
-            current.set('dblNewWeight', null);
-            current.set('intWeightUOMId', null);
-            current.set('strWeightUOM', null);
-            current.set('intNewWeightUOMId', null);
-            current.set('strNewWeightUOM', null);
-            current.set('dblWeightPerQty', null);
-            current.set('dblNewWeightPerQty', null);
-            current.set('dblLineTotal', 0.00);*/
-
-            current.set('strStorageLocation', records[0].get('strStorageLocationName'));
-            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
-            current.set('dblQuantity', records[0].get('dblOnHand'));
-            current.set('intItemUOMId', records[0].get('intItemUOMId'));
-            current.set('strItemUOM', records[0].get('strUnitMeasure'));
-        }
-        else if (combo.itemId === 'cboStorageLocation') {
-            current.set('intStorageLocationId', record.get('intStorageLocationId'));
-            me.getStockQuantity(current, win);
-            current.set('intItemUOMId', null);
-            current.set('dblItemUOMUnitQty', null);
-            current.set('strItemUOM', null);
             current.set('intLotId', null);
             current.set('strLotNumber', null);
             current.set('intNewLotId', null);
@@ -867,6 +850,44 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblWeightPerQty', null);
             current.set('dblNewWeightPerQty', null);
             current.set('dblLineTotal', 0.00);
+
+            current.set('strStorageLocation', records[0].get('strStorageLocationName'));
+            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('intSubLocationId', records[0].get('intSubLocationId'));
+            current.set('dblQuantity', records[0].get('dblOnHand'));
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
+            current.set('strItemUOM', records[0].get('strUnitMeasure'));
+        }
+        else if (combo.itemId === 'cboStorageLocation') {
+            current.set('intStorageLocationId', record.get('intStorageLocationId'));
+           // me.getStockQuantity(current, win);
+            current.set('dblItemUOMUnitQty', null);
+            current.set('intLotId', null);
+            current.set('strLotNumber', null);
+            current.set('intNewLotId', null);
+            current.set('strNewLotNumber', null);
+            current.set('dblAdjustByQuantity', null);
+            current.set('dblNewQuantity', null);
+            current.set('dblNewCost', null);
+            current.set('intNewItemUOMId', null);
+            current.set('dblNewItemUOMUnitQty', null);
+            current.set('strNewItemUOM', null);
+            current.set('dblWeight', null);
+            current.set('dblNewWeight', null);
+            current.set('intWeightUOMId', null);
+            current.set('strWeightUOM', null);
+            current.set('intNewWeightUOMId', null);
+            current.set('strNewWeightUOM', null);
+            current.set('dblWeightPerQty', null);
+            current.set('dblNewWeightPerQty', null);
+            current.set('dblLineTotal', 0.00);
+
+            current.set('strSubLocation', records[0].get('strSubLocationName'));
+            current.set('intSubLocationId', records[0].get('intSubLocationId'));
+            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('dblQuantity', records[0].get('dblOnHand'));
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
+            current.set('strItemUOM', records[0].get('strUnitMeasure'));
         }
 
         else if (combo.itemId === 'cboNewItemNo') {
@@ -1508,7 +1529,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var current = plugin.getActiveRecord();
         var win = obj.up('window');
 
-        if(newValue == null) {
+         if (current && (newValue === null || newValue === '')) {
             current.set('intStorageLocationId', null);
             me.getStockQuantity(current, win);
         }
@@ -1554,6 +1575,17 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
+    onSubLocationChange: function (control, newValue, oldValue, eOpts) {
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && (newValue === null || newValue === '')) {
+            current.set('dblQuantity', 0);
+            current.set('intSubLocationId', null);
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboItemNo": {
@@ -1571,7 +1603,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 select: this.onAdjustmentDetailSelect
             },
             "#cboSubLocation": {
-                select: this.onAdjustmentDetailSelect
+                select: this.onAdjustmentDetailSelect,
+                change: this.onSubLocationChange
             },
             "#cboUOM": {
                 select: this.onAdjustmentDetailSelect,

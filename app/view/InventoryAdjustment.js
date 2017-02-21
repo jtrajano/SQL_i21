@@ -459,27 +459,62 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intStorageLocationId',
+                                                                    dataIndex: 'intLocationId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Country Id',
+                                                                    text: 'Location Id',
                                                                     hidden: true
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strName',
+                                                                    dataIndex: 'intItemLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intSubLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Sub Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intStorageLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Storage Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strStorageLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Name',
+                                                                    text: 'Storage Location',
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strDescription',
+                                                                    dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Description',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblOnHand',
+                                                                    dataType: 'float',
+                                                                    text: 'Available Qty',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intItemUOMId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item UOM Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'UOM',
                                                                     flex: 1
                                                                 }
                                                             ],
                                                             itemId: 'cboStorageLocation',
-                                                            displayField: 'strName',
-                                                            valueField: 'strName'
+                                                            displayField: 'strStorageLocationName',
+                                                            valueField: 'strStorageLocationName'
                                                         }
                                                     },
                                                     {

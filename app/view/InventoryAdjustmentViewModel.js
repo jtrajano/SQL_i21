@@ -114,6 +114,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         },
         fromSubLocation: {
             type: 'icbuffereditemstockuomview'
+        },    
+        fromStorageLocation: {
+            type: 'icbuffereditemstockuomview'
         }
     },
 
