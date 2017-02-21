@@ -3091,11 +3091,37 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },      
 
+    onShipFromAddressChange: function (combo, newValue, oldValue, eOpts) {
+        var win = combo.up('window');
+		var txtShipFromAddress = win.down('#txtShipFromAddress');
+
+          ic.utils.ajax({
+                url: '../i21/api/companylocation/search'
+            })
+            .flatMap(function(res) {
+                var json = JSON.parse(res.responseText);
+                return json.data;
+            })
+            .filter(function(data) {
+                return data.intCompanyLocationId === newValue;
+            })
+            .subscribe(
+                function(successResponse) {
+                    txtShipFromAddress.setValue(successResponse.strAddress)                 
+                }
+                ,function(failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            )
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
                 select: this.onShipLocationSelect,
-                beforeselect: this.onShipFromAddressBeforeSelect
+                beforeselect: this.onShipFromAddressBeforeSelect,
+                change: this.onShipFromAddressChange
             },
             "#cboShipToAddress": {
                 select: this.onShipLocationSelect
