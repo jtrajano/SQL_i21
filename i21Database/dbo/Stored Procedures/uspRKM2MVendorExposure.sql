@@ -76,7 +76,8 @@ IF (ISNULL(@ysnVendorProducer,0)=0)
 BEGIN
 	select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
               dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue, dblTotalSpend
-			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,(isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0))  dblPotentialAdditionalVolume, 0 as intConcurrencyId
+			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,
+			  case when (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) < 0 then 0 else (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) end  dblPotentialAdditionalVolume, 0 as intConcurrencyId
 			  from (
        SELECT strVendorName,strRating,
               dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue,
@@ -164,7 +165,8 @@ BEGIN
 
 	select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
               dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue, dblTotalSpend
-			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,(isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0))  dblPotentialAdditionalVolume, 0 as intConcurrencyId
+			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,
+			  case when (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) < 0 then 0 else (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) end  dblPotentialAdditionalVolume, 0 as intConcurrencyId
 			  from (
        SELECT strVendorName,strRating,
               dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue,
