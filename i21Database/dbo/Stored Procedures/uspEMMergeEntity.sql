@@ -192,6 +192,8 @@ BEGIN
 			select 'tblPREmployee'
 		end
 
+		insert into @parentAvoidTable(strTable)
+		select 'tblEMEntityRequireApprovalFor'
 
 		--
 		insert into @EntityRelationShips
@@ -231,6 +233,8 @@ BEGIN
 				AND y.name in ('numeric', 'nvarchar', 'varchar', 'int')
 				AND (@getAllColumn = 1 or c.name not in (select strColumn from @avoidColumn)) 
 		--
+
+
 		insert into @EntityRelationShips
 		SELECT
 			'UPDATE ' + R.TABLE_NAME + ' SET ' +  R.COLUMN_NAME + '='+ @PrimaryKeyString +' WHERE ' + R.COLUMN_NAME  + '=' + @CurMergeId + ';' as stment		
