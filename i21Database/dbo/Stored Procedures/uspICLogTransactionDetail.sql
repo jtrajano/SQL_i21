@@ -34,19 +34,22 @@ BEGIN
 			DELETE FROM tblICTransactionDetailLog WHERE strTransactionType = 'Inventory Receipt' AND intTransactionId = @TransactionId
 
 			INSERT INTO tblICTransactionDetailLog(
-				strTransactionType,
-				intTransactionId, 
-				intTransactionDetailId,
-				intOrderNumberId,
-				intOrderType,
-				intSourceNumberId,
-				intSourceType,
-				intLineNo,
-				intItemId,
-				intItemUOMId,
-				dblQuantity,
-				ysnLoad,
-				intLoadReceive)
+				strTransactionType
+				,intTransactionId 
+				,intTransactionDetailId
+				,intOrderNumberId
+				,intOrderType
+				,intSourceNumberId
+				,intSourceType
+				,intLineNo
+				,intItemId
+				,intItemUOMId
+				,dblQuantity
+				,ysnLoad
+				,intLoadReceive
+				,dblNet
+				,intSourceInventoryDetailId
+			)
 			SELECT 'Inventory Receipt',
 				ReceiptItem.intInventoryReceiptId, 
 				ReceiptItem.intInventoryReceiptItemId,
@@ -65,7 +68,9 @@ BEGIN
 				ReceiptItem.intUnitMeasureId,
 				ReceiptItem.dblOpenReceive,
 				ReceiptItemSource.ysnLoad,
-				ReceiptItem.intLoadReceive
+				ReceiptItem.intLoadReceive,
+				ReceiptItem.dblNet,
+				ReceiptItem.intSourceInventoryReceiptItemId 
 			FROM tblICInventoryReceiptItem ReceiptItem
 				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -79,17 +84,18 @@ BEGIN
 			DELETE FROM tblICTransactionDetailLog WHERE strTransactionType = 'Inventory Shipment' AND intTransactionId = @TransactionId
 
 			INSERT INTO tblICTransactionDetailLog(
-				strTransactionType,
-				intTransactionId, 
-				intTransactionDetailId,
-				intOrderNumberId,
-				intOrderType,
-				intSourceNumberId,
-				intSourceType,
-				intLineNo,
-				intItemId,
-				intItemUOMId,
-				dblQuantity)
+				strTransactionType
+				,intTransactionId 
+				,intTransactionDetailId
+				,intOrderNumberId
+				,intOrderType
+				,intSourceNumberId
+				,intSourceType
+				,intLineNo
+				,intItemId
+				,intItemUOMId
+				,dblQuantity
+			)
 			SELECT 'Inventory Shipment',
 				ShipmentItem.intInventoryShipmentId, 
 				ShipmentItem.intInventoryShipmentItemId,

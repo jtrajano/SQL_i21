@@ -5034,6 +5034,7 @@
     <Build Include="dbo\Views\vyuQMSampleStaticPropertiesResult.sql" />
     <Build Include="dbo\Tables\tblIPLSPPartner.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportBasisComponent.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateReceiptForReturn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
