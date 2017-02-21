@@ -327,6 +327,7 @@ FROM
 	--	dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, NULL) ARGIA
 	WHERE 
 		SO.ysnProcessed = 1
+		AND SO.strTransactionType = 'Order'
 		AND ICI.strType <> 'Software'
 
 UNION ALL
@@ -586,6 +587,7 @@ FROM
 	--	dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, 'License') ARGIA
 	WHERE 
 		SO.ysnProcessed = 1
+		AND SO.strTransactionType = 'Order'
 		AND ICI.strType = 'Software'
 		AND SOD.strMaintenanceType IN ('License/Maintenance', 'License Only')
 
@@ -845,6 +847,7 @@ FROM
 	--	dbo.fnARGetAccountUsedInLineItemAsTable(SOD.intSalesOrderDetailId, 1, 'Maintenance') ARGIA
 	WHERE 
 		SO.ysnProcessed = 1
+		AND SO.strTransactionType = 'Order'
 		AND ICI.strType = 'Software'
 		AND SOD.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
 
