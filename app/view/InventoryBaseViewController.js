@@ -22,7 +22,7 @@ Ext.define('Inventory.view.InventoryBaseViewController', {
                 callbackFn: function(batch, options) {
                     me.pokeGrid(grid);
                     if(me.afterSave) {
-                        me.afterSave(me, batch, options);
+                        me.afterSave(me, win, batch, options);
                     }
                 }
             });
