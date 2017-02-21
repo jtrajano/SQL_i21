@@ -258,6 +258,9 @@ BEGIN TRY
 		FROM @tblLoadContainerRecord
 		WHERE intLoadContainerId = @intLoadContainerId
 
+        IF ISNULL(@strModifiedContainerColumns,'')<> ''
+                BREAK;
+
 		SELECT @intMinLoadContainerRecordId = MIN(intLoadContainerRecordId)
 		FROM @tblLoadContainerRecord
 		WHERE intLoadContainerRecordId > @intMinLoadContainerRecordId
