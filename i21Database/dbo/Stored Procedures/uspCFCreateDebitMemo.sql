@@ -185,7 +185,7 @@ BEGIN
 			,[intCurrencyId]						= NULL
 			,[intTermId]							= intTermID
 			,[dtmDate]								= dtmInvoiceDate								
-			,[dtmDueDate]							= dtmInvoiceDate
+			,[dtmDueDate]							= NULL
 			,[dtmShipDate]							= dtmInvoiceDate							-- TEMPORARY
 			,[intEntitySalespersonId]				= intSalesPersonId										-- TEMPORARY
 			,[intFreightTermId]						= NULL 
