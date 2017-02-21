@@ -138,6 +138,11 @@ Begin
 	Select @intItemId,cl.intCompanyLocationId,1,3
 	From tblSMCompanyLocation cl
 
+	Insert Into tblICItemSubLocation(intItemId,intSubLocationId)
+	Select @intItemId,sl.intCompanyLocationSubLocationId
+	From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName 
+	where s.intStageItemId=@intStageItemId
+
 	--Add Audit Trail Record
 	Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intItemId) + '","keyValue":' + CONVERT(VARCHAR,@intItemId) + ',"iconCls":"small-new-plus","leaf":true}'
 	
@@ -171,6 +176,20 @@ Begin --Update
 	Join tblIPSAPUOM su on um.strSymbol=su.stri21UOM
 	Join tblIPItemUOMStage st on st.strUOM=su.strSAPUOM
 	Where intItemId=@intItemId AND st.intStageItemId=@intStageItemId
+
+	--add new sublocations
+	Insert Into tblICItemSubLocation(intItemId,intSubLocationId)
+	Select @intItemId,sl.intCompanyLocationSubLocationId
+	From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName 
+	where s.intStageItemId=@intStageItemId AND 
+	sl.intCompanyLocationSubLocationId NOT IN (Select intSubLocationId From tblICItemSubLocation Where intItemId=@intItemId)
+
+	--Delete the SubLocation if it is marked for deletion
+	Delete From tblICItemSubLocation
+	Where intItemId=@intItemId AND 
+	intSubLocationId IN (Select sl.intCompanyLocationSubLocationId 
+	From tblSMCompanyLocationSubLocation sl Join tblIPItemSubLocationStage s on sl.strSubLocationName=s.strSubLocation 
+	Where s.intStageItemId=@intStageItemId AND ISNULL(s.ysnDeleted,0)=1)
 End
 End
 
@@ -187,8 +206,11 @@ End
 	Select @intNewStageItemId,@strItemNo,strUOM,dblNumerator,dblDenominator
 	From tblIPItemUOMStage Where intStageItemId=@intStageItemId
 
+	Insert Into tblIPItemSubLocationArchive(intStageItemId,strItemNo,strSubLocation,ysnDeleted)
+	Select @intNewStageItemId,@strItemNo,strSubLocation,ysnDeleted
+	From tblIPItemSubLocationStage Where intStageItemId=@intStageItemId
+
 	Delete From tblIPItemStage Where intStageItemId=@intStageItemId
-	Delete From tblIPItemUOMStage Where intStageItemId=@intStageItemId
 
 	Commit Tran
 
@@ -213,8 +235,11 @@ BEGIN CATCH
 	Select @intNewStageItemId,@strItemNo,strUOM,dblNumerator,dblDenominator
 	From tblIPItemUOMStage Where intStageItemId=@intStageItemId
 
+	Insert Into tblIPItemSubLocationError(intStageItemId,strItemNo,strSubLocation,ysnDeleted)
+	Select @intNewStageItemId,@strItemNo,strSubLocation,ysnDeleted
+	From tblIPItemSubLocationStage Where intStageItemId=@intStageItemId
+
 	Delete From tblIPItemStage Where intStageItemId=@intStageItemId
-	Delete From tblIPItemUOMStage Where intStageItemId=@intStageItemId
 END CATCH
 
 	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem

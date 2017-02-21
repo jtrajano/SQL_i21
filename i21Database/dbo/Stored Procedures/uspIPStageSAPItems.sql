@@ -37,6 +37,12 @@ BEGIN TRY
 	 ,dblDenominator NUMERIC(38,20)
 	 )
 
+	DECLARE @tblItemSubLocation TABLE (
+	  strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	 ,strSubLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	 ,strMarkForDeletion NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	 )
+
 	INSERT INTO @tblItem (
 		strItemNo
 		,dtmCreatedDate
@@ -92,6 +98,16 @@ BEGIN TRY
 			,UMREN NUMERIC(38,20)
 	)
 
+	Insert Into @tblItemSubLocation(strItemNo,strSubLocation,strMarkForDeletion)
+		SELECT MATNR
+		,WERKS
+		,LVORM
+	FROM OPENXML(@idoc, 'MATMAS03/IDOC/E1MARAM/E1MARCM', 2) WITH (
+			 MATNR NVARCHAR(50) '../MATNR'
+			,WERKS NVARCHAR(50)
+			,LVORM NVARCHAR(50)
+	)
+
 	Begin Tran
 
 	--ZCOM
@@ -103,6 +119,11 @@ BEGIN TRY
 	Insert Into tblIPItemUOMStage(intStageItemId,strItemNo,strUOM,dblNumerator,dblDenominator)
 	Select i.intStageItemId,i.strItemNo,strUOM,dblNumerator,dblDenominator
 	From @tblItemUOM iu Join tblIPItemStage i on iu.strItemNo=i.strItemNo
+	Where (RIGHT(iu.strItemNo,8) like '496%' OR RIGHT(iu.strItemNo,8) like '491%') AND strItemType='ZCOM'
+
+	Insert Into tblIPItemSubLocationStage(intStageItemId,strItemNo,strSubLocation,ysnDeleted)
+	Select i.intStageItemId,i.strItemNo,strSubLocation,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END
+	From @tblItemSubLocation iu Join tblIPItemStage i on iu.strItemNo=i.strItemNo
 	Where (RIGHT(iu.strItemNo,8) like '496%' OR RIGHT(iu.strItemNo,8) like '491%') AND strItemType='ZCOM'
 
 	--ZMPN
