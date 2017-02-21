@@ -61,9 +61,69 @@ AS
 			CC.dblRate,
 			CD.strPriceUOM,
 			CD.dblBasis,
-			CD.dblCashPrice
+			CD.dblCashPrice,
+			1 AS intDisplayOrder
+
 	FROM	vyuCTSearchContractDetail	CD
 	JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
 	JOIN	tblICItem					BI	ON	BI.intItemId			=	CC.intItemId
 	WHERE	CC.ysnBasis	=	1 
 	AND		CD.intContractDetailId IN (SELECT * FROM dbo.fnSplitString(@intContractDetailId,','))
+
+	UNION ALL
+
+	SELECT  CD.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
+			CD.strERPPONumber,
+			CD.dtmStartDate,
+			CD.dtmEndDate,
+			CD.strCustomerVendor,
+			CD.strItemNo,
+			CD.dblDetailQuantity,
+			CD.strItemUOM,
+			CD.dblNetWeight,
+			CD.strWeightUOM,
+
+			CD.strContractItemName, 
+			CD.strContractItemNo,
+			CD.strFutMarketName, 
+			CD.strFutureMonth,
+			CD.dblFutures,
+			CD.strCurrency,
+			'Basis'			AS	strComponentItem,
+			CD.dblBasis		AS  dblRate,
+			CD.strPriceUOM,
+			CD.dblBasis,
+			CD.dblCashPrice,
+			2 AS intDisplayOrder
+
+	FROM	vyuCTSearchContractDetail	CD
+	WHERE	CD.intContractDetailId IN (SELECT * FROM dbo.fnSplitString(@intContractDetailId,','))
+
+	UNION ALL
+
+	SELECT  CD.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
+			CD.strERPPONumber,
+			CD.dtmStartDate,
+			CD.dtmEndDate,
+			CD.strCustomerVendor,
+			CD.strItemNo,
+			CD.dblDetailQuantity,
+			CD.strItemUOM,
+			CD.dblNetWeight,
+			CD.strWeightUOM,
+
+			CD.strContractItemName, 
+			CD.strContractItemNo,
+			CD.strFutMarketName, 
+			CD.strFutureMonth,
+			CD.dblFutures,
+			CD.strCurrency,
+			'Cash Price'		AS	strComponentItem,
+			CD.dblCashPrice		AS  dblRate,
+			CD.strPriceUOM,
+			CD.dblBasis,
+			CD.dblCashPrice,
+			3 AS intDisplayOrder
+
+	FROM	vyuCTSearchContractDetail	CD
+	WHERE	CD.intContractDetailId IN (SELECT * FROM dbo.fnSplitString(@intContractDetailId,','))
