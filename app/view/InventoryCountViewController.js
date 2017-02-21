@@ -69,7 +69,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 title: 'Inventory Count - {current.strCountNo}'
             },
             btnDelete: {
-                disabled: '{current.ysnPosted}'
+                disabled: '{disableBtnDelete}'
             },
             btnSave: {
                 disabled: '{current.ysnPosted}'
