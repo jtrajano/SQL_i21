@@ -216,8 +216,8 @@ BEGIN
 			,[intAccountId] 		=	@APAccount
 			,[strBillId]			=	@generatedBillRecordId
 			,[strReference] 		=	A.strBillOfLading
-			,[dblTotal] 			=	A.dblInvoiceAmount
-			,[dblAmountDue]			=	A.dblInvoiceAmount
+			,[dblTotal] 			=	@totalReceiptAmount
+			,[dblAmountDue]			=	@totalReceiptAmount
 			,[intEntityId]			=	@userId
 			,[ysnPosted]			=	0
 			,[ysnPaid]				=	0
