@@ -822,11 +822,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
         readOnlyGrossTareUOM: function (get) {
-            if (get('current.strReceiptType') === 'Inventory Return') {
-                return true; 
-            }
-            else if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intWeightUOMId'))) {
+            if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intWeightUOMId'))) {
                 return true;
+            }
+            else if (get('current.strReceiptType') === 'Inventory Return') {
+                return false; 
             }
             else {
                 return false;

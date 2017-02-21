@@ -31,5 +31,6 @@ namespace iRely.Inventory.BusinessLayer
         SaveResult ReturnReceipt(int receiptId, out int? inventoryReturnId);
         Task<SearchResult> SearchReceiptCharges(GetParameter param);
         SaveResult UpdateReceiptVoucher();
+        SaveResult CheckReceiptForValidReturn(int? receiptId);
     }
 }

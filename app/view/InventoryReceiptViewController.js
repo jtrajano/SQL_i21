@@ -1757,7 +1757,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 })
                 .subscribe(
                     function(successResponse) {
-                        var jsonData = Ext.decode(response.responseText);
+                        var jsonData = Ext.decode(successResponse.responseText);
                         var tblICInventoryReceiptItems = current.tblICInventoryReceiptItems(); 
 
                         if (tblICInventoryReceiptItems) {
@@ -6206,7 +6206,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
 
-        iRely.Functions.showCustomDialog('question','yesno','Do you want to return this inventory receipt?', buttonAction);         
+        // Call an ajax to validate the receipt if receipt is valid for return. 
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryReceipt/CheckReceiptForValidReturn',
+            params:{
+                receiptId: current.get('intInventoryReceiptId')
+            },
+            method: 'get'  
+        })
+        .subscribe(
+            function(successResponse) {
+                // var jsonData = Ext.decode(successResponse.responseText);
+                iRely.Functions.showCustomDialog('question','yesno','Do you want to return this inventory receipt?', buttonAction);
+            }
+            , function(failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                iRely.Functions.showErrorDialog(jsonData.message.statusText);
+            }
+        );                
     },
 
     onSpecialKeyTab: function(component, e, eOpts) {
