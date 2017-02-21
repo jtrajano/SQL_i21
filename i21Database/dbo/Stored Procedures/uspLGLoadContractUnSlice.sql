@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspLGLoadContractUnSlice 
+﻿CREATE  PROCEDURE uspLGLoadContractUnSlice 
 				 @intContractHeaderId INT
 AS
 BEGIN TRY
@@ -45,6 +45,11 @@ BEGIN TRY
 		,intLoadId INT
 		)
 
+	DECLARE @MergedContractLoad TABLE (
+		intRowNo INT IDENTITY(1, 1)
+		,intMContractDetailId INT
+		)
+
 	-- Only Unsliced. ie., existing contract sequence records got merged only (not the parent)
 	INSERT INTO @ContractSliceDetail
 	SELECT intContractDetailId
@@ -55,13 +60,20 @@ BEGIN TRY
 	WHERE intContractHeaderId = @intContractHeaderId
 		AND ysnSlice = 0
 
+	INSERT INTO @MergedContractLoad
+	SELECT intContractDetailId
+	FROM tblCTContractDetail
+	WHERE intContractHeaderId = @intContractHeaderId
+		AND ISNULL(ysnSlice,1) <> 0 
+
 	IF ((SELECT COUNT(1) FROM @ContractSliceDetail ) < 1)
 		RETURN;
-
+	
 	-- Parent contract sequence. ie., from which sequence it sliced
-	SELECT TOP 1 @intParentContractDetailId = intCParentDetailId
-				,@intCContractDetailId = intCContractDetailId
-	FROM @ContractSliceDetail
+	SELECT TOP 1 @intCContractDetailId = intCContractDetailId
+	FROM @ContractSliceDetail WHERE intCParentDetailId IS NOT NULL
+
+	SELECT @intParentContractDetailId = intMContractDetailId FROM @MergedContractLoad
 
 	SELECT @intUserId = intLastModifiedById
 	FROM tblCTContractDetail
@@ -77,11 +89,7 @@ BEGIN TRY
 		,LD.intWeightItemUOMId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-	WHERE CASE 
-			WHEN L.intPurchaseSale = 1
-				THEN LD.intPContractDetailId
-			ELSE LD.intSContractDetailId
-			END = @intParentContractDetailId
+	WHERE LD.intPContractDetailId = @intParentContractDetailId
 		AND intShipmentType = 2
 
 	SELECT TOP 1 @intContractDetailId = intCParentDetailId
@@ -89,11 +97,6 @@ BEGIN TRY
 
 	SELECT @intCRowNo = MIN(intCRowNo)
 	FROM @ContractSliceDetail
-
-	IF ((SELECT COUNT(1) FROM @ParentLoad ) < 1)
-	BEGIN
-		RETURN;
-	END
 
 	SELECT @intMinLoadRecordId = MIN(intLoadRecordId)
 	FROM @ParentLoad
@@ -111,7 +114,7 @@ BEGIN TRY
 		SET @intOrgContractDetailQtyUOM = NULL
 
 		INSERT INTO @DeleteContractLoad
-		SELECT intContractDetailId
+		SELECT LD.intPContractDetailId
 			,LD.intLoadDetailId
 			,L.intLoadId
 		FROM tblLGLoad L
@@ -137,20 +140,16 @@ BEGIN TRY
 			FROM @ParentLoad
 			WHERE intLoadRecordId = @intMinLoadRecordId
 
-			SELECT @dblOrgContractDetailQty = dblQuantity
-				  ,@intOrgContractDetailQtyUOM = intUnitMeasureId
-			FROM tblCTContractDetail
-			WHERE intContractDetailId = @intParentContractDetailId
+			SELECT @dblOrgContractDetailQty = dblCQuantity
+				  ,@intOrgContractDetailQtyUOM = intCUnitMeasureId
+			FROM @ContractSliceDetail
+			WHERE intCRowNo = @intCRowNo
 
-			IF (@dblOrgLoadDetailQty <= @dblOrgContractDetailQty)
-			BEGIN
-				-- Update sample representing qty for the original parent contract sequence
-				UPDATE tblLGLoadDetail
-				SET dblQuantity += @dblOrgContractDetailQty
-				   ,dblNet += dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId, intWeightItemUOMId, @dblOrgContractDetailQty)
-				   ,dblGross += dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId, intWeightItemUOMId, @dblOrgContractDetailQty)
-				WHERE intLoadDetailId = @intOrgLoadIDetaild
-			END
+			UPDATE tblLGLoadDetail
+			SET dblQuantity += @dblOrgContractDetailQty
+				,dblNet += dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId, intWeightItemUOMId, @dblOrgContractDetailQty)
+				,dblGross += dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId, intWeightItemUOMId, @dblOrgContractDetailQty)
+			WHERE intLoadDetailId = @intOrgLoadIDetaild
 
 			SELECT @intMinLoadRecordId = MIN(intLoadRecordId)
 			FROM @ParentLoad
