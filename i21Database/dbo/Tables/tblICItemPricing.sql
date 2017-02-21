@@ -26,8 +26,8 @@ Type the overview for the table here.
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemPricing] PRIMARY KEY ([intItemPricingId]), 
-		CONSTRAINT [FK_tblICItemPricing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblICItemPricing_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]), 
+		CONSTRAINT [FK_tblICItemPricing_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]) ON DELETE CASCADE, 
+		CONSTRAINT [FK_tblICItemPricing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
 		CONSTRAINT [AK_tblICItemPricing] UNIQUE ([intItemId], [intItemLocationId])
 	)
 
