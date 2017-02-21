@@ -266,12 +266,108 @@ WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		
 IF ISNULL(@post,0) = 1
 BEGIN
-	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
+	INSERT INTO @GLEntries (
+	    dtmDate ,
+	    strBatchId ,
+	    intAccountId ,
+	    dblDebit ,
+	    dblCredit ,
+	    dblDebitUnit ,
+	    dblCreditUnit ,
+	    strDescription ,
+	    strCode ,
+	    strReference ,
+	    intCurrencyId ,
+	    dblExchangeRate ,
+	    dtmDateEntered ,
+	    dtmTransactionDate ,
+	    strJournalLineDescription ,
+	    intJournalLineNo ,
+	    ysnIsUnposted ,
+	    intUserId ,
+	    intEntityId ,
+	    strTransactionId ,
+	    intTransactionId ,
+	    strTransactionType ,
+	    strTransactionForm ,
+	    strModuleName ,
+	    dblDebitForeign ,
+	    dblDebitReport ,
+	    dblCreditForeign ,
+	    dblCreditReport ,
+	    dblReportingRate ,
+	    dblForeignRate ,
+	    strRateType 
+	)
+	SELECT     
+	    dtmDate ,
+	    strBatchId ,
+	    intAccountId ,
+	    dblDebit ,
+	    dblCredit ,
+	    dblDebitUnit ,
+	    dblCreditUnit ,
+	    strDescription ,
+	    strCode ,
+	    strReference ,
+	    intCurrencyId ,
+	    dblExchangeRate ,
+	    dtmDateEntered ,
+	    dtmTransactionDate ,
+	    strJournalLineDescription ,
+	    intJournalLineNo ,
+	    ysnIsUnposted ,
+	    intUserId ,
+	    intEntityId ,
+	    strTransactionId ,
+	    intTransactionId ,
+	    strTransactionType ,
+	    strTransactionForm ,
+	    strModuleName ,
+	    dblDebitForeign ,
+	    dblDebitReport ,
+	    dblCreditForeign ,
+	    dblCreditReport ,
+	    dblReportingRate ,
+	    dblForeignRate ,
+	    strRateType 	 
+	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
 
 	IF EXISTS(SELECT 1 FROM @adjustedEntries)
 	BEGIN
-		INSERT INTO @GLEntries
+		INSERT INTO @GLEntries (
+			dtmDate						
+			,strBatchId					
+			,intAccountId				
+			,dblDebit					
+			,dblCredit					
+			,dblDebitUnit				
+			,dblCreditUnit				
+			,strDescription				
+			,strCode					
+			,strReference				
+			,intCurrencyId				
+			,dblExchangeRate			
+			,dtmDateEntered				
+			,dtmTransactionDate			
+			,strJournalLineDescription  
+			,intJournalLineNo			
+			,ysnIsUnposted				
+			,intUserId					
+			,intEntityId				
+			,strTransactionId			
+			,intTransactionId			
+			,strTransactionType			
+			,strTransactionForm			
+			,strModuleName				
+			,intConcurrencyId			
+			,dblDebitForeign			
+			,dblDebitReport				
+			,dblCreditForeign			
+			,dblCreditReport			
+			,dblReportingRate			
+			,dblForeignRate						
+		)
 		EXEC uspICPostCostAdjustment @adjustedEntries, @batchId, @userId
 	END
 END
