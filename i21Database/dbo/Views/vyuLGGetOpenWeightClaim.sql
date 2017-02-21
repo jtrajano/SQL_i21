@@ -92,7 +92,7 @@ JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 JOIN tblICItem I ON I.intItemId = CD.intItemId
 JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
 LEFT JOIN tblEMEntity EMP ON EMP.intEntityId = CH.intProducerId
-LEFT JOIN tblICCommodityAttribute CA ON	CA.intCommodityAttributeId	= I.intOriginId
+LEFT JOIN tblICCommodityAttribute CA ON	CA.intCommodityAttributeId	= I.intOriginId	AND CA.strType = 'Origin'
 LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId
 LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
@@ -103,5 +103,5 @@ LEFT JOIN (
 	) RI ON RI.intSourceId = LD.intLoadDetailId AND RI.intLineNo = LD.intPContractDetailId AND RI.intOrderId = CH.intContractHeaderId AND Load.intPurchaseSale = 1
 LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = Load.intLoadId
 WHERE Load.intShipmentStatus = CASE Load.intPurchaseSale WHEN  1 THEN 4 ELSE 6 END AND IsNull(WC.intWeightClaimId, 0) = 0
-	AND CA.strType = 'Origin'
+
 ) t1
