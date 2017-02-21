@@ -134,7 +134,8 @@ Begin
 		@dblTotalGross				=	dblTotalGross,
 		@dblTotalNet				=	dblTotalNet,
 		@strLocation				=	strCompanyLocation,
-		@dtmETSPOL					=	dtmETSPOL		
+		@dtmETSPOL					=	dtmETSPOL,
+		@strWarehouseVendorAccNo	=	strWarehouseVendorAccNo			
 	From tblLGLoadLSPStg Where intLoadStgId=@intMinHeader
 
 	Select TOP 1 @strPackingDesc=ct.strPackingDescription From tblCTContractDetail ct Join tblLGLoadDetail ld on ct.intContractDetailId=ld.intPContractDetailId 
@@ -200,7 +201,7 @@ Begin
 		+ '<TELEPHONE1>'	+ ISNULL(strOriginTelePhoneNo,'')		+ '</TELEPHONE1>'
 		+ '<TELEFAX>'		+ ISNULL(strOriginTeleFaxNo,'')			+ '</TELEFAX>'
 		+ '<COUNTRY1>'		+ ISNULL(strOriginCountry,'')			+ '</COUNTRY1>'
-		+ '</E1ADRM6">'
+		+ '</E1ADRM6>'
 		+ '</E1EDT44>'
 
 		+ '<E1EDT44 SEGMENT="1">'
@@ -214,7 +215,7 @@ Begin
 		+ '<TELEPHONE1>'	+ ISNULL(strDestinationTelePhoneNo,'')		+ '</TELEPHONE1>'
 		+ '<TELEFAX>'		+ ISNULL(strDestinationTeleFaxNo,'')			+ '</TELEFAX>'
 		+ '<COUNTRY1>'		+ ISNULL(strDestinationCountry,'')			+ '</COUNTRY1>'
-		+ '</E1ADRM6">'
+		+ '</E1ADRM6>'
 		+ '</E1EDT44>'
 
 		+ '</E1EDK33>'
