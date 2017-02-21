@@ -45,25 +45,7 @@ SELECT [intPaymentId]
           ,[strCustomerName]
           ,[strCustomerAddress]
           ,[dblARBalance]
-          ,[dblPendingInvoice]        = (
-                                          SELECT PendingInvoices = ISNULL(ISNULL(ABC.Total1,0) - ISNULL(DEF.Total2,0),0)
-                                          FROM 
-                                          (                                     
-                                              SELECT SUM(ISNULL(dblInvoiceTotal,0)) Total1 , intEntityCustomerId  FROM  tblARInvoice WHERE strTransactionType IN ('Invoice','Service Charge','Cash', 'Debit Memo') 
-                                              AND intEntityCustomerId = A.intEntityCustomerId
-                                              AND ISNULL(ysnPosted,0) = 0
-											  AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
-                                              GROUP BY tblARInvoice.intEntityCustomerId
-                                          ) ABC
-                                          INNER JOIN 
-                                          (                                    
-                                              SELECT SUM(ISNULL(dblInvoiceTotal,0)) Total2, intEntityCustomerId FROM  tblARInvoice WHERE strTransactionType IN ('Credit Memo', 'Cash Refund')
-                                              AND intEntityCustomerId = A.intEntityCustomerId
-                                              AND ISNULL(ysnPosted,0) = 0
-											  AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
-                                              GROUP BY tblARInvoice.intEntityCustomerId  
-                                          ) DEF ON ABC.intEntityCustomerId = DEF.intEntityCustomerId
-                                        )
+          ,[dblPendingInvoice]        = (SELECT ISNULL(SUM(CASE WHEN strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0 AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0))))
           ,[dblPendingPayment]
           ,[intInvoiceId]
           ,[strInvoiceNumber]
