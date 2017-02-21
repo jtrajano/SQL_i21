@@ -2397,8 +2397,8 @@ Ext.define('Inventory.view.ItemViewController', {
         });
     },
 
-    afterSave: function(me, win, batch, options) {
-        win.context.data.reload();
+    afterSave: function(win, me, batch, options) {
+        win.view.context.data.reload();
     },
 
     onEditLocationClick: function(button, e, eOpts) {
