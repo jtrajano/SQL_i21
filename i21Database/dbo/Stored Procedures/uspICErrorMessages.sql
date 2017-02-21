@@ -513,7 +513,7 @@ SET @strmessage = 'Check the return date on the transaction. Return date is %s, 
 EXEC sp_addmessage 80108,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80109) EXEC sp_dropmessage 80109, 'us_english'	
-SET @strmessage = 'Return is stopped. All the stocks %s from %s are already returned or over-return is going to happen.'
+SET @strmessage = 'Return is stopped. All of the stocks in %s that is received in %s are either sold, consumed, returned, or over-return is going to happen.'
 EXEC sp_addmessage 80109,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80110) EXEC sp_dropmessage 80110, 'us_english'	
@@ -715,3 +715,12 @@ EXEC sp_addmessage 80158,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80159) EXEC sp_dropmessage 80159, 'us_english'	
 SET @strmessage = 'Item: %s, Qty: %s, Cost: %s'
 EXEC sp_addmessage 80159,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80160) EXEC sp_dropmessage 80160, 'us_english'	
+SET @strmessage = 'Transaction not saved. Stocks for %s will have an over-return.'
+EXEC sp_addmessage 80160,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80161) EXEC sp_dropmessage 80161, 'us_english'	
+SET @strmessage = 'Return no longer allowed. All of the stocks are returned.'
+EXEC sp_addmessage 80161,11,@strmessage,'us_english','False'
+
