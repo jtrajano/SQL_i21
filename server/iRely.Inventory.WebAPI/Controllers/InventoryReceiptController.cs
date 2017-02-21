@@ -333,5 +333,28 @@ namespace iRely.Inventory.WebApi
             });
 
         }
+
+        [HttpGet]
+        [ActionName("CheckReceiptForValidReturn")]
+        public HttpResponseMessage CheckReceiptForValidReturn(int? receiptId)
+        {
+            var result = _bl.CheckReceiptForValidReturn(receiptId);
+
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.NotAcceptable;
+
+            return Request.CreateResponse(httpStatusCode, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+
+        }
+
     }
 }

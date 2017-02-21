@@ -951,5 +951,25 @@ namespace iRely.Inventory.BusinessLayer
             }
             return saveResult;
         }
+
+        public SaveResult CheckReceiptForValidReturn(int? receiptId)
+        {
+            SaveResult saveResult = new SaveResult();
+
+            // Check the receipt
+            try
+            {
+                var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                db.ValidateReceiptForReturn(receiptId);
+                saveResult.HasError = false; 
+            }
+            catch (Exception ex)
+            {
+                saveResult.BaseException = ex;
+                saveResult.HasError = true;
+                saveResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return saveResult;
+        }
     }
 }
