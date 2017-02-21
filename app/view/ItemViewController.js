@@ -1344,6 +1344,7 @@ Ext.define('Inventory.view.ItemViewController', {
             enableCustomTab: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             onSaveClick: me.saveAndPokeGrid(win, grdUOM),
+            
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
@@ -2383,8 +2384,23 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             });
             search.show();
-        }
-        showAddScreen();
+        };
+
+        // if (!win.context.data.hasChanges()) {
+        //     showAddScreen();
+        // }
+
+        win.context.data.saveRecord({
+            callbackFn: function(batch, options) {
+                showAddScreen();
+            }
+        });
+    },
+
+    afterSave: function(owner, batch, options) {
+        var me = owner;
+        var current = me.getViewModel().get('current');
+        current.tblICItemPricings().load();
     },
 
     onEditLocationClick: function(button, e, eOpts) {
