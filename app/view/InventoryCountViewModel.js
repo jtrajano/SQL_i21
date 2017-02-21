@@ -154,6 +154,12 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
             else {
                 return false;
             }
+        },
+        disableBtnDelete: function (get) {
+            if(get('current.ysnPosted') || get('current.intStatus') === 3 )
+                return true;
+            else
+                return false;
         }
     }
 
