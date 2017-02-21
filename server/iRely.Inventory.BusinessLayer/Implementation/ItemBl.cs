@@ -158,6 +158,10 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     msg = "The location(s) you are trying to remove are being used in Pricing tab.";
                 }
+                else if (result.BaseException.Message.Contains("The DELETE statement conflicted with the REFERENCE constraint \"FK_tblICInventoryReceiptItem_tblICItemUOM\"."))
+                {
+                    msg = "Cannot delete this item because it's already used in a receipt.";
+                }
             }
 
             return new BusinessResult<tblICItem>()
