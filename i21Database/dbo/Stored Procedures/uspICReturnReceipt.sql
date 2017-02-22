@@ -252,6 +252,7 @@ BEGIN
 				ON il.intItemId = ri.intItemId
 				AND il.intLocationId = r.intLocationId
 	WHERE	r.intInventoryReceiptId = @intReceiptId
+			AND ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) > 0
 END 
 
 -- Create the lots for the return transaction 
