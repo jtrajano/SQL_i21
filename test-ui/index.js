@@ -533,6 +533,15 @@ Harness.start(
                                         commonIC
 
                                     ]
+                                },
+                                {
+                                    url: 'BusinessDomain/InventoryShipment/OpenISScreen/ISOpenNewScreen.js?v=' + version,
+                                    title: 'ISOpenNewScreen',
+                                    preload: [
+                                        functionalTest,
+                                        commonIC
+
+                                    ]
                                 }
                             ]
                         },
