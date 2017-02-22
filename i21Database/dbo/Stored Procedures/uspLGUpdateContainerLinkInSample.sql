@@ -10,4 +10,9 @@ BEGIN
 		,intLoadDetailContainerLinkId = NULL
 		,intLoadId = NULL
 	WHERE intLoadDetailContainerLinkId = @intLoadDetailContainerLinkId
+	
+	UPDATE tblLGLoadDetailContainerLink 
+	SET intLoadContainerId = NULL,
+		intLoadDetailId = NULL
+	WHERE intLoadDetailContainerLinkId = @intLoadDetailContainerLinkId
 END

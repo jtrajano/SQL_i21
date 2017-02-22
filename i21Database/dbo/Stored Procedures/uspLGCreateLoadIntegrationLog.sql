@@ -220,10 +220,12 @@ BEGIN TRY
 				,LC.dblNetWt
 				,LC.dblGrossWt
 				,LC.strWeightUnitMeasure
+				,LDCL.strExternalContainerId
 				,@strRowState
 				,GETDATE()
 			FROM vyuLGLoadContainerView LC
 			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 			WHERE LC.intLoadId = @intLoadId
 		END
@@ -295,7 +297,7 @@ BEGIN TRY
 		LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
 		WHERE intLoadId = @intLoadId
 
-		SELECT @intLoadStgId = SCOPE_IDENTITY()
+		SELECT @intLoadLogId = SCOPE_IDENTITY()
 
 		INSERT INTO tblLGLoadDetailLog(
 			 intLoadLogId
@@ -325,7 +327,7 @@ BEGIN TRY
 			,strChangeType
 			,strRowState
 			,strCommodityCode)
-		SELECT @intLoadStgId
+		SELECT @intLoadLogId
 			,@intLoadId
 			,CASE 
 				WHEN ISNULL(LSID.intLoadDetailId, 0) = 0
@@ -398,7 +400,7 @@ BEGIN TRY
 		IF (@intShipmentType = 1)
 		BEGIN
 			INSERT INTO tblLGLoadContainerLog
-			SELECT @intLoadStgId
+			SELECT @intLoadLogId
 				,@intLoadId
 				,LC.intLoadContainerId
 				,LC.strContainerNumber
@@ -415,14 +417,18 @@ BEGIN TRY
 					PARTITION BY LC.intLoadId ORDER BY LC.intLoadId
 					) AS Seq
 				,LC.dblQuantity
-				,LC.strItemUOM
+				,UM.strUnitMeasure strItemUOM
 				,LC.dblNetWt
 				,LC.dblGrossWt
-				,LC.strWeightUnitMeasure
-				,@strRowState
-			FROM vyuLGLoadContainerView LC
+				,LUM.strUnitMeasure strWeightUnitMeasure
+				,LDCL.strExternalContainerId
+				,''
+			FROM tblLGLoadContainer LC
 			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
+			JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intWeightUnitMeasureId
 			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 			WHERE LC.intLoadId = @intLoadId
 		END
 	END
