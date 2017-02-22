@@ -1141,7 +1141,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 format: '0,000.##'
                                                                             },
                                                                             {
-                                                                                xtype: 'unitmeasurecolumn',
+                                                                                xtype: 'griduomcolumn',
                                                                                 decimalPrecisionField: 'intItemUOMDecimalPlaces',
                                                                                 displayField: 'strUnitMeasure',
                                                                                 itemId: 'colUOMQtyToReceive',
@@ -1150,7 +1150,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 dataIndex: 'dblOpenReceive',
                                                                                 text: 'Qty to Receive',
                                                                                 editor: {
-                                                                                    xtype: 'gridunitmeasurefield',
+                                                                                    xtype: 'griduomfield',
                                                                                     valueField: 'intUnitMeasureId',
                                                                                     updateField: 'intUnitMeasureId',
                                                                                     lookupValueField: 'intItemUnitMeasureId',
