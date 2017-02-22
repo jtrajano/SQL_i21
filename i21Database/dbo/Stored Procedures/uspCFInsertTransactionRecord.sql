@@ -119,6 +119,7 @@ BEGIN
 	--LOGS--
 
 	DECLARE @intOverFilledTransactionId INT = NULL
+	DECLARE @intAccountId				INT = 0
 	DECLARE @intCardId					INT = 0
 	DECLARE @intVehicleId				INT	= 0
 	DECLARE @intProductId				INT	= 0
@@ -215,7 +216,6 @@ BEGIN
 
 	IF(@strNetworkType = 'PacPride')
 	BEGIN
-
 		-----------ORIGINAL GROSS PRICE-------
 		IF(@dblOriginalGrossPrice IS NULL OR @dblOriginalGrossPrice = 0)
 		BEGIN
@@ -497,6 +497,11 @@ BEGIN
 	BEGIN
 		SET @intCardId = NULL
 	END
+	ELSE
+	BEGIN
+		SELECT @intAccountId = intAccountId
+		FROM tblCFCard WHERE intCardId = @intCardId
+	END
 
 	IF(@intProductId = 0)
 	BEGIN
@@ -524,10 +529,18 @@ BEGIN
 	SET @intARItemLocationId = (SELECT TOP 1 intARLocationId
 								FROM tblCFSite 
 								WHERE intSiteId = @intSiteId)
-
-	SET @intVehicleId =(SELECT TOP 1 intVehicleId
+	
+	IF(@intAccountId IS NOT NULL AND @intAccountId != 0)
+	BEGIN
+		SET @intVehicleId =
+						(SELECT TOP 1 intVehicleId
 						FROM tblCFVehicle
-						WHERE strVehicleNumber	= @strVehicleId)
+						WHERE strVehicleNumber	= @strVehicleId AND intAccountId = @intAccountId)
+	END
+	ELSE
+	BEGIN
+		SET @intVehicleId = NULL
+	END
 	------------------------------------------------------------
 
 
@@ -620,6 +633,13 @@ BEGIN
 		BEGIN
 			SET @ysnInvalid = 1
 		END
+		IF(@intVehicleId = 0 OR @intVehicleId IS NULL)
+		BEGIN
+			SET @intVehicleId = NULL
+			SET @ysnInvalid = 1
+		END
+
+		
 
 		---- DUPLICATE CHECK -- 
 		--SELECT @intDupTransCount = COUNT(*)
@@ -813,6 +833,14 @@ BEGIN
 
 			RETURN;
 		END
+		IF((@intVehicleId = 0 OR @intVehicleId IS NULL) AND @strTransactionType != 'Foreign Sale')
+		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find vehicle number ' + @strVehicleId + ' into i21 vehilce list')
+
+			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find vehilce number ' + @strVehicleId + ' into i21 vehilce list')
+		END
+
 		
 		
 

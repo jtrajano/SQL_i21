@@ -668,8 +668,8 @@ BEGIN
 					DROP TABLE #ItemTax
 				END
 
-		
-				
+				--select * from @tblCFRemoteTax
+
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
 				---------------------------------------------------
@@ -689,7 +689,7 @@ BEGIN
 						,ISNULL(strReason,'Invalid Setup -' + strTaxCode)
 						,@guid
 					FROM @tblCFRemoteTax
-					WHERE (ysnInvalidSetup =1 AND LOWER(strReason) NOT LIKE '%item category%')
+					WHERE (ysnInvalidSetup =1 AND LOWER(strReason) NOT LIKE '%item category%') AND (ysnTaxExempt IS NULL OR  ysnTaxExempt = 0)
 				END
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
