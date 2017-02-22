@@ -38,7 +38,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
 	, CASE WHEN C.intTransactionType != 1 AND abs(B.dblDiscount) > 0 THEN B.dblDiscount * -1 ELSE B.dblDiscount END AS dblDiscount
-	, B.dblInterest 
+	, CASE WHEN C.intTransactionType != 1 AND abs(B.dblInterest) > 0 THEN B.dblInterest * -1 ELSE B.dblInterest END AS dblInterest 
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
 	, C.dtmDueDate 

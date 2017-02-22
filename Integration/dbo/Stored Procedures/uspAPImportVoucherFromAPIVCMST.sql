@@ -148,7 +148,9 @@ SELECT
 										ELSE 1
 										END
 									END),
-	[dblDiscount]			=	CASE WHEN A.apivc_net_amt + ISNULL(A.apivc_disc_taken,0) = A.apivc_orig_amt THEN ISNULL(A.apivc_disc_taken,0) ELSE 0 END, --THERE ARE DISCOUNT TAKE BUT DID NOT DEDUCTED TO CHECK AMOUNT
+	[dblDiscount]			=	CASE WHEN A.apivc_net_amt + ISNULL(A.apivc_disc_taken,0) = A.apivc_orig_amt THEN 
+										(CASE WHEN ISNULL(A.apivc_disc_taken,0) > 0 THEN ISNULL(A.apivc_disc_taken,0) ELSE 0 END)
+								ELSE 0 END, --THERE ARE DISCOUNT TAKE BUT DID NOT DEDUCTED TO CHECK AMOUNT
 	[dblInterest]			=	CASE WHEN A.apivc_net_amt + ISNULL(A.apivc_disc_taken,0) = A.apivc_orig_amt THEN 
 									(CASE WHEN A.apivc_disc_taken < 0 THEN A.apivc_disc_taken * -1 ELSE 0 END) --it is interest if its value is negative
 								ELSE 0 END, 
