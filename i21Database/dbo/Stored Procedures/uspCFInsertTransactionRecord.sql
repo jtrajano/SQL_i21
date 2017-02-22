@@ -215,6 +215,14 @@ BEGIN
 
 	IF(@strNetworkType = 'PacPride')
 	BEGIN
+
+		-----------ORIGINAL GROSS PRICE-------
+		IF(@dblOriginalGrossPrice IS NULL OR @dblOriginalGrossPrice = 0)
+		BEGIN
+		SET @dblOriginalGrossPrice = @dblTransferCost
+		END
+		
+		-----------TRANSACTION TYPE-----------
 		IF(@intSellingHost = @intParticipantNo AND @intBuyingHost = @intParticipantNo)
 		BEGIN
 			SET @strTransactionType = 'Local/Network'
