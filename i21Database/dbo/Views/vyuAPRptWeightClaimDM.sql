@@ -96,7 +96,7 @@ FROM
 	INNER JOIN (tblCTContractDetail ContractDetail INNER JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId)
 			ON WC2Details.intContractDetailId = ContractDetail.intContractDetailId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = WC2Details.intAccountId
-	INNER JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = WC2.intCurrencyId
+	INNER JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = WC2Details.intCurrencyId
 	LEFT JOIN (tblICItemUOM ItemCostUOM INNER JOIN tblICUnitMeasure ItemCostUOMMeasure ON ItemCostUOM.intUnitMeasureId = ItemCostUOMMeasure.intUnitMeasureId) 
 			ON WC2Details.intCostUOMId = ItemCostUOM.intItemUOMId
 	LEFT JOIN tblICItemContract ItemContract INNER JOIN tblSMCountry ItemOriginCountry ON ItemContract.intCountryId = ItemOriginCountry.intCountryID
