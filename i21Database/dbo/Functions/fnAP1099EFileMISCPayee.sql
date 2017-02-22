@@ -29,8 +29,8 @@ BEGIN
 		+ CASE WHEN @corrected = 1 THEN 'G' ELSE ' ' END
 		+ SPACE(4)
 		+ '1' --EIN
-		+ SPACE(9 - LEN(ISNULL(NULLIF(SUBSTRING(REPLACE(A.strFederalTaxId,'-',''),1,10),''),SPACE(9)))) 
-			+ ISNULL(NULLIF(SUBSTRING(REPLACE(A.strFederalTaxId,'-',''),1,10),''),SPACE(9)) -- 12-20
+		+ SPACE(9 - LEN(ISNULL(NULLIF(SUBSTRING(REPLACE(dbo.fnTrimX(A.strFederalTaxId),'-',''),1,10),''),SPACE(9)))) 
+			+ ISNULL(NULLIF(SUBSTRING(REPLACE(dbo.fnTrimX(A.strFederalTaxId),'-',''),1,10),''),SPACE(9)) -- 12-20
 		+ CAST(A.intEntityVendorId AS NVARCHAR) + SPACE(20 - LEN(CAST(A.intEntityVendorId AS NVARCHAR))) -- 21-40
 		+ SPACE(4) -- 41-44
 		+ SPACE(10) -- 45-54
@@ -120,7 +120,7 @@ BEGIN
 		+ REPLICATE('0',12) 
 		END-- 235-246
 		+ ' ' --Foreign Indicator
-		+ A.strPayeeName + SPACE(40 - LEN(A.strPayeeName))
+		+ dbo.fnTrimX(A.strPayeeName) + SPACE(40 - LEN(dbo.fnTrimX(A.strPayeeName)))
 		+ SPACE(40) -- 288-327
 		+ SPACE(40) -- 328-367
 		+ ISNULL(A.strAddress,'') + SPACE(40 - LEN(ISNULL(A.strAddress,'')))

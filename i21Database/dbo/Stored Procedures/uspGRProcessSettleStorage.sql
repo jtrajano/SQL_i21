@@ -1121,7 +1121,7 @@ BEGIN TRY
 						, @UserKey
 						, @intBillId OUTPUT 
 						
-				UPDATE tblAPBill SET strVendorOrderNumber=strBillId WHERE intBillId=@intBillId
+				UPDATE tblAPBill SET strVendorOrderNumber=@TicketNo WHERE intBillId=@intBillId
 				
 				UPDATE SH
 				SET  SH.intInventoryReceiptId = @intReceiptId

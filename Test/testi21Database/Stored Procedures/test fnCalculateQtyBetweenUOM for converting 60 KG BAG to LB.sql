@@ -1,4 +1,4 @@
-﻿ CREATE PROCEDURE testi21Database.[test fnCalculateQtyBetweenUOM for converting 60 KG BAG to LB]
+﻿CREATE PROCEDURE testi21Database.[test fnCalculateQtyBetweenUOM for converting 60 KG BAG to LB]
 AS 
 BEGIN
 	-- Call the fake data

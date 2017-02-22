@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
 	@xmlParam NVARCHAR(MAX)=null
 )
 AS
@@ -29,6 +28,7 @@ BEGIN
 		,strCustomerName		   = ''
 		,strLocationName		   = ''
 		,strInvoiceReportNumber	   = ''
+		,strTempInvoiceReportNumber= ''
 		,strInvoiceNumber		   = ''
 		,strTransactionId		   = ''
 		,strTransactionType		   = ''
@@ -301,7 +301,7 @@ BEGIN
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 				IF(@CFID IS NOT NULL)
 				BEGIN
-					--EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					EXEC('UPDATE tblCFTransaction SET strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 				END
@@ -339,7 +339,7 @@ BEGIN
 				IF(@CFID IS NOT NULL)
 				BEGIN
 
-					--EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					EXEC('UPDATE tblCFTransaction SET strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					EXEC('UPDATE tblCFTransaction SET dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 
@@ -365,6 +365,8 @@ BEGIN
 		--SELECT * FROM vyuCFInvoiceReport where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 
 		SELECT * FROM vyuCFInvoiceReport AS main 
+		INNER JOIN @tblCFInvoiceNunber as cfInvRptNo
+		on main.intAccountId = cfInvRptNo.intAccountId
 		INNER JOIN 
 		(	SELECT intAccountId AS intSubAccountId,SUM(dblCalculatedTotalAmount) AS dblInvoiceTotal 
 			FROM vyuCFInvoiceReport
@@ -376,4 +378,3 @@ BEGIN
 	END
     
 END
-GO

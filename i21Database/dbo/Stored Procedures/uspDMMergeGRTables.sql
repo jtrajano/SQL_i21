@@ -11,7 +11,7 @@ DECLARE @SQLString NVARCHAR(MAX) = '';
 
 BEGIN
 
-    -- tblGRStorageType
+   -- tblGRStorageType
     SET @SQLString = N'MERGE tblGRStorageType AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblGRStorageType]) AS Source
         ON (Target.intStorageScheduleTypeId = Source.intStorageScheduleTypeId)
@@ -50,10 +50,10 @@ BEGIN
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblGRStorageSchedulePeriod]) AS Source
         ON (Target.intStorageSchedulePeriodId = Source.intStorageSchedulePeriodId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intConcurrencyId = Source.intConcurrencyId, Target.intStorageScheduleRule = Source.intStorageScheduleRule, Target.strPeriodType = Source.strPeriodType, Target.dtmEffectiveDate = Source.dtmEffectiveDate, Target.dtmEndingDate = Source.dtmEndingDate, Target.intNumberOfDays = Source.intNumberOfDays, Target.dblStorageRate = Source.dblStorageRate, Target.strFeeDescription = Source.strFeeDescription, Target.dblFeeRate = Source.dblFeeRate, Target.strFeeType = Source.strFeeType, Target.intSort = Source.intSort
+            UPDATE SET Target.intConcurrencyId = Source.intConcurrencyId, Target.intStorageScheduleRule = Source.intStorageScheduleRule, Target.strPeriodType = Source.strPeriodType, Target.dtmEffectiveDate = Source.dtmEffectiveDate, Target.dtmEndingDate = Source.dtmEndingDate, Target.intNumberOfDays = Source.intNumberOfDays, Target.dblStorageRate = Source.dblStorageRate, Target.strFeeDescription = Source.strFeeDescription, Target.intSort = Source.intSort
         WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intStorageSchedulePeriodId, intConcurrencyId, intStorageScheduleRule, strPeriodType, dtmEffectiveDate, dtmEndingDate, intNumberOfDays, dblStorageRate, strFeeDescription, dblFeeRate, strFeeType, intSort)
-            VALUES (Source.intStorageSchedulePeriodId, Source.intConcurrencyId, Source.intStorageScheduleRule, Source.strPeriodType, Source.dtmEffectiveDate, Source.dtmEndingDate, Source.intNumberOfDays, Source.dblStorageRate, Source.strFeeDescription, Source.dblFeeRate, Source.strFeeType, Source.intSort)
+            INSERT (intStorageSchedulePeriodId, intConcurrencyId, intStorageScheduleRule, strPeriodType, dtmEffectiveDate, dtmEndingDate, intNumberOfDays, dblStorageRate, strFeeDescription, intSort)
+            VALUES (Source.intStorageSchedulePeriodId, Source.intConcurrencyId, Source.intStorageScheduleRule, Source.strPeriodType, Source.dtmEffectiveDate, Source.dtmEndingDate, Source.intNumberOfDays, Source.dblStorageRate, Source.strFeeDescription, Source.intSort)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -67,10 +67,10 @@ BEGIN
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblGRStorageScheduleRule]) AS Source
         ON (Target.intStorageScheduleRuleId = Source.intStorageScheduleRuleId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intConcurrencyId = Source.intConcurrencyId, Target.strScheduleDescription = Source.strScheduleDescription, Target.intStorageType = Source.intStorageType, Target.intCommodity = Source.intCommodity, Target.intAllowanceDays = Source.intAllowanceDays, Target.dtmEffectiveDate = Source.dtmEffectiveDate, Target.dtmTerminationDate = Source.dtmTerminationDate, Target.dblFeeRate = Source.dblFeeRate, Target.strFeeType = Source.strFeeType, Target.intCurrencyID = Source.intCurrencyID, Target.strScheduleId = Source.strScheduleId, Target.strStorageRate = Source.strStorageRate, Target.strFirstMonth = Source.strFirstMonth, Target.strLastMonth = Source.strLastMonth, Target.strAllowancePeriod = Source.strAllowancePeriod, Target.dtmAllowancePeriodFrom = Source.dtmAllowancePeriodFrom, Target.dtmAllowancePeriodTo = Source.dtmAllowancePeriodTo
+            UPDATE SET Target.intConcurrencyId = Source.intConcurrencyId, Target.strScheduleDescription = Source.strScheduleDescription, Target.intStorageType = Source.intStorageType, Target.intCommodity = Source.intCommodity, Target.intAllowanceDays = Source.intAllowanceDays, Target.dtmEffectiveDate = Source.dtmEffectiveDate, Target.dtmTerminationDate = Source.dtmTerminationDate, Target.intCurrencyID = Source.intCurrencyID, Target.strScheduleId = Source.strScheduleId, Target.strStorageRate = Source.strStorageRate, Target.strFirstMonth = Source.strFirstMonth, Target.strLastMonth = Source.strLastMonth, Target.strAllowancePeriod = Source.strAllowancePeriod, Target.dtmAllowancePeriodFrom = Source.dtmAllowancePeriodFrom, Target.dtmAllowancePeriodTo = Source.dtmAllowancePeriodTo
         WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intStorageScheduleRuleId, intConcurrencyId, strScheduleDescription, intStorageType, intCommodity, intAllowanceDays, dtmEffectiveDate, dtmTerminationDate, dblFeeRate, strFeeType, intCurrencyID, strScheduleId, strStorageRate, strFirstMonth, strLastMonth, strAllowancePeriod, dtmAllowancePeriodFrom, dtmAllowancePeriodTo)
-            VALUES (Source.intStorageScheduleRuleId, Source.intConcurrencyId, Source.strScheduleDescription, Source.intStorageType, Source.intCommodity, Source.intAllowanceDays, Source.dtmEffectiveDate, Source.dtmTerminationDate, Source.dblFeeRate, Source.strFeeType, Source.intCurrencyID, Source.strScheduleId, Source.strStorageRate, Source.strFirstMonth, Source.strLastMonth, Source.strAllowancePeriod, Source.dtmAllowancePeriodFrom, Source.dtmAllowancePeriodTo)
+            INSERT (intStorageScheduleRuleId, intConcurrencyId, strScheduleDescription, intStorageType, intCommodity, intAllowanceDays, dtmEffectiveDate, dtmTerminationDate, intCurrencyID, strScheduleId, strStorageRate, strFirstMonth, strLastMonth, strAllowancePeriod, dtmAllowancePeriodFrom, dtmAllowancePeriodTo)
+            VALUES (Source.intStorageScheduleRuleId, Source.intConcurrencyId, Source.strScheduleDescription, Source.intStorageType, Source.intCommodity, Source.intAllowanceDays, Source.dtmEffectiveDate, Source.dtmTerminationDate, Source.intCurrencyID, Source.strScheduleId, Source.strStorageRate, Source.strFirstMonth, Source.strLastMonth, Source.strAllowancePeriod, Source.dtmAllowancePeriodFrom, Source.dtmAllowancePeriodTo)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 

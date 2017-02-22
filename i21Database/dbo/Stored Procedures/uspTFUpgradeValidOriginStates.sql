@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFUpgradeValidOriginStates]
+	@TaxAuthorityCode NVARCHAR(10),
 	@ValidOriginStates TFValidOriginStates READONLY
 
 AS
@@ -15,16 +16,27 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
+	DECLARE @TaxAuthorityId INT
+	SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
+	IF (ISNULL(@TaxAuthorityId, 0) = 0)
+	BEGIN
+		RAISERROR('Tax Authority code does not exist.', 16, 1)
+	END
+
+	SELECT VOS.*, ODS.intOriginDestinationStateId, RC.intReportingComponentId
+	INTO #tmpVOS
+	FROM @ValidOriginStates VOS
+	LEFT JOIN tblTFOriginDestinationState ODS ON ODS.strOriginDestinationState COLLATE Latin1_General_CI_AS = VOS.strState COLLATE Latin1_General_CI_AS
+	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = VOS.strFormCode COLLATE Latin1_General_CI_AS
+		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = VOS.strScheduleCode COLLATE Latin1_General_CI_AS
+		AND RC.strType COLLATE Latin1_General_CI_AS = VOS.strType COLLATE Latin1_General_CI_AS
+
 	MERGE	
-	INTO	tblTFValidOriginState
+	INTO	tblTFReportingComponentOriginState
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
-		SELECT VOS.*, ODS.intOriginDestinationStateId, RC.intReportingComponentId FROM @ValidOriginStates VOS
-		LEFT JOIN tblTFOriginDestinationState ODS ON ODS.strOriginDestinationState COLLATE Latin1_General_CI_AS = VOS.strState COLLATE Latin1_General_CI_AS
-		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = VOS.strFormCode COLLATE Latin1_General_CI_AS
-			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = VOS.strScheduleCode COLLATE Latin1_General_CI_AS
-			AND RC.strType COLLATE Latin1_General_CI_AS = VOS.strType COLLATE Latin1_General_CI_AS
+		SELECT * FROM #tmpVOS
 	) AS SOURCE
 		ON TARGET.intOriginDestinationStateId = SOURCE.intOriginDestinationStateId
 			AND TARGET.intReportingComponentId = SOURCE.intReportingComponentId
@@ -34,26 +46,33 @@ BEGIN TRY
 		SET 
 			intReportingComponentId			= SOURCE.intReportingComponentId
 			, intOriginDestinationStateId	= SOURCE.intOriginDestinationStateId
-			, strOriginState				= SOURCE.strState
-			, strType						= SOURCE.strStatus
-			, strFilter						= SOURCE.strFilter
+			, strType						= SOURCE.strFilter
+
 	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId
 			, intOriginDestinationStateId
-			, strOriginState
 			, strType
-			, strFilter
+		
 		)
 		VALUES (
 			SOURCE.intReportingComponentId
 			, SOURCE.intOriginDestinationStateId
-			, SOURCE.strState
 			, SOURCE.strStatus
-			, SOURCE.strFilter
-		)
-	WHEN NOT MATCHED BY SOURCE THEN 
-		DELETE;
+		);
+
+	-- Delete existing Valid Origin States that is not within Source
+	DELETE FROM tblTFReportingComponentOriginState
+	WHERE intReportingComponentOriginStateId IN (
+		SELECT DISTINCT RCOrigin.intReportingComponentOriginStateId FROM tblTFReportingComponentOriginState RCOrigin
+		LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCOrigin.intReportingComponentId
+		LEFT JOIN #tmpVOS tmp ON tmp.intReportingComponentId = RCOrigin.intReportingComponentId
+			AND tmp.intOriginDestinationStateId = RCOrigin.intOriginDestinationStateId
+		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
+			AND ISNULL(tmp.intOriginDestinationStateId, '') = ''
+	)
+
+	DROP TABLE #tmpVOS
 
 END TRY
 BEGIN CATCH

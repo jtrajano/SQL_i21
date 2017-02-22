@@ -302,7 +302,6 @@ End
 	From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId
 
 	Delete From tblIPEntityStage Where intStageEntityId=@intStageEntityId
-	Delete From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId
 
 	Commit Tran
 
@@ -328,7 +327,6 @@ BEGIN CATCH
 	From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId
 
 	Delete From tblIPEntityStage Where intStageEntityId=@intStageEntityId
-	Delete From tblIPEntityContactStage Where intStageEntityId=@intStageEntityId
 END CATCH
 
 	Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor

@@ -24,8 +24,8 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@ysnIncludeBudget			AS BIT
 		,@ysnPrintOnlyPastDue		AS BIT
 		,@xmlDocumentId				AS INT
-		,@query						AS NVARCHAR(MAX)		
-		,@innerQuery				AS NVARCHAR(MAX) = ''
+		,@query						AS NVARCHAR(MAX)
+		,@queryBudget				AS NVARCHAR(MAX)
 		,@joinQuery                 AS NVARCHAR(MAX) = ''
 		,@filter					AS NVARCHAR(MAX) = ''
 		,@fieldname					AS NVARCHAR(50)
@@ -97,6 +97,7 @@ DECLARE @temp_statement_table TABLE(
 	,[strStatementFooterComment]	NVARCHAR(MAX)	
 	,[strCompanyName]				NVARCHAR(MAX)
 	,[strCompanyAddress]			NVARCHAR(MAX)
+	,[dblARBalance]					NUMERIC(18,6)
 )
 
 DECLARE @temp_cf_table TABLE(
@@ -168,19 +169,10 @@ ELSE
 SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
 SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 
-IF UPPER(@condition) = UPPER('As Of')
-	BEGIN		
-		SET @innerQuery = 'AND I.dtmPostDate <= '+ @strDateTo +''
-	END
-ELSE
-	BEGIN
-		SET @innerQuery = 'AND I.dtmPostDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo+''
-	END
-
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, @strLocationName
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
 
-DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
+DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
 
 SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
 
@@ -217,13 +209,15 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	 , C.strName
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
-	 , strAccountStatusCode = NULL
+	 , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityCustomerId)
 	 , CL.strLocationName
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
 	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
+	 , dblARBalance = CUST.dblARBalance
 FROM vyuARCustomer C
+	INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
 	LEFT JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1
 	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityCustomerId
 		AND I.ysnPosted  = 1		
@@ -257,6 +251,64 @@ END
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
 
+IF @ysnIncludeBudget = 1
+	BEGIN
+		SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
+			'SELECT strReferenceNumber			= ''Budget for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101) 
+				  , strTransactionType			= ''Customer Budget''
+				  , intEntityCustomerId			= C.intEntityCustomerId
+				  , dtmDueDate					= DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate))
+				  , dtmDate						= dtmBudgetDate
+				  , intDaysDue					= DATEDIFF(DAY, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), @dtmDateTo)
+				  , dblTotalAmount				= dblBudgetAmount
+				  , dblAmountPaid				= dblAmountPaid
+				  , dblAmountDue				= dblBudgetAmount - dblAmountPaid
+				  , dblPastDue					= dblBudgetAmount - dblAmountPaid
+				  , dblMonthlyBudget			= dblBudgetAmount
+				  , dblRunningBalance			= SUM(dblBudgetAmount - dblAmountPaid) OVER (PARTITION BY C.intEntityCustomerId ORDER BY intCustomerBudgetId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+				  , strCustomerNumber			= C.strCustomerNumber
+				  , strName						= C.strName
+				  , strBOLNumber				= NULL
+				  , dblCreditLimit				= C.dblCreditLimit
+				  , strAccountStatusCode		= dbo.fnARGetCustomerAccountStatusCodes(CB.intEntityCustomerId)
+				  , strLocationName				= NULL
+				  , strFullAddress				= NULL
+				  , strStatementFooterComment	= NULL
+				  , strCompanyName				= NULL
+				  , strCompanyAddress			= NULL
+				  , dblARBalance				= CUST.dblARBalance
+			FROM tblARCustomerBudget CB
+				INNER JOIN vyuARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId
+				INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId	
+			WHERE CB.dtmBudgetDate BETWEEN @dtmDateFrom AND @dtmDateTo
+			  AND CB.dblAmountPaid < CB.dblBudgetAmount '
+
+		SET @filter = ''
+
+		DELETE FROM @temp_xml_table WHERE [fieldname] = 'strLocationName'
+
+		WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
+			BEGIN
+				SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
+				SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
+	
+				DELETE FROM @temp_xml_table WHERE id = @id
+
+				IF EXISTS(SELECT 1 FROM @temp_xml_table)
+				BEGIN
+					SET @filter = @filter + ' AND '
+				END
+			END
+		
+		IF ISNULL(@filter,'') != ''
+		BEGIN
+			SET @queryBudget = @queryBudget + ' WHERE ' + @filter
+		END	
+
+		INSERT INTO @temp_statement_table
+		EXEC sp_executesql @queryBudget
+	END
+
 DELETE 
 FROM 
 	@temp_statement_table
@@ -267,6 +319,21 @@ WHERE
 								tblARInvoice 
 					       WHERE 
 								strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo') )
+
+IF @ysnPrintOnlyPastDue = 1
+	BEGIN
+		DELETE FROM @temp_statement_table WHERE dblPastDue = 0
+		UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
+	END
+
+IF @ysnPrintZeroBalance = 0
+	BEGIN
+		DELETE FROM @temp_statement_table WHERE dblARBalance = 0
+		DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
+	END
+
+IF @ysnPrintCreditBalance = 0
+	DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		
 
 INSERT INTO @temp_cf_table
 (
@@ -354,10 +421,6 @@ FROM
 	  ,dtmAsOfDate									= @dtmDateTo
 	  ,blbLogo										= dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
-INNER JOIN @temp_aging_table AS AGINGREPORT
-	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-INNER JOIN tblARCustomer CUSTOMER 
-	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 WHERE strReferenceNumber NOT IN (SELECT strInvoiceNumber FROM @temp_cf_table)
 
 UNION ALL
@@ -411,5 +474,4 @@ INNER JOIN @temp_aging_table AS AGINGREPORT
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN tblARCustomer CUSTOMER 
 	ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-WHERE AGINGREPORT.dblTotalAR <> 0
- AND (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)
+WHERE (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)

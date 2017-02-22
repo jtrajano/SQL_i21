@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspGLPostRecap
+﻿CREATE PROCEDURE uspGLPostRecap
 	@RecapTable RecapTableType READONLY 
 	,@intEntityUserSecurityId AS INT = NULL 
 AS
@@ -60,6 +60,7 @@ INSERT INTO tblGLPostRecap (
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
+		,[strRateType]
 		,[intConcurrencyId]
 )
 -- RETRIEVE THE DATA FROM THE TABLE VARIABLE. 
@@ -100,6 +101,7 @@ SELECT	[dtmDate]
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
+		,[strRateType]
 		,[intConcurrencyId] = 1
 FROM	@RecapTable udtRecap INNER JOIN tblGLAccount gl
 			ON udtRecap.intAccountId = gl.intAccountId

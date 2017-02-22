@@ -59,7 +59,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intFreightTermId]						INT												NULL		-- Freight Term Id
 	,[intShipViaId]							INT												NULL		-- Entity Id of ShipVia
 	,[intPaymentMethodId]					INT												NULL		-- NULL
-	,[strInvoiceOriginId]					NVARCHAR(8)		COLLATE Latin1_General_CI_AS	NULL		-- Reference to the original/parent record
+	,[strInvoiceOriginId]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Reference to the original/parent record
+	,[ysnUseOriginIdAsInvoiceNumber]		BIT												NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
 	,[strPONumber]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Purchase Order Number
 	,[strBOLNumber]							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- BOL Number	
 	,[strDeliverPickup]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- Pickup or Deliver

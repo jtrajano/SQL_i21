@@ -1,8 +1,9 @@
 ﻿
 CREATE PROCEDURE uspCMApplyCheckChangeForCheckPrint
 	@intBankAccountId INT = NULL,
-	@strTransactionId NVARCHAR(40) = NULL,
+	@strTransactionIds NVARCHAR(max) = NULL,
 	@strBatchId NVARCHAR(20) = NULL,
+	@strProcessType NVARCHAR(100),
 	@ysnCheckToBePrinted BIT = 0
 AS
 
@@ -40,14 +41,25 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@CASH_PAYMENT AS NVARCHAR(20) = 'Cash'
 
 -- Mass update the ysnCheckToBePrinted
-UPDATE	[dbo].[tblCMBankTransaction]
-SET		ysnCheckToBePrinted = @ysnCheckToBePrinted
+IF(@strProcessType = 'ACH From Customer')
+BEGIN
+	UPDATE tblCMUndepositedFund
+	SET ysnToProcess = @ysnCheckToBePrinted
 		,intConcurrencyId = intConcurrencyId + 1
-WHERE	intBankAccountId = @intBankAccountId
-		AND intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
-		AND strTransactionId = ISNULL(@strTransactionId, strTransactionId)
-		AND strLink = ISNULL(@strBatchId, strLink)
-		AND ysnPosted = 1
-		--AND ysnClr = 0
-		AND dblAmount <> 0
-		AND strReferenceNo NOT IN (@CASH_PAYMENT) -- Do not include AP Payments that is paid thru a "Cash" payment method. 
+	WHERE intUndepositedFundId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
+		AND ysnCommitted is null
+END
+ELSE
+BEGIN
+	UPDATE	[dbo].[tblCMBankTransaction]
+	SET		ysnCheckToBePrinted = @ysnCheckToBePrinted
+			,intConcurrencyId = intConcurrencyId + 1
+	WHERE	intBankAccountId = @intBankAccountId
+			AND intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
+			AND intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
+			AND strLink = ISNULL(@strBatchId, strLink)
+			AND ysnPosted = 1
+			--AND ysnClr = 0
+			AND dblAmount <> 0
+			AND strReferenceNo NOT IN (@CASH_PAYMENT) -- Do not include AP Payments that is paid thru a "Cash" payment method. 
+END

@@ -48,6 +48,7 @@ BEGIN
 				,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
 				,strSiteComment = B.strComment
 				,strSiteInstruction = B.strInstruction
+				,B.ysnActive
 			FROM tblTMSite B
 			INNER JOIN tblTMCustomer C
 				ON B.intCustomerID = C.intCustomerID
@@ -83,6 +84,7 @@ BEGIN
 					,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
 					,strSiteComment = B.strComment
 					,strSiteInstruction = B.strInstruction
+					,B.ysnActive
 				FROM tblTMSite B
 				INNER JOIN tblTMCustomer C
 					ON B.intCustomerID = C.intCustomerID

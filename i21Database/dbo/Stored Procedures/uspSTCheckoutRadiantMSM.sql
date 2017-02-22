@@ -59,15 +59,34 @@ FROM
 FROM    @xml.nodes('//b:MiscellaneousSummaryMovement/b:MSMDetail/b:MSMSalesTotals') x(u)) as S
 --END
 
-    Update dbo.tblSTCheckoutPaymentOptions
-    SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
-    , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
-	, dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
-    FROM #tempCheckoutInsert chk
-    JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
-    JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
-    WHERE S.intStoreId = @intStoreId AND intCheckoutId = @intCheckoutId AND tblSTCheckoutPaymentOptions.intPaymentOptionId = PO.intPaymentOptionId
-       
+ --   Update dbo.tblSTCheckoutPaymentOptions
+ --   SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
+ --   , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
+	--, dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
+ --   FROM #tempCheckoutInsert chk
+ --   JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
+ --   JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
+ --   WHERE S.intStoreId = @intStoreId AND intCheckoutId = @intCheckoutId AND tblSTCheckoutPaymentOptions.intPaymentOptionId = PO.intPaymentOptionId
+
+    --Update tblSTCheckoutPaymentOptions
+	Update dbo.tblSTCheckoutPaymentOptions
+    SET dblRegisterAmount = s.TotalSummaryAmount
+    , intRegisterCount = s.TotalSummaryCount
+	, dblAmount = s.TotalSummaryAmount
+    FROM #Temp ST
+	JOIN (
+			SELECT ISNULL(CAST(TenderSubCode as int) ,0) as TenderSubCode,
+			       SUM(ISNULL(CAST(MiscellaneousSummaryCount as decimal(18,6)) ,0)) as TotalSummaryCount,
+			       SUM(ISNULL(CAST(MiscellaneousSummaryAmount as decimal(18,6)) ,0)) as TotalSummaryAmount
+			FROM #Temp
+			GROUP BY TenderSubCode
+	     ) s ON ST.TenderSubCode = s.TenderSubCode
+    JOIN tblSTPaymentOption PO ON PO.intRegisterMop = ST.TenderSubCode
+    JOIN tblSTStore Store ON Store.intStoreId = PO.intStoreId
+	JOIN tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
+    WHERE Store.intStoreId = @intStoreId AND ST.TenderSubCode <> ''
+	AND intCheckoutId = @intCheckoutId
+
     Update dbo.tblSTCheckoutPaymentOptions
     SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
     , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
@@ -136,7 +155,6 @@ FROM    @xml.nodes('//b:MiscellaneousSummaryMovement/b:MSMDetail/b:MSMSalesTotal
     --SET dblCustomerCount = (SELECT SUM(CAST(TenderTransactionsCount as int)) FROM #tempCheckoutInsert) 
     --WHERE intCheckoutId = @intCheckoutId
 
-
 	--Update TenderTransactionsCount
 	Update dbo.tblSTCheckoutHeader
 	SET dblCustomerCount = (S.TenderTransactionsCount)
@@ -144,9 +162,9 @@ FROM    @xml.nodes('//b:MiscellaneousSummaryMovement/b:MSMDetail/b:MSMSalesTotal
 	(SELECT 
 		SUM(TenderTransactionsCount) as TenderTransactionsCount
     FROM #Temp ST
-    JOIN dbo.tblSTPaymentOption PO ON PO.intRegisterMop = ST.TenderSubCode
-    JOIN dbo.tblSTStore Store ON Store.intStoreId = PO.intStoreId
-	JOIN dbo.tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
+    JOIN tblSTPaymentOption PO ON PO.intRegisterMop = ST.TenderSubCode
+    JOIN tblSTStore Store ON Store.intStoreId = PO.intStoreId
+	JOIN tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
     WHERE ST.TenderSubCode <> ''
 	AND Store.intStoreId = @intStoreId  
 	AND intCheckoutId = @intCheckoutId) as S

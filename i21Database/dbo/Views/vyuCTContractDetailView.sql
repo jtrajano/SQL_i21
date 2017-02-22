@@ -28,7 +28,7 @@ AS
 			CD.strDestinationPointType,			CD.intItemContractId,			CD.intNoOfLoad,
 			CD.dblQuantityPerLoad,				CD.strReference,				CD.intStorageScheduleRuleId,
 			CD.dblNetWeight,					CD.ysnUseFXPrice,				CD.intSplitId,
-			CD.intFarmFieldId,
+			CD.intFarmFieldId,					CD.intRateTypeId,				CD.intCurrencyExchangeRateId,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
@@ -122,7 +122,7 @@ AS
 
 			ISNULL(WU.dblUnitQty,1)	AS dblWeightUnitQty,
 			ISNULL(IU.dblUnitQty,1)	AS dblUnitQty,
-			
+			RT.strCurrencyExchangeRateType,		RT.strDescription	AS strCurrencyExchangeRateTypeDesc,
 
 			--Header Detail
 
@@ -228,4 +228,5 @@ AS
 				Group By	intSContractDetailId
 			)								SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId		LEFT
 	JOIN	tblICUnitMeasure				U5	ON	U5.intUnitMeasureId			=	PA.intAllocationUOMId		LEFT	
-	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId
+	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId		LEFT
+	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	

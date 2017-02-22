@@ -2,6 +2,7 @@
 (
 	[intCompanyPreferenceId] INT NOT NULL IDENTITY, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
+	[strLicenseNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
     [strTransferUpdateOption] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [strProcessScaleTickets] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [dtmTicketDailyStopTime] DATETIME NULL, 

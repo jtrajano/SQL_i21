@@ -213,8 +213,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strCountry AS strCompanyCountry ,
 				@strPhone AS strCompanyPhone ,
 				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip,
-				@strFullName AS strUserFullName,
-				'' AS strExternalPONumber,
+				@strUserName AS strUserFullName,
+				CD.strERPPONumber AS strExternalPONumber,
 				CONVERT(NVARCHAR,L.intNumberOfContainers) + ' (' + L.strPackingDescription +')' AS strNumberOfContainers,
 				CType.strContainerType,
 				@strLogisticsCompanyName AS strLogisticsCompanyName,
@@ -224,6 +224,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN	tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
@@ -367,8 +368,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strCountry AS strCompanyCountry ,
 				@strPhone AS strCompanyPhone ,
 				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip,
-				@strFullName AS strUserFullName,
-				'' AS strExternalPONumber,
+				@strUserName AS strUserFullName,
+				CD.strERPPONumber AS strExternalPONumber,
 				CONVERT(NVARCHAR,L.intNumberOfContainers) + ' (' + L.strPackingDescription +')' AS strNumberOfContainers,
 				CType.strContainerType,
 				@strLogisticsCompanyName AS strLogisticsCompanyName,
@@ -378,6 +379,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN	tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId

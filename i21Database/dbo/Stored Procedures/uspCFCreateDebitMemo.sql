@@ -90,6 +90,7 @@ BEGIN
 		SET @executedLine = 5
 		INSERT INTO @EntriesForInvoice(
 			 [strTransactionType]
+			,[strSCInvoiceNumber]		
 			,[intSalesAccountId]
 			,[strSourceTransaction]
 			,[intSourceId]
@@ -107,6 +108,7 @@ BEGIN
 			,[intShipViaId]
 			,[intPaymentMethodId]
 			,[strInvoiceOriginId]
+			,[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]
 			,[strBOLNumber]
 			,[strDeliverPickup]
@@ -144,7 +146,6 @@ BEGIN
 			,[intTaxGroupId]
 			,[ysnRecomputeTax]
 			,[intSCInvoiceId]
-			,[strSCInvoiceNumber]
 			,[intInventoryShipmentItemId]
 			,[strShipmentNumber]
 			,[intSalesOrderDetailId]
@@ -173,6 +174,7 @@ BEGIN
 		)
 		SELECT
 			 [strTransactionType]					= 'Debit Memo'
+			,[strSCInvoiceNumber]					= ''
 			,[intSalesAccountId]					= @accountId
 			,[strSourceTransaction]					= 'CF Invoice'
 			,[intSourceId]							= 1											-- TEMPORARY
@@ -183,13 +185,14 @@ BEGIN
 			,[intCurrencyId]						= NULL
 			,[intTermId]							= intTermID
 			,[dtmDate]								= dtmInvoiceDate								
-			,[dtmDueDate]							= dtmInvoiceDate
+			,[dtmDueDate]							= NULL
 			,[dtmShipDate]							= dtmInvoiceDate							-- TEMPORARY
 			,[intEntitySalespersonId]				= intSalesPersonId										-- TEMPORARY
 			,[intFreightTermId]						= NULL 
 			,[intShipViaId]							= NULL 
 			,[intPaymentMethodId]					= NULL
-			,[strInvoiceOriginId]					= ''
+			,[strInvoiceOriginId]					= strInvoiceReportNumber
+			,[ysnUseOriginIdAsInvoiceNumber]		= 1
 			,[strPONumber]							= NULL
 			,[strBOLNumber]							= ''
 			,[strDeliverPickup]						= NULL
@@ -215,9 +218,9 @@ BEGIN
 			,[strItemDescription]					= NULL
 			,[intItemUOMId]							= NULL
 			,[dblQtyOrdered]						= NULL
-			,[dblQtyShipped]						= SUM(dblQuantity)
+			,[dblQtyShipped]						= 1 -- DEFAULT TO 1
 			,[dblDiscount]							= NULL
-			,[dblPrice]								= dblAccountTotalAmount / SUM(dblQuantity)
+			,[dblPrice]								= dblAccountTotalAmount
 			,[ysnRefreshPrice]						= 0
 			,[strMaintenanceType]					= ''
 			,[strFrequency]							= ''
@@ -227,7 +230,6 @@ BEGIN
 			,[intTaxGroupId]						= NULL
 			,[ysnRecomputeTax]						= 0
 			,[intSCInvoiceId]						= NULL
-			,[strSCInvoiceNumber]					= ''
 			,[intInventoryShipmentItemId]			= NULL
 			,[strShipmentNumber]					= ''
 			,[intSalesOrderDetailId]				= NULL

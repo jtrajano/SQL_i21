@@ -17,7 +17,7 @@
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
-	,@ItemVFDDocumentNumber			NVARCHAR(100)   = NULL
+	,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
@@ -116,7 +116,7 @@ IF NOT EXISTS(SELECT NULL FROM tblICItem IC WHERE IC.[intItemId] = @ItemId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120002, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120002)	
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120002)
 		RETURN 0;
 	END
 	
@@ -124,7 +124,7 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120003, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120003)	
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120003)
 		RETURN 0;
 	END		
 	
@@ -134,9 +134,20 @@ IF NOT EXISTS(	SELECT NULL
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120004, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120004)	
+		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120004)
 		RETURN 0;
 	END
+
+
+--IF EXISTS(	SELECT	NULL 
+--			FROM	tblICItem IC 
+--			WHERE	IC.[intItemId] = @ItemId AND ISNULL(IC.[strLotTracking], 'No') <> 'No'
+--		)
+--	BEGIN		
+--		IF ISNULL(@RaiseError,0) = 1
+--			RAISERROR(120076, 16, 1);
+--		RETURN 0;
+--	END
 	
 IF ISNULL(@RaiseError,0) = 0	
 	BEGIN TRANSACTION
@@ -221,7 +232,6 @@ BEGIN TRY
 				,[strItemTermDiscountBy]
 				,[dblPrice]
 				,[strPricing]
-				,[strVFDDocumentNumber]
 				,[dblTotalTax]
 				,[dblTotal]
 				,[intSubCurrencyId]
@@ -283,6 +293,7 @@ BEGIN TRY
 				,[intStorageScheduleTypeId]				
 				,[intDestinationGradeId]
 				,[intDestinationWeightId]
+				,[strVFDDocumentNumber]
 				,[intConcurrencyId])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
@@ -299,8 +310,7 @@ BEGIN TRY
 				,[dblItemTermDiscount]				= ISNULL(@ItemTermDiscount, @ZeroDecimal)
 				,[strItemTermDiscountBy]			= @ItemTermDiscountBy
 				,[dblPrice]							= (CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
-				,[strPricing]						= @ItemPricing
-				,[strVFDDocumentNumber]				= @ItemVFDDocumentNumber
+				,[strPricing]						= @ItemPricing 
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal
 				,[intSubCurrencyId]					= ISNULL(@ItemSubCurrencyId, @CurrencyId)
@@ -362,6 +372,7 @@ BEGIN TRY
 				,[intStorageScheduleTypeId]			= @ItemStorageScheduleTypeId
 				,[intDestinationGradeId]			= @ItemDestinationGradeId
 				,[intDestinationWeightId]			= @ItemDestinationWeightId
+				,[strVFDDocumentNumber]				= @ItemVFDDocumentNumber
 				,[intConcurrencyId]					= 0
 			FROM
 				tblICItem IC

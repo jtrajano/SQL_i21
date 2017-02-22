@@ -11,7 +11,7 @@ DECLARE @SQLString NVARCHAR(MAX) = '';
 
 BEGIN
 
-    -- tblCTContractHeader
+     -- tblCTContractHeader
     SET @SQLString = N'MERGE tblCTContractHeader AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblCTContractHeader]) AS Source
         ON (Target.intContractHeaderId = Source.intContractHeaderId)
