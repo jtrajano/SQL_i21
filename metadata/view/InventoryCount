@@ -1436,7 +1436,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strSubLocationName",
-                                                        "itemId": "cboSubLocation",
+                                                        "itemId": "cboGrdSubLocation",
                                                         "valueField": "strSubLocationName"
                                                     },
                                                     "name": "MyComboBox11",
@@ -1537,7 +1537,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strStorageLocationName",
-                                                        "itemId": "cboStorageLocation",
+                                                        "itemId": "cboGrdStorageLocation",
                                                         "valueField": "strStorageLocationName"
                                                     },
                                                     "name": "MyComboBox14",
