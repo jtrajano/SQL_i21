@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMGetBankAccountRegister] 
 @intBankAccountId  INT,
+@skip INT,
+@take INT,
 @totalCount AS INT = 0 OUTPUT 
 
 AS
@@ -28,8 +30,6 @@ DECLARE @openingBalance AS NUMERIC(18,6),
 		@strReferenceNo AS NVARCHAR(50),
 		@strMemo AS NVARCHAR(250),
 		@strPayee AS NVARCHAR(100),
-		@skip INT = NULL,
-		@take INT = NULL,
 		@ysnMaskEmployeeName AS BIT,
 		@RowNum BIGINT = 0
 
