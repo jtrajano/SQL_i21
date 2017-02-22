@@ -19,7 +19,11 @@ SELECT
 	,dblBillAmount = (CASE WHEN C.strBillingType = 'Gallons' AND ISNULL((Q.ysnEnableLeaseBillingAboveMinUse),0) = 1 
 							THEN 
 								( CASE WHEN Q.strLeaseBillingIncentiveCalculation = '2 Years Ago' THEN
-									(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(JJ.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
+									(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL((SELECT SUM(dblQuantityDelivered) 
+																																						FROM tblTMDeliveryHistory 
+																																						WHERE intSiteID = D.intSiteID
+																																							AND DATEADD(dd, DATEDIFF(dd, 0, dtmInvoiceDate), 0) >= DATEADD(dd, DATEDIFF(dd, 0, DATEADD(MONTH, -12, GETDATE())), 0)
+																																							),0) > Z.dblMinimumUsage) > 0
 										THEN
 											0.0
 										ELSE
@@ -94,8 +98,6 @@ LEFT JOIN vyuTMSiteDeliveryHistoryTotal HH
 	ON A.intSiteID = HH.intSiteId AND HH.intCurrentSeasonYear = HH.intSeasonYear
 LEFT JOIN vyuTMSiteDeliveryHistoryTotal II
 	ON A.intSiteID = II.intSiteId AND (II.intCurrentSeasonYear - 1) = II.intSeasonYear
-LEFT JOIN vyuTMSiteDeliveryHistoryTotal JJ
-	ON A.intSiteID = JJ.intSiteId AND (JJ.intCurrentSeasonYear - 2) = JJ.intSeasonYear
 ,(	SELECT TOP 1 
 		ysnEnableLeaseBillingAboveMinUse 
 		,strLeaseBillingIncentiveCalculation
