@@ -565,6 +565,30 @@ Harness.start(
                     ]
 
             },
+
+            {
+                group: 'InventoryTransfer',
+                items:
+                    [
+                        {
+                            group: 'OpenTransferScreen',
+                            items: [
+                                {
+                                    url: 'BusinessDomain/InventoryTransfer/OpenTransferScreen/ITOpenSearchScreen.js?v=' + version,
+                                    title: 'ITOpenSearchScreen',
+                                    preload: [
+                                        functionalTest,
+                                        commonIC
+
+                                    ]
+                                }
+                            ]
+                        }
+
+                    ]
+
+            },
+
             {
                 group: 'StockChecking',
                 items: [
