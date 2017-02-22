@@ -6321,12 +6321,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         //Deselect all rows in Item Grid
         grdInventoryReceipt.getSelectionModel().deselectAll();
 
-        var doPost = function (currentRecord){
+        var doPost = function (){
+            var current = currentRecord; 
             ic.utils.ajax({
-                url: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
+                url: (current.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
                 params:{
-                    strTransactionId: currentRecord.get('strReceiptNumber'),
-                    isPost: currentRecord.get('ysnPosted') ? false : true,
+                    strTransactionId: current.get('strReceiptNumber'),
+                    isPost: current.get('ysnPosted') ? false : true,
                     isRecap: false
                 },
                 method: 'post'
@@ -6349,7 +6350,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (!context.data.hasChanges()) {
                         me.doOtherChargeCalculate(
                             win
-                            ,doPost(currentRecord)                        
+                            ,doPost                       
                         );
                         return;
                     }
@@ -6359,7 +6360,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         successFn: function () {
                             me.doOtherChargeCalculate(
                                 win
-                                ,doPost(currentRecord)
+                                ,doPost
                             );
                         }
                     });
@@ -6406,7 +6407,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (!context.data.hasChanges()) {
                     me.doOtherChargeCalculate(
                         win,
-                        doPost(currentRecord)
+                        doPost
                     );
                     return;
                 }
@@ -6416,7 +6417,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     successFn: function () {
                         me.doOtherChargeCalculate(
                             win,
-                            doPost(currentRecord)
+                            doPost
                         );                        
                     }
                 });
