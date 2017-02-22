@@ -5,18 +5,18 @@
 RETURNS INT
 AS
 BEGIN
-	RETURN	ISNULL((	SELECT 
+	RETURN	ISNULL((	SELECT TOP 1 
+							intDefaultCurrencyId
+						FROM
+							tblSMCompanyPreference
+						WHERE
+							intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0
+					), (SELECT 
 							[intCurrencyId]
 						FROM
 							tblARCustomer
 						WHERE
 							[intEntityCustomerId] = @EntityCustomerId
-					), (	SELECT TOP 1 
-								intDefaultCurrencyId
-							FROM
-								tblSMCompanyPreference
-							WHERE
-								intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0
 						)
 				    )		
 END
