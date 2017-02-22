@@ -26,9 +26,11 @@ select @intUOMId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where 
 SELECT @ysnIncludeInventoryHedge = ysnIncludeInventoryHedge FROM tblRKCompanyPreference  
 SELECT @strRiskView = strRiskView FROM tblRKCompanyPreference 
 
-SELECT @intForecastWeeklyConsumptionUOMId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId and intUnitMeasureId=@intForecastWeeklyConsumptionUOMId  
-SELECT @dblForecastWeeklyConsumption=isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intUOMId,@intForecastWeeklyConsumptionUOMId,@intForecastWeeklyConsumption),1)
+DECLARE @intForecastWeeklyConsumptionUOMId1 int
+SELECT @intForecastWeeklyConsumptionUOMId1=intCommodityUnitMeasureId from tblICCommodityUnitMeasure 
+			WHERE intCommodityId=@intCommodityId and intUnitMeasureId=@intForecastWeeklyConsumptionUOMId  
 
+SELECT @dblForecastWeeklyConsumption=isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intForecastWeeklyConsumptionUOMId1,@intUOMId,@intForecastWeeklyConsumption),1)
 DECLARE @ListImported as Table (    
         intRowNumber int,
      Selection  nvarchar(200) COLLATE Latin1_General_CI_AS,  
@@ -104,14 +106,13 @@ intRowNumber,'Outright Coverage',Selection,PriceStatus,strFutureMonth,strAccount
     WHERE Selection= CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END 
               and PriceStatus = CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
 ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
---select * from @ListImported
+
 INSERT INTO @ListFinal
 SELECT
 intRowNumber,'Outright Coverage','Outright coverage(Weeks)' Selection,'Outright coverage(Weeks)' PriceStatus,strFutureMonth,strAccountNumber,  
     CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))/@dblForecastWeeklyConsumption as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
        dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListImported    
-    WHERE Selection= CASE WHEN @strRiskView='Processor' THEN 'Outright coverage(Weeks)' ELSE 'Net market risk(weeks)' END
-       --and PriceStatus= CASE WHEN @strRiskView='Processor' THEN 'xoverage(Weeks)' ELSE 'Net market risk(weeks)' END
+    WHERE Selection=CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
 ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END,intOrderByHeading,PriceStatus ASC
 
 INSERT INTO @ListFinal

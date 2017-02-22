@@ -769,11 +769,11 @@ BEGIN
        INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId )  
        SELECT CASE WHEN @strRiskView='Processor' THEN 'Outright coverage(Weeks)' ELSE 'Outright coverage(Weeks)' END AS Selection,
 					  CASE WHEN @strRiskView='Processor' THEN 'Outright coverage (weeks)' ELSE 'Net market risk(Weeks)' END as PriceStatus,
-					  strFutureMonth,strAccountNumber, sum(dblNoOfContract)/@dblForecastWeeklyConsumption,
-						strTradeNo,TransactionDate,TranType,CustVendor,sum(dblNoOfLot), sum(dblQuantity)
+					  strFutureMonth,strAccountNumber, CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))/@dblForecastWeeklyConsumption,
+						strTradeNo,TransactionDate,TranType,CustVendor,(dblNoOfLot), (dblQuantity)
                      ,intContractHeaderId,intFutOptTransactionHeaderId FROM @List 
        WHERE Selection=CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
-       GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
+       --GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
 END
 
 IF (@strRiskView <> 'Processor')
