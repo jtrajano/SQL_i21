@@ -227,7 +227,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , strRecordNumber		= ISNULL(P.strRecordNumber, PCREDITS.strRecordNumber)
 	  , strTransactionType  = I.strTransactionType
 	  , strPaymentInfo	    = ''PAYMENT REF: '' + P.strPaymentInfo
-	  , dtmDatePaid			= ISNULL(P.dtmDatePaid, PCREDITS.dtmDatePaid)
+	  , dtmDatePaid			= ISNULL(ISNULL(P.dtmDatePaid, PCREDITS.dtmDatePaid), ''01/02/1900'')
 	  , dblPayment			= ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) - ISNULL(PD.dblInterest, 0)
 	  , dblBalance			= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
 	  , strSalespersonName  = ESP.strName
@@ -275,6 +275,7 @@ INSERT INTO @temp_statement_table(
 	, strTransactionType
 	, dblCreditLimit
 	, dtmDate
+	, dtmDatePaid
 	, intInvoiceId
 	, dblBalance
 	, dblPayment
@@ -286,6 +287,7 @@ SELECT
 	, 'Balance Forward'
 	, B.dblCreditLimit
 	, @dtmDateFrom
+	, '01/01/1900'
 	, 1
 	, B.dblTotalAR
 	, 0
