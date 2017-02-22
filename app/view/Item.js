@@ -4164,6 +4164,7 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
+                                                                hidden: true,
                                                                 itemId: 'btnInsertPricing',
                                                                 arrowVisible: false,
                                                                 iconCls: 'small-insert',
@@ -4172,6 +4173,7 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
+                                                                hidden: true,
                                                                 itemId: 'btnDeletePricing',
                                                                 iconCls: 'small-remove',
                                                                 text: 'Remove'
