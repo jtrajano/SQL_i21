@@ -847,7 +847,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var isLock = true;
         if (button.text === 'Unlock Inventory') {
             isLock = false;
-        }
+        } 
 
         var doLock = function () {
             if (current) {
@@ -1129,14 +1129,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
                     }
                     break;
-                case 'cboSubLocation':
+                case 'cboGrdSubLocation':
                     current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
                     current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
                     current.set('intItemUOMId', records[0].get('intItemUOMId'));
                     current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
                     break;
-                case 'cboStorageLocation':
+                case 'cboGrdStorageLocation':
                     current.set('strSubLocationName', records[0].get('strSubLocationName'));
                     current.set('intSubLocationId', records[0].get('intSubLocationId'));
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
@@ -1325,11 +1325,11 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             "#cboItem": {
                 select: this.onInventoryCountDetailSelect
             },
-            "#cboSubLocation": {
+            "#cboGrdSubLocation": {
                 select: this.onInventoryCountDetailSelect,
                 change: this.onSubLocationChange
             },
-            "#cboStorageLocation": {
+            "#cboGrdStorageLocation": {
                 select: this.onInventoryCountDetailSelect,
                 change: this.onStorageLocationChange
             },

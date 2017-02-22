@@ -722,7 +722,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         flex: 1
                                                     }
                                                 ],
-                                                itemId: 'cboSubLocation',
+                                                itemId: 'cboGrdSubLocation',
                                                 displayField: 'strSubLocationName',
                                                 valueField: 'strSubLocationName'
                                             }
@@ -789,7 +789,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         flex: 1
                                                     }
                                                 ],
-                                                itemId: 'cboStorageLocation',
+                                                itemId: 'cboGrdStorageLocation',
                                                 displayField: 'strStorageLocationName',
                                                 valueField: 'strStorageLocationName'
                                             }
