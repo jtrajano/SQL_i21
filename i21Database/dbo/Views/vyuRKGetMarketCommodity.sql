@@ -11,7 +11,8 @@ SELECT
 	um.intUnitMeasureId,
 	um.strUnitMeasure,
 	sm.intCurrencyID,
-	sm.strCurrency
+	sm.strCurrency,
+	mm.strCommodityAttributeId
 FROM tblICCommodity c
 JOIN tblRKCommodityMarketMapping mm on c.intCommodityId=mm.intCommodityId
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=mm.intFutureMarketId
