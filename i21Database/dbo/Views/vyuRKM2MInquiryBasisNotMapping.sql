@@ -13,6 +13,7 @@ SELECT  intM2MInquiryBasisDetailId
 		,strPricingType
 		,strLocationName
 		,strUnitMeasure
+		,mm.strCommodityAttributeId
  FROM tblRKM2MInquiry bd
 join tblRKM2MInquiryBasisDetail mb on mb.intM2MInquiryId=bd.intM2MInquiryId
 join tblICCommodity c on c.intCommodityId=bd.intCommodityId
