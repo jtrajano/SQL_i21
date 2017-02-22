@@ -7,6 +7,7 @@ AS
 			IC.intItemId,
 			IC.intItemLocationId,
 			IC.strContractItemName,
+			IC.strContractItemNo,
 			IC.intCountryId,
 			IC.strGrade,
 			IC.strGradeType,
