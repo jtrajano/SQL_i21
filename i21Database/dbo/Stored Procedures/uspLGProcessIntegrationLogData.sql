@@ -218,40 +218,9 @@ BEGIN TRY
 			,@strColumnsToIgnore = 'intLoadLogId,strRowState'
 			,@strModifiedColumns = @strModifiedContainerColumns OUTPUT
 
-		IF (@intMaxLoadContainerLogId = @intMinLoadContainerLogId)
+		IF (@intMaxLoadContainerLogId = @intMinLoadContainerLogId) AND NOT EXISTS(SELECT 1 FROM tblLGLoadContainerStg WHERE intLoadId = @intLoadId)
 		BEGIN
-			SET @ysnContainerAddedAlready = 1
-
-			INSERT INTO tblLGLoadContainerStg
-			SELECT @intLoadStdId
-				,LC.intLoadId
-				,LC.intLoadContainerId
-				,LC.strContainerNumber
-				,CASE 
-					WHEN CT.strContainerType LIKE '%20%'
-						THEN '000000000010003243'
-					WHEN CT.strContainerType LIKE '%40%'
-						THEN '000000000010003244'
-					ELSE CT.strContainerType
-					END
-				,'0002'
-				,L.strExternalShipmentNumber
-				,ROW_NUMBER() OVER (
-					PARTITION BY LC.intLoadId ORDER BY LC.intLoadId
-					) AS Seq
-				,LC.dblQuantity
-				,LC.strItemUOM
-				,LC.dblNetWt
-				,LC.dblGrossWt
-				,LC.strWeightUnitMeasure
-				,'Added'
-				,GETDATE()
-			FROM vyuLGLoadContainerView LC
-			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
-			JOIN @tblLoadContainerRecord R ON R.intLoadContainerId = LC.intLoadContainerId
-			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
-
-			BREAK;
+			GOTO INSERTDATE
 		END
 
 		DELETE
@@ -271,6 +240,7 @@ BEGIN TRY
 			OR LTRIM(RTRIM(ISNULL(@strModifiedDetailColumns, ''))) <> ''
 			OR LTRIM(RTRIM(ISNULL(@strModifiedContainerColumns, ''))) <> ''
 			)
+INSERTDATE:
 	BEGIN
 		INSERT INTO tblLGLoadStg (
 			intLoadId
@@ -447,10 +417,6 @@ BEGIN TRY
 
 		IF (@strShipmentType = 'Shipment' AND ISNULL(@ysnContainerAddedAlready,0) = 0)
 		BEGIN
-		
-			SELECT @intLoadStdId = MAX(LS.intLoadStgId)
-			FROM tblLGLoadStg LS WHERE intLoadId = @intLoadId
-
 			INSERT INTO tblLGLoadContainerStg
 			SELECT @intLoadStdId
 				,@intLoadId
@@ -469,18 +435,59 @@ BEGIN TRY
 					PARTITION BY LC.intLoadId ORDER BY LC.intLoadId
 					) AS Seq
 				,LC.dblQuantity
-				,LC.strItemUOM
+				,UM.strUnitMeasure strItemUOM
 				,LC.dblNetWt
 				,LC.dblGrossWt
-				,LC.strWeightUnitMeasure
+				,LUM.strUnitMeasure strWeightUnitMeasure
+				,LDCL.strExternalContainerId
 				,'Modified'
 				,GETDATE()
-			FROM vyuLGLoadContainerView LC
+			FROM tblLGLoadContainer LC
 			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
+			JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intWeightUnitMeasureId
 			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+			LEFT JOIN tblLGLoadContainerLog LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 			WHERE LC.intLoadId = @intLoadId
+
+			UNION
+
+			SELECT @intLoadStdId
+				,@intLoadId
+				,intLoadContainerId
+				,strContainerNo COLLATE Latin1_General_CI_AS
+				,strContainerSizeCode COLLATE Latin1_General_CI_AS
+				,'0002' COLLATE Latin1_General_CI_AS
+				,strExternalPONumber COLLATE Latin1_General_CI_AS
+				,strSeq COLLATE Latin1_General_CI_AS
+				,dblContainerQty
+				,strContainerUOM COLLATE Latin1_General_CI_AS
+				,dblNetWt
+				,dblGrossWt
+				,strWeightUOM
+				,strExternalContainerId
+				,'Delete' Collate Latin1_General_CI_AS
+				,GETDATE()
+			FROM tblLGLoadContainerLog
+			WHERE intLoadId = @intLoadId
+				AND strContainerNo NOT IN (
+					SELECT LC.strContainerNumber
+					FROM tblLGLoadContainer LC
+					JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
+					JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intWeightUnitMeasureId
+					LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+					LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+					WHERE LC.intLoadId = @intLoadId
+			)
 		END
 	END
+		
+	UPDATE LDCL
+	SET strExternalContainerId = LO.strExternalContainerId
+	FROM tblLGLoadDetailContainerLink LDCL
+	JOIN tblLGLoadContainerLog LO ON LDCL.intLoadContainerId = LO.intLoadContainerId
+	WHERE ISNULL(LO.strExternalContainerId,'') <> ''
 
 	DELETE FROM tblLGLoadContainerLog
 	DELETE FROM tblLGLoadDetailLog
