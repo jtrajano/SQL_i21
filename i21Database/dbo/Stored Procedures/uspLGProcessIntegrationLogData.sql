@@ -447,7 +447,7 @@ INSERTDATE:
 			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
 			JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intWeightUnitMeasureId
 			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
-			LEFT JOIN tblLGLoadContainerLog LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+			LEFT JOIN tblLGLoadContainerLog LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId AND LDCL.intLoadLogId = (SELECT MIN(intLoadLogId) FROM tblLGLoadLog)
 			WHERE LC.intLoadId = @intLoadId
 
 			UNION
