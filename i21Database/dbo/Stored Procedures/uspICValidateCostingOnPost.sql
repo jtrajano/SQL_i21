@@ -227,3 +227,28 @@ BEGIN
 	RAISERROR(80094, 11, 1, @strItemNo, @strTransactionId)
 	RETURN -1
 END 
+
+/*
+	Check if the transaction is using a foreign currency and it has a missing forex rate. 
+*/
+SELECT @strItemNo = NULL
+		, @intItemId = NULL 
+		, @strTransactionId = NULL 
+
+SELECT TOP 1 
+		@strTransactionId = strTransactionId
+		,@strItemNo = i.strItemNo
+		,@intItemId = iv.intItemId
+FROM	@ItemsToValidate iv  
+		INNER JOIN tblICItem i 
+			ON iv.intItemId = i.intItemId
+WHERE	ISNULL(iv.dblForexRate, 0) = 0 
+		AND iv.intCurrencyId IS NOT NULL 
+		AND iv.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate.'
+	RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo)
+	RETURN -1
+END 

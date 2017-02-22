@@ -724,3 +724,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80161) EXEC sp_dropmessa
 SET @strmessage = 'Return no longer allowed. All of the stocks are returned.'
 EXEC sp_addmessage 80161,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80162) EXEC sp_dropmessage 80162, 'us_english'	
+SET @strmessage = '%s is using a foreign currency. Please check if %s has a forex rate.'
+EXEC sp_addmessage 80162,11,@strmessage,'us_english','False'
+
