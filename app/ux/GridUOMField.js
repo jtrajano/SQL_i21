@@ -139,8 +139,10 @@ Ext.define('Inventory.ux.GridUOMField', {
             }
             actualFilter.conjunction = (filter.conjunction ? filter.conjunction : 'and');
             actualFilter.condition = (filter.condition ? filter.condition : 'eq');
+
             return actualFilter;
         });
+
         return result;
     },
 
@@ -161,7 +163,7 @@ Ext.define('Inventory.ux.GridUOMField', {
             }
         }
 
-        var dynamicFilters = cfg && cfg.defaultFilter ? me.createDynamicFilters(cfg.defaultFilters, vm, activeRecord) : [],
+        var dynamicFilters = cfg && cfg.defaultFilters ? me.createDynamicFilters(cfg.defaultFilters, vm, activeRecord) : [],
             filterParam = cfg && cfg.defaultFilters ? iRely.Functions.encodeFilters(dynamicFilters) : "[]",
             columnsParam = me.encodeColumnsParam(cfg && cboCfg && cboCfg.columns ? cboCfg.columns : me.cboUom.columns);
 
@@ -301,19 +303,56 @@ Ext.define('Inventory.ux.GridUOMField', {
         if(plugin) {
             activeRecord = plugin.context.record;
         }
-
+        me.setupQueryParams();
         me.setupComboboxFilters();
         // Reload uom store if has a pending request and re-initialize value and precision.
-        if(me.store.hasPendingLoad()) {
-            me.store.load({
-                callback: function(records, op, success) {
-                    me.setValue(value);
+        // if(me.store.hasPendingLoad()) {
+        //     me.isLoading = true;
+        //     me.store.load({
+        //         callback: function(records, op, success) {
+        //             me.isLoading = false;
+        //             me.setValue(value);
+        //         }
+        //     });
+        // }
+
+         me.store.load({
+             callback: function() {
+                var newValue2 = value;
+                // Count decimal places based on UOM and set text decimal precision
+                if(plugin) {
+                    activeRecord = plugin.context.record;
+                    if(activeRecord) {
+                        var strUOM2 = activeRecord.get(me.getDisplayField());
+                        var intUOM2 = activeRecord.get(me.getValueField());
+
+                        // if(me.cboUom.selection) {
+                        //     strUOM = me.cboUom.getRawValue();
+                        //     intUOM = me.cboUom.getValue();
+                        // }
+
+                        // var modifiedRecord = me.getModifiedRow(activeRecord.internalId);
+                        // if(modifiedRecord) {
+                        //     intUOM = modifiedRecord.data.intUOMId;
+                        //     strUOM = modifiedRecord.data.strUOM;
+                        // }
+
+                        me.cboUom.setValue(intUOM2);
+                        me.cboUom.setRawValue(strUOM2);
+                        
+                        me.setComboboxSelection(intUOM2);
+                        //me.setupQueryParams();
+                        var decimals = me.getUomDecimals(intUOM2);
+                        newValue2 = me.setupDecimalPrecision(value, decimals, removeTrailingZeroes);
+                    }
                 }
-            });
-        }
+                
+                me.value = newValue;
+                me.txtQuantity.setValue(newValue);     
+             }
+         });
 
         var newValue = value;
-        me.setupComboboxFilters();
         // Count decimal places based on UOM and set text decimal precision
         if(plugin) {
             activeRecord = plugin.context.record;
