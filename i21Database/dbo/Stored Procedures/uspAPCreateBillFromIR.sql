@@ -90,6 +90,21 @@ BEGIN
 		RAISERROR(80111, 11, 1)  
 	END 
 END
+ELSE 
+BEGIN
+	
+	DECLARE @availableQty INT
+	SET @availableQty =	(SELECT  CASE WHEN A.dblOpenReceive =  SUM(B.dblQtyReceived) THEN 1 ELSE 0 END
+					FROM tblICInventoryReceiptItem A
+						INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
+					where A.intInventoryReceiptItemId IN  (SELECT intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds))  AND B.intInventoryReceiptChargeId IS NULL
+					GROUP BY A.dblOpenReceive)
+		IF(@availableQty = 1)
+		BEGIN 
+			-- Voucher is no longer needed. All items have Voucher.
+			RAISERROR(80111, 11, 1)  
+		END 
+END
 
 --removed first the constraint
 ALTER TABLE tblAPBill
