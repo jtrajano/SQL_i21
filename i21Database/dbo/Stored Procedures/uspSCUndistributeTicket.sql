@@ -74,6 +74,7 @@ BEGIN TRY
 					EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
 					EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intEntityId
 					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intEntityId
+					EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 
 					FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @intInventoryReceiptItemId , @strTransactionId;
 				END
@@ -128,6 +129,8 @@ BEGIN TRY
 					EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 					EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
 					EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
+					EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
+
 
 					FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @intInventoryShipmentItemId , @strTransactionId;
 				END
