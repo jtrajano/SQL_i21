@@ -18,7 +18,7 @@ SELECT
 	,strItemNumber = ISNULL(M.strItemNo,'')
 	,dblBillAmount = (CASE WHEN C.strBillingType = 'Gallons' AND ISNULL((Q.ysnEnableLeaseBillingAboveMinUse),0) = 1 
 							THEN 
-								( CASE WHEN Q.strLeaseBillingIncentiveCalculation = '2 Years Ago' THEN
+								( CASE WHEN Q.strLeaseBillingIncentiveCalculation = 'Last 12 Months' THEN
 									(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL((SELECT SUM(dblQuantityDelivered) 
 																																						FROM tblTMDeliveryHistory 
 																																						WHERE intSiteID = D.intSiteID
@@ -29,7 +29,7 @@ SELECT
 										ELSE
 											ISNULL(G.dblAmount,0.0)
 										END)
-									WHEN Q.strLeaseBillingIncentiveCalculation = 'Prior Year' THEN
+									WHEN Q.strLeaseBillingIncentiveCalculation = 'Prior Season' THEN
 										(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(II.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
 										THEN
 											0.0
