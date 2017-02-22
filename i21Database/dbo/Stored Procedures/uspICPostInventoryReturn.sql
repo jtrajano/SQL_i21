@@ -1165,9 +1165,6 @@ BEGIN
 	ROLLBACK TRAN @TransactionName
 	EXEC dbo.uspGLPostRecap 
 			@GLEntries
-			,@intTransactionId
-			,@strTransactionId
-			,'IC'
 			,@intEntityUserSecurityId
 	COMMIT TRAN @TransactionName
 END 
