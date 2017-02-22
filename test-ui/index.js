@@ -581,6 +581,15 @@ Harness.start(
                                         commonIC
 
                                     ]
+                                },
+                                {
+                                    url: 'BusinessDomain/InventoryTransfer/OpenTransferScreen/ITOpenNewScreen.js?v=' + version,
+                                    title: 'ITOpenNewScreen',
+                                    preload: [
+                                        functionalTest,
+                                        commonIC
+
+                                    ]
                                 }
                             ]
                         }
