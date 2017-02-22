@@ -1582,6 +1582,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('intShipViaId', vendorLocation.get('intShipViaId'));
                 //current.set('intTaxGroupId', vendorLocation.get('intTaxGroupId'));
             }
+
+            if(iRely.Functions.isEmpty(current.get('intCurrencyId'))) {
+                current.set('intCurrencyId', i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'));
+            }
         }
 
         var isHidden = true;
