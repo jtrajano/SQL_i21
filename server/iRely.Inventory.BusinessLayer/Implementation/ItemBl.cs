@@ -1066,5 +1066,24 @@ namespace iRely.Inventory.BusinessLayer
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
+
+        /// <summary>
+        /// Return the sub locations of an item. 
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetItemSubLocations(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemSubLocations>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
     }
 }

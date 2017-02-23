@@ -30,5 +30,7 @@ namespace iRely.Inventory.BusinessLayer
         ItemBl.DuplicateItemSaveResult DuplicateItem(int intItemId);
         Task<object> GetItemUOMsByType(int? intItemId, string strUnitType);
         Task<SearchResult> GetItemOwner(GetParameter param);
+        Task<SearchResult> GetItemSubLocations(GetParameter param);
+
     }
 }
