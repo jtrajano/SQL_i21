@@ -14,6 +14,7 @@ BEGIN
 	-- Variables used in the validations. 
 	DECLARE @strItemNo AS NVARCHAR(50)
 			,@intItemId AS INT 
+			,@strTransactionId AS NVARCHAR(50)
 END 
 
 -- Validate 
@@ -113,6 +114,32 @@ BEGIN
 		RAISERROR(80065, 11, 1, @strItemNo)
 		GOTO _Exit
 	END 
+END 
+
+/*
+	Check if the transaction is using a foreign currency and it has a missing forex rate. 
+*/
+SELECT @strItemNo = NULL
+		, @intItemId = NULL 
+		, @strTransactionId = NULL 
+
+SELECT TOP 1 
+		@strTransactionId = Receipt.strReceiptNumber
+		,@strItemNo = Item.strItemNo
+		,@intItemId = Item.intItemId
+FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
+			ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+		INNER JOIN tblICItem Item
+			ON Item.intItemId = OtherCharge.intChargeId
+WHERE	ISNULL(OtherCharge.dblForexRate, 0) = 0 
+		AND OtherCharge.intCurrencyId IS NOT NULL 
+		AND OtherCharge.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate.'
+	RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo)
+	RETURN -1
 END 
 
 -- Calculate the other charges. 
@@ -366,14 +393,14 @@ BEGIN
 					END					
 				,intTransactionTypeId  = @intTransactionTypeId
 				,intCurrencyId = ISNULL(ReceiptCharges.intCurrencyId, Receipt.intCurrencyId) 
-				,dblExchangeRate = ReceiptCharges.dblForexRate
+				,dblExchangeRate = ISNULL(ReceiptCharges.dblForexRate, 1)
 				,ReceiptItem.intInventoryReceiptItemId
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
 				,AllocatedOtherCharges.ysnAccrue
 				,AllocatedOtherCharges.ysnPrice
 				,AllocatedOtherCharges.ysnInventoryCost
-				,ReceiptCharges.dblForexRate
+				,dblForexRate = ISNULL(ReceiptCharges.dblForexRate, 1) 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
@@ -412,7 +439,7 @@ BEGIN
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+			,dblExchangeRate			= ForGLEntries_CTE.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
@@ -469,7 +496,7 @@ BEGIN
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+			,dblExchangeRate			= ForGLEntries_CTE.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
@@ -532,7 +559,7 @@ BEGIN
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+			,dblExchangeRate			= ForGLEntries_CTE.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
@@ -590,7 +617,7 @@ BEGIN
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+			,dblExchangeRate			= ForGLEntries_CTE.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
