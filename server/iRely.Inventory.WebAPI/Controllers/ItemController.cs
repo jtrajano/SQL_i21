@@ -216,5 +216,12 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemOwner(param));
         }
 
+        [HttpGet]
+        [ActionName("GetItemSubLocations")]
+        public async Task<HttpResponseMessage> GetItemSubLocations(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemSubLocations(param));
+        }
+
     }
 }

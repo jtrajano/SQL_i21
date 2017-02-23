@@ -891,4 +891,24 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICGetItemSubLocationsMap : EntityTypeConfiguration<vyuICGetItemSubLocations>
+    {
+        public vyuICGetItemSubLocationsMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetItemSubLocations");
+            this.Property(t => t.intId).HasColumnName("intId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.intCountryId).HasColumnName("intCountryId");
+        }
+    }
+
 }
