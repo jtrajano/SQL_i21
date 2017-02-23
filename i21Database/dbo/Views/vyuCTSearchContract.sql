@@ -64,7 +64,8 @@ AS
 			END		strStatuses,
 			CH.intStockCommodityUnitMeasureId,
 			CH.strStockCommodityUnitMeasure,
-			CH.strProducer
+			CH.strProducer,
+			CH.strSalesperson
 
 	FROM	[vyuCTSearchContractHeader] CH	LEFT
 	JOIN

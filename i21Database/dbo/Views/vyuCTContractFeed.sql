@@ -7,13 +7,17 @@ AS
 			CH.strContractBasis,			CD.strSubLocation,			CH.strCreatedBy,		CH.strContractBasisDescription	AS strContractBasisDesc,	
 			CD.strCreatedByNo,				CH.strTerm,					CD.strPurchasingGroup,	CH.strEntityNumber				AS strEntityNo,	
 			CH.strContractNumber,			CD.strERPPONumber,			CD.intContractSeq,		CD.strItemNo,
-			CD.strStorageLocation,			CD.dblQuantity,				CD.dblCashPrice,		CD.strItemUOM					AS strQuantityUOM,
+			CD.strStorageLocation,			CD.dblQuantity,										CD.strItemUOM					AS strQuantityUOM,
 			CD.dtmPlannedAvailabilityDate,	CD.dblBasis,				CD.strCurrency,			CD.dblCashPrice / 100.0			AS dblUnitCashPrice,	
 			CD.strPriceUOM,					CH.dtmContractDate,			CD.dtmStartDate,		CD.dtmEndDate,
 			CD.dblNetWeight,				CD.strNetWeightUOM,			VE.strVendorAccountNum,	AE.intEntityId					AS intSubmittedById,
 			CH.strTermCode,					CD.strContractItemNo,		CD.strContractItemName,	AE.strName						AS strSubmittedBy,
 			CD.strERPItemNumber,			CD.strERPBatchNumber,		CD.intContractStatusId,	ISNULL(AE.strExternalERPId,UE.strExternalERPId)			AS strSubmittedByNo,
-			OG.strCountry	AS strOrigin
+			OG.strCountry	AS strOrigin,
+			CASE	WHEN	CD.intPricingTypeId = 1 THEN	CD.dblFutures
+					WHEN	CD.intPricingTypeId = 6	THEN	CD.dblCashPrice
+					ELSE	0
+			END	dblCashPrice
 			
 	FROM	vyuCTContractSequence	CD
 	JOIN	vyuCTContractHeaderView	CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
