@@ -923,24 +923,6 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strAccountCategory',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Account Category',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'intAccountGroupId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Account Group Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strAccountGroup',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Account Group',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
                                                                                     dataIndex: 'strAccountType',
                                                                                     dataType: 'string',
                                                                                     text: 'Account Type',
