@@ -1260,11 +1260,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 120,
                                                                                 dataIndex: 'dblUnitCost',
                                                                                 text: 'Cost',
-                                                                                format: '0,000.000###',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
+                                                                                    quantityField: true,
                                                                                     itemId: 'txtUnitCost',
-                                                                                    decimalPrecision: 6,
                                                                                     minValue: 0
                                                                                 }
                                                                             },
@@ -2616,9 +2615,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'colRate',
                                                                         modelValidation: true,
                                                                         text: 'Rate',
-                                                                        format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numericfield',
+                                                                            quantityField: true,
                                                                             modelValidation: true
                                                                         }
                                                                     },
@@ -2665,9 +2664,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'colChargeAmount',
                                                                         dataIndex: 'dblAmount',
                                                                         text: 'Amount',
-                                                                        format: '0,000.00####',
                                                                         editor: {
                                                                             xtype: 'numericfield',
+                                                                            currencyField: true,
                                                                             modelValidation: true
                                                                         }
                                                                     },
