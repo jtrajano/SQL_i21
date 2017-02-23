@@ -929,7 +929,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         align: 'right',
                                                         dataIndex: 'dblQuantity',
                                                         text: 'Transfer Qty',
-                                                        format: '0,000.##',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             quantityField: true,
@@ -1040,9 +1039,9 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         align: 'right',
                                                         dataIndex: 'dblCost',
                                                         text: 'Cost',
-                                                        format: '0,000.##',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
