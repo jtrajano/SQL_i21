@@ -5051,6 +5051,7 @@
     <Build Include="dbo\Views\vyuICMultiCurrencyRevalueReceipt.sql" />
     <Build Include="dbo\Views\vyuICMultiCurrencyRevalueShipmentOtherCharges.sql" />
     <Build Include="dbo\Views\vyuICMultiCurrencyRevalueShipment.sql" />
+    <Build Include="dbo\Functions\fnEscapeXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
