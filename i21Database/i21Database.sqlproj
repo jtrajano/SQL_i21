@@ -5057,6 +5057,8 @@
     <Build Include="dbo\Tables\tblIPItemSubLocationArchive.sql" />
     <Build Include="dbo\Tables\tblCRMLostRevenueConfig.sql" />
     <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
+    <Build Include="dbo\Views\vyuARMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuICGetItemSubLocations.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
