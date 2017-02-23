@@ -33,6 +33,7 @@ SELECT ItemNumber
 , ISNULL(MAX(Locale2Rate), '0.000000') AS Locale2Rate
 , Locale2GLAccount
 , ISNULL(MAX(Locale2Method), 'U') AS Locale2Method
+, Locale2EFT
 , ISNULL(MAX(Locale2SSTOnLC2), 'N') AS Locale2SSTOnLC2
 , Locale2LC2OnFET
 , ISNULL(MAX(Locale3Description), 'Locale 3 Tax') AS Locale3Description
