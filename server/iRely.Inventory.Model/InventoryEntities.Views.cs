@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets52fd6a197d407121aed1fe85335b8a0000ee8a46b618c677909df0d82a18164f))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets1905704849e5ae7ab8a689a77017f8a9e458efad0d0816434ddf11d9c87b8eba))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets52fd6a197d407121aed1fe85335b8a0000ee8a46b618c677909df0d82a18164f : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets1905704849e5ae7ab8a689a77017f8a9e458efad0d0816434ddf11d9c87b8eba : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "52fd6a197d407121aed1fe85335b8a0000ee8a46b618c677909df0d82a18164f"; }
+            get { return "1905704849e5ae7ab8a689a77017f8a9e458efad0d0816434ddf11d9c87b8eba"; }
         }
 
         /// <summary>
@@ -1925,6 +1925,16 @@ namespace Edm_EntityMappingGeneratedViews
             if (extentName == "InventoryEntities.vyuICGetItemOwners")
             {
                 return GetView375();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuICGetItemSubLocations")
+            {
+                return GetView376();
+            }
+
+            if (extentName == "InventoryEntities.vyuICGetItemSubLocations")
+            {
+                return GetView377();
             }
 
             return null;
@@ -15348,6 +15358,54 @@ namespace Edm_EntityMappingGeneratedViews
             T.strItemNo AS vyuICGetItemOwner_strItemNo, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetItemOwner AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetItemSubLocations.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView376()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetItemSubLocations
+        [CodeFirstDatabaseSchema.vyuICGetItemSubLocations](T1.vyuICGetItemSubLocations_intId, T1.vyuICGetItemSubLocations_strItemNo, T1.vyuICGetItemSubLocations_intItemId, T1.vyuICGetItemSubLocations_intLocationId, T1.vyuICGetItemSubLocations_intItemLocationId, T1.vyuICGetItemSubLocations_intSubLocationId, T1.vyuICGetItemSubLocations_strSubLocationName, T1.vyuICGetItemSubLocations_intCountryId)
+    FROM (
+        SELECT 
+            T.intId AS vyuICGetItemSubLocations_intId, 
+            T.strItemNo AS vyuICGetItemSubLocations_strItemNo, 
+            T.intItemId AS vyuICGetItemSubLocations_intItemId, 
+            T.intLocationId AS vyuICGetItemSubLocations_intLocationId, 
+            T.intItemLocationId AS vyuICGetItemSubLocations_intItemLocationId, 
+            T.intSubLocationId AS vyuICGetItemSubLocations_intSubLocationId, 
+            T.strSubLocationName AS vyuICGetItemSubLocations_strSubLocationName, 
+            T.intCountryId AS vyuICGetItemSubLocations_intCountryId, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetItemSubLocations AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetItemSubLocations.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView377()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetItemSubLocations
+        [iRely.Inventory.Model.vyuICGetItemSubLocations](T1.vyuICGetItemSubLocations_intId, T1.vyuICGetItemSubLocations_strItemNo, T1.vyuICGetItemSubLocations_intItemId, T1.vyuICGetItemSubLocations_intLocationId, T1.vyuICGetItemSubLocations_intItemLocationId, T1.vyuICGetItemSubLocations_intSubLocationId, T1.vyuICGetItemSubLocations_strSubLocationName, T1.vyuICGetItemSubLocations_intCountryId)
+    FROM (
+        SELECT 
+            T.intId AS vyuICGetItemSubLocations_intId, 
+            T.strItemNo AS vyuICGetItemSubLocations_strItemNo, 
+            T.intItemId AS vyuICGetItemSubLocations_intItemId, 
+            T.intLocationId AS vyuICGetItemSubLocations_intLocationId, 
+            T.intItemLocationId AS vyuICGetItemSubLocations_intItemLocationId, 
+            T.intSubLocationId AS vyuICGetItemSubLocations_intSubLocationId, 
+            T.strSubLocationName AS vyuICGetItemSubLocations_strSubLocationName, 
+            T.intCountryId AS vyuICGetItemSubLocations_intCountryId, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetItemSubLocations AS T
     ) AS T1");
         }
     }
