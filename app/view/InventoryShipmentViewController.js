@@ -3116,6 +3116,25 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             )
     },
 
+    onCustomerDrilldown: function (combo) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityCustomer', { action: 'new', viewConfig: { modal: true } });
+        }
+        else {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityCustomer', {
+                filters: [
+                    {
+                        column: 'intEntityId',
+                        value: current.get('intEntityCustomerId')
+                    }
+                ]
+            });
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -3127,7 +3146,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 select: this.onShipLocationSelect
             },
             "#cboCustomer": {
-                select: this.onCustomerSelect
+                select: this.onCustomerSelect,
+                drilldown: this.onCustomerDrilldown
             },
             "#cboOrderNumber": {
                 select: this.onOrderNumberSelect

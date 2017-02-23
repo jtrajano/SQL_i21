@@ -611,7 +611,7 @@
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strName",
                                                 "enableDrillDown": true,
-                                                "fieldLabel": "Vendor",
+                                                "fieldLabel": "Vendor<font color=\"red\"> *</font>",
                                                 "itemId": "cboVendor",
                                                 "labelAlign": "top",
                                                 "labelWidth": 80,
