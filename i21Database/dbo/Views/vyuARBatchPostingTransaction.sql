@@ -4,11 +4,11 @@ SELECT
 	 GL.strBatchId
 	,GL.dtmDate
 	,GL.strTransactionType
-	,COUNT(AR.intTransactionId) dblEntriesCount
-	,SUM(AR.dblTotal) dblTotalAmount
+	,dblEntriesCount			= COUNT(AR.intTransactionId)  
+	,dblTotalAmount				= SUM(AR.dblTotal) 
 	,AR.strUserName
 	,AR.strLocationName	
-	,AR.intCurrencyID
+	,intCurrencyId				= AR.intCurrencyID
 	,AR.strCurrency
 	,AR.strCurrencyDescription
 FROM
