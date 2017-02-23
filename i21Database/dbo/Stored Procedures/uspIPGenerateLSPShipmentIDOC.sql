@@ -60,7 +60,9 @@ Declare @intMinHeader				INT,
 		@strPackingDesc				NVARCHAR(50),
 		@dtmETSPOL					DATETIME,
 		@strLSPPartnerNo			NVARCHAR(100),
-		@strWarehouseVendorAccNo	NVARCHAR(100)
+		@strWarehouseVendorAccNo	NVARCHAR(100),
+		@strMVessel					NVARCHAR(200),
+		@strMVoyageNumber			NVARCHAR(200)
 
 Declare @tblDetail AS Table
 (
@@ -135,7 +137,9 @@ Begin
 		@dblTotalNet				=	dblTotalNet,
 		@strLocation				=	strCompanyLocation,
 		@dtmETSPOL					=	dtmETSPOL,
-		@strWarehouseVendorAccNo	=	strWarehouseVendorAccNo			
+		@strWarehouseVendorAccNo	=	strWarehouseVendorAccNo,
+		@strMVessel					=	strMVessel,
+		@strMVoyageNumber			=	strMVoyageNumber
 	From tblLGLoadLSPStg Where intLoadStgId=@intMinHeader
 
 	Select TOP 1 @strPackingDesc=ct.strPackingDescription From tblCTContractDetail ct Join tblLGLoadDetail ld on ct.intContractDetailId=ld.intPContractDetailId 
@@ -146,7 +150,7 @@ Begin
 
 	If ISNULL(@strLSPPartnerNo,'') =''
 	Begin
-		Update tblLGLoadLSPStg Set strFeedStatus='Unprocessed',strMessage='Invalid LSP Partner' Where intLoadStgId=@intLoadStgId
+		Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='Invalid LSP Partner' Where intLoadStgId=@intLoadStgId
 		GOTO NEXT_SHIPMENT
 	End
 
@@ -167,6 +171,8 @@ Begin
 	Set @strXml += '<E1EDT20 SEGMENT="1">'
 	Set @strXml += '<TKNUM>'	+ ISNULL(@strLoadNumber,'')	+ '</TKNUM>'
 	Set @strXml += '<SHTYP>'	+ 'Z001'			+ '</SHTYP>'
+	Set @strXml += '<EXTI1>'	+ dbo.fnEscapeXML(ISNULL(@strMVoyageNumber,''))	+ '</EXTI1>'
+	Set @strXml += '<EXTI2>'	+ dbo.fnEscapeXML(ISNULL(@strMVessel,''))	+ '</EXTI2>'
 	Set @strXml += '<SDABW>'	+ ISNULL(@strPackingDesc,'')	+ '</SDABW>'
 
 	Set @strXml += '<E1EDT18 SEGMENT="1">'
@@ -176,16 +182,16 @@ Begin
 	Set @strAddressXml=NULL
 	Select @strAddressXml=COALESCE(@strAddressXml, '') 
 		+ '<E1ADRM4 SEGMENT="1">'
-		+ '<PARTNER_Q>'		+ 'SP'									+ '</PARTNER_Q>'
-		+ '<PARTNER_ID>'	+ ISNULL(@strVendorAccountNo,'')		+ '</PARTNER_ID>'
-		+ '<LANGUAGE>'		+ 'EN'									+ '</LANGUAGE>'
-		+ '<NAME1>'			+ ISNULL(strVendorName,'')				+ '</NAME1>'
-		+ '<STREET1>'		+ ISNULL(strVendorAddress,'')			+ '</STREET1>'
-		+ '<POSTL_COD1>'	+ ISNULL(strVendorPostalCode,'')		+ '</POSTL_COD1>'
-		+ '<CITY1>'			+ ISNULL(strVendorCity,'')				+ '</CITY1>'
-		+ '<TELEPHONE1>'	+ ISNULL(strVendorTelePhoneNo,'')		+ '</TELEPHONE1>'
-		+ '<TELEFAX>'		+ ISNULL(strVendorTeleFaxNo,'')			+ '</TELEFAX>'
-		+ '<COUNTRY1>'		+ ISNULL(strVendorCountry,'')			+ '</COUNTRY1>'
+		+ '<PARTNER_Q>'		+ 'SP'													+ '</PARTNER_Q>'
+		+ '<PARTNER_ID>'	+ ISNULL(@strVendorAccountNo,'')						+ '</PARTNER_ID>'
+		+ '<LANGUAGE>'		+ 'EN'													+ '</LANGUAGE>'
+		+ '<NAME1>'			+ dbo.fnEscapeXML(ISNULL(strVendorName,''))				+ '</NAME1>'
+		+ '<STREET1>'		+ dbo.fnEscapeXML(ISNULL(strVendorAddress,''))			+ '</STREET1>'
+		+ '<POSTL_COD1>'	+ dbo.fnEscapeXML(ISNULL(strVendorPostalCode,''))		+ '</POSTL_COD1>'
+		+ '<CITY1>'			+ dbo.fnEscapeXML(ISNULL(strVendorCity,''))				+ '</CITY1>'
+		+ '<TELEPHONE1>'	+ ISNULL(strVendorTelePhoneNo,'')						+ '</TELEPHONE1>'
+		+ '<TELEFAX>'		+ ISNULL(strVendorTeleFaxNo,'')							+ '</TELEFAX>'
+		+ '<COUNTRY1>'		+ ISNULL(strVendorCountry,'')							+ '</COUNTRY1>'
 		+ '</E1ADRM4>'
 
 		+ '<E1EDK33 SEGMENT="1">'
@@ -194,13 +200,13 @@ Begin
 		+ '<QUALI>'		+ '001'	+ '</QUALI>'
 		+ '<E1ADRM6 SEGMENT="1">'
 		+ '<LANGUAGE>'		+ 'EN'	+ '</LANGUAGE>'
-		+ '<NAME1>'			+ ISNULL(strOriginName,'')			+ '</NAME1>'
-		+ '<STREET1>'		+ ISNULL(strOriginAddress,'')			+ '</STREET1>'
-		+ '<POSTL_COD1>'	+ ISNULL(strOriginPostalCode,'')		+ '</POSTL_COD1>'
-		+ '<CITY1>'			+ ISNULL(strOriginCity,'')				+ '</CITY1>'
-		+ '<TELEPHONE1>'	+ ISNULL(strOriginTelePhoneNo,'')		+ '</TELEPHONE1>'
-		+ '<TELEFAX>'		+ ISNULL(strOriginTeleFaxNo,'')			+ '</TELEFAX>'
-		+ '<COUNTRY1>'		+ ISNULL(strOriginCountry,'')			+ '</COUNTRY1>'
+		+ '<NAME1>'			+ dbo.fnEscapeXML(ISNULL(strOriginName,''))				+ '</NAME1>'
+		+ '<STREET1>'		+ dbo.fnEscapeXML(ISNULL(strOriginAddress,''))			+ '</STREET1>'
+		+ '<POSTL_COD1>'	+ dbo.fnEscapeXML(ISNULL(strOriginPostalCode,''))		+ '</POSTL_COD1>'
+		+ '<CITY1>'			+ dbo.fnEscapeXML(ISNULL(strOriginCity,''))				+ '</CITY1>'
+		+ '<TELEPHONE1>'	+ ISNULL(strOriginTelePhoneNo,'')						+ '</TELEPHONE1>'
+		+ '<TELEFAX>'		+ ISNULL(strOriginTeleFaxNo,'')							+ '</TELEFAX>'
+		+ '<COUNTRY1>'		+ ISNULL(strOriginCountry,'')							+ '</COUNTRY1>'
 		+ '</E1ADRM6>'
 		+ '</E1EDT44>'
 
@@ -208,13 +214,13 @@ Begin
 		+ '<QUALI>'		+ '002'	+ '</QUALI>'
 		+ '<E1ADRM6 SEGMENT="1">'
 		+ '<LANGUAGE>'		+ 'EN'	+ '</LANGUAGE>'
-		+ '<NAME1>'			+ ISNULL(strDestinationName,'')			+ '</NAME1>'
-		+ '<STREET1>'		+ ISNULL(strDestinationAddress,'')			+ '</STREET1>'
-		+ '<POSTL_COD1>'	+ ISNULL(strDestinationPostalCode,'')		+ '</POSTL_COD1>'
-		+ '<CITY1>'			+ ISNULL(strDestinationCity,'')				+ '</CITY1>'
-		+ '<TELEPHONE1>'	+ ISNULL(strDestinationTelePhoneNo,'')		+ '</TELEPHONE1>'
-		+ '<TELEFAX>'		+ ISNULL(strDestinationTeleFaxNo,'')			+ '</TELEFAX>'
-		+ '<COUNTRY1>'		+ ISNULL(strDestinationCountry,'')			+ '</COUNTRY1>'
+		+ '<NAME1>'			+ dbo.fnEscapeXML(ISNULL(strDestinationName,''))			+ '</NAME1>'
+		+ '<STREET1>'		+ dbo.fnEscapeXML(ISNULL(strDestinationAddress,''))			+ '</STREET1>'
+		+ '<POSTL_COD1>'	+ dbo.fnEscapeXML(ISNULL(strDestinationPostalCode,''))		+ '</POSTL_COD1>'
+		+ '<CITY1>'			+ dbo.fnEscapeXML(ISNULL(strDestinationCity,''))			+ '</CITY1>'
+		+ '<TELEPHONE1>'	+ ISNULL(strDestinationTelePhoneNo,'')						+ '</TELEPHONE1>'
+		+ '<TELEFAX>'		+ ISNULL(strDestinationTeleFaxNo,'')						+ '</TELEFAX>'
+		+ '<COUNTRY1>'		+ ISNULL(strDestinationCountry,'')							+ '</COUNTRY1>'
 		+ '</E1ADRM6>'
 		+ '</E1EDT44>'
 
@@ -224,21 +230,21 @@ Begin
 	Set @strXml += ISNULL(@strAddressXml,'')
 
 	Set @strXml += '<E1EDL20 SEGMENT="1">'
-	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
-	Set @strXml += '<VSTEL>'	+ ISNULL(@strHeaderSubLocation,'')	+ '</VSTEL>'
-	Set @strXml += '<INCO1>'	+ ISNULL(@strContractBasis,'')			+ '</INCO1>'
-	Set @strXml += '<INCO2>'	+ ISNULL(@strContractBasisDesc,'')		+ '</INCO2>'
-	Set @strXml += '<BTGEW>'	+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblTotalGross)),'')		+ '</BTGEW>'
+	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')						+ '</VBELN>'
+	Set @strXml += '<VSTEL>'	+ ISNULL(@strHeaderSubLocation,'')							+ '</VSTEL>'
+	Set @strXml += '<INCO1>'	+ dbo.fnEscapeXML(ISNULL(@strContractBasis,''))				+ '</INCO1>'
+	Set @strXml += '<INCO2>'	+ dbo.fnEscapeXML(ISNULL(@strContractBasisDesc,''))			+ '</INCO2>'
+	Set @strXml += '<BTGEW>'	+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblTotalGross)),'')	+ '</BTGEW>'
 	Set @strXml += '<NTGEW>'	+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblTotalNet)),'')		+ '</NTGEW>'
-	Set @strXml += '<GEWEI>'	+ ISNULL(dbo.fnIPConverti21UOMToSAP(@strHeaderUOM),'')			+ '</GEWEI>'
-	Set @strXml += '<BOLNR>'	+ ISNULL(@strBillOfLading,'')			+ '</BOLNR>'
-	Set @strXml += '<TRAID>'	+ ISNULL(@strShippingLine,'')			+ '</TRAID>'
-	Set @strXml += '<LIFEX>'	+ ISNULL(@strLoadNumber,'')				+ '</LIFEX>'
-	Set @strXml += '<PODAT>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOD,112),'')		+ '</PODAT>'
+	Set @strXml += '<GEWEI>'	+ ISNULL(dbo.fnIPConverti21UOMToSAP(@strHeaderUOM),'')		+ '</GEWEI>'
+	Set @strXml += '<BOLNR>'	+ ISNULL(@strBillOfLading,'')								+ '</BOLNR>'
+	Set @strXml += '<TRAID>'	+ dbo.fnEscapeXML(ISNULL(@strShippingLine,''))				+ '</TRAID>'
+	Set @strXml += '<LIFEX>'	+ ISNULL(@strLoadNumber,'')									+ '</LIFEX>'
+	Set @strXml += '<PODAT>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOD,112),'')			+ '</PODAT>'
 
 	Set @strXml += '<E1EDL22 SEGMENT="1">'
-	Set @strXml += '<VSTEL_BEZ>'	+ ISNULL(@strLocation,'')				+ '</VSTEL_BEZ>'
-	Set @strXml += '<INCO1_BEZ>'	+ ISNULL(@strContractBasisDesc,'')		+ '</INCO1_BEZ>'
+	Set @strXml += '<VSTEL_BEZ>'	+ ISNULL(@strLocation,'')								+ '</VSTEL_BEZ>'
+	Set @strXml += '<INCO1_BEZ>'	+ dbo.fnEscapeXML(ISNULL(@strContractBasisDesc,''))		+ '</INCO1_BEZ>'
 	Set @strXml +=	'</E1EDL22>'
 
 	Set @strXml += '<E1EDT13 SEGMENT="1">'
@@ -354,7 +360,7 @@ Begin
 			Set @strCertificates=NULL
 			Select @strCertificates=COALESCE(@strCertificates, '') 
 				+ '<ZE1EDL43_PH SEGMENT="1">'
-				+ '<ZZCOFFEE>'  +  ISNULL(strCertificationName,'') + '</ZZCOFFEE>' 
+				+ '<ZZCOFFEE>'  +  dbo.fnEscapeXML(ISNULL(strCertificationName,'')) + '</ZZCOFFEE>' 
 				+ '</ZE1EDL43_PH>'
 			From tblCTContractCertification cc Join tblICCertification c on cc.intCertificationId=c.intCertificationId
 			Where cc.intContractDetailId=(Select intPContractDetailId From tblLGLoadDetail Where intLoadDetailId=@intLoadDetailId)
@@ -388,7 +394,7 @@ Begin
 							+ '<ARKTX>'  +  ISNULL(@strItemDesc,'') + '</ARKTX>' 
 							+ '<WERKS>'  +  '' + '</WERKS>' 
 							+ '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
-							+ '<CHARG>'  +  ISNULL(c.strContainerNumber,'') + '</CHARG>' 
+							+ '<CHARG>'  +  dbo.fnEscapeXML(ISNULL(c.strContainerNumber,'')) + '</CHARG>' 
 							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),c.dblNetWt)),'') + '</LFIMG>' 
 							+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(um.strUnitMeasure,'')) + '</VRKME>' 
 							+ '<LGMNG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),c.dblNetWt)),'') + '</LGMNG>' 
@@ -399,7 +405,7 @@ Begin
 							+ '<HIPOS>' + ISNULL(@strDeliveryItemNo,'') + '</HIPOS>' 
 
 							+ '<E1EDL19 SEGMENT="1">'
-							+ '<QUALF>'  +  'BAS' + '</QUALF>' 
+							+ '<QUALF>'  +  'QUA' + '</QUALF>' 
 							+ '</E1EDL19>'
 
 							+ '<E1EDL19 SEGMENT="1">'

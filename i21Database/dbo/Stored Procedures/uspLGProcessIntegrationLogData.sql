@@ -439,7 +439,7 @@ INSERTDATE:
 				,LC.dblNetWt
 				,LC.dblGrossWt
 				,LUM.strUnitMeasure strWeightUnitMeasure
-				,LDCL.strExternalContainerId
+				,NULL
 				,'Modified'
 				,GETDATE()
 			FROM tblLGLoadContainer LC
@@ -447,7 +447,7 @@ INSERTDATE:
 			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
 			JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intWeightUnitMeasureId
 			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
-			LEFT JOIN tblLGLoadContainerLog LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId AND LDCL.intLoadLogId = (SELECT MIN(intLoadLogId) FROM tblLGLoadLog)
+			--LEFT JOIN tblLGLoadContainerLog LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId AND LDCL.intLoadLogId = (SELECT MIN(intLoadLogId) FROM tblLGLoadLog)
 			WHERE LC.intLoadId = @intLoadId
 
 			UNION
@@ -470,8 +470,8 @@ INSERTDATE:
 				,GETDATE()
 			FROM tblLGLoadContainerLog
 			WHERE intLoadId = @intLoadId
-				AND strContainerNo NOT IN (
-					SELECT LC.strContainerNumber
+				AND intLoadContainerId NOT IN (
+					SELECT LC.intLoadContainerId
 					FROM tblLGLoadContainer LC
 					JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
 					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
@@ -488,6 +488,12 @@ INSERTDATE:
 	FROM tblLGLoadDetailContainerLink LDCL
 	JOIN tblLGLoadContainerLog LO ON LDCL.intLoadContainerId = LO.intLoadContainerId
 	WHERE ISNULL(LO.strExternalContainerId,'') <> ''
+
+	UPDATE LDCL
+	SET strExternalContainerId = LO.strExternalContainerId
+	FROM tblLGLoadContainerStg LDCL
+	JOIN tblLGLoadContainerLog LO ON LDCL.intLoadContainerId = LO.intLoadContainerId
+	WHERE ISNULL(LO.strExternalContainerId,'') <> '' AND LDCL.intLoadStgId=@intLoadStdId
 
 	DELETE FROM tblLGLoadContainerLog
 	DELETE FROM tblLGLoadDetailLog
