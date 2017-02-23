@@ -42,11 +42,11 @@
 				on e.intEntityCustomerId = a.intEntityCustomerId and e.intItemId is not null and e.intCategoryId is not null
 			join tblICItem f
 				on e.intItemId = f.intItemId
-			join tblETExportFilterItem g
-				on g.intItemId = f.intItemId
-			join tblETExportFilterCategory h
-				on h.intCategoryId = e.intCategoryId	
-	
+			--join tblETExportFilterItem g
+			--	on g.intItemId = f.intItemId
+			--join tblETExportFilterCategory h
+			--	on h.intCategoryId = e.intCategoryId	
+		where e.intItemId in (select intItemId from tblETExportFilterItem) or e.intCategoryId in (select intCategoryId from tblETExportFilterCategory )
 
 
 		union
@@ -73,10 +73,11 @@
 				on e.intEntityCustomerId = a.intEntityCustomerId and e.intCategoryId is not null and e.intItemId is null
 			join tblICItem f
 				on f.intCategoryId = e.intCategoryId
-			join tblETExportFilterItem g
-				on f.intItemId = g.intItemId
-			join tblETExportFilterCategory h
-				on h.intCategoryId = e.intCategoryId
+			--join tblETExportFilterItem g
+			--	on f.intItemId = g.intItemId
+			--join tblETExportFilterCategory h
+			--	on h.intCategoryId = e.intCategoryId
+			where e.intItemId in (select intItemId from tblETExportFilterItem) or e.intCategoryId in (select intCategoryId from tblETExportFilterCategory )
 		union	
 
 		select 
