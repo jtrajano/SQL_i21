@@ -109,8 +109,11 @@
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@ItemConversionAccountId		INT				= NULL
 	,@ItemSalesAccountId			INT				= NULL
+	,@ItemCurrencyExchangeRateTypeId	INT				= NULL
+	,@ItemCurrencyExchangeRateId	INT				= NULL
+	,@ItemCurrencyExchangeRate		NUMERIC(18,8)	= 1.000000
 	,@ItemSubCurrencyId				INT				= NULL
-	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= 1.000000
 	,@DocumentMaintenanceId			INT				= NULL
 	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemDestinationGradeId		INT				= NULL
