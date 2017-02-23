@@ -288,7 +288,8 @@ SELECT * FROM(
 UNION  
 SELECT * FROM(  
   SELECT DISTINCT 'Specialities & Low grades' as Selection,'a. Unfixed' as PriceStatus,cv.strFutureMonth,  
-  strContractType+' - '+pl.strDescription +'(Delta='+convert(nvarchar,left(pl.dblDeltaPercent,4))+'%)' as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
+  strContractType+' - '+pl.strDescription +'(Delta='+convert(nvarchar,left(pl.dblDeltaPercent,4))+'%)' as strAccountNumber,
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,
    -dblNoOfLots as dblNoOfLot,
@@ -623,18 +624,24 @@ SELECT CASE WHEN @strRiskView='Processor' then 'Physical position / Differential
               strAccountNumber,sum(dblNoOfLot) dblNoOfLot,getdate() TransactionDate,sum(dblNoOfLot) dblQuantity,'Inventory' TranType
 FROM (
   SELECT distinct    
-  'Purchase'+' - '+isnull(ca.strDescription,'') as strAccountNumber,
-  iis.dblUnitOnHand dblNoOfLot
+  'Purchase'+' - '+isnull(c.strDescription,'') as strAccountNumber,
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,iis.dblUnitOnHand) dblNoOfLot
   FROM tblICItem ic 
   JOIN tblICItemStock iis on iis.intItemId=ic.intItemId 
   join tblICItemLocation il on il.intItemId=iis.intItemId
-  join tblICItemUOM i on ic.intItemId=ic.intItemId
+  join tblICItemUOM i on ic.intItemId=ic.intItemId and i.ysnStockUnit=1
+  JOIN tblICCommodityUnitMeasure um on um.intCommodityId=@intCommodityId and um.intUnitMeasureId=i.intUnitMeasureId  
   JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=il.intLocationId 
-  JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  
-  LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=ic.intCommodityId and um.intUnitMeasureId=i.intUnitMeasureId  
-  WHERE ic.intCommodityId=@intCommodityId   
-        AND cl.intCompanyLocationId= case when isnull(@intCompanyLocationId,0)=0 then cl.intCompanyLocationId else @intCompanyLocationId end)t2
+  JOIN tblICCommodityAttribute c on c.intCommodityAttributeId=ic.intProductTypeId    
+  JOIN tblRKCommodityMarketMapping m on m.intCommodityId=c.intCommodityId and   intProductTypeId=intCommodityAttributeId
+                     AND intCommodityAttributeId in (select Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS from [dbo].[fnSplitString](m.strCommodityAttributeId, ','))
+  JOIN tblRKFutureMarket fm on fm.intFutureMarketId=m.intFutureMarketId
+
+  WHERE ic.intCommodityId=@intCommodityId  and fm.intFutureMarketId=@intFutureMarketId 
+        AND cl.intCompanyLocationId= case when isnull(@intCompanyLocationId,0)=0 then cl.intCompanyLocationId else @intCompanyLocationId end
+		)t2
 GROUP BY strAccountNumber
+
 
 BEGIN
        DECLARE @DemandFinal1 as Table (  
@@ -676,7 +683,7 @@ JOIN tblICCommodityAttribute c on c.intCommodityId = i.intCommodityId
 JOIN tblRKCommodityMarketMapping m on m.intCommodityId=c.intCommodityId and   intProductTypeId=intCommodityAttributeId
                      AND intCommodityAttributeId in (select Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS from [dbo].[fnSplitString](m.strCommodityAttributeId, ','))
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=m.intFutureMarketId
-WHERE m.intCommodityId=@intCommodityId and fm.intFutureMarketId =@intFutureMarketId
+WHERE m.intCommodityId=@intCommodityId and fm.intFutureMarketId = @intFutureMarketId
 
 DECLARE @intRowNumber INT
 DECLARE @dblQuantity  numeric(24,10)
@@ -913,5 +920,4 @@ ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strF
 
 SELECT intRowNumber,Selection,PriceStatus,strFutureMonth,strAccountNumber, CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
        dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId  from @ListFinal --order by intRowNumber1 asc
-
 GO
