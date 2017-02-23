@@ -1246,9 +1246,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         align: 'right',
                                                                         dataIndex: 'dblUnitPrice',
                                                                         text: 'Unit Price',
-                                                                        format: '0,000.00####',
                                                                         editor: {
-                                                                            xtype: 'numeric'
+                                                                            xtype: 'numeric',
+                                                                            quantityField: true
                                                                         }
                                                                     },
                                                                     {
@@ -2043,9 +2043,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colRate',
                                                         text: 'Rate',
-                                                        format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numericfield'
+                                                            xtype: 'numericfield',
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
