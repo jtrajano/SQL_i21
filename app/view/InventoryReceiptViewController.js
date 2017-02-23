@@ -3791,6 +3791,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('intOrderId', po.get('intContractHeaderId'));
 
                 var costTypes = po.get('tblCTContractCosts');
+                var costTypes = _.filter(costTypes, function(c) { return !c.ysnBasis; });
                 if (costTypes) {
                     if (costTypes.length > 0) {
                         costTypes.forEach(function (otherCharge) {
@@ -5221,6 +5222,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     if (result) {
                                         Ext.each(result, function (contract) {
                                             var contractCosts = contract.get('tblCTContractCosts');
+                                            var contractCosts = _.filter(contractCosts, function(c) { return !c.ysnBasis; });
                                             if (contractCosts) {
                                                 Ext.each(contractCosts, function (otherCharge) {
                                                     var receiptCharges = currentVM.tblICInventoryReceiptCharges().data.items;
