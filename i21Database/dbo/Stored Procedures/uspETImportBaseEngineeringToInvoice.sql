@@ -245,6 +245,7 @@ BEGIN
 			,@RaiseError			   = 1 
 			,@UseOriginIdAsInvoiceNumber = 1
 			,@InvoiceOriginId         = @strOriginInvoiceNumber
+			,@RecomputeTax            = 0
 		--GEt the created invoice number
 		SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
 		SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
