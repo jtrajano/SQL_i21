@@ -17,8 +17,11 @@
 	,@ItemSalesOrderDetailId		INT				= NULL	
 	,@ItemTaxGroupId				INT				= NULL
 	,@EntitySalespersonId			INT				= NULL	
+	,@ItemCurrencyExchangeRateTypeId	INT				= NULL
+	,@ItemCurrencyExchangeRateId	INT				= NULL
+	,@ItemCurrencyExchangeRate		NUMERIC(18,8)	= 1.000000
 	,@ItemSubCurrencyId				INT				= NULL
-	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= 1.000000
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
@@ -112,6 +115,9 @@ BEGIN TRY
 		,[dblPrice]
 		,[dblTotalTax]
 		,[dblTotal]
+		,[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]
 		,[intSubCurrencyId]
 		,[dblSubCurrencyRate]
 		,[intAccountId]
@@ -176,6 +182,9 @@ BEGIN TRY
 		,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
 		,[dblTotalTax]						= @ZeroDecimal
 		,[dblTotal]							= @ZeroDecimal
+		,[intCurrencyExchangeRateTypeId]	= @ItemCurrencyExchangeRateTypeId
+		,[intCurrencyExchangeRateId]		= @ItemCurrencyExchangeRateId
+		,[dblCurrencyExchangeRate]			= CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1 ELSE ISNULL(@ItemCurrencyExchangeRate, 1) END
 		,[intSubCurrencyId]					= ISNULL(@ItemSubCurrencyId, @CurrencyId)
 		,[dblSubCurrencyRate]				= CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
 		,[intAccountId]						= NULL 

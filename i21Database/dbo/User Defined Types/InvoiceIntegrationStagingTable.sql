@@ -166,6 +166,9 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnVirtualMeterReading]				BIT												NULL
 	,[ysnClearDetailTaxes]					BIT												NULL		-- Indicate whether to clear tax details before inserting tax details from LineItemTaxDetailStagingTable
 	,[intTempDetailIdForTaxes]				INT												NULL		-- Temporary Id for linking line item detail taxes (LineItemTaxDetailStagingTable) which are also fro processing
+	,[intCurrencyExchangeRateTypeId]		INT												NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
+	,[intCurrencyExchangeRateId]			INT												NULL
+	,[dblCurrencyExchangeRate]				NUMERIC(18, 6)									NULL		-- Forex Rate
 	,[intSubCurrencyId]						INT												NULL		-- SubCurrency Id (tblSMCurrency.intCurrencyID) == tblARInvoice.[intCurrencyId] || tblSMCurrency.[intCurrencyID] WHERE tblSMCurrency.[intMainCurrencyId] = tblARInvoice.[intCurrencyId]
 	,[dblSubCurrencyRate]					NUMERIC(18, 6)									NULL		-- SubCurrency Rate
 	,[ysnBlended]							BIT												NULL		-- Indicates if a Finished Good item is already blended
