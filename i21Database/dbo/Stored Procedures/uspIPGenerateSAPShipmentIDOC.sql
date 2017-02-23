@@ -48,7 +48,8 @@ Declare @intMinHeader				INT,
 		@dblNetWeight				NUMERIC(38,20),
 		@strWeightUOM				NVARCHAR(50),
 		@dtmETAPOD					DATETIME,
-		@intNoOfContainer			INT
+		@intNoOfContainer			INT,
+		@intExternalContainerNo		INT
 
 Declare @tblDetail AS Table
 (
@@ -252,7 +253,10 @@ Begin
 			Else
 				Set @strItemXml += '<WERKS>'  +  '' + '</WERKS>' 
 			Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
-			Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
+			If UPPER(@strCommodityCode)='COFFEE'
+				Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
+			Else
+				Set @strItemXml += '<CHARG>'  +  '' + '</CHARG>' 
 			Set @strItemXml += '<KDMAT>'  +  ISNULL(@strItemNo,'') + '</KDMAT>' 
 			If ISNULL(@ysnBatchSplit,0)=0
 				Set @strItemXml += '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblNetWeight)),'') + '</LFIMG>'
@@ -291,26 +295,36 @@ Begin
 				If (Select COUNT(1) From tblLGLoadDetailContainerLink lc Join tblLGLoadDetail ld on lc.intLoadDetailId=ld.intLoadDetailId
 					Where ld.intLoadId=@intLoadId AND lc.intLoadDetailId=@intLoadDetailId)>1
 				Begin
+					--Generate POSNR
+					SELECT @intExternalContainerNo = CASE WHEN ISNULL(MAX(strExternalContainerId),0)=0 THEN 900000 ELSE MAX(strExternalContainerId) END 
+					FROM tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId
+					Update tblLGLoadContainerStg Set strExternalContainerId=@intExternalContainerNo,@intExternalContainerNo=@intExternalContainerNo+1
+					Where intLoadStgId=@intLoadStgId AND ISNULL(strExternalContainerId,'')=''
+
 					Set @strContainerXml=NULL
 					Select @strContainerXml=COALESCE(@strContainerXml, '') 
 							+ '<E1EDL24 SEGMENT="1">'
-							+ '<POSNR>' + ISNULL(CONVERT(VARCHAR,(900000 + ROW_NUMBER() OVER(ORDER BY c.intLoadContainerId ASC))),'') + '</POSNR>' 
+							+ '<POSNR>' + ISNULL(CONVERT(VARCHAR,lc.strExternalContainerId),'') + '</POSNR>' 
 							+ '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
 							+ '<WERKS>'  +  '' + '</WERKS>' 
 							+ '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
-							+ '<CHARG>'  +  ISNULL(c.strContainerNumber,'') + '</CHARG>' 
+							+ '<CHARG>'  +  ISNULL(lc.strContainerNo,'') + '</CHARG>' 
 							+ '<KDMAT>'  +  ISNULL(@strItemNo,'') + '</KDMAT>' 
-							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),c.dblNetWt)),'') + '</LFIMG>' 
-							+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(um.strUnitMeasure,'')) + '</VRKME>' 
+							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),CASE WHEN UPPER(lc.strRowState)='DELETE' Then 0 ELSE lc.dblNetWt END)),'') + '</LFIMG>' 
+							+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(lc.strWeightUOM,'')) + '</VRKME>' 
 							+ '<HIPOS>' + ISNULL(@strDeliveryItemNo,'') + '</HIPOS>' 
 
 							+ '<E1EDL19 SEGMENT="1">'
 							+ '<QUALF>'  +  'QUA' + '</QUALF>' 
 							+ '</E1EDL19>'
 
-							+ '<E1EDL19 SEGMENT="1">'
+							+
+							Case When c.intConcurrencyId=1 THEN --New Container
+							'<E1EDL19 SEGMENT="1">'
 							+ '<QUALF>'  +  'BAS' + '</QUALF>' 
 							+ '</E1EDL19>'
+							ELSE '' END
+							+
 
 							+ '<E1EDL41 SEGMENT="1">'
 							+ '<QUALI>'  +  '001' + '</QUALI>' 
@@ -319,18 +333,14 @@ Begin
 							+ '</E1EDL41>'
 
 							+ '</E1EDL24>'
-					From tblLGLoadDetailContainerLink lc Join tblLGLoadDetail ld on lc.intLoadDetailId=ld.intLoadDetailId
-					Join tblLGLoadContainer c on lc.intLoadContainerId=c.intLoadContainerId
-					Join tblICUnitMeasure um on c.intWeightUnitMeasureId=um.intUnitMeasureId
-					Where ld.intLoadId=@intLoadId AND lc.intLoadDetailId=@intLoadDetailId
+					From tblLGLoadContainerStg lc
+					Left Join tblLGLoadContainer c on lc.intLoadContainerId=c.intLoadContainerId
+					Where lc.intLoadStgId=@intLoadStgId ORDER BY lc.strExternalContainerId
 
 					--Update the POSNR in container link table
-					Update t Set t.strExternalContainerId=t1.intRowNo
-					From tblLGLoadDetailContainerLink t Join
-					(
-					Select lc.intLoadDetailContainerLinkId,(900000 + ROW_NUMBER() OVER(ORDER BY lc.intLoadContainerId ASC)) intRowNo
-					From tblLGLoadDetailContainerLink lc Where lc.intLoadId=@intLoadId AND lc.intLoadDetailId=@intLoadDetailId
-					) t1 on t.intLoadDetailContainerLinkId=t1.intLoadDetailContainerLinkId
+					Update lc Set lc.strExternalContainerId=cs.strExternalContainerId
+					From tblLGLoadDetailContainerLink lc Join tblLGLoadContainerStg cs on lc.intLoadContainerId=cs.intLoadContainerId
+					Where lc.intLoadId=@intLoadId AND cs.intLoadStgId=@intLoadStgId
 
 					Set @strItemXml += ISNULL(@strContainerXml,'')
 				End
@@ -374,7 +384,7 @@ Begin
 					+ '<VEMEH>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(ld.strUnitOfMeasure,'')) + '</VEMEH>'
 					+ '</E1EDL44>'			 
 					From tblLGLoadDetailContainerLink cl Join tblLGLoadDetailStg ld on cl.intLoadDetailId=ld.intLoadDetailId
-					Where intLoadContainerId=@intLoadContainerId
+					Where intLoadContainerId=@intLoadContainerId AND ld.intLoadStgId=@intLoadStgId
 
 					Set @strContainerXml += ISNULL(@strContainerItemXml,'')
 					Set @strContainerXml += '</E1EDL37>'
