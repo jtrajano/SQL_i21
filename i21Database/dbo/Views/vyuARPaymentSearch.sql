@@ -23,45 +23,89 @@ SELECT
 	,strUserEntered			= ISNULL(GL.strName, EM.strName)
 	,strTicketNumbers		= dbo.fnARGetScaleTicketNumbersFromPayment(P.intPaymentId)
 	,strCustomerReferences	= dbo.fnARGetCustomerReferencesFromPayment(P.intPaymentId)
+	,intCurrencyId			= P.intCurrencyId
+	,strCurrency			= SMC.strCurrency
+    ,strCurrencyDescription	= SMC.strDescription	 
 FROM
-	tblARPayment P 
-LEFT OUTER JOIN (SELECT intEntityId, strName FROM tblEMEntity ) EM ON P.intEntityId = EM.intEntityId
+	(SELECT intPaymentId, 
+			strRecordNumber, 
+			intEntityId, 
+			intEntityCustomerId, 
+			intBankAccountId, 
+			dtmDatePaid,
+			intPaymentMethodId, 
+			dblAmountPaid, 
+			ysnPosted, 
+			intLocationId, 
+			intAccountId, 
+			intCurrencyId  
+	FROM 
+		tblARPayment) P 
 LEFT OUTER JOIN 
-	tblSMPaymentMethod PM 
-		ON P.intPaymentMethodId = PM.intPaymentMethodID
+	(SELECT intEntityId, 
+			strName 
+	 FROM 
+		tblEMEntity ) EM ON P.intEntityId = EM.intEntityId
+LEFT OUTER JOIN 
+	(SELECT intPaymentMethodID, 
+			strPaymentMethod 
+	 FROM 
+		tblSMPaymentMethod) PM ON P.intPaymentMethodId = PM.intPaymentMethodID
 INNER JOIN 
-	tblEMEntity E 
-		ON P.intEntityCustomerId = E.intEntityId
+	(SELECT intEntityId, 
+			strEntityNo, 
+			strName 
+	FROM 
+		tblEMEntity) E ON P.intEntityCustomerId = E.intEntityId
 LEFT OUTER JOIN 
-	tblARCustomer C 
-		ON E.intEntityId = C.intEntityCustomerId
+	(SELECT intEntityCustomerId, 
+			strCustomerNumber 
+	 FROM 
+		tblARCustomer) C ON E.intEntityId = C.intEntityCustomerId
 LEFT OUTER JOIN 
-	tblCMBankAccount BA 
-		ON P.intBankAccountId = BA.intBankAccountId
+	(SELECT intBankAccountId, 
+			strBankAccountNo 
+	 FROM 
+		tblCMBankAccount) BA ON P.intBankAccountId = BA.intBankAccountId
 LEFT OUTER JOIN
-	tblSMCompanyLocation CL
-		ON P.intLocationId = CL.intCompanyLocationId
+	(SELECT intCompanyLocationId, 
+			strLocationName 
+	 FROM 
+		tblSMCompanyLocation) CL ON P.intLocationId = CL.intCompanyLocationId
 LEFT OUTER JOIN
 	(
-	SELECT --TOP 1
-		 G.intTransactionId
-		,G.strTransactionId
-		,G.intAccountId
-		,G.strTransactionType
-		,G.dtmDate
-		,G.strBatchId
-		,E.intEntityId
-		,E.strName
-	FROM
-		tblGLDetail G
-	LEFT OUTER JOIN
-		tblEMEntity E
-			ON G.intEntityId = E.intEntityId
-	WHERE
-			G.strTransactionType IN ('Receive Payments')
-		AND G.ysnIsUnposted = 0
-		AND G.strCode = 'AR'
-	) GL
-		ON P.intPaymentId = GL.intTransactionId
-		AND P.intAccountId = GL.intAccountId
-		AND P.strRecordNumber = GL.strTransactionId
+		SELECT --TOP 1
+			 G.intTransactionId
+			,G.strTransactionId
+			,G.intAccountId
+			,G.strTransactionType
+			,G.dtmDate
+			,G.strBatchId
+			,E.intEntityId
+			,E.strName
+		FROM
+			(SELECT intTransactionId, 
+					strTransactionId, 
+					intAccountId, 
+					strTransactionType, 
+					dtmDate, 
+					strBatchId, 
+					intEntityId 
+			 FROM 
+				tblGLDetail
+			 WHERE 
+				strTransactionType IN ('Receive Payments') 
+				AND ysnIsUnposted = 0 
+				AND strCode = 'AR') G
+		LEFT OUTER JOIN
+			(SELECT intEntityId, 
+					strName 
+			 FROM 
+				tblEMEntity) E ON G.intEntityId = E.intEntityId
+	) GL ON P.intPaymentId = GL.intTransactionId AND P.intAccountId = GL.intAccountId AND P.strRecordNumber = GL.strTransactionId
+LEFT OUTER JOIN 
+	(SELECT intCurrencyID, 
+			strCurrency, 
+			strDescription 
+	FROM 
+		tblSMCurrency) SMC ON P.intCurrencyId = SMC.intCurrencyID		
