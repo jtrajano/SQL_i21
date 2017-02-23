@@ -893,7 +893,7 @@
             this.xrTableCell21.StylePriority.UseFont = false;
             this.xrTableCell21.StylePriority.UsePadding = false;
             this.xrTableCell21.StylePriority.UseTextAlignment = false;
-            this.xrTableCell21.Text = "Parent Lot No.";
+            this.xrTableCell21.Text = "Lot No.";
             this.xrTableCell21.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.xrTableCell21.Weight = 0.3935743677810935D;
             // 
@@ -907,7 +907,7 @@
             this.tableCell26.StylePriority.UseFont = false;
             this.tableCell26.StylePriority.UsePadding = false;
             this.tableCell26.StylePriority.UseTextAlignment = false;
-            this.tableCell26.Text = "Lot No.";
+            this.tableCell26.Text = "Pallet Id";
             this.tableCell26.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.tableCell26.Weight = 0.35901361193944803D;
             // 
