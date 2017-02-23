@@ -85,6 +85,10 @@ SELECT
 	,[strDestinationGrade]				= ''
 	,[intDestinationWeightId]			= NULL
 	,[strDestinationWeight]				= ''
+	,[intCurrencyExchangeRateTypeId]	= SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]					= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= SOD.[dblSubCurrencyRate]
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -143,7 +147,10 @@ LEFT OUTER JOIN
 		ON SOD.[intSalesOrderDetailId] = ISD.[intLineNo]
 LEFT OUTER JOIN
 	tblSMCurrency SMC
-		ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID] 		
+		ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID]
+LEFT OUTER JOIN
+	tblSMCurrencyExchangeRateType SMCRT
+		ON SOD.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE
 	SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	AND SOD.[dblQtyOrdered] - ISNULL(SOD.[dblQtyShipped], 0.000000) <> 0.000000
@@ -236,6 +243,10 @@ SELECT
 	,[strDestinationGrade]				= ''
 	,[intDestinationWeightId]			= NULL
 	,[strDestinationWeight]				= ''
+	,[intCurrencyExchangeRateTypeId]	= SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]					= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= SOD.[dblSubCurrencyRate]
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -289,7 +300,10 @@ LEFT OUTER JOIN
 		ON SOD.[intTaxGroupId] = TG.intTaxGroupId
 LEFT OUTER JOIN
 	tblSMCurrency SMC
-		ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID] 
+		ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID]
+LEFT OUTER JOIN
+	tblSMCurrencyExchangeRateType SMCRT
+		ON SOD.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
@@ -384,6 +398,10 @@ SELECT
 	,[strDestinationGrade]				= ISNULL(SHP.[strDestinationGrade], ARCC.[strDestinationGrade])
 	,[intDestinationWeightId]			= ISNULL(SHP.[intDestinationWeightId], ARCC.[intDestinationWeightId])
 	,[strDestinationWeight]				= ISNULL(SHP.[strDestinationWeight], ARCC.[strDestinationWeight])
+	,[intCurrencyExchangeRateTypeId]	= NULL --SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= '' --SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= NULL --SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= 1 --SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]					= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= SOD.[dblSubCurrencyRate]
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -562,7 +580,7 @@ SELECT
 	,[strShippedItemId]					= 'icis:' + CAST(ICIS.[intInventoryShipmentId] AS NVARCHAR(250))
 	,[intEntityCustomerId]				= ICIS.[intEntityCustomerId]
 	,[strCustomerName]					= EME.[strName]
-	,[intCurrencyId]					= ISNULL(ISNULL(ARCC.[intCurrencyId], ARC.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
+	,[intCurrencyId]					= ISNULL((SELECT TOP 1 intCurrencyId FROM tblICInventoryShipmentCharge WHERE intInventoryShipmentId = ICIS.[intInventoryShipmentId] AND intCurrencyId IS nOT NULL),ISNULL(ISNULL(ARCC.[intCurrencyId], ARC.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0)))
 	,[intSalesOrderId]					= NULL
 	,[intSalesOrderDetailId]			= NULL
 	,[strSalesOrderNumber]				= ''
@@ -641,9 +659,13 @@ SELECT
 	,[strDestinationGrade]				= ISNULL(CTDG.[strDestinationGrade], ARCC.[strDestinationGrade])
 	,[intDestinationWeightId]			= ISNULL(ICISI.[intDestinationWeightId], ARCC.[intDestinationWeightId])
 	,[strDestinationWeight]				= ISNULL(CTDW.[strDestinationWeight], ARCC.[strDestinationWeight])
-	,[intSubCurrencyId]					= ARCC.[intSubCurrencyId]
-	,[dblSubCurrencyRate]				= ARCC.[dblSubCurrencyRate]
-	,[strSubCurrency]					= SMC.[strCurrency]
+	,[intCurrencyExchangeRateTypeId]	= NULL --SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= '' --SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= NULL --SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= 1 --SOD.[dblCurrencyExchangeRate]
+	,[intSubCurrencyId]					= NULL
+	,[dblSubCurrencyRate]				= 1
+	,[strSubCurrency]					= ''
 FROM
 	tblICInventoryShipmentItem ICISI
 INNER JOIN
@@ -843,9 +865,13 @@ SELECT
 	,[strDestinationGrade]				= ''
 	,[intDestinationWeightId]			= NULL
 	,[strDestinationWeight]				= ''
-	,[intSubCurrencyId]					= ICISC.[intCurrencyId]
-	,[dblSubCurrencyRate]				= ICISC.[dblRate] 
-	,[strSubCurrency]					= SMC.[strCurrency]
+	,[intCurrencyExchangeRateTypeId]	= NULL --SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= '' --SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= NULL --SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= 1 --SOD.[dblCurrencyExchangeRate]
+	,[intSubCurrencyId]					= NULL
+	,[dblSubCurrencyRate]				= 1
+	,[strSubCurrency]					= ''
 FROM
 	tblICInventoryShipmentCharge ICISC
 INNER JOIN
@@ -975,6 +1001,10 @@ SELECT
 	,[strDestinationGrade]				= ''
 	,[intDestinationWeightId]			= NULL
 	,[strDestinationWeight]				= ''
+	,[intCurrencyExchangeRateTypeId]	= NULL --SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= '' --SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= NULL --SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= 1 --SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]					= ARSID.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= ARSID.[dblSubCurrencyRate]
 	,[strSubCurrency]					= ARSID.[strSubCurrency]
@@ -1109,6 +1139,10 @@ SELECT
 	,[strDestinationGrade]				= ''
 	,[intDestinationWeightId]			= NULL
 	,[strDestinationWeight]				= ''
+	,[intCurrencyExchangeRateTypeId]	= NULL --SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= '' --SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= NULL --SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= 1 --SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]					= NULL
 	,[dblSubCurrencyRate]				= 1
 	,[strSubCurrency]					= ''
@@ -1244,6 +1278,10 @@ SELECT DISTINCT
 	,[strDestinationGrade]				= CTDG.[strDestinationGrade]
 	,[intDestinationWeightId]			= ICISI.[intDestinationWeightId]
 	,[strDestinationWeight]				= CTDW.[strDestinationWeight]
+	,[intCurrencyExchangeRateTypeId]	= NULL --SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= '' --SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= NULL --SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= 1 --SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]					= ICISI.[intCurrencyId]
 	,[dblSubCurrencyRate]				= CASE WHEN ISNULL(SMC.[intCent], 0) = 0 THEN 1.000000 ELSE CAST(SMC.[intCent] AS NUMERIC(18,6)) END
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -1344,11 +1382,11 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[strOrderUnitMeasure]				= ARCC.[strOrderUnitMeasure]
 	,[intShipmentItemUOMId]				= ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId])
 	,[strShipmentUnitMeasure]			= ISNULL(ARCC.[strUnitMeasure],ICUM.[strUnitMeasure])
-	,[dblQtyShipped]					= [dbo].[fnCalculateQtyBetweenUOM](LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity])
-	,[dblQtyOrdered]					= ISNULL(LD.dblQuantity,0)
-	,[dblShipmentQuantity]				= [dbo].[fnCalculateQtyBetweenUOM](LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity]) --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
-	,[dblShipmentQtyShippedTotal]		= [dbo].[fnCalculateQtyBetweenUOM](LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity])
-	,[dblQtyRemaining]					= [dbo].[fnCalculateQtyBetweenUOM](LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity])
+	,[dblQtyShipped]					= ISNULL(ARCC.[dblShipQuantity],LD.[dblQuantity])
+	,[dblQtyOrdered]					= ISNULL([dblOrderQuantity],0)
+	,[dblShipmentQuantity]				= ISNULL(ARCC.[dblShipQuantity],LD.[dblQuantity]) --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
+	,[dblShipmentQtyShippedTotal]		= ISNULL(ARCC.[dblShipQuantity],LD.[dblQuantity])
+	,[dblQtyRemaining]					= ISNULL(ARCC.[dblShipQuantity],LD.[dblQuantity])
 	,[dblDiscount]						= 0
 	,[dblPrice]							= ARCC.[dblCashPrice] 
 	,[dblShipmentUnitPrice]				= ARCC.[dblCashPrice]
@@ -1391,6 +1429,10 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[strDestinationGrade]				= ARCC.[strDestinationGrade]
 	,[intDestinationWeightId]			= ARCC.[intDestinationWeightId]
 	,[strDestinationWeight]				= ARCC.[strDestinationWeight]
+	,[intCurrencyExchangeRateTypeId]	= NULL --SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= '' --SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= NULL --SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= 1 --SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]					= ARCC.[intSubCurrencyId] 
 	,[dblSubCurrencyRate]				= ARCC.[dblSubCurrencyRate] 
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -1502,6 +1544,10 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[strDestinationGrade]				= CTDG.[strDestinationGrade]
 	,[intDestinationWeightId]			= ARID.[intDestinationWeightId]
 	,[strDestinationWeight]				= CTDW.[strDestinationWeight]
+	,[intCurrencyExchangeRateTypeId]	= NULL --SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= '' --SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= NULL --SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= 1 --SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]					= LWS.[intCurrencyId]
 	,[dblSubCurrencyRate]				= CASE WHEN ISNULL(SMC.[intCent], 0) = 0 THEN 1.000000 ELSE CAST(SMC.[intCent] AS NUMERIC(18,6)) END
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -1614,6 +1660,10 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[strDestinationGrade]				= CTDG.[strDestinationGrade]
 	,[intDestinationWeightId]			= ARID.[intDestinationWeightId]
 	,[strDestinationWeight]				= CTDW.[strDestinationWeight]
+	,[intCurrencyExchangeRateTypeId]	= NULL --SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= '' --SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= NULL --SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= 1 --SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]					= LC.[intCurrencyId]
 	,[dblSubCurrencyRate]				= CASE WHEN ISNULL(SMC.[intCent], 0) = 0 THEN 1.000000 ELSE CAST(SMC.[intCent] AS NUMERIC(18,6)) END
 	,[strSubCurrency]					= SMC.[strCurrency]
@@ -1726,6 +1776,10 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[strDestinationGrade]				= CTDG.[strDestinationGrade]
 	,[intDestinationWeightId]			= ARID.[intDestinationWeightId]
 	,[strDestinationWeight]				= CTDW.[strDestinationWeight]
+	,[intCurrencyExchangeRateTypeId]	= NULL --SOD.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= '' --SMCRT.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= NULL --SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= 1 --SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]					= LC.[intCurrencyId]
 	,[dblSubCurrencyRate]				= CASE WHEN ISNULL(SMC.[intCent], 0) = 0 THEN 1.000000 ELSE CAST(SMC.[intCent] AS NUMERIC(18,6)) END
 	,[strSubCurrency]					= SMC.[strCurrency]
