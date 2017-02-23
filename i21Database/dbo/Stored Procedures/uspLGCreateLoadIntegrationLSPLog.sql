@@ -79,6 +79,10 @@ BEGIN TRY
 		,dblTotalGross
 		,dblTotalNet
 		,strWeightUOM
+		,strMVessel
+		,strMVoyageNumber
+		,strFVessel
+		,strFVoyageNumber
 		)
 	SELECT L.intLoadId
 		,strShipmentType = CASE L.intShipmentType
@@ -109,7 +113,7 @@ BEGIN TRY
 		,strWarehouseVendorAddress = EL.strAddress
 		,strWarehouseVendorPostalCode = EL.strZipCode
 		,strWarehouseVendorCity = EL.strCity
-		,strWarehouseVendorCountry = EL.strCountry
+		,strWarehouseVendorCountry = (SELECT TOP 1 SM.strISOCode FROM tblSMCountry SM WHERE SM.strCountry = EL.strCountry)
 		,strWarehouseVendorAccNo = A.strVendorAccountNum
 		,(
 			SELECT TOP 1 E.strEntityName
@@ -148,9 +152,10 @@ BEGIN TRY
 			WHERE LD.intLoadId = L.intLoadId
 			) strVendorTeleFaxNo
 		,(
-			SELECT TOP 1 E.strEntityCountry
+			SELECT TOP 1 SM.strISOCode
 			FROM tblLGLoadDetail LD
 			JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
+			JOIN tblSMCountry SM ON SM.strCountry = E.strEntityCountry
 			WHERE LD.intLoadId = L.intLoadId
 			) strVendorCountry
 		,(
@@ -220,6 +225,10 @@ BEGIN TRY
 			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IUM.intUnitMeasureId
 			WHERE LD.intLoadId = L.intLoadId
 			) strWeightUnitMeasure
+		,L.strMVessel
+		,L.strMVoyageNumber
+		,L.strFVessel
+		,L.strFVoyageNumber
 	FROM vyuLGLoadView L
 	LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
 	LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
