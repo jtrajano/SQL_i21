@@ -5054,6 +5054,7 @@
     <Build Include="dbo\Tables\tblIPItemSubLocationError.sql" />
     <Build Include="dbo\Tables\tblIPItemSubLocationArchive.sql" />
     <Build Include="dbo\Tables\tblCRMLostRevenueConfig.sql" />
+    <Build Include="dbo\Views\vyuAPOriginCCDTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
