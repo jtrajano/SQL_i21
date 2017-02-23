@@ -116,30 +116,32 @@ BEGIN
 	END 
 END 
 
-/*
-	Check if the transaction is using a foreign currency and it has a missing forex rate. 
-*/
-SELECT @strItemNo = NULL
-		, @intItemId = NULL 
-		, @strTransactionId = NULL 
-
-SELECT TOP 1 
-		@strTransactionId = Receipt.strReceiptNumber
-		,@strItemNo = Item.strItemNo
-		,@intItemId = Item.intItemId
-FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
-			ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
-		INNER JOIN tblICItem Item
-			ON Item.intItemId = OtherCharge.intChargeId
-WHERE	ISNULL(OtherCharge.dblForexRate, 0) = 0 
-		AND OtherCharge.intCurrencyId IS NOT NULL 
-		AND OtherCharge.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
-
-IF @intItemId IS NOT NULL 
+-- VAlidate
 BEGIN 
-	-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate.'
-	RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo)
-	RETURN -1
+	-- Check if the transaction is using a foreign currency and it has a missing forex rate. 
+	SELECT @strItemNo = NULL
+			, @intItemId = NULL 
+			, @strTransactionId = NULL 
+
+	SELECT TOP 1 
+			@strTransactionId = Receipt.strReceiptNumber
+			,@strItemNo = Item.strItemNo
+			,@intItemId = Item.intItemId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
+				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+			INNER JOIN tblICItem Item
+				ON Item.intItemId = OtherCharge.intChargeId
+	WHERE	ISNULL(OtherCharge.dblForexRate, 0) = 0 
+			AND OtherCharge.intCurrencyId IS NOT NULL 
+			AND OtherCharge.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
+
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate.'
+		RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo)
+		RETURN -1
+	END 
 END 
 
 -- Calculate the other charges. 
