@@ -245,13 +245,13 @@ BEGIN
 				,dblCost = AllocatedOtherCharges.dblAmount
 				,intTransactionTypeId  = @intTransactionTypeId
 				,intCurrencyId = ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId) 
-				,dblExchangeRate = 1
+				,dblExchangeRate = ISNULL(ShipmentCharges.dblForexRate, 1) 
 				,ShipmentItem.intInventoryShipmentItemId
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
 				,AllocatedOtherCharges.ysnAccrue
 				,AllocatedOtherCharges.ysnPrice
-				,ShipmentCharges.dblForexRate
+				,dblForexRate = ISNULL(ShipmentCharges.dblForexRate, 1) 
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem 
 					ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 				INNER JOIN dbo.tblICInventoryShipmentItemAllocatedCharge AllocatedOtherCharges
