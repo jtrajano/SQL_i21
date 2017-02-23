@@ -5047,6 +5047,10 @@
     <Build Include="dbo\Tables\tblCRMLostRevenueConfig.sql" />
     <Build Include="dbo\Views\vyuARMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuICGetItemSubLocations.sql" />
+    <Build Include="dbo\Views\vyuICMultiCurrencyRevalueReceiptOtherCharges.sql" />
+    <Build Include="dbo\Views\vyuICMultiCurrencyRevalueReceipt.sql" />
+    <Build Include="dbo\Views\vyuICMultiCurrencyRevalueShipmentOtherCharges.sql" />
+    <Build Include="dbo\Views\vyuICMultiCurrencyRevalueShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
