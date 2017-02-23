@@ -95,10 +95,15 @@ Declare @tblMessage AS Table
 			,Z1PA1	NVARCHAR(50)
 			)
 
+--delete records if tracking no is not a number
+Delete From @tblAcknowledgement Where ISNUMERIC(strTrackingNo)=0
+
 Select @intMinRowNo=MIN(intRowNo) From @tblAcknowledgement
 
 While(@intMinRowNo is not null) --Loop Start
 Begin
+	Set @strDeliveryType=''
+
 	Select 
 		@strMesssageType = strMesssageType,
 		@strStatus = strStatus,
@@ -113,12 +118,6 @@ Begin
 		@strDeliveryItemNo = strDeliveryItemNo,
 		@strDeliveryType = strDeliveryType	
 		From @tblAcknowledgement Where intRowNo=@intMinRowNo
-
-	If @strMesssageType='DESADV'
-		Set @strDeliveryType=''
-
-	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')='U'
-		Set @strMesssageType='DESADV'
 
 	--PO Create
 	If @strMesssageType='PORDCR1'
@@ -146,6 +145,11 @@ Begin
 
 		If @strStatus NOT IN (52,53) --Error
 		Begin
+			--update the rowstate of next modified record to added if available
+			Update tblCTContractFeed Set strRowState='Added'
+			Where intContractFeedId = (Select TOP 1 intContractFeedId From tblCTContractFeed 
+			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')='' Order By intContractFeedId)
+
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
@@ -182,23 +186,15 @@ Begin
 		End
 	End
 
-	--Shipment
+	--Shipment Create
 	If @strMesssageType='DESADV'
 	Begin
 		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
 
-		If ISNULL(@strDeliveryType,'')='U' AND Exists(Select 1 From tblLGLoad Where intLoadShippingInstructionId=@intLoadId)
-			Select TOP 1 @intLoadId=intLoadId From tblLGLoad Where intLoadShippingInstructionId=@intLoadId
-
 		If @strStatus IN (52,53) --Success
-		Begin
-			If ISNULL(@strDeliveryType,'')='U' --Update
 			Begin
-				Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success'
-				Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')
-			End
-			Else
-			Begin --Create
+				Update tblLGLoadContainer Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+
 				Update tblLGLoad  Set strExternalShipmentNumber=@strParam,intConcurrencyId=intConcurrencyId+1
 				Where intLoadId=@intLoadId
 
@@ -211,7 +207,44 @@ Begin
 
 				--update the delivery Details in modified loads
 				Update tblLGLoadStg Set strExternalShipmentNumber=@strParam Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')=''
+
+				Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+				Values(@strMesssageType,'Success',@strRefNo,@strParam)
 			End
+
+		If @strStatus NOT IN (52,53) --Error
+		Begin
+			--update the rowstate of next modified record to added if available
+			Update tblLGLoadStg Set strRowState='Added' 
+			Where intLoadStgId = (Select TOP 1 intLoadStgId From tblLGLoadStg Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='' Order By intLoadStgId)
+
+			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
+
+			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
+			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')='Awt Ack'
+
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
+		End
+	End
+
+	--Shipment Update
+	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')='U'
+	Begin
+		Set @strMesssageType='DESADV'
+
+		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
+
+		If Exists(Select 1 From tblLGLoad Where intLoadShippingInstructionId=@intLoadId)
+			Select TOP 1 @intLoadId=intLoadId From tblLGLoad Where intLoadShippingInstructionId=@intLoadId
+
+		If @strStatus IN (52,53) --Success
+		Begin
+			Update tblLGLoadContainer Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+			Update tblLGLoad Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+
+			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success'
+			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')
 
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 			Values(@strMesssageType,'Success',@strRefNo,@strParam)

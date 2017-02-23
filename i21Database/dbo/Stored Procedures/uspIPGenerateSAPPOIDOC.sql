@@ -213,7 +213,7 @@ Begin
 		End
 
 		--Find Doc Type
-		If @strContractBasis IN ('FCA','EXW')
+		If @strContractBasis IN ('FCA','EXW','DDP','DAP','DDU')
 			Set @strDocType='ZHDE'
 
 		If @strContractBasis IN ('FOB','CFR')
@@ -222,6 +222,8 @@ Begin
 		If @strSubLocation IN ('L953','L954')
 			Set @strDocType='ZB2B'
 		
+		If ISNULL(@strDocType,'')='' Set @strDocType='ZHUB'
+
 		--Header Start Xml
 		If ISNULL(@strXmlHeaderStart,'')=''
 		Begin
@@ -270,8 +272,8 @@ Begin
 				Set @strXmlHeaderStart += '<VPER_START>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmStartDate,112),'')	+ '</VPER_START>'
 				Set @strXmlHeaderStart += '<VPER_END>'		+ ISNULL(CONVERT(VARCHAR(10),@dtmEndDate,112),'')	+ '</VPER_END>'
 				Set @strXmlHeaderStart += '<REF_1>'			+ ISNULL(@strContractNumber,'')		+ '</REF_1>'
-				Set @strXmlHeaderStart += '<INCOTERMS1>'	+ ISNULL(@strContractBasis,'')		+ '</INCOTERMS1>'
-				Set @strXmlHeaderStart += '<INCOTERMS2>'	+ ISNULL(@strContractBasisDesc,'')	+ '</INCOTERMS2>'
+				Set @strXmlHeaderStart += '<INCOTERMS1>'	+ dbo.fnEscapeXML(ISNULL(@strContractBasis,''))		+ '</INCOTERMS1>'
+				Set @strXmlHeaderStart += '<INCOTERMS2>'	+ dbo.fnEscapeXML(ISNULL(@strContractBasisDesc,''))	+ '</INCOTERMS2>'
 				Set @strXmlHeaderStart +=	'</E1BPMEPOHEADER>'
 
 				--HeaderX
@@ -318,17 +320,17 @@ Begin
 				Set @strItemXml += '<E1BPMEPOITEM SEGMENT="1">'
 				Set @strItemXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
 				If UPPER(@strCommodityCode)='TEA'
-					Set @strItemXml += '<MATERIAL>'		+ ISNULL(ISNULL(@strContractItemNo,@strItemNo),'')				+ '</MATERIAL>'
+					Set @strItemXml += '<MATERIAL>'		+ dbo.fnEscapeXML(ISNULL(ISNULL(@strContractItemNo,@strItemNo),''))				+ '</MATERIAL>'
 				ELSE
-					Set @strItemXml += '<MATERIAL>'		+ ISNULL(@strItemNo,'')				+ '</MATERIAL>'
+					Set @strItemXml += '<MATERIAL>'		+ dbo.fnEscapeXML(ISNULL(@strItemNo,''))				+ '</MATERIAL>'
 				Set @strItemXml += '<PLANT>'		+ ISNULL(@strSubLocation,'')		+ '</PLANT>'
 				Set @strItemXml += '<STGE_LOC>'		+ ISNULL(@strStorageLocation,'')	+ '</STGE_LOC>'
 				Set @strItemXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractDetailId),'')	+ '</TRACKINGNO>'
 				Set @strItemXml += '<QUANTITY>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblQuantity)),'')		+ '</QUANTITY>'
 				Set @strItemXml += '<PO_UNIT>'		+ ISNULL(@strQuantityUOM,'')		+ '</PO_UNIT>'
 				Set @strItemXml += '<ORDERPR_UN>'	+ ISNULL(@strPriceUOM,'')			+ '</ORDERPR_UN>'
-				Set @strItemXml += '<NET_PRICE>'	+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblCashPrice * 1000)),'0.00')	+ '</NET_PRICE>'
-				Set @strItemXml += '<PRICE_UNIT>'	+ '1000'	+ '</PRICE_UNIT>'
+				Set @strItemXml += '<NET_PRICE>'	+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblCashPrice)),'0.00')	+ '</NET_PRICE>'
+				Set @strItemXml += '<PRICE_UNIT>'	+ '1'	+ '</PRICE_UNIT>'
 				If ISNULL(@dblCashPrice,0)=0
 					Set @strItemXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
 				Else
@@ -373,7 +375,7 @@ Begin
 				--Schedule
 				Set @strScheduleXml += '<E1BPMEPOSCHEDULE SEGMENT="1">'
 				Set @strScheduleXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
-				Set @strScheduleXml += '<SCHED_LINE>'	+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</SCHED_LINE>'
+				Set @strScheduleXml += '<SCHED_LINE>'	+ '0001'		+ '</SCHED_LINE>'
 				Set @strScheduleXml += '<DELIVERY_DATE>'+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')	+ '</DELIVERY_DATE>'
 				Set @strScheduleXml += '<QUANTITY>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblQuantity)),'')	+ '</QUANTITY>'
 				Set @strScheduleXml += '</E1BPMEPOSCHEDULE>'
@@ -381,7 +383,7 @@ Begin
 				--ScheduleX
 				Set @strScheduleXXml += '<E1BPMEPOSCHEDULX SEGMENT="1">'
 				Set @strScheduleXXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
-				Set @strScheduleXXml += '<SCHED_LINE>'	+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</SCHED_LINE>'
+				Set @strScheduleXXml += '<SCHED_LINE>'	+ '0001'		+ '</SCHED_LINE>'
 				Set @strScheduleXXml += '<PO_ITEMX>'		+ 'X'	+ '</PO_ITEMX>'
 				Set @strScheduleXXml += '<SCHED_LINEX>'		+ 'X'	+ '</SCHED_LINEX>'
 				If @dtmPlannedAvailabilityDate IS NOT NULL
@@ -394,10 +396,10 @@ Begin
 				Set @strCondXml += '<E1BPMEPOCOND SEGMENT="1">'
 				Set @strCondXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
 				Set @strCondXml += '<COND_TYPE>'		+ 'ZDIF'		+ '</COND_TYPE>'
-				Set @strCondXml += '<COND_VALUE>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblBasis * 100)),'')	+ '</COND_VALUE>'
+				Set @strCondXml += '<COND_VALUE>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblBasis)),'')	+ '</COND_VALUE>'
 				Set @strCondXml += '<CURRENCY>'			+ ISNULL(@strCurrency,'')		+ '</CURRENCY>'
 				Set @strCondXml += '<COND_UNIT>'		+ ISNULL(@strPriceUOM,'')		+ '</COND_UNIT>'
-				Set @strCondXml += '<COND_P_UNT>'		+ '100'	+ '</COND_P_UNT>'
+				Set @strCondXml += '<COND_P_UNT>'		+ '1'	+ '</COND_P_UNT>'
 				Set @strCondXml += '<CHANGE_ID>'		+ 'U' + '</CHANGE_ID>'
 				Set @strCondXml += '</E1BPMEPOCOND>'
 
@@ -423,7 +425,7 @@ Begin
 					Begin
 						Set @strTextXml += '<E1BPMEPOTEXTHEADER>'
 						Set @strTextXml += '<TEXT_ID>' + 'L16' + '</TEXT_ID>' 
-						Set @strTextXml += '<TEXT_LINE>'  +  ISNULL(@strOrigin,'') + '</TEXT_LINE>' 
+						Set @strTextXml += '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(@strOrigin,'')) + '</TEXT_LINE>' 
 						Set @strTextXml += '</E1BPMEPOTEXTHEADER>'
 					End
 
@@ -431,7 +433,7 @@ Begin
 					Select @strCertificates=COALESCE(@strCertificates, '') 
 						+ '<E1BPMEPOTEXTHEADER>'
 						+ '<TEXT_ID>' + 'L15' + '</TEXT_ID>' 
-						+ '<TEXT_LINE>'  +  ISNULL(strCertificationName,'') + '</TEXT_LINE>' 
+						+ '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(strCertificationName,'')) + '</TEXT_LINE>' 
 						+ '</E1BPMEPOTEXTHEADER>'
 					From tblCTContractCertification cc Join tblICCertification c on cc.intCertificationId=c.intCertificationId
 					Where cc.intContractDetailId=@intContractDetailId
