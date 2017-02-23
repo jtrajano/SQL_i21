@@ -300,9 +300,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     }
                                                                 ],
                                                                 flex: 1.5,
+                                                                enableDrillDown: true,
                                                                 itemId: 'cboCustomer',
                                                                 margin: '0 5 0 0',
-                                                                fieldLabel: 'Customer',
+                                                                fieldLabel: 'Customer<font color="red"> *</font>',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 60,
                                                                 displayField: 'strName',

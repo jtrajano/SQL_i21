@@ -617,7 +617,8 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strName",
-                                                        "fieldLabel": "Customer",
+                                                        "enableDrillDown": true,
+                                                        "fieldLabel": "Customer<font color=\"red\"> *</font>",
                                                         "itemId": "cboCustomer",
                                                         "labelAlign": "top",
                                                         "labelWidth": 60,
@@ -630,13 +631,20 @@
                                                     },
                                                     "name": "MyComboBox71",
                                                     "configAlternates": {
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrilldown": "boolean",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "cc4e53f6-45f4-47f5-b16d-09a216055827",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
