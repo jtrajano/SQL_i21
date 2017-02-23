@@ -516,15 +516,12 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Unit Qty',
-                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             quantityField: true,
                                                             validateOnChange: false,
                                                             fieldStyle: 'text-align:right',
-                                                            hideTrigger: true,
-                                                            decimalPrecision: 20,
-                                                            minValue: 0.000001
+                                                            hideTrigger: true
                                                         }
                                                     },
                                                     {
@@ -4215,9 +4212,9 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Last Cost',
                                                         flex: 0.8,
-                                                        format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
@@ -4228,9 +4225,9 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Standard Cost',
                                                         flex: 0.8,
-                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'txtStandardCost'
                                                         }
                                                     },
@@ -4242,9 +4239,9 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Average Cost',
                                                         flex: 0.8,
-                                                        format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
@@ -4282,10 +4279,9 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Amount/Percent',
                                                         flex: 0.8,
-                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            decimalPrecision: 6
+                                                            currencyField: true
                                                         }
                                                     },
                                                     {
@@ -4296,10 +4292,9 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Retail Price',
                                                         flex: 0.8,
-                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            decimalPrecision: 6
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
@@ -4559,12 +4554,11 @@ Ext.define('Inventory.view.Item', {
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Amount/Percent',
-                                                                        format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true,
-                                                                            decimalPrecision: 6
+                                                                            hideTrigger: true
                                                                         }
                                                                     },
                                                                     {
@@ -4573,12 +4567,11 @@ Ext.define('Inventory.view.Item', {
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Unit Price',
-                                                                        format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true,
-                                                                            decimalPrecision: 6
+                                                                            hideTrigger: true
                                                                         }
                                                                     },
                                                                     {
@@ -4801,13 +4794,12 @@ Ext.define('Inventory.view.Item', {
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Discount Amount/Percent',
-                                                                        format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             itemId: 'txtSpecialPricingDiscount',
                                                                             fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true,
-                                                                            decimalPrecision: 6
+                                                                            hideTrigger: true
                                                                         }
                                                                     },
                                                                     {
@@ -4817,9 +4809,9 @@ Ext.define('Inventory.view.Item', {
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Unit Price',
-                                                                        format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             itemId: 'txtSpecialPricingUnitPrice',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true,
