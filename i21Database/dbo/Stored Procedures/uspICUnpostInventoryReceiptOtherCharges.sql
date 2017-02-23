@@ -277,14 +277,14 @@ BEGIN
 					END 
 				,intTransactionTypeId  = @intTransactionTypeId
 				,intCurrencyId = ISNULL(ReceiptCharges.intCurrencyId, Receipt.intCurrencyId)  
-				,dblExchangeRate = ReceiptCharges.dblForexRate
+				,dblExchangeRate = ISNULL(ReceiptCharges.dblForexRate, 1) 
 				,ReceiptItem.intInventoryReceiptItemId
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
 				,AllocatedOtherCharges.ysnAccrue
 				,AllocatedOtherCharges.ysnPrice
 				,AllocatedOtherCharges.ysnInventoryCost
-				,ReceiptCharges.dblForexRate
+				,dblForexRate = ISNULL(ReceiptCharges.dblForexRate, 1) 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges

@@ -22,7 +22,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN TRANSACTION
+BEGIN 
+	DECLARE @TransactionName AS VARCHAR(500) = 'uspICAddItemReceipt_' + CAST(NEWID() AS NVARCHAR(100));
+	BEGIN TRAN @TransactionName
+	SAVE TRAN @TransactionName
+END 
 
 DECLARE @intEntityId AS INT
 DECLARE @startingNumberId_InventoryReceipt AS INT = 23;
@@ -173,8 +177,7 @@ BEGIN
 			BEGIN
 				--Receipt Type is invalid or missing.
 				RAISERROR(80134, 11, 1);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 			
 		-- Validate Vendor Id --
@@ -188,8 +191,7 @@ BEGIN
 			BEGIN
 				-- Vendor Id is invalid or missing.
 				RAISERROR(80135, 11, 1);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Ship From Id --
@@ -203,8 +205,7 @@ BEGIN
 			BEGIN
 				-- Ship From Id is invalid or missing.
 				RAISERROR(80136, 11, 1);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Location Id
@@ -218,8 +219,7 @@ BEGIN
 			BEGIN
 				-- Location Id is invalid or missing.
 				RAISERROR(80137, 11, 1);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Ship Via Id
@@ -236,8 +236,7 @@ BEGIN
 				SET @valueShipViaIdStr = CAST(@valueShipViaId AS NVARCHAR(50))
 				-- Ship Via Id {Ship Via Id} is invalid.
 				RAISERROR(80138, 11, 1, @valueShipViaIdStr);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Currency Id
@@ -251,8 +250,7 @@ BEGIN
 			BEGIN
 				-- Currency Id is invalid or missing.
 				RAISERROR(80113, 11, 1);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Freight Term Id
@@ -268,8 +266,7 @@ BEGIN
 				SET @valueFreightTermIdStr = CAST(@valueFreightTermId AS NVARCHAR(50))
 				-- Freight Term Id {Freight Term Id} is invalid.
 				RAISERROR(80114, 11, 1, @valueFreightTermIdStr);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Source Type Id
@@ -283,8 +280,7 @@ BEGIN
 			BEGIN
 				-- Source Type Id is invalid or missing.
 				RAISERROR(80115, 11, 1);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Check if there is an existing Inventory receipt 
@@ -310,7 +306,7 @@ BEGIN
 
 			-- 'Unable to update %s. It is posted. Please unpost it first.'
 			RAISERROR(80077, 11, 1, @receiptNumber);	
-			GOTO _Exit;
+			GOTO _Exit_With_Rollback;
 		END
 				
 		IF @inventoryReceiptId IS NULL 
@@ -486,8 +482,7 @@ BEGIN
 				SET @valueItemIdStr = CAST(@valueItemId AS NVARCHAR(50))
 				-- Item Id {Item Id} invalid.
 				RAISERROR(80117, 11, 1, @valueItemIdStr);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Tax Group Id
@@ -503,8 +498,7 @@ BEGIN
 				SET @valueTaxGroupIdStr = CAST(@valueTaxGroupId AS NVARCHAR(50))
 				-- Tax Group Id {Tax Group Id} is invalid.
 				RAISERROR(80116, 11, 1, @valueTaxGroupIdStr);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Contract Header Id
@@ -520,8 +514,7 @@ BEGIN
 				SET @valueContractHeaderIdStr = CAST(@valueContractHeaderId AS NVARCHAR(50))
 				-- Contract Header Id {Contract Header Id} is invalid.
 				RAISERROR(80118, 11, 1, @valueContractHeaderIdStr);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 			
 		-- Validate Contract Detail Id
@@ -536,8 +529,7 @@ BEGIN
 				SET @valueContractHeaderIdStr =  CAST(@valueContractHeaderId AS NVARCHAR(50));
 				-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
 				RAISERROR(80119, 11, 1, @valueContractHeaderIdStr);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Item UOM Id
@@ -557,8 +549,7 @@ BEGIN
 
 				-- Item UOM Id is invalid or missing for lot {Item}.
 				RAISERROR(80120, 11, 1, @getItem);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Sub Location Id
@@ -579,8 +570,7 @@ BEGIN
 
 				-- Sub Location is invalid or missing for item {Item}.
 				RAISERROR(80097, 11, 1,@getItem);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Storage Location Id
@@ -600,8 +590,7 @@ BEGIN
 
 				-- Storage Location is invalid for item {Item}.
 				RAISERROR(80098, 11, 1, @getItem);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Gross/Net UOM Id
@@ -620,8 +609,7 @@ BEGIN
 
 				-- Gross/Net UOM is invalid for item {Item}.
 				RAISERROR(80121, 11, 1, @getItem);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Cost UOM Id
@@ -640,8 +628,7 @@ BEGIN
 
 				-- Cost UOM is invalid or missing for item {Item}.
 				RAISERROR(80122, 11, 1, @getItem);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Lot Id
@@ -663,8 +650,7 @@ BEGIN
 				SET @valueLotIdStr = CAST(@valueLotId AS NVARCHAR(50))
 				-- Lot ID {Lot Id} is invalid for item {Item}.
 				RAISERROR(80123, 11, 1, @valueLotIdStr, @getItem);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		--  Flush out existing detail detail data for re-insertion
@@ -846,8 +832,7 @@ BEGIN
 
 				-- Entity Id is invalid or missing for other charge item {Other Charge Item No.}.
 				RAISERROR(80140, 11, 1, @valueCharge);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Other Charge Receipt Type --
@@ -866,8 +851,7 @@ BEGIN
 
 				-- Receipt type is invalid or missing for other charge item {Other Charge Item No.}.
 				RAISERROR(80141, 11, 1, @valueCharge);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Other Charge Location Id
@@ -886,8 +870,7 @@ BEGIN
 
 				-- Location Id is invalid or missing for other charge item {Other Charge Item No.}.
 				RAISERROR(80142, 11, 1, @valueCharge);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Other Charge Ship Via Id
@@ -906,8 +889,7 @@ BEGIN
 
 				-- Ship Via Id is invalid for other charge item {Other Charge Item No.}.
 				RAISERROR(80143, 11, 1, @valueCharge);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Other Charge Ship From Id --
@@ -926,8 +908,7 @@ BEGIN
 				WHERE intItemId = @valueChargeId
 				-- Ship From Id is invalid or missing for other charge item {Other Charge Item No.}.
 				RAISERROR(80144, 11, 1, @valueCharge);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Other Charge Currency Id
@@ -939,15 +920,14 @@ BEGIN
 		WHERE RawData.intCurrencyId > 0 AND RawData.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
 
 		IF @valueChargeId > 0
-			BEGIN
-				SELECT @valueCharge = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @valueChargeId
-				-- Currency Id is invalid for other charge item {Other Charge Item No.}.
-				RAISERROR(80145, 11, 1, @valueCharge);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
-			END
+		BEGIN
+			SELECT @valueCharge = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @valueChargeId
+			-- Currency Id is invalid for other charge item {Other Charge Item No.}.
+			RAISERROR(80145, 11, 1, @valueCharge);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Other Charge Item Id
 		IF EXISTS(SELECT *
@@ -957,8 +937,7 @@ BEGIN
 					BEGIN
 						-- Other Charge Item Id is invalid or missing.
 						RAISERROR(80124, 11, 1);
-						ROLLBACK TRANSACTION;
-						GOTO _Exit;
+						GOTO _Exit_With_Rollback;
 					END
 
 		-- Validate Cost Method
@@ -978,8 +957,7 @@ BEGIN
 
 				-- Cost Method for Other Charge item {Other Charge Item No.} is invalid or missing.
 				RAISERROR(80125, 11, 1, @valueCharge);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Cost Currency Id
@@ -1001,8 +979,7 @@ BEGIN
 				SET @valueCostCurrencyIdStr = CAST(@valueCostCurrencyId AS NVARCHAR(50))
 				-- Cost Currency Id %s is invalid for other charge item %s.
 				RAISERROR(80126, 11, 1, @valueCostCurrencyIdStr, @valueCharge);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Cost UOM Id
@@ -1023,8 +1000,7 @@ BEGIN
 
 				-- Cost UOM is invalid or missing for item {Charge Item No.}.
 				RAISERROR(80122, 11, 1, @valueCharge);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Other Charges Vendor Id
@@ -1044,8 +1020,7 @@ BEGIN
 
 				-- Vendor Id is invalid for other charge item {Other Charge Item No.}.
 				RAISERROR(80127, 11, 1, @valueCharge);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Allocate Cost By
@@ -1064,8 +1039,7 @@ BEGIN
 
 				-- Allocate Cost By is invalid or missing for other charge item {Other Charge Item No.}.
 				RAISERROR(80128, 11, 1, @valueCharge);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Contract Header Id
@@ -1082,8 +1056,7 @@ BEGIN
 				SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
 				-- Contract Header Id {Contract Header Id} is invalid.
 				RAISERROR(80118, 11, 1, @valueOtherChargeContractHeaderIdStr);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Contract Detail Id
@@ -1100,8 +1073,7 @@ BEGIN
 				SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
 				-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
 				RAISERROR(80119, 11, 1, @valueOtherChargeContractHeaderIdStr);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Validate Tax Group Id
@@ -1118,8 +1090,7 @@ BEGIN
 				SET @valueOtherChargeTaxGroupIdStr = CAST(@valueOtherChargeTaxGroupId AS NVARCHAR(50))
 				-- Tax Group Id {Tax Group Id} is invalid.
 				RAISERROR(80116, 11, 1, @valueOtherChargeTaxGroupIdStr);
-				ROLLBACK TRANSACTION;
-				GOTO _Exit;
+				GOTO _Exit_With_Rollback;
 			END
 
 		-- Insert the Other Charges
@@ -1157,7 +1128,7 @@ BEGIN
 				,[ysnAccrue]				= RawData.ysnAccrue
 				,[ysnPrice]					= RawData.ysnPrice
 				,[ysnSubCurrency]			= ISNULL(RawData.ysnSubCurrency, 0) 
-				,[intCurrencyId]			= RawData.intCostCurrencyId
+				,[intCurrencyId]			= ISNULL(RawData.intCostCurrencyId, RawData.intCurrencyId) 
 				,[intCent]					= CostCurrency.intCent
 				,[intTaxGroupId]			= RawData.intTaxGroupId
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
@@ -1526,370 +1497,349 @@ BEGIN
 					IF EXISTS (SELECT * 
 							   FROM tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
 							   WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId AND Item.strLotTracking != 'No')
-						BEGIN
+					BEGIN
 
-							------------------------------------------------
-							------- Validate Receipt Item Lot fields -------
-							------------------------------------------------
-							DECLARE @valueLotRecordId INT = NULL
-									,@valueLotRecordNo NVARCHAR(50) = NULL
+						------------------------------------------------
+						------- Validate Receipt Item Lot fields -------
+						------------------------------------------------
+						DECLARE @valueLotRecordId INT = NULL
+								,@valueLotRecordNo NVARCHAR(50) = NULL
 
-							-- Validate Lot Entity Id
-							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.intEntityVendorId IS NULL OR ItemLot.intEntityVendorId NOT IN (SELECT intEntityId FROM tblEMEntity)
+						-- Validate Lot Entity Id
+						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot
+						WHERE ItemLot.intEntityVendorId IS NULL OR ItemLot.intEntityVendorId NOT IN (SELECT intEntityId FROM tblEMEntity)
 
-							IF @valueLotRecordNo IS NOT NULL
-								BEGIN
-									-- Entity Id is invalid or missing for lot {Lot Number}.
-									RAISERROR(80146, 11, 1, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
+						IF @valueLotRecordNo IS NOT NULL
+							BEGIN
+								-- Entity Id is invalid or missing for lot {Lot Number}.
+								RAISERROR(80146, 11, 1, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
 
-							-- Validate Lot Receipt Type --
-							SET @valueLotRecordNo = NULL
+						-- Validate Lot Receipt Type --
+						SET @valueLotRecordNo = NULL
 
-							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.strReceiptType IS NULL OR (RTRIM(LTRIM(LOWER(ItemLot.strReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order'))
+						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot
+						WHERE ItemLot.strReceiptType IS NULL OR (RTRIM(LTRIM(LOWER(ItemLot.strReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order'))
 
-							IF @valueLotRecordNo IS NOT NULL
-								BEGIN
-									-- Receipt type is invalid or missing for lot {Lot Number}.
-									RAISERROR(80147, 11, 1, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
+						IF @valueLotRecordNo IS NOT NULL
+							BEGIN
+								-- Receipt type is invalid or missing for lot {Lot Number}.
+								RAISERROR(80147, 11, 1, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
 
-							-- Validate Lot Location Id
-							SET @valueLotRecordNo = NULL
+						-- Validate Lot Location Id
+						SET @valueLotRecordNo = NULL
 
-							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.intLocationId IS NULL OR ItemLot.intLocationId NOT IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation)
+						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot
+						WHERE ItemLot.intLocationId IS NULL OR ItemLot.intLocationId NOT IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation)
 		
-							IF @valueLotRecordNo IS NOT NULL
-								BEGIN
-									-- Location Id is invalid or missing for lot {Lot Number}.
-									RAISERROR(80148, 11, 1, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
+						IF @valueLotRecordNo IS NOT NULL
+							BEGIN
+								-- Location Id is invalid or missing for lot {Lot Number}.
+								RAISERROR(80148, 11, 1, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
 
-							-- Validate Lot Ship Via Id
-							SET @valueLotRecordNo = NULL
+						-- Validate Lot Ship Via Id
+						SET @valueLotRecordNo = NULL
 
-							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.intShipViaId > 0 AND ItemLot.intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)
+						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot
+						WHERE ItemLot.intShipViaId > 0 AND ItemLot.intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)
 
-							IF @valueLotRecordNo IS NOT NULL
-								BEGIN
-									-- Ship Via Id is invalid for lot {Lot Number}.
-									RAISERROR(80149, 11, 1, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
+						IF @valueLotRecordNo IS NOT NULL
+							BEGIN
+								-- Ship Via Id is invalid for lot {Lot Number}.
+								RAISERROR(80149, 11, 1, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
 
-							-- Validate Lot Ship From Id --
-							SET @valueLotRecordNo = NULL
+						-- Validate Lot Ship From Id --
+						SET @valueLotRecordNo = NULL
 
-							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.intShipFromId IS NULL OR ItemLot.intShipFromId NOT IN (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = ItemLot.intEntityVendorId)
+						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot
+						WHERE ItemLot.intShipFromId IS NULL OR ItemLot.intShipFromId NOT IN (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = ItemLot.intEntityVendorId)
 
-							IF @valueLotRecordNo IS NOT NULL
-								BEGIN
-									-- Ship From Id is invalid or missing for lot {Lot Number}.
-									RAISERROR(80150, 11, 1, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
+						IF @valueLotRecordNo IS NOT NULL
+							BEGIN
+								-- Ship From Id is invalid or missing for lot {Lot Number}.
+								RAISERROR(80150, 11, 1, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
 
-							-- Validate Lot Currency Id
-							SET @valueLotRecordNo = NULL
+						-- Validate Lot Currency Id
+						SET @valueLotRecordNo = NULL
 
-							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.intCurrencyId IS NULL OR ItemLot.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
+						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot
+						WHERE ItemLot.intCurrencyId IS NULL OR ItemLot.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
 
-							IF @valueLotRecordNo IS NOT NULL
-								BEGIN
-									-- Currency Id is invalid or missing for lot {Lot Number}.
-									RAISERROR(80151, 11, 1, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
+						IF @valueLotRecordNo IS NOT NULL
+							BEGIN
+								-- Currency Id is invalid or missing for lot {Lot Number}.
+								RAISERROR(80151, 11, 1, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
 
-							-- Validate Lot Source Type Id
-							SET @valueLotRecordNo = NULL
+						-- Validate Lot Source Type Id
+						SET @valueLotRecordNo = NULL
 
-							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.intSourceType IS NULL OR ItemLot.intSourceType > 4 OR ItemLot.intSourceType < 0
+						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot
+						WHERE ItemLot.intSourceType IS NULL OR ItemLot.intSourceType > 4 OR ItemLot.intSourceType < 0
 
-							IF @valueLotRecordNo IS NOT NULL
-								BEGIN
-									-- Source Type Id is invalid or missing for lot {Lot Number}.
-									RAISERROR(80152, 11, 1, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
+						IF @valueLotRecordNo IS NOT NULL
+							BEGIN
+								-- Source Type Id is invalid or missing for lot {Lot Number}.
+								RAISERROR(80152, 11, 1, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
 
-							-- Validate Lot Item Id
-							SET @valueLotRecordNo = NULL
+						-- Validate Lot Item Id
+						SET @valueLotRecordNo = NULL
 
-							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot	   
-							WHERE ItemLot.intItemId IS NULL OR ItemLot.intItemId NOT IN (SELECT intItemId FROM tblICItem)
+						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot	   
+						WHERE ItemLot.intItemId IS NULL OR ItemLot.intItemId NOT IN (SELECT intItemId FROM tblICItem)
 
-							IF @valueLotRecordNo IS NOT NULL
-								BEGIN
-									-- Item Id is invalid or missing for lot {Lot Number}.
-									RAISERROR(80153, 11, 1, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
+						IF @valueLotRecordNo IS NOT NULL
+							BEGIN
+								-- Item Id is invalid or missing for lot {Lot Number}.
+								RAISERROR(80153, 11, 1, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
 
-							-- Validate Lot Sub Location Id
-							SET @valueLotRecordNo = NULL
+						-- Validate Lot Sub Location Id
+						SET @valueLotRecordNo = NULL
 
-							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot	   	   
-							WHERE ItemLot.intSubLocationId IS NULL OR ItemLot.intSubLocationId NOT IN (SELECT intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationId = ItemLot.intLocationId)
+						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot	   	   
+						WHERE ItemLot.intSubLocationId IS NULL OR ItemLot.intSubLocationId NOT IN (SELECT intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationId = ItemLot.intLocationId)
 
-							IF @valueLotRecordNo IS NOT NULL
-								BEGIN
-									-- Sub Location is invalid or missing for {Lot Number}.
-									RAISERROR(80154, 11, 1, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
+						IF @valueLotRecordNo IS NOT NULL
+							BEGIN
+								-- Sub Location is invalid or missing for {Lot Number}.
+								RAISERROR(80154, 11, 1, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
 
-							-- Validate Lot Storage Location Id
-							SET @valueLotRecordNo = NULL
+						-- Validate Lot Storage Location Id
+						SET @valueLotRecordNo = NULL
 
-							SELECT @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot   
-							WHERE ItemLot.intStorageLocationId IS NULL OR ItemLot.intStorageLocationId NOT IN (SELECT intStorageLocationId FROM tblICStorageLocation WHERE intLocationId = ItemLot.intLocationId AND intSubLocationId = ItemLot.intSubLocationId)
+						SELECT @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot   
+						WHERE ItemLot.intStorageLocationId IS NULL OR ItemLot.intStorageLocationId NOT IN (SELECT intStorageLocationId FROM tblICStorageLocation WHERE intLocationId = ItemLot.intLocationId AND intSubLocationId = ItemLot.intSubLocationId)
 								 
-							IF @valueLotRecordNo IS NOT NULL
-								BEGIN
-									-- 'Storage Location is invalid or missing for lot {Lot Number}.
-									RAISERROR(80155, 11, 1, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
+						IF @valueLotRecordNo IS NOT NULL
+							BEGIN
+								-- 'Storage Location is invalid or missing for lot {Lot Number}.
+								RAISERROR(80155, 11, 1, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
 
-							-- Validate Lot Id
-							DECLARE @valueLotRecordLotId INT = NULL
+						-- Validate Lot Id
+						DECLARE @valueLotRecordLotId INT = NULL
+						SET @valueLotRecordNo = NULL
+
+						SELECT TOP 1 @valueLotRecordLotId = ItemLot.intLotId, @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot
+						WHERE ItemLot.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId)
+						ORDER BY ItemLot.intLotId ASC
+
+						IF @valueLotRecordLotId > 0
+							BEGIN
+								DECLARE @valueLotRecordLotIdStr NVARCHAR(50)
+								SET @valueLotRecordLotIdStr = CAST(@valueLotRecordLotId AS NVARCHAR(50))
+								-- Lot ID {Lot Id} is invalid for lot {Lot Number}.
+								RAISERROR(80157, 11, 1, @valueLotRecordLotIdStr, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
+
+						-- Validate Lot Number
+						DECLARE @valueLotRecordLotNo NVARCHAR(50) = NULL
+								,@valueLotRecordItemId INT = NULL
+								,@valueLotRecordItemNo NVARCHAR(50) = NULL
+
+						SELECT TOP 1 @valueLotRecordItemId = ItemLot.intItemId
+						FROM @LotEntries ItemLot
+						WHERE ItemLot.strLotNumber IS NULL 
+								OR (ItemLot.intLotId > 0 AND ItemLot.strLotNumber NOT IN (SELECT strLotNumber FROM tblICLot WHERE intLotId = ItemLot.intLotId))
+						ORDER BY ItemLot.strLotNumber ASC
+
+						IF @valueLotRecordItemId > 0
+							BEGIN
+								SELECT @valueLotRecordItemNo = strItemNo
+								FROM tblICItem
+								WHERE intItemId = @valueLotRecordItemId
+
+								-- Lot Number is invalid or missing for item {ItemNo.}.
+								RAISERROR(80130, 11, 1, @valueLotRecordItemNo);
+								GOTO _Exit_With_Rollback;
+							END
+
+							-- Validate Lot Item UOM Id
 							SET @valueLotRecordNo = NULL
-
-							SELECT TOP 1 @valueLotRecordLotId = ItemLot.intLotId, @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId)
-							ORDER BY ItemLot.intLotId ASC
-
-							IF @valueLotRecordLotId > 0
-								BEGIN
-									DECLARE @valueLotRecordLotIdStr NVARCHAR(50)
-									SET @valueLotRecordLotIdStr = CAST(@valueLotRecordLotId AS NVARCHAR(50))
-									-- Lot ID {Lot Id} is invalid for lot {Lot Number}.
-									RAISERROR(80157, 11, 1, @valueLotRecordLotIdStr, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
-
-							-- Validate Lot Number
-							DECLARE @valueLotRecordLotNo NVARCHAR(50) = NULL
-									,@valueLotRecordItemId INT = NULL
-									,@valueLotRecordItemNo NVARCHAR(50) = NULL
-
-							SELECT TOP 1 @valueLotRecordItemId = ItemLot.intItemId
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.strLotNumber IS NULL 
-									OR (ItemLot.intLotId > 0 AND ItemLot.strLotNumber NOT IN (SELECT strLotNumber FROM tblICLot WHERE intLotId = ItemLot.intLotId))
-							ORDER BY ItemLot.strLotNumber ASC
-
-							IF @valueLotRecordItemId > 0
-								BEGIN
-									SELECT @valueLotRecordItemNo = strItemNo
-									FROM tblICItem
-									WHERE intItemId = @valueLotRecordItemId
-
-									-- Lot Number is invalid or missing for item {ItemNo.}.
-									RAISERROR(80130, 11, 1, @valueLotRecordItemNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
-
-								-- Validate Lot Item UOM Id
-								SET @valueLotRecordNo = NULL
 								 
-								SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-								FROM @LotEntries ItemLot
-								WHERE ItemLot.intItemUnitMeasureId IS NULL OR
-									  ItemLot.intItemUnitMeasureId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = ItemLot.intItemId)
-								ORDER BY ItemLot.intItemUnitMeasureId ASC
-
-								IF @valueLotRecordNo IS NOT NULL
-									BEGIN
-										-- Item UOM Id is invalid or missing for lot {Lot Number}.
-										RAISERROR(80156, 11, 1, @valueLotRecordNo);
-										ROLLBACK TRANSACTION;
-										GOTO _Exit;
-									END
-
-							-- Validate Lot Condition
-							DECLARE @valueLotRecordLotCondition NVARCHAR(50) = NULL
-								SET @valueLotRecordNo = NULL
-
-								SELECT TOP 1 @valueLotRecordLotCondition = ItemLot.strCondition, @valueLotRecordNo = ItemLot.strLotNumber
-								FROM @LotEntries ItemLot
-								WHERE ItemLot.strCondition IS NOT NULL 
-									  AND RTRIM(LTRIM(LOWER(ItemLot.strCondition))) NOT IN ('sound/full', 'slack', 'damaged', 'clean wgt')
-								ORDER BY ItemLot.strCondition ASC
-
-								IF @valueLotRecordLotCondition IS NOT NULL
-									BEGIN
-										-- Lot Condition {Lot Condition} is invalid for lot {Lot Number}.
-										RAISERROR(80131, 11, 1, @valueLotRecordLotCondition, @valueLotRecordNo);
-										ROLLBACK TRANSACTION;
-										GOTO _Exit;
-									END
-
-							-- Validate Parent Lot Id
-							DECLARE @valueLotRecordParentLotId INT = NULL
-									,@valueLotRecordParentLotIdStr NVARCHAR(50)
-							SET @valueLotRecordNo = NULL
-
-							SELECT TOP 1 @valueLotRecordParentLotId = ItemLot.intParentLotId, @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.intParentLotId NOT IN (SELECT intParentLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId AND intLotId = ItemLot.intLotId)
-							ORDER BY ItemLot.intParentLotId ASC
-
-							IF @valueLotRecordParentLotId > 0
-								BEGIN
-									SET @valueLotRecordParentLotIdStr = CAST(@valueLotRecordParentLotId AS NVARCHAR(50))
-									-- Parent Lot Id {Parent Lot Id} is invalid for lot {Lot Number}.
-									RAISERROR(80132, 11, 1, @valueLotRecordParentLotIdStr, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
-								END
-
-							-- Validate Parent Lot Number
-							DECLARE @valueLotRecordParentLotNo NVARCHAR(50) = NULL
-							SET @valueLotRecordNo = NULL
-
 							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
 							FROM @LotEntries ItemLot
-							WHERE ItemLot.intParentLotId > 0
-									AND (ItemLot.strParentLotNumber IS NULL OR
-									(ItemLot.strParentLotNumber NOT IN (SELECT strParentLotNumber FROM tblICParentLot WHERE intItemId = ItemLot.intItemId AND intParentLotId = ItemLot.intParentLotId)))
-							ORDER BY ItemLot.strParentLotNumber ASC
+							WHERE ItemLot.intItemUnitMeasureId IS NULL OR
+									ItemLot.intItemUnitMeasureId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = ItemLot.intItemId)
+							ORDER BY ItemLot.intItemUnitMeasureId ASC
 
 							IF @valueLotRecordNo IS NOT NULL
 								BEGIN
-									-- Parent Lot Number is invalid or missing for lot {Lot Number}.
-									RAISERROR(80133, 11, 1, @valueLotRecordNo);
-									ROLLBACK TRANSACTION;
-									GOTO _Exit;
+									-- Item UOM Id is invalid or missing for lot {Lot Number}.
+									RAISERROR(80156, 11, 1, @valueLotRecordNo);
+									GOTO _Exit_With_Rollback;
 								END
 
-							-- Insert Lot for Receipt Item
-							INSERT INTO dbo.tblICInventoryReceiptItemLot (
-								[intInventoryReceiptItemId]		
-								,[intLotId]
-								,[strLotNumber]
-								,[strLotAlias]
-								,[intSubLocationId]
-								,[intStorageLocationId]
-								,[intItemUnitMeasureId]
-								,[dblQuantity]
-								,[dblGrossWeight]
-								,[dblTareWeight]
-								,[dblCost]
-								,[intNoPallet]
-								,[intUnitPallet]
-								,[dblStatedGrossPerUnit]
-								,[dblStatedTarePerUnit]
-								,[strContainerNo]
-								,[intEntityVendorId]
-								,[strGarden]
-								,[strMarkings]
-								,[intOriginId]
-								,[intGradeId]
-								,[intSeasonCropYear]
-								,[strVendorLotId]
-								,[dtmManufacturedDate]
-								,[strRemarks]
-								,[strCondition]
-								,[dtmCertified]
-								,[dtmExpiryDate]
-								,[intParentLotId]
-								,[strParentLotNumber]
-								,[strParentLotAlias]
-								,[intSort]
-								,[intConcurrencyId]
-							)
-							SELECT
-								[intInventoryReceiptItemId]	= @currentReceiptItemId
-								,[intLotId] = ItemLot.intLotId
-								,[strLotNumber] = ItemLot.strLotNumber
-								,[strLotAlias] = ItemLot.strLotAlias
-								,[intSubLocationId] = ItemLot.intSubLocationId
-								,[intStorageLocationId] = ItemLot.intStorageLocationId
-								,[intItemUnitMeasureId] = ItemLot.intItemUnitMeasureId
-								,[dblQuantity] = ItemLot.dblQuantity
-								,[dblGrossWeight] = ItemLot.dblGrossWeight
-								,[dblTareWeight] = ItemLot.dblTareWeight
-								,[dblCost] = ItemLot.dblCost
-								,[intNoPallet] = ItemLot.intNoPallet
-								,[intUnitPallet] = ItemLot.intUnitPallet
-								,[dblStatedGrossPerUnit] = ItemLot.dblStatedGrossPerUnit
-								,[dblStatedTarePerUnit] = ItemLot.dblStatedTarePerUnit
-								,[strContainerNo] = ItemLot.strContainerNo
-								,[intEntityVendorId] = ItemLot.intEntityVendorId
-								,[strGarden] = ItemLot.strGarden
-								,[strMarkings] = ItemLot.strMarkings
-								,[intOriginId] = ItemLot.intOriginId
-								,[intGradeId] = ItemLot.intGradeId
-								,[intSeasonCropYear] = ItemLot.intSeasonCropYear
-								,[strVendorLotId] = ItemLot.strVendorLotId
-								,[dtmManufacturedDate] = ItemLot.dtmManufacturedDate
-								,[strRemarks] = ItemLot.strRemarks
-								,[strCondition] = ItemLot.strCondition
-								,[dtmCertified] = ItemLot.dtmCertified
-								,[dtmExpiryDate] = ItemLot.dtmExpiryDate
-								,[intParentLotId] = ItemLot.intParentLotId
-								,[strParentLotNumber] = ItemLot.strParentLotNumber
-								,[strParentLotAlias] = ItemLot.strParentLotAlias
-								,[intSort] = 1
-								,[intConcurrencyId] = 1
-							FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
-								ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
-								AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
-								AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
-								AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
-								AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
-								AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
-								AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
-								AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
-							LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
-								ON ReceiptItem.intItemId = ItemLot.intItemId
-								AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
-								AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
-							WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId
-						END
-					ELSE
-						GOTO _Exit
+						-- Validate Lot Condition
+						DECLARE @valueLotRecordLotCondition NVARCHAR(50) = NULL
+							SET @valueLotRecordNo = NULL
 
+							SELECT TOP 1 @valueLotRecordLotCondition = ItemLot.strCondition, @valueLotRecordNo = ItemLot.strLotNumber
+							FROM @LotEntries ItemLot
+							WHERE ItemLot.strCondition IS NOT NULL 
+									AND RTRIM(LTRIM(LOWER(ItemLot.strCondition))) NOT IN ('sound/full', 'slack', 'damaged', 'clean wgt')
+							ORDER BY ItemLot.strCondition ASC
+
+							IF @valueLotRecordLotCondition IS NOT NULL
+								BEGIN
+									-- Lot Condition {Lot Condition} is invalid for lot {Lot Number}.
+									RAISERROR(80131, 11, 1, @valueLotRecordLotCondition, @valueLotRecordNo);
+									GOTO _Exit_With_Rollback;
+								END
+
+						-- Validate Parent Lot Id
+						DECLARE @valueLotRecordParentLotId INT = NULL
+								,@valueLotRecordParentLotIdStr NVARCHAR(50)
+						SET @valueLotRecordNo = NULL
+
+						SELECT TOP 1 @valueLotRecordParentLotId = ItemLot.intParentLotId, @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot
+						WHERE ItemLot.intParentLotId NOT IN (SELECT intParentLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId AND intLotId = ItemLot.intLotId)
+						ORDER BY ItemLot.intParentLotId ASC
+
+						IF @valueLotRecordParentLotId > 0
+							BEGIN
+								SET @valueLotRecordParentLotIdStr = CAST(@valueLotRecordParentLotId AS NVARCHAR(50))
+								-- Parent Lot Id {Parent Lot Id} is invalid for lot {Lot Number}.
+								RAISERROR(80132, 11, 1, @valueLotRecordParentLotIdStr, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
+
+						-- Validate Parent Lot Number
+						DECLARE @valueLotRecordParentLotNo NVARCHAR(50) = NULL
+						SET @valueLotRecordNo = NULL
+
+						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						FROM @LotEntries ItemLot
+						WHERE ItemLot.intParentLotId > 0
+								AND (ItemLot.strParentLotNumber IS NULL OR
+								(ItemLot.strParentLotNumber NOT IN (SELECT strParentLotNumber FROM tblICParentLot WHERE intItemId = ItemLot.intItemId AND intParentLotId = ItemLot.intParentLotId)))
+						ORDER BY ItemLot.strParentLotNumber ASC
+
+						IF @valueLotRecordNo IS NOT NULL
+							BEGIN
+								-- Parent Lot Number is invalid or missing for lot {Lot Number}.
+								RAISERROR(80133, 11, 1, @valueLotRecordNo);
+								GOTO _Exit_With_Rollback;
+							END
+
+						-- Insert Lot for Receipt Item
+						INSERT INTO dbo.tblICInventoryReceiptItemLot (
+							[intInventoryReceiptItemId]		
+							,[intLotId]
+							,[strLotNumber]
+							,[strLotAlias]
+							,[intSubLocationId]
+							,[intStorageLocationId]
+							,[intItemUnitMeasureId]
+							,[dblQuantity]
+							,[dblGrossWeight]
+							,[dblTareWeight]
+							,[dblCost]
+							,[intNoPallet]
+							,[intUnitPallet]
+							,[dblStatedGrossPerUnit]
+							,[dblStatedTarePerUnit]
+							,[strContainerNo]
+							,[intEntityVendorId]
+							,[strGarden]
+							,[strMarkings]
+							,[intOriginId]
+							,[intGradeId]
+							,[intSeasonCropYear]
+							,[strVendorLotId]
+							,[dtmManufacturedDate]
+							,[strRemarks]
+							,[strCondition]
+							,[dtmCertified]
+							,[dtmExpiryDate]
+							,[intParentLotId]
+							,[strParentLotNumber]
+							,[strParentLotAlias]
+							,[intSort]
+							,[intConcurrencyId]
+						)
+						SELECT
+							[intInventoryReceiptItemId]	= @currentReceiptItemId
+							,[intLotId] = ItemLot.intLotId
+							,[strLotNumber] = ItemLot.strLotNumber
+							,[strLotAlias] = ItemLot.strLotAlias
+							,[intSubLocationId] = ItemLot.intSubLocationId
+							,[intStorageLocationId] = ItemLot.intStorageLocationId
+							,[intItemUnitMeasureId] = ItemLot.intItemUnitMeasureId
+							,[dblQuantity] = ItemLot.dblQuantity
+							,[dblGrossWeight] = ItemLot.dblGrossWeight
+							,[dblTareWeight] = ItemLot.dblTareWeight
+							,[dblCost] = ItemLot.dblCost
+							,[intNoPallet] = ItemLot.intNoPallet
+							,[intUnitPallet] = ItemLot.intUnitPallet
+							,[dblStatedGrossPerUnit] = ItemLot.dblStatedGrossPerUnit
+							,[dblStatedTarePerUnit] = ItemLot.dblStatedTarePerUnit
+							,[strContainerNo] = ItemLot.strContainerNo
+							,[intEntityVendorId] = ItemLot.intEntityVendorId
+							,[strGarden] = ItemLot.strGarden
+							,[strMarkings] = ItemLot.strMarkings
+							,[intOriginId] = ItemLot.intOriginId
+							,[intGradeId] = ItemLot.intGradeId
+							,[intSeasonCropYear] = ItemLot.intSeasonCropYear
+							,[strVendorLotId] = ItemLot.strVendorLotId
+							,[dtmManufacturedDate] = ItemLot.dtmManufacturedDate
+							,[strRemarks] = ItemLot.strRemarks
+							,[strCondition] = ItemLot.strCondition
+							,[dtmCertified] = ItemLot.dtmCertified
+							,[dtmExpiryDate] = ItemLot.dtmExpiryDate
+							,[intParentLotId] = ItemLot.intParentLotId
+							,[strParentLotNumber] = ItemLot.strParentLotNumber
+							,[strParentLotAlias] = ItemLot.strParentLotAlias
+							,[intSort] = 1
+							,[intConcurrencyId] = 1
+						FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
+							ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
+							AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+							AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
+							AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+							AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+							AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+							AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
+							AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+						LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+							ON ReceiptItem.intItemId = ItemLot.intItemId
+							AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
+							AND ReceiptItem.intStorageLocationId = ItemLot.intStorageLocationId
+						WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId
+					END
 
 					SET @prevReceiptItemId = @currentReceiptItemId
-
 					SET @counterItem = @counterItem + 1
-
 				END
 		END
 
@@ -2035,8 +1985,20 @@ BEGIN
 	_BreakLoop:
 
 	CLOSE loopDataForReceiptHeader;
-	DEALLOCATE loopDataForReceiptHeader;
-
-	COMMIT TRANSACTION 
+	DEALLOCATE loopDataForReceiptHeader;	
 END
+
+IF @@TRANCOUNT > 0
+BEGIN 
+	COMMIT TRAN @TransactionName
+	GOTO _Exit
+END 
+
+_Exit_With_Rollback:
+IF @@TRANCOUNT > 0 
+BEGIN 
+	ROLLBACK TRAN @TransactionName
+	COMMIT TRAN @TransactionName
+END
+
 _Exit:
