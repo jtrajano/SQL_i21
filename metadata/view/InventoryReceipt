@@ -2546,7 +2546,7 @@
                                                                         "align": null,
                                                                         "dataIndex": "dblUnitCost",
                                                                         "dataType": null,
-                                                                        "format": "0,000.000###",
+                                                                        "format": null,
                                                                         "itemId": "colUnitCost",
                                                                         "text": "Cost",
                                                                         "width": 120
@@ -2569,15 +2569,24 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
-                                                                                "decimalPrecision": 6,
+                                                                                "decimalPrecision": null,
                                                                                 "itemId": "txtUnitCost",
-                                                                                "minValue": 0
+                                                                                "minValue": 0,
+                                                                                "quantityField": true
                                                                             },
                                                                             "name": "MyNumberField12",
                                                                             "configAlternates": {
-                                                                                "currencyField": "binding"
+                                                                                "currencyField": "binding",
+                                                                                "quantityField": "boolean"
                                                                             },
-                                                                            "designerId": "21443f4e-1088-4fc0-abfb-03d159b6eeb5"
+                                                                            "designerId": "21443f4e-1088-4fc0-abfb-03d159b6eeb5",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "quantityField",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -5625,7 +5634,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "flex": null,
-                                                                "format": "0,000.000000",
+                                                                "format": null,
                                                                 "itemId": "colRate",
                                                                 "modelValidation": true,
                                                                 "text": "Rate"
@@ -5642,13 +5651,22 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "designer|createAlias": "numericfield",
-                                                                        "modelValidation": true
+                                                                        "modelValidation": true,
+                                                                        "quantityField": true
                                                                     },
                                                                     "name": "MyNumberField60",
                                                                     "configAlternates": {
-                                                                        "currencyField": "boolean"
+                                                                        "currencyField": "boolean",
+                                                                        "quantityField": "boolean"
                                                                     },
-                                                                    "designerId": "deaa7036-c826-4da4-ad4d-ef151babc91c"
+                                                                    "designerId": "deaa7036-c826-4da4-ad4d-ef151babc91c",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "quantityField",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
                                                         },
@@ -5734,7 +5752,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "dblAmount",
                                                                 "flex": null,
-                                                                "format": "0,000.00####",
+                                                                "format": null,
                                                                 "itemId": "colChargeAmount",
                                                                 "text": "Amount"
                                                             },
@@ -5749,14 +5767,23 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "currencyField": true,
                                                                         "designer|createAlias": "numericfield",
                                                                         "modelValidation": true
                                                                     },
                                                                     "name": "MyNumberField61",
                                                                     "configAlternates": {
-                                                                        "currencyField": "boolean"
+                                                                        "currencyField": "boolean",
+                                                                        "quantityField": "binding"
                                                                     },
-                                                                    "designerId": "2eeba050-620f-45cf-bce8-33840e54938d"
+                                                                    "designerId": "2eeba050-620f-45cf-bce8-33840e54938d",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "currencyField",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
                                                         },
