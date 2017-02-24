@@ -72,12 +72,13 @@ SELECT	NEWID() AS id,
 		ysnEligibleRefund = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
 		dblTotalPurchases = SUM(dblTotalPurchases),
 		dblTotalSales = SUM(dblTotalSales),
-		dblRefundAmount = SUM(dblRefundAmount),
-		dblEquityRefund = SUM(dblEquityRefund),
-		dblCashRefund = SUM(dblCashRefund),
-		dblLessFWT = SUM(dblLessFWT),
-		dblLessServiceFee,
-		dblCheckAmount = SUM(dblCashRefund) - SUM(dblLessFWT) - dblLessServiceFee
+		dblRefundAmount = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(dblRefundAmount) ELSE 0 END,
+		dblNonRefundAmount = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN 0 ELSE SUM(dblRefundAmount) END,
+		dblEquityRefund = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(dblEquityRefund) ELSE 0 END,
+		dblCashRefund = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(dblCashRefund) ELSE 0 END,
+		dblLessFWT = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(dblLessFWT) ELSE 0 END,
+		dblLessServiceFee = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN dblLessServiceFee ELSE 0 END,
+		dblCheckAmount = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(dblCashRefund) - SUM(dblLessFWT) - dblLessServiceFee ELSE 0 END
 	FROM Refund
 	CROSS APPLY ComPref
 	GROUP BY	intCustomerId,

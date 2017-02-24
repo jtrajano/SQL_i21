@@ -5,9 +5,9 @@ SELECT	NEWID() as id,
 		RCus.intRefundTypeId,
 		PC.strCategoryCode,
 		PC.strDescription,
-		RCat.dblVolume,
+		dblVolume = SUM(RCat.dblVolume),
 		RCat.dblRefundRate AS dblRate,
-		dblRefundAmount = ROUND(RCat.dblVolume * RCat.dblRefundRate,2)
+		dblRefundAmount = SUM(ROUND(RCat.dblVolume * RCat.dblRefundRate,2))
 		FROM tblPATRefundCategory RCat
 	INNER JOIN tblPATRefundCustomer RCus
 		ON RCus.intRefundCustomerId = RCat.intRefundCustomerId
@@ -15,3 +15,4 @@ SELECT	NEWID() as id,
 		ON PC.intPatronageCategoryId = RCat.intPatronageCategoryId
 	INNER JOIN tblPATRefund R
 		ON R.intRefundId = RCus.intRefundId
+	GROUP BY RCus.intRefundId, RCus.intRefundTypeId, PC.strCategoryCode, PC.strDescription, RCat.dblRefundRate

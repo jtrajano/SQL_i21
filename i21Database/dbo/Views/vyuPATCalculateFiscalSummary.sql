@@ -11,6 +11,7 @@ WITH ComPref AS (
 FiscalSum AS (
 SELECT		Total.intFiscalYear,
 			Total.intCustomerPatronId,
+			Total.strStockStatus,
 			CompLoc.intCompanyLocationId,
 			Total.dblVolume,
 			dblRefundAmount = SUM(CASE WHEN Total.ysnEligibleRefund = 1 THEN Total.dblRefundAmount ELSE 0 END),
@@ -33,6 +34,7 @@ SELECT		Total.intFiscalYear,
 		    FROM (
 				SELECT	B.intCustomerPatronId,
 						RRD.intRefundTypeId,
+						ARC.strStockStatus,
 						intFiscalYear = B.intFiscalYear,
 						dblVolume = SUM(B.dblVolume),
 						ysnEligibleRefund = CASE WHEN SUM(RRD.dblRate * B.dblVolume) >= ComPref.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
@@ -42,9 +44,12 @@ SELECT		Total.intFiscalYear,
 						ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
 				INNER JOIN tblPATRefundRate RR
 						ON RR.intRefundTypeId = RRD.intRefundTypeId
+				INNER JOIN tblARCustomer ARC
+						ON ARC.intEntityCustomerId = B.intCustomerPatronId
 				CROSS APPLY ComPref
 				WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 				GROUP BY	B.intCustomerPatronId,
+							ARC.strStockStatus,
 							B.dblVolume,
 							B.intFiscalYear,
 							RRD.intRefundTypeId,
@@ -60,6 +65,7 @@ SELECT		Total.intFiscalYear,
 	CROSS APPLY (SELECT intCompanyLocationId,dblWithholdPercent FROM tblSMCompanyLocation) CompLoc
 	GROUP BY Total.intFiscalYear,
 			Total.intCustomerPatronId,
+			Total.strStockStatus,
 			CompLoc.intCompanyLocationId,
 			Total.dblVolume,
 			Total.intRefundTypeId,
@@ -67,7 +73,9 @@ SELECT		Total.intFiscalYear,
 			ComPref.dblServiceFee
 )
 
-SELECT	intFiscalYear AS intFiscalYearId,
+SELECT	NEWID() AS id,
+		intFiscalYear AS intFiscalYearId,
+		strStockStatus,
 		intCompanyLocationId,
 		dblVolume = SUM(dblVolume), 
 		dblRefundAmount = SUM(dblRefundAmount),
@@ -82,4 +90,4 @@ SELECT	intFiscalYear AS intFiscalYearId,
 		intProducers,
 		intOthers
 FROM FiscalSum
-GROUP BY intFiscalYear, intCompanyLocationId, intVoting, intNonVoting, intProducers, intOthers
+GROUP BY intFiscalYear, strStockStatus, intCompanyLocationId, intVoting, intNonVoting, intProducers, intOthers
