@@ -48,6 +48,7 @@
     [strTransactionId]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strPrintTimeStamp]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceReportNumber]     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strTempInvoiceReportNumber] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intInvoiceId]               INT             NULL,
     [intConcurrencyId]           INT             CONSTRAINT [DF_tblCFTransaction_intConcurrencyId_1] DEFAULT ((1)) NULL,
     [ysnPostedCSV]               BIT             NULL,
@@ -66,6 +67,8 @@
     CONSTRAINT [FK_tblCFTransaction_tblCTContractHeader] FOREIGN KEY ([intContractId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
     CONSTRAINT [FK_tblCFTransaction_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+
+
 
 
 
@@ -175,4 +178,74 @@ CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intContractDetailId]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intCardId]
     ON [dbo].[tblCFTransaction]([intCardId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intVehicleId]
+    ON [dbo].[tblCFTransaction]([intVehicleId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intTransactionId]
+    ON [dbo].[tblCFTransaction]([intTransactionId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intSiteId]
+    ON [dbo].[tblCFTransaction]([intSiteId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intSiteGroupId]
+    ON [dbo].[tblCFTransaction]([intSiteGroupId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intProductId]
+    ON [dbo].[tblCFTransaction]([intProductId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intPriceProfileId]
+    ON [dbo].[tblCFTransaction]([intPriceProfileId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intPriceIndexId]
+    ON [dbo].[tblCFTransaction]([intPriceIndexId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intNetworkId]
+    ON [dbo].[tblCFTransaction]([intNetworkId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intInvoiceId]
+    ON [dbo].[tblCFTransaction]([intInvoiceId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intContractId]
+    ON [dbo].[tblCFTransaction]([intContractId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intContractDetailId]
+    ON [dbo].[tblCFTransaction]([intContractDetailId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intCardId]
+    ON [dbo].[tblCFTransaction]([intCardId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intARLocationId]
+    ON [dbo].[tblCFTransaction]([intARLocationId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFTransaction_intARItemId]
+    ON [dbo].[tblCFTransaction]([intARItemId] ASC);
 

@@ -85,34 +85,36 @@ BEGIN TRY
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
 	--------------------------------------
 
-	----------GROUP BY CUSTOMER-----------
-	INSERT INTO #tblCFDisctinctCustomerInvoice(
-		intAccountId	
-		,intCustomerId	
-	)
-	SELECT 
-		intAccountId	
-		,intCustomerId	
-	FROM #tblCFInvoiceDiscount
-	GROUP BY intAccountId,intCustomerId	
-	--------------------------------------
+	UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM #tblCFInvoiceDiscount)
 
-	----------UPDATE INVOICE REPORT NUMBER-----------
-	WHILE (EXISTS(SELECT 1 FROM #tblCFDisctinctCustomerInvoice))
-	-------------------------------------------------
-	BEGIN
+	------------GROUP BY CUSTOMER-----------
+	--INSERT INTO #tblCFDisctinctCustomerInvoice(
+	--	intAccountId	
+	--	,intCustomerId	
+	--)
+	--SELECT 
+	--	intAccountId	
+	--	,intCustomerId	
+	--FROM #tblCFInvoiceDiscount
+	--GROUP BY intAccountId,intCustomerId	
+	----------------------------------------
+
+	------------UPDATE INVOICE REPORT NUMBER-----------
+	--WHILE (EXISTS(SELECT 1 FROM #tblCFDisctinctCustomerInvoice))
+	---------------------------------------------------
+	--BEGIN
 			
-		EXEC uspSMGetStartingNumber 53, @CFID OUT
+	--	EXEC uspSMGetStartingNumber 53, @CFID OUT
 
-		SELECT	@loopCustomerId = intCustomerId, 
-				@loopAccountId = intAccountId 
-		FROM #tblCFDisctinctCustomerInvoice
+	--	SELECT	@loopCustomerId = intCustomerId, 
+	--			@loopAccountId = intAccountId 
+	--	FROM #tblCFDisctinctCustomerInvoice
 
-		UPDATE tblCFTransaction SET strInvoiceReportNumber =  @CFID WHERE intTransactionId IN (SELECT intTransactionId FROM #tblCFInvoiceDiscount WHERE intAccountId = @loopAccountId AND intCustomerId = @loopCustomerId)
+	--	UPDATE tblCFTransaction SET strInvoiceReportNumber =  @CFID WHERE intTransactionId IN (SELECT intTransactionId FROM #tblCFInvoiceDiscount WHERE intAccountId = @loopAccountId AND intCustomerId = @loopCustomerId)
 	
-		DELETE FROM #tblCFDisctinctCustomerInvoice WHERE intAccountId = @loopAccountId AND intCustomerId = @loopCustomerId
+	--	DELETE FROM #tblCFDisctinctCustomerInvoice WHERE intAccountId = @loopAccountId AND intCustomerId = @loopCustomerId
 
-	END
+	--END
 	
 
 	EXEC	@return_value = [dbo].[uspCFCreateInvoicePayment]

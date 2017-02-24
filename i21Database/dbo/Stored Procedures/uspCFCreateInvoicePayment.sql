@@ -165,6 +165,7 @@ BEGIN
 				,@DatePaid				= dtmInvoiceDate
 				,@PaymentMethodId		= (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'CF Invoice')
 				,@InvoiceReportNumber	= strInvoiceReportNumber 
+				,@PaymentInfo			= strInvoiceReportNumber
 				FROM #tblCFInvoiceDiscount 
 				WHERE intTransactionId = @id
 				AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)

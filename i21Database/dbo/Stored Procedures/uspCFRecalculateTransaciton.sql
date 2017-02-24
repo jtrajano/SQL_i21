@@ -668,8 +668,8 @@ BEGIN
 					DROP TABLE #ItemTax
 				END
 
-		
-				
+				--select * from @tblCFRemoteTax
+
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
 				---------------------------------------------------
@@ -689,7 +689,7 @@ BEGIN
 						,ISNULL(strReason,'Invalid Setup -' + strTaxCode)
 						,@guid
 					FROM @tblCFRemoteTax
-					WHERE (ysnInvalidSetup =1 AND LOWER(strReason) NOT LIKE '%item category%')
+					WHERE (ysnInvalidSetup =1 AND LOWER(strReason) NOT LIKE '%item category%') AND (ysnTaxExempt IS NULL OR  ysnTaxExempt = 0)
 				END
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
@@ -1508,8 +1508,8 @@ BEGIN
 			),
 			(
 				 'Total Amount'
-				,@dblOriginalPrice * @dblQuantity
-				,@dblPrice * @dblQuantity
+				,ROUND(@dblOriginalPrice * @dblQuantity,2)
+				,ROUND(@dblPrice * @dblQuantity,2)
 			)
 		END
 	ELSE
@@ -1532,8 +1532,8 @@ BEGIN
 		),
 		(
 			 'Total Amount'
-			,@dblOriginalPrice * @dblQuantity
-			,(@dblPrice + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity
+			,ROUND(@dblOriginalPrice * @dblQuantity,2)
+			,ROUND((@dblPrice + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
 		)
 		END
 	---------------------------------------------------

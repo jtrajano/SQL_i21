@@ -46,7 +46,29 @@
 
 
 
+
+
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCFItem_intItemId]
     ON [dbo].[tblCFItem]([intItemId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFItem_intSiteId]
+    ON [dbo].[tblCFItem]([intSiteId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFItem_intNetworkId]
+    ON [dbo].[tblCFItem]([intNetworkId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFItem_intItemId]
+    ON [dbo].[tblCFItem]([intItemId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFItem_intARItemId]
+    ON [dbo].[tblCFItem]([intARItemId] ASC);
 

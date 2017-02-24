@@ -47,10 +47,10 @@
     CONSTRAINT [FK_tblCFAccount_tblCFDiscountSchedule] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [dbo].[tblCFDiscountSchedule] ([intDiscountScheduleId]),
     CONSTRAINT [FK_tblCFAccount_tblCFFeeProfile] FOREIGN KEY ([intFeeProfileId]) REFERENCES [dbo].[tblCFFeeProfile] ([intFeeProfileId]),
     CONSTRAINT [FK_tblCFAccount_tblCFInvoiceCycle] FOREIGN KEY ([intInvoiceCycle]) REFERENCES [dbo].[tblCFInvoiceCycle] ([intInvoiceCycleId]),
+    CONSTRAINT [FK_tblCFAccount_tblCFPriceProfileHeader] FOREIGN KEY ([intRemotePriceProfileId]) REFERENCES [dbo].[tblCFPriceProfileHeader] ([intPriceProfileHeaderId]),
     CONSTRAINT [FK_tblCFAccount_tblCFPriceRuleGroup] FOREIGN KEY ([intPriceRuleGroup]) REFERENCES [dbo].[tblCFPriceRuleGroup] ([intPriceRuleGroupId]),
-    CONSTRAINT [FK_tblCFAccount_tblSMTerm] FOREIGN KEY ([intTermsCode]) REFERENCES [dbo].[tblSMTerm] ([intTermID]), 
-    CONSTRAINT [FK_tblCFAccount_tblCFPriceProfileHeader] FOREIGN KEY (intRemotePriceProfileId) REFERENCES [dbo].tblCFPriceProfileHeader ([intPriceProfileHeaderId]),
-    CONSTRAINT [FK_tblCFAccount_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId])
+    CONSTRAINT [FK_tblCFAccount_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId]),
+    CONSTRAINT [FK_tblCFAccount_tblSMTerm] FOREIGN KEY ([intTermsCode]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
 );
 
 
@@ -64,4 +64,31 @@
 
 
 
+
+
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFAccount_intTermsCode]
+    ON [dbo].[tblCFAccount]([intTermsCode] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFAccount_intInvoiceCycle]
+    ON [dbo].[tblCFAccount]([intInvoiceCycle] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFAccount_intDiscountScheduleId]
+    ON [dbo].[tblCFAccount]([intDiscountScheduleId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFAccount_intCustomerId]
+    ON [dbo].[tblCFAccount]([intCustomerId] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [tblCFAccount_intAccountId]
+    ON [dbo].[tblCFAccount]([intAccountId] ASC);
 
