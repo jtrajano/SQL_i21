@@ -72,7 +72,7 @@
 	CONSTRAINT [FK_tblCRMOpportunity_tblCRMSource_intSourceId] FOREIGN KEY (intSourceId) REFERENCES [dbo].[tblCRMSource] ([intSourceId]),
     CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intReferredByEntityId] FOREIGN KEY ([intReferredByEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
     CONSTRAINT [FK_tblCRMOpportunity_tblCRMMilestone_intMilestoneId] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblCRMMilestone] ([intMilestoneId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
+    --CONSTRAINT [FK_tblCRMOpportunity_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
     CONSTRAINT [FK_tblCRMOpportunity_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
     CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intLostToCompetitorId] FOREIGN KEY ([intLostToCompetitorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
