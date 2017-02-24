@@ -18,6 +18,7 @@
 	[strGridLayoutUrl]			NVARCHAR(MAX) Collate Latin1_General_CI_AS	NULL,
 	[strScreenName]				NVARCHAR(250) Collate Latin1_General_CI_AS	NULL,
 	[strDefaultFilters]			NVARCHAR(MAX) Collate Latin1_General_CI_AS  NULL,
+	[strSearchSettingsId]		NVARCHAR(250) Collate Latin1_General_CI_AS  NULL,
 	[intConcurrencyId]			int											NOT NULL, 
 
 	CONSTRAINT [PK_tblSMHomePanelDashboard] PRIMARY KEY CLUSTERED ([intHomePanelDashboardId] ASC),
