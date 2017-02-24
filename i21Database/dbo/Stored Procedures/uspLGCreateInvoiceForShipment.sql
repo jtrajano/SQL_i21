@@ -164,8 +164,7 @@ DECLARE
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	INNER JOIN [tblARCustomer] ARC ON LD.intCustomerEntityId = ARC.[intEntityCustomerId]
-	--LEFT JOIN tblSOSalesOrder SO ON L.strLoadNumber = SO.strSalesOrderNumber
-
+	WHERE L.intLoadId = @intLoadId
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable		
 
