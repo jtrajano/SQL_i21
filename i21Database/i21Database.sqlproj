@@ -5055,6 +5055,7 @@
     <Build Include="dbo\Tables\tblIPItemSubLocationArchive.sql" />
     <Build Include="dbo\Tables\tblCRMLostRevenueConfig.sql" />
     <Build Include="dbo\Functions\fnEscapeXML.sql" />
+    <Build Include="dbo\Views\vyuCRMAllLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
