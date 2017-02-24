@@ -18,6 +18,7 @@ DECLARE @strStatusCode NVARCHAR(MAX)
 DECLARE @strStatusDesc NVARCHAR(MAX)
 DECLARE @strStatusType NVARCHAR(MAX)
 DECLARE @strParam NVARCHAR(MAX)
+DECLARE @strParam1 NVARCHAR(MAX)
 DECLARE @strRefNo NVARCHAR(50)
 DECLARE @strTrackingNo NVARCHAR(50)
 DECLARE @strPOItemNo NVARCHAR(50)
@@ -44,6 +45,7 @@ Declare @tblAcknowledgement AS TABLE
 	strStatusDesc NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strStatusType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strParam NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strParam1 NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strTrackingNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strPOItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
@@ -66,7 +68,7 @@ Declare @tblMessage AS Table
 	)
 
 	Insert Into @tblAcknowledgement(strMesssageType,strStatus,strStatusCode,strStatusDesc,strStatusType,
-	strParam,strRefNo,strTrackingNo,strPOItemNo,strLineItemBatchNo,strDeliveryItemNo,strDeliveryType)
+	strParam,strParam1,strRefNo,strTrackingNo,strPOItemNo,strLineItemBatchNo,strDeliveryItemNo,strDeliveryType)
 	SELECT 
 	 MESTYP_LNG
 	,[STATUS]
@@ -74,6 +76,7 @@ Declare @tblMessage AS Table
 	,STATXT
 	,STATYP
 	,STAPA2_LNG
+	,STAPA1_LNG
 	,REF_1
 	,TRACKINGNO
 	,PO_ITEM
@@ -87,6 +90,7 @@ Declare @tblMessage AS Table
 			,STATXT NVARCHAR(50)		'../../STATXT'
 			,STATYP NVARCHAR(50)		'../../STATYP'
 			,STAPA2_LNG NVARCHAR(50)	'../../STAPA2_LNG'
+			,STAPA1_LNG NVARCHAR(50)	'../../STAPA1_LNG'
 			,REF_1 NVARCHAR(50)			
 			,TRACKINGNO NVARCHAR(50)	
 			,PO_ITEM NVARCHAR(50)		
@@ -96,7 +100,7 @@ Declare @tblMessage AS Table
 			)
 
 --delete records if tracking no is not a number
-Delete From @tblAcknowledgement Where ISNUMERIC(strTrackingNo)=0
+Delete From @tblAcknowledgement Where ISNUMERIC(strTrackingNo)=0 AND strMesssageType IN ('PORDCR1','PORDCH','DESADV')
 
 Select @intMinRowNo=MIN(intRowNo) From @tblAcknowledgement
 
@@ -111,6 +115,7 @@ Begin
 		@strStatusDesc = ISNULL(strStatusDesc,''),
 		@strStatusType = ISNULL(strStatusType,''),
 		@strParam = strParam,
+		@strParam1 = strParam1,
 		@strRefNo = strRefNo,
 		@strTrackingNo = strTrackingNo,
 		@strPOItemNo = strPOItemNo,
@@ -205,8 +210,8 @@ Begin
 
 				Update tblLGLoadDetailStg Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo AND intLoadId=@intLoadId
 
-				--update the delivery Details in modified loads
-				Update tblLGLoadStg Set strExternalShipmentNumber=@strParam Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')=''
+				--update the delivery Details in modified loads both instruction and advice
+				Update tblLGLoadStg Set strExternalShipmentNumber=@strParam Where strShippingInstructionNumber=@strRefNo AND ISNULL(strFeedStatus,'')=''
 
 				Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 				Values(@strMesssageType,'Success',@strRefNo,@strParam)
@@ -247,7 +252,7 @@ Begin
 			Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')
 
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
-			Values(@strMesssageType,'Success',@strRefNo,@strParam)
+			Values(@strMesssageType,'Success',@strRefNo,@strParam1)
 		End
 
 		If @strStatus NOT IN (52,53) --Error
@@ -263,7 +268,7 @@ Begin
 	End
 
 	--Receipt
-	If @strMesssageType='WHSCON'
+	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')='P'
 	Begin
 		Select @intReceiptId=r.intInventoryReceiptId
 		From tblICInventoryReceipt r 
