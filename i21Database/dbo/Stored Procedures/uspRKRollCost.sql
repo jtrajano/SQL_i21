@@ -3,11 +3,10 @@
 	@dtmToDate datetime = null
 AS
 
-
 SELECT  Convert(int,ROW_NUMBER() OVER(ORDER BY strFutureMonth ASC)) intRowNumber, strFutMarketName,strCommodityCode,strFutureMonth,intFutureMarketId,intCommodityId,intFutureMonthId,
-	SUM(dblContratPrice)/SUM(intOpenContract) dblWtAvgOpenLongPosition 
+	SUM(isnull(dblContratPrice,0))/isnull(SUM(intOpenContract),1) dblWtAvgOpenLongPosition
 	,SUM(isnull(dblContratPrice,0)+isnull(dblMatchedPrice,0)+isnull(dblRollQtyPrice,0))/
-				SUM(isnull(intOpenContract,0)+isnull(dblMatchedQty,0)+isnull(dblRollQty,0)) dblAvgPriceOld
+				SUM(isnull(intOpenContract,0)+isnull(dblMatchedQty,0)+isnull(dblRollQty,0)) dblAvgPriceOld 
 
 	,sum(isnull(dblLongPrice,0))/sum(isnull(dblLongQty,1)) as dblLongQty
 	,sum(isnull(dblShortPrice,0))/sum(isnull(dblShortQty,1)) as dblShortQty
@@ -124,5 +123,5 @@ JOIN tblRKFuturesMonth fm on ft.intFutureMarketId=fm.intFutureMarketId and ft.in
 WHERE intSelectedInstrumentTypeId=1  AND intInstrumentTypeId=1
 and convert(datetime,CONVERT(VARCHAR(10),ft.dtmFilledDate,110)) BETWEEN @dtmFromDate and @dtmToDate
 )t 
-WHERE (isnull(intOpenContract,0) >0 OR isnull(dblMatchedQty,0) >0 OR isnull(dblRollQty,0) >0) and strFutureMonth in('Sep 18','Dec 18')
+WHERE (isnull(intOpenContract,0) >0 OR isnull(dblMatchedQty,0) >0 OR isnull(dblRollQty,0) >0) 
  GROUP BY  strFutMarketName,strCommodityCode,strFutureMonth,intFutureMarketId,intCommodityId,intFutureMonthId
