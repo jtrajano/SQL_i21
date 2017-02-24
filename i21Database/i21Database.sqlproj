@@ -5057,6 +5057,7 @@
     <Build Include="dbo\Tables\tblIPItemSubLocationArchive.sql" />
     <Build Include="dbo\Views\vyuCRMAllLocation.sql" />
     <Build Include="dbo\Views\vyuCMACHFromCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetSubLocations.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
