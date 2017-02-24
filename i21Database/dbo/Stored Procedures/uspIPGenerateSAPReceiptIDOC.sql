@@ -210,8 +210,8 @@ Begin
 			--Batch Split for Coffee
 			If UPPER(@strCommodityCode)='COFFEE' AND ISNULL(@ysnBatchSplit,0)=1
 			Begin
-				Set @strContainerXml=NULL
-				Select @strContainerXml=COALESCE(@strContainerXml, '') 
+				Set @strContainerXml=''
+				Select @strContainerXml=@strContainerXml
 						+ '<E1EDL24 SEGMENT="1">'
 						+ '<POSNR>'	 +	ISNULL(cl.strExternalContainerId,'')  + '</POSNR>' 
 						+ '<MATNR>'  +  ISNULL(ri.strItemNo,'') + '</MATNR>' 
@@ -231,7 +231,6 @@ Begin
 				Join tblLGLoadDetailContainerLink cl on ri.intSourceId=cl.intLoadDetailId AND ri.intContainerId=cl.intLoadContainerId
 				Join tblLGLoadDetail ld on ri.intSourceId=ld.intLoadDetailId AND ri.intItemId=ld.intItemId
 				Where ri.intInventoryReceiptId=@intMinHeader AND ri.intSourceId=@intLoadDetailId
-				Order By cl.intLoadDetailContainerLinkId
 
 				Set @strItemXml += ISNULL(@strContainerXml,'')
 			End

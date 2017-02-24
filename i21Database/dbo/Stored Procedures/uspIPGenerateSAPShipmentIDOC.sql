@@ -301,8 +301,8 @@ Begin
 					Update tblLGLoadContainerStg Set strExternalContainerId=@intExternalContainerNo,@intExternalContainerNo=@intExternalContainerNo+1
 					Where intLoadStgId=@intLoadStgId AND ISNULL(strExternalContainerId,'')=''
 
-					Set @strContainerXml=NULL
-					Select @strContainerXml=COALESCE(@strContainerXml, '') 
+					Set @strContainerXml=''
+					Select @strContainerXml=@strContainerXml
 							+ '<E1EDL24 SEGMENT="1">'
 							+ '<POSNR>' + ISNULL(CONVERT(VARCHAR,lc.strExternalContainerId),'') + '</POSNR>' 
 							+ '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
@@ -335,7 +335,7 @@ Begin
 							+ '</E1EDL24>'
 					From tblLGLoadContainerStg lc
 					Left Join tblLGLoadContainer c on lc.intLoadContainerId=c.intLoadContainerId
-					Where lc.intLoadStgId=@intLoadStgId ORDER BY lc.strExternalContainerId
+					Where lc.intLoadStgId=@intLoadStgId
 
 					--Update the POSNR in container link table
 					Update lc Set lc.strExternalContainerId=cs.strExternalContainerId
@@ -374,8 +374,8 @@ Begin
 					Set @strContainerXml += '<VHART>'  +  '0002' + '</VHART>' 
 					Set @strContainerXml += '<VHILM_KU>'  +  ISNULL(@strContainerSizeCode,'') + '</VHILM_KU>' 
 
-					Set @strContainerItemXml=NULL
-					Select @strContainerItemXml=COALESCE(@strContainerItemXml, '') 
+					Set @strContainerItemXml=''
+					Select @strContainerItemXml=@strContainerItemXml
 					+ '<E1EDL44 SEGMENT="1">'
 					--+ '<VBELN>'  +  ISNULL(@strExternalDeliveryNumber,'') + '</VBELN>' 
 					+ '<POSNR>'  +  CASE WHEN ISNULL(ld.strExternalShipmentItemNumber,'')='' THEN ISNULL(CONVERT(VARCHAR,(10 * @intNoOfContainer * ROW_NUMBER() OVER(ORDER BY cl.intLoadDetailContainerLinkId ASC))),'')
