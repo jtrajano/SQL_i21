@@ -40,25 +40,25 @@ BEGIN TRY
 		IF @strInOutFlag = 'I'
 			BEGIN
 				CREATE TABLE #tmpItemReceiptIds (
-					[intInventoryReceiptItemId] [INT] PRIMARY KEY,
-					[intInventoryReceiptId] [INT],
+					[intInventoryReceiptId] [INT] PRIMARY KEY,
 					[strReceiptNumber] [VARCHAR](100),
-					UNIQUE ([intInventoryReceiptItemId])
+					UNIQUE ([intInventoryReceiptId])
 				);
-				INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intInventoryReceiptId,strReceiptNumber) SELECT intInventoryReceiptItemId,intInventoryReceiptId,strReceiptNumber FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
+				INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber) SELECT DISTINCT(intInventoryReceiptId),strReceiptNumber FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
 				
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
-				SELECT intInventoryReceiptId, intInventoryReceiptItemId, strReceiptNumber
+				SELECT intInventoryReceiptId,  strReceiptNumber
 				FROM #tmpItemReceiptIds
 
 				OPEN intListCursor;
 
 				-- Initial fetch attempt
-				FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @intInventoryReceiptItemId , @strTransactionId;
+				FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @strTransactionId;
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
+					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
 					SELECT @intBillId = intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
 					SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
 					IF @ysnPosted =1
@@ -76,7 +76,7 @@ BEGIN TRY
 					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intEntityId
 					EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 
-					FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @intInventoryReceiptItemId , @strTransactionId;
+					FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId;
 				END
 				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 			END
@@ -128,9 +128,9 @@ BEGIN TRY
 						END
 					EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 					EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
+					EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
 					EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
 					EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
-
 
 					FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @intInventoryShipmentItemId , @strTransactionId;
 				END
