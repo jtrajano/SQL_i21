@@ -687,7 +687,38 @@ BEGIN TRY
 		DELETE
 		FROM @GLEntries
 
-		INSERT INTO @GLEntries
+		INSERT INTO @GLEntries([dtmDate]
+	,[strBatchId]
+	,[intAccountId]
+	,[dblDebit]
+	,[dblCredit]
+	,[dblDebitUnit]
+	,[dblCreditUnit]
+	,[strDescription]
+	,[strCode]
+	,[strReference]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+	,[dtmDateEntered]
+	,[dtmTransactionDate]
+	,[strJournalLineDescription]
+	,[intJournalLineNo]
+	,[ysnIsUnposted]
+	,[intUserId]
+	,[intEntityId]
+	,[strTransactionId]
+	,[intTransactionId]
+	,[strTransactionType]
+	,[strTransactionForm]
+	,[strModuleName]
+	,[intConcurrencyId]
+	,[dblDebitForeign]
+	,[dblDebitReport]
+	,[dblCreditForeign]
+	,[dblCreditReport]
+	,[dblReportingRate]
+	,[dblForeignRate]
+)
 		EXEC uspICPostCostAdjustment @adjustedEntries
 			,@strBatchId
 			,@userId
