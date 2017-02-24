@@ -137,9 +137,10 @@ Begin
 		@dblTotalNet				=	dblTotalNet,
 		@strLocation				=	strCompanyLocation,
 		@dtmETSPOL					=	dtmETSPOL,
-		@strWarehouseVendorAccNo	=	strWarehouseVendorAccNo,
-		@strMVessel					=	strMVessel,
-		@strMVoyageNumber			=	strMVoyageNumber
+		@strWarehouseVendorAccNo	=	strWarehouseVendorAccNo
+		--,
+		--@strMVessel					=	strMVessel,
+		--@strMVoyageNumber			=	strMVoyageNumber
 	From tblLGLoadLSPStg Where intLoadStgId=@intMinHeader
 
 	Select TOP 1 @strPackingDesc=ct.strPackingDescription From tblCTContractDetail ct Join tblLGLoadDetail ld on ct.intContractDetailId=ld.intPContractDetailId 
