@@ -67,7 +67,7 @@ SELECT
 				[intFreightTermId],
 				[intShipViaId],
 				[intPricingTypeId],
-				[intRateTypeId],
+				[intRateTypeId] = NULL, -- temp until CT has committed their changes on tblCTContractDetail,
 				[intCurrencyExchangeRateId],
 				[dblRate]
 		 FROM 
