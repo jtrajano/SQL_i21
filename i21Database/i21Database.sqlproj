@@ -5068,6 +5068,7 @@
     <Build Include="dbo\Stored Procedures\uspFACreateAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFADepreciateAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFADisposeAsset.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAsset.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
