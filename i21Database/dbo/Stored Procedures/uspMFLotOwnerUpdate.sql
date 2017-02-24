@@ -96,7 +96,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		IF @intNewItemOwnerId <> @intOldItemOwnerId
+		IF @intNewItemOwnerId <> ISNULL(@intOldItemOwnerId, 0)
 		BEGIN
 			UPDATE tblMFLotInventory
 			SET intItemOwnerId = @intNewItemOwnerId
