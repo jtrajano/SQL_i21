@@ -355,7 +355,7 @@ BEGIN
 				,[intEntityCustomerId]					= CS.intCustomerPatronId
 				,[intCompanyLocationId]					= @intCompanyLocationId
 				,[intCurrencyId]						= ARC.intCurrencyId
-				,[intTermId]							= EML.intTermsId
+				,[intTermId]							= ARC.intTermsId
 				,[dtmDate]								= CS.dtmIssueDate
 				,[dtmDueDate]							= NULL
 				,[dtmShipDate]							= CS.dtmIssueDate
@@ -398,7 +398,7 @@ BEGIN
 				,[dtmMaintenanceDate]					= NULL
 				,[dblMaintenanceAmount]					= NULL
 				,[dblLicenseAmount]						= NULL
-				,[intTaxGroupId]						= EML.intTaxGroupId
+				,[intTaxGroupId]						= NULL
 				,[ysnRecomputeTax]						= 1
 				,[intSCInvoiceId]						= NULL
 				,[strSCInvoiceNumber]					= ''
@@ -427,8 +427,6 @@ BEGIN
 			FROM tblPATCustomerStock CS
 			INNER JOIN tblARCustomer ARC
 				ON ARC.intEntityCustomerId = CS.intCustomerPatronId
-			INNER JOIN tblEMEntityLocation EML
-				ON EML.intEntityId = CS.intCustomerPatronId
 			CROSS JOIN (SELECT intSalesAccount FROM tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId) SADef
 			WHERE CS.intCustomerStockId = @intCustomerStockId
 
