@@ -16,8 +16,8 @@ SELECT
 								FROM tblARInvoice I	WHERE I.ysnPosted = 1 AND YEAR(I.dtmPostDate) =  DATEPART(year, GETDATE()) AND I.intEntityCustomerId = CAR.intEntityCustomerId)
 , dblLastYearSales			= (SELECT ISNULL(SUM(CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END), 0.000000)
 								FROM tblARInvoice I WHERE I.ysnPosted = 1 AND YEAR(I.dtmPostDate) =  DATEPART(year, GETDATE()) - 1 AND I.intEntityCustomerId = CAR.intEntityCustomerId)
-, dblLastPayment			= ISNULL((SELECT TOP 1 ISNULL(dblAmountPaid, 0) FROM tblARPayment WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 1 ORDER BY intPaymentId DESC), 0)
-, dtmLastPaymentDate		= (SELECT TOP 1 dtmDatePaid FROM tblARPayment WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 1 ORDER BY intPaymentId DESC)
+, dblLastPayment			= ISNULL(PAYMENT.dblAmountPaid, 0)
+, dtmLastPaymentDate		= PAYMENT.dtmDatePaid
 , dblLastStatement			= (SELECT TOP 1 [dblLastStatement] FROM [tblARStatementOfAccount] WHERE strEntityNo = CAR.strEntityNo)
 , dtmLastStatementDate		= (SELECT TOP 1 [dtmLastStatementDate] FROM [tblARStatementOfAccount] WHERE strEntityNo = CAR.strEntityNo)
 , dtmNextPaymentDate		= CB.dtmBudgetDate
@@ -43,3 +43,11 @@ FROM vyuARCustomerAgingReport CAR
 LEFT JOIN tblARCustomerBudget CB 
 	ON CAR.intEntityCustomerId = CB.intEntityCustomerId 
 	AND DATEADD(MONTH, 1, GETDATE()) BETWEEN CB.dtmBudgetDate AND DATEADD(MONTH, 1, CB.dtmBudgetDate)
+OUTER APPLY
+        (SELECT TOP 1 P.intEntityCustomerId
+                    , P.dblAmountPaid
+					, P.dtmDatePaid 
+        FROM tblARPayment P 
+			INNER JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID
+		WHERE P.intEntityCustomerId = CAR.intEntityCustomerId AND P.ysnPosted = 1 AND PM.strPaymentMethod != 'CF Invoice'
+		ORDER BY P.intPaymentId DESC) PAYMENT
