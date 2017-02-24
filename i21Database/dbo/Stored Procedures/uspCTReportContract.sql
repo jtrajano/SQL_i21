@@ -139,6 +139,7 @@ BEGIN TRY
 			CH.strContractNumber,
 			CH.strCustomerContract,
 			CB.strContractBasis,
+			CB.strContractBasis+' '+CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END AS strContractBasisDesc,
 			SQ.strLocationName,			
 			CY.strCropYear,
 			SQ.srtLoadingPoint + ' :' srtLoadingPoint,
@@ -180,6 +181,11 @@ BEGIN TRY
 			PR.strName AS strProducer,
 			PO.strPosition,
 			CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' strCaller,
+			CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL 
+			ELSE 
+				CASE WHEN CH.intPricingTypeId=2 THEN SQ.strFixationBy +'''s Call ('+SQ.strFutMarketName+')'
+				ELSE NULL END
+			END strCallerDesc,
 			@strContractConditions AS strContractConditions,
 			CASE WHEN ISNULL(CB.strContractBasis,'') <>'' THEN 'Condition :' ELSE NULL END AS lblCondition,
 			CASE WHEN ISNULL(PR.strName,'') <>'' THEN 'Producer :' ELSE NULL END AS lblProducer,
@@ -189,7 +195,7 @@ BEGIN TRY
 			CASE WHEN ISNULL(CY.strCropYear,'') <>'' THEN 'Crop Year :' ELSE NULL END AS lblCropYear,
 			CASE WHEN ISNULL(SQ.strShipper,'') <>'' THEN 'Shipper :' ELSE NULL END AS lblShipper,
 			CASE WHEN ISNULL(SQ.strDestinationPointName,'') <>'' THEN SQ.srtDestinationPoint + ' :'  ELSE NULL END AS lblDestinationPoint,			
-			CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' THEN 'Pricing :' ELSE NULL END AS lblPricing,
+			CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2 THEN 'Pricing :' ELSE NULL END AS lblPricing,
 			CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>'' THEN 'Weighing:' ELSE NULL END AS lblWeighing,
 			CASE WHEN ISNULL(TM.strTerm,'') <>'' THEN 'Payment Term:' ELSE NULL END AS lblTerm,
 			CASE WHEN ISNULL(IB.strInsuranceBy,'') <>'' THEN 'Insurance:' ELSE NULL END AS lblInsurance,
@@ -224,7 +230,8 @@ BEGIN TRY
 	JOIN	tblCTPosition		PO	ON	PO.intPositionId		=	CH.intPositionId		LEFT
 	JOIN	tblSMCountry		CO	ON	CO.intCountryID			=	CH.intCountryId			LEFT
 	JOIN	tblAPVendor			VR	ON	VR.intEntityVendorId	=	CH.intEntityId			LEFT
-	JOIN	tblARCustomer		CR	ON	CR.intEntityCustomerId	=	CH.intEntityId			LEFT
+	JOIN	tblARCustomer		CR	ON	CR.intEntityCustomerId	=	CH.intEntityId			LEFT	
+	JOIN	tblSMCity			CT	ON	CT.intCityId			=	CH.intINCOLocationTypeId
 	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intINCOLocationTypeId LEFT
 	JOIN	(
 				SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum, 
