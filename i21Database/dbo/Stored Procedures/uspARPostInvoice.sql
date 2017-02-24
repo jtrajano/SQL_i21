@@ -4320,6 +4320,11 @@ IF @recap = 0
 					INNER JOIN
 						dbo.tblHDTicketHoursWorked HDTHW
 							ON PID.intInvoiceId = HDTHW.intInvoiceId
+														
+					DELETE PD
+					FROM tblARPaymentDetail PD
+						INNER JOIN tblARPayment P ON P.intPaymentId = PD.intPaymentId AND P.ysnPosted = 0
+					WHERE PD.intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @PostInvoiceData)
 						
 					BEGIN TRY
 						DECLARE @TankDeliveryForUnSync TABLE (
