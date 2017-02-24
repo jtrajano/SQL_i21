@@ -185,14 +185,14 @@ BEGIN TRY
 	FROM	dbo.tblGRStorageType ST	        
 	WHERE	ST.strStorageTypeCode = @strDistributionOption
 
-	IF @intGRStorageId is NULL
+	IF ISNULL(@intGRStorageId,0) <= 0
 	BEGIN
 	   	SELECT	@intGRStorageId = ST.intDefaultStorageTypeId
 		FROM	dbo.tblSCScaleSetup ST	        
 		WHERE	ST.intScaleSetupId = @intScaleStationId
 	END
 	
-	IF @intGRStorageId IS NULL 
+	IF ISNULL(@intGRStorageId,0) = 0
 	BEGIN 
 		-- Raise the error:
 		--RAISERROR('Invalid Default Storage Setup - uspSCStorageUpdate', 16, 1);
