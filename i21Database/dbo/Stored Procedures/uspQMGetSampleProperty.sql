@@ -83,6 +83,7 @@ BEGIN
 			,@dtmExpiryDate DATETIME
 			,@strRawMaterial NVARCHAR(100)
 			,@strPackingMaterial NVARCHAR(100)
+			,@strPackingMaterial1 NVARCHAR(100)
 			,@strCountryOfOrigin NVARCHAR(50)
 			,@strPalletId1 NVARCHAR(50)
 			,@strPalletId2 NVARCHAR(50)
@@ -91,6 +92,10 @@ BEGIN
 			,@intOriginId INT
 			,@intStatusId INT
 			,@intRecipeId INT
+			,@strLotNumber nvarchar(50)
+			,@strPackagingLotCode1 nvarchar(50)
+			,@strPackagingLotCode2 nvarchar(50)
+			,@strTargetWeight nvarchar(50)
 
 		SELECT @dtmPlannedDate = dtmPlannedDate
 			,@intPlannedShiftId = intPlannedShiftId
@@ -120,6 +125,7 @@ BEGIN
 
 		SELECT @strLifeTimeType = strLifeTimeType
 			,@intLifeTime = intLifeTime
+			,@strTargetWeight=strWeightControlCode
 		FROM dbo.tblICItem
 		WHERE intItemId = @intItemId
 
@@ -148,7 +154,7 @@ BEGIN
 
 		SELECT @strRawMaterial = ''
 
-		IF @intStatusId = 9
+		IF @intStatusId <>10
 		BEGIN
 			SELECT @intRecipeId = intRecipeId
 			FROM tblMFRecipe
@@ -176,11 +182,21 @@ BEGIN
 
 			SELECT @strPackingMaterial = ''
 
-			SELECT @strPackingMaterial = @strPackingMaterial + I.strItemNo + ','
+			SELECT @strPackingMaterial =  I.strItemNo 
 			FROM tblMFRecipeItem RI
 			JOIN tblICItem I ON I.intItemId = RI.intItemId
 			WHERE RI.intRecipeId = @intRecipeId
 				AND I.intCategoryId = @intPMCategoryId
+				AND I.strDescription Like 'Pch-%'
+
+			SELECT @strPackingMaterial1 = ''
+
+			SELECT @strPackingMaterial1 =  I.strItemNo 
+			FROM tblMFRecipeItem RI
+			JOIN tblICItem I ON I.intItemId = RI.intItemId
+			WHERE RI.intRecipeId = @intRecipeId
+				AND I.intCategoryId = @intPMCategoryId
+				AND I.strDescription Like 'Cs-%'
 		END
 		ELSE
 		BEGIN
@@ -204,17 +220,24 @@ BEGIN
 
 			SELECT @strPackingMaterial = ''
 
-			SELECT @strPackingMaterial = @strPackingMaterial + I.strItemNo + ','
+			SELECT @strPackingMaterial = I.strItemNo
 			FROM tblMFWorkOrderRecipeItem RI
 			JOIN tblICItem I ON I.intItemId = RI.intItemId
 			WHERE intWorkOrderId = @intProductValueId
 				AND I.intCategoryId = @intPMCategoryId
+				AND I.strDescription Like 'Pch-%'
+
+			SELECT @strPackingMaterial1 = ''
+
+			SELECT @strPackingMaterial1 = I.strItemNo
+			FROM tblMFWorkOrderRecipeItem RI
+			JOIN tblICItem I ON I.intItemId = RI.intItemId
+			WHERE intWorkOrderId = @intProductValueId
+				AND I.intCategoryId = @intPMCategoryId
+				AND I.strDescription Like 'Cs-%'
 		END
 
-		IF @strPackingMaterial <> ''
-		BEGIN
-			SELECT @strPackingMaterial = Left(@strPackingMaterial, Len(@strPackingMaterial) - 1)
-		END
+		
 
 		SELECT @strCountryOfOrigin = ''
 
@@ -222,11 +245,12 @@ BEGIN
 			,@strPalletId2 = ''
 			,@strPalletId3 = ''
 
-		SELECT TOP 1 @strPalletId1 = L.strLotNumber
+		SELECT TOP 1 @strPalletId1 = PL.strParentLotNumber,@strLotNumber=strLotNumber 
 			,@intTaskId = T.intTaskId
 		FROM tblMFStageWorkOrder SW
 		JOIN dbo.tblMFTask T ON T.intOrderHeaderId = SW.intOrderHeaderId
 		JOIN dbo.tblICLot L ON L.intLotId = T.intLotId
+		JOIN dbo.tblICParentLot PL on PL.intParentLotId =L.intParentLotId 
 		JOIN tblICItem I ON I.intItemId = T.intItemId
 		WHERE intWorkOrderId = @intProductValueId
 			AND I.intCategoryId <> @intPMCategoryId
@@ -235,11 +259,12 @@ BEGIN
 		IF @strPalletId1 IS NULL
 			SELECT @strPalletId1 = ''
 
-		SELECT TOP 1 @strPalletId2 = L.strLotNumber
+		SELECT TOP 1 @strPalletId2 = PL.strParentLotNumber
 			,@intTaskId = T.intTaskId
 		FROM tblMFStageWorkOrder SW
 		JOIN dbo.tblMFTask T ON T.intOrderHeaderId = SW.intOrderHeaderId
 		JOIN dbo.tblICLot L ON L.intLotId = T.intLotId
+		JOIN dbo.tblICParentLot PL on PL.intParentLotId =L.intParentLotId 
 		JOIN tblICItem I ON I.intItemId = T.intItemId
 		WHERE intWorkOrderId = @intProductValueId
 			AND I.intCategoryId <> @intPMCategoryId
@@ -249,11 +274,12 @@ BEGIN
 		IF @strPalletId2 IS NULL
 			SELECT @strPalletId2 = ''
 
-		SELECT TOP 1 @strPalletId3 = L.strLotNumber
+		SELECT TOP 1 @strPalletId3 = PL.strParentLotNumber
 			,@intTaskId = T.intTaskId
 		FROM tblMFStageWorkOrder SW
 		JOIN dbo.tblMFTask T ON T.intOrderHeaderId = SW.intOrderHeaderId
 		JOIN dbo.tblICLot L ON L.intLotId = T.intLotId
+		JOIN dbo.tblICParentLot PL on PL.intParentLotId =L.intParentLotId 
 		JOIN tblICItem I ON I.intItemId = T.intItemId
 		WHERE intWorkOrderId = @intProductValueId
 			AND I.intCategoryId <> @intPMCategoryId
@@ -263,9 +289,40 @@ BEGIN
 		IF @strPalletId3 IS NULL
 			SELECT @strPalletId3 = ''
 
+			SELECT @strPackagingLotCode1 = ''
+			,@strPackagingLotCode2 = ''
+
+		SELECT TOP 1 @strPackagingLotCode1 = PL.strParentLotNumber 
+			,@intTaskId = T.intTaskId
+		FROM tblMFStageWorkOrder SW
+		JOIN dbo.tblMFTask T ON T.intOrderHeaderId = SW.intOrderHeaderId
+		JOIN dbo.tblICLot L ON L.intLotId = T.intLotId
+		JOIN dbo.tblICParentLot PL on PL.intParentLotId =L.intParentLotId 
+		JOIN tblICItem I ON I.intItemId = T.intItemId
+		WHERE intWorkOrderId = @intProductValueId
+		AND I.strDescription Like 'Pch-%'
+		ORDER BY T.intTaskId
+
+		IF @strPackagingLotCode1 IS NULL
+			SELECT @strPackagingLotCode1 = ''
+
+		SELECT TOP 1 @strPackagingLotCode2 = PL.strParentLotNumber
+		FROM tblMFStageWorkOrder SW
+		JOIN dbo.tblMFTask T ON T.intOrderHeaderId = SW.intOrderHeaderId
+		JOIN dbo.tblICLot L ON L.intLotId = T.intLotId
+		JOIN dbo.tblICParentLot PL on PL.intParentLotId =L.intParentLotId 
+		JOIN tblICItem I ON I.intItemId = T.intItemId
+		WHERE intWorkOrderId = @intProductValueId
+			AND I.strDescription Like 'Pch-%'
+			AND T.intTaskId > @intTaskId
+		ORDER BY T.intTaskId
+
+		IF @strPackagingLotCode2 IS NULL
+			SELECT @strPackagingLotCode2 = ''
+
 		SELECT @intOriginId = intOriginId
 		FROM tblICInventoryReceiptItemLot
-		WHERE strLotNumber = @strPalletId1
+		WHERE strLotNumber = @strLotNumber
 
 		SELECT @strCountryOfOrigin = strCountry
 		FROM tblSMCountry
@@ -281,7 +338,7 @@ BEGIN
 			,PRT.intPropertyId
 			,PRT.strPropertyName
 			,PRT.strDescription
-			,Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(PRT.strDefaultValue, '{LotCode}', @strLotCode), '{Product}', @strItemNo), '{Product Expiration Date}', @dtmExpiryDate), '{Raw Material}', @strRawMaterial), '{Packing Material}', @strPackingMaterial), '{Country of Origin}', @strCountryOfOrigin), '{Raw Material Pallet 1}', @strPalletId1), '{Raw Material Pallet 2}', @strPalletId2), '{Raw Material Pallet 3}', @strPalletId3) AS strPropertyValue
+			,'' AS strPropertyValue
 			,GETDATE() AS dtmCreateDate
 			,'' AS strResult
 			,cast(0 AS BIT) AS ysnFinal
@@ -289,7 +346,7 @@ BEGIN
 			,PP.intSequenceNo
 			,PPV.dtmValidFrom
 			,PPV.dtmValidTo
-			,PPV.strPropertyRangeText
+			,Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace((Case When PRT.strDefaultValue='' Then PPV.strPropertyRangeText Else PRT.strDefaultValue End), '{Lot Code}', @strLotCode), '{Product}', @strItemNo), '{Product Expiration Date}', @dtmExpiryDate), '{Raw Material}', @strRawMaterial), '{Packing Material - Pouch}', @strPackingMaterial), '{Packing Material - Case}', @strPackingMaterial1), '{Country of Origin}', @strCountryOfOrigin), '{Raw Material Lot Code 1}', @strPalletId1), '{Raw Material Lot Code 2}', @strPalletId2), '{Raw Material Lot Code 3}', @strPalletId3) , '{Packing Material Lot Code 1}', @strPackagingLotCode1 ), '{Packing Material Lot Code 2}', @strPackagingLotCode2), '{Target Weight}', @strTargetWeight)AS strPropertyRangeText
 			,PPV.dblMinValue
 			,PPV.dblMaxValue
 			,PPV.dblLowValue
