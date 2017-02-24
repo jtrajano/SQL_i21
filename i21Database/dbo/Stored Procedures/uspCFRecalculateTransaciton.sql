@@ -1429,7 +1429,7 @@ BEGIN
 				AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
 
 
-				SELECT * FROM @tblCFRemoteTax
+				--SELECT * FROM @tblCFRemoteTax
 				
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
