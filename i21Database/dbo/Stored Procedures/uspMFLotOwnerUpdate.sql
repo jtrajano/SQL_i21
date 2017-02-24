@@ -141,21 +141,21 @@ BEGIN TRY
 		END
 	END
 
-	--SELECT @intSourceId = 1
-	--	,@intSourceTransactionTypeId = 8
+	SELECT @intSourceId = 1
+		,@intSourceTransactionTypeId = 8
 
-	--EXEC [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange] @intItemId = @intItemId
-	--	,@dtmDate = @dtmDate
-	--	,@intLocationId = @intLocationId
-	--	,@intSubLocationId = @intSubLocationId
-	--	,@intStorageLocationId = @intStorageLocationId
-	--	,@strLotNumber = @strLotNumber
-	--	,@intNewOwnerId = @intNewItemOwnerId
-	--	,@intSourceId = @intSourceId
-	--	,@intSourceTransactionTypeId = @intSourceTransactionTypeId
-	--	,@intEntityUserSecurityId = @intUserId
-	--	,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-	--	,@strDescription = NULL
+	EXEC [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange] @intItemId = @intItemId
+		,@dtmDate = @dtmDate
+		,@intLocationId = @intLocationId
+		,@intSubLocationId = @intSubLocationId
+		,@intStorageLocationId = @intStorageLocationId
+		,@strLotNumber = @strLotNumber
+		,@intNewOwnerId = @intOwnerId
+		,@intSourceId = @intSourceId
+		,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+		,@intEntityUserSecurityId = @intUserId
+		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+		,@strDescription = NULL
 END TRY
 
 BEGIN CATCH
