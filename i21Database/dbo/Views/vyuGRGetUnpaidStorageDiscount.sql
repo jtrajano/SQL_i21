@@ -13,23 +13,42 @@ SELECT CONVERT(INT, DENSE_RANK() OVER (
  ,CS.intItemId  
  ,Item.strItemNo  
  ,CS.intCompanyLocationId  
- ,c.strLocationName  
+ ,LOC.strLocationName  
  ,CS.strStorageTicketNumber  
  ,QM.intDiscountScheduleCodeId  
  ,DItem.intItemId AS intDiscountItemId  
- ,DItem.strItemNo AS strDiscountCode  
- ,dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CS.intUnitMeasureId, CU.intUnitMeasureId, CS.dblOpenBalance) dblOpenBalance  
+ ,DItem.strItemNo AS strDiscountCode
+ --,dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CS.intUnitMeasureId, CU.intUnitMeasureId, CS.dblOpenBalance) dblOpenBalance
+ ,CASE 
+	WHEN QM.strCalcMethod=1 THEN ((SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance))/100.0)*(100-t1.dblTotalShrink)
+	WHEN QM.strCalcMethod=2 THEN ((SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance))/100.0)*(100-t.dblGrossShrink)
+	WHEN QM.strCalcMethod=3 THEN SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance)
+  END  dblOpenBalance  
+ ,DC.strDisplayField AS strDicountOn
+ ,SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance) AS dblGrossUnits
+ ,((SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance))/100.0)*(100-t.dblGrossShrink) AS dblWetUnits
+ ,(SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance))* t1.dblTotalShrink/100.0 AS dblTotalShrink
+ ,((SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance))/100.0)*(100-t1.dblTotalShrink) AS dblNetUnits
  ,ISNULL(QM.dblDiscountDue, 0) AS dblDiscountDue  
  ,ISNULL(QM.dblDiscountPaid, 0) AS dblDiscountPaid  
  ,(ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) AS dblDiscountUnpaid  
- ,dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CS.intUnitMeasureId, CU.intUnitMeasureId, CS.dblOpenBalance) * (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) AS dblDiscountTotal  
-FROM tblGRCustomerStorage CS  
-JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = CS.intCompanyLocationId  
+ ,CASE 
+	WHEN QM.strCalcMethod=1 THEN ((SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance))/100.0)*(100-t1.dblTotalShrink)
+	WHEN QM.strCalcMethod=2 THEN ((SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance))/100.0)*(100-t.dblGrossShrink)
+	WHEN QM.strCalcMethod=3 THEN SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance)
+  END
+ * (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) AS dblDiscountTotal  
+FROM tblGRCustomerStorage CS
+JOIN tblSCTicket SC ON SC.intTicketId=CS.intTicketId    
+JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
 JOIN tblEMEntity E ON E.intEntityId = CS.intEntityId  
-JOIN tblICCommodity CM ON CM.intCommodityId = CS.intCommodityId  
+JOIN tblICCommodity COM ON COM.intCommodityId = CS.intCommodityId  
 JOIN tblICItem Item ON Item.intItemId = CS.intItemId  
 JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1  
 LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = CS.intCustomerStorageId AND QM.strSourceType = 'Storage'  
-JOIN tblGRDiscountScheduleCode a ON a.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId  
-JOIN tblICItem DItem ON DItem.intItemId = a.intItemId  
+JOIN tblGRDiscountScheduleCode Dcode ON Dcode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId  
+JOIN tblICItem DItem ON DItem.intItemId = Dcode.intItemId
+JOIN tblGRDiscountCalculationOption DC ON DC.intValueFieldId = QM.strCalcMethod
+JOIN (SELECT intTicketFileId,SUM(dblShrinkPercent) dblGrossShrink FROM tblQMTicketDiscount WHERE strSourceType = 'Storage' AND strCalcMethod=3 GROUP BY intTicketFileId)t ON t.intTicketFileId=CS.intCustomerStorageId
+JOIN (SELECT intTicketFileId,SUM(dblShrinkPercent) dblTotalShrink FROM tblQMTicketDiscount WHERE strSourceType = 'Storage' GROUP BY intTicketFileId)t1 ON t1.intTicketFileId=CS.intCustomerStorageId    
 WHERE ISNULL(CS.strStorageType, '') <> 'ITR' AND CS.dblOpenBalance >0 AND (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
