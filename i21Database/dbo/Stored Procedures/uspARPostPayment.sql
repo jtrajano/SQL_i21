@@ -33,6 +33,9 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Payment Transaction' + CAST(NEWID() 
 IF @raiseError = 0
 	--BEGIN TRAN @TransactionName
 	BEGIN TRANSACTION
+
+DECLARE @ZeroDecimal DECIMAL(18,6)
+SET @ZeroDecimal = 0.000000	
  
 DECLARE @ARReceivablePostData TABLE (
 	intPaymentId			INT PRIMARY KEY,
@@ -1349,6 +1352,8 @@ IF @post = 1
 			,[dblCredit]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[strDescription]
 			,[strCode]
 			,[strReference]
@@ -1381,7 +1386,9 @@ IF @post = 1
 			,dblDebit					= A.dblAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0				
+			,dblCreditUnit				= 0
+			,dblDebitForeign			= @ZeroDecimal
+			,dblCreditForeign			= @ZeroDecimal				
 			,strDescription				= A.strNotes 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1421,7 +1428,9 @@ IF @post = 1
 			,dblDebit					= 0
 			,dblCredit					= A.dblUnappliedAmount
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0				
+			,dblCreditUnit				= 0	
+			,dblDebitForeign			= @ZeroDecimal
+			,dblCreditForeign			= @ZeroDecimal			
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount)  
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1460,7 +1469,9 @@ IF @post = 1
 			,dblDebit					= 0
 			,dblCredit					= A.dblAmountPaid
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0				
+			,dblCreditUnit				= 0		
+			,dblDebitForeign			= @ZeroDecimal
+			,dblCreditForeign			= @ZeroDecimal						
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = SMCL.intSalesAdvAcct) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1503,7 +1514,9 @@ IF @post = 1
 			,dblDebit					= SUM(B.dblDiscount)
 			,dblCredit					= 0 
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0				
+			,dblCreditUnit				= 0		
+			,dblDebitForeign			= @ZeroDecimal
+			,dblCreditForeign			= @ZeroDecimal						
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1552,7 +1565,9 @@ IF @post = 1
 			,dblDebit					= SUM(B.dblInterest)
 			,dblCredit					= 0 
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0				
+			,dblCreditUnit				= 0	
+			,dblDebitForeign			= @ZeroDecimal
+			,dblCreditForeign			= @ZeroDecimal							
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1605,7 +1620,9 @@ IF @post = 1
 												ELSE B.dblPayment END))
 										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0				
+			,dblCreditUnit				= 0
+			,dblDebitForeign			= @ZeroDecimal
+			,dblCreditForeign			= @ZeroDecimal								
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.intAccountId) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1655,7 +1672,9 @@ IF @post = 1
 			,dblDebit					= 0
 			,dblCredit					= SUM(B.dblDiscount) 
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0				
+			,dblCreditUnit				= 0		
+			,dblDebitForeign			= @ZeroDecimal
+			,dblCreditForeign			= @ZeroDecimal						
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1704,7 +1723,9 @@ IF @post = 1
 			,dblDebit					= 0
 			,dblCredit					= SUM(B.dblInterest) 
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0				
+			,dblCreditUnit				= 0		
+			,dblDebitForeign			= @ZeroDecimal
+			,dblCreditForeign			= @ZeroDecimal						
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = ISNULL(P.intInterestAccountId, @IncomeInterestAccount)) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1768,6 +1789,8 @@ IF @post = 0
 				,dblCredit
 				,dblDebitUnit
 				,dblCreditUnit
+				,dblDebitForeign
+				,dblCreditForeign
 				,strDescription
 				,strCode
 				,strReference
@@ -1795,6 +1818,8 @@ IF @post = 0
 				,dblCredit						= GL.dblDebit
 				,dblDebitUnit					= GL.dblCreditUnit
 				,dblCreditUnit					= GL.dblDebitUnit
+				,dblDebitForeign				= GL.dblDebitForeign
+				,dblCreditForeign				= GL.dblCreditForeign
 				,GL.strDescription
 				,GL.strCode
 				,GL.strReference
@@ -1864,6 +1889,8 @@ IF @recap = 1
 			,[dblCredit]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dtmDate]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
@@ -1890,6 +1917,8 @@ IF @recap = 1
 			,Credit.Value
 			,A.[dblDebitUnit]
 			,A.[dblCreditUnit]
+			,A.[dblDebitForeign]
+			,A.[dblCreditForeign]
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
