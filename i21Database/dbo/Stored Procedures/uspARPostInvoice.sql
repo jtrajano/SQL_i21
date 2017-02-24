@@ -46,10 +46,6 @@ DECLARE @PostInvoiceData TABLE  (
 	,UNIQUE (intInvoiceId)
 );
 
-
- 
-
-
 DECLARE @InvalidInvoiceData TABLE  (
 	strError NVARCHAR(max),
 	strTransactionType NVARCHAR(50),
@@ -70,7 +66,6 @@ DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
-
 
 DECLARE @UserEntityID				INT
 		,@DiscountAccountId			INT
@@ -189,13 +184,11 @@ BEGIN TRY
 				IF (ISNULL(@invoicesToAdd, '') <> '')
 					BEGIN
 						INSERT INTO @PostInvoiceData 
-
-						
+												
 						SELECT ARI.[intInvoiceId], ARI.intCompanyLocationId, ARI.[strInvoiceNumber], ARI.strTransactionType, ARI.[intEntityId], ARI.[intPeriodsToAccrue]
 						FROM dbo.tblARInvoice ARI
 						WHERE ARI.[ysnPosted] = 0 
 							AND intInvoiceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd))
-
 
 						EXEC dbo.uspARReComputeInvoiceAmounts @intSplitInvoiceId
 
@@ -2088,6 +2081,8 @@ IF @post = 1
 				,[dblCredit]
 				,[dblDebitUnit]
 				,[dblCreditUnit]
+				,[dblDebitForeign]
+				,[dblCreditForeign]
 				,[strDescription]
 				,[strCode]
 				,[strReference]
@@ -2167,7 +2162,9 @@ IF @post = 1
 																									ARI.intInvoiceId = A.intInvoiceId
 																									AND ARID.dblTotal <> @ZeroDecimal  
 																								)
-																							END				
+																							END		
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal																					
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2229,6 +2226,8 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
 				,dblDebitUnit				= @ZeroDecimal 
 				,dblCreditUnit				= @ZeroDecimal
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2278,7 +2277,9 @@ IF @post = 1
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
 				,dblDebitUnit				= @ZeroDecimal
-				,dblCreditUnit				= @ZeroDecimal		
+				,dblCreditUnit				= @ZeroDecimal	
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal					
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2343,6 +2344,8 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
 				,dblDebitUnit				= @ZeroDecimal 
 				,dblCreditUnit				= @ZeroDecimal
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2391,6 +2394,8 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2466,6 +2471,8 @@ IF @post = 1
 											  ELSE 0  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2542,6 +2549,8 @@ IF @post = 1
 											  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2621,6 +2630,8 @@ IF @post = 1
 											  ELSE 0  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2674,6 +2685,8 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2727,6 +2740,8 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2779,6 +2794,8 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblShipping ELSE 0  END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2828,7 +2845,9 @@ IF @post = 1
 													CASE WHEN DT.dblAdjustedTax < 0 THEN ABS(DT.dblAdjustedTax) ELSE 0 END 
 											  END
 				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblCreditUnit				= 0			
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal					
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2877,7 +2896,9 @@ IF @post = 1
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0 END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblCreditUnit				= 0		
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal							
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -3107,6 +3128,8 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END				
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal					
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -3175,6 +3198,8 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END				
+				,dblDebitForeign			= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal					
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -3793,6 +3818,8 @@ IF @post = 0
 				,dblCredit
 				,dblDebitUnit
 				,dblCreditUnit
+				,dblDebitForeign
+				,dblCreditForeign				
 				,strDescription
 				,strCode
 				,strReference
@@ -3820,6 +3847,8 @@ IF @post = 0
 				,dblCredit						= GLD.dblDebit
 				,dblDebitUnit					= GLD.dblCreditUnit
 				,dblCreditUnit					= GLD.dblDebitUnit
+				,dblDebitForeign				= GLD.dblDebitForeign
+				,dblCreditForeign				= GLD.dblCreditForeign				
 				,GLD.strDescription
 				,GLD.strCode
 				,GLD.strReference
@@ -4141,6 +4170,9 @@ IF @recap = 1
 			,[dblCredit]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]			
+			,[intCurrencyId]
 			,[dtmDate]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
@@ -4167,6 +4199,9 @@ IF @recap = 1
 			,Credit.Value
 			,A.[dblDebitUnit]
 			,A.[dblCreditUnit]
+			,A.[dblDebitForeign]
+			,A.[dblCreditForeign]			
+			,A.[intCurrencyId]
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
