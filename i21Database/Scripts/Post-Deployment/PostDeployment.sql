@@ -209,6 +209,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\23_AddDefaultCollectionLetters.sql
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
 :r .\AR\DefaultData\25_UpdateTransactionAccountIds.sql
+:r .\AR\DefaultData\26_FixAmountsForCashTransaction.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql

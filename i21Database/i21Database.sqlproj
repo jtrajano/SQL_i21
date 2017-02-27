@@ -4811,6 +4811,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\NE_Nebraska.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\3_TaxTableReferences.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxCode.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\26_FixAmountsForCashTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
