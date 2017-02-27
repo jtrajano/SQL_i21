@@ -43,7 +43,7 @@ SET ANSI_WARNINGS OFF
 		FROM tblPATRefund R
 		INNER JOIN tblPATRefundCustomer RC
 			ON R.intRefundId = RC.intRefundId
-		WHERE R.intRefundId = @refundId AND RC.intBillId IS NULL
+		WHERE R.intRefundId = @refundId AND RC.intBillId IS NULL AND RC.ysnEligibleRefund = 1
 	END
 	ELSE
 	BEGIN
@@ -60,7 +60,7 @@ SET ANSI_WARNINGS OFF
 		FROM tblPATRefund R
 		INNER JOIN tblPATRefundCustomer RC
 			ON R.intRefundId = RC.intRefundId
-		WHERE RC.intRefundCustomerId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@refundCustomerIds))
+		WHERE RC.intRefundCustomerId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@refundCustomerIds)) AND RC.ysnEligibleRefund = 1
 	END
 
 	DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
