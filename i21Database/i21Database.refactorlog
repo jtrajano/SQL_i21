@@ -5929,4 +5929,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblSMMultiCurrency_RateType_Sales]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e0b7d515-4c8b-43f3-9645-2a799c524e32" ChangeDateTime="02/27/2017 05:35:08">
+    <Property Name="ElementName" Value="[dbo].[tblSMMultiCurrency].[intPurchasingId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMMultiCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intAccountsPayableId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f242339b-0645-46c8-9d17-77db4b583ab8" ChangeDateTime="02/27/2017 05:36:08">
+    <Property Name="ElementName" Value="[dbo].[tblSMMultiCurrency].[intSalesId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMMultiCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intAccountsReceivableId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="97d42ad6-de03-431a-96eb-4ef2be8cfeed" ChangeDateTime="02/27/2017 05:37:10">
+    <Property Name="ElementName" Value="[dbo].[FK_tblSMMultiCurrency_RateType_Purchasing]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMMultiCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblSMMultiCurrency_RateType_AccountsPayable]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5448976d-3bc6-4c7d-b2a2-41bf040d9ea4" ChangeDateTime="02/27/2017 05:38:07">
+    <Property Name="ElementName" Value="[dbo].[FK_tblSMMultiCurrency_RateType_Sales]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMMultiCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblSMMultiCurrency_RateType_AccountsReceivable]" />
+  </Operation>
 </Operations>
