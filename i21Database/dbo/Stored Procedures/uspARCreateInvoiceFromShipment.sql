@@ -198,6 +198,9 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]
 	,[intSubCurrencyId] 
 	,[dblSubCurrencyRate] 
 	)
@@ -306,6 +309,9 @@ SELECT
 	,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
 	,[intDestinationGradeId]				= ARSI.[intDestinationGradeId]
 	,[intDestinationWeightId]				= ARSI.[intDestinationWeightId]
+	,[intCurrencyExchangeRateTypeId]		= ARSI.[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
 FROM
@@ -422,6 +428,9 @@ SELECT
 	,[intStorageScheduleTypeId]				= SOD.intStorageScheduleTypeId
 	,[intDestinationGradeId]				= NULL
 	,[intDestinationWeightId]				= NULL
+	,[intCurrencyExchangeRateTypeId]		= SOD.[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]			= SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]				= SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
 FROM 

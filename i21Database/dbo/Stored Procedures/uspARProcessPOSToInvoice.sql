@@ -92,6 +92,11 @@ INSERT INTO @EntriesForInvoice(
 	,[ysnVirtualMeterReading]
 	,[ysnClearDetailTaxes]					
 	,[intTempDetailIdForTaxes]
+	,[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]
+	,[intSubCurrencyId]
+	,[dblSubCurrencyRate]
 )
 SELECT
 	 [strTransactionType]					= @strTransactionType
@@ -171,6 +176,11 @@ SELECT
 	,[ysnVirtualMeterReading]				= NULL
 	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= @intPOSId
+	,[intCurrencyExchangeRateTypeId]		= NULL
+	,[intCurrencyExchangeRateId]			= NULL
+	,[dblCurrencyExchangeRate]				= 1.000000
+	,[intSubCurrencyId]						= NULL
+	,[dblSubCurrencyRate]					= 1.000000
 
 FROM tblARPOS POS 
 INNER JOIN tblARPOSDetail POSDetail ON POS.intPOSId = POSDetail.intPOSId

@@ -442,6 +442,11 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCOGSAmount]
 							,[intTempDetailIdForTaxes]
 							,[intConversionAccountId]
+							,[intCurrencyExchangeRateTypeId]
+							,[intCurrencyExchangeRateId]
+							,[dblCurrencyExchangeRate]
+							,[intSubCurrencyId]
+							,[dblSubCurrencyRate]
 						)
 						SELECT 
 							 [strSourceTransaction]		= 'Import'
@@ -528,6 +533,11 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCOGSAmount]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST THEN @COGSAmount ELSE NULL END
 							,[intTempDetailIdForTaxes]  = @ImportLogDetailId
 							,[intConversionAccountId]	= @ConversionAccountId
+							,[intCurrencyExchangeRateTypeId]	= NULL
+							,[intCurrencyExchangeRateId]		= NULL
+							,[dblCurrencyExchangeRate]	= 1.000000
+							,[intSubCurrencyId]			= NULL
+							,[dblSubCurrencyRate]		= 1.000000
 				
 						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 							BEGIN
