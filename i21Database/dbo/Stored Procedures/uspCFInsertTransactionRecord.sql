@@ -118,6 +118,7 @@ BEGIN
 	DECLARE @ysnSiteAcceptCreditCard	BIT = 0
 	--LOGS--
 
+	DECLARE @ysnVehicleRequire			BIT = 0
 	DECLARE @intOverFilledTransactionId INT = NULL
 	DECLARE @intAccountId				INT = 0
 	DECLARE @intCardId					INT = 0
@@ -509,8 +510,13 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		SELECT @intAccountId = intAccountId
-		FROM tblCFCard WHERE intCardId = @intCardId
+		SELECT TOP 1
+			 @intAccountId = a.intAccountId
+			,@ysnVehicleRequire = a.ysnVehicleRequire
+		FROM tblCFCard as c
+		INNER JOIN tblCFAccount as a
+		ON c.intAccountId = a.intAccountId
+		WHERE intCardId = @intCardId
 	END
 
 	IF(@intProductId = 0)
@@ -540,7 +546,7 @@ BEGIN
 								FROM tblCFSite 
 								WHERE intSiteId = @intSiteId)
 	
-	IF(@intAccountId IS NOT NULL AND @intAccountId != 0)
+	IF(@intAccountId IS NOT NULL AND @intAccountId != 0 AND @strVehicleId != 0)
 	BEGIN
 		SET @intVehicleId =
 						(SELECT TOP 1 intVehicleId
@@ -845,10 +851,13 @@ BEGIN
 		END
 		IF((@intVehicleId = 0 OR @intVehicleId IS NULL) AND @strTransactionType != 'Foreign Sale')
 		BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find vehicle number ' + @strVehicleId + ' into i21 vehilce list')
+			IF(@ysnVehicleRequire = 1)
+			BEGIN
+				INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+				VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
 
-			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find vehilce number ' + @strVehicleId + ' into i21 vehilce list')
+				INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
+			END
 		END
 
 		
