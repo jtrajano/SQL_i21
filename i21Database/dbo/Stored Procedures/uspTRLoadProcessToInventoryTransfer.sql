@@ -91,8 +91,8 @@ END
 		,[strTransferType]          = 'Location to Location'
 		,[intSourceType]            = 3
 		,[strDescription]           = MIN(IC.strDescription)
-		,[intFromLocationId]        = MIN(TR.intCompanyLocationId)
-		,[intToLocationId]          = MIN(DH.intCompanyLocationId)
+		,[intFromLocationId]        = TR.intCompanyLocationId
+		,[intToLocationId]          = DH.intCompanyLocationId
 		,[ysnShipmentRequired]      = 0
 		,[intStatusId]              = 1
 		,[intShipViaId]             = MIN(TL.intShipViaId)
