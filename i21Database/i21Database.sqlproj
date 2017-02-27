@@ -5314,6 +5314,7 @@
     <Build Include="dbo\Stored Procedures\uspSMTransactionApproved.sql" />
     <Build Include="dbo\Stored Procedures\uspSMTransactionCheckIfRequiredApproval.sql" />
     <None Include="dbo\Triggers\trgAfterInsertUpdatetblMFWorkOrder.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\30_FixAmountsForCashTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
