@@ -4,7 +4,7 @@
 	@Message NVARCHAR(100) = '' OUTPUT,
 	@StartDate DATETIME = NULL,
 	@EndDate DATETIME = NULL,
-	@LogKey NVARCHAR(100) = NULL
+	@LogKey NVARCHAR(100) = NULL OUTPUT
 
 	AS
 
