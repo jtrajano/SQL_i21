@@ -56,7 +56,7 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		UPDATE LIA
 		SET
 			 LIA.[intAccountId]				= IST.[intSalesAccountId]
-			,LIA.[intSalesAccountId]		= IST.[intSalesAccountId]
+			,LIA.[intSalesAccountId]		= CASE WHEN ARI.[strTransactionType] = 'Debit Memo' THEN ARID.[intSalesAccountId] ELSE IST.[intSalesAccountId] END
 			,LIA.[intCOGSAccountId]			= IST.[intCOGSAccountId]
 			,LIA.[intInventoryAccountId]	= IST.[intInventoryAccountId] 
 		FROM
