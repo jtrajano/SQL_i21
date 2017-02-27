@@ -483,6 +483,9 @@ BEGIN TRY
 				
 		-- INVENTORY TRANSFER --
 		-- SET INCREMENT PRIMARY ID FOR TEMP @TFTransaction
+		DECLARE @TFTransaction_intId INT
+		SET @TFTransaction_intId = 0 UPDATE @TFTransaction 
+		SET @TFTransaction_intId = intId = @TFTransaction_intId + 1
 
 		SET @Count = (SELECT COUNT(intId) FROM @TFTransaction) 				
 		WHILE(@Count > 0) -- LOOP ON INVOICE ID/S
