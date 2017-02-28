@@ -58,5 +58,5 @@ LEFT JOIN dbo.tblSMTaxGroup F
 	ON BD.intTaxGroupId = F.intTaxGroupId
 LEFT JOIN dbo.tblSCTicket SC 
 	ON SC.intInventoryReceiptId = IR.intInventoryReceiptId
-INNER JOIN tblSMCurrency CUR 
+INNER JOIN dbo.tblSMCurrency CUR 
 	ON CUR.intCurrencyID = A.intCurrencyId
