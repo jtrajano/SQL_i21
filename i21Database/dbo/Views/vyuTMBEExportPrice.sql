@@ -67,6 +67,7 @@ CROSS APPLY (
         ,NULL
         ,NULL --TermId
         ,NULL --@GetAllAvailablePricing
+		,(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference )
         )
 ) B
 

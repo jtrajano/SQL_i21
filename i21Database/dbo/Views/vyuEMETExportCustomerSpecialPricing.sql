@@ -30,7 +30,8 @@
 			b.intShipToId,
 			null,
 			'Standard',
-			0	
+			0,	
+		    (SELECT TOP 1 intDefaultCountryId FROM tblSMCompanyPreference)
 		) c
 	where a.intItemId is not null and a.intItemId > 0
 	
@@ -85,7 +86,9 @@
 			null,	
 			'Standard',
 			null,
-			0			
+			0,	
+		    (SELECT TOP 1 intDefaultCountryId FROM tblSMCompanyPreference)	
+					
 		) c
  
 	 WHERE g.strItemNo is not null
