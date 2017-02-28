@@ -120,7 +120,7 @@ SELECT	CHK.dtmDate
 						CHK.strPayee + ' ' + (STUFF( (SELECT ' and ' + strName 
                              FROM tblAPVendorLien LIEN
 							 INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
-							 WHERE LIEN.ysnActive = 1 
+							 WHERE LIEN.ysnActive = 1 AND GETDATE() BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
                              ORDER BY intEntityVendorLienId
                              FOR XML PATH('')), 
                             1, 1, ''))
