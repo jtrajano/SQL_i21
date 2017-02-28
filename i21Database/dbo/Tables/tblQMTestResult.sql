@@ -50,8 +50,7 @@
 	CONSTRAINT [FK_tblQMTestResult_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 	CONSTRAINT [FK_tblQMTestResult_tblQMPropertyValidityPeriod] FOREIGN KEY ([intPropertyValidityPeriodId]) REFERENCES [tblQMPropertyValidityPeriod]([intPropertyValidityPeriodId]), 
 	CONSTRAINT [FK_tblQMTestResult_tblQMControlPoint] FOREIGN KEY ([intControlPointId]) REFERENCES [tblQMControlPoint]([intControlPointId]), 
-	CONSTRAINT [FK_tblQMTestResult_tblQMProperty_intParentPropertyId] FOREIGN KEY ([intParentPropertyId]) REFERENCES [tblQMProperty]([intPropertyId]), 
-	CONSTRAINT [FK_tblQMTestResult_tblQMListItem] FOREIGN KEY ([intListItemId]) REFERENCES [tblQMListItem]([intListItemId]) 
+	CONSTRAINT [FK_tblQMTestResult_tblQMProperty_intParentPropertyId] FOREIGN KEY ([intParentPropertyId]) REFERENCES [tblQMProperty]([intPropertyId])
 )
 
 GO
