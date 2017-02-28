@@ -96,6 +96,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICUnitMeasureMap());
             modelBuilder.Configurations.Add(new tblICUnitMeasureConversionMap());
             modelBuilder.Configurations.Add(new tblICLotMap());
+            modelBuilder.Configurations.Add(new vyuICItemLotMap());
             modelBuilder.Configurations.Add(new tblICParentLotMap());
 
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityClassVariant>(p => p.Requires("strType").HasValue("Class"));
