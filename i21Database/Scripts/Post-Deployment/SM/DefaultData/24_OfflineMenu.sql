@@ -1,7 +1,7 @@
 ﻿ SET IDENTITY_INSERT [dbo].[tblSMOfflineMenu] ON
 
  --DECLARE @intOfflineMenu INT
-
+DECLARE @recordCount INT
 SELECT @recordCount = COUNT(*) FROM tblSMOfflineMenu
 
 BEGIN
