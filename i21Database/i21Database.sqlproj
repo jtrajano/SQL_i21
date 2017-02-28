@@ -5070,6 +5070,7 @@
     <Build Include="dbo\Stored Procedures\uspFADisposeAsset.sql" />
     <Build Include="dbo\Tables\tblFAFixedAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetSubLocations.sql" />
+    <Build Include="dbo\Views\vyuICItemLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
