@@ -807,19 +807,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotPhyVsStated: 'dblPhysicalVsStated',
                 colLotWeightUOM: 'strWeightUOM',
                 colLotParentLotId: {
-                    dataIndex: 'strParentLotNumber',
+                    dataIndex: 'strParentLotNumber',                    
                     editor: {
                         store: '{parentLots}',
-                        readOnly: '{readOnlyReceiptItemGrid}',
                         defaultFilters: [
                             {
                                 column: 'intItemId',
                                 value: '{grdInventoryReceipt.selection.intItemId}',
                                 conjunction: 'and'
                             }
-                        ]
+                        ],
+                        readOnly: '{readOnlyReceiptItemGrid}',
+                        forceSelection: '{forceSelection}',                        
                     }
-                },
+                },                
                 colLotContainerNo: 'strContainerNo',
                 colLotVendorLocation: {
                     dataIndex: 'strGarden'
@@ -1250,18 +1251,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    setupAdditionalBinding: function (win) {
-        var column, editor;
-
-        column = win.down('#colLotParentLotId');
-        if (column) {
-            editor = column.getEditor();
-        }
-        if (editor) {
-            editor.forceSelection = false;
-        }
-    },
-
     show: function (config) {
         "use strict";
 
@@ -1304,7 +1293,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
             task.delay(500);         
 
-            me.setupAdditionalBinding(win);
+            //me.setupAdditionalBinding(win);
         }
     },
     onPageChange: function (pagingStatusBar, record, eOpts) {
