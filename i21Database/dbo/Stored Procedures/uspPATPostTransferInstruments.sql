@@ -175,13 +175,12 @@ SET @batchIdUsed = @batchId;
 				VALUES(TD.intTransferorId, TD.intToFiscalYearId, 'Undistributed', TD.intToRefundTypeId, TD.dblQuantityTransferred, 1);
 
 		UPDATE CS
-		SET CS.dblSharesNo = CASE WHEN @ysnPosted = 1 THEN CS.dblSharesNo - tempTD.dblQuantityTransferred ELSE CS.dblSharesNo + tempTD.dblQuantityTransferred END,
-			CS.strActivityStatus = CASE WHEN @ysnPosted = 1 THEN 'Xferred' ELSE 'Open' END,
+		SET CS.strActivityStatus = CASE WHEN @ysnPosted = 1 THEN 'Xferred' ELSE 'Open' END,
 			CS.dtmTransferredDate = GETDATE()
 		FROM tblPATCustomerStock AS CS 
 		INNER JOIN #tempTransferDetails AS tempTD
-			ON CS.intCustomerPatronId = tempTD.intTransferorId AND CS.intStockId = tempTD.intCustomerStockId
-		WHERE CS.strActivityStatus = 'Open' AND CS.ysnPosted <> 1
+			ON CS.intCustomerStockId = tempTD.intCustomerStockId
+		WHERE CS.ysnPosted = 1
 
 	END
 
