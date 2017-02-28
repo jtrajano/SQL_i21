@@ -17,6 +17,5 @@
 	CONSTRAINT [PK_tblQMAttribute] PRIMARY KEY ([intAttributeId]), 
 	CONSTRAINT [AK_tblQMAttribute_strAttributeName] UNIQUE ([strAttributeName]), 
 	CONSTRAINT [FK_tblQMAttribute_tblQMAttributeDataType] FOREIGN KEY ([intDataTypeId]) REFERENCES [tblQMAttributeDataType]([intDataTypeId]), 
-	CONSTRAINT [FK_tblQMAttribute_tblQMList] FOREIGN KEY ([intListId]) REFERENCES [tblQMList]([intListId]),
-	CONSTRAINT [FK_tblQMAttribute_tblQMListItem] FOREIGN KEY ([intListItemId]) REFERENCES [tblQMListItem]([intListItemId]) 
+	CONSTRAINT [FK_tblQMAttribute_tblQMList] FOREIGN KEY ([intListId]) REFERENCES [tblQMList]([intListId])
 )
