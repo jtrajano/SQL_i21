@@ -161,10 +161,19 @@ BEGIN
 												*	ISNULL(ShipmentItem.dblQuantity, 0) 
 												*	CASE 
 														WHEN ISNULL(Shipment.intCurrencyId, @DefaultCurrencyId) <> @DefaultCurrencyId THEN 
-															ISNULL(ShipmentItem.dblForeignUnitPrice, 0)
+															-- Convert the foreign price to transaction currency. 
+															ISNULL(ShipmentItem.dblForeignUnitPrice, 0) * ISNULL(ShipmentItem.dblForexRate, 0) 
 														ELSE 
 															ISNULL(ShipmentItem.dblUnitPrice, 0)
 													END
+												* 
+													-- and then convert the transaction price to the other charge currency. 
+													CASE WHEN ISNULL(Charge.intCurrencyId, Shipment.intCurrencyId) <> Shipment.intCurrencyId AND ISNULL(Charge.dblForexRate, 0) <> 0 THEN 
+															1 / Charge.dblForexRate
+														ELSE 
+															1
+												END 
+
 												, 2
 											)
 

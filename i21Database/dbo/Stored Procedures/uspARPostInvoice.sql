@@ -3472,6 +3472,7 @@ IF @post = 1
 					,[dblCreditReport]
 					,[dblReportingRate]
 					,[dblForeignRate]
+					,[strRateType]
 				)
 				EXEC	dbo.uspICPostCosting  
 						@ItemsForPost  

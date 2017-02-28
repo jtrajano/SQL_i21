@@ -539,6 +539,7 @@ BEGIN TRY
 				,[dblCreditReport]
 				,[dblReportingRate]
 				,[dblForeignRate]
+				,[strRateType]
 				)
 			EXEC dbo.uspICPostCosting @ItemsForPost
 				,@strBatchId
