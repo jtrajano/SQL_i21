@@ -39,6 +39,8 @@ Data here is used in the Voucher tab/grid.
 		[strAllVouchers] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[strFilterString] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmCreated] DATETIME NULL, 
+		[intCurrencyId] INT NULL,
+		[strCurrency] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		CONSTRAINT [PK_tblICSearchReceiptVoucher] PRIMARY KEY NONCLUSTERED ([intId])
 	)
 	GO

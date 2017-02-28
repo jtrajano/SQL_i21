@@ -23,6 +23,8 @@ SELECT	Receipt.intEntityVendorId
 		,dblItemsPayable = receiptAndVoucheredItems.dblItemsPayable
 		,dblTaxesPayable = receiptAndVoucheredItems.dblTaxesPayable
 		,dtmLastVoucherDate = topVoucher.dtmBillDate		
+		,receiptAndVoucheredItems.intCurrencyId
+		,receiptAndVoucheredItems.strCurrency
 		,strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) 
 		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) 
 FROM	tblICInventoryReceipt Receipt 
@@ -63,8 +65,16 @@ FROM	tblICInventoryReceipt Receipt
 									END 
 							END
 							* dbo.fnCalculateCostBetweenUOM(ISNULL(ri.intCostUOMId, ri.intUnitMeasureId), ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId), ri.dblUnitCost)
+							* (
+								CASE 
+									WHEN ReceiptItem.ysnSubCurrency = 1 AND ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN 
+										1 / ISNULL(Receipt.intSubCurrencyCents, 1) 
+									ELSE 
+										1 
+								END 
+							)
 							, 2
-						)
+						)						
 
 					,dblVoucherLineTotal = ISNULL(voucher.LineTotal, 0)
 					,dblReceiptTax = ISNULL(ri.dblTax, 0)
@@ -104,7 +114,9 @@ FROM	tblICInventoryReceipt Receipt
 						ISNULL(ri.dblTax, 0)
 						- ISNULL(voucher.TaxTotal, 0) 
 					,i.strItemNo
-					,strItemDescription = i.strDescription				
+					,strItemDescription = i.strDescription
+					,intCurrencyId = currency.intCurrencyID
+					,strCurrency = currency.strCurrency
 			FROM	tblICInventoryReceiptItem ri 
 					OUTER APPLY (
 						SELECT	QtyTotal = 
@@ -171,7 +183,14 @@ FROM	tblICInventoryReceipt Receipt
 						AND Receipt.strReceiptType = 'Transfer Order'
 
 					LEFT JOIN tblICItem i 
-						ON i.intItemId = ri.intItemId						
+						ON i.intItemId = ri.intItemId	
+
+					LEFT JOIN tblSMCurrency subCurrency
+						ON subCurrency.intMainCurrencyId = CASE WHEN ri.ysnSubCurrency = 1 THEN Receipt.intCurrencyId ELSE NULL END 
+
+					LEFT JOIN tblSMCurrency currency
+						ON currency.intCurrencyID = CASE WHEN ri.ysnSubCurrency = 1 THEN subCurrency.intCurrencyID ELSE Receipt.intCurrencyId END 
+
 			WHERE	ri.intInventoryReceiptId = Receipt.intInventoryReceiptId
 					AND ri.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 		) receiptAndVoucheredItems
