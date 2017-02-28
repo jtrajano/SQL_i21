@@ -173,7 +173,7 @@ SELECT
 	,[dblItemWeight]						= @ZeroDecimal 
 	,[intItemWeightUOMId]					= NULL
 	,[dblPrice]								= CTCDV.[dblCashPrice] 
-	,[strPricing]							= 'Contracts - Customer Pricing'
+	,[strPricing]							= 'Contracts'
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
 	,[strFrequency]							= NULL
