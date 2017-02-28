@@ -42,3 +42,4 @@ AS
 				JOIN	tblICInventoryReceiptCharge	RC	ON	RC.intInventoryReceiptChargeId	=	BD.intInventoryReceiptChargeId	
 				WHERE	BD.intInventoryReceiptChargeId IS NOT NULL 
 			)BD	ON	BD.intContractHeaderId	=	CC.intContractHeaderId AND CC.intItemId = BD.intItemId
+	WHERE	CC.ysnBasis <> 1
