@@ -30,7 +30,7 @@ BEGIN TRY
 			   ,@intBillId = @intBillId OUTPUT
 	END
 
-	SET @intNewBillId = @intBillId
+	SET @intNewBillId = ISNULL(@intBillId,0)
 
 	COMMIT TRANSACTION
 END TRY
