@@ -22,12 +22,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 { dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string', drillDownText: 'View Vendor', drillDownClick: 'onViewVendorName' },
                 { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName' },
                 { dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string' },
+                { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                 { dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
 
                 { dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strVendorId', text: 'Vendor Id', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strTransferor', text: 'Transferor', flex: 1, dataType: 'string', hidden: true },
-                { dataIndex: 'strCurrency', text: 'Currency', flex: 1, dataType: 'string', hidden: true },
+                
                 { dataIndex: 'intBlanketRelease', text: 'Blanket Release', flex: 1, dataType: 'int', hidden: true },
                 { dataIndex: 'strVendorRefNo', text: 'Vendor Reference No', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strWarehouseRefNo', text: 'Warehouse Reference No', flex: 1, dataType: 'string', hidden: true },

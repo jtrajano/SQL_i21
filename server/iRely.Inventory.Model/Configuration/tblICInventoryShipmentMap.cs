@@ -129,6 +129,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strComment).HasColumnName("strComment");
             this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.strCurrency).HasColumnName("strCurrency");
         }
     }
 
