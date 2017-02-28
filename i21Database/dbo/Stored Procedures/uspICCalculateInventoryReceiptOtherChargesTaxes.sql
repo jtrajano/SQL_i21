@@ -145,7 +145,7 @@ BEGIN
 					,[intSort]
 					,[intConcurrencyId]				
 				)
-				SELECT 	[intInventoryReceiptChargeId]		= @InventoryReceiptChargeId
+				SELECT 	[intInventoryReceiptChargeId]	= @InventoryReceiptChargeId
 						,[intTaxGroupId]				= [intTaxGroupId]
 						,[intTaxCodeId]					= [intTaxCodeId]
 						,[intTaxClassId]				= [intTaxClassId]

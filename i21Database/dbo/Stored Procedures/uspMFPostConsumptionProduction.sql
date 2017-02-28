@@ -683,7 +683,8 @@ BEGIN
 		,[dblCreditReport]
 		,[dblReportingRate]
 		,[dblForeignRate]
-		)
+		,[strRateType]
+	)
 	EXEC dbo.uspICCreateGLEntries @strBatchId
 		,NULL
 		,@intUserId
