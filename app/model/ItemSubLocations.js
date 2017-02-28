@@ -14,7 +14,14 @@ Ext.define('Inventory.model.ItemSubLocations', {
         { name: 'intId', type: 'int'},
         { name: 'strItemNo', type: 'string'},
         { name: 'intItemId', type: 'int'},
-        { name: 'intLocationId', type: 'int'},
+        { name: 'intLocationId', type: 'int', 
+            reference: {
+                type: 'Inventory.model.ItemLocation',
+                inverse: {
+                    role: 'tblICItemSubLocations'
+                }
+            }
+        },
         { name: 'intItemLocationId', type: 'int'},
         { name: 'intSubLocationId', type: 'int', allowNull: true},
         { name: 'strSubLocationName', type: 'string'},
