@@ -112,7 +112,10 @@ SELECT * FROM(
 						THEN BILL.dblTotal * -1
 						ELSE BILL.dblTotal
 						END
-			,dblDiscount = PYMTDetail.dblDiscount
+			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
+						THEN PYMTDetail.dblDiscount 
+						ELSE  PYMTDetail.dblInterest 
+						END
 			,dblNet = CASE WHEN BILL.intTransactionType = 3
 						THEN PYMTDetail.dblPayment * -1
 						ELSE PYMTDetail.dblPayment
