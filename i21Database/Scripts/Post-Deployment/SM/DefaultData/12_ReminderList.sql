@@ -560,7 +560,7 @@ GO
 			WHERE [strReminder] = N'Unlock' AND [strType] = N'Transaction'
 		END
 GO
-IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Scale Service' AND [strType] = N'Ticket Management')
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Error' AND [strType] = N'Scale Service')
 BEGIN
 	DECLARE @intMaxSortOrder INT
 	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
