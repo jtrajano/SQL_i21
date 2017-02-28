@@ -168,6 +168,7 @@
     <Compile Include="Common\Import\ImportFuelCodes.cs" />
     <Compile Include="Common\Import\ImportFuelTypes.cs" />
     <Compile Include="Common\Import\ImportInventoryCount.cs" />
+    <Compile Include="Common\Import\ImportInventoryCountDetails.cs" />
     <Compile Include="Common\Import\ImportItemAccountCategories.cs" />
     <Compile Include="Common\Import\ImportItemAccounts.cs" />
     <Compile Include="Common\Import\ImportItemContracts.cs" />

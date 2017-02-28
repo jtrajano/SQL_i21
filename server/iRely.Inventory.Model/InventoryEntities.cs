@@ -205,6 +205,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptChargeMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptVoucherMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemViewMap());
+            modelBuilder.Configurations.Add(new vyuICGetItemUOMMap());
 
             modelBuilder.Configurations.Add(new vyuICInventoryReceiptLookUpMap());
             modelBuilder.Configurations.Add(new vyuICInventoryReceiptItemLookUpMap());            
