@@ -111,7 +111,10 @@ SELECT  TOP 10 * FROM(
 						THEN BILL.dblTotal * -1
 						ELSE BILL.dblTotal
 						END
-			,dblDiscount = PYMTDetail.dblDiscount
+			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
+						THEN PYMTDetail.dblDiscount 
+						ELSE  PYMTDetail.dblInterest 
+						END
 			,dblNet = CASE WHEN BILL.intTransactionType = 3
 						THEN PYMTDetail.dblPayment * -1
 						ELSE PYMTDetail.dblPayment
@@ -152,7 +155,10 @@ SELECT  TOP 10 * FROM(
 			,dtmDate = INV.dtmDate
 			,strComment = SUBSTRING(INV.strComments,1,25)
 			,dblAmount = INV.dblInvoiceTotal
-			,dblDiscount = PYMTDetail.dblDiscount
+			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
+						THEN PYMTDetail.dblDiscount 
+						ELSE  PYMTDetail.dblInterest 
+						END
 			,dblNet = PYMTDetail.dblPayment
 			--,CONTRACTHEADER.strContractNumber
 			--,strPPDType = ''
