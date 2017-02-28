@@ -14,7 +14,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRANSACTION
 
-	DECLARE @tmpTransacions TABLE (
+	DECLARE @tmpTransactions TABLE (
 		[intTransactionId] [int] PRIMARY KEY,
 		UNIQUE (intTransactionId)
 	);
@@ -23,7 +23,7 @@ BEGIN TRANSACTION
 	DECLARE @error NVARCHAR(MAX);
 	DECLARE @batchId NVARCHAR(40);
 
-	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@stockIds)
+	INSERT INTO @tmpTransactions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@stockIds)
 	
 	IF(@batchId IS NULL)
 		EXEC uspSMGetStartingNumber 3, @batchId OUT
@@ -43,10 +43,11 @@ BEGIN TRANSACTION
 
 	UPDATE tblPATCustomerStock
 		SET strActivityStatus = 'Open',
-			dtmRetireDate = null
-		WHERE intCustomerStockId IN (SELECT [intTransactionId] FROM @tmpTransacions)
+			dtmRetireDate = null,
+			intBillId = null
+		WHERE intCustomerStockId IN (SELECT [intTransactionId] FROM @tmpTransactions);
 
-	SELECT @totalRecords = COUNT([intTransactionId]) FROM @tmpTransacions
+	SELECT @totalRecords = COUNT([intTransactionId]) FROM @tmpTransactions;
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
