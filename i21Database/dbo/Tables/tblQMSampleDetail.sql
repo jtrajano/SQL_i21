@@ -15,6 +15,5 @@
 	
 	CONSTRAINT [PK_tblQMSampleDetail] PRIMARY KEY ([intSampleDetailId]), 
 	CONSTRAINT [FK_tblQMSampleDetail_tblQMSample] FOREIGN KEY ([intSampleId]) REFERENCES [tblQMSample]([intSampleId]) ON DELETE CASCADE, 
-	CONSTRAINT [FK_tblQMSampleDetail_tblQMAttribute] FOREIGN KEY ([intAttributeId]) REFERENCES [tblQMAttribute]([intAttributeId]), 
-	CONSTRAINT [FK_tblQMSampleDetail_tblQMListItem] FOREIGN KEY ([intListItemId]) REFERENCES [tblQMListItem]([intListItemId]) 
+	CONSTRAINT [FK_tblQMSampleDetail_tblQMAttribute] FOREIGN KEY ([intAttributeId]) REFERENCES [tblQMAttribute]([intAttributeId])
 )
