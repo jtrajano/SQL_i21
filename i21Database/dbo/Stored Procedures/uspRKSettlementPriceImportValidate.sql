@@ -7,7 +7,7 @@ DECLARE @PreviousErrMsg nvarchar(Max)
 DECLARE @mRowNumber INT
 DECLARE @strFutureMarket NVARCHAR(50)
 DECLARE @strInstrumentType NVARCHAR(50)
-DECLARE @dtmPriceDate NVARCHAR(50)
+DECLARE @dtmPriceDate datetime
 DECLARE @strFutureMonth NVARCHAR(50)
 DECLARE @dblLastSettle decimal(24,10)
 DECLARE @dblLow decimal(24,10)
