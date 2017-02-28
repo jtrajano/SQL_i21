@@ -36,6 +36,9 @@ SELECT
 	,[intScaleTicketId]							=	ScaleTicket.intScaleTicketId
 	,[strScaleTicketNumber]						=	ScaleTicket.strScaleTicketNumber
 	,[intLocationId]							=	Shipment.intShipFromLocationId
+	,intForexRateTypeId							=	ShipmentCharge.intForexRateTypeId
+	,dblForexRate								=	ShipmentCharge.dblForexRate
+
 FROM tblICInventoryShipmentCharge ShipmentCharge INNER JOIN tblICItem Item 
 		ON ShipmentCharge.intChargeId = Item.intItemId
 	INNER JOIN tblICInventoryShipment Shipment

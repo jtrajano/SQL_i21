@@ -50,7 +50,13 @@ SELECT
 		,receiptItemLot.dblStatedNetPerUnit
 		,receiptItemLot.dblStatedTotalNet
 		,receiptItemLot.dblPhysicalVsStated
+		,receipt.intCurrencyId
+		,Currency.strCurrency
 FROM	tblICInventoryReceiptItemLot receiptItemLot
+		INNER JOIN tblICInventoryReceiptItem item 
+			ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceipt receipt
+			ON receipt.intInventoryReceiptId = item.intInventoryReceiptId
 		LEFT OUTER JOIN tblSMCompanyLocationSubLocation sub 
 			ON sub.intCompanyLocationSubLocationId = receiptItemLot.intSubLocationId
 		LEFT OUTER JOIN tblICStorageLocation sloc 
@@ -65,8 +71,6 @@ FROM	tblICInventoryReceiptItemLot receiptItemLot
 			ON iuom.intItemUOMId = receiptItemLot.intItemUnitMeasureId
 		LEFT OUTER JOIN tblICUnitMeasure uom 
 			ON uom.intUnitMeasureId = iuom.intUnitMeasureId
-		INNER JOIN tblICInventoryReceiptItem item 
-			ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
 		LEFT JOIN tblICItemUOM itemItemUOM 
 			ON itemItemUOM.intItemUOMId = item.intUnitMeasureId
 		LEFT OUTER JOIN tblICUnitMeasure itemUOM 
@@ -76,3 +80,5 @@ FROM	tblICInventoryReceiptItemLot receiptItemLot
 			AND itemWeightUOM.intItemId = item.intItemId
 		LEFT OUTER JOIN tblICUnitMeasure weightUOM 
 			ON weightUOM.intUnitMeasureId = itemWeightUOM.intUnitMeasureId
+		LEFT JOIN tblSMCurrency Currency
+			ON Currency.intCurrencyID = receipt.intCurrencyId

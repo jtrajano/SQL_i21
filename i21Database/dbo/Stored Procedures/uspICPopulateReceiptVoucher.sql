@@ -42,6 +42,8 @@ BEGIN
 			,strAllVouchers
 			,strFilterString
 			,dtmCreated
+			,intCurrencyId
+			,strCurrency
 	)
 	SELECT	
 			intInventoryReceiptId
@@ -69,6 +71,8 @@ BEGIN
 			,strAllVouchers
 			,strFilterString
 			,dtmCreated = @dtmCreated
+			,receiptItem.intCurrencyId
+			,receiptItem.strCurrency
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
 				ON entity.intEntityId = vendor.intEntityVendorId
 			CROSS APPLY (
@@ -103,6 +107,8 @@ BEGIN
 			,strAllVouchers
 			,strFilterString
 			,dtmCreated = @dtmCreated
+			,receiptCharges.intCurrencyId
+			,receiptCharges.strCurrency
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
 				ON entity.intEntityId = vendor.intEntityVendorId
 			CROSS APPLY (

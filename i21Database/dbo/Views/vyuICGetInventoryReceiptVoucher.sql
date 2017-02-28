@@ -22,11 +22,15 @@ SELECT
 	,strBillId = ISNULL(ri.strBillId, 'New Voucher')
 	,dtmBillDate = ri.dtmBillDate
 	,intBillId = ri.intBillId
+	,r.intCurrencyId
+	,currency.strCurrency
 FROM	tblICInventoryReceipt r  
 		LEFT JOIN vyuAPVendor vendor
 			ON vendor.intEntityVendorId = r.intEntityVendorId
 		LEFT JOIN tblSMCompanyLocation c
 			ON c.intCompanyLocationId = r.intLocationId
+		LEFT JOIN tblSMCurrency currency
+			ON currency.intCurrencyID = r.intCurrencyId
 		OUTER APPLY (
 			SELECT	strOrderNumber = COALESCE(ContractView.strContractNumber, POView.strPurchaseOrderNumber, TransferView.strTransferNo)
 					,ri.intInventoryReceiptItemId

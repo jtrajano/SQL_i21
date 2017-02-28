@@ -59,6 +59,8 @@ SELECT
 	,receiptItemLot.dblStatedNetPerUnit
 	,receiptItemLot.dblStatedTotalNet
 	,receiptItemLot.dblPhysicalVsStated
+	,receiptItem.intCurrencyId
+	,receiptItem.strCurrency
 FROM tblICInventoryReceiptItemLot receiptItemLot
 LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = receiptItemLot.intSubLocationId
