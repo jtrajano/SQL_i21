@@ -58,7 +58,7 @@ FROM
 		ON A.intAccountId = C.intAccountId
 	INNER JOIN dbo.tblEMEntityLocation EL
 		ON EL.intEntityLocationId = A.intShipFromId
-	INNER JOIN tblSMCurrency CUR 
+	INNER JOIN dbo.tblSMCurrency CUR 
 		ON CUR.intCurrencyID = A.intCurrencyId
 	OUTER APPLY
 	(
