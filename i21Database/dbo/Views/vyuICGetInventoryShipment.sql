@@ -177,6 +177,7 @@ SELECT Shipment.intInventoryShipmentId
 	WHEN Location.strUseLocationAddress = 'Letterhead' 
 	THEN '' END AS strCompanyAddress
 	, Shipment.intCurrencyId
+	, Currency.strCurrency
 FROM tblICInventoryShipment Shipment
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Shipment.intShipFromLocationId
 	LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = Shipment.intEntityCustomerId	
@@ -186,4 +187,5 @@ FROM tblICInventoryShipment Shipment
 	LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipment.intFreightTermId
 	LEFT JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId
 	LEFT JOIN tblSMCompanyLocation ShipFromLocation ON ShipFromLocation.intCompanyLocationId = Shipment.intShipFromLocationId
+	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = Shipment.intCurrencyId
 GO
