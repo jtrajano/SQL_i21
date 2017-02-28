@@ -1231,6 +1231,8 @@ namespace iRely.Inventory.Model
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
         public decimal? dblNetWeight { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
     }
 
     public class vyuICGetShipmentAddOrder
@@ -1458,5 +1460,7 @@ namespace iRely.Inventory.Model
         public decimal? dblCOGSAmount { get; set; }
         public decimal? dblQtyToInvoice { get; set; }
         public decimal? dblInTransitAmount { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set;  }
     }
 }

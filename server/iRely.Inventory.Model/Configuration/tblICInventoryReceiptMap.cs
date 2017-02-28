@@ -346,6 +346,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
             this.Property(t => t.strVendorRefNo).HasColumnName("strVendorRefNo");
             this.Property(t => t.strShipFrom).HasColumnName("strShipFrom");
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.strCurrency).HasColumnName("strCurrency");
         }
     }
 
@@ -591,6 +593,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblStatedNetPerUnit).HasColumnName("dblStatedNetPerUnit").HasPrecision(38, 20);
             this.Property(t => t.dblStatedTotalNet).HasColumnName("dblStatedTotalNet").HasPrecision(38, 20);
             this.Property(t => t.dblPhysicalVsStated).HasColumnName("dblPhysicalVsStated").HasPrecision(38, 20);
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.strCurrency).HasColumnName("strCurrency");
         }
     }
 
@@ -843,6 +847,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblItemsPayable).HasColumnName("dblItemsPayable");
             this.Property(t => t.dblTaxesPayable).HasColumnName("dblTaxesPayable");
             this.Property(t => t.dtmLastVoucherDate).HasColumnName("dtmLastVoucherDate");
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.strCurrency).HasColumnName("strCurrency");
             this.Property(t => t.strAllVouchers).HasColumnName("strAllVouchers");
             this.Property(t => t.strFilterString).HasColumnName("strFilterString");
         }

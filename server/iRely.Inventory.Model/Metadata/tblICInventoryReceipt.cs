@@ -1038,6 +1038,8 @@ namespace iRely.Inventory.Model
         public string strSubCurrency { get; set; }
         public string strVendorRefNo { get; set; }
         public string strShipFrom { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
@@ -1434,6 +1436,8 @@ namespace iRely.Inventory.Model
         public decimal? dblStatedNetPerUnit { get; set; }
         public decimal? dblStatedTotalNet { get; set; }
         public decimal? dblPhysicalVsStated { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
 
         public tblICInventoryReceiptItemLot tblICInventoryReceiptItemLot { get; set; }
     }
@@ -1703,6 +1707,8 @@ namespace iRely.Inventory.Model
         public decimal? dblItemsPayable { get; set; }
         public decimal? dblTaxesPayable { get; set; }
         public DateTime? dtmLastVoucherDate { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
         public string strAllVouchers { get; set; }
         public string strFilterString { get; set; }
     }
