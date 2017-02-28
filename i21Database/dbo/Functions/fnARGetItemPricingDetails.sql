@@ -27,6 +27,7 @@
 	,@InvoiceType				NVARCHAR(200)
 	,@TermId					INT
 	,@GetAllAvailablePricing	BIT
+	,@SpecialPricingCurrencyId	INT
 )
 RETURNS @returntable TABLE
 (
@@ -157,6 +158,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 						,@VendorLocationId
 						,@InvoiceType
 						,0
+						,@SpecialPricingCurrencyId
 					);
 			
 			
@@ -210,6 +212,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 						,@VendorLocationId
 						,@InvoiceType
 						,@GetAllAvailablePricing
+						,@SpecialPricingCurrencyId
 					)
 			END				
 	END
@@ -365,3 +368,5 @@ DECLARE	 @Price				NUMERIC(18,6)
 	SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
 	RETURN				
 END
+
+
