@@ -224,7 +224,7 @@ AS
 					CD.intSalespersonId,
 					MAX(intCurrencyId)			AS	intCurrencyId,
 					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
-					CASE	WHEN ISNULL(CAST(ROUND(SUM(CD.dblNoOfLots),0)AS INT),0)-ISNULL(PF.[dblLotsFixed],0) = 0 
+					CASE	WHEN ISNULL(PF.[dblTotalLots],0)-ISNULL(PF.[dblLotsFixed],0) = 0 
 							THEN 'Fully Priced' 
 							WHEN ISNULL([dblLotsFixed],0) = 0 THEN 'Unpriced'
 							ELSE 'Partially Priced' 

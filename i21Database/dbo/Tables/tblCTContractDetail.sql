@@ -114,7 +114,10 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[ysnInvoice] BIT NULL DEFAULT 0, 
 	[ysnProvisionalInvoice] BIT NULL DEFAULT 0, 
 	[ysnQuantityFinal] BIT NULL DEFAULT 0, 
-	
+	[intProducerId] INT NULL,
+	[ysnClaimsToProducer] BIT,
+	[ysnRiskToProducer] BIT,
+
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
 
