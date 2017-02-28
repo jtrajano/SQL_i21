@@ -22,6 +22,7 @@ SELECT	CS.intCustomerStockId,
 		dtmCheckDate = CASE WHEN CS.intBillId IS NULL THEN ARPAY.dtmDatePaid ELSE APPAY.dtmDatePaid END,
 		dblCheckAmount = CASE WHEN CS.intBillId IS NULL THEN ARPAY.dblPayment ELSE APPAY.dblPayment END,
 		ysnPosted = CASE WHEN ISNULL(CS.ysnPosted, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
+		ysnRetiredPosted = CASE WHEN ISNULL(CS.ysnRetiredPosted, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
 		CS.intConcurrencyId
 	FROM tblPATCustomerStock CS
 	INNER JOIN tblEMEntity C

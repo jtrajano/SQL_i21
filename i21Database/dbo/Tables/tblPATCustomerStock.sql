@@ -14,6 +14,7 @@
 	[dblParValue] NUMERIC(18,6) NULL,
 	[dblFaceValue] NUMERIC(18,6) NULL,
 	[ysnPosted] BIT NULL DEFAULT 0,
+	[ysnRetiredPosted] BIT NULL DEFAULT 0,
 	[intBillId] INT NULL,
 	[intInvoiceId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT 0, 

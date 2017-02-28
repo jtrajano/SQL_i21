@@ -2,7 +2,6 @@
 	@intCustomerStockId INT = NULL,
 	@ysnPosted BIT = NULL,
 	@ysnRecap BIT = NULL,
-	@ysnVoting BIT = NULL,
 	@ysnRetired BIT = NULL,
 	@intCompanyLocationId INT = NULL,
 	@intUserId INT = NULL,
@@ -56,7 +55,8 @@ SET @batchIdUsed = @batchId;
 			CS.dblFaceValue,
 			CS.intBillId,
 			CS.intInvoiceId,
-			CS.ysnPosted
+			CS.ysnPosted,
+			CS.ysnRetiredPosted
 	INTO #tempCustomerStock
 	FROM tblPATCustomerStock CS
 		WHERE intCustomerStockId = @intCustomerStockId
@@ -205,8 +205,7 @@ END CATCH
 
 IF(@isGLSucces = 1)
 BEGIN
-	---------- UPDATE CUSTOMER STOCK TABLE ---------------
-	UPDATE tblPATCustomerStock SET ysnPosted = @ysnPosted WHERE intCustomerStockId = @intCustomerStockId
+
 
 	--------------------- RETIRED STOCKS ------------------	
 	IF(@ysnRetired = 1)
@@ -255,13 +254,15 @@ BEGIN
 				@endTransaction = @intCreatedId,
 				@success = @success OUTPUT
 
+
 		END
 		ELSE
 		BEGIN
 			DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tempCustomerStock) AND ysnPaid <> 1;
-			UPDATE tblPATCustomerStock SET intBillId = null WHERE intCustomerStockId = @intCustomerStockId;
 			EXEC uspPATProcessVoid @intCustomerStockId, @intUserId;
 		END
+		---------- UPDATE CUSTOMER STOCK TABLE ---------------
+		UPDATE tblPATCustomerStock SET ysnRetiredPosted = @ysnPosted WHERE intCustomerStockId = @intCustomerStockId;
 
 	END
 	ELSE
@@ -446,6 +447,8 @@ BEGIN
 			DELETE FROM tblARInvoice WHERE intInvoiceId IN (SELECT intInvoiceId FROM #tempCustomerStock) AND ysnPaid <> 1;
 			UPDATE tblPATCustomerStock SET intInvoiceId = null WHERE intCustomerStockId = @intCustomerStockId;
 		END
+		---------- UPDATE CUSTOMER STOCK TABLE ---------------
+		UPDATE tblPATCustomerStock SET ysnPosted = @ysnPosted WHERE intCustomerStockId = @intCustomerStockId;
 	END
 END
 
