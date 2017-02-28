@@ -26,7 +26,7 @@ BEGIN
 		WHERE intLoadId = @intTransactionId
 
 		SELECT TOP 1 @ysnClaimsToProducer = ISNULL(CH.ysnClaimsToProducer, 0),
-					 @intProducerEntityId = intProducerId
+					 @intProducerEntityId = CD.intProducerId
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 

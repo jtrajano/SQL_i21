@@ -64,27 +64,14 @@ BEGIN TRY
 			IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strFeedStatus,'') ='')
 			BEGIN
 				DELETE FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND  ISNULL(strFeedStatus,'') =''
-				IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId)
-				BEGIN
-					INSERT	INTO tblCTContractFeed (intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,strItemNo,strRowState,dtmFeedCreated)
-					SELECT	TOP 1 intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,
-							(SELECT TOP 1 strItemNo FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strItemNo,'') <> '') strItemNo,
-							'Delete',GETDATE()
-					FROM	tblCTContractFeed
-					WHERE	intContractDetailId = @intContractDetailId
-					ORDER BY intContractFeedId DESC
-				END
 			END
-			ELSE
-			BEGIN
-				INSERT	INTO tblCTContractFeed (intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,strItemNo,strRowState,dtmFeedCreated)
-				SELECT	TOP 1 intContractHeaderId,intContractDetailId,strCommodityCode,strCommodityDesc,strERPPONumber,intContractSeq,
-						(SELECT TOP 1 strItemNo FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strItemNo,'') <> '') strItemNo,
-						'Delete',GETDATE()
-				FROM	tblCTContractFeed
-				WHERE	intContractDetailId = @intContractDetailId
-				ORDER BY intContractFeedId DESC
-			END
+
+			INSERT	INTO tblCTContractFeed (intContractHeaderId, intContractDetailId, strCommodityCode, strCommodityDesc, strContractBasis, strContractBasisDesc, strSubLocation, strCreatedBy, strCreatedByNo, strEntityNo, strVendorAccountNum, strSubmittedBy, strSubmittedByNo, strTerm, strTermCode, dtmContractDate, dtmStartDate, dtmEndDate, strPurchasingGroup, strContractNumber, strERPPONumber, strERPItemNumber, strERPBatchNumber, intContractSeq, strItemNo, strContractItemNo, strContractItemName, strOrigin, strStorageLocation, dblQuantity, strQuantityUOM, dblNetWeight, strNetWeightUOM, dblCashPrice, dblUnitCashPrice, dtmPlannedAvailabilityDate, dblBasis, strCurrency, strPriceUOM, strRowState, dtmFeedCreated)
+			SELECT	TOP 1 intContractHeaderId, intContractDetailId, strCommodityCode, strCommodityDesc, strContractBasis, strContractBasisDesc, strSubLocation, strCreatedBy, strCreatedByNo, strEntityNo, strVendorAccountNum, strSubmittedBy, strSubmittedByNo, strTerm, strTermCode, dtmContractDate, dtmStartDate, dtmEndDate, strPurchasingGroup, strContractNumber, strERPPONumber, strERPItemNumber, strERPBatchNumber, intContractSeq, strItemNo, strContractItemNo, strContractItemName, strOrigin, strStorageLocation, dblQuantity, strQuantityUOM, dblNetWeight, strNetWeightUOM, dblCashPrice, dblUnitCashPrice, dtmPlannedAvailabilityDate, dblBasis, strCurrency, strPriceUOM,
+					'Delete',GETDATE()
+			FROM	tblCTContractFeed
+			WHERE	intContractDetailId = @intContractDetailId
+			ORDER BY intContractFeedId DESC			
 		END
 		--Unslice
 		IF(@ysnSlice = 0)
