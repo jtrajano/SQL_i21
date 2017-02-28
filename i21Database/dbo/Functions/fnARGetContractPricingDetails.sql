@@ -86,7 +86,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		
 	IF(@Price IS NOT NULL)
 	BEGIN
-		SET @Pricing = 'Contracts - Customer Pricing'
+		SET @Pricing = 'Contracts'
 		INSERT @returntable(
 			 [dblPrice]
 			,[strPricing]
@@ -164,7 +164,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		
 	IF(@Price IS NOT NULL)
 	BEGIN
-		SET @Pricing = 'Contracts - Customer Pricing'
+		SET @Pricing = 'Contracts'
 		INSERT @returntable(
 			 [dblPrice]
 			,[strPricing]

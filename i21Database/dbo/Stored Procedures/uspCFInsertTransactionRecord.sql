@@ -1052,7 +1052,7 @@ BEGIN
 				WHERE intTransactionId = @Pk
 					
 		END
-		ELSE IF (@strPriceMethod = 'Contracts - Customer Pricing' OR @strPriceMethod = 'Contract Pricing')
+		ELSE IF (@strPriceMethod = 'Contracts' OR @strPriceMethod = 'Contract Pricing')
 		BEGIN
 
 				IF(@intPrcAvailableQuantity < @dblQuantity)
