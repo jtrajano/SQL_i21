@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPStageSAPStock]
-	@strXml nvarchar(max)
+	@strXml nvarchar(max),
+	@strSessionId nvarchar(50) = '' out
 AS
 
 BEGIN TRY
@@ -11,7 +12,7 @@ BEGIN TRY
 		
 	DECLARE @idoc INT
 	DECLARE @ErrMsg nvarchar(max)
-	DECLARE @strSessionId nvarchar(50)=NEWID()
+	Set @strSessionId = NEWID()
 
 	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -22,6 +23,8 @@ BEGIN TRY
 	[strItemNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strSubLocation] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strStockType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[dblInspectionQuantity] NUMERIC(38,20),
+	[dblBlockedQuantity] NUMERIC(38,20),
 	[dblQuantity] NUMERIC(38,20)
 	)
 
@@ -29,25 +32,31 @@ BEGIN TRY
 		strItemNo
 		,strSubLocation
 		,strStockType
+		,dblInspectionQuantity
+		,dblBlockedQuantity
 		,dblQuantity
 		)
 	SELECT MATNR
 		,WERKS
 		,DELKZ
+		,INSME
+		,SPEME
 		,MNG01
-	FROM OPENXML(@idoc, 'LOISTD01/IDOC/E1MDSTL', 2) WITH (
-			 MATNR NVARCHAR(100) 
-			,WERKS NVARCHAR(100) 
-			,DELKZ NVARCHAR(50) 'E1PLSEL/E1MDPSL/DELKZ'
-			,MNG01 NUMERIC(38,20) 'E1PLSEL/E1MDPSL/MNG01'
+	FROM OPENXML(@idoc, 'LOISTD01/IDOC/E1MDSTL/E1PLSEL/E1MDPSL', 2) WITH (
+			 MATNR NVARCHAR(100) '../../MATNR'
+			,WERKS NVARCHAR(100) '../../WERKS'
+			,DELKZ NVARCHAR(50) 
+			,INSME NUMERIC(38,20) '../../INSME'
+			,SPEME NUMERIC(38,20) '../../SPEME'
+			,MNG01 NUMERIC(38,20) 
 			)
 
 	If NOT Exists (Select 1 From @tblStock)
 		RaisError('Unable to process. Xml tag (LOISTD01/IDOC/E1MDSTL) not found.',16,1)
 
 	--Add to Staging tables
-	Insert into tblIPStockStage(strItemNo,strSubLocation,strStockType,dblQuantity,strSessionId)
-	Select '0000000000' + strItemNo,strSubLocation,strStockType,dblQuantity,@strSessionId
+	Insert into tblIPStockStage(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,strSessionId)
+	Select '0000000000' + strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,@strSessionId
 	From @tblStock Where (UPPER(strStockType) like 'WB%' OR UPPER(strStockType) like 'KB%' OR UPPER(strStockType) like 'LK%')
 	AND (RIGHT(strItemNo,8) like '496%' OR RIGHT(strItemNo,8) like '491%')
 

@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPStock]
+@strSessionId NVARCHAR(50)=''
 AS
 BEGIN TRY
 
@@ -13,8 +14,9 @@ Declare @intMinRowNo int,
 		@intSubLocationId int,
 		@strItemNo NVARCHAR(100),
 		@strSubLocation NVARCHAR(100),
+		@dblInspectionQuantity NUMERIC(38,20),
+		@dblBlockedQuantity NUMERIC(38,20),
 		@dblQuantity NUMERIC(38,20),
-		@strSessionId NVARCHAR(50),
 		@intLocationId int,
 		@intEntityUserId int,
 		@intSourceId int=1,
@@ -32,17 +34,32 @@ DECLARE @tblStock TABLE (
 
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
 
-Insert Into @tblStock(strItemNo,strSubLocation,dblQuantity,strSessionId)
-Select strItemNo,strSubLocation,SUM(dblQuantity),strSessionId 
-From tblIPStockStage Group By strItemNo,strSubLocation,strSessionId
+If ISNULL(@strSessionId,'')=''
+	Insert Into @tblStock(strItemNo,strSubLocation,dblQuantity,strSessionId)
+	Select strItemNo,strSubLocation,SUM(ISNULL(dblQuantity,0)),strSessionId 
+	From tblIPStockStage Group By strItemNo,strSubLocation,strSessionId
+Else
+	Insert Into @tblStock(strItemNo,strSubLocation,dblQuantity,strSessionId)
+	Select strItemNo,strSubLocation,SUM(ISNULL(dblQuantity,0)),strSessionId 
+	From tblIPStockStage 
+	Where strSessionId=@strSessionId
+	Group By strItemNo,strSubLocation,strSessionId
 
 Select @intMinRowNo=Min(intRowNo) From @tblStock
 
 While(@intMinRowNo is not null)
 Begin
 	BEGIN TRY
+		Set @intItemId=NULL
+		Set @intSubLocationId=NULL
+
 		Select @strItemNo=strItemNo,@strSubLocation=strSubLocation,@dblQuantity=dblQuantity,@strSessionId=strSessionId
 		From @tblStock Where intRowNo=@intMinRowNo
+
+		Select TOP 1 @dblInspectionQuantity=ISNULL(dblInspectionQuantity,0),@dblBlockedQuantity=ISNULL(dblBlockedQuantity,0) From tblIPStockStage 
+		Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
+
+		Set @dblQuantity = @dblQuantity + @dblInspectionQuantity + @dblBlockedQuantity
 
 		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
 		Select @intSubLocationId=intCompanyLocationSubLocationId 
@@ -66,6 +83,8 @@ Begin
 		Select @intMinRowNo1=MIN(intCompanyLocationId) From tblSMCompanyLocation Where intCompanyLocationId<>@intLocationId
 		While (@intMinRowNo1 is not null)
 		Begin
+			Set @intSubLocationId=NULL
+
 			Select @intSubLocationId=intCompanyLocationSubLocationId 
 			From tblSMCompanyLocationSubLocation Where strSubLocationName=@strSubLocation AND intCompanyLocationId=@intMinRowNo1
 
@@ -89,8 +108,8 @@ Begin
 		End
 
 		--Move to Archive
-		Insert Into tblIPStockArchive(strItemNo,strSubLocation,strStockType,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
-		Select strItemNo,strSubLocation,strStockType,dblQuantity,strSessionId,'Success',''
+		Insert Into tblIPStockArchive(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
+		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,strSessionId,'Success',''
 		From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
 
 		Delete From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
@@ -106,8 +125,8 @@ Begin
 		SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 		--Move to Error
-		Insert Into tblIPStockError(strItemNo,strSubLocation,strStockType,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
-		Select strItemNo,strSubLocation,strStockType,dblQuantity,strSessionId,'Failed',@ErrMsg
+		Insert Into tblIPStockError(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
+		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,strSessionId,'Failed',@ErrMsg
 		From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
 
 		Delete From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
