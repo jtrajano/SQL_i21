@@ -24,6 +24,7 @@ DECLARE @Contacts TABLE
 	, sscon_email nvarchar(max)
 	, sscon_first_name nvarchar(max)
 	, sscon_last_name nvarchar(max)
+	, sscon_suffix nvarchar(max)
 	, sscon_work_no nvarchar(max)
 	, sscon_work_ext nvarchar(max)
 	, sscon_cell_no nvarchar(max)
@@ -42,6 +43,7 @@ DECLARE @Contacts TABLE
 			, sscon_email 
 			, sscon_first_name 
 			, sscon_last_name 
+			, sscon_suffix
 			, sscon_work_no 
 			, sscon_work_ext 
 			, sscon_cell_no 
@@ -56,6 +58,7 @@ DECLARE @Contacts TABLE
 			, isnull(sscon_email, '')
 			, isnull(sscon_first_name, '')
 			, isnull(sscon_last_name, '')
+			, isnull(sscon_suffix, '')
 			, isnull(sscon_work_no, '')
 			, isnull(sscon_work_ext, '')
 			, isnull(sscon_cell_no, '')
@@ -97,7 +100,6 @@ DECLARE @Contacts TABLE
 			select top 1 @id = id, @sscon_cus_no = sscon_cus_no from @Contacts
 			declare @intEntityId int
 			declare @Name		nvarchar(200)
-			declare @Email		nvarchar(200)
 
 			BEGIN -- Create entity record for Contacts
 
@@ -112,15 +114,16 @@ DECLARE @Contacts TABLE
 				declare @CP				nvarchar(200)
 				declare @WorkPhone		nvarchar(200)
 				declare @Fax			nvarchar(200)
-
+				declare @Email          nvarchar(200)
 				
 				select top 1
-					@Name			= rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name)),
+					@Name			= rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name)) + ' ' + rtrim(ltrim(sscon_suffix)),
 					@ContactNumber	= rtrim(ltrim(sscon_contact_id)),
 					@Title			= substring((rtrim(ltrim(sscon_contact_title))), 1,35),
 					@CP				= isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_cell_no)) + ' x' + rtrim(ltrim(sscon_cell_ext))))), 'x'), ''),
 					@WorkPhone		= isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_work_no)) + ' x' + rtrim(ltrim(sscon_work_ext))))), 'x'), ''),
-					@Fax			= isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_fax_no)) + ' x' + rtrim(ltrim(sscon_fax_ext))))), 'x'), '')
+					@Fax			= isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_fax_no)) + ' x' + rtrim(ltrim(sscon_fax_ext))))), 'x'), ''),
+					@Email			= rtrim(ltrim(sscon_email))
 				from @Contacts where id = @id
 				
 				insert into tblEMEntity(strName, strContactNumber, strTitle)
@@ -153,6 +156,15 @@ DECLARE @Contacts TABLE
 					begin
 						insert into tblEMContactDetail (intEntityId, strValue, intContactDetailTypeId)
 						select top 1 @intContactId, @Fax, intContactDetailTypeId from tblEMContactDetailType where strType = 'Phone' and strField = 'Fax' 
+					end
+				end
+
+				if @Email <> ''
+				begin
+					if exists(select top 1 1 from tblEMContactDetailType where strType = 'Email' and strField = 'Alt Email')
+					begin
+						insert into tblEMContactDetail (intEntityId, strValue, intContactDetailTypeId)
+						select top 1 @intContactId, @Email, intContactDetailTypeId from tblEMContactDetailType where strType = 'Email' and strField = 'Alt Email' 
 					end
 				end
 					
