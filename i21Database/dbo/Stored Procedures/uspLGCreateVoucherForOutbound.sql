@@ -82,11 +82,13 @@ BEGIN TRY
 		,intAccountId = [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,dblQtyReceived = 1
 		,dblCost = (
-			Sum(LWS.dblActualAmount) / (
-				SELECT SUM(dblNet)
-				FROM tblLGLoadDetail D
-				WHERE L.intLoadId = D.intLoadId
-				) * SUM(LD.dblNet)
+			CONVERT(NUMERIC(18, 6), Sum(LWS.dblActualAmount)) / (
+				CONVERT(NUMERIC(18, 6), (
+						SELECT SUM(dblNet)
+						FROM tblLGLoadDetail D
+						WHERE L.intLoadId = D.intLoadId
+						))
+				) * CONVERT(NUMERIC(18, 6), SUM(LD.dblNet))
 			)
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -111,9 +113,9 @@ BEGIN TRY
 		,L.intLoadId
 		,L.strLoadNumber
 		,LD.intLoadDetailId
-	
+
 	UNION ALL
-	
+
 	SELECT V.intEntityVendorId
 		,LD.intLoadId
 		,LD.intLoadDetailId
@@ -123,12 +125,14 @@ BEGIN TRY
 		,intAccountId = [dbo].[fnGetItemGLAccount](V.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,dblQtyReceived = 1
 		,dblCost = (
-			Sum(V.dblPrice) / (
-				SELECT SUM(dblNet)
-				FROM vyuLGLoadCostForVendor VN
-				WHERE VN.intLoadId = V.intLoadId
+			CONVERT(NUMERIC(18, 6), Sum(V.dblPrice)) / (
+				CONVERT(NUMERIC(18, 6), (
+						SELECT SUM(dblNet)
+						FROM vyuLGLoadCostForVendor VN
+						WHERE VN.intLoadId = V.intLoadId
+						))
 				)
-			) * V.dblNet
+			) * CONVERT(NUMERIC(18, 6), V.dblNet)
 	FROM vyuLGLoadCostForVendor V
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
