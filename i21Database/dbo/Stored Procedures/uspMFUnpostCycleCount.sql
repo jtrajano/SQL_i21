@@ -174,7 +174,8 @@ BEGIN TRY
 			,[dblCreditReport]
 			,[dblReportingRate]
 			,[dblForeignRate]
-			)
+			,[strRateType]
+		)
 		EXEC dbo.uspICUnpostCosting @intTransactionId
 			,@strAdjustmentNo
 			,@strBatchId
@@ -240,7 +241,8 @@ BEGIN TRY
 			,[dblCreditReport]
 			,[dblReportingRate]
 			,[dblForeignRate]
-			)
+			,[strRateType]
+		)
 		EXEC dbo.uspICUnpostCosting @intBatchId
 			,@strWorkOrderNo
 			,@strBatchId

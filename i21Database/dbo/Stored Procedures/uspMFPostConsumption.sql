@@ -314,6 +314,7 @@ BEGIN
 		,[dblCreditReport]
 		,[dblReportingRate]
 		,[dblForeignRate]
+		,[strRateType]
 		)
 	EXEC dbo.uspICPostCosting @ItemsForPost
 		,@strBatchId

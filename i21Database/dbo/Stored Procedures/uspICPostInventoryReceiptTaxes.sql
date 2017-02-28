@@ -108,6 +108,7 @@ BEGIN
 		,strTransactionForm
 		,intPurchaseTaxAccountId
 		,dblForexRate 
+		,strRateType
 	)
 	AS 
 	(
@@ -127,11 +128,12 @@ BEGIN
 													END 
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= Receipt.intCurrencyId
-				,dblExchangeRate					= 1
+				,dblExchangeRate					= ReceiptItem.dblForexRate
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
 				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
 				,dblForexRate						= ReceiptItem.dblForexRate
+				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -143,6 +145,8 @@ BEGIN
 					ON TaxCode.intTaxCodeId = ReceiptTaxes.intTaxCodeId
 				LEFT JOIN dbo.tblICInventoryTransactionType TransType
 					ON TransType.intTransactionTypeId = @intTransactionTypeId
+				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptItem.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId				
 	)
 	
@@ -182,6 +186,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType 
 	FROM	ForGLEntries_CTE LEFT JOIN dbo.tblGLAccount GLAccount 
 				ON GLAccount.intAccountId = ForGLEntries_CTE.intPurchaseTaxAccountId
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblTax) Debit
@@ -232,6 +237,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType 
 	FROM	ForGLEntries_CTE INNER JOIN @GLAccounts InventoryAccounts
 				ON ForGLEntries_CTE.intItemId = InventoryAccounts.intItemId
 				AND ForGLEntries_CTE.intItemLocationId = InventoryAccounts.intItemLocationId
