@@ -172,6 +172,9 @@ Begin
 
 		If @strStatus IN (52,53) --Success
 		Begin
+			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo,intConcurrencyId=intConcurrencyId+1 
+			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId=@strTrackingNo
+
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage='Success'
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND strFeedStatus IN ('Awt Ack','Ack Rcvd')
 

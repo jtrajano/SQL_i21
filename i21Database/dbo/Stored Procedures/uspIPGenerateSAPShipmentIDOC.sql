@@ -90,7 +90,8 @@ Declare @tblOutput AS Table
 	strLoadStgIds NVARCHAR(MAX),
 	strRowState NVARCHAR(50),
 	strXml NVARCHAR(MAX),
-	strShipmentNo NVARCHAR(100)
+	strShipmentNo NVARCHAR(100),
+	strDeliveryNo NVARCHAR(100)
 )
 
 Select @strCreateIDOCHeader=dbo.fnIPGetSAPIDOCHeader('SHIPMENT CREATE')
@@ -263,6 +264,8 @@ Begin
 			Else
 				Set @strItemXml += '<LFIMG>'  +  '' + '</LFIMG>'
 			Set @strItemXml += '<VRKME>'  +  ISNULL(@strWeightUOM,'') + '</VRKME>' 
+			If UPPER(@strCommodityCode)='TEA' AND UPPER(@strHeaderRowState)='ADDED'
+				Set @strItemXml += '<VOLUM>'  +  '1' + '</VOLUM>' 
 			If ISNULL(@ysnBatchSplit,0)=1
 				Set @strItemXml += '<HIPOS>'  +  ISNULL(@strDeliveryItemNo,'') + '</HIPOS>'
 
@@ -417,8 +420,8 @@ Begin
 	Set @strXml += '</IDOC>'
 	Set @strXml +=  '</DELVRY07>'
 
-	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml,strShipmentNo)
-	VALUES(@intMinHeader,CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,@strLoadNumber)
+	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml,strShipmentNo,strDeliveryNo)
+	VALUES(@intMinHeader,CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,ISNULL(@strLoadNumber,''),ISNULL(@strExternalDeliveryNumber,''))
 
 	NEXT_SHIPMENT:
 	Select @intMinHeader=Min(intLoadStgId) From tblLGLoadStg Where intLoadStgId>@intMinHeader AND ISNULL(strFeedStatus,'')=''
