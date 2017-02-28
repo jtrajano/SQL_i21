@@ -16,18 +16,17 @@ BEGIN
        WHERE intScaleDeviceId = @intScaleDeviceId
        IF @intDeviceInterfaceFileId IS NULL
        BEGIN
-              INSERT INTO tblSCDeviceInterfaceFile (intScaleDeviceId, strDeviceData, intConcurrencyId) 
-              VALUES (@intScaleDeviceId, @strDeviceData, 1)
+              INSERT INTO tblSCDeviceInterfaceFile (intScaleDeviceId, strDeviceData, intConcurrencyId, dtmScaleTime) 
+              VALUES (@intScaleDeviceId, @strDeviceData, 1, GETDATE())
 
 			  SET @ReturnValue = SCOPE_IDENTITY()
        END
        ELSE
        BEGIN
-              UPDATE tblSCDeviceInterfaceFile SET strDeviceData = @strDeviceData 
+              UPDATE tblSCDeviceInterfaceFile SET strDeviceData = @strDeviceData , dtmScaleTime = GETDATE()
               WHERE intDeviceInterfaceFileId = @intDeviceInterfaceFileId
 
 			  SET @ReturnValue = @intDeviceInterfaceFileId
        END
 END
-
 GO
