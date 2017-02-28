@@ -5071,6 +5071,7 @@
     <Build Include="dbo\Tables\tblFAFixedAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetSubLocations.sql" />
     <Build Include="dbo\Views\vyuICItemLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposureDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -76,7 +76,10 @@ LEFT JOIN tblEMEntity e on e.intEntityId=ch.intProducerId
 IF (ISNULL(@ysnVendorProducer,0)=0)
 BEGIN
 	select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
-              dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue, dblTotalSpend
+              CONVERT(NUMERIC(16,2),dblFixedPurchaseVolume) dblFixedPurchaseVolume, CONVERT(NUMERIC(16,2),dblUnfixedPurchaseVolume) dblUnfixedPurchaseVolume
+			  , CONVERT(NUMERIC(16,2),dblTotalCommittedVolume) dblTotalCommittedVolume, CONVERT(NUMERIC(16,2),dblFixedPurchaseValue) dblFixedPurchaseValue,
+			   CONVERT(NUMERIC(16,2),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue, CONVERT(NUMERIC(16,2),dblTotalCommittedValue) dblTotalCommittedValue,
+			    CONVERT(NUMERIC(16,2),dblTotalSpend) dblTotalSpend
 			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,
 			  case when (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) < 0 then 0 else (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) end  dblPotentialAdditionalVolume, 0 as intConcurrencyId
 			  from (
@@ -130,7 +133,7 @@ BEGIN
                                   case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyPrice
        
                                   ,dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
+                                  fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
                                   fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))/
                                   case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyUnFixedPrice                       
 
@@ -165,7 +168,10 @@ ELSE
 BEGIN
 
 	select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
-              dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue, dblTotalSpend
+                   CONVERT(NUMERIC(16,2),dblFixedPurchaseVolume) dblFixedPurchaseVolume, CONVERT(NUMERIC(16,2),dblUnfixedPurchaseVolume) dblUnfixedPurchaseVolume
+			  , CONVERT(NUMERIC(16,2),dblTotalCommittedVolume) dblTotalCommittedVolume, CONVERT(NUMERIC(16,2),dblFixedPurchaseValue) dblFixedPurchaseValue,
+			   CONVERT(NUMERIC(16,2),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue, CONVERT(NUMERIC(16,2),dblTotalCommittedValue) dblTotalCommittedValue,
+			    CONVERT(NUMERIC(16,2),dblTotalSpend) dblTotalSpend
 			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,
 			  case when (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) < 0 then 0 else (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) end  dblPotentialAdditionalVolume, 0 as intConcurrencyId
 			  from (
