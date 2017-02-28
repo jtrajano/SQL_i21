@@ -71,7 +71,7 @@ BEGIN TRY
 
 	IF (SELECT COUNT(1) FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved') >1	
 	BEGIN	
-		SET @strApprovalText='This document concerns the Confirmed Agreement between Parties. Please sign in twofold and return to KDE as follows: one signed original by registered mail and one PDF-copy of the signed original by e-mail.'	
+		SET @strApprovalText='This document concerns the Confirmed Agreement between Parties. Please sign in twofold and return to KDE as follows: one signed original by mail and one PDF-copy of the signed original by e-mail.'	
 		SET @IsFullApproved=1    
 	END
 	ELSE
@@ -82,13 +82,13 @@ BEGIN TRY
 
 	SELECT @FirstApprovalSign =  Sig.blbDetail 
 								 FROM tblSMSignature Sig 
-								 JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
-								 WHERE ESig.intEntityId=@FirstApprovalId
+								 --JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
+								 WHERE Sig.intEntityId=@FirstApprovalId
 
 	SELECT @SecondApprovalSign =Sig.blbDetail 
 								FROM tblSMSignature Sig 
-								JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
-								WHERE ESig.intEntityId=@SecondApprovalId
+								--JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
+								WHERE Sig.intEntityId=@SecondApprovalId
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,
