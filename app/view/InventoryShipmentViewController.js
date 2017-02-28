@@ -97,6 +97,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'int'},
                         {dataIndex: 'strCustomerNumber', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Customer', drillDownClick: 'onViewCustomerNo', hidden: true },
                         {dataIndex: 'strCustomerName', text: 'Customer Name', flex: 1, dataType: 'string', drillDownText: 'View Customer', drillDownClick: 'onViewCustomerName', hidden: true },
+                        {dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                         {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
 
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
@@ -124,6 +125,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'int'},
                         {dataIndex: 'strCustomerNumber', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerNo', hidden: true },
                         {dataIndex: 'strCustomerName', text: 'Customer Name', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerName', hidden: true },
+                        {dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                         {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
 
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
@@ -155,6 +157,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         { dataIndex: 'strCustomerName', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Customer', drillDownClick: 'onViewCustomerName' },
                         { dataIndex: 'strDestination', text: 'Destination', flex: 1, dataType: 'string' },
                         { dataIndex: 'dtmShipDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
+                        { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                         { dataIndex: 'strItemNo', text: 'Item', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
                         { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float'},
                         { xtype: 'numbercolumn', dataIndex: 'dblQtyShipped', text: 'Qty Shipped', flex: 1, dataType: 'float'},
