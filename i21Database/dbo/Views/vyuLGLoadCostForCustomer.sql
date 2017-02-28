@@ -58,27 +58,9 @@ FROM (
 			ELSE ICI.[strDescription]
 			END
 		,[intShipmentItemUOMId] = LD.[intItemUOMId]
-		,[dblPrice] = (
-			Sum(LC.dblAmount) / (
-				SELECT SUM(dblNet)
-				FROM tblLGLoadDetail D
-				WHERE L.intLoadId = D.intLoadId
-				) * SUM(LD.dblNet)
-			)
-		,[dblShipmentUnitPrice] = (
-			Sum(LC.dblAmount) / (
-				SELECT SUM(dblNet)
-				FROM tblLGLoadDetail D
-				WHERE L.intLoadId = D.intLoadId
-				) * SUM(LD.dblNet)
-			)
-		,[dblTotal] = (
-			Sum(LC.dblAmount) / (
-				SELECT SUM(dblNet)
-				FROM tblLGLoadDetail D
-				WHERE L.intLoadId = D.intLoadId
-				) * SUM(LD.dblNet)
-			)
+		,[dblPrice] = Sum(LC.dblAmount) 
+		,[dblShipmentUnitPrice] = Sum(LC.dblAmount) 
+		,[dblTotal] = Sum(LC.dblAmount) 
 		,[intAccountId] = ARIA.[intAccountId]
 		,[intCOGSAccountId] = ARIA.[intCOGSAccountId]
 		,[intSalesAccountId] = ARIA.[intSalesAccountId]
