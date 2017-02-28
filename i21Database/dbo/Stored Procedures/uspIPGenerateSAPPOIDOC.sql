@@ -62,7 +62,8 @@ Declare @tblOutput AS Table
 	strContractFeedIds NVARCHAR(MAX),
 	strRowState NVARCHAR(50),
 	strXml NVARCHAR(MAX),
-	strContractNo NVARCHAR(100)
+	strContractNo NVARCHAR(100),
+	strPONo NVARCHAR(100)
 )
 
 Declare @tblHeader AS Table
@@ -314,11 +315,15 @@ Begin
 		End
 
 		--Repeat Details
-		If UPPER(@strRowState)='ADDED' OR UPPER(@strRowState)='MODIFIED'
 			Begin
 				--Item
 				Set @strItemXml += '<E1BPMEPOITEM SEGMENT="1">'
-				Set @strItemXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
+				If UPPER(@strCommodityCode)='COFFEE'
+					Set @strItemXml += '<PO_ITEM>'		+ '0001'		+ '</PO_ITEM>'
+				Else
+					Set @strItemXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
+				If UPPER(@strRowState)='DELETE'
+					Set @strItemXml += '<DELETE_IND>'	+ 'X'	+ '</DELETE_IND>'
 				If UPPER(@strCommodityCode)='TEA'
 					Set @strItemXml += '<MATERIAL>'		+ dbo.fnEscapeXML(ISNULL(ISNULL(@strContractItemNo,@strItemNo),''))				+ '</MATERIAL>'
 				ELSE
@@ -345,8 +350,13 @@ Begin
 
 				--ItemX
 				Set @strItemXXml += '<E1BPMEPOITEMX SEGMENT="1">'
-				Set @strItemXXml += '<PO_ITEM>'			+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
+				If UPPER(@strCommodityCode)='COFFEE'
+					Set @strItemXXml += '<PO_ITEM>'		+ '0001'		+ '</PO_ITEM>'
+				Else
+					Set @strItemXXml += '<PO_ITEM>'			+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
 				Set @strItemXXml += '<PO_ITEMX>'		+ 'X'	+ '</PO_ITEMX>'
+				If UPPER(@strRowState)='DELETE'
+					Set @strItemXXml += '<DELETE_IND>'	+ 'X'	+ '</DELETE_IND>'
 				If @strItemNo IS NOT NULL
 					Set @strItemXXml += '<MATERIAL>'		+ 'X'		+ '</MATERIAL>'
 				If @strSubLocation IS NOT NULL
@@ -374,18 +384,26 @@ Begin
 
 				--Schedule
 				Set @strScheduleXml += '<E1BPMEPOSCHEDULE SEGMENT="1">'
-				Set @strScheduleXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
+				If UPPER(@strCommodityCode)='COFFEE'
+					Set @strScheduleXml += '<PO_ITEM>'		+ '0001'		+ '</PO_ITEM>'
+				Else
+					Set @strScheduleXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
 				Set @strScheduleXml += '<SCHED_LINE>'	+ '0001'		+ '</SCHED_LINE>'
-				Set @strScheduleXml += '<DELIVERY_DATE>'+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')	+ '</DELIVERY_DATE>'
+				Set @strScheduleXml += '<DEL_DATCAT_EXT>'	+ '1'		+ '</DEL_DATCAT_EXT>'
+				Set @strScheduleXml += '<DELIVERY_DATE>'+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,104),'')	+ '</DELIVERY_DATE>'
 				Set @strScheduleXml += '<QUANTITY>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblQuantity)),'')	+ '</QUANTITY>'
 				Set @strScheduleXml += '</E1BPMEPOSCHEDULE>'
 
 				--ScheduleX
 				Set @strScheduleXXml += '<E1BPMEPOSCHEDULX SEGMENT="1">'
-				Set @strScheduleXXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
+				If UPPER(@strCommodityCode)='COFFEE'
+					Set @strScheduleXXml += '<PO_ITEM>'		+ '0001'		+ '</PO_ITEM>'
+				Else
+					Set @strScheduleXXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
 				Set @strScheduleXXml += '<SCHED_LINE>'	+ '0001'		+ '</SCHED_LINE>'
 				Set @strScheduleXXml += '<PO_ITEMX>'		+ 'X'	+ '</PO_ITEMX>'
 				Set @strScheduleXXml += '<SCHED_LINEX>'		+ 'X'	+ '</SCHED_LINEX>'
+				Set @strScheduleXXml += '<DEL_DATCAT_EXT>'	+ 'X'		+ '</DEL_DATCAT_EXT>'
 				If @dtmPlannedAvailabilityDate IS NOT NULL
 					Set @strScheduleXXml += '<DELIVERY_DATE>'+ 'X'	+ '</DELIVERY_DATE>'
 				If @dblQuantity IS NOT NULL
@@ -394,7 +412,10 @@ Begin
 
 				--Basis Information
 				Set @strCondXml += '<E1BPMEPOCOND SEGMENT="1">'
-				Set @strCondXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
+				If UPPER(@strCommodityCode)='COFFEE'
+					Set @strCondXml += '<ITM_NUMBER>'		+ '0001'		+ '</ITM_NUMBER>'
+				Else
+					Set @strCondXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
 				Set @strCondXml += '<COND_TYPE>'		+ 'ZDIF'		+ '</COND_TYPE>'
 				Set @strCondXml += '<COND_VALUE>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblBasis)),'')	+ '</COND_VALUE>'
 				Set @strCondXml += '<CURRENCY>'			+ ISNULL(@strCurrency,'')		+ '</CURRENCY>'
@@ -405,7 +426,10 @@ Begin
 
 				--Basis InformationX
 				Set @strCondXXml += '<E1BPMEPOCONDX SEGMENT="1">'
-				Set @strCondXXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
+				If UPPER(@strCommodityCode)='COFFEE'
+					Set @strCondXXml += '<ITM_NUMBER>'		+ '0001'		+ '</ITM_NUMBER>'
+				Else
+					Set @strCondXXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
 				Set @strCondXXml += '<ITM_NUMBERX>'		+ 'X'		+ '</ITM_NUMBERX>'
 				Set @strCondXXml += '<COND_TYPE>'		+ 'X'		+ '</COND_TYPE>'
 				If @dblBasis IS NOT NULL
@@ -460,24 +484,6 @@ Begin
 				End
 			End
 
-		If UPPER(@strRowState)='DELETE'
-		Begin
-			--Item
-			Set @strItemXml += '<E1BPMEPOITEM SEGMENT="1">'
-			Set @strItemXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
-			Set @strItemXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractDetailId),'')	+ '</TRACKINGNO>'
-			Set @strItemXml += '<DELETE_IND>'	+ 'X'	+ '</DELETE_IND>'
-			Set @strItemXml +=	'</E1BPMEPOITEM>'
-
-			--ItemX
-			Set @strItemXXml += '<E1BPMEPOITEMX SEGMENT="1">'
-			Set @strItemXXml += '<PO_ITEM>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</PO_ITEM>'
-			Set @strItemXXml += '<PO_ITEMX>'		+ 'X'		+ '</PO_ITEMX>'
-			Set @strItemXXml += '<TRACKINGNO>'	+ 'X'	+ '</TRACKINGNO>'
-			Set @strItemXXml += '<DELETE_IND>'	+ 'X'	+ '</DELETE_IND>'
-			Set @strItemXXml +=	'</E1BPMEPOITEMX>'
-		End
-
 		--Header End Xml
 		If ISNULL(@strXmlHeaderEnd,'')=''
 		Begin
@@ -508,8 +514,8 @@ Begin
 	--Final Xml
 	Set @strXml = @strXmlHeaderStart + @strItemXml + @strItemXXml + @strScheduleXml + @strScheduleXXml + @strCondXml + @strCondXXml + @strTextXml + @strXmlHeaderEnd
 
-	INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml,strContractNo)
-	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,@strContractNumber)
+	INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml,strContractNo,strPONo)
+	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,ISNULL(@strContractNumber,''),ISNULL(@strERPPONumber,''))
 
 	NEXT_PO:
 	Select @intMinRowNo=Min(intRowNo) From @tblHeader Where intRowNo>@intMinRowNo
