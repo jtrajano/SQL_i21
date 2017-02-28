@@ -299,8 +299,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         flex: 1
                                                                     }
                                                                 ],
-                                                                flex: 1.5,
                                                                 enableDrillDown: true,
+                                                                flex: 1.5,
                                                                 itemId: 'cboCustomer',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Customer<font color="red"> *</font>',
@@ -1259,7 +1259,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         width: 120,
                                                                         align: 'right',
                                                                         dataIndex: 'dblForeignUnitPrice',
-                                                                        text: 'Foreign Unit Price',
+                                                                        text: 'Unit Price',
                                                                         format: '0,000.00####',
                                                                         editor: {
                                                                             xtype: 'numeric'
@@ -1288,11 +1288,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         dataType: 'numeric',
+                                                                        hidden: true,
                                                                         itemId: 'colForeignLineTotal',
                                                                         width: 120,
                                                                         align: 'right',
                                                                         dataIndex: 'dblForeignLineTotal',
-                                                                        text: 'Foreign Line Total'
+                                                                        text: 'Line Total'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
