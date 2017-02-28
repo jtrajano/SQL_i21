@@ -13,5 +13,6 @@ namespace iRely.Inventory.BusinessLayer
     public interface ILotBl : IBusinessLayer<tblICLot>
     {
         Task<SearchResult> GetHistory(GetParameter param);
+        Task<SearchResult> GetLots(GetParameter param);
     }
 }
