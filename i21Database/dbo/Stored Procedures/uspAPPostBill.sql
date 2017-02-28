@@ -267,7 +267,7 @@ WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 IF ISNULL(@post,0) = 1
 BEGIN
 	INSERT INTO @GLEntries (
-	    dtmDate ,
+		dtmDate ,
 	    strBatchId ,
 	    intAccountId ,
 	    dblDebit ,
@@ -300,7 +300,7 @@ BEGIN
 	    strRateType 
 	)
 	SELECT     
-	    dtmDate ,
+		dtmDate ,
 	    strBatchId ,
 	    intAccountId ,
 	    dblDebit ,
@@ -658,6 +658,7 @@ ELSE
 			,[strDescription]
 			,[strJournalLineDescription]
 			,[strReference]	
+			,[intCurrencyId]
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
@@ -676,6 +677,10 @@ ELSE
 			,[strTransactionType]
 			,[strAccountId]
 			,[strAccountGroup]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
+			,[strRateType]
+			
 		)
 		SELECT
 			[strTransactionId]
@@ -684,6 +689,7 @@ ELSE
 			,A.[strDescription]
 			,A.[strJournalLineDescription]
 			,A.[strReference]	
+			,A.[intCurrencyId]
 			,A.[dtmTransactionDate]
 			,Debit.Value
 			,Credit.Value
@@ -692,7 +698,7 @@ ELSE
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
-			,A.[dblExchangeRate]
+			,A.[dblForeignRate]
 			,A.[intUserId]
 			,A.[dtmDateEntered]
 			,A.[strBatchId]
@@ -702,13 +708,19 @@ ELSE
 			,A.[strTransactionType]
 			,B.strAccountId
 			,C.strAccountGroup
+			,DebitForeign.Value
+			,CreditForeign.Value
+			,(SELECT strCurrencyExchangeRateType FROM dbo.tblSMCurrencyExchangeRateType 
+				WHERE intCurrencyExchangeRateTypeId IN (SELECT TOP 1 intCurrencyExchangeRateTypeId FROM dbo.tblAPBillDetail WHERE intBillId = A.intTransactionId ))         
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId
 		INNER JOIN dbo.tblGLAccountGroup C
 			ON B.intAccountGroupId = C.intAccountGroupId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit;
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit
+		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) DebitForeign
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0))  CreditForeign;
 		
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
