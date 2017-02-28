@@ -169,6 +169,7 @@ namespace iRely.Inventory.Model
         public bool? ysnPosted { get; set; }
         public int? intWarehouseInstructionHeaderId { get; set; }
         public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
 
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
     }

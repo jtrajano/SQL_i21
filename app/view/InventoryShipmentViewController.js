@@ -21,6 +21,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'int'},
                 {dataIndex: 'strCustomerNumber', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerNo'},
                 {dataIndex: 'strCustomerName', text: 'Customer Name', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerName'},
+                {dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                 {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'},
 
                 {dataIndex: 'strReferenceNumber', text: 'Reference Number', flex: 1, dataType: 'string', hidden: true },
