@@ -43,7 +43,7 @@ SELECT Lot.intLotId
        , strWeightUOM = CASE WHEN isnull(Lot.intWeightUOMId,0) = 0 THEN UOM.strUnitMeasure ELSE WeightUOM.strUnitMeasure END
        , dblWeightUOMConv = ItemWeightUOM.dblUnitQty
        , Lot.dblWeightPerQty
-       , Lot.intOriginId
+       , OG.intCountryID intOriginId
        , Lot.strBOLNo
        , Lot.strVessel
        , Lot.strReceiptNumber
@@ -96,5 +96,7 @@ LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLoca
 LEFT JOIN tblICLotStatus LotStatus ON LotStatus.intLotStatusId = Lot.intLotStatusId
 LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = Lot.intWeightUOMId
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+LEFT JOIN tblICCommodityAttribute CA ON	CA.intCommodityAttributeId	= Item.intOriginId	AND CA.strType = 'Origin'
+LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 WHERE Lot.dblQty > 0 
 ) InvLots
