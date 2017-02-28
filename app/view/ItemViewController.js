@@ -435,6 +435,14 @@ Ext.define('Inventory.view.ItemViewController', {
                 colLocationCostingMethod: 'strCostingMethod'
             },
 
+            grdItemSubLocations: {
+                colSubLocationName: {
+                    editor: {
+                        store: '{subLocations}'
+                    }
+                }
+            },
+
             //--------------//
             //GL Account Tab//
             //--------------//
@@ -1314,7 +1322,7 @@ Ext.define('Inventory.view.ItemViewController', {
             grdManufacturingCellAssociation = win.down('#grdManufacturingCellAssociation'),
             grdOwner = win.down('#grdOwner'),
             grdMotorFuelTax = win.down('#grdMotorFuelTax'),
-
+            grdItemSubLocations = win.down('#grdItemSubLocations'),
             grdPricing = win.down('#grdPricing'),
             grdPricingLevel = win.down('#grdPricingLevel'),
             grdSpecialPricing = win.down('#grdSpecialPricing'),
@@ -1339,7 +1347,7 @@ Ext.define('Inventory.view.ItemViewController', {
             enableCustomTab: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             onSaveClick: me.saveAndPokeGrid(win, grdUOM),
-            
+            include: 'tblICItemLocations.tblICItemSubLocations',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
@@ -1358,7 +1366,16 @@ Ext.define('Inventory.view.ItemViewController', {
                         grid: grdLocationStore,
                         deleteButton : grdLocationStore.down('#btnDeleteLocation'),
                         position: 'none'
-                    })
+                    }),
+                    details: [
+                        {
+                            key: 'tblICItemSubLocations',
+                            component: Ext.create('iRely.mvvm.grid.Manager', {
+                                grid: grdItemSubLocations,
+                                deleteButton : grdItemSubLocations.down('#btnDeleteItemSubLocation')
+                            })
+                        }
+                    ]
                 },
                 {
                     key: 'tblICItemVendorXrefs',

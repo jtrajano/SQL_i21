@@ -970,9 +970,10 @@ Ext.define('Inventory.view.Item', {
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
-                                                                flex: 1,
+                                                                flex: 3,
                                                                 itemId: 'grdLocationStore',
                                                                 margin: -1,
+                                                                width: 593,
                                                                 columnLines: true,
                                                                 dockedItems: [
                                                                     {
@@ -1082,6 +1083,102 @@ Ext.define('Inventory.view.Item', {
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel'
                                                                 })
+                                                            },
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                flex: 2,
+                                                                itemId: 'grdItemSubLocations',
+                                                                margin: '0 0 0 10',
+                                                                title: 'Sub Locations',
+                                                                forceFit: true,
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions1',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnAddItemSubLocation',
+                                                                                iconCls: 'small-insert',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteItemSubLocation',
+                                                                                iconCls: 'small-remove',
+                                                                                text: 'Remove'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colsubSubLocationName',
+                                                                        width: 244,
+                                                                        text: 'Sub Location',
+                                                                        editor: {
+                                                                            xtype: 'combobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationSubLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Sub Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strSubLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Sub Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strSubLocationDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboItemSubLocations',
+                                                                            displayField: 'strSubLocationName',
+                                                                            valueField: 'intCompanyLocationSubLocationId'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        hidden: true,
+                                                                        itemId: 'colsubItemSubLocationId',
+                                                                        dataIndex: 'intItemSubLocationId',
+                                                                        text: 'Sub Location Id'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        hidden: true,
+                                                                        itemId: 'colsubSubLocationId',
+                                                                        dataIndex: 'intSubLocationId',
+                                                                        text: 'Item Sub Location Id'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        hidden: true,
+                                                                        itemId: 'colsubItemLocationId',
+                                                                        dataIndex: 'intItemLocationId',
+                                                                        text: 'Item Sub Location Id'
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     },
