@@ -5,6 +5,7 @@ SELECT O.intItemOwnerId
 	,I.strItemNo
 	,O.intOwnerId
 	,E.strEntityNo AS strOwnerNo
+	,E.strEntityNo + ' - ' + E.strName AS strDisplayOwner
 	,E.strName
 FROM tblICItemOwner O
 JOIN tblEMEntity E ON E.intEntityId = O.intOwnerId
