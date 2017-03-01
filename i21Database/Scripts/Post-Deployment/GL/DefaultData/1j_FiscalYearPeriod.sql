@@ -5,4 +5,5 @@ GO
 	 UPDATE tblGLFiscalYearPeriod SET  ysnINVOpen = 1 WHERE ysnINVOpen IS NULL
 	 UPDATE tblGLFiscalYearPeriod SET  ysnPROpen = 1 WHERE ysnPROpen IS NULL
 	 UPDATE tblGLFiscalYearPeriod SET  ysnCMOpen = 1 WHERE ysnCMOpen IS NULL
+	 UPDATE tblGLFiscalYearPeriod SET  ysnCTOpen = 1 WHERE ysnCTOpen IS NULL
 GO
