@@ -26,8 +26,7 @@
 	,@AllowQtyToExceed			BIT
 	,@InvoiceType				NVARCHAR(200)
 	,@TermId					INT
-	,@GetAllAvailablePricing	BIT
-	,@SpecialPricingCurrencyId	INT
+	,@GetAllAvailablePricing	BIT	
 )
 RETURNS @returntable TABLE
 (
@@ -71,6 +70,7 @@ BEGIN
 		,@InvoiceType			
 		,@TermId				
 		,@GetAllAvailablePricing
-		,@SpecialPricingCurrencyId)
+		,(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference ))
+
 	RETURN
 END
