@@ -352,7 +352,7 @@ Begin
 			Set @strItemXml += '</E1EDL19>'
 
 			Set @strItemXml += '<E1EDL43 SEGMENT="1">'
-			Set @strItemXml += '<QUALI>'  +  'V' + '</QUALI>' 
+			Set @strItemXml += '<QUALF>'  +  'V' + '</QUALF>' 
 			Set @strItemXml += '<BELNR>'  +  ISNULL(@strPONo,'') + '</BELNR>' 
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strPOLineItemNo,'') + '</POSNR>' 
 
@@ -458,7 +458,7 @@ Begin
 					+ '<VEMEH>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(ld.strUnitOfMeasure,'')) + '</VEMEH>'
 					+ '</E1EDL44>'			 
 					From tblLGLoadDetailContainerLink cl Join tblLGLoadDetailLSPStg ld on cl.intLoadDetailId=ld.intLoadDetailId
-					Where intLoadContainerId=@intLoadContainerId
+					Where intLoadContainerId=@intLoadContainerId AND ld.intLoadStgId=@intLoadStgId
 
 					Set @strContainerXml += ISNULL(@strContainerItemXml,'')
 					Set @strContainerXml += '</E1EDL37>'
