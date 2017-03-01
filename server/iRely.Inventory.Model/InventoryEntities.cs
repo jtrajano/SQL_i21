@@ -58,6 +58,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICItemKitDetailMap());
             modelBuilder.Configurations.Add(new tblICItemLocationMap());
             modelBuilder.Configurations.Add(new tblICItemSubLocationMap());
+            modelBuilder.Configurations.Add(new vyuICItemSubLocationsMap());
             modelBuilder.Configurations.Add(new tblICItemCommodityCostMap());
             modelBuilder.Configurations.Add(new tblICItemNoteMap());
             modelBuilder.Configurations.Add(new tblICItemOwnerMap());

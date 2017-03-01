@@ -971,9 +971,11 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'advancefiltergrid',
                                                                 flex: 3,
+                                                                reference: 'grdLocationStore',
                                                                 itemId: 'grdLocationStore',
                                                                 margin: -1,
                                                                 width: 593,
+                                                                title: 'Company Locations',
                                                                 columnLines: true,
                                                                 dockedItems: [
                                                                     {
@@ -1125,7 +1127,7 @@ Ext.define('Inventory.view.Item', {
                                                                         width: 244,
                                                                         text: 'Sub Location',
                                                                         editor: {
-                                                                            xtype: 'combobox',
+                                                                            xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
                                                                                     dataIndex: 'intCompanyLocationSubLocationId',
@@ -1154,7 +1156,7 @@ Ext.define('Inventory.view.Item', {
                                                                             ],
                                                                             itemId: 'cboItemSubLocations',
                                                                             displayField: 'strSubLocationName',
-                                                                            valueField: 'intCompanyLocationSubLocationId'
+                                                                            valueField: 'strSubLocationName'
                                                                         }
                                                                     },
                                                                     {
@@ -1162,21 +1164,34 @@ Ext.define('Inventory.view.Item', {
                                                                         hidden: true,
                                                                         itemId: 'colsubItemSubLocationId',
                                                                         dataIndex: 'intItemSubLocationId',
-                                                                        text: 'Sub Location Id'
+                                                                        text: 'Id'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         hidden: true,
                                                                         itemId: 'colsubSubLocationId',
                                                                         dataIndex: 'intSubLocationId',
-                                                                        text: 'Item Sub Location Id'
+                                                                        text: 'Sub Location Id'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         hidden: true,
                                                                         itemId: 'colsubItemLocationId',
                                                                         dataIndex: 'intItemLocationId',
-                                                                        text: 'Item Sub Location Id'
+                                                                        text: 'Item Location Id'
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvItemSubLocations'
+                                                                },
+                                                                selModel: {
+                                                                    selType: 'checkboxmodel'
+                                                                },
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepItemSubLocations',
+                                                                        clicksToEdit: 1
                                                                     }
                                                                 ]
                                                             }

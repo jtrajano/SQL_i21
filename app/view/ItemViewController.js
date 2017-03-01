@@ -436,9 +436,19 @@ Ext.define('Inventory.view.ItemViewController', {
             },
 
             grdItemSubLocations: {
-                colSubLocationName: {
+                colsubSubLocationName: {
+                    dataIndex: 'strSubLocationName',
                     editor: {
-                        store: '{subLocations}'
+                        store: '{subLocations}',
+                        origValueField: 'intCompanyLocationSubLocationId',
+                        origUpdateField: 'intSubLocationId',
+                        defaultFilters: [
+                            {
+                                column: 'intCompanyLocationId',
+                                value: '{grdLocationStore.selection.intCompanyLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 }
             },
@@ -1347,7 +1357,6 @@ Ext.define('Inventory.view.ItemViewController', {
             enableCustomTab: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             onSaveClick: me.saveAndPokeGrid(win, grdUOM),
-            include: 'tblICItemLocations.tblICItemSubLocations',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
@@ -3959,6 +3968,26 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    // onLocationSelectionChange: function(selModel, selected, oOpts) {
+    //     if (selModel) {
+    //         if (selModel.view === null || selModel.view == 'undefined') {
+    //             if (selModel.views == 'undefined' || selModel.views === null || selModel.views.length == 0)
+    //                 return;
+    //         }
+    //         var win = selModel.view.grid.up('window');
+    //         var vm = win.viewModel;
+    //         var grid = win.down('#grdItemSubLocations');
+
+    //         if (selected.length > 0) {
+    //             var current = selected[0];
+                
+    //             if(!current.phantom && !current.dirty) {
+                    
+    //             }
+    //         }
+    //     }
+    // },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -4067,7 +4096,8 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#grdLocationStore": {
                 itemdblclick: this.onLocationDoubleClick,
-                cellclick: this.onLocationCellClick
+                cellclick: this.onLocationCellClick,
+                //selectionchange: this.onLocationSelectionChange
             },
             "#cboTracking": {
                 specialKey: this.onSpecialKeyTab

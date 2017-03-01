@@ -13,11 +13,10 @@ namespace iRely.Inventory.Model
             // Table & Column Mappings
             this.ToTable("tblICItemSubLocation");
             this.Property(t => t.intItemSubLocationId).HasColumnName("intItemSubLocationId");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
 
-            this.HasOptional(p => p.tblICItemLocation)
+            this.HasRequired(p => p.tblICItemLocation)
                 .WithMany(p => p.tblICItemSubLocations)
                 .HasForeignKey(p => p.intItemLocationId);
         }
