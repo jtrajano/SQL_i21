@@ -36,7 +36,7 @@ RETURNS @returntable TABLE
     [dblCreditReport]           NUMERIC (18, 6) NULL,
     [dblReportingRate]          NUMERIC (18, 6) NULL,
     [dblForeignRate]            NUMERIC (18, 6) NULL,
-	[strRateType]				NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
+	[strRateType]				NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
 )
 AS
@@ -79,15 +79,20 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
-											 ELSE A.dblAmountDue END) * ISNULL(NULLIF(ForexRate.dblRate,0),1) AS DECIMAL(18,2)),
+		[dblCredit]						=	 CAST(CASE WHEN ForexRate.dblRate > 0 
+												 THEN  (CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
+													 ELSE Details.dblTotal END)
+											ELSE (
+													(CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
+													 ELSE A.dblAmountDue END))
+											END AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
-		[dblExchangeRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
+		[dblExchangeRate]				=	0,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	CASE WHEN intTransactionType = 1 THEN 'Posted Bill'
@@ -112,7 +117,7 @@ BEGIN
 											 ELSE A.dblAmountDue END) AS DECIMAL(18,2)),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
+		[dblForeignRate]				=	0,
 		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A
@@ -120,11 +125,17 @@ BEGIN
 				ON A.intEntityVendorId = C.intEntityVendorId
 			CROSS APPLY
 			(
-				SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency 
+				SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency
 				FROM dbo.tblAPBillDetail A 
 				LEFT JOIN dbo.tblSMCurrencyExchangeRateType B ON A.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
 				WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 			) ForexRate
+			CROSS APPLY
+			(
+				SELECT SUM(dblTotal * A.dblRate) AS dblTotal
+				FROM dbo.tblAPBillDetail A 
+				WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+			) Details
 			
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	--PREPAY, DEBIT MEMO ENTRIES
