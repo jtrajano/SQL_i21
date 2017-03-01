@@ -166,13 +166,13 @@ BEGIN
 												CASE 
 													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
 														-- Convert the line total to transaction currency. 
-														ReceiptItem.dblLineTotal * ReceiptItem.dblForexRate
+														ISNULL(ReceiptItem.dblLineTotal, 0) * ReceiptItem.dblForexRate
 													ELSE 
-														ReceiptItem.dblLineTotal
+														ISNULL(ReceiptItem.dblLineTotal, 0)
 												END 
 												* 
 												-- and then convert the transaction currency to the other charge currency. 
-												CASE WHEN ISNULL(Charge.intCurrencyId, Receipt.intCurrencyId) <> Receipt.intCurrencyId AND ISNULL(Charge.dblForexRate, 0) <> 0 THEN 
+												CASE WHEN ISNULL(Charge.intCurrencyId, Receipt.intCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(Charge.dblForexRate, 0) <> 0 THEN 
 														1 / Charge.dblForexRate
 													ELSE 
 														1
