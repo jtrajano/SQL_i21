@@ -91,7 +91,7 @@ intTransactionId
 	WHEN intBankTransactionTypeId = 5 AND dblAmount < 0 THEN dblAmount
 	ELSE 0 
 	END AS dblPayment
-,CASE WHEN intBankTransactionTypeId IN (1,10,11,18,19,103,116,121,123)  THEN dblAmount 
+,CASE WHEN intBankTransactionTypeId IN (1,10,11,18,19,103,116,121,122,123)  THEN dblAmount 
 	WHEN intBankTransactionTypeId = 5 AND dblAmount > 0 THEN dblAmount
 	ELSE 0 
 	END AS dblDeposit
