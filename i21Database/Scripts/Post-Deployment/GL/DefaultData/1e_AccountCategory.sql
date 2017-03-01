@@ -109,7 +109,12 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 59,name = 'Realized Gain or Loss Foreign Currency' UNION ALL
 			SELECT id = 60,name = 'Unrealized Gain or Loss Foreign Currency'UNION ALL
 			SELECT id = 61,name = 'Deferred Payable'UNION ALL
-			SELECT id = 62,name = 'Gain or loss commodity' --GL-1667
+			SELECT id = 62,name = 'Forex Revalue Offset AR' UNION ALL --GL-3286
+			SELECT id = 63,name = 'Forex Revalue Offset AP' UNION ALL --GL-3286
+			SELECT id = 64,name = 'Forex Revalue Offset CM' UNION ALL --GL-3286
+			SELECT id = 65,name = 'Forex Revalue Offset Inventory' UNION ALL --GL-3286
+			SELECT id = 66,name = 'Forex Revalue Offset Purchase Contract' UNION ALL --GL-3286
+			SELECT id = 67,name = 'Forex Revalue Offset Sales Contract' --GL-3286
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
