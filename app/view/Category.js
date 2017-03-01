@@ -147,6 +147,7 @@ Ext.define('Inventory.view.Category', {
                                         items: [
                                             {
                                                 xtype: 'container',
+                                                height: 389,
                                                 layout: {
                                                     type: 'hbox',
                                                     align: 'stretch',
@@ -483,6 +484,7 @@ Ext.define('Inventory.view.Category', {
                                             {
                                                 xtype: 'container',
                                                 flex: 1,
+                                                hidden: true,
                                                 layout: {
                                                     type: 'hbox',
                                                     align: 'stretch',
