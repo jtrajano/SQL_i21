@@ -81,7 +81,21 @@ SELECT
 	,SPT.strPricingType as strSPricingType
 	,SFR.strOrigin+' - '+SFR.strDest as strSOriginDest
 	,SCT.dblNoOfLots as dblSNoOfLots
-	,ysnDelivered = CONVERT(BIT,(CASE WHEN SCT.dblBalance <= 0 THEN 1 ELSE 0 END))
+	,ysnDelivered = CONVERT(BIT, CASE 
+								 WHEN SCT.dblBalance <= 0
+									THEN 1
+								 ELSE CASE 
+										WHEN (
+												ALD.dblSAllocatedQty > ISNULL((
+														SELECT SUM(LD.dblQuantity)
+														FROM tblLGLoadDetail LD
+														WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId
+														), 0)
+												)
+											THEN 0
+										ELSE 1
+										END
+								 END)
 FROM tblLGAllocationDetail ALD
 JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId
 LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = ALH.intCommodityId
