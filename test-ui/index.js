@@ -677,6 +677,21 @@ Harness.start(
                         ]
                     }
                 ]
+            },
+
+            {
+                group: 'Commodity',
+                items: [
+                    {
+                        url: 'BusinessDomain/Commodity/17xOpenSearchCommodityScreen.js?v=' + version,
+                        title: '17xOpenSearchCommodityScreen',
+                        preload: [
+                            functionalTest,
+                            commonIC
+
+                        ]
+                    }
+                ]
             }
 
 
