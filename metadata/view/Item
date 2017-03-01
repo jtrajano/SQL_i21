@@ -2143,7 +2143,8 @@
                                                         "itemId": "grdLocationStore",
                                                         "layout|flex": 3,
                                                         "margin": -1,
-                                                        "title": null,
+                                                        "reference": "grdLocationStore",
+                                                        "title": "Company Locations",
                                                         "width": 593
                                                     },
                                                     "name": "MyGridPanel2",
@@ -2400,6 +2401,9 @@
                                                         "title": "Sub Locations"
                                                     },
                                                     "name": "MyGridPanel18",
+                                                    "configAlternates": {
+                                                        "viewConfig": "object"
+                                                    },
                                                     "designerId": "b2a87234-9a0c-445c-a751-80f5de420ddf",
                                                     "cn": [
                                                         {
@@ -2506,9 +2510,10 @@
                                                                             "    }",
                                                                             "]"
                                                                         ],
+                                                                        "designer|createAlias": "gridcombobox",
                                                                         "displayField": "strSubLocationName",
                                                                         "itemId": "cboItemSubLocations",
-                                                                        "valueField": "intCompanyLocationSubLocationId"
+                                                                        "valueField": "strSubLocationName"
                                                                     },
                                                                     "name": "MyComboBox85",
                                                                     "configAlternates": {
@@ -2536,7 +2541,7 @@
                                                                 "dataIndex": "intItemSubLocationId",
                                                                 "hidden": true,
                                                                 "itemId": "colsubItemSubLocationId",
-                                                                "text": "Sub Location Id"
+                                                                "text": "Id"
                                                             },
                                                             "name": "MyColumn74",
                                                             "designerId": "4dd138f6-cdec-4cb6-a3c8-f4f15dd7814c"
@@ -2552,7 +2557,7 @@
                                                                 "dataIndex": "intSubLocationId",
                                                                 "hidden": true,
                                                                 "itemId": "colsubSubLocationId",
-                                                                "text": "Item Sub Location Id"
+                                                                "text": "Sub Location Id"
                                                             },
                                                             "name": "MyColumn82",
                                                             "designerId": "07c05b42-b3ef-49c7-9df9-f44886fc6ec7"
@@ -2568,7 +2573,7 @@
                                                                 "dataIndex": "intItemLocationId",
                                                                 "hidden": true,
                                                                 "itemId": "colsubItemLocationId",
-                                                                "text": "Item Sub Location Id"
+                                                                "text": "Item Location Id"
                                                             },
                                                             "name": "MyColumn83",
                                                             "designerId": "fe3e3d60-c6e1-447e-a59f-42d6a568718f"
@@ -2580,8 +2585,35 @@
                                                                 "type": "object"
                                                             },
                                                             "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "grvItemSubLocations"
+                                                            },
                                                             "name": "MyGridView1",
                                                             "designerId": "233a10b4-cbd4-4de2-b33a-decba52cdf9a"
+                                                        },
+                                                        {
+                                                            "type": "Ext.selection.CheckboxModel",
+                                                            "reference": {
+                                                                "name": "selModel",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "name": "MyCheckboxSelectionModel14",
+                                                            "designerId": "c9266364-a6af-4215-8e09-938f5f41c5d5"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.plugin.CellEditing",
+                                                            "reference": {
+                                                                "name": "plugins",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "clicksToEdit": 1,
+                                                                "pluginId": "cepItemSubLocations"
+                                                            },
+                                                            "name": "MyCellEditingPlugin4",
+                                                            "designerId": "3180b5ea-b992-4e84-b38f-1dcce853d7df"
                                                         }
                                                     ]
                                                 }

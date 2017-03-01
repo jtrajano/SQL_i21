@@ -5,7 +5,8 @@ Ext.define('Inventory.model.ItemLocation', {
     extend: 'iRely.BaseEntity',
 
     requires: [
-        'Ext.data.Field'
+        'Ext.data.Field',
+        'Inventory.model.ItemSubLocation',
     ],
 
     idProperty: 'intItemLocationId',

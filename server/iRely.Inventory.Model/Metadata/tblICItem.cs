@@ -888,6 +888,16 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set;  }
     }
 
+    public class vyuICItemSubLocations
+    {
+        public int intItemSubLocationId { get; set; }
+        public int? intItemLocationId { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intConcurrencyId { get; set; }
+
+    }
+
     public class vyuICGetItemSubLocations
     {
         public int intId { get; set; }
