@@ -73,6 +73,13 @@ BEGIN TRY
 
 	DROP TABLE #tmpVPC
 
+	-- Add Default (1) in NULL intConcurrencyId
+	DECLARE @RCProductCode INT
+	SELECT TOP 1 @RCProductCode =  intReportingComponentProductCodeId FROM tblTFReportingComponentProductCode
+	IF(@RCProductCode IS NOT NULL)
+		BEGIN
+			UPDATE tblTFReportingComponentProductCode SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
+		END
 END TRY
 BEGIN CATCH
 	SELECT 
