@@ -1345,15 +1345,13 @@ IF @post = 1
 	BEGIN TRY
 			  		 
 		INSERT INTO @GLEntries (
-			[dtmDate] 
+			 [dtmDate]
 			,[strBatchId]
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
-			,[dblDebitForeign]
-			,[dblCreditForeign]
 			,[strDescription]
 			,[strCode]
 			,[strReference]
@@ -1372,6 +1370,13 @@ IF @post = 1
 			,[strTransactionForm]
 			,[strModuleName]
 			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
 		)
 		--DEBIT
 		SELECT
@@ -1383,12 +1388,10 @@ IF @post = 1
 													CASE WHEN @intWriteOffAccount IS NOT NULL THEN @intWriteOffAccount ELSE @WriteOffAccount END
 												ELSE A.intAccountId END)
 											END
-			,dblDebit					= A.dblAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+			,dblDebit					= A.dblBaseAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,dblDebitForeign			= @ZeroDecimal
-			,dblCreditForeign			= @ZeroDecimal				
 			,strDescription				= A.strNotes 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1406,7 +1409,14 @@ IF @post = 1
 			,strTransactionType			= @SCREEN_NAME
 			,strTransactionForm			= @SCREEN_NAME
 			,strModuleName				= @MODULE_NAME
-			,intConcurrencyId			= 1				 
+			,intConcurrencyId			= 1
+			,[dblDebitForeign]			= A.dblAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+			,[dblDebitReport]			= A.dblAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+			,[dblCreditForeign]			= 0
+			,[dblCreditReport]			= 0
+			,[dblReportingRate]			= 0
+			,[dblForeignRate]			= 0
+			,[strRateType]				= ''			 
 		FROM
 			tblARPayment A			 
 		INNER JOIN
@@ -1426,11 +1436,9 @@ IF @post = 1
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount
 			,dblDebit					= 0
-			,dblCredit					= A.dblUnappliedAmount
+			,dblCredit					= A.dblBaseUnappliedAmount
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0	
-			,dblDebitForeign			= @ZeroDecimal
-			,dblCreditForeign			= @ZeroDecimal			
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount)  
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1448,7 +1456,14 @@ IF @post = 1
 			,strTransactionType			= @SCREEN_NAME
 			,strTransactionForm			= @SCREEN_NAME
 			,strModuleName				= @MODULE_NAME
-			,intConcurrencyId			= 1				 
+			,intConcurrencyId			= 1
+			,[dblDebitForeign]			= 0
+			,[dblDebitReport]			= 0
+			,[dblCreditForeign]			= A.dblUnappliedAmount
+			,[dblCreditReport]			= A.dblUnappliedAmount
+			,[dblReportingRate]			= 0
+			,[dblForeignRate]			= 0
+			,[strRateType]				= ''	 
 		FROM
 			tblARPayment A 
 		INNER JOIN
@@ -1467,11 +1482,9 @@ IF @post = 1
 			,strBatchID					= @batchId
 			,intAccountId				= SMCL.intSalesAdvAcct 
 			,dblDebit					= 0
-			,dblCredit					= A.dblAmountPaid
+			,dblCredit					= A.dblBaseAmountPaid
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0		
-			,dblDebitForeign			= @ZeroDecimal
-			,dblCreditForeign			= @ZeroDecimal						
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = SMCL.intSalesAdvAcct) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1489,7 +1502,14 @@ IF @post = 1
 			,strTransactionType			= @SCREEN_NAME
 			,strTransactionForm			= @SCREEN_NAME
 			,strModuleName				= @MODULE_NAME
-			,intConcurrencyId			= 1				 
+			,intConcurrencyId			= 1
+			,[dblDebitForeign]			= 0
+			,[dblDebitReport]			= 0
+			,[dblCreditForeign]			= A.dblAmountPaid
+			,[dblCreditReport]			= A.dblAmountPaid
+			,[dblReportingRate]			= 0
+			,[dblForeignRate]			= 0
+			,[strRateType]				= ''	 
 		FROM
 			tblARPayment A
 		INNER JOIN
@@ -1511,12 +1531,10 @@ IF @post = 1
 			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
 			,intAccountId				= @DiscountAccount 
-			,dblDebit					= SUM(B.dblDiscount)
+			,dblDebit					= B.dblBaseDiscount
 			,dblCredit					= 0 
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0		
-			,dblDebitForeign			= @ZeroDecimal
-			,dblCreditForeign			= @ZeroDecimal						
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1534,7 +1552,14 @@ IF @post = 1
 			,strTransactionType			= @SCREEN_NAME
 			,strTransactionForm			= @SCREEN_NAME
 			,strModuleName				= @MODULE_NAME
-			,intConcurrencyId			= 1				 
+			,intConcurrencyId			= 1
+			,[dblDebitForeign]			= B.dblDiscount
+			,[dblDebitReport]			= B.dblDiscount
+			,[dblCreditForeign]			= 0
+			,[dblCreditReport]			= 0
+			,[dblReportingRate]			= B.dblCurrencyExchangeRate
+			,[dblForeignRate]			= B.dblCurrencyExchangeRate
+			,[strRateType]				= ''	 
 		FROM
 			tblARPayment A 
 		INNER JOIN
@@ -1549,12 +1574,12 @@ IF @post = 1
 		WHERE
 			B.dblDiscount <> 0
 			AND B.dblPayment <> 0
-		GROUP BY
-			A.intPaymentId
-			,A.strRecordNumber
-			,C.strCustomerNumber
-			,A.dtmDatePaid
-			,A.intCurrencyId	
+		--GROUP BY
+		--	A.intPaymentId
+		--	,A.strRecordNumber
+		--	,C.strCustomerNumber
+		--	,A.dtmDatePaid
+		--	,A.intCurrencyId	
 			
 		UNION ALL
 		--DEBIT Interest
@@ -1562,12 +1587,10 @@ IF @post = 1
 			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount 
-			,dblDebit					= SUM(B.dblInterest)
+			,dblDebit					= B.dblBaseInterest
 			,dblCredit					= 0 
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0	
-			,dblDebitForeign			= @ZeroDecimal
-			,dblCreditForeign			= @ZeroDecimal							
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1585,7 +1608,14 @@ IF @post = 1
 			,strTransactionType			= @SCREEN_NAME
 			,strTransactionForm			= @SCREEN_NAME
 			,strModuleName				= @MODULE_NAME
-			,intConcurrencyId			= 1				 
+			,intConcurrencyId			= 1
+			,[dblDebitForeign]			= B.dblInterest
+			,[dblDebitReport]			= B.dblInterest
+			,[dblCreditForeign]			= 0
+			,[dblCreditReport]			= 0
+			,[dblReportingRate]			= B.dblCurrencyExchangeRate
+			,[dblForeignRate]			= B.dblCurrencyExchangeRate
+			,[strRateType]				= ''	 			 
 		FROM
 			tblARPayment A 
 		INNER JOIN
@@ -1600,12 +1630,12 @@ IF @post = 1
 		WHERE
 			B.dblInterest <> 0
 			AND B.dblPayment <> 0
-		GROUP BY
-			A.intPaymentId
-			,A.strRecordNumber
-			,C.strCustomerNumber
-			,A.dtmDatePaid
-			,A.intCurrencyId	
+		--GROUP BY
+		--	A.intPaymentId
+		--	,A.strRecordNumber
+		--	,C.strCustomerNumber
+		--	,A.dtmDatePaid
+		--	,A.intCurrencyId	
 			
 			
 		UNION ALL
@@ -1615,14 +1645,12 @@ IF @post = 1
 			,strBatchID					= @batchId
 			,intAccountId				= B.intAccountId 
 			,dblDebit					= 0
-			,dblCredit					= SUM((CASE WHEN (B.dblAmountDue = (B.dblPayment - B.dblInterest) + B.dblDiscount)
-												THEN (B.dblPayment - B.dblInterest)  + B.dblDiscount
-												ELSE B.dblPayment END))
+			,dblCredit					= (CASE WHEN (B.dblBaseAmountDue = (B.dblBasePayment - B.dblBaseInterest) + B.dblBaseDiscount)
+												THEN (B.dblBasePayment - B.dblBaseInterest)  + B.dblBaseDiscount
+												ELSE B.dblBasePayment END)
 										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,dblDebitForeign			= @ZeroDecimal
-			,dblCreditForeign			= @ZeroDecimal								
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.intAccountId) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1640,7 +1668,20 @@ IF @post = 1
 			,strTransactionType			= @SCREEN_NAME
 			,strTransactionForm			= @SCREEN_NAME
 			,strModuleName				= @MODULE_NAME
-			,intConcurrencyId			= 1				 
+			,intConcurrencyId			= 1
+			,[dblDebitForeign]			= 0
+			,[dblDebitReport]			= 0
+			,[dblCreditForeign]			= (CASE WHEN (B.dblAmountDue = (B.dblPayment - B.dblInterest) + B.dblDiscount)
+												THEN (B.dblPayment - B.dblInterest)  + B.dblDiscount
+												ELSE B.dblPayment END)
+										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+			,[dblCreditReport]			= (CASE WHEN (B.dblAmountDue = (B.dblPayment - B.dblInterest) + B.dblDiscount)
+												THEN (B.dblPayment - B.dblInterest)  + B.dblDiscount
+												ELSE B.dblPayment END)
+										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+			,[dblReportingRate]			= B.dblCurrencyExchangeRate
+			,[dblForeignRate]			= B.dblCurrencyExchangeRate
+			,[strRateType]				= ''				 
 		FROM
 			tblARPayment A 
 		INNER JOIN 
@@ -1654,14 +1695,14 @@ IF @post = 1
 				ON A.intPaymentId = P.intPaymentId 
 		WHERE
 			B.dblPayment <> 0
-		GROUP BY
-			A.intPaymentId
-			,A.strRecordNumber
-			,B.intAccountId
-			,C.strCustomerNumber
-			,A.dtmDatePaid
-			,A.intCurrencyId
-			,A.ysnInvoicePrepayment
+		--GROUP BY
+		--	A.intPaymentId
+		--	,A.strRecordNumber
+		--	,B.intAccountId
+		--	,C.strCustomerNumber
+		--	,A.dtmDatePaid
+		--	,A.intCurrencyId
+		--	,A.ysnInvoicePrepayment
 			
 		UNION ALL
 		
@@ -1670,11 +1711,9 @@ IF @post = 1
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount
 			,dblDebit					= 0
-			,dblCredit					= SUM(B.dblDiscount) 
+			,dblCredit					= B.dblBaseDiscount
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0		
-			,dblDebitForeign			= @ZeroDecimal
-			,dblCreditForeign			= @ZeroDecimal						
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1692,7 +1731,14 @@ IF @post = 1
 			,strTransactionType			= @SCREEN_NAME
 			,strTransactionForm			= @SCREEN_NAME
 			,strModuleName				= @MODULE_NAME
-			,intConcurrencyId			= 1				 
+			,intConcurrencyId			= 1
+			,[dblDebitForeign]			= 0
+			,[dblDebitReport]			= 0
+			,[dblCreditForeign]			= B.dblDiscount
+			,[dblCreditReport]			= B.dblDiscount
+			,[dblReportingRate]			= B.dblCurrencyExchangeRate
+			,[dblForeignRate]			= B.dblCurrencyExchangeRate
+			,[strRateType]				= ''		 
 		FROM
 			tblARPayment A 
 		INNER JOIN
@@ -1707,12 +1753,12 @@ IF @post = 1
 		WHERE
 			B.dblDiscount <> 0
 			AND B.dblPayment <> 0
-		GROUP BY
-			A.intPaymentId
-			,A.strRecordNumber
-			,C.strCustomerNumber
-			,A.dtmDatePaid
-			,A.intCurrencyId			
+		--GROUP BY
+		--	A.intPaymentId
+		--	,A.strRecordNumber
+		--	,C.strCustomerNumber
+		--	,A.dtmDatePaid
+		--	,A.intCurrencyId			
 			
 		UNION ALL
 		
@@ -1721,11 +1767,9 @@ IF @post = 1
 			,strBatchID					= @batchId
 			,intAccountId				= ISNULL(P.intInterestAccountId, @IncomeInterestAccount)
 			,dblDebit					= 0
-			,dblCredit					= SUM(B.dblInterest) 
+			,dblCredit					= B.dblBaseInterest
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0		
-			,dblDebitForeign			= @ZeroDecimal
-			,dblCreditForeign			= @ZeroDecimal						
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = ISNULL(P.intInterestAccountId, @IncomeInterestAccount)) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
@@ -1743,7 +1787,14 @@ IF @post = 1
 			,strTransactionType			= @SCREEN_NAME
 			,strTransactionForm			= @SCREEN_NAME
 			,strModuleName				= @MODULE_NAME
-			,intConcurrencyId			= 1				 
+			,intConcurrencyId			= 1				
+			,[dblDebitForeign]			= 0
+			,[dblDebitReport]			= 0
+			,[dblCreditForeign]			= B.dblInterest
+			,[dblCreditReport]			= B.dblInterest
+			,[dblReportingRate]			= B.dblCurrencyExchangeRate
+			,[dblForeignRate]			= B.dblCurrencyExchangeRate
+			,[strRateType]				= ''		  
 		FROM
 			tblARPayment A 
 		INNER JOIN
@@ -1758,13 +1809,13 @@ IF @post = 1
 		WHERE
 			B.dblInterest <> 0
 			AND B.dblPayment <> 0
-		GROUP BY
-			A.intPaymentId
-			,A.strRecordNumber
-			,C.strCustomerNumber
-			,A.dtmDatePaid
-			,A.intCurrencyId
-			,P.intInterestAccountId
+		--GROUP BY
+		--	A.intPaymentId
+		--	,A.strRecordNumber
+		--	,C.strCustomerNumber
+		--	,A.dtmDatePaid
+		--	,A.intCurrencyId
+		--	,P.intInterestAccountId
 			
 	END TRY
 	BEGIN CATCH	
@@ -1782,33 +1833,38 @@ IF @post = 0
 	BEGIN   								
 		BEGIN TRY 
 			INSERT INTO @GLEntries(
-				 dtmDate
-				,strBatchId
-				,intAccountId
-				,dblDebit
-				,dblCredit
-				,dblDebitUnit
-				,dblCreditUnit
-				,dblDebitForeign
-				,dblCreditForeign
-				,strDescription
-				,strCode
-				,strReference
-				,intCurrencyId
-				,dblExchangeRate
-				,dtmDateEntered
-				,dtmTransactionDate
-				,strJournalLineDescription
-				,intJournalLineNo
-				,ysnIsUnposted
-				,intUserId
-				,intEntityId
-				,strTransactionId
-				,intTransactionId
-				,strTransactionType
-				,strTransactionForm
-				,strModuleName
-				,intConcurrencyId
+				 [dtmDate]
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[strRateType]
 			)
 			SELECT	
 				 GL.dtmDate
@@ -1817,9 +1873,7 @@ IF @post = 0
 				,dblDebit						= GL.dblCredit
 				,dblCredit						= GL.dblDebit
 				,dblDebitUnit					= GL.dblCreditUnit
-				,dblCreditUnit					= GL.dblDebitUnit
-				,dblDebitForeign				= GL.dblDebitForeign
-				,dblCreditForeign				= GL.dblCreditForeign
+				,dblCreditUnit					= GL.dblDebitUnit				
 				,GL.strDescription
 				,GL.strCode
 				,GL.strReference
@@ -1838,6 +1892,13 @@ IF @post = 0
 				,GL.strTransactionForm
 				,GL.strModuleName
 				,GL.intConcurrencyId
+				,[dblDebitForeign]				= GL.dblDebitForeign
+				,[dblDebitReport]				= GL.dblDebitReport
+				,[dblCreditForeign]				= GL.dblCreditForeign
+				,[dblCreditReport]				= GL.dblCreditReport
+				,[dblReportingRate]				= GL.dblReportingRate 
+				,[dblForeignRate]				= GL.dblForeignRate 
+				,[strRateType]					= ''
 			FROM
 				tblGLDetail GL
 			INNER JOIN
@@ -1986,14 +2047,20 @@ IF @recap = 0
 				tblARInvoice
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) - P.dblPayment 
+				,tblARInvoice.dblBasePayment = ISNULL(tblARInvoice.dblBasePayment,0.00) - P.dblBasePayment 
 				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) - P.dblDiscount			
+				,tblARInvoice.dblBaseDiscount = ISNULL(tblARInvoice.dblBaseDiscount,0.00) - P.dblBaseDiscount			
 				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) - P.dblInterest				
+				,tblARInvoice.dblBaseInterest = ISNULL(tblARInvoice.dblBaseInterest,0.00) - P.dblBaseInterest				
 			FROM
 				(
 					SELECT 
 						SUM(A.dblPayment * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) dblPayment
+						, SUM(A.dblBasePayment * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) dblBasePayment
 						, SUM(A.dblDiscount) dblDiscount
+						, SUM(A.dblBaseDiscount) dblBaseDiscount
 						, SUM(A.dblInterest) dblInterest						
+						, SUM(A.dblBaseInterest) dblBaseInterest						
 						,A.intInvoiceId 
 					FROM
 						tblARPaymentDetail A
@@ -2015,6 +2082,7 @@ IF @recap = 0
 				tblARInvoice
 			SET 
 				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - ((C.dblPayment - C.dblInterest) + C.dblDiscount)
+				,tblARInvoice.dblBaseAmountDue = C.dblBaseInvoiceTotal - ((C.dblBasePayment - C.dblBaseInterest) + C.dblBaseDiscount)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -2045,6 +2113,7 @@ IF @recap = 0
 				tblARPaymentDetail
 			SET 
 				dblPayment = CASE WHEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.dblPayment THEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.dblPayment END
+				,dblBasePayment = CASE WHEN (((ISNULL(C.dblBaseAmountDue,0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.dblBasePayment THEN (((ISNULL(C.dblBaseAmountDue,0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.dblBasePayment END
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -2061,6 +2130,7 @@ IF @recap = 0
 				tblARPaymentDetail
 			SET 
 				dblAmountDue = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) - A.dblPayment)
+				,dblBaseAmountDue = ((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00)) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) - A.dblBasePayment)
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -2245,14 +2315,20 @@ IF @recap = 0
 				tblARInvoice
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) + P.dblPayment 
+				,tblARInvoice.dblBasePayment = ISNULL(tblARInvoice.dblBasePayment,0.00) + P.dblBasePayment 
 				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount				
+				,tblARInvoice.dblBaseDiscount = ISNULL(tblARInvoice.dblBaseDiscount,0.00) + P.dblBaseDiscount				
 				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) + P.dblInterest
+				,tblARInvoice.dblBaseInterest = ISNULL(tblARInvoice.dblBaseInterest,0.00) + P.dblBaseInterest
 			FROM
 				(
 					SELECT 
 						SUM(A.dblPayment * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) dblPayment
+						,SUM(A.dblBasePayment * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) dblBasePayment
 						,SUM(A.dblDiscount) dblDiscount
+						,SUM(A.dblBaseDiscount) dblBaseDiscount
 						,SUM(A.dblInterest) dblInterest
+						,SUM(A.dblBaseInterest) dblBaseInterest
 						,A.intInvoiceId 
 					FROM
 						tblARPaymentDetail A
@@ -2274,6 +2350,7 @@ IF @recap = 0
 				tblARInvoice
 			SET 
 				tblARInvoice.dblAmountDue = (C.dblInvoiceTotal + C.dblInterest) - (C.dblPayment + C.dblDiscount)
+				,tblARInvoice.dblBaseAmountDue = (C.dblBaseInvoiceTotal + C.dblBaseInterest) - (C.dblBasePayment + C.dblBaseDiscount)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -2305,6 +2382,7 @@ IF @recap = 0
 				tblARPaymentDetail
 			SET 
 				dblAmountDue = ISNULL(C.dblAmountDue, 0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)-- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
+				,dblBaseAmountDue = ISNULL(C.dblBaseAmountDue, 0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)-- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -2434,6 +2512,7 @@ IF @recap = 0
 			tblARPaymentDetail
 		SET 
 			dblAmountDue = ISNULL(C.dblAmountDue, 0.00) -- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
+			,dblBaseAmountDue = ISNULL(C.dblBaseAmountDue, 0.00) -- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN
@@ -2451,6 +2530,7 @@ IF @recap = 0
 			tblARPaymentDetail
 		SET 
 			dblPayment = CASE WHEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.dblPayment THEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.dblPayment END
+			,dblBasePayment = CASE WHEN (((ISNULL(C.dblBaseAmountDue,0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00)) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.dblBasePayment THEN (((ISNULL(C.dblBaseAmountDue,0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.dblBasePayment END
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN
@@ -2468,6 +2548,7 @@ IF @recap = 0
 			tblARPaymentDetail
 		SET 
 			dblAmountDue = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - A.dblPayment)
+			,dblBaseAmountDue = ((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - A.dblBasePayment)
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN
