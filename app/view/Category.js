@@ -147,6 +147,7 @@ Ext.define('Inventory.view.Category', {
                                         items: [
                                             {
                                                 xtype: 'container',
+                                                height: 389,
                                                 layout: {
                                                     type: 'hbox',
                                                     align: 'stretch',
@@ -235,6 +236,51 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'chkSalesAnalysisByTon',
                                                                 fieldLabel: 'Sales Analysis by Ton',
                                                                 labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                itemId: 'txtStandardQty',
+                                                                fieldLabel: 'Standard Qty',
+                                                                labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intCategoryUOMId',
+                                                                        dataType: 'numeric',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'intCategoryId',
+                                                                        dataType: 'numeric',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strUnitMeasure',
+                                                                        dataType: 'string',
+                                                                        text: 'Unit Measure',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strUnitType',
+                                                                        dataType: 'string',
+                                                                        text: 'Unit Type',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'checkcolumn',
+                                                                        dataIndex: 'ysnStockUnit',
+                                                                        dataType: 'boolean',
+                                                                        text: 'Stock Unit',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                itemId: 'cboStandardUOM',
+                                                                fieldLabel: 'Standard UOM',
+                                                                labelWidth: 130,
+                                                                displayField: 'strUnitMeasure',
+                                                                valueField: 'intCategoryUOMId'
                                                             }
                                                         ]
                                                     },
@@ -335,58 +381,13 @@ Ext.define('Inventory.view.Category', {
                                                                 valueField: 'intItemId'
                                                             },
                                                             {
-                                                                xtype: 'numberfield',
-                                                                itemId: 'txtStandardQty',
-                                                                fieldLabel: 'Standard Qty',
-                                                                labelWidth: 130
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intCategoryUOMId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'intCategoryId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strUnitMeasure',
-                                                                        dataType: 'string',
-                                                                        text: 'Unit Measure',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strUnitType',
-                                                                        dataType: 'string',
-                                                                        text: 'Unit Type',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkcolumn',
-                                                                        dataIndex: 'ysnStockUnit',
-                                                                        dataType: 'boolean',
-                                                                        text: 'Stock Unit',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboStandardUOM',
-                                                                fieldLabel: 'Standard UOM',
-                                                                labelWidth: 130,
-                                                                displayField: 'strUnitMeasure',
-                                                                valueField: 'intCategoryUOMId'
-                                                            },
-                                                            {
                                                                 xtype: 'container',
                                                                 flex: 1,
                                                                 height: 154,
                                                                 layout: {
                                                                     type: 'hbox',
                                                                     align: 'stretch',
-                                                                    padding: '5 0 0 0'
+                                                                    padding: '0 0 0 0'
                                                                 },
                                                                 items: [
                                                                     {
@@ -483,6 +484,7 @@ Ext.define('Inventory.view.Category', {
                                             {
                                                 xtype: 'container',
                                                 flex: 1,
+                                                hidden: true,
                                                 layout: {
                                                     type: 'hbox',
                                                     align: 'stretch',

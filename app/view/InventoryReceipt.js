@@ -1252,7 +1252,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colItemSubCurrency',
-                                                                                text: 'Cost Currency'
+                                                                                text: 'Currency Unit'
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',

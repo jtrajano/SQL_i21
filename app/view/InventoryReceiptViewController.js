@@ -22,12 +22,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 { dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string', drillDownText: 'View Vendor', drillDownClick: 'onViewVendorName' },
                 { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName' },
                 { dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string' },
+                { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                 { dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
 
                 { dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strVendorId', text: 'Vendor Id', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strTransferor', text: 'Transferor', flex: 1, dataType: 'string', hidden: true },
-                { dataIndex: 'strCurrency', text: 'Currency', flex: 1, dataType: 'string', hidden: true },
+                
                 { dataIndex: 'intBlanketRelease', text: 'Blanket Release', flex: 1, dataType: 'int', hidden: true },
                 { dataIndex: 'strVendorRefNo', text: 'Vendor Reference No', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strWarehouseRefNo', text: 'Warehouse Reference No', flex: 1, dataType: 'string', hidden: true },
@@ -112,7 +113,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string'},
                         { dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string', drillDownText: 'View Order', drillDownClick: 'onViewOrder'},
                         { dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string', drillDownText: 'View Source', drillDownClick: 'onViewSource'},
-                        { dataIndex: 'strUnitMeasure', text: 'Receipt UOM', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
+                        { dataIndex: 'strUnitMeasure', text: 'Receipt UOM', flex: 1, dataType: 'string' },                        
 
                         { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', flex: 1, dataType: 'float' },
                         { xtype: 'numbercolumn', format: '0,000.000##', dataIndex: 'dblUnitCost', text: 'Cost', flex: 1, dataType: 'float', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.000##' },
@@ -144,6 +146,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strBillOfLading', text: 'BOL No.', flex: 1, dataType: 'string'},
                         { dataIndex: 'strContractNumber', text: 'Contract No.', flex: 1, dataType: 'string'},
                         { dataIndex: 'strItemNo', text: 'Other Charges', flex: 1, dataType: 'string'},
+                        { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                         { dataIndex: 'strOnCostType', text: 'On Cost', flex: 1, dataType: 'string'},
                         { dataIndex: 'strCostMethod', text: 'Cost Method', flex: 1, dataType: 'string'},
                         { dataIndex: 'strCurrency', text: 'Cost Currency', flex: 1, dataType: 'string'},
@@ -174,6 +177,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string' },
                         { dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string' },
                         { dataIndex: 'strStorageLocationName', text: 'Storage Location', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                         { dataIndex: 'strUnitMeasure', text: 'Lot UOM', flex: 1, dataType: 'string' },
                         { xtype: 'numbercolumn', dataIndex: 'dblQuantity', text: 'Lot Qty', flex: 1, dataType: 'float' },
                         { xtype: 'numbercolumn', dataIndex: 'dblGrossWeight', text: 'Gross Wgt', flex: 1, dataType: 'float' },
@@ -207,6 +211,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strReceiptType', text: 'Order Type', width: 120, dataType: 'string' },
                         { dataIndex: 'strOrderNumber', text: 'Order No', width: 100, dataType: 'string' },
                         { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
+                        { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                         // { dataIndex: 'strItemDescription', text: 'Item Description', flex: 1, dataType: 'string' },
                         { dataIndex: 'dblUnitCost', text: 'Unit Cost', width: 120, dataType: 'float', xtype: 'numbercolumn' },
                         { dataIndex: 'dblReceiptQty', text: 'Receipt Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
@@ -2272,10 +2277,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         // Convert to the functional currency. 
-        if (intCurrencyId && intCurrencyId != defaultCurrency){
-            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
-            lineTotal = lineTotal * dblForexRate; 
-        }
+        // if (intCurrencyId && intCurrencyId != defaultCurrency){
+        //     dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+        //     lineTotal = lineTotal * dblForexRate; 
+        // }
 
         return i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2)
     },
@@ -2411,67 +2416,100 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
         var totalChargeTaxes = 0;
         var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+        var transactionCurrencyId = current.get('intCurrencyId');
+        var transactionVendorId = current.get('intEntityVendorId');
 
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
+                        // var otherChargeTax = charge.get('dblTax');  
+                        // var intCurrencyId = charge.get('intCurrencyId');
+
+                        // // Convert the amount to functional currency. 
+                        // if (intCurrencyId && intCurrencyId != intDefaultCurrencyId){
+                        //     var dblForexRate = charge.get('dblForexRate');
+                        //     dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0; 
+                        //     otherChargeTax = otherChargeTax * dblForexRate; 
+                        // }
+
+                        // totalChargeTaxes += otherChargeTax;
+
+                        // Add the charge taxes if:
+                        // 1. Charge Vendor is the same as the transaction vendor id. 
+                        // 2. Charge Currency is the same as the transaction currency id. 
+                        var chargeCurrencyId = charge.get('intCurrencyId');
+                        var chargeVendorId = charge.get('intEntityVendorId'); 
                         var otherChargeTax = charge.get('dblTax');  
-                        var intCurrencyId = charge.get('intCurrencyId');
+                        var ysnPrice = charge.get('ysnPrice'); 
 
-                        // Convert the amount to functional currency. 
-                        if (intCurrencyId && intCurrencyId != intDefaultCurrencyId){
-                            var dblForexRate = charge.get('dblForexRate');
-                            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0; 
-                            otherChargeTax = otherChargeTax * dblForexRate; 
+                        chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
+                        chargeVendorId = Ext.isNumeric(chargeVendorId) ? chargeVendorId : transactionVendorId; 
+                        if (transactionCurrencyId == chargeCurrencyId && transactionVendorId == chargeVendorId) 
+                        {
+                            //totalChargeTaxes = ysnPrice ? totalChargeTaxes - otherChargeTax : totalChargeTaxes + otherChargeTax;   
+                            totalChargeTaxes += otherChargeTax;
                         }
-
-
-                        totalChargeTaxes += otherChargeTax;
                     }
                 });
             }
         }
-        return totalChargeTaxes;
+        return totalChargeTaxes;       
+
     },
 
     calculateOtherCharges: function (win) {
         var current = win.viewModel.data.current;
         var totalCharges = 0;
-        var txtCharges = win.down('#txtCharges');
+        //var txtCharges = win.down('#txtCharges');
         var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+        var transactionCurrencyId = current.get('intCurrencyId');
+        var transactionVendorId = current.get('intEntityVendorId');
 
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
-                        var amount = charge.get('dblAmount');
-                        var intCurrencyId = charge.get('intCurrencyId');
+                        // var amount = charge.get('dblAmount');
+                        // var intChargeCurrencyId = charge.get('intCurrencyId');
 
                         // Convert the amount to functional currency. 
-                        if (intCurrencyId && intCurrencyId != intDefaultCurrencyId){
-                            var dblForexRate = charge.get('dblForexRate');
-                            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0; 
-                            amount = amount * dblForexRate; 
-                        }
+                        // if (intChargeCurrencyId && intChargeCurrencyId != intDefaultCurrencyId){
+                        //     var dblForexRate = charge.get('dblForexRate');
+                        //     dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0; 
+                        //     amount = amount * dblForexRate; 
+                        // }
 
-                        if (charge.get('ysnPrice') === true) {
-                            totalCharges -= amount;
-                        }
-                        else {
-                            totalCharges += amount;
-                        }
+                        // if (charge.get('ysnPrice') === true) {
+                        //     totalCharges -= amount;
+                        // }
+                        // else {
+                        //     totalCharges += amount;
+                        // }                        
+                        
+                        // Add the charges amount where:
+                        // 1. Charge Vendor is the same as the transaction vendor id. 
+                        // 2. Charge Currency is the same as the transaction currency id. 
+                        var chargeCurrencyId = charge.get('intCurrencyId');
+                        var chargeVendorId = charge.get('intEntityVendorId'); 
+                        var amount = charge.get('dblAmount');
+                        var ysnPrice = charge.get('ysnPrice'); 
 
+                        chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
+                        chargeVendorId = Ext.isNumeric(chargeVendorId) ? chargeVendorId : transactionVendorId; 
+                        if (transactionCurrencyId == chargeCurrencyId && transactionVendorId == chargeVendorId) 
+                        {
+                            totalCharges = ysnPrice ? totalCharges - amount : totalCharges + amount;   
+                        }
                     }
                 });
             }
         }
 
-        if (txtCharges) {txtCharges.setValue(totalCharges);}
-
-        return totalCharges;
+        //if (txtCharges) {txtCharges.setValue(totalCharges);}
+        return totalCharges;        
     },
 
     showOtherCharges: function (win) {
