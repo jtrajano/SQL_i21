@@ -18,6 +18,7 @@ AS
 			,dblAmount				=	CD.dblTotalCost
 			,intCurrencyId			=	CD.intCurrencyId
 			,intForexRateType		=	CD.intRateTypeId
+			,strForexRateType		=	RT.strCurrencyExchangeRateType
 			,dblForexRate			=	CD.dblRate
 			,dblHistoricAmount		=	CD.dblTotalCost * CD.dblRate
 			,dblNewForexRate		=	0
@@ -27,11 +28,12 @@ AS
 			,dblDebit				=	0
 			,dblCredit				=	0
 
-	FROM	tblCTContractDetail		CD
-	JOIN	tblCTContractHeader		CH	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
-	JOIN	tblCTContractType		CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
-	JOIN	tblEMEntity				EY	ON	EY.intEntityId			=	CH.intEntityId
-	JOIN	tblICCommodity			CY	ON	CY.intCommodityId		=	CH.intCommodityId
-	JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId =	CD.intCompanyLocationId LEFT
-	JOIN	tblICItem				IM	ON	IM.intItemId			=	CD.intItemId			LEFT
-	JOIN	tblICCategory			CG	ON	CG.intCategoryId		=	IM.intCategoryId
+	FROM	tblCTContractDetail				CD
+	JOIN	tblCTContractHeader				CH	ON	CD.intContractHeaderId				=	CH.intContractHeaderId
+	JOIN	tblCTContractType				CT	ON	CT.intContractTypeId				=	CH.intContractTypeId
+	JOIN	tblEMEntity						EY	ON	EY.intEntityId						=	CH.intEntityId
+	JOIN	tblICCommodity					CY	ON	CY.intCommodityId					=	CH.intCommodityId
+	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId				=	CD.intCompanyLocationId			LEFT
+	JOIN	tblICItem						IM	ON	IM.intItemId						=	CD.intItemId					LEFT
+	JOIN	tblICCategory					CG	ON	CG.intCategoryId					=	IM.intCategoryId				LEFT 
+	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId
