@@ -338,7 +338,9 @@ Begin
 							+ '</E1EDL24>'
 					From tblLGLoadContainerStg lc
 					Left Join tblLGLoadContainer c on lc.intLoadContainerId=c.intLoadContainerId
-					Where lc.intLoadStgId=@intLoadStgId
+					Left Join tblLGLoadDetailContainerLink cl on lc.intLoadContainerId=cl.intLoadContainerId
+					Left Join tblLGLoadDetail ld on ld.intLoadDetailId=cl.intLoadDetailId
+					Where lc.intLoadStgId=@intLoadStgId AND ld.intLoadDetailId=@intLoadDetailId
 
 					--Update the POSNR in container link table
 					Update lc Set lc.strExternalContainerId=cs.strExternalContainerId
