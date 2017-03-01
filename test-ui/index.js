@@ -690,6 +690,15 @@ Harness.start(
                             commonIC
 
                         ]
+                    },
+                    {
+                        url: 'BusinessDomain/Commodity/17xOpenNewCommodityScreen.js?v=' + version,
+                        title: '17xOpenNewCommodityScreen',
+                        preload: [
+                            functionalTest,
+                            commonIC
+
+                        ]
                     }
                 ]
             }
