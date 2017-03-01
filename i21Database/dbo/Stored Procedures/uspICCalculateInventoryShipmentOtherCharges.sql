@@ -48,7 +48,7 @@ BEGIN
 END 
 
 -- Get the default currency ID
-DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 -- Calculate the cost method for "Per Unit"
 BEGIN 
@@ -160,7 +160,7 @@ BEGIN
 												(ISNULL(Charge.dblRate, 0) / 100)
 												*	ISNULL(ShipmentItem.dblQuantity, 0) 
 												*	CASE 
-														WHEN ISNULL(Shipment.intCurrencyId, @DefaultCurrencyId) <> @DefaultCurrencyId THEN 
+														WHEN ISNULL(Shipment.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ShipmentItem.dblForexRate, 0) <> 0 THEN 
 															-- Convert the foreign price to transaction currency. 
 															ISNULL(ShipmentItem.dblForeignUnitPrice, 0) * ISNULL(ShipmentItem.dblForexRate, 0) 
 														ELSE 
@@ -168,7 +168,7 @@ BEGIN
 													END
 												* 
 													-- and then convert the transaction price to the other charge currency. 
-													CASE WHEN ISNULL(Charge.intCurrencyId, Shipment.intCurrencyId) <> Shipment.intCurrencyId AND ISNULL(Charge.dblForexRate, 0) <> 0 THEN 
+													CASE WHEN ISNULL(Charge.intCurrencyId, Shipment.intCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(Charge.dblForexRate, 0) <> 0 THEN 
 															1 / Charge.dblForexRate
 														ELSE 
 															1
