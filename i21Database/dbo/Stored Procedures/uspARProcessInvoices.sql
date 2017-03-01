@@ -1208,11 +1208,11 @@ BEGIN TRY
 			,[intCompanyLocationId]		= @CompanyLocationId
 			--,[intAccountId]				= @AccountId 
 			,[intCurrencyId]			= @CurrencyId
-			,[intTermId]				= ISNULL(@TermId, EL.[intTermsId])
+			,[intTermId]				= ISNULL(@TermId, C.[intTermsId])
 			,[intSourceId] 				= @NewSourceId
 			,[intPeriodsToAccrue] 		= ISNULL(@PeriodsToAccrue,1)
 			,[dtmDate]					= @Date
-			,[dtmDueDate]				= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@Date, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
+			,[dtmDueDate]				= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@Date, ISNULL(ISNULL(@TermId, C.[intTermsId]),0)) AS DATE)))
 			,[dtmShipDate]				= @ShipDate
 			,[dtmPostDate]				= @PostDate
 			,[dblInvoiceSubtotal]		= @ZeroDecimal

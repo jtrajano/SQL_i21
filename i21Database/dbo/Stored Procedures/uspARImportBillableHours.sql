@@ -47,14 +47,13 @@ END
 DECLARE @NullTermsTable TABLE(intEntityCustomerId INT)
 INSERT INTO @NullTermsTable 
 SELECT
-	intEntityCustomerId 
+	THW.intEntityCustomerId 
 FROM
 	@TicketHoursWorked THW
-INNER JOIN 
-	[tblEMEntityLocation] EL 
-		ON THW.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1		
-WHERE
-	EL.intTermsId IS NULL
+INNER JOIN
+	(SELECT intEntityCustomerId, intTermsId FROM tblARCustomer) ARC ON THW.intEntityCustomerId = ARC.intEntityCustomerId 
+WHERE ARC.intTermsId IS NULL
+
 
 IF EXISTS(SELECT * FROM @NullTermsTable)
 BEGIN

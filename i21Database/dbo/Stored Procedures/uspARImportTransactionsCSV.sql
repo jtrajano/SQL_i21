@@ -186,8 +186,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @CompanyLocationId			= CL.intCompanyLocationId
 					, @EntityId						= ISNULL(@UserEntityId, IL.intEntityId)
 					, @EntitySalespersonId			= SP.intEntitySalespersonId
-					, @TermId						= EL.intTermsId
-					, @DueDate						= dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, EL.intTermsId)
+					, @TermId						= C.intTermsId
+					, @DueDate						= dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, C.intTermsId)
 					, @TransactionType				= ILD.strTransactionType
 					, @Type							= @Type
 					, @Comment						= @IMPORTFORMAT_CARQUEST + ' ' + ILD.strTransactionType + ' ' + ILD.strTransactionNumber
@@ -306,7 +306,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Term Code provided does not exists. '
 		ELSE IF @TermId = 0 AND @IsTank = 0
 			BEGIN
-				SELECT TOP 1 @TermId = intTermsId FROM [tblEMEntityLocation] WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
+				SELECT TOP 1 @TermId = intTermsId FROM [tblARCustomer] WHERE intEntityCustomerId = @EntityCustomerId  
 				IF ISNULL(@TermId, 0) = 0
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The customer provided doesn''t have default terms. '				
 			END

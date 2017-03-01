@@ -14,7 +14,7 @@ SELECT
 ,Cus.ysnActive
 ,Cus.intSalespersonId
 ,Cus.intCurrencyId
-,Loc.intTermsId
+,Cus.intTermsId
 ,Loc.intShipViaId
 ,ShipToLoc.strLocationName as strShipToLocationName
 ,ShipToLoc.strAddress as strShipToAddress
