@@ -391,11 +391,11 @@ BEGIN TRY
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId
 		,[intCurrencyId]				= @DefaultCurrency
-		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
+		,[intTermId]					= ISNULL(@TermId, C.[intTermsId])
 		,[intSourceId]					= @SourceId
 		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
 		,[dtmDate]						= ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)
-		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
+		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(@TermId, C.[intTermsId]),0)) AS DATE)))
 		,[dtmShipDate]					= ISNULL(@ShipDate, DATEADD(month, 1, ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)))
 		,[dtmPostDate]					= ISNULL(CAST(@PostDate AS DATE),ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly))
 		,[dblInvoiceSubtotal]			= @ZeroDecimal
