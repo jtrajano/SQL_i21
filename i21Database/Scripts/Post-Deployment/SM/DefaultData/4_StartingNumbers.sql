@@ -1107,6 +1107,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Price Contract')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 116
+			,[strTransactionType]	= N'Revalue Transaction'
+			,[strPrefix]			= N'CON-'
+			,[intNumber]			= 1
+			,[strModule]			= 'General Ledger'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Revalue Transaction')
 	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
