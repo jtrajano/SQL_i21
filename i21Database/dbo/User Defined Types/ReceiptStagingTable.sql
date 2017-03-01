@@ -38,12 +38,14 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intGrossNetUOMId] INT NULL							-- The Gross/Net UOM used for the item.
 	,[dblGross] NUMERIC(38, 20) NULL 
 	,[dblNet] NUMERIC(38, 20) NULL 
-	,[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0       -- Fuel Surcharge	
-	,[ysnFreightInPrice] BIT NULL DEFAULT 0				-- Freight should be included In Price
-	,[intCostUOMId] INT NULL							-- Cost UOM
-	,[intDiscountSchedule] INT NULL						-- Discount Schedule field. (Quality module).
+	,[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0			-- Fuel Surcharge	
+	,[ysnFreightInPrice] BIT NULL DEFAULT 0					-- Freight should be included In Price
+	,[intCostUOMId] INT NULL								-- Cost UOM
+	,[intDiscountSchedule] INT NULL							-- Discount Schedule field. (Quality module).
 	,[ysnSubCurrency] BIT NULL 
-	,[intPaymentOn] INT NULL							-- Reserved for PaymentOn option
+	,[intPaymentOn] INT NULL								-- Reserved for PaymentOn option
+	,[intForexRateTypeId] INT NULL							-- Currency Forex Rate Type Id
+	,[dblForexRate] NUMERIC(18, 6) NULL					-- Forex Rate (Exchange Rate)
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	
@@ -51,7 +53,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intSourceType] INT NULL                               -- FOR TRANSPORTS ITS 3
 
 	-- Integration Field
-	,[intInventoryReceiptId] INT NULL                   -- Existing id of an Inventory Receipt. 
-	,[strSourceId] NVARCHAR(50) NULL					-- String Id of the source transaction. 
-	,[strSourceScreenName] NVARCHAR(50) NULL			-- Name of the screen name where the transaction is coming from.
+	,[intInventoryReceiptId] INT NULL						-- Existing id of an Inventory Receipt. 
+	,[strSourceId] NVARCHAR(50) NULL						-- String Id of the source transaction. 
+	,[strSourceScreenName] NVARCHAR(50) NULL				-- Name of the screen name where the transaction is coming from.
 )

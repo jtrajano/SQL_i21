@@ -142,6 +142,12 @@ BEGIN
 	GOTO _Exit;
 END 
 
+-- Get the functional currency
+BEGIN 
+	DECLARE @intFunctionalCurrencyId AS INT
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+END 
+
 -- Do a loop using a cursor. 
 BEGIN 
 	DECLARE @intId INT
@@ -328,7 +334,7 @@ BEGIN
 			FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
 						ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 						AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
-						AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+						AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId)
 						AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
 						AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 						AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
@@ -351,7 +357,7 @@ BEGIN
 				,intShipViaId			= IntegrationData.intShipViaId
 				,intShipFromId			= IntegrationData.intShipFromId
 				,intReceiverId			= @intUserId 
-				,intCurrencyId			= IntegrationData.intCurrencyId
+				,intCurrencyId			= ISNULL(IntegrationData.intCurrencyId, @intFunctionalCurrencyId)
 				,intSubCurrencyCents	= IntegrationData.intSubCurrencyCents
 				,strVessel				= NULL
 				,intFreightTermId		= IntegrationData.intFreightTermId 
@@ -425,7 +431,7 @@ BEGIN
 				/*intShipViaId*/				,IntegrationData.intShipViaId
 				/*intShipFromId*/				,IntegrationData.intShipFromId
 				/*intReceiverId*/				,@intUserId 
-				/*intCurrencyId*/				,IntegrationData.intCurrencyId
+				/*intCurrencyId*/				,ISNULL(IntegrationData.intCurrencyId, @intFunctionalCurrencyId) 
 				/*intSubCurrencyCents*/			,IntegrationData.intSubCurrencyCents
 				/*strVessel*/					,NULL
 				/*intFreightTermId*/			,IntegrationData.intFreightTermId 
@@ -687,6 +693,8 @@ BEGIN
 				,intDiscountSchedule
 				,ysnSubCurrency
 				,intTaxGroupId
+				,intForexRateTypeId
+				,dblForexRate 
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -757,10 +765,13 @@ BEGIN
 				,intDiscountSchedule	= RawData.intDiscountSchedule
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0)
 				,intTaxGroupId			= RawData.intTaxGroupId
+				,intForexRateTypeId		= RawData.intForexRateTypeId
+				,dblForexRate			= RawData.dblForexRate
+
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
-					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId)
 					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
@@ -965,22 +976,25 @@ BEGIN
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
-		SELECT @valueCostCurrencyId = RawData.intCostCurrencyId, @valueChargeId = RawData.intChargeId
-		FROM	@OtherCharges RawData 
-		WHERE RawData.intCostCurrencyId NOT IN (SELECT intCurrencyId FROM tblSMCurrency)
+		SELECT	TOP 1 
+				@valueCostCurrencyId = RawData.intCostCurrencyId
+				,@valueChargeId = RawData.intChargeId
+		FROM	@OtherCharges RawData LEFT JOIN tblSMCurrency c 
+					ON RawData.intCostCurrencyId = c.intCurrencyID
+		WHERE	c.intCurrencyID IS NULL 
 
-		IF @valueCostCurrencyId > 0
-			BEGIN
-				SELECT @valueCharge = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @valueChargeId
+		IF @valueCostCurrencyId IS NOT NULL 
+		BEGIN
+			SELECT @valueCharge = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @valueChargeId
 
-				DECLARE @valueCostCurrencyIdStr NVARCHAR(50)
-				SET @valueCostCurrencyIdStr = CAST(@valueCostCurrencyId AS NVARCHAR(50))
-				-- Cost Currency Id %s is invalid for other charge item %s.
-				RAISERROR(80126, 11, 1, @valueCostCurrencyIdStr, @valueCharge);
-				GOTO _Exit_With_Rollback;
-			END
+			DECLARE @valueCostCurrencyIdStr NVARCHAR(50)
+			SET @valueCostCurrencyIdStr = CAST(@valueCostCurrencyId AS NVARCHAR(50))
+			-- Cost Currency Id %s is invalid for other charge item %s.
+			RAISERROR(80126, 11, 1, @valueCostCurrencyIdStr, @valueCharge);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Cost UOM Id
 		-- Cost UOM Id is required if Cost Method is 'Per Unit'
@@ -1128,7 +1142,7 @@ BEGIN
 				,[ysnAccrue]				= RawData.ysnAccrue
 				,[ysnPrice]					= RawData.ysnPrice
 				,[ysnSubCurrency]			= ISNULL(RawData.ysnSubCurrency, 0) 
-				,[intCurrencyId]			= ISNULL(RawData.intCostCurrencyId, RawData.intCurrencyId) 
+				,[intCurrencyId]			= COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) 
 				,[intCent]					= CostCurrency.intCent
 				,[intTaxGroupId]			= RawData.intTaxGroupId
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
@@ -1138,7 +1152,7 @@ BEGIN
 					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
-					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId)
 				LEFT JOIN dbo.tblICItemUOM ItemUOM			
 					ON ItemUOM.intItemId = RawData.intChargeId  
 					AND ItemUOM.intItemUOMId = RawData.intCostUOMId
@@ -1828,7 +1842,7 @@ BEGIN
 							AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
 							AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
 							AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
-							AND ISNULL(RawHeaderData.Currency,0) = ISNULL(ItemLot.intCurrencyId,0)
+							AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(ItemLot.intCurrencyId, @intFunctionalCurrencyId)
 							AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
 							AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
 						LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
