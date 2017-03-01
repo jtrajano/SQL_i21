@@ -20,7 +20,7 @@ SELECT I.strItemNo
 	,LS.strSecondaryStatus
 FROM dbo.tblICLot L
 JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-JOIN dbo.tblICItem I ON I.intItemId = I.intItemId
+JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
