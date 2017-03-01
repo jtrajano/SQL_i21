@@ -9,9 +9,10 @@ BEGIN
 
 	IF EXISTS	(
 					SELECT	* 
-					FROM	tblICItemSubLocation SL
+					FROM	tblICItemSubLocation	SL
+					JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId	=	SL.intItemLocationId	
 					JOIN	tblSMCompanyLocationSubLocation CS	ON CS.intCompanyLocationSubLocationId = SL.intSubLocationId
-					WHERE	intItemId = @intItemId AND CS.intCompanyLocationId = @intCompanyLocationId
+					WHERE	IL.intItemId = @intItemId AND CS.intCompanyLocationId = @intCompanyLocationId
 				)
 	BEGIN
 		SELECT	SL.intItemSubLocationId,
@@ -19,10 +20,11 @@ BEGIN
 				CS.intCompanyLocationSubLocationId,
 				CS.strSubLocationName,
 				CS.intCountryId,
-				SL.intItemId 
-		FROM	tblICItemSubLocation SL
+				IL.intItemId 
+		FROM	tblICItemSubLocation	SL
+		JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId	=	SL.intItemLocationId	
 		JOIN	tblSMCompanyLocationSubLocation CS	ON CS.intCompanyLocationSubLocationId = SL.intSubLocationId
-		WHERE	intItemId = @intItemId AND CS.intCompanyLocationId = @intCompanyLocationId
+		WHERE	IL.intItemId = @intItemId AND CS.intCompanyLocationId = @intCompanyLocationId
 		AND		CS.strSubLocationName  LIKE '%' + @strSubLocationName + '%'
 		AND		CS.intCompanyLocationSubLocationId =(CASE WHEN @intSubLocationId > 0 THEN @intSubLocationId ELSE CS.intCompanyLocationSubLocationId END)
 	END		
