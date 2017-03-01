@@ -10,9 +10,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ErrorMessage NVARCHAR(4000),
-		@ErrorSeverity INT,
-		@ErrorState INT;
+DECLARE @ErrorMessage NVARCHAR(4000)
+		,@ErrorSeverity INT
+		,@ErrorState INT
+		,@jsonData NVARCHAR(MAX);
 
 DECLARE @InventoryReceiptId INT
 		,@intInventoryReceiptItemId INT
@@ -83,59 +84,73 @@ BEGIN TRY
 		ELSE
 			BEGIN
 				CREATE TABLE #tmpItemShipmentIds (
-					[intInventoryShipmentItemId] [INT] PRIMARY KEY,
-					[intInventoryShipmentId] [INT],
+					[intInventoryShipmentId] [INT] PRIMARY KEY,
 					[strShipmentNumber] [VARCHAR](100),
-					UNIQUE ([intInventoryShipmentItemId])
+					UNIQUE ([intInventoryShipmentId])
 				);
-				INSERT INTO #tmpItemShipmentIds(intInventoryShipmentItemId,intInventoryShipmentId,strShipmentNumber) SELECT  intInventoryShipmentItemId,intInventoryShipmentId,strShipmentNumber FROM vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
+				INSERT INTO #tmpItemShipmentIds(intInventoryShipmentId,strShipmentNumber) SELECT DISTINCT(intInventoryShipmentId),strShipmentNumber from vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
 				
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
-				SELECT intInventoryShipmentId, intInventoryShipmentItemId, strShipmentNumber
+				SELECT intInventoryShipmentId, strShipmentNumber
 				FROM #tmpItemShipmentIds
 
 				OPEN intListCursor;
 
 				-- Initial fetch attempt
-				FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @intInventoryShipmentItemId , @strTransactionId;
+				FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @strTransactionId;
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
+					SELECT @intInventoryShipmentItemId = intInventoryShipmentItemId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId
 					SELECT @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
 					SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
-					IF @ysnPosted =1
-						BEGIN
-							EXEC [dbo].[uspARPostInvoice]
-								@batchId			= NULL,
-								@post				= 0,
-								@recap				= 0,
-								@param				= @intInvoiceId,
-								@userId				= @intUserId,
-								@beginDate			= NULL,
-								@endDate			= NULL,
-								@beginTransaction	= NULL,
-								@endTransaction		= NULL,
-								@exclude			= NULL,
-								@successfulCount	= @successfulCount OUTPUT,
-								@invalidCount		= @invalidCount OUTPUT,
-								@success			= @success OUTPUT,
-								@batchIdUsed		= @batchIdUsed OUTPUT,
-								@recapId			= @recapId OUTPUT,
-								@transType			= N'all',
-								@accrueLicense		= 0,
-								@raiseError			= 1
-						END
+					IF @ysnPosted = 1
+					BEGIN
+						EXEC [dbo].[uspARPostInvoice]
+							@batchId			= NULL,
+							@post				= 0,
+							@recap				= 0,
+							@param				= @intInvoiceId,
+							@userId				= @intUserId,
+							@beginDate			= NULL,
+							@endDate			= NULL,
+							@beginTransaction	= NULL,
+							@endTransaction		= NULL,
+							@exclude			= NULL,
+							@successfulCount	= @successfulCount OUTPUT,
+							@invalidCount		= @invalidCount OUTPUT,
+							@success			= @success OUTPUT,
+							@batchIdUsed		= @batchIdUsed OUTPUT,
+							@recapId			= @recapId OUTPUT,
+							@transType			= N'all',
+							@accrueLicense		= 0,
+							@raiseError			= 1
+					END
 					EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 					EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
 					EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
 					EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
 					EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
-
-					FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @intInventoryShipmentItemId , @strTransactionId;
+					DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
+					FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @strTransactionId;
 				END
+
 				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 			END
+		
+		--Audit Log
+		
+		SET @jsonData = 'Updated - Record:' + CAST(@intTicketId AS NVARCHAR(MAX)) + '","keyValue":"' + CAST(@intTicketId AS NVARCHAR(MAX)) + ''          
+		EXEC dbo.uspSMAuditLog 
+			@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
+			,@screenName		= 'Grain.view.ScaleViewController'	-- Screen Namespace
+			,@entityId			= @intUserId						-- Entity Id.
+			,@actionType		= 'Updated'							-- Action Type
+			,@changeDescription	= 'Ticket Status'					-- Description
+			,@fromValue			= 'Completed'						-- Previous Value
+			,@toValue			= 'Reopened'						-- New Value
+			,@details			= @jsonData;
 
 		IF ISNULL(@intLoadDetailId,0) > 0
 		BEGIN
