@@ -383,6 +383,7 @@
     <Compile Include="Controllers\ImportDataController.cs" />
     <Compile Include="Controllers\InventoryReceiptItemLotController.cs" />
     <Compile Include="Controllers\InventoryValuationController.cs" />
+    <Compile Include="Controllers\ItemSubLocationController.cs" />
     <Compile Include="Controllers\M2MComputationController.cs" />
     <Compile Include="Controllers\MeasurementController.cs" />
     <Compile Include="Controllers\ParentLotController.cs" />
