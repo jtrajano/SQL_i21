@@ -58,8 +58,8 @@ SELECT l.intLotId
 	,cl.intCompanyLocationId
 	,um1.strUnitMeasure AS strWeightUOM
 	,pl.strParentLotNumber
-	,IsNUll(e2.strName,e1.strName) strOwner
-	,IsNUll(e2.intEntityId ,e1.intEntityId) intEntityId
+	,e2.strEntityNo + ' - ' + e2.strName AS strOwner
+	,e2.intEntityId AS intEntityId
 	,'' AS strCurrency
 	,'' AS strCostUOM
 	,0 AS intContainerId
@@ -107,8 +107,6 @@ LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = clsl.intCompanyLo
 LEFT JOIN tblICItemUOM ium1 ON ium1.intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
 LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = ium1.intUnitMeasureId
 LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
-LEFT JOIN tblICItemOwner ito ON ito.intItemId = i.intItemId and ito.ysnDefault =1
-LEFT JOIN tblEMEntity e1 ON e1.intEntityId = ito.intOwnerId
 LEFT JOIN tblEMEntity e ON e.intEntityId = l.intEntityVendorId
 LEFT JOIN vyuMFStockReservation S ON S.intLotId = l.intLotId
 Left JOIN dbo.tblICCommodityAttribute CA on CA.intCommodityAttributeId =l.intGradeId 
