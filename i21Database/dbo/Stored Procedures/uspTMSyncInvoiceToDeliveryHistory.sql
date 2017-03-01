@@ -554,7 +554,7 @@ BEGIN
 							,intUserID = @intUserId
 							,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 							,intSiteID = A.intSiteID
-							,strSalesPersonID = I.strSalespersonId
+							,strSalesPersonID = I.strEntityNo
 							,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems) ELSE (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems) END
 							,ysnForReview = 1
 							,dtmMarkForReviewDate = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
@@ -595,8 +595,8 @@ BEGIN
 							ON A.intSiteID = G.intSiteID
 						INNER JOIN tblTMClock H
 							ON A.intClockID = H.intClockID
-						LEFT JOIN tblARSalesperson I
-							ON I.intEntitySalespersonId = C.intEntitySalespersonId
+						LEFT JOIN tblEMEntity I
+							ON I.intEntityId = C.intEntitySalespersonId
 						
 						SET @intNewDeliveryHistoryId = @@IDENTITY
 						
@@ -749,7 +749,7 @@ BEGIN
 						,intUserID = @intUserId
 						,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 						,intSiteID = A.intSiteID
-						,strSalesPersonID = I.strSalespersonId
+						,strSalesPersonID = I.strEntityNo
 						,dblExtendedAmount = (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems)
 						,ysnForReview = 0
 						,dtmMarkForReviewDate = NULL
@@ -804,8 +804,8 @@ BEGIN
 						ON A.intSiteID = G.intSiteID
 					INNER JOIN tblTMClock H
 						ON A.intClockID = H.intClockID
-					LEFT JOIN tblARSalesperson I
-						ON I.intEntitySalespersonId = C.intEntitySalespersonId
+					LEFT JOIN tblEMEntity I
+						ON I.intEntityId = C.intEntitySalespersonId
 					
 					SET @intNewDeliveryHistoryId = @@IDENTITY
 					
@@ -1118,7 +1118,7 @@ BEGIN
 			,intUserID = @intUserId
 			,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 			,intSiteID = A.intSiteID
-			,strSalesPersonID = I.strSalespersonId
+			,strSalesPersonID = I.strEntityNo
 			,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - ISNULL(B.dblTotal,0.0) ELSE ISNULL(B.dblTotal,0.0) END
 			,ysnForReview = 0
 			,dtmMarkForReviewDate = NULL
@@ -1162,8 +1162,8 @@ BEGIN
 			ON A.intSiteID = G.intSiteID
 		INNER JOIN tblTMClock H
 			ON A.intClockID = H.intClockID
-		LEFT JOIN tblARSalesperson I
-			ON I.intEntitySalespersonId = C.intEntitySalespersonId
+		LEFT JOIN tblEMEntity I
+			ON I.intEntityId = C.intEntitySalespersonId
 
 		----Update Site Info
 		--UPDATE tblTMSite
