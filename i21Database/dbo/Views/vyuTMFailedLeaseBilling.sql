@@ -16,38 +16,7 @@ SELECT
 	,strSerialNumber = B.strSerialNumber
 	,intDeviceId = B.intDeviceId
 	,strItemNumber = ISNULL(M.strItemNo,'')
-	,dblBillAmount = (CASE WHEN C.strBillingType = 'Gallons' AND ISNULL((Q.ysnEnableLeaseBillingAboveMinUse),0) = 1 
-							THEN 
-								( CASE WHEN Q.strLeaseBillingIncentiveCalculation = 'Last 12 Months' THEN
-									(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL((SELECT SUM(dblQuantityDelivered) 
-																																						FROM tblTMDeliveryHistory 
-																																						WHERE intSiteID = D.intSiteID
-																																							AND DATEADD(dd, DATEDIFF(dd, 0, dtmInvoiceDate), 0) >= DATEADD(dd, DATEDIFF(dd, 0, DATEADD(MONTH, -12, GETDATE())), 0)
-																																							),0) > Z.dblMinimumUsage) > 0
-										THEN
-											0.0
-										ELSE
-											ISNULL(G.dblAmount,0.0)
-										END)
-									WHEN Q.strLeaseBillingIncentiveCalculation = 'Prior Season' THEN
-										(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(II.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
-										THEN
-											0.0
-										ELSE
-											ISNULL(G.dblAmount,0.0)
-										END)
-									ELSE
-										(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(HH.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
-										THEN
-											0.0
-										ELSE
-											ISNULL(G.dblAmount,0.0)
-										END)
-									END
-								)
-							ELSE
-								ISNULL(G.dblAmount,0.0)
-							END)
+	,dblBillAmount = O.dblBillAmount
 	,intBillingMonth = C.intBillingMonth
 	,dtmLastLeaseBillingDate = C.dtmLastLeaseBillingDate
 	,dtmDontBillAfter = C.dtmDontBillAfter
