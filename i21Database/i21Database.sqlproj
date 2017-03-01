@@ -5059,6 +5059,7 @@
     <Build Include="dbo\Views\vyuCMACHFromCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetSubLocations.sql" />
     <Build Include="dbo\Views\vyuGLMulticurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuAPMultiCurrencyRevalue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
