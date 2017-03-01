@@ -170,7 +170,7 @@ BEGIN TRY
 		,'' strOriginCity
 		,'' strOriginTelePhoneNo
 		,'' strOriginTeleFaxNo
-		,'' strOriginCountry
+		,OCountry.strISOCode strOriginCountry
 		,'' strOriginRegion
 		,L.strDestinationPort
 		,'' strDestinationAddress
@@ -178,7 +178,7 @@ BEGIN TRY
 		,'' strDestinationCity
 		,'' strDestinationTelePhoneNo
 		,'' strDestinationTeleFaxNo
-		,'' strDestinationCountry
+		,DCountry.strISOCode strDestinationCountry
 		,'' strDestinationRegion
 		,strContractBasis = (
 			SELECT TOP 1 CB.strContractBasis
@@ -237,6 +237,10 @@ BEGIN TRY
 	LEFT JOIN tblEMEntity WE ON WE.intEntityId = CLSL.intVendorId
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = WE.intEntityId
 	LEFT JOIN tblAPVendor A ON A.intEntityVendorId = WE.intEntityId
+	LEFT JOIN tblSMCity OCity ON OCity.strCity = L.strOriginPort
+	LEFT JOIN tblSMCountry OCountry ON OCountry.intCountryID = OCity.intCountryId
+	LEFT JOIN tblSMCity DCity ON DCity.strCity = L.strDestinationPort
+	LEFT JOIN tblSMCountry DCountry ON DCountry .intCountryID = DCity.intCountryId
 	WHERE L.intLoadId = @intLoadId
 
 	SELECT @intLoadStgId = SCOPE_IDENTITY()
