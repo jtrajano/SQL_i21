@@ -1795,6 +1795,52 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = plugin.getActiveRecord();
 
         if (combo.itemId === 'cboItem') {
+
+            // Get the default Forex Rate Type from the Company Preference. 
+            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryId');
+
+            // Get the last cost
+            var dblLastCost = records[0].get('dblLastCost');
+            var dblCostUOMConvFactor = records[0].get('dblCostUOMConvFactor');
+
+            // Convert the last cost to the Cost UOM. 
+            dblLastCost = Ext.isNumeric(dblLastCost) ? dblLastCost : 0;
+            dblCostUOMConvFactor = Ext.isNumeric(dblCostUOMConvFactor) ? dblCostUOMConvFactor : 0;
+
+            dblLastCost = dblCostUOMConvFactor != 0 ? dblLastCost * dblCostUOMConvFactor : dblLastCost; 
+            dblLastCost = i21.ModuleMgr.Inventory.roundDecimalFormat(dblLastCost, 6);
+
+            // Get the Forex Rate. 
+            iRely.Functions.getForexRate(
+                win.viewModel.data.current.get('intCurrencyId'),
+                intRateType,
+                win.viewModel.data.current.get('dtmReceiptDate'),
+                function(successResponse){
+                    if (successResponse && successResponse.length > 0){
+                        var dblForexRate = successResponse[0].dblRate;
+                        var strRateType = successResponse[0].strRateType;             
+
+                        dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+
+                        // Convert the last cost to the transaction currency.
+                        // and round it to two decimal places.  
+                        dblLastCost = dblForexRate != 0 ?  dblLastCost / dblForexRate : 0;
+                        dblLastCost = i21.ModuleMgr.Inventory.roundDecimalFormat(dblLastCost, 6);
+                        
+                        current.set('intForexRateTypeId', intRateType);
+                        current.set('strForexRateType', strRateType);
+                        current.set('dblForexRate', dblForexRate);
+                        current.set('dblUnitCost', dblLastCost);
+                        current.set('dblUnitRetail', dblLastCost);
+                    }
+                },
+                function(failureResponse){
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            );            
+
+
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
             current.set('strLotTracking', records[0].get('strLotTracking'));
@@ -1961,8 +2007,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
         else if (combo.itemId === 'cboCostUOM') {
-            current.set('dblCostUOMConvFactor', records[0].get('dblUnitQty'));
-            current.set('dblUnitCost', records[0].get('dblLastCost'));
+            var dblLastCost = records[0].get('dblLastCost');
+            var dblUnitQty = records[0].get('dblUnitQty'); 
+            var dblForexRate = current.get('dblForexRate');
+
+            dblUnitQty = Ext.isNumeric(dblUnitQty) ? dblUnitQty : 0;
+            dblLastCost = Ext.isNumeric(dblLastCost) ? dblLastCost : 0;
+            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+
+            // Convert the last cost from functional currency to the transaction currency. 
+            dblLastCost = dblForexRate != 0 ? dblLastCost / dblForexRate : dblLastCost;
+            dblLastCost = i21.ModuleMgr.Inventory.roundDecimalFormat(dblLastCost, 6);
+            
+            current.set('dblCostUOMConvFactor', dblUnitQty);
+            current.set('dblUnitCost', dblLastCost);
         }
         else if (combo.itemId === 'cboStorageLocation') {
             if (current.get('intSubLocationId') !== records[0].get('intSubLocationId')) {
