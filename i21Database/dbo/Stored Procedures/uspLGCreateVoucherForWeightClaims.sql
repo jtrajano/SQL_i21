@@ -328,9 +328,8 @@ BEGIN TRY
 	JOIN tblLGLoad LD ON LD.intLoadId = BD.intLoadId
 	JOIN tblLGWeightClaim WC ON WC.intLoadId = BD.intLoadId
 	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
-	LEFT JOIN tblICItemAccount IA ON IA.intItemId = WCD.intItemId 
+	LEFT JOIN tblICItemAccount IA ON IA.intItemId = WCD.intItemId AND IA.intAccountCategoryId = 27
 	WHERE WCD.intContractDetailId = BD.intContractDetailId
-		AND IA.intAccountCategoryId = 27
 		AND WC.intWeightClaimId = @intWeightClaimId 
 
 END TRY
