@@ -1231,14 +1231,54 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var pnlLotTracking = win.down('#pnlLotTracking');
         
         if (combo.itemId === 'cboItemNo') {
+
+            // Get the default Forex Rate Type from the Company Preference. 
+            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryId');
+
+            // Get the sales price
+            var dblUnitPrice = records[0].get('dblIssueSalePrice');
+            var dblUnitPriceForeign = records[0].get('dblIssueSalePrice');
+
+            dblUnitPrice = Ext.isNumeric(dblUnitPrice) ? dblUnitPrice : 0;            
+            dblUnitPriceForeign = Ext.isNumeric(dblUnitPriceForeign) ? dblUnitPriceForeign : 0;
+
+            // Get the Forex Rate. 
+            iRely.Functions.getForexRate(
+                win.viewModel.data.current.get('intCurrencyId'),
+                intRateType,
+                win.viewModel.data.current.get('dtmShipDate'),
+                function(successResponse){
+                    if (successResponse && successResponse.length > 0){
+                        var dblForexRate = successResponse[0].dblRate;
+                        var strRateType = successResponse[0].strRateType;             
+
+                        dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+
+                        // Convert the sales price to the transaction currency.
+                        // and round it to 6 decimal places.  
+                        dblUnitPriceForeign = dblForexRate != 0 ?  dblUnitPrice / dblForexRate : 0;
+                        dblUnitPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblUnitPriceForeign, 6);
+                        
+                        current.set('intForexRateTypeId', intRateType);
+                        current.set('strForexRateType', strRateType);
+                        current.set('dblForexRate', dblForexRate);
+                        current.set('dblForeignUnitPrice', dblUnitPriceForeign);
+                    }
+                },
+                function(failureResponse){
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            );
+
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
             current.set('strLotTracking', records[0].get('strLotTracking'));
             current.set('intCommodityId', records[0].get('intCommodityId'));
             current.set('intItemUOMId', records[0].get('intIssueUOMId'));
             current.set('strUnitMeasure', records[0].get('strIssueUOM'));
-            current.set('dblUnitPrice', records[0].get('dblIssueSalePrice'));
-            current.set('dblForeignUnitPrice', records[0].get('dblIssueSalePrice'));
+            current.set('dblUnitPrice', dblUnitPrice);
+            current.set('dblForeignUnitPrice',dblUnitPriceForeign);
             current.set('dblItemUOMConvFactor', records[0].get('dblIssueUOMConvFactor'));
             current.set('strUnitType', records[0].get('strIssueUOMType'));
             current.set('intOwnershipType', 1);
@@ -1258,11 +1298,22 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     
         }
         else if (combo.itemId === 'cboUOM') {
-            current.set('dblItemUOMConv', records[0].get('dblUnitQty'));
-            current.set('dblUnitCost', records[0].get('dblLastCost'));
-            current.set('dblUnitPrice', records[0].get('dblSalePrice'));
-            current.set('dblForeignUnitPrice', records[0].get('dblSalePrice'));
-            current.set('intItemUOMId', records[0].get('intItemUnitMeasureId'));
+            var dblUnitQty = records[0].get('dblUnitQty');
+            var dblLastCost = records[0].get('dblLastCost');
+            var dblSalesPrice = records[0].get('dblSalePrice');
+            var dblSalesPriceForeign = records[0].get('dblSalePrice');
+            var intItemUOMId = records[0].get('intItemUnitMeasureId');
+            var dblForexRate = current.get('dblForexRate');
+
+            // Convert the sales price from functional currency to the transaction currency. 
+            dblSalesPriceForeign = dblForexRate != 0 ? dblSalesPrice / dblForexRate : dblLastCost;
+            dblSalesPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblSalesPriceForeign, 6);            
+
+            current.set('dblItemUOMConv', dblUnitQty);
+            current.set('dblUnitCost', dblLastCost);
+            current.set('dblUnitPrice', dblSalesPrice);
+            current.set('dblForeignUnitPrice', dblSalesPriceForeign);
+            current.set('intItemUOMId', intItemUOMId);
         }
         else if (combo.itemId === 'cboSubLocation') {
             if (current.get('intSubLocationId') !== records[0].get('intSubLocationId')) {
