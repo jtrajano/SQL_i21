@@ -421,6 +421,7 @@ set ysnAPOpen = 0
 ,ysnINVOpen  = 0
 ,ysnCMOpen = 0 
 ,ysnPROpen = 0
+,ysnCTOpen=0
 where intFiscalYearId in (select intFiscalYearId from tblGLFiscalYear where  ysnStatus = 0 )
 
 SET IDENTITY_INSERT tblGLFiscalYearPeriod OFF
