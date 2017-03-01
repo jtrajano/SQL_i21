@@ -17,7 +17,7 @@ BEGIN TRY
 	IF @ysnPost = 1
 	BEGIN
 		UPDATE tblGLFiscalYear SET ysnStatus = 0 WHERE intFiscalYearId = @intFiscalYearId	
-		UPDATE tblGLFiscalYearPeriod SET ysnOpen = 0,ysnAROpen = 0, ysnAPOpen = 0, ysnINVOpen = 0, ysnCMOpen = 0, ysnPROpen = 0 where intFiscalYearId = @intFiscalYearId
+		UPDATE tblGLFiscalYearPeriod SET ysnOpen = 0,ysnAROpen = 0, ysnAPOpen = 0, ysnINVOpen = 0, ysnCMOpen = 0, ysnPROpen = 0, ysnCTOpen = 0 where intFiscalYearId = @intFiscalYearId
 	END	
 	ELSE IF @ysnPost = 0 
 	BEGIN
@@ -29,7 +29,7 @@ BEGIN TRY
 													ON A.intAccountGroupId = B.intAccountGroupId WHERE A.strAccountId = @strRetainedAccount), '')
 		UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE strTransactionId = CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount and ysnIsUnposted = 0
 		UPDATE tblGLFiscalYear SET ysnStatus = 1 WHERE intFiscalYearId = @intFiscalYearId
-		UPDATE tblGLFiscalYearPeriod SET ysnOpen = 1,ysnAROpen = 1, ysnAPOpen = 1, ysnINVOpen = 1, ysnCMOpen = 1, ysnPROpen = 1 where intFiscalYearId = @intFiscalYearId
+		UPDATE tblGLFiscalYearPeriod SET ysnOpen = 1,ysnAROpen = 1, ysnAPOpen = 1, ysnINVOpen = 1, ysnCMOpen = 1, ysnPROpen = 1, ysnCTOpen = 1 where intFiscalYearId = @intFiscalYearId
 	END
 	
 	
