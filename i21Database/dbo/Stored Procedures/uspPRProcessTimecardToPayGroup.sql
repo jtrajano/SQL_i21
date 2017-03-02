@@ -47,8 +47,8 @@ WHERE T.ysnApproved = 1
 	AND T.intPayGroupDetailId IS NULL
 	AND T.dblHours > 0
 	AND T.intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
-	AND CAST(FLOOR(CAST(T.dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,T.dtmDateIn) AS FLOAT)) AS DATETIME)
-	AND CAST(FLOOR(CAST(T.dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,T.dtmDateOut) AS FLOAT)) AS DATETIME)
+	AND CAST(FLOOR(CAST(T.dtmTimeIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,T.dtmTimeIn) AS FLOAT)) AS DATETIME)
+	AND CAST(FLOOR(CAST(T.dtmTimeOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,T.dtmTimeOut) AS FLOAT)) AS DATETIME)
 GROUP BY
 	T.intEntityEmployeeId
 	,T.intEmployeeEarningId
@@ -191,9 +191,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				,TC.dtmDate
 				,TC.intEmployeeEarningId
 				,TC.intEmployeeDepartmentId
-				,TC.dtmDateIn
 				,TC.dtmTimeIn
-				,TC.dtmDateOut
 				,TC.dtmTimeOut
 				,TC.ysnApproved
 				,TC.dblHours
@@ -203,12 +201,12 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 									FROM
 										tblPRTimecard TCR
 									WHERE 
-										TCR.dtmDateOut <= TC.dtmDateOut 
+										TCR.dtmTimeOut <= TC.dtmTimeOut 
 										AND TCR.intEntityEmployeeId = TC.intEntityEmployeeId
 										AND TCR.intEmployeeEarningId = TC.intEmployeeEarningId
 										AND TCR.intEmployeeDepartmentId = TC.intEmployeeDepartmentId
-										AND CAST(FLOOR(CAST(TCR.dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,TCR.dtmDateIn) AS FLOAT)) AS DATETIME)
-										AND CAST(FLOOR(CAST(TCR.dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,TCR.dtmDateOut) AS FLOAT)) AS DATETIME))
+										AND CAST(FLOOR(CAST(TCR.dtmTimeIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,TCR.dtmTimeIn) AS FLOAT)) AS DATETIME)
+										AND CAST(FLOOR(CAST(TCR.dtmTimeOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,TCR.dtmTimeOut) AS FLOAT)) AS DATETIME))
 			FROM
 				tblPRTimecard TC LEFT JOIN tblPREmployeeEarning EE
 				ON TC.intEmployeeEarningId = EE.intEmployeeEarningId
@@ -217,8 +215,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				AND TC.dblHours > 0
 				AND TC.intEmployeeEarningId = @intEmployeeEarningId
 				AND TC.intEmployeeDepartmentId = @intEmployeeDepartmentId
-				AND CAST(FLOOR(CAST(TC.dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,TC.dtmDateIn) AS FLOAT)) AS DATETIME)
-				AND CAST(FLOOR(CAST(TC.dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,TC.dtmDateOut) AS FLOAT)) AS DATETIME)
+				AND CAST(FLOOR(CAST(TC.dtmTimeIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,TC.dtmTimeIn) AS FLOAT)) AS DATETIME)
+				AND CAST(FLOOR(CAST(TC.dtmTimeOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,TC.dtmTimeOut) AS FLOAT)) AS DATETIME)
 			GROUP BY 
 				TC.intTimecardId
 				,TC.intEntityEmployeeId
@@ -226,9 +224,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				,TC.intEmployeeEarningId
 				,TC.intEmployeeDepartmentId
 				,TC.dblHours
-				,TC.dtmDateIn
 				,TC.dtmTimeIn
-				,TC.dtmDateOut
 				,TC.dtmTimeOut
 				,TC.ysnApproved
 				,EE.dblDefaultHours) X
