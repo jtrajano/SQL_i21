@@ -6,8 +6,8 @@
 
 AS
 
-SELECT CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,strName,convert(numeric(24,6),dblQty) as dblQty,
-convert(numeric(24,6),dblTotPurchased) dblTotPurchased, 
+SELECT CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,strName,convert(numeric(24,2),dblQty) as dblQty,
+convert(numeric(24,2),dblTotPurchased) dblTotPurchased, 
                (dblTotPurchased/SUM(CASE WHEN isnull(dblTotPurchased,0)=0 then 1 else dblTotPurchased end) OVER ())*100  as dblCompanySpend ,0 as intConcurrencyId
        FROM(
 SELECT strName, isnull(sum(dblQty),0) as dblQty,isnull(sum(dblTotPurchased),0) as dblTotPurchased from(
@@ -54,33 +54,27 @@ SELECT e.strName,strContractNumber,
 							
 							),0)) dblUnPriced
 
-              ,(SELECT distinct
-               dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,
-              (((SUM(dblFixationPrice) OVER (PARTITION BY det.intContractDetailId )  * SUM(dblFixationPrice) OVER (PARTITION BY det.intContractDetailId )  +
-                     (isnull(dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
-                     /cd.dblNoOfLots)+det.dblBasis)*
-                     dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, cuc.intUnitMeasureId,ic.intUnitMeasureId,cd.dblQuantity) 
-                                   - isnull((
-								   select sum(dblLineTotal) dblLineTotal from (
-									SELECT distinct ri.*
-                                        FROM tblICInventoryReturned r
-                                                JOIN tblICInventoryReceipt ir on r.intTransactionId=ir.intInventoryReceiptId
-                                                JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryReceiptId
-                                                JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo
-                                        WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId )t
-										
-										),0))/
-                     case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
-              FROM vyuCTSearchPriceContract det
-              JOIN vyuCTSearchPriceContractDetail detcd on det.intPriceFixationId=detcd.intPriceFixationId 
-			  join tblCTContractDetail tcd on det.intContractDetailId = tcd.intContractDetailId
-			  JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId
-			  JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=ch.intCommodityUOMId               
-			  JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
-              JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-              WHERE strStatus in('Partially Priced')
-              AND det.intContractDetailId=cd.intContractDetailId
-              ) as dblParPriced,
+		  ,(SELECT DISTINCT
+				   dbo.fnCTConvertQtyToTargetCommodityUOM
+				   (@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,
+						((((SUM(dblFixationPrice*dblBalanceNoOfLots) OVER (PARTITION BY det.intContractDetailId )  
+						 + (isnull(dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
+						 )/ cd.dblNoOfLots)
+						 +det.dblBasis)
+						 * 
+						dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity)
+						)
+					/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
+				  FROM vyuCTSearchPriceContract det
+				  JOIN vyuCTSearchPriceContractDetail detcd on det.intPriceFixationId=detcd.intPriceFixationId 
+				  JOIN tblCTContractDetail tcd on det.intContractDetailId = tcd.intContractDetailId
+				  JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId
+				  JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=ch.intCommodityUOMId               
+				  JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
+				  JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
+				  WHERE strStatus in('Partially Priced')
+				  AND det.intContractDetailId=cd.intContractDetailId
+				  ) as dblParPriced,
 
 			(select sum(dblReturnQty) from (
 				SELECT  DISTINCT ri.*,dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,ri.dblOpenReceive) dblReturnQty			 

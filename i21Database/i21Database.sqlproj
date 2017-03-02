@@ -5064,6 +5064,7 @@
     <Build Include="dbo\Views\vyuAPMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposureDetail.sql" />
     <Build Include="dbo\Views\vyuCTMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuRKSourcingReportDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
