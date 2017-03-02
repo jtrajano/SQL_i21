@@ -1781,6 +1781,36 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         })
     },
 
+    getVendorCost: function(cfg, successFn, failureFn){
+        // Sanitize parameters; 
+        cfg = cfg ? cfg : {}; 
+        successFn = successFn && (successFn instanceof Function) ? successFn : function(){ /*empty function*/ };
+        failureFn = failureFn && (failureFn instanceof Function) ? failureFn : function(){ /*empty function*/ };
+
+        ic.utils.ajax({
+            url: '../entitymanagement/api/vendorpricing/SearchVendorLocationItemCurrency',
+            params:{
+                VendorId: cfg.vendorId,
+                ItemId: cfg.itemId,
+                CurrencyId: cfg.currencyId,
+                VendorLocation: cfg.vendorLocation,
+                ItemUOM: cfg.itemUOM,
+                ValidDate: cfg.validDate
+            },
+            method: 'get'  
+        })
+        .subscribe(
+            function(successResponse) {
+                //var jsonData = Ext.decode(successResponse.responseText);
+                successFn(successResponse);
+            }
+            ,function(failureResponse) {
+                //var jsonData = Ext.decode(failureResponse.responseText);
+                failureFn(failureResponse);
+            }
+        );  
+    },
+
     onReceiptItemSelect: function (combo, records, eOpts) {
         var me = this;
 
@@ -1798,8 +1828,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // Get the default Forex Rate Type from the Company Preference. 
             var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
+            
+            // Get the functional currency:
+            var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+            
+            // Get the important header data: 
+            var currentHeader = win.viewModel.data.current;
+            var transactionCurrencyId = currentHeader.get('intCurrencyId');
+            var vendorId = currentHeader.get('intEntityVendorId');            
+            var vendorLocation = currentHeader.get('intShipFromId');            
+            var dtmReceiptDate = currentHeader.get('dtmReceiptDate');
 
-            // Get the last cost
+            // Get the important detail data:
+            var itemId = records[0].get('intItemId');
+            var intItemUnitMeasureId = records[0].get('intReceiveUnitMeasureId'); 
             var dblLastCost = records[0].get('dblLastCost');
             var dblCostUOMConvFactor = records[0].get('dblCostUOMConvFactor');
 
@@ -1810,37 +1852,78 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             dblLastCost = dblCostUOMConvFactor != 0 ? dblLastCost * dblCostUOMConvFactor : dblLastCost; 
             dblLastCost = i21.ModuleMgr.Inventory.roundDecimalFormat(dblLastCost, 6);
 
-            // Get the Forex Rate. 
-            if (intRateType){
-                iRely.Functions.getForexRate(
-                    win.viewModel.data.current.get('intCurrencyId'),
-                    intRateType,
-                    win.viewModel.data.current.get('dtmReceiptDate'),
-                    function(successResponse){
-                        if (successResponse && successResponse.length > 0){
-                            var dblForexRate = successResponse[0].dblRate;
-                            var strRateType = successResponse[0].strRateType;             
+            // function variable to process the default forex rate. 
+            var processForexRateOnSuccess = function(successResponse, isItemLastCost){
+                if (successResponse && successResponse.length > 0 ){
+                    var dblForexRate = successResponse[0].dblRate;
+                    var strRateType = successResponse[0].strRateType;             
 
-                            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+                    dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
 
-                            // Convert the last cost to the transaction currency.
-                            // and round it to two decimal places.  
-                            dblLastCost = dblForexRate != 0 ?  dblLastCost / dblForexRate : 0;
-                            dblLastCost = i21.ModuleMgr.Inventory.roundDecimalFormat(dblLastCost, 6);
-                            
-                            current.set('intForexRateTypeId', intRateType);
-                            current.set('strForexRateType', strRateType);
-                            current.set('dblForexRate', dblForexRate);
-                            current.set('dblUnitCost', dblLastCost);
-                            current.set('dblUnitRetail', dblLastCost);
-                        }
-                    },
-                    function(failureResponse){
-                        var jsonData = Ext.decode(failureResponse.responseText);
-                        iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                    // Convert the last cost to the transaction currency.
+                    // and round it to six decimal places.  
+                    if (transactionCurrencyId != functionalCurrencyId && isItemLastCost){
+                        dblLastCost = dblForexRate != 0 ?  dblLastCost / dblForexRate : 0;
+                        dblLastCost = i21.ModuleMgr.Inventory.roundDecimalFormat(dblLastCost, 6);
                     }
-                );  
+                    
+                    current.set('intForexRateTypeId', intRateType);
+                    current.set('strForexRateType', strRateType);
+                    current.set('dblForexRate', dblForexRate);
+                    current.set('dblUnitCost', dblLastCost);
+                    current.set('dblUnitRetail', dblLastCost);                            
+                }
             }
+
+            // function variable to process the vendor cost. 
+            var processVendorCostOnSuccess = function(successResponse){
+                var jsonData = Ext.decode(successResponse.responseText);
+                var isItemLastCost = true; 
+
+                // If there is a vendor cost, replace dblLastCost with the vendor cost. 
+                if (jsonData && jsonData.data && jsonData.data.length > 0) {
+                    var dataArray = jsonData.data[0];
+                    if (dataArray) {
+                        dblLastCost = dataArray.dblUnit; 
+                        current.set('dblUnitCost', dblLastCost);
+                        current.set('dblUnitRetail', dblLastCost);                                                    
+                        isItemLastCost = false;
+                    }
+                }
+
+                // If transaction currency is a foreign currency, get the default forex rate type, forex rate, and convert the last cost to the transaction currency. 
+                if (transactionCurrencyId != functionalCurrencyId && intRateType){
+                    iRely.Functions.getForexRate(
+                        transactionCurrencyId,
+                        intRateType,
+                        win.viewModel.data.current.get('dtmReceiptDate'),
+                        function(successResponse){
+                            processForexRateOnSuccess(successResponse, isItemLastCost);
+                        },
+                        function(failureResponse){
+                            var jsonData = Ext.decode(failureResponse.responseText);
+                            iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                        }
+                    );                      
+                }
+            };
+
+            var processVendorCostOnFailure = function(failureResponse){
+                var jsonData = Ext.decode(failureResponse.responseText);
+                //iRely.Functions.showErrorDialog(jsonData.Message);
+                iRely.Functions.showErrorDialog('Something went wrong while getting the item cost from the Vendor Pricing setup.');
+            };
+
+            // Get the vendor cost. 
+            var vendorCostCfg = {
+                vendorId: vendorId,
+                itemId: itemId,
+                currencyId: transactionCurrencyId,
+                vendorLocation: vendorLocation,
+                itemUOM: intItemUnitMeasureId,
+                validDate: dtmReceiptDate
+            }
+            me.getVendorCost(vendorCostCfg, processVendorCostOnSuccess, processVendorCostOnFailure);
 
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
@@ -1849,8 +1932,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strUnitMeasure', records[0].get('strReceiveUOM'));
             current.set('intCostUOMId', records[0].get('intReceiveUOMId'));
             current.set('strCostUOM', records[0].get('strReceiveUOM'));
-            current.set('dblUnitCost', records[0].get('dblLastCost'));
-            current.set('dblUnitRetail', records[0].get('dblLastCost'));
+            current.set('dblUnitCost', dblLastCost);
+            current.set('dblUnitRetail', dblLastCost);
             current.set('dblItemUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
             current.set('dblCostUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
             current.set('strUnitType', records[0].get('strReceiveUOMType'));

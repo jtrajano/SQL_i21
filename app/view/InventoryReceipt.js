@@ -1081,6 +1081,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataIndex: 'strLifeTimeType',
                                                                                             dataType: 'string',
                                                                                             hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intReceiveUnitMeasureId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
                                                                                         }
                                                                                     ],
                                                                                     itemId: 'cboItem',
