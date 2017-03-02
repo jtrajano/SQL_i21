@@ -5964,4 +5964,46 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblSMMultiCurrency_RateType_AccountsReceivable]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="3d730d8c-e915-4a96-85bc-e0f45a8e2447" ChangeDateTime="03/01/2017 05:51:30">
+    <Property Name="ElementName" Value="[dbo].[tblSMMultiCurrency].[intAccountsPayableId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMMultiCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intAccountsPayableRateTypeId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f02e1f13-8c1b-491c-a82b-31376aa9c666" ChangeDateTime="03/01/2017 05:52:49">
+    <Property Name="ElementName" Value="[dbo].[tblSMMultiCurrency].[intCashManagementId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMMultiCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intCashManagementRateTypeId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e942bb63-507a-4ef8-b604-086eb71809da" ChangeDateTime="03/01/2017 05:53:57">
+    <Property Name="ElementName" Value="[dbo].[tblSMMultiCurrency].[intInventoryId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMMultiCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intInventoryRateTypeId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d5d7180e-0a58-40d5-a4fe-1244c86bdbb5" ChangeDateTime="03/01/2017 05:55:27">
+    <Property Name="ElementName" Value="[dbo].[tblSMMultiCurrency].[intContractId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMMultiCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intContractRateTypeId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9abf13fa-4df2-47ff-900c-34e02bda9aa8" ChangeDateTime="03/01/2017 05:56:19">
+    <Property Name="ElementName" Value="[dbo].[tblSMMultiCurrency].[intAccountsReceivableId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMMultiCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intAccountsReceivableRateTypeId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="dc104b29-d22e-4229-80e5-c6c1ca7b7b5f" ChangeDateTime="03/01/2017 05:57:45">
+    <Property Name="ElementName" Value="[dbo].[tblSMMultiCurrency].[intGeneralJournalId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMMultiCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intGeneralJournalRateTypeId]" />
+  </Operation>
 </Operations>
