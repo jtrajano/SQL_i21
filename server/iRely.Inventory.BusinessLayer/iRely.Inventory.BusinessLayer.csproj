@@ -197,6 +197,7 @@
     <Compile Include="Implementation\CompanyPreferenceBl.cs" />
     <Compile Include="Implementation\CategoryTaxBl.cs" />
     <Compile Include="Implementation\InventoryReceiptChargeTaxBl.cs" />
+    <Compile Include="Implementation\ItemSubLocationBl.cs" />
     <Compile Include="Implementation\M2MComputationBl.cs" />
     <Compile Include="Implementation\MeasurementBl.cs" />
     <Compile Include="Implementation\InventoryReceiptItemLotBl.cs" />
@@ -230,6 +231,7 @@
     <Compile Include="Implementation\TagBl.cs" />
     <Compile Include="Implementation\UnitMeasureBl.cs" />
     <Compile Include="Interface\IInventoryReceiptChargeTaxBl.cs" />
+    <Compile Include="Interface\IItemSubLocationBl.cs" />
     <Compile Include="Interface\IM2MComputationBl.cs" />
     <Compile Include="Interface\IMeasurementBl.cs" />
     <Compile Include="Interface\IInventoryReceiptItemLotBl.cs" />

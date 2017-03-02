@@ -435,6 +435,24 @@ Ext.define('Inventory.view.ItemViewController', {
                 colLocationCostingMethod: 'strCostingMethod'
             },
 
+            grdItemSubLocations: {
+                colsubSubLocationName: {
+                    dataIndex: 'strSubLocationName',
+                    editor: {
+                        store: '{subLocations}',
+                        origValueField: 'intCompanyLocationSubLocationId',
+                        origUpdateField: 'intSubLocationId',
+                        defaultFilters: [
+                            {
+                                column: 'intCompanyLocationId',
+                                value: '{grdLocationStore.selection.intCompanyLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                }
+            },
+
             //--------------//
             //GL Account Tab//
             //--------------//
@@ -1314,7 +1332,7 @@ Ext.define('Inventory.view.ItemViewController', {
             grdManufacturingCellAssociation = win.down('#grdManufacturingCellAssociation'),
             grdOwner = win.down('#grdOwner'),
             grdMotorFuelTax = win.down('#grdMotorFuelTax'),
-
+            grdItemSubLocations = win.down('#grdItemSubLocations'),
             grdPricing = win.down('#grdPricing'),
             grdPricingLevel = win.down('#grdPricingLevel'),
             grdSpecialPricing = win.down('#grdSpecialPricing'),
@@ -1339,7 +1357,6 @@ Ext.define('Inventory.view.ItemViewController', {
             enableCustomTab: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             onSaveClick: me.saveAndPokeGrid(win, grdUOM),
-            
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
@@ -1358,7 +1375,16 @@ Ext.define('Inventory.view.ItemViewController', {
                         grid: grdLocationStore,
                         deleteButton : grdLocationStore.down('#btnDeleteLocation'),
                         position: 'none'
-                    })
+                    }),
+                    details: [
+                        {
+                            key: 'tblICItemSubLocations',
+                            component: Ext.create('iRely.mvvm.grid.Manager', {
+                                grid: grdItemSubLocations,
+                                deleteButton : grdItemSubLocations.down('#btnDeleteItemSubLocation')
+                            })
+                        }
+                    ]
                 },
                 {
                     key: 'tblICItemVendorXrefs',
@@ -3942,6 +3968,26 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    // onLocationSelectionChange: function(selModel, selected, oOpts) {
+    //     if (selModel) {
+    //         if (selModel.view === null || selModel.view == 'undefined') {
+    //             if (selModel.views == 'undefined' || selModel.views === null || selModel.views.length == 0)
+    //                 return;
+    //         }
+    //         var win = selModel.view.grid.up('window');
+    //         var vm = win.viewModel;
+    //         var grid = win.down('#grdItemSubLocations');
+
+    //         if (selected.length > 0) {
+    //             var current = selected[0];
+                
+    //             if(!current.phantom && !current.dirty) {
+                    
+    //             }
+    //         }
+    //     }
+    // },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -4050,7 +4096,8 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#grdLocationStore": {
                 itemdblclick: this.onLocationDoubleClick,
-                cellclick: this.onLocationCellClick
+                cellclick: this.onLocationCellClick,
+                //selectionchange: this.onLocationSelectionChange
             },
             "#cboTracking": {
                 specialKey: this.onSpecialKeyTab

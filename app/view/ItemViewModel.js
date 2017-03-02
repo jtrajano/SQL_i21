@@ -31,6 +31,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'EntityManagement.store.VendorBuffered',
         'EntityManagement.store.CustomerBuffered',
         'i21.store.CompanyLocationBuffered',
+        'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.CountryBuffered',
         'i21.store.TaxGroupMasterBuffered',
         'i21.store.CompanyLocationPricingLevelBuffered',
@@ -46,6 +47,9 @@ Ext.define('Inventory.view.ItemViewModel', {
     ],
 
     stores: {
+        subLocations: {
+            type: 'smcompanylocationsublocationbuffered'
+        },
         m2mComputations: {
             type: 'icbufferedm2mcomputation',
             

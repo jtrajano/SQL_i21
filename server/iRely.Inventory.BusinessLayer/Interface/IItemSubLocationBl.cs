@@ -7,12 +7,10 @@ using System.Threading.Tasks;
 
 using iRely.Inventory.Model;
 
-
 namespace iRely.Inventory.BusinessLayer
 {
-    public interface ILotBl : IBusinessLayer<tblICLot>
+    public interface IItemSubLocationBl : IBusinessLayer<tblICItemSubLocation>
     {
-        Task<SearchResult> GetHistory(GetParameter param);
-        Task<SearchResult> GetLots(GetParameter param);
+        Task<SearchResult> GetItemSubLocations(GetParameter param);
     }
 }
