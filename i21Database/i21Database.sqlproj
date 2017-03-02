@@ -5078,6 +5078,8 @@
     <Build Include="dbo\Tables\tblFAFixedAssetDepreciation.sql" />
     <Build Include="dbo\Tables\tblFADepreciationMethod.sql" />
     <Build Include="dbo\Tables\tblFADepreciationMethodDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetQualityPropertiesByWO.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
