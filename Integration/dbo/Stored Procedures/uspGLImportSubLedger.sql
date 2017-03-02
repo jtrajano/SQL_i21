@@ -10,16 +10,26 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     	AS
     	BEGIN
     	SET NOCOUNT ON;
-    	DECLARE @isCOAPresent BIT
+    	DECLARE @isCOAPresent BIT, @halt BIT  = 0
     	SELECT @isCOAPresent = 1,@importLogId = 0
     	IF NOT EXISTS (SELECT * FROM glijemst WHERE glije_period between @startingPeriod and @endingPeriod)
     	BEGIN
     		IF @importLogId = 0
     			EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'',@intUserId,@version ,@importLogId OUTPUT
-    		UPDATE tblGLCOAImportLog SET strEvent = ''No Data to import from the Origin on a given period.'' WHERE intImportLogId = @importLogId
-    		RETURN
+			EXEC dbo.[uspGLCreateImportLogDetail]	@importLogId , ''No Data to import from the Origin on a given period.'' ,null ,null
+			SET @halt = 1
     	END
 
+		IF EXISTS(SELECT TOP 1 1 FROM vyuAPOriginCCDTransaction) -- AP-3144 check for non-imported Credit Card Reconciliation records
+		BEGIN
+			IF @importLogId = 0
+    			EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'',@intUserId,@version ,@importLogId OUTPUT
+			EXEC dbo.[uspGLCreateImportLogDetail]	@importLogId ,  ''Unable to Post because there is no cross reference between i21 and Origin.'' ,null ,null
+			SET @halt = 1
+		END
+
+		IF @halt = 1 RETURN
+		
     	IF NOT EXISTS( SELECT * FROM tblGLCOACrossReference)
     	BEGIN
     		IF @importLogId = 0
