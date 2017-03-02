@@ -5276,6 +5276,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 { xtype: 'numbercolumn', dataIndex: 'dblFranchise', text: 'Franchise', width: 100, dataType: 'float', hidden: true },
                 { xtype: 'numbercolumn', dataIndex: 'dblContainerWeightPerQty', text: 'Container Weight Per Qty', width: 100, dataType: 'float', hidden: true },
 
+                { dataIndex: 'intForexRateTypeId', text: 'Forex Rate Type Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strForexRateType', text: 'Forex Rate Type', width: 100, dataType: 'string', hidden: true },
+                { xtype: 'numbercolumn', dataIndex: 'dblForexRate', text: 'Forex Rate', width: 100, dataType: 'float', hidden: true },
+
                 { xtype: 'numbercolumn', dataIndex: 'dblGross', text: 'Gross', width: 100, dataType: 'float' },
                 { xtype: 'numbercolumn', dataIndex: 'dblNet', text: 'Net', width: 100, dataType: 'float' }
             ];
@@ -5341,7 +5345,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             ysnSubCurrency: order.get('ysnSubCurrency'),
                             strSubCurrency: order.get('strSubCurrency'),
                             dblGross: order.get('dblGross'),
-                            dblNet: order.get('dblNet')
+                            dblNet: order.get('dblNet'),
+                            intForexRateTypeId: order.get('intForexRateTypeId'),
+                            strForexRateType: order.get('strForexRateType'),
+                            dblForexRate: order.get('dblForexRate'),
                         };
                         currentVM.set('strBillOfLading', order.get('strBOL'));
 
