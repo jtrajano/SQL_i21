@@ -214,7 +214,7 @@ SELECT
 		,[dblQty] 							=	CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END 
 		,[dblUOMQty] 						=	itemUOM.dblUnitQty
 		,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
-		,[dblNewCost] 						=	B.dblCost
+		,[dblNewCost] 						=	CASE WHEN (E2.dblForexRate != B.dblRate) THEN costAdjust.dblCost ELSE B.dblCost END --Convert to Functional Currency Rate was change.
 		,[intCurrencyId] 					=	A.intCurrencyId
 		,[dblExchangeRate] 					=	0
 		,[intTransactionId]					=	A.intBillId
@@ -255,14 +255,18 @@ FROM	tblAPBill A INNER JOIN tblAPBillDetail B
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 		LEFT JOIN tblICItemUOM receiptCostUOM
 			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
-
+		OUTER APPLY (
+			SELECT (E2.dblUnitCost * E2.dblForexRate) - (dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) * B.dblRate) AS dblCost
+		) costAdjust
 
 
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NULL 
 		-- Compare the cost used in Voucher against the IR cost. 
+		-- Compare the ForexRate use in Voucher against IR Rate
 		-- If there is a difference, add it to @adjustedEntries table variable. 
 		AND dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) != E2.dblUnitCost
+		OR E2.dblForexRate != B.dblRate
 		
 IF ISNULL(@post,0) = 1
 BEGIN
