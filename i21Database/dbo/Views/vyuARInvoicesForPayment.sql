@@ -51,6 +51,10 @@ SELECT
 	,[ysnExcludeForPayment]		= ARIFP.[ysnExcludeForPayment]
 	,[intPaymentMethodId]		= ARIFP.[intPaymentMethodId]	
 	,[strPaymentMethod]			= ARIFP.[strPaymentMethod]
+	,[intCurrencyExchangeRateTypeId]	= DFR.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= DFR.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= DFR.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= DFR.[dblCurrencyExchangeRate]
 FROM
 	(
 		SELECT 
@@ -231,3 +235,5 @@ LEFT OUTER JOIN
 		tblSMCompanyLocation
 	) SMCL
 		ON ARIFP.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
+CROSS APPLY
+		[dbo].[fnARGetDefaultForexRate](ARIFP.[dtmDate], ARIFP.[intCurrencyId], NULL) DFR

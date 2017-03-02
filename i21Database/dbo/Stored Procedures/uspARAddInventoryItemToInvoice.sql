@@ -68,8 +68,8 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
-	,@ItemCurrencyExchangeRateTypeId	INT
-	,@ItemCurrencyExchangeRateId	INT
+	,@ItemCurrencyExchangeRateTypeId	INT			= NULL
+	,@ItemCurrencyExchangeRateId	INT				= NULL
 	,@ItemCurrencyExchangeRate		NUMERIC(18, 8)	= 1.000000
 	,@ItemSubCurrencyId				INT				= NULL
 	,@ItemSubCurrencyRate			NUMERIC(18,8)	= 1.000000

@@ -5082,6 +5082,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
     <Build Include="dbo\Views\vyuRKSourcingReportDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportDetail.sql" />
+    <Build Include="dbo\Functions\fnARGetDefaultForexRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
