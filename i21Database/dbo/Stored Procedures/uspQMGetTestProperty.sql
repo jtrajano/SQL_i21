@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE uspQMGetTestProperty
-	@intTestId INT
+﻿CREATE PROCEDURE uspQMGetTestProperty @intTestId INT
 	,@intProductId INT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -21,19 +20,4 @@ JOIN tblQMTest T ON T.intTestId = TP.intTestId
 JOIN tblQMProperty PR ON PR.intPropertyId = TP.intPropertyId
 JOIN tblQMDataType D ON D.intDataTypeId = PR.intDataTypeId
 WHERE TP.intTestId = @intTestId
-
-UNION
-
-SELECT TP.intTestId
-	,TP.intFormulaID AS intPropertyId
-	,T.strTestName
-	,PR.strPropertyName
-	,D.intDataTypeId
-	,@intProductId AS intProductId
-	,PR.strIsMandatory
-	,D.strDataTypeName
-FROM tblQMTestProperty TP
-JOIN tblQMTest T ON T.intTestId = TP.intTestId
-JOIN tblQMProperty PR ON PR.intPropertyId = TP.intFormulaID
-JOIN tblQMDataType D ON D.intDataTypeId = PR.intDataTypeId
-WHERE TP.intTestId = @intTestId
+ORDER BY TP.intSequenceNo
