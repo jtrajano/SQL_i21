@@ -170,7 +170,7 @@ BEGIN
 		[strBillId]				=	@generatedBillRecordId,
 		[strReference] 			=	A.strBillOfLading,
 		[dblTotal] 				=	ABS(@totalReceiptAmount),
-		[dblAmountDue]			=	@totalReceiptAmount,
+		[dblAmountDue]			=	ABS(@totalReceiptAmount),
 		[intEntityId]			=	@userId,
 		[ysnPosted]				=	0,
 		[ysnPaid]				=	0,
