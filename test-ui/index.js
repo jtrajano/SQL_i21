@@ -714,6 +714,15 @@ Harness.start(
                             commonIC
 
                         ]
+                    },
+                    {
+                        url: 'BusinessDomain/StorageLocation/17xOpenNewStorageLocationScreen.js?v=' + version,
+                        title: '17xOpenNewStorageLocationScreen',
+                        preload: [
+                            functionalTest,
+                            commonIC
+
+                        ]
                     }
                 ]
             }
