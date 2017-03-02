@@ -1797,7 +1797,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (combo.itemId === 'cboItem') {
 
             // Get the default Forex Rate Type from the Company Preference. 
-            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryId');
+            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
 
             // Get the last cost
             var dblLastCost = records[0].get('dblLastCost');
@@ -1811,35 +1811,36 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             dblLastCost = i21.ModuleMgr.Inventory.roundDecimalFormat(dblLastCost, 6);
 
             // Get the Forex Rate. 
-            iRely.Functions.getForexRate(
-                win.viewModel.data.current.get('intCurrencyId'),
-                intRateType,
-                win.viewModel.data.current.get('dtmReceiptDate'),
-                function(successResponse){
-                    if (successResponse && successResponse.length > 0){
-                        var dblForexRate = successResponse[0].dblRate;
-                        var strRateType = successResponse[0].strRateType;             
+            if (intRateType){
+                iRely.Functions.getForexRate(
+                    win.viewModel.data.current.get('intCurrencyId'),
+                    intRateType,
+                    win.viewModel.data.current.get('dtmReceiptDate'),
+                    function(successResponse){
+                        if (successResponse && successResponse.length > 0){
+                            var dblForexRate = successResponse[0].dblRate;
+                            var strRateType = successResponse[0].strRateType;             
 
-                        dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+                            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
 
-                        // Convert the last cost to the transaction currency.
-                        // and round it to two decimal places.  
-                        dblLastCost = dblForexRate != 0 ?  dblLastCost / dblForexRate : 0;
-                        dblLastCost = i21.ModuleMgr.Inventory.roundDecimalFormat(dblLastCost, 6);
-                        
-                        current.set('intForexRateTypeId', intRateType);
-                        current.set('strForexRateType', strRateType);
-                        current.set('dblForexRate', dblForexRate);
-                        current.set('dblUnitCost', dblLastCost);
-                        current.set('dblUnitRetail', dblLastCost);
+                            // Convert the last cost to the transaction currency.
+                            // and round it to two decimal places.  
+                            dblLastCost = dblForexRate != 0 ?  dblLastCost / dblForexRate : 0;
+                            dblLastCost = i21.ModuleMgr.Inventory.roundDecimalFormat(dblLastCost, 6);
+                            
+                            current.set('intForexRateTypeId', intRateType);
+                            current.set('strForexRateType', strRateType);
+                            current.set('dblForexRate', dblForexRate);
+                            current.set('dblUnitCost', dblLastCost);
+                            current.set('dblUnitRetail', dblLastCost);
+                        }
+                    },
+                    function(failureResponse){
+                        var jsonData = Ext.decode(failureResponse.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
                     }
-                },
-                function(failureResponse){
-                    var jsonData = Ext.decode(failureResponse.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
-                }
-            );            
-
+                );  
+            }
 
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));

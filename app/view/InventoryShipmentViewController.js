@@ -1220,6 +1220,46 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    getItemSalesPrice: function(itemPricingParams, successFn){
+        ic.utils.ajax({
+            url: '../accountsreceivable/api/common/getitemprice',
+            params: {
+                intItemId: itemPricingParams.ItemId,
+                intCustomerId: itemPricingParams.CustomerId,
+                intCurrencyId: itemPricingParams.CurrencyId,
+                intLocationId: itemPricingParams.LocationId,
+                intItemUOMId: itemPricingParams.ItemUOMId,
+                dtmTransactionDate: itemPricingParams.TransactionDate,
+                dblQuantity: itemPricingParams.Quantity,
+                intContractHeaderId: null,
+                intContractDetailId: null,
+                strContractNumber: null,
+                ysnCustomerPricingOnly: false,
+                ysnItemPricingOnly: false,
+                intContractSeq: null,
+                dblOriginalQuantity: null,
+                intShipToLocationId: itemPricingParams.ShipToLocationId,
+                strInvoiceType: itemPricingParams.InvoiceType,
+                intTermId: null
+            },
+            method: 'post'
+        })
+        .subscribe(
+            function(response){
+                var jsonData = Ext.decode(response.responseText);
+                if (successFn){
+                    successFn();
+                }
+                
+            },
+            function(response) {
+                var jsonData = Ext.decode(response.responseText);
+                var msg = jsonData.ExceptionMessage;
+                iRely.Functions.showErrorDialog(msg);
+            }
+        );
+    },
+
     onItemNoSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -1233,7 +1273,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (combo.itemId === 'cboItemNo') {
 
             // Get the default Forex Rate Type from the Company Preference. 
-            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryId');
+            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
 
             // Get the sales price
             var dblUnitPrice = records[0].get('dblIssueSalePrice');
@@ -1243,33 +1283,35 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             dblUnitPriceForeign = Ext.isNumeric(dblUnitPriceForeign) ? dblUnitPriceForeign : 0;
 
             // Get the Forex Rate. 
-            iRely.Functions.getForexRate(
-                win.viewModel.data.current.get('intCurrencyId'),
-                intRateType,
-                win.viewModel.data.current.get('dtmShipDate'),
-                function(successResponse){
-                    if (successResponse && successResponse.length > 0){
-                        var dblForexRate = successResponse[0].dblRate;
-                        var strRateType = successResponse[0].strRateType;             
+            if (intRateType){
+                iRely.Functions.getForexRate(
+                    win.viewModel.data.current.get('intCurrencyId'),
+                    intRateType,
+                    win.viewModel.data.current.get('dtmShipDate'),
+                    function(successResponse){
+                        if (successResponse && successResponse.length > 0){
+                            var dblForexRate = successResponse[0].dblRate;
+                            var strRateType = successResponse[0].strRateType;             
 
-                        dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+                            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
 
-                        // Convert the sales price to the transaction currency.
-                        // and round it to 6 decimal places.  
-                        dblUnitPriceForeign = dblForexRate != 0 ?  dblUnitPrice / dblForexRate : 0;
-                        dblUnitPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblUnitPriceForeign, 6);
-                        
-                        current.set('intForexRateTypeId', intRateType);
-                        current.set('strForexRateType', strRateType);
-                        current.set('dblForexRate', dblForexRate);
-                        current.set('dblForeignUnitPrice', dblUnitPriceForeign);
+                            // Convert the sales price to the transaction currency.
+                            // and round it to 6 decimal places.  
+                            dblUnitPriceForeign = dblForexRate != 0 ?  dblUnitPrice / dblForexRate : 0;
+                            dblUnitPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblUnitPriceForeign, 6);
+                            
+                            current.set('intForexRateTypeId', intRateType);
+                            current.set('strForexRateType', strRateType);
+                            current.set('dblForexRate', dblForexRate);
+                            current.set('dblForeignUnitPrice', dblUnitPriceForeign);
+                        }
+                    },
+                    function(failureResponse){
+                        var jsonData = Ext.decode(failureResponse.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
                     }
-                },
-                function(failureResponse){
-                    var jsonData = Ext.decode(failureResponse.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
-                }
-            );
+                );
+            }
 
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
