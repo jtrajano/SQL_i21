@@ -1657,6 +1657,9 @@ namespace iRely.Inventory.Model
         public string strSubCurrency { get; set; }
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
+        public int? intForexRateTypeId { get; set; }
+        public string strForexRateType { get; set; }
+        public decimal? dblForexRate { get; set; }
     }
 
     //public class vyuICGetInventoryReceiptVoucher
