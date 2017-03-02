@@ -14,6 +14,7 @@
 	[dtmDate]						[datetime]										NULL,
 	[ysnCurrent]					[bit]											NULL,
 	[ysnEmail]						[bit]											NULL,
+	[intScreenId]					[int]											NULL,
 	[intConcurrencyId]				[int]											NOT NULL DEFAULT ((1)), 
     CONSTRAINT [FK_tblSMApproval_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSMApproval_tblEMEntity_Approver] FOREIGN KEY ([intApproverId]) REFERENCES [tblEMEntity]([intEntityId]), 
