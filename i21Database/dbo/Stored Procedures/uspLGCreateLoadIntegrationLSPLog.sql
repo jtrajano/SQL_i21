@@ -31,6 +31,13 @@ BEGIN TRY
 		,strCompanyLocation
 		,strSubLocation
 		,strLanguage
+		,strWarehouseVendorNo
+		,strWarehouseVendorName
+		,strWarehouseVendorAddress
+		,strWarehouseVendorPostalCode
+		,strWarehouseVendorCity
+		,strWarehouseVendorCountry
+		,strWarehouseVendorAccNo
 		,strVendorName
 		,strVendorAddress
 		,strVendorPostalCode
@@ -55,10 +62,22 @@ BEGIN TRY
 		,strDestinationTeleFaxNo
 		,strDestinationCountry
 		,strDestinationRegion
+		,strForwardingAgent
+		,strForwardingAgentPostalCode
+		,strForwardingAgentCity
+		,strForwardingAgentTelePhoneNo
+		,strForwardingAgentTeleFaxNo
+		,strForwardingAgentCountry
+		,strForwardingAgentAccNo
 		,strContractBasis
 		,strContractBasisDesc
 		,strBillOfLading
 		,strShippingLine
+		,strShippingLinePostalCode
+		,strShippingLineCity
+		,strShippingLineTelePhoneNo
+		,strShippingLineTeleFaxNo
+		,strShippingLineCountry
 		,strShippingLineAccountNo
 		,strExternalShipmentNumber
 		,strDateQualifier
@@ -72,8 +91,12 @@ BEGIN TRY
 		,dblTotalGross
 		,dblTotalNet
 		,strWeightUOM
+		,strMVessel
+		,strMVoyageNumber
+		,strFVessel
+		,strFVoyageNumber
 		)
-	SELECT intLoadId
+	SELECT L.intLoadId
 		,strShipmentType = CASE L.intShipmentType
 			WHEN 1
 				THEN 'Shipment'
@@ -97,6 +120,13 @@ BEGIN TRY
 			WHERE LD.intLoadId = L.intLoadId
 			) strSubLocationName
 		,'EN' strLanguage
+		,strWarehouseVendorNo = WE.strEntityNo
+		,strWarehouseVendorName = WE.strName
+		,strWarehouseVendorAddress = EL.strAddress
+		,strWarehouseVendorPostalCode = EL.strZipCode
+		,strWarehouseVendorCity = EL.strCity
+		,strWarehouseVendorCountry = (SELECT TOP 1 SM.strISOCode FROM tblSMCountry SM WHERE SM.strCountry = EL.strCountry)
+		,strWarehouseVendorAccNo = A.strVendorAccountNum
 		,(
 			SELECT TOP 1 E.strEntityName
 			FROM tblLGLoadDetail LD
@@ -134,9 +164,10 @@ BEGIN TRY
 			WHERE LD.intLoadId = L.intLoadId
 			) strVendorTeleFaxNo
 		,(
-			SELECT TOP 1 E.strEntityCountry
+			SELECT TOP 1 SM.strISOCode
 			FROM tblLGLoadDetail LD
 			JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
+			JOIN tblSMCountry SM ON SM.strCountry = E.strEntityCountry
 			WHERE LD.intLoadId = L.intLoadId
 			) strVendorCountry
 		,(
@@ -151,7 +182,7 @@ BEGIN TRY
 		,'' strOriginCity
 		,'' strOriginTelePhoneNo
 		,'' strOriginTeleFaxNo
-		,'' strOriginCountry
+		,OCountry.strISOCode strOriginCountry
 		,'' strOriginRegion
 		,L.strDestinationPort
 		,'' strDestinationAddress
@@ -159,8 +190,15 @@ BEGIN TRY
 		,'' strDestinationCity
 		,'' strDestinationTelePhoneNo
 		,'' strDestinationTeleFaxNo
-		,'' strDestinationCountry
+		,DCountry.strISOCode strDestinationCountry
 		,'' strDestinationRegion
+		,L.strForwardingAgent
+		,FAEL.strZipCode
+		,FAEL.strCity
+		,FAEL.strPhone
+		,FAEL.strFax
+		,FACountry.strISOCode
+		,FAV.strVendorAccountNum
 		,strContractBasis = (
 			SELECT TOP 1 CB.strContractBasis
 			FROM tblCTContractHeader CH
@@ -179,6 +217,11 @@ BEGIN TRY
 			)
 		,L.strBLNumber
 		,L.strShippingLine
+		,SLEL.strZipCode
+		,SLEL.strCity
+		,SLEL.strPhone
+		,SLEL.strFax
+		,SLCountry.strISOCode
 		,V.strVendorAccountNum strShippingLineAccountNo
 		,L.strExternalShipmentNumber
 		,'015' AS strDateQualifier
@@ -206,10 +249,29 @@ BEGIN TRY
 			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IUM.intUnitMeasureId
 			WHERE LD.intLoadId = L.intLoadId
 			) strWeightUnitMeasure
+		,L.strMVessel
+		,L.strMVoyageNumber
+		,L.strFVessel
+		,L.strFVoyageNumber
 	FROM vyuLGLoadView L
 	LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
+	LEFT JOIN tblEMEntityLocation SLEL ON SLEL.intEntityId = E.intEntityId
+	LEFT JOIN tblSMCountry SLCountry ON SLCountry.strCountry = SLEL.strCountry
 	LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
-	WHERE intLoadId = @intLoadId
+	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+	LEFT JOIN tblEMEntity WE ON WE.intEntityId = CLSL.intVendorId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = WE.intEntityId
+	LEFT JOIN tblAPVendor A ON A.intEntityVendorId = WE.intEntityId
+	LEFT JOIN tblSMCity OCity ON OCity.strCity = L.strOriginPort
+	LEFT JOIN tblSMCountry OCountry ON OCountry.intCountryID = OCity.intCountryId
+	LEFT JOIN tblSMCity DCity ON DCity.strCity = L.strDestinationPort
+	LEFT JOIN tblSMCountry DCountry ON DCountry .intCountryID = DCity.intCountryId
+	LEFT JOIN tblEMEntity FA ON FA.intEntityId = L.intForwardingAgentEntityId
+	LEFT JOIN tblEMEntityLocation FAEL ON FAEL.intEntityId = FA.intEntityId
+	LEFT JOIN tblSMCountry FACountry ON FACountry.strCountry = FAEL.strCountry
+	LEFT JOIN tblAPVendor FAV ON FAV.intEntityVendorId = FA.intEntityId
+	WHERE L.intLoadId = @intLoadId
 
 	SELECT @intLoadStgId = SCOPE_IDENTITY()
 
