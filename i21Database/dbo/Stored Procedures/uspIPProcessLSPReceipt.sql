@@ -18,7 +18,8 @@ Declare @intMinRowNo int,
 		@intReceiptId INT,
 		@strFinalErrMsg NVARCHAR(MAX)='',
 		@intUserId INT,
-		@strPartnerNo NVARCHAR(100)
+		@strPartnerNo NVARCHAR(100),
+		@intLoadId INT
 
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
 
@@ -27,6 +28,8 @@ Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage
 While(@intMinRowNo is not null)
 Begin
 	BEGIN TRY
+		Set @intLoadId=NULL
+
 		Select @strDeliveryNo=strDeliveryNo,@dtmReceiptDate=dtmReceiptDate,@strPartnerNo=strPartnerNo
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 
@@ -40,6 +43,10 @@ Begin
 			Select TOP 1 @intUserId=intEntityUserSecurityId From tblSMUserSecurity Where strUserName='irelyadmin'
 		Else
 			Select TOP 1 @intUserId=intEntityUserSecurityId From tblSMUserSecurity
+
+		Select @intLoadId=intLoadId From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo AND intShipmentType=1
+		If ISNULL(@intLoadId,0)=0
+			RaisError('Invalid Delivery No',16,1)
 
 		Begin Tran
 
@@ -55,7 +62,7 @@ Begin
 			Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityVendorId
 			Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
 			Join tblLGLoad l on l.intLoadId=ld.intLoadId
-			Where ri.intStageReceiptId=@intMinRowNo AND ri.dblQuantity>0
+			Where ri.intStageReceiptId=@intMinRowNo AND ISNULL(ri.dblQuantity,0)=0
 			 
 			SET @intReceiptId = SCOPE_IDENTITY();
 
@@ -78,7 +85,7 @@ Begin
 			Join tblCTContractDetail ct on ld.intPContractDetailId=ct.intContractDetailId
 			Join tblLGLoad l on l.intLoadId=ld.intLoadId
 			Join tblLGLoadDetailContainerLink cl on ld.intLoadDetailId=cl.intLoadDetailId AND cl.strExternalContainerId=ri.strDeliveryItemNo
-			Where ri.intStageReceiptId=@intMinRowNo AND ri.dblQuantity>0
+			Where ri.intStageReceiptId=@intMinRowNo AND ri.dblQuantity>0 AND l.intLoadId=@intLoadId
 
 			--Lots
 			Insert into tblICInventoryReceiptItemLot (intInventoryReceiptItemId,strLotNumber,intSubLocationId,intStorageLocationId,dblQuantity,
