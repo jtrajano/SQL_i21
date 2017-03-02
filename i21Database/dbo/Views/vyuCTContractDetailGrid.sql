@@ -50,7 +50,9 @@ AS
 						ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
 			END		AS	dblAppliedQty,
 			dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)	AS	dblExchangeRate,
-			IM.intProductTypeId
+			IM.intProductTypeId,
+			CQ.dblBulkQuantity ,
+			CQ.dblQuantity AS dblBagQuantity
 
 FROM		tblCTContractDetail			CD
 	 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=		CD.intContractHeaderId	
@@ -122,3 +124,4 @@ LEFT JOIN	(
 				) t
 				WHERE intRowNum = 1
 			)							QA	ON	QA.intContractDetailId			=		CD.intContractDetailId
+LEFT JOIN	tblLGContainerTypeCommodityQty CQ ON CQ.intCommodityId = CH.intCommodityId AND CQ.intContainerTypeId = CD.intContainerTypeId AND CQ.intCommodityAttributeId = IM.intOriginId
