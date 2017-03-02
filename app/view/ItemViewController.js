@@ -1059,7 +1059,18 @@ Ext.define('Inventory.view.ItemViewController', {
                 colSpecialPricingDiscQty: 'dblDiscountThruQty',
                 colSpecialPricingDiscAmount: 'dblDiscountThruAmount',
                 colSpecialPricingAccumQty: 'dblAccumulatedQty',
-                colSpecialPricingAccumAmount: 'dblAccumulatedAmount'
+                colSpecialPricingAccumAmount: 'dblAccumulatedAmount',
+                colSpecialPricingCurrency: {
+                    dataIndex: 'strCurrency',
+                    editor: {
+                        store: '{currency}',
+                        defaultFilters: [{
+                            column: 'ysnSubCurrency',
+                            value: false
+                        }]
+                    }
+                },
+                colSpecialPricingForexRate: 'dblForexRate'
             },
 
             //---------//
@@ -3112,6 +3123,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             }
             current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
+            current.set('intCurrencyId', i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'));
+            current.set('strCurrency', i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency'));
         }
         else if (combo.column.itemId === 'colSpecialPricingUnit') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
@@ -3142,6 +3155,10 @@ Ext.define('Inventory.view.ItemViewController', {
                 current.set('dblDiscountedPrice', discPrice);
             }
             else { current.set('dblDiscountedPrice', 0.00); }
+        }
+
+        else if (combo.column.itemId === 'colSpecialPricingCurrency'){
+            current.set('intCurrencyId', records[0].get('intCurrencyID'));
         }
     },
 
@@ -4081,6 +4098,9 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboSpecialPricingDiscountBy": {
                 select: this.onSpecialPricingSelect,
                 beforequery: this.onSpecialPricingBeforeQuery
+            },
+            "#cboSpecialPricingCurrency": {
+                select: this.onSpecialPricingSelect
             },
             "#cboBundleUOM": {
                 select: this.onBundleSelect

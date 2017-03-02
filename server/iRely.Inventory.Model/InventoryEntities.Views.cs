@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets6c79d7c7f8a74046de8182b2a744986d595a6e32906d5f141b5b52a86a0bfd3c))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsaec315e7e4c028360856ec579e3590c3ba01c40d78cd6d6a770ea82d95bbd10f))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets6c79d7c7f8a74046de8182b2a744986d595a6e32906d5f141b5b52a86a0bfd3c : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsaec315e7e4c028360856ec579e3590c3ba01c40d78cd6d6a770ea82d95bbd10f : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "6c79d7c7f8a74046de8182b2a744986d595a6e32906d5f141b5b52a86a0bfd3c"; }
+            get { return "aec315e7e4c028360856ec579e3590c3ba01c40d78cd6d6a770ea82d95bbd10f"; }
         }
 
         /// <summary>
@@ -192,12 +192,12 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView28();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemPricing")
+            if (extentName == "CodeFirstDatabase.tblICItemSpecialPricing")
             {
                 return GetView29();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemSpecialPricing")
+            if (extentName == "CodeFirstDatabase.tblICItemPricing")
             {
                 return GetView30();
             }
@@ -712,12 +712,12 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView132();
             }
 
-            if (extentName == "InventoryEntities.tblICItemPricings")
+            if (extentName == "InventoryEntities.tblICItemSpecialPricings")
             {
                 return GetView133();
             }
 
-            if (extentName == "InventoryEntities.tblICItemSpecialPricings")
+            if (extentName == "InventoryEntities.tblICItemPricings")
             {
                 return GetView134();
             }
@@ -2928,10 +2928,45 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblICItemPricing.
+        /// Gets the view for CodeFirstDatabase.tblICItemSpecialPricing.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView29()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing tblICItemSpecialPricing
+        [CodeFirstDatabaseSchema.tblICItemSpecialPricing](T1.tblICItemSpecialPricing_intItemSpecialPricingId, T1.tblICItemSpecialPricing_intItemId, T1.tblICItemSpecialPricing_intItemLocationId, T1.tblICItemSpecialPricing_strPromotionType, T1.tblICItemSpecialPricing_dtmBeginDate, T1.tblICItemSpecialPricing_dtmEndDate, T1.tblICItemSpecialPricing_intItemUnitMeasureId, T1.tblICItemSpecialPricing_dblUnit, T1.tblICItemSpecialPricing_strDiscountBy, T1.tblICItemSpecialPricing_dblDiscount, T1.tblICItemSpecialPricing_dblUnitAfterDiscount, T1.tblICItemSpecialPricing_dblDiscountThruQty, T1.tblICItemSpecialPricing_dblDiscountThruAmount, T1.tblICItemSpecialPricing_dblAccumulatedQty, T1.tblICItemSpecialPricing_dblAccumulatedAmount, T1.tblICItemSpecialPricing_intCurrencyId, T1.tblICItemSpecialPricing_dblForexRate, T1.tblICItemSpecialPricing_intSort, T1.tblICItemSpecialPricing_intConcurrencyId)
+    FROM (
+        SELECT 
+            T.intItemSpecialPricingId AS tblICItemSpecialPricing_intItemSpecialPricingId, 
+            T.intItemId AS tblICItemSpecialPricing_intItemId, 
+            T.intItemLocationId AS tblICItemSpecialPricing_intItemLocationId, 
+            T.strPromotionType AS tblICItemSpecialPricing_strPromotionType, 
+            T.dtmBeginDate AS tblICItemSpecialPricing_dtmBeginDate, 
+            T.dtmEndDate AS tblICItemSpecialPricing_dtmEndDate, 
+            T.intItemUnitMeasureId AS tblICItemSpecialPricing_intItemUnitMeasureId, 
+            T.dblUnit AS tblICItemSpecialPricing_dblUnit, 
+            T.strDiscountBy AS tblICItemSpecialPricing_strDiscountBy, 
+            T.dblDiscount AS tblICItemSpecialPricing_dblDiscount, 
+            T.dblUnitAfterDiscount AS tblICItemSpecialPricing_dblUnitAfterDiscount, 
+            T.dblDiscountThruQty AS tblICItemSpecialPricing_dblDiscountThruQty, 
+            T.dblDiscountThruAmount AS tblICItemSpecialPricing_dblDiscountThruAmount, 
+            T.dblAccumulatedQty AS tblICItemSpecialPricing_dblAccumulatedQty, 
+            T.dblAccumulatedAmount AS tblICItemSpecialPricing_dblAccumulatedAmount, 
+            T.intCurrencyId AS tblICItemSpecialPricing_intCurrencyId, 
+            T.dblForexRate AS tblICItemSpecialPricing_dblForexRate, 
+            T.intSort AS tblICItemSpecialPricing_intSort, 
+            T.intConcurrencyId AS tblICItemSpecialPricing_intConcurrencyId, 
+            True AS _from0
+        FROM InventoryEntities.tblICItemSpecialPricings AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.tblICItemPricing.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView30()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemPricing
@@ -2953,39 +2988,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.intConcurrencyId AS tblICItemPricing_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICItemPricings AS T
-    ) AS T1");
-        }
-
-        /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblICItemSpecialPricing.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView30()
-        {
-            return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICItemSpecialPricing
-        [CodeFirstDatabaseSchema.tblICItemSpecialPricing](T1.tblICItemSpecialPricing_intItemSpecialPricingId, T1.tblICItemSpecialPricing_intItemId, T1.tblICItemSpecialPricing_intItemLocationId, T1.tblICItemSpecialPricing_strPromotionType, T1.tblICItemSpecialPricing_dtmBeginDate, T1.tblICItemSpecialPricing_dtmEndDate, T1.tblICItemSpecialPricing_intItemUnitMeasureId, T1.tblICItemSpecialPricing_dblUnit, T1.tblICItemSpecialPricing_strDiscountBy, T1.tblICItemSpecialPricing_dblDiscount, T1.tblICItemSpecialPricing_dblUnitAfterDiscount, T1.tblICItemSpecialPricing_dblDiscountThruQty, T1.tblICItemSpecialPricing_dblDiscountThruAmount, T1.tblICItemSpecialPricing_dblAccumulatedQty, T1.tblICItemSpecialPricing_dblAccumulatedAmount, T1.tblICItemSpecialPricing_intSort, T1.tblICItemSpecialPricing_intConcurrencyId)
-    FROM (
-        SELECT 
-            T.intItemSpecialPricingId AS tblICItemSpecialPricing_intItemSpecialPricingId, 
-            T.intItemId AS tblICItemSpecialPricing_intItemId, 
-            T.intItemLocationId AS tblICItemSpecialPricing_intItemLocationId, 
-            T.strPromotionType AS tblICItemSpecialPricing_strPromotionType, 
-            T.dtmBeginDate AS tblICItemSpecialPricing_dtmBeginDate, 
-            T.dtmEndDate AS tblICItemSpecialPricing_dtmEndDate, 
-            T.intItemUnitMeasureId AS tblICItemSpecialPricing_intItemUnitMeasureId, 
-            T.dblUnit AS tblICItemSpecialPricing_dblUnit, 
-            T.strDiscountBy AS tblICItemSpecialPricing_strDiscountBy, 
-            T.dblDiscount AS tblICItemSpecialPricing_dblDiscount, 
-            T.dblUnitAfterDiscount AS tblICItemSpecialPricing_dblUnitAfterDiscount, 
-            T.dblDiscountThruQty AS tblICItemSpecialPricing_dblDiscountThruQty, 
-            T.dblDiscountThruAmount AS tblICItemSpecialPricing_dblDiscountThruAmount, 
-            T.dblAccumulatedQty AS tblICItemSpecialPricing_dblAccumulatedQty, 
-            T.dblAccumulatedAmount AS tblICItemSpecialPricing_dblAccumulatedAmount, 
-            T.intSort AS tblICItemSpecialPricing_intSort, 
-            T.intConcurrencyId AS tblICItemSpecialPricing_intConcurrencyId, 
-            True AS _from0
-        FROM InventoryEntities.tblICItemSpecialPricings AS T
     ) AS T1");
         }
 
@@ -6339,10 +6341,45 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for InventoryEntities.tblICItemPricings.
+        /// Gets the view for InventoryEntities.tblICItemSpecialPricings.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView133()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing tblICItemSpecialPricings
+        [iRely.Inventory.Model.tblICItemSpecialPricing](T1.tblICItemSpecialPricing_intItemSpecialPricingId, T1.tblICItemSpecialPricing_intItemId, T1.tblICItemSpecialPricing_intItemLocationId, T1.tblICItemSpecialPricing_strPromotionType, T1.tblICItemSpecialPricing_dtmBeginDate, T1.tblICItemSpecialPricing_dtmEndDate, T1.tblICItemSpecialPricing_intItemUnitMeasureId, T1.tblICItemSpecialPricing_dblUnit, T1.tblICItemSpecialPricing_strDiscountBy, T1.tblICItemSpecialPricing_dblDiscount, T1.tblICItemSpecialPricing_dblUnitAfterDiscount, T1.tblICItemSpecialPricing_dblDiscountThruQty, T1.tblICItemSpecialPricing_dblDiscountThruAmount, T1.tblICItemSpecialPricing_dblAccumulatedQty, T1.tblICItemSpecialPricing_dblAccumulatedAmount, T1.tblICItemSpecialPricing_intCurrencyId, T1.tblICItemSpecialPricing_dblForexRate, T1.tblICItemSpecialPricing_intSort, T1.tblICItemSpecialPricing_intConcurrencyId)
+    FROM (
+        SELECT 
+            T.intItemSpecialPricingId AS tblICItemSpecialPricing_intItemSpecialPricingId, 
+            T.intItemId AS tblICItemSpecialPricing_intItemId, 
+            T.intItemLocationId AS tblICItemSpecialPricing_intItemLocationId, 
+            T.strPromotionType AS tblICItemSpecialPricing_strPromotionType, 
+            T.dtmBeginDate AS tblICItemSpecialPricing_dtmBeginDate, 
+            T.dtmEndDate AS tblICItemSpecialPricing_dtmEndDate, 
+            T.intItemUnitMeasureId AS tblICItemSpecialPricing_intItemUnitMeasureId, 
+            T.dblUnit AS tblICItemSpecialPricing_dblUnit, 
+            T.strDiscountBy AS tblICItemSpecialPricing_strDiscountBy, 
+            T.dblDiscount AS tblICItemSpecialPricing_dblDiscount, 
+            T.dblUnitAfterDiscount AS tblICItemSpecialPricing_dblUnitAfterDiscount, 
+            T.dblDiscountThruQty AS tblICItemSpecialPricing_dblDiscountThruQty, 
+            T.dblDiscountThruAmount AS tblICItemSpecialPricing_dblDiscountThruAmount, 
+            T.dblAccumulatedQty AS tblICItemSpecialPricing_dblAccumulatedQty, 
+            T.dblAccumulatedAmount AS tblICItemSpecialPricing_dblAccumulatedAmount, 
+            T.intCurrencyId AS tblICItemSpecialPricing_intCurrencyId, 
+            T.dblForexRate AS tblICItemSpecialPricing_dblForexRate, 
+            T.intSort AS tblICItemSpecialPricing_intSort, 
+            T.intConcurrencyId AS tblICItemSpecialPricing_intConcurrencyId, 
+            True AS _from0
+        FROM CodeFirstDatabase.tblICItemSpecialPricing AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.tblICItemPricings.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView134()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemPricings
@@ -6364,39 +6401,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.intConcurrencyId AS tblICItemPricing_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICItemPricing AS T
-    ) AS T1");
-        }
-
-        /// <summary>
-        /// Gets the view for InventoryEntities.tblICItemSpecialPricings.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView134()
-        {
-            return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICItemSpecialPricings
-        [iRely.Inventory.Model.tblICItemSpecialPricing](T1.tblICItemSpecialPricing_intItemSpecialPricingId, T1.tblICItemSpecialPricing_intItemId, T1.tblICItemSpecialPricing_intItemLocationId, T1.tblICItemSpecialPricing_strPromotionType, T1.tblICItemSpecialPricing_dtmBeginDate, T1.tblICItemSpecialPricing_dtmEndDate, T1.tblICItemSpecialPricing_intItemUnitMeasureId, T1.tblICItemSpecialPricing_dblUnit, T1.tblICItemSpecialPricing_strDiscountBy, T1.tblICItemSpecialPricing_dblDiscount, T1.tblICItemSpecialPricing_dblUnitAfterDiscount, T1.tblICItemSpecialPricing_dblDiscountThruQty, T1.tblICItemSpecialPricing_dblDiscountThruAmount, T1.tblICItemSpecialPricing_dblAccumulatedQty, T1.tblICItemSpecialPricing_dblAccumulatedAmount, T1.tblICItemSpecialPricing_intSort, T1.tblICItemSpecialPricing_intConcurrencyId)
-    FROM (
-        SELECT 
-            T.intItemSpecialPricingId AS tblICItemSpecialPricing_intItemSpecialPricingId, 
-            T.intItemId AS tblICItemSpecialPricing_intItemId, 
-            T.intItemLocationId AS tblICItemSpecialPricing_intItemLocationId, 
-            T.strPromotionType AS tblICItemSpecialPricing_strPromotionType, 
-            T.dtmBeginDate AS tblICItemSpecialPricing_dtmBeginDate, 
-            T.dtmEndDate AS tblICItemSpecialPricing_dtmEndDate, 
-            T.intItemUnitMeasureId AS tblICItemSpecialPricing_intItemUnitMeasureId, 
-            T.dblUnit AS tblICItemSpecialPricing_dblUnit, 
-            T.strDiscountBy AS tblICItemSpecialPricing_strDiscountBy, 
-            T.dblDiscount AS tblICItemSpecialPricing_dblDiscount, 
-            T.dblUnitAfterDiscount AS tblICItemSpecialPricing_dblUnitAfterDiscount, 
-            T.dblDiscountThruQty AS tblICItemSpecialPricing_dblDiscountThruQty, 
-            T.dblDiscountThruAmount AS tblICItemSpecialPricing_dblDiscountThruAmount, 
-            T.dblAccumulatedQty AS tblICItemSpecialPricing_dblAccumulatedQty, 
-            T.dblAccumulatedAmount AS tblICItemSpecialPricing_dblAccumulatedAmount, 
-            T.intSort AS tblICItemSpecialPricing_intSort, 
-            T.intConcurrencyId AS tblICItemSpecialPricing_intConcurrencyId, 
-            True AS _from0
-        FROM CodeFirstDatabase.tblICItemSpecialPricing AS T
     ) AS T1");
         }
 

@@ -22,6 +22,6 @@ namespace iRely.Inventory.BusinessLayer
 
     public interface IItemSpecialPricingBl : IBusinessLayer<tblICItemSpecialPricing>
     {
-        
+        Task<SearchResult> GetItemSpecialPricing(GetParameter param);
     }
 }
