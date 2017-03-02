@@ -12,7 +12,7 @@ SELECT A.intDocumentMaintenanceId
 	 , B.intDocumentMaintenanceMessageId
 	 , B.strHeaderFooter
 	 , B.intCharacterLimit
-	 , B.strMessage
+	 , strMessage								= CONVERT(VarChar(max), B.blbMessage)
 	 , B.ysnRecipe
 	 , B.ysnQuote
 	 , B.ysnSalesOrder
