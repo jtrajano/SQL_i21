@@ -5080,7 +5080,6 @@
     <Build Include="dbo\Tables\tblFADepreciationMethodDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetQualityPropertiesByWO.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
-    <Build Include="dbo\Views\vyuRKSourcingReportDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportDetail.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultForexRate.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostRevalue.sql" />
