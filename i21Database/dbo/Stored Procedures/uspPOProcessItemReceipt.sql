@@ -99,6 +99,8 @@ BEGIN
 			,ysnSubCurrency
 			,strVendorRefNo
 			,intFreightTermId
+			,intForexRateTypeId
+			,dblForexRate
 	)
 	SELECT	
 			strReceiptType			= @ReceiptType_PurchaseOrder
@@ -132,6 +134,8 @@ BEGIN
 			,ysnSubCurrency			= 0 
 			,strVendorRefNo			= PO.strReference
 			,intFreightTermId		= PO.intFreightTermId
+			,intForexRateTypeId		= PODetail.intForexRateTypeId
+			,dblForexRate			= PODetail.dblForexRate
 
 	FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
 				ON PO.intPurchaseId = PODetail.intPurchaseId
