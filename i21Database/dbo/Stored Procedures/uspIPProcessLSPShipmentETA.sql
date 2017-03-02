@@ -13,13 +13,19 @@ Declare @intMinRowNo int,
 		@strDeliveryNo NVARCHAR(50),
 		@dtmETA DATETIME,
 		@intLoadId INT,
-		@strPartnerNo NVARCHAR(100)
+		@strPartnerNo NVARCHAR(100),
+		@intLoadStgId INT,
+		@intNewLoadStgId INT,
+		@dtmOldETA DATETIME
 
 Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage
 
 While(@intMinRowNo is not null)
 Begin
 	BEGIN TRY
+		Set @intLoadId=NULL
+		Set @intLoadStgId=NULL
+
 		Select @strDeliveryNo=strDeliveryNo,@dtmETA=dtmETA,@strPartnerNo=strPartnerNo
 		From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
 
@@ -29,14 +35,44 @@ Begin
 		If @dtmETA IS NULL
 			RaisError('Invalid ETA',16,1)
 
-		Select @intLoadId=intLoadId From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo
+		Select @intLoadId=intLoadId,@dtmOldETA=dtmETAPOD From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo AND intShipmentType=1
+		If ISNULL(@intLoadId,0)=0
+			RaisError('Invalid Delivery No',16,1)
+
+		If ISNULL(CONVERT(VARCHAR(10),@dtmOldETA,112),'') = ISNULL(CONVERT(VARCHAR(10),@dtmETA,112),'')
+			RaisError('No Change in ETA',16,1)
 
 		Begin Tran
 
-		Update tblLGLoad Set dtmETAPOD=@dtmETA Where intLoadId=@intLoadId
+		Update tblLGLoad Set dtmETAPOD=@dtmETA,intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
 
 		Insert Into tblLGETATracking(intLoadId,strTrackingType,dtmETAPOD,dtmModifiedOn)
 		Values(@intLoadId,'ETA POD',@dtmETA,GETDATE()) 
+
+		Select TOP 1 @intLoadStgId=intLoadStgId From tblLGLoadStg Where intLoadId=@intLoadId Order By intLoadStgId Desc
+
+		--Write to Shipment Stg Tables so that ETA Update will send to SAP
+		Insert Into tblLGLoadStg(intLoadId,strTransactionType,strLoadNumber,strShippingInstructionNumber,strContractBasis,strContractBasisDesc,strBillOfLading,strShippingLine,
+				strShippingLineAccountNo,strExternalShipmentNumber,strDateQualifier,dtmScheduledDate,dtmETAPOD,dtmETAPOL,dtmETSPOL,dtmBLDate,strRowState,dtmFeedCreated)
+		Select intLoadId,strTransactionType,strLoadNumber,strShippingInstructionNumber,strContractBasis,strContractBasisDesc,strBillOfLading,strShippingLine,
+				strShippingLineAccountNo,strExternalShipmentNumber,strDateQualifier,dtmScheduledDate,@dtmETA,dtmETAPOL,dtmETSPOL,dtmBLDate,'Modified',GETDATE()
+		From tblLGLoadStg Where intLoadStgId=@intLoadStgId
+
+		Set @intNewLoadStgId=SCOPE_IDENTITY()
+
+		Insert Into tblLGLoadDetailStg(intLoadStgId,intLoadId,intSIDetailId,intLoadDetailId,intRowNumber,strItemNo,strSubLocationName,strStorageLocationName,strBatchNumber,dblDeliveredQty,strUnitOfMeasure,
+				dblNetWt,dblGrossWt,strWeightUOM,intHigherPositionRef,strDocumentCategory,strReferenceDataInfo,strSeq,strLoadNumber,strExternalPONumber,strExternalPOItemNumber,
+				strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,strCommodityCode,strChangeType,strRowState,dtmFeedCreated)
+		Select @intNewLoadStgId,intLoadId,intSIDetailId,intLoadDetailId,intRowNumber,strItemNo,strSubLocationName,strStorageLocationName,strBatchNumber,dblDeliveredQty,strUnitOfMeasure,
+			dblNetWt,dblGrossWt,strWeightUOM,intHigherPositionRef,strDocumentCategory,strReferenceDataInfo,strSeq,strLoadNumber,strExternalPONumber,strExternalPOItemNumber,
+			strExternalPOBatchNumber,strExternalShipmentItemNumber,strExternalBatchNo,strCommodityCode,strChangeType,'Modified',GETDATE()
+			From tblLGLoadDetailStg Where intLoadStgId=@intLoadStgId
+
+		Insert Into tblLGLoadContainerStg(intLoadStgId,intLoadId,intLoadContainerId,strContainerNo,strContainerSizeCode,strPackagingMaterialType,strExternalPONumber,strSeq,dblContainerQty,strContainerUOM,
+					dblNetWt,dblGrossWt,strWeightUOM,strExternalContainerId,strRowState,dtmFeedCreated)
+		Select @intNewLoadStgId,intLoadId,intLoadContainerId,strContainerNo,strContainerSizeCode,strPackagingMaterialType,strExternalPONumber,strSeq,dblContainerQty,strContainerUOM,
+				dblNetWt,dblGrossWt,strWeightUOM,strExternalContainerId,'Modified',GETDATE()
+				From tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId
 
 		--Move to Archive
 		Insert Into tblIPShipmentETAArchive(strDeliveryNo,dtmETA,strPartnerNo,strImportStatus,strErrorMessage)
