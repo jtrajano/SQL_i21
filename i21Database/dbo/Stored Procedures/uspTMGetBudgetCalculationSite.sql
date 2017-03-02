@@ -80,6 +80,8 @@ BEGIN
 		--,dblEstimatedBudget = 
 		,intCustomerId = A.intCustomerID
 		,dblDailyUse = (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END)
+		,intDeliveryTermId = (CASE WHEN A.intDeliveryTermID IS NULL THEN H.intTermsId ELSE A.intDeliveryTermID END)
+		,intStartBudgetMonth = MONTH(I.dtmBudgetBeginDate)
 	INTO #tmpStage1
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
@@ -94,6 +96,10 @@ BEGIN
 		ON A.intLocationId = D.intCompanyLocationId
 	LEFT JOIN tblTMClock E
 		ON A.intClockID = E.intClockID
+	LEFT JOIN tblEMEntityLocation H
+		ON C.intEntityId = H.intEntityId
+	LEFT JOIN tblARCustomer I
+		ON C.intEntityId = I.intEntityCustomerId
 
 	IF OBJECT_ID('tempdb..#tmpStage2') IS NOT NULL 
 	BEGIN DROP TABLE #tmpStage2 END
