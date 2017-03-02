@@ -76,6 +76,7 @@ SELECT CD.intContractDetailId
 	,S.dblRepresentingQty AS dblContainerQty
 	,intShipmentType = 1
 	,CD.strERPPONumber
+	,CD.intNumberOfContainers
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -216,6 +217,7 @@ SELECT CD.intContractDetailId
 	,S.dblRepresentingQty AS dblContainerQty
 	,intShipmentType = 2
 	,CD.strERPPONumber
+	,CD.intNumberOfContainers
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -310,3 +312,4 @@ GROUP BY CD.intContractDetailId
 	,S.dblRepresentingQty
 	,CD.strERPPONumber
 	,ysnValidateExternalPONo
+	,CD.intNumberOfContainers

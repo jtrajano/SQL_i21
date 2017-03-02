@@ -49,7 +49,9 @@ AS
 			CHS.intCommodityId AS intSCommodityId,
 			CDS.intItemUOMId AS intSItemUOMId,
 			ITS.intOriginId as intSOriginId,
-			US.strUnitType as strSUnitType
+			US.strUnitType as strSUnitType,
+			ITP.strType AS strPItemType,
+			ITP.strType AS strSItemType
 
 	FROM 	tblLGAllocationDetail AD
 	JOIN	tblLGAllocationHeader	AH	ON AH.intAllocationHeaderId = AD.intAllocationHeaderId

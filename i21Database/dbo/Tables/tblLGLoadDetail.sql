@@ -38,6 +38,7 @@
 	[intPickLotDetailId] INT NULL,
 	[intPSubLocationId] INT NULL, 
 	[intSSubLocationId] INT NULL, 
+	[intNumberOfContainers] INT NULL, 
 	[strExternalShipmentItemNumber] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strExternalBatchNo] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 

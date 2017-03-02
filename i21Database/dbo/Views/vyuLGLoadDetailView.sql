@@ -204,6 +204,7 @@ SELECT LoadDetail.intLoadDetailId
 													WHEN ISNULL(SIndex.strIndexType, 0) != 'Fixed'
 														THEN NULL
 													END
+	, LoadDetail.intNumberOfContainers
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
