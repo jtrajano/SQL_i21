@@ -52,7 +52,7 @@ AS
 			,@InvoiceType
 			,@TermId
 			,0
-			,(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference )
+			,@CurrencyId
 		)
 
 RETURN 0
