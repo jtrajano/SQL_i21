@@ -4661,9 +4661,9 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'strCurrency',
                                                                         itemId: 'colPricingLevelCurrency',
                                                                         minWidth: 80,
+                                                                        dataIndex: 'strCurrency',
                                                                         text: 'Currency',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
@@ -4971,6 +4971,67 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'numberfield',
                                                                             currencyField: true,
                                                                             itemId: 'txtSpecialPricingDiscount',
+                                                                            fieldStyle: 'text-align:right',
+                                                                            hideTrigger: true
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colSpecialPricingCurrency',
+                                                                        minWidth: 80,
+                                                                        dataIndex: 'strCurrency',
+                                                                        text: 'Currency',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCurrencyID',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCurrency',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Currency',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'ysnSubCurrency',
+                                                                                    dataType: 'boolean',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intMainCurrencyId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intSubCurrencyCent',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'SubCurrency Cent',
+                                                                                    hidden: true
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboSpecialPricingCurrency',
+                                                                            displayField: 'strCurrency',
+                                                                            valueField: 'strCurrency'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colSpecialPricingForexRate',
+                                                                        align: 'right',
+                                                                        dataIndex: 'strFieldName',
+                                                                        text: 'Forex Rate',
+                                                                        editor: {
+                                                                            xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
