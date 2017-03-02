@@ -549,76 +549,76 @@ UNION ALL SELECT intValidProductCodeId = 117, strProductCode = '100', strFormCod
 UNION ALL SELECT intValidProductCodeId = 118, strProductCode = '101', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 119, strProductCode = '092', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 120, strProductCode = '093', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 121, strProductCode = 'E00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 122, strProductCode = 'E11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 123, strProductCode = 'M00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 124, strProductCode = 'M11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 125, strProductCode = '125', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 126, strProductCode = '065', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 127, strProductCode = '061', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 128, strProductCode = 'E00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 129, strProductCode = 'E11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 130, strProductCode = 'M00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 131, strProductCode = 'M11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 132, strProductCode = '125', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 133, strProductCode = '065', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 134, strProductCode = '061', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 135, strProductCode = '090', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 136, strProductCode = '248', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 137, strProductCode = '198', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 138, strProductCode = '249', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 139, strProductCode = '052', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 140, strProductCode = '196', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 141, strProductCode = '058', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 142, strProductCode = '265', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 143, strProductCode = '126', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 144, strProductCode = '059', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 145, strProductCode = '075', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 146, strProductCode = '223', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 147, strProductCode = '121', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 148, strProductCode = '199', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 149, strProductCode = '091', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 150, strProductCode = '076', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 151, strProductCode = '150', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 152, strProductCode = '130', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 153, strProductCode = '145', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 154, strProductCode = '146', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 155, strProductCode = '147', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 156, strProductCode = '148', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 157, strProductCode = '074', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 158, strProductCode = '073', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 159, strProductCode = '100', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 160, strProductCode = '101', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 161, strProductCode = '092', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 162, strProductCode = '093', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 163, strProductCode = '090', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 164, strProductCode = '248', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 165, strProductCode = '198', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 166, strProductCode = '249', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 167, strProductCode = '052', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 168, strProductCode = '196', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 169, strProductCode = '058', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 170, strProductCode = '265', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 171, strProductCode = '126', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 172, strProductCode = '059', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 173, strProductCode = '075', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 174, strProductCode = '223', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 175, strProductCode = '121', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 176, strProductCode = '199', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 177, strProductCode = '091', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 178, strProductCode = '076', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 179, strProductCode = '150', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 180, strProductCode = '130', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 181, strProductCode = '145', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 182, strProductCode = '146', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 183, strProductCode = '147', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 184, strProductCode = '148', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 185, strProductCode = '074', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 186, strProductCode = '073', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 187, strProductCode = '100', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 188, strProductCode = '101', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 189, strProductCode = '092', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 190, strProductCode = '093', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
+UNION ALL SELECT intValidProductCodeId = 121, strProductCode = 'E00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 122, strProductCode = 'E11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 123, strProductCode = 'M00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 124, strProductCode = 'M11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 125, strProductCode = '125', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 126, strProductCode = '065', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 127, strProductCode = '061', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 128, strProductCode = 'E00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 129, strProductCode = 'E11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 130, strProductCode = 'M00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 131, strProductCode = 'M11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 132, strProductCode = '125', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 133, strProductCode = '065', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 134, strProductCode = '061', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 135, strProductCode = '090', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 136, strProductCode = '248', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 137, strProductCode = '198', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 138, strProductCode = '249', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 139, strProductCode = '052', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 140, strProductCode = '196', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 141, strProductCode = '058', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 142, strProductCode = '265', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 143, strProductCode = '126', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 144, strProductCode = '059', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 145, strProductCode = '075', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 146, strProductCode = '223', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 147, strProductCode = '121', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 148, strProductCode = '199', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 149, strProductCode = '091', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 150, strProductCode = '076', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 151, strProductCode = '150', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 152, strProductCode = '130', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 153, strProductCode = '145', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 154, strProductCode = '146', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 155, strProductCode = '147', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 156, strProductCode = '148', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 157, strProductCode = '074', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 158, strProductCode = '073', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 159, strProductCode = '100', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 160, strProductCode = '101', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 161, strProductCode = '092', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 162, strProductCode = '093', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 163, strProductCode = '090', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 164, strProductCode = '248', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 165, strProductCode = '198', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 166, strProductCode = '249', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 167, strProductCode = '052', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 168, strProductCode = '196', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 169, strProductCode = '058', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 170, strProductCode = '265', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 171, strProductCode = '126', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 172, strProductCode = '059', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 173, strProductCode = '075', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 174, strProductCode = '223', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 175, strProductCode = '121', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 176, strProductCode = '199', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 177, strProductCode = '091', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 178, strProductCode = '076', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 179, strProductCode = '150', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 180, strProductCode = '130', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 181, strProductCode = '145', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 182, strProductCode = '146', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 183, strProductCode = '147', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 184, strProductCode = '148', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 185, strProductCode = '074', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 186, strProductCode = '073', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 187, strProductCode = '100', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 188, strProductCode = '101', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 189, strProductCode = '092', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 190, strProductCode = '093', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 191, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 192, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 193, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
@@ -626,134 +626,134 @@ UNION ALL SELECT intValidProductCodeId = 194, strProductCode = 'M11', strFormCod
 UNION ALL SELECT intValidProductCodeId = 195, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 196, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 197, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 198, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 199, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 200, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 201, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 202, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 203, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 204, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 205, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 206, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 207, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 208, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 209, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 210, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 211, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 212, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 213, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 214, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 215, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 216, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 217, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 218, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 219, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 220, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 221, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 222, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 223, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 224, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 225, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 226, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 227, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 228, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 229, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 230, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 231, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 232, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 233, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 234, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 235, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 236, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 237, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 238, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 239, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 240, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 241, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 242, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 243, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 244, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 245, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 246, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 247, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 248, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 249, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 250, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 251, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 252, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 253, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 254, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 255, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 256, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 257, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 258, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 259, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 260, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 261, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 262, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 263, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 264, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 265, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 266, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 267, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 268, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 269, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 270, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 271, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 272, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 273, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 274, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 275, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 276, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 277, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 278, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 279, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 280, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 281, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
+UNION ALL SELECT intValidProductCodeId = 198, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 199, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 200, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 201, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 202, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 203, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 204, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 205, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 206, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 207, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 208, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 209, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 210, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 211, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 212, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 213, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 214, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 215, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 216, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 217, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 218, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 219, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 220, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 221, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 222, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 223, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 224, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 225, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 226, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 227, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 228, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 229, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 230, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 231, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 232, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 233, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 234, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 235, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 236, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 237, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 238, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 239, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 240, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 241, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 242, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 243, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 244, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 245, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 246, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 247, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 248, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 249, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 250, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 251, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 252, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 253, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 254, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 255, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 256, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 257, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 258, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 259, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 260, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 261, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 262, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 263, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 264, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 265, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 266, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 267, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 268, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 269, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 270, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 271, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 272, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 273, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 274, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 275, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 276, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 277, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 278, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 279, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 280, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 281, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 282, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 283, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 284, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 285, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 286, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 287, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 288, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 289, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 290, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 291, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 292, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 293, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 294, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 295, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 296, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 297, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 298, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 299, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 300, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 301, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 302, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 303, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 304, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 305, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 306, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 307, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 308, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 309, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 310, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 311, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 312, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 313, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 314, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 315, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 316, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 317, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 318, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 319, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 320, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 321, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 322, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 323, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 324, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 325, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
+UNION ALL SELECT intValidProductCodeId = 286, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 287, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 288, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 289, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 290, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 291, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 292, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 293, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 294, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 295, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 296, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 297, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 298, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 299, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 300, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 301, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 302, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 303, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 304, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 305, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 306, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 307, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 308, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 309, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 310, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 311, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 312, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 313, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 314, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 315, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 316, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 317, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 318, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 319, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 320, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 321, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 322, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 323, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 324, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 325, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 334, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 335, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 336, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
@@ -775,312 +775,312 @@ UNION ALL SELECT intValidProductCodeId = 351, strProductCode = '150', strFormCod
 UNION ALL SELECT intValidProductCodeId = 352, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 353, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 354, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 355, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 356, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 357, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 358, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 359, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 360, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 361, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 362, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 363, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 364, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 365, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 366, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 367, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 368, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 369, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 370, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 371, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 372, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 373, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 374, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 375, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 376, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 377, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 378, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 379, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 380, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 381, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 382, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 383, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 384, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 385, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 386, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 387, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 388, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 389, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 390, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 391, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 392, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 393, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 394, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 395, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 396, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 397, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 398, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 399, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 400, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 401, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 402, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 403, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 404, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 405, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 406, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 407, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 408, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 409, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 410, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 411, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 412, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 413, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 414, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 415, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 416, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 417, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 418, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 419, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 420, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 421, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 422, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 423, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 424, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 425, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 426, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 427, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 428, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 429, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 430, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 431, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 432, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 433, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 434, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 435, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 436, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 437, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 438, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 439, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 440, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 441, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 442, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 443, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 444, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 445, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 446, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 447, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 448, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 449, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 450, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 451, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 452, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 453, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 454, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 455, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 456, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 457, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 458, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 459, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 460, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 461, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 462, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 463, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 464, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 465, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 466, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 467, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 468, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 469, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 470, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 471, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 472, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 473, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 474, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 475, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 476, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 477, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 478, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 479, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 480, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 481, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 482, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 483, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 484, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 485, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 486, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 487, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 488, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 489, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 490, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 491, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 492, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 493, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 494, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 495, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 496, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 497, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 498, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 499, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 500, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 501, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 502, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 503, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 504, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 505, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 506, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 507, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 508, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 509, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 510, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 511, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 512, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 513, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 514, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 515, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 516, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 517, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 518, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 519, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 520, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 521, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 522, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 523, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 524, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 525, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 526, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 527, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 528, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 529, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 530, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 531, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 532, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 533, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 534, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 535, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 536, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 537, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 538, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 539, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 540, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 541, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 542, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 543, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 544, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 545, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 546, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 547, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 548, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 549, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 550, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 551, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 552, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 553, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 554, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 555, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 556, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 557, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 558, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 559, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 560, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 561, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 562, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 563, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 564, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 572, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 573, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 574, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 575, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 576, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 577, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 578, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 579, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 580, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 581, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 582, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 583, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 584, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 585, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 586, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 587, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 588, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 589, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 590, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 591, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 592, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 593, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 594, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 595, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 596, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 597, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 598, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 599, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 600, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 601, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 602, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 603, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 604, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 605, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 606, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 607, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 608, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 609, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 610, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 611, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 612, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 613, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 614, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 615, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 616, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 617, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 618, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 619, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 620, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 621, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 622, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 623, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 624, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 625, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 626, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 627, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 628, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 629, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 630, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 631, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 632, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 633, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 634, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 635, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 636, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 637, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 638, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 639, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 640, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 641, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 642, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 643, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 644, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 645, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 646, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 647, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 648, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 649, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 650, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 651, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 652, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 653, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 654, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 655, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 656, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 657, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 658, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 659, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 660, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 661, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 662, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 663, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 664, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 665, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 666, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 667, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
+UNION ALL SELECT intValidProductCodeId = 355, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 356, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 357, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 358, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 359, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 360, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 361, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 362, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 363, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 364, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 365, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 366, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 367, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 368, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 369, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 370, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 371, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 372, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 373, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 374, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 375, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 376, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 377, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 378, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 379, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 380, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 381, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 382, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 383, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 384, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 385, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 386, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 387, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 388, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 389, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 390, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 391, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 392, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 393, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 394, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 395, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 396, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 397, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 398, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 399, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 400, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 401, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 402, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 403, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 404, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 405, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 406, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 407, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 408, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 409, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 410, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 411, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 412, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 413, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 414, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 415, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 416, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 417, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 418, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 419, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 420, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 421, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 422, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 423, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 424, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 425, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 426, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 427, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 428, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 429, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 430, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 431, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 432, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 433, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 434, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 435, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 436, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 437, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 438, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 439, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 440, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 441, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 442, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 443, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 444, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 445, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 446, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 447, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 448, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 449, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 450, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 451, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 452, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 453, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 454, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 455, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 456, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 457, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 458, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 459, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 460, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 461, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 462, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 463, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 464, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 465, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 466, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 467, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 468, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 469, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 470, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 471, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 472, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 473, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 474, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 475, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 476, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 477, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 478, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 479, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 480, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 481, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 482, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 483, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 484, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 485, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 486, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 487, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 488, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 489, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 490, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 491, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 492, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 493, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 494, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 495, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 496, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 497, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 498, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 499, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 500, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 501, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 502, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 503, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 504, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 505, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 506, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 507, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 508, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 509, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 510, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 511, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 512, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 513, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 514, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 515, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 516, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 517, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 518, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 519, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 520, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 521, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 522, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 523, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 524, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 525, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 526, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 527, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 528, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 529, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 530, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 531, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 532, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 533, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 534, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 535, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 536, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 537, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 538, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 539, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 540, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 541, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 542, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 543, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 544, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 545, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 546, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 547, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 548, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 549, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 550, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 551, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 552, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 553, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 554, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 555, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 556, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 557, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 558, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 559, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 560, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 561, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 562, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 563, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 564, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 572, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 573, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 574, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 575, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 576, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 577, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 578, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 579, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 580, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 581, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 582, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 583, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 584, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 585, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 586, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 587, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 588, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 589, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 590, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 591, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 592, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 593, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 594, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 595, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 596, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 597, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 598, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 599, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 600, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 601, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 602, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 603, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 604, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 605, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 606, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 607, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 608, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 609, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 610, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 611, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 612, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 613, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 614, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 615, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 616, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 617, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 618, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 619, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 620, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 621, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 622, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 623, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 624, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 625, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 626, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 627, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 628, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 629, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 630, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 631, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 632, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 633, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 634, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 635, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 636, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 637, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 638, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 639, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 640, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 641, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 642, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 643, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 644, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 645, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 646, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 647, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 648, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 649, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 650, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 651, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 652, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 653, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 654, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 655, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 656, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 657, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 658, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 659, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 660, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 661, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 662, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 663, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 664, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 665, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 666, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 667, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 675, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 676, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 677, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
@@ -1100,385 +1100,385 @@ UNION ALL SELECT intValidProductCodeId = 690, strProductCode = '148', strFormCod
 UNION ALL SELECT intValidProductCodeId = 691, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 692, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 693, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 694, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 695, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 696, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 697, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 698, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 699, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 700, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 701, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 702, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 703, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 704, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 705, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 706, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 707, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 708, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 709, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 710, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 711, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 712, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 713, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 714, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 715, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 716, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 717, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 718, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 719, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 720, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 721, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 722, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 723, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 724, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 725, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 726, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 727, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 728, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 729, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 730, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 731, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 732, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 733, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 734, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 735, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 736, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 737, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 738, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 739, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 740, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 741, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 742, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 743, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 744, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 745, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 746, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 747, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 748, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 749, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 750, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 751, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 752, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 753, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 754, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 755, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 756, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 757, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 758, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 759, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 760, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 761, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 762, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 763, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 764, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 765, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 766, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 767, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 768, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 769, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 770, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 771, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 772, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 773, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 774, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 775, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 776, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 777, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 778, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 779, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 780, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 781, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 782, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 783, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 784, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 785, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 786, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 787, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 788, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 789, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 790, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 791, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 792, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 793, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 794, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 795, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 796, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 797, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 798, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 799, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 800, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 801, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 802, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 803, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 804, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 805, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 806, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 807, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 808, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 809, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 810, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 811, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 812, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 813, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 814, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 815, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 816, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 817, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 818, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 819, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 820, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 821, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 822, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 823, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 824, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 825, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 826, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 827, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 828, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 829, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 830, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 831, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 832, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 833, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 834, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 835, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 836, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 837, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 838, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 839, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 840, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 841, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 842, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 843, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 844, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 845, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 846, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 847, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 848, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 849, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 850, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 851, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 852, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 853, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 854, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 855, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 856, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 857, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 858, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 859, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 860, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 861, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 862, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 863, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 864, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 865, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 866, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 873, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 874, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 875, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 876, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 879, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 880, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 881, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 882, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 883, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 886, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 887, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 888, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 889, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 890, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 891, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 902, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 903, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 904, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 905, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 906, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 907, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 908, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 909, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 910, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 911, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 912, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 913, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 914, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 915, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 916, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 917, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 918, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 919, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 920, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 921, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 922, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 923, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 924, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 925, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 926, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 927, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 928, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 929, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 930, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 931, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 932, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 933, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 934, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 935, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 936, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 937, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 938, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 939, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 940, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 941, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 942, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 943, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 944, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 945, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 946, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 947, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 948, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 949, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 950, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 951, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 952, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 953, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 954, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 955, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 956, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 957, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 958, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 959, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 960, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 961, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 962, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 963, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 964, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 965, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 966, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 967, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 968, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 969, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 970, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 971, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 972, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 973, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 974, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 975, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 976, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 977, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 978, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 979, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 980, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 981, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 982, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 983, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 984, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 985, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 986, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 987, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 988, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 989, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 990, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 991, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 992, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 993, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 994, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 995, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 996, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 997, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 998, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 999, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1000, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1001, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1002, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1003, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1004, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1005, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1006, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1007, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1008, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1009, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1010, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1011, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1012, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1013, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1014, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1015, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1016, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1017, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1018, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1019, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1020, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1021, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1022, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1023, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1024, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1025, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1026, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1027, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1028, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1029, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1030, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1031, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1032, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1033, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1034, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1035, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1036, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1037, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1038, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1039, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1040, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1041, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1042, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1043, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1044, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1045, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1046, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1047, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1048, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1049, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1050, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1051, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1052, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1053, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1054, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1055, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1056, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1057, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1058, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1059, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1060, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1061, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1062, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1063, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1064, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1065, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1066, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1067, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1068, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1069, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1070, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1071, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1072, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1073, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1074, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1075, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1076, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1077, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1078, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1079, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1080, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1081, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1082, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1083, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1084, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1085, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1086, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1087, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1088, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1089, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1090, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1091, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1092, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
+UNION ALL SELECT intValidProductCodeId = 694, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 695, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 696, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 697, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 698, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 699, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 700, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 701, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 702, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 703, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 704, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 705, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 706, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 707, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 708, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 709, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 710, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 711, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 712, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 713, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 714, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 715, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 716, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 717, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 718, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 719, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 720, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 721, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 722, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 723, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 724, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 725, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 726, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 727, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 728, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 729, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 730, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 731, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 732, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 733, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 734, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 735, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 736, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 737, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 738, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 739, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 740, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 741, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 742, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 743, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 744, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 745, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 746, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 747, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 748, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 749, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 750, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 751, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 752, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 753, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 754, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 755, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 756, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 757, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 758, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 759, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 760, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 761, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 762, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 763, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 764, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 765, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 766, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 767, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 768, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 769, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 770, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 771, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 772, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 773, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 774, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 775, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 776, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 777, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 778, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 779, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 780, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 781, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 782, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 783, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 784, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 785, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 786, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 787, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 788, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 789, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 790, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 791, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 792, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 793, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 794, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 795, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 796, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 797, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 798, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 799, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 800, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 801, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 802, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 803, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 804, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 805, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 806, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 807, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 808, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 809, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 810, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 811, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 812, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 813, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 814, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 815, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 816, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 817, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 818, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 819, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 820, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 821, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 822, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 823, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 824, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 825, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 826, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 827, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 828, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 829, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 830, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 831, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 832, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 833, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 834, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 835, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 836, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 837, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 838, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 839, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 840, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 841, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 842, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 843, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 844, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 845, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 846, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 847, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 848, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 849, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 850, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 851, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 852, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 853, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 854, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 855, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 856, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 857, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 858, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 859, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 860, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 861, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 862, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 863, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 864, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 865, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 866, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 873, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 874, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 875, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 876, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 879, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 880, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 881, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 882, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 883, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 886, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 887, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 888, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 889, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 890, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 891, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 902, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 903, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 904, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 905, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 906, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 907, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 908, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 909, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 910, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 911, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 912, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 913, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 914, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 915, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 916, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 917, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 918, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 919, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 920, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 921, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 922, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 923, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 924, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 925, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 926, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 927, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 928, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 929, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 930, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 931, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 932, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 933, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 934, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 935, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 936, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 937, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 938, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 939, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 940, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 941, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 942, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 943, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 944, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 945, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 946, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 947, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 948, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 949, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 950, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 951, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 952, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 953, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 954, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 955, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 956, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 957, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 958, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 959, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 960, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 961, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 962, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 963, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 964, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 965, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 966, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 967, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 968, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 969, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 970, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 971, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 972, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 973, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 974, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 975, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 976, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 977, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 978, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 979, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 980, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 981, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 982, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 983, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 984, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 985, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 986, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 987, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 988, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 989, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 990, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 991, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 992, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 993, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 994, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 995, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 996, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 997, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 998, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 999, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1000, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1001, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1002, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1003, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1004, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1005, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1006, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1007, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1008, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1009, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1010, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1011, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1012, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1013, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1014, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1015, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1016, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1017, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1018, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1019, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1020, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1021, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1022, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1023, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1024, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1025, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1026, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1027, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1028, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1029, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1030, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1031, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1032, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1033, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1034, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1035, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1036, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1037, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1038, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1039, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1040, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1041, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1042, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1043, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1044, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1045, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1046, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1047, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1048, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1049, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1050, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1051, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1052, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1053, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1054, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1055, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1056, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1057, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1058, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1059, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1060, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1061, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1062, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1063, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1064, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1065, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1066, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1067, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1068, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1069, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1070, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1071, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1072, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1073, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1074, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1075, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1076, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1077, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1078, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1079, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1080, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1081, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1082, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1083, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1084, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1085, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1086, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1087, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1088, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1089, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1090, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1091, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1092, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 1093, strProductCode = '061', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 1094, strProductCode = '065', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 1095, strProductCode = 'E00', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strFilter = ''
@@ -1509,7 +1509,7 @@ UNION ALL SELECT intValidProductCodeId = 1355, strProductCode = 'E10', strFormCo
 UNION ALL SELECT intValidProductCodeId = 1356, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 1357, strProductCode = 'E10', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 1358, strProductCode = 'E10', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1359, strProductCode = 'E10', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strFilter = ''
+UNION ALL SELECT intValidProductCodeId = 1359, strProductCode = 'E10', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strFilter = ''	
 UNION ALL SELECT intValidProductCodeId = 1360, strProductCode = 'E10', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = ''
 UNION ALL SELECT intValidProductCodeId = 1361, strProductCode = 'E10', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = ''
 
