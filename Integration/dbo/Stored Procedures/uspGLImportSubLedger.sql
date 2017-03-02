@@ -27,6 +27,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 			EXEC dbo.[uspGLCreateImportLogDetail]	@importLogId ,  ''Unable to Post because there is no cross reference between i21 and Origin.'' ,null ,null
 			SET @halt = 1
 		END
+
+		IF @halt = 1 RETURN
 		
     	IF NOT EXISTS( SELECT * FROM tblGLCOACrossReference)
     	BEGIN
