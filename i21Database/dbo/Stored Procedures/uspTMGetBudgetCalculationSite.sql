@@ -61,7 +61,14 @@ BEGIN
 										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END) - ISNULL(A.dblYTDGalsThisSeason,0.0)
 									ELSE 0
 									END) AS NUMERIC(18,6))
-		,dblCurrentARBalance = CAST((ISNULL(G.dbl0Days,0.0) + ISNULL(G.dbl10Days,0.0) + ISNULL(G.dbl30Days,0.0) + ISNULL(G.dbl60Days,0.0) + ISNULL(G.dbl90Days,0.0) + ISNULL(G.dbl91Days,0.0) + ISNULL(G.dblFuture,0.0) - ISNULL(G.dblUnappliedCredits,0.0)) AS NUMERIC(18,6))
+								+ (CASE WHEN @strCalculateBudgetFor = 'Next Year'
+								THEN
+									(365 * (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END))
+								ELSE
+									(30 * ISNULL(@intNumberOfMonthsInBudget,0) * (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END))
+								END
+								)
+		,dblCurrentARBalance = CAST((ISNULL(G.dbl10Days,0.0) + ISNULL(G.dbl30Days,0.0) + ISNULL(G.dbl60Days,0.0) + ISNULL(G.dbl90Days,0.0) + ISNULL(G.dbl91Days,0.0) + ISNULL(G.dblFuture,0.0) - ISNULL(G.dblUnappliedCredits,0.0)) AS NUMERIC(18,6))
 		,intSiteID = A.intSiteID
 		,dblUnappliedCredits = ISNULL(G.dblUnappliedCredits,0.0)
 		,intEntityCustomerId = C.intEntityId
@@ -147,13 +154,7 @@ BEGIN
 									WHEN @ysnIncludeCredits = 1 AND @ysnIncludeInvoices = 1
 										THEN ROUND((((dblRequiredQuantity * dblPrice) + dblCurrentARBalance - dblUnappliedCredits) / @intNumberOfMonthsInBudget),0)
 								END) 
-								+ (CASE WHEN @strCalculateBudgetFor = 'Next Year'
-									THEN
-										(365 * dblDailyUse)
-									ELSE
-										(30 * ISNULL(@intNumberOfMonthsInBudget,0) * dblDailyUse)
-									END
-								)
+							
 	INTO #tmpStage3
 	FROM #tmpStage2
 	
