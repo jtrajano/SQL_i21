@@ -5,7 +5,7 @@ SELECT
 	,strTransactionId			= s.strShipmentNumber
 	,strTransactionDate			= s.dtmShipDate
 	,strTransactionDueDate		= s.dtmRequestedArrivalDate
-	,strVendorName				= s.intEntityCustomerId
+	,strVendorName				= e.strName
 	,strCommodity				= c.strCommodityCode
 	,strLineOfBusiness			= lob.strLineOfBusiness
 	,strLocation				= loc.strLocationName
@@ -26,10 +26,10 @@ SELECT
 	,dblUnrealizedCreditGain	= 0 --Calcuate By GL
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
-	,iv.*
 FROM tblICInventoryShipment s
 	LEFT JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
 	LEFT JOIN tblICItem i ON i.intItemId = si.intItemId
+	LEFT JOIN tblEMEntity e ON e.intEntityId = s.intEntityCustomerId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = s.intShipFromLocationId
 	LEFT JOIN tblICCategory ct ON ct.intCategoryId = i.intCategoryId
 	LEFT JOIN tblSMLineOfBusiness lob ON lob.intLineOfBusinessId = ct.intLineOfBusinessId
