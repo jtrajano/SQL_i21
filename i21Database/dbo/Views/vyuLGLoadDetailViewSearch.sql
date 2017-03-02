@@ -167,6 +167,7 @@ SELECT   Load.intLoadId
 		,Item.intCommodityId
 		,CA.intCommodityAttributeId
 		,CA.strDescription AS strOrigin
+		,LoadDetail.intNumberOfContainers
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
