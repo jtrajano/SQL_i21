@@ -43,7 +43,8 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Patronage.store.BufferedPatronageCategory',
         'TaxForm.store.BufferedTaxAuthority',
         'TaxForm.store.BufferedProductCode',
-        'Inventory.store.BufferedM2MComputation'
+        'Inventory.store.BufferedM2MComputation',
+        'i21.store.CurrencyBuffered'
     ],
 
     stores: {
@@ -909,6 +910,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                 direction: 'ASC',
                 property: 'intSort'
             }
+        },
+        currency: {
+            type: 'currencybuffered'
         }
     },
     

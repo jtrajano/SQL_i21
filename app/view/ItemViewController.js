@@ -999,7 +999,17 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{commissionsOn}'
                     }
                 },
-                colPricingLevelCommissionRate: 'dblCommissionRate'
+                colPricingLevelCommissionRate: 'dblCommissionRate',
+                colPricingLevelCurrency: {
+                    dataIndex: 'strCurrency',
+                    editor: {
+                        store: '{currency}',
+                        defaultFilters: [{
+                            column: 'ysnSubCurrency',
+                            value: false
+                        }]
+                    }
+                }
             },
 
             grdSpecialPricing: {
@@ -3049,6 +3059,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             }
         }
+        else if (combo.column.itemId === 'colPricingLevelCurrency'){
+            current.set('intCurrencyId', records[0].get('intCurrencyID'));
+        }
     },
 
     onSpecialPricingBeforeQuery: function (obj) {
@@ -4048,6 +4061,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 select: this.onPricingLevelSelect
             },
             "#cboPricingLevelCommissionOn": {
+                select: this.onPricingLevelSelect
+            },
+             "#cboPricingLevelCurrency": {
                 select: this.onPricingLevelSelect
             },
             "#cboSpecialPricingLocation": {

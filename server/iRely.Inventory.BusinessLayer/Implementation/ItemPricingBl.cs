@@ -62,6 +62,47 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
+        public async Task<SearchResult> GetItemPricingLevel(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICItemPricingLevel>()
+                .Include(p => p.tblICItem)
+                .Include(p => p.tblICItemLocation)
+                .Include(p => p.tblICItemUOM)
+                .Include(p => p.tblSMCurrency)
+                .Select(p => new ItemPricingLevelVM
+                {
+                    intItemPricingLevelId = p.intItemPricingLevelId,
+                    intItemId = p.intItemId,
+                    intItemLocationId = p.intItemLocationId,
+                    strPriceLevel = p.strPriceLevel,
+                    intItemUnitMeasureId = p.intItemUnitMeasureId,
+                    dblUnit = p.dblUnit,
+                    dblMin = p.dblMin,
+                    dblMax = p.dblMax,
+                    strPricingMethod = p.strPricingMethod,
+                    dblAmountRate = p.dblAmountRate,
+                    dblUnitPrice = p.dblUnitPrice,
+                    strCommissionOn = p.strCommissionOn,
+                    dblCommissionRate = p.dblCommissionRate,
+                    intCurrencyId = p.intCurrencyId,
+                    intSort = p.intSort,
+                    strLocationName = p.tblICItemLocation.vyuICGetItemLocation.strLocationName,
+                    intLocationId = p.tblICItemLocation.intLocationId,
+                    strUnitMeasure = p.tblICItemUOM.tblICUnitMeasure.strUnitMeasure,
+                    strUPC = p.tblICItemUOM.strUpcCode,
+                    strCurrency = p.tblSMCurrency.strCurrency,
+                    intConcurrencyId = p.intConcurrencyId
+                })
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemPricingLevelId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
     }
 
     public class ItemSpecialPricingBl : BusinessLayer<tblICItemSpecialPricing>, IItemSpecialPricingBl
