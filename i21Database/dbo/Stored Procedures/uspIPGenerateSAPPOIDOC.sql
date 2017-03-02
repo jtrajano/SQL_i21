@@ -457,7 +457,7 @@ Begin
 					Select @strCertificates=COALESCE(@strCertificates, '') 
 						+ '<E1BPMEPOTEXTHEADER>'
 						+ '<TEXT_ID>' + 'L15' + '</TEXT_ID>' 
-						+ '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(strCertificationName,'')) + '</TEXT_LINE>' 
+						+ '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(strCertificationCode,'')) + '</TEXT_LINE>' 
 						+ '</E1BPMEPOTEXTHEADER>'
 					From tblCTContractCertification cc Join tblICCertification c on cc.intCertificationId=c.intCertificationId
 					Where cc.intContractDetailId=@intContractDetailId
