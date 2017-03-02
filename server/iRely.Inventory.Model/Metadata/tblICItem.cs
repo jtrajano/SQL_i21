@@ -401,8 +401,10 @@ namespace iRely.Inventory.Model
         public string strStockUOMType { get; set; }
         public decimal? dblStockUnitQty { get; set; }
         public int? intReceiveUOMId { get; set; }
+        public int? intReceiveUnitMeasureId { get; set; }
         public decimal? dblReceiveUOMConvFactor { get; set; }
         public int? intIssueUOMId { get; set; }
+        public int? intIssueUnitMeasureId { get; set; }
         public decimal? dblIssueUOMConvFactor { get; set; }
         public string strReceiveUOMType { get; set; }
         public string strIssueUOMType { get; set; }
