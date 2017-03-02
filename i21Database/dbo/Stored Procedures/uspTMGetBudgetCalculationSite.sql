@@ -79,7 +79,9 @@ BEGIN
 		--,dblPrice = 
 		--,dblEstimatedBudget = 
 		,intCustomerId = A.intCustomerID
-		,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0.0) ELSE ISNULL(A.dblWinterDailyUse,0) END)
+		,dblDailyUse = (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END)
+		,intDeliveryTermId = (CASE WHEN A.intDeliveryTermID IS NULL THEN H.intTermsId ELSE A.intDeliveryTermID END)
+		,intStartBudgetMonth = MONTH(I.dtmBudgetBeginDate)
 	INTO #tmpStage1
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
@@ -100,6 +102,10 @@ BEGIN
 		ON A.intSiteID = I.intSiteId AND (I.intCurrentSeasonYear - 1) = I.intSeasonYear
 	LEFT JOIN vyuTMSiteDeliveryHistoryTotal J
 		ON A.intSiteID = J.intSiteId AND (J.intCurrentSeasonYear - 2) = J.intSeasonYear
+	LEFT JOIN tblEMEntityLocation K
+		ON C.intEntityId = K.intEntityId
+	LEFT JOIN tblARCustomer L
+		ON C.intEntityId = L.intEntityCustomerId
 
 	IF OBJECT_ID('tempdb..#tmpStage2') IS NOT NULL 
 	BEGIN DROP TABLE #tmpStage2 END
