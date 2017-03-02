@@ -945,3 +945,31 @@ UPDATE tblQMProperty
 SET strDefaultValue = ''
 WHERE strDefaultValue IS NULL
 Go
+
+-- To update the sequence no for existing test properties. This script should run only once for a client
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblQMTestProperty
+		WHERE intSequenceNo > 1
+		)
+BEGIN
+	DECLARE @TestProperty TABLE (
+		intSeqNo INT IDENTITY(1, 1)
+		,intTestPropertyId INT
+		,intSequenceNo INT
+		)
+
+	INSERT INTO @TestProperty
+	SELECT intTestPropertyId
+		,ROW_NUMBER() OVER (
+			PARTITION BY intTestId ORDER BY intTestPropertyId
+			) AS intSequenceNo
+	FROM tblQMTestProperty
+
+	UPDATE a
+	SET a.intSequenceNo = b.intSequenceNo
+	FROM tblQMTestProperty a
+	JOIN @TestProperty b ON b.intTestPropertyId = a.intTestPropertyId
+END
+GO
