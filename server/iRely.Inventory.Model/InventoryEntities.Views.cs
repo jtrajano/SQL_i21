@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets7fececdaa07edce85ab67014cb38c53ae70c4dc906bf37d6dbef87d8cae28622))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsa774e2e6f1c5da24e157743eadf5d5826e324c048868d5084aee1afbc277d14c))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets7fececdaa07edce85ab67014cb38c53ae70c4dc906bf37d6dbef87d8cae28622 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsa774e2e6f1c5da24e157743eadf5d5826e324c048868d5084aee1afbc277d14c : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "7fececdaa07edce85ab67014cb38c53ae70c4dc906bf37d6dbef87d8cae28622"; }
+            get { return "a774e2e6f1c5da24e157743eadf5d5826e324c048868d5084aee1afbc277d14c"; }
         }
 
         /// <summary>
@@ -2892,7 +2892,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemPricingLevel
-        [CodeFirstDatabaseSchema.tblICItemPricingLevel](T1.tblICItemPricingLevel_intItemPricingLevelId, T1.tblICItemPricingLevel_intItemId, T1.tblICItemPricingLevel_intItemLocationId, T1.tblICItemPricingLevel_strPriceLevel, T1.tblICItemPricingLevel_intItemUnitMeasureId, T1.tblICItemPricingLevel_dblUnit, T1.tblICItemPricingLevel_dblMin, T1.tblICItemPricingLevel_dblMax, T1.tblICItemPricingLevel_strPricingMethod, T1.tblICItemPricingLevel_dblAmountRate, T1.tblICItemPricingLevel_dblUnitPrice, T1.tblICItemPricingLevel_strCommissionOn, T1.tblICItemPricingLevel_dblCommissionRate, T1.tblICItemPricingLevel_intCurrencyId, T1.tblICItemPricingLevel_intSort, T1.tblICItemPricingLevel_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItemPricingLevel](T1.tblICItemPricingLevel_intItemPricingLevelId, T1.tblICItemPricingLevel_intItemId, T1.tblICItemPricingLevel_intItemLocationId, T1.tblICItemPricingLevel_strPriceLevel, T1.tblICItemPricingLevel_intItemUnitMeasureId, T1.tblICItemPricingLevel_dblUnit, T1.tblICItemPricingLevel_dblMin, T1.tblICItemPricingLevel_dblMax, T1.tblICItemPricingLevel_strPricingMethod, T1.tblICItemPricingLevel_dblAmountRate, T1.tblICItemPricingLevel_dblUnitPrice, T1.tblICItemPricingLevel_strCommissionOn, T1.tblICItemPricingLevel_dblCommissionRate, T1.tblICItemPricingLevel_intCurrencyId, T1.tblICItemPricingLevel_dblForexRate, T1.tblICItemPricingLevel_intSort, T1.tblICItemPricingLevel_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemPricingLevelId AS tblICItemPricingLevel_intItemPricingLevelId, 
@@ -2909,6 +2909,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strCommissionOn AS tblICItemPricingLevel_strCommissionOn, 
             T.dblCommissionRate AS tblICItemPricingLevel_dblCommissionRate, 
             T.intCurrencyId AS tblICItemPricingLevel_intCurrencyId, 
+            T.dblForexRate AS tblICItemPricingLevel_dblForexRate, 
             T.intSort AS tblICItemPricingLevel_intSort, 
             T.intConcurrencyId AS tblICItemPricingLevel_intConcurrencyId, 
             True AS _from0
@@ -6302,7 +6303,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemPricingLevels
-        [iRely.Inventory.Model.tblICItemPricingLevel](T1.tblICItemPricingLevel_intItemPricingLevelId, T1.tblICItemPricingLevel_intItemId, T1.tblICItemPricingLevel_intItemLocationId, T1.tblICItemPricingLevel_strPriceLevel, T1.tblICItemPricingLevel_intItemUnitMeasureId, T1.tblICItemPricingLevel_dblUnit, T1.tblICItemPricingLevel_dblMin, T1.tblICItemPricingLevel_dblMax, T1.tblICItemPricingLevel_strPricingMethod, T1.tblICItemPricingLevel_dblAmountRate, T1.tblICItemPricingLevel_dblUnitPrice, T1.tblICItemPricingLevel_strCommissionOn, T1.tblICItemPricingLevel_dblCommissionRate, T1.tblICItemPricingLevel_intCurrencyId, T1.tblICItemPricingLevel_intSort, T1.tblICItemPricingLevel_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItemPricingLevel](T1.tblICItemPricingLevel_intItemPricingLevelId, T1.tblICItemPricingLevel_intItemId, T1.tblICItemPricingLevel_intItemLocationId, T1.tblICItemPricingLevel_strPriceLevel, T1.tblICItemPricingLevel_intItemUnitMeasureId, T1.tblICItemPricingLevel_dblUnit, T1.tblICItemPricingLevel_dblMin, T1.tblICItemPricingLevel_dblMax, T1.tblICItemPricingLevel_strPricingMethod, T1.tblICItemPricingLevel_dblAmountRate, T1.tblICItemPricingLevel_dblUnitPrice, T1.tblICItemPricingLevel_strCommissionOn, T1.tblICItemPricingLevel_dblCommissionRate, T1.tblICItemPricingLevel_intCurrencyId, T1.tblICItemPricingLevel_dblForexRate, T1.tblICItemPricingLevel_intSort, T1.tblICItemPricingLevel_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemPricingLevelId AS tblICItemPricingLevel_intItemPricingLevelId, 
@@ -6319,6 +6320,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strCommissionOn AS tblICItemPricingLevel_strCommissionOn, 
             T.dblCommissionRate AS tblICItemPricingLevel_dblCommissionRate, 
             T.intCurrencyId AS tblICItemPricingLevel_intCurrencyId, 
+            T.dblForexRate AS tblICItemPricingLevel_dblForexRate, 
             T.intSort AS tblICItemPricingLevel_intSort, 
             T.intConcurrencyId AS tblICItemPricingLevel_intConcurrencyId, 
             True AS _from0

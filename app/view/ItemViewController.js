@@ -1009,7 +1009,8 @@ Ext.define('Inventory.view.ItemViewController', {
                             value: false
                         }]
                     }
-                }
+                },
+                colPricingLevelForexRate: 'dblForexRate'
             },
 
             grdSpecialPricing: {
@@ -3047,6 +3048,8 @@ Ext.define('Inventory.view.ItemViewController', {
         if (combo.column.itemId === 'colPricingLevelLocation'){
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
             current.set('intLocationId', records[0].get('intLocationId'));
+            current.set('intCurrencyId', i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'));
+            current.set('strCurrency', i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency'));
         }
         else if (combo.column.itemId === 'colPricingLevelUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));

@@ -4661,9 +4661,9 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        dataIndex: 'strCurrency',
                                                                         itemId: 'colPricingLevelCurrency',
                                                                         minWidth: 80,
-                                                                        dataIndex: 'strFieldName',
                                                                         text: 'Currency',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
@@ -4705,6 +4705,19 @@ Ext.define('Inventory.view.Item', {
                                                                             itemId: 'cboPricingLevelCurrency',
                                                                             displayField: 'strCurrency',
                                                                             valueField: 'strCurrency'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colPricingLevelForexRate',
+                                                                        align: 'right',
+                                                                        dataIndex: 'strFieldName',
+                                                                        text: 'Forex Rate',
+                                                                        editor: {
+                                                                            xtype: 'numberfield',
+                                                                            quantityField: true,
+                                                                            fieldStyle: 'text-align:right',
+                                                                            hideTrigger: true
                                                                         }
                                                                     },
                                                                     {
