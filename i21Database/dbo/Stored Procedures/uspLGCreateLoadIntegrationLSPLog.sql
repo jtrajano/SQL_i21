@@ -62,10 +62,22 @@ BEGIN TRY
 		,strDestinationTeleFaxNo
 		,strDestinationCountry
 		,strDestinationRegion
+		,strForwardingAgent
+		,strForwardingAgentPostalCode
+		,strForwardingAgentCity
+		,strForwardingAgentTelePhoneNo
+		,strForwardingAgentTeleFaxNo
+		,strForwardingAgentCountry
+		,strForwardingAgentAccNo
 		,strContractBasis
 		,strContractBasisDesc
 		,strBillOfLading
 		,strShippingLine
+		,strShippingLinePostalCode
+		,strShippingLineCity
+		,strShippingLineTelePhoneNo
+		,strShippingLineTeleFaxNo
+		,strShippingLineCountry
 		,strShippingLineAccountNo
 		,strExternalShipmentNumber
 		,strDateQualifier
@@ -180,6 +192,13 @@ BEGIN TRY
 		,'' strDestinationTeleFaxNo
 		,DCountry.strISOCode strDestinationCountry
 		,'' strDestinationRegion
+		,L.strForwardingAgent
+		,FAEL.strZipCode
+		,FAEL.strCity
+		,FAEL.strPhone
+		,FAEL.strFax
+		,FACountry.strISOCode
+		,FAV.strVendorAccountNum
 		,strContractBasis = (
 			SELECT TOP 1 CB.strContractBasis
 			FROM tblCTContractHeader CH
@@ -198,6 +217,11 @@ BEGIN TRY
 			)
 		,L.strBLNumber
 		,L.strShippingLine
+		,SLEL.strZipCode
+		,SLEL.strCity
+		,SLEL.strPhone
+		,SLEL.strFax
+		,SLCountry.strISOCode
 		,V.strVendorAccountNum strShippingLineAccountNo
 		,L.strExternalShipmentNumber
 		,'015' AS strDateQualifier
@@ -231,6 +255,8 @@ BEGIN TRY
 		,L.strFVoyageNumber
 	FROM vyuLGLoadView L
 	LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
+	LEFT JOIN tblEMEntityLocation SLEL ON SLEL.intEntityId = E.intEntityId
+	LEFT JOIN tblSMCountry SLCountry ON SLCountry.strCountry = SLEL.strCountry
 	LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
 	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
@@ -241,6 +267,10 @@ BEGIN TRY
 	LEFT JOIN tblSMCountry OCountry ON OCountry.intCountryID = OCity.intCountryId
 	LEFT JOIN tblSMCity DCity ON DCity.strCity = L.strDestinationPort
 	LEFT JOIN tblSMCountry DCountry ON DCountry .intCountryID = DCity.intCountryId
+	LEFT JOIN tblEMEntity FA ON FA.intEntityId = L.intForwardingAgentEntityId
+	LEFT JOIN tblEMEntityLocation FAEL ON FAEL.intEntityId = FA.intEntityId
+	LEFT JOIN tblSMCountry FACountry ON FACountry.strCountry = FAEL.strCountry
+	LEFT JOIN tblAPVendor FAV ON FAV.intEntityVendorId = FA.intEntityId
 	WHERE L.intLoadId = @intLoadId
 
 	SELECT @intLoadStgId = SCOPE_IDENTITY()
