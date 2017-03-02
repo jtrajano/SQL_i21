@@ -49,9 +49,21 @@ SELECT
 	,Certification.strCertificationName
 	,CH.intContractHeaderId
 	,ISNULL(CD.dblScheduleQty,0) AS dblScheduleQty
-	,ISNULL(CD.ysnInvoice,0) AS ysnInvoice
-	,ISNULL(CD.ysnProvisionalInvoice,0) AS ysnProvisionalInvoice
-	,ISNULL(CD.ysnQuantityFinal,0) AS ysnQuantityFinal
+	,CASE 
+		WHEN	ISNULL(CD.ysnInvoice,0)=0 THEN 'N'	
+		ELSE 'Y' 
+	 END 
+	 AS ysnInvoice
+	,CASE 
+		WHEN	ISNULL(CD.ysnProvisionalInvoice,0)=0 THEN 'N'	
+		ELSE 'Y' 
+	 END 
+	 AS ysnProvisionalInvoice
+	,CASE 
+		WHEN	ISNULL(CD.ysnQuantityFinal,0)=0 THEN 'N'	
+		ELSE 'Y' 
+	 END  
+	 AS ysnQuantityFinal
 	,CH.strInternalComment
 	,LG.dblQuantity AS dblShippingInsQty
 FROM vyuCTContractSequence CSeq
