@@ -1,24 +1,24 @@
 ﻿CREATE VIEW [dbo].[vyuICMultiCurrencyRevalueShipment]
 AS
-SELECT DISTINCT
-	 strTransactionType			= CAST(NULL AS NVARCHAR(50))
-	,strTransactionId			= CAST(NULL AS NVARCHAR(50))
-	,strTransactionDate			= CAST(NULL AS NVARCHAR(50))
-	,strTransactionDueDate		= CAST(NULL AS NVARCHAR(50))
-	,strVendorName				= CAST(NULL AS NVARCHAR(50))
-	,strCommodity				= CAST(NULL AS NVARCHAR(50))
-	,strLineOfBusiness			= CAST(NULL AS NVARCHAR(50))
-	,strLocation				= CAST(NULL AS NVARCHAR(50))
-	,strTicket					= CAST(NULL AS NVARCHAR(50))
-	,strContractNumber			= CAST(NULL AS NVARCHAR(50))
-	,strItemId					= CAST(NULL AS NVARCHAR(50))
-	,dblQuantity				= CAST(NULL AS NUMERIC(18, 6))
-	,dblUnitPrice				= CAST(NULL AS NUMERIC(18, 6))
-	,dblAmount					= CAST(NULL AS NUMERIC(18, 6))
-	,intCurrencyId				= CAST(NULL AS INT)
-	,intForexRateType			= CAST(NULL AS INT)
-	,strForexRateType			= CAST(NULL AS NVARCHAR(50))
-	,dblForexRate				= CAST(NULL AS NUMERIC(18, 6))
+SELECT
+	 strTransactionType			= CASE s.intOrderType WHEN 1 THEN 'Sales Contract' WHEN 2 THEN 'Sales Order' WHEN 3 THEN 'Transfer Order' WHEN 4 THEN 'Direct' END
+	,strTransactionId			= s.strShipmentNumber
+	,strTransactionDate			= s.dtmShipDate
+	,strTransactionDueDate		= s.dtmRequestedArrivalDate
+	,strVendorName				= s.intEntityCustomerId
+	,strCommodity				= c.strCommodityCode
+	,strLineOfBusiness			= lob.strLineOfBusiness
+	,strLocation				= loc.strLocationName
+	,strTicket					= st.strTicketNumber
+	,strContractNumber			= hd.strContractNumber
+	,strItemId					= i.strItemNo
+	,dblQuantity				= si.dblQuantity
+	,dblUnitPrice				= si.dblUnitPrice
+	,dblAmount					= ISNULL(si.dblQuantity, 0) * ISNULL(si.dblUnitPrice, 0)
+	,intCurrencyId				= s.intCurrencyId
+	,intForexRateType			= si.intForexRateTypeId
+	,strForexRateType			= ex.strCurrencyExchangeRateType
+	,dblForexRate				= si.dblForexRate
 	,dblHistoricAmount			= CAST(NULL AS NUMERIC(18, 6))
 	,dblNewForexRate			= 0 --Calcuate By GL
 	,dblNewAmount				= 0 --Calcuate By GL
@@ -26,3 +26,19 @@ SELECT DISTINCT
 	,dblUnrealizedCreditGain	= 0 --Calcuate By GL
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
+	,iv.*
+FROM tblICInventoryShipment s
+	LEFT JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+	LEFT JOIN tblICItem i ON i.intItemId = si.intItemId
+	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = s.intShipFromLocationId
+	LEFT JOIN tblICCategory ct ON ct.intCategoryId = i.intCategoryId
+	LEFT JOIN tblSMLineOfBusiness lob ON lob.intLineOfBusinessId = ct.intLineOfBusinessId
+	LEFT JOIN tblSMCurrencyExchangeRateType ex ON ex.intCurrencyExchangeRateTypeId = si.intForexRateTypeId
+	LEFT JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
+	LEFT JOIN vyuCTContractHeaderView hd ON si.intSourceId = hd.intContractHeaderId
+	LEFT JOIN vyuSCTicketInventoryShipmentView st ON st.intInventoryShipmentId = si.intInventoryShipmentId
+	LEFT JOIN tblARInvoiceDetail id ON id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+		AND id.intItemId = si.intItemId
+	LEFT JOIN tblARInvoice iv ON iv.intInvoiceId = id.intInvoiceId
+WHERE s.ysnPosted = 1
+	AND id.intInvoiceId IS NULL

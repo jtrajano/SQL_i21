@@ -9,8 +9,8 @@ SELECT
 	,strCommodity				= c.strDescription
 	,strLineOfBusiness			= lob.strLineOfBusiness
 	,strLocation				= loc.strLocationName
-	,strTicket					= CAST(NULL AS NVARCHAR(50))
-	,strContractNumber			= CAST(NULL AS NVARCHAR(50))
+	,strTicket					= st.strTicketNumber
+	,strContractNumber			= hd.strContractNumber
 	,strItemId					= i.strItemNo
 	,dblQuantity				= ri.dblOpenReceive
 	,dblUnitPrice				= ri.dblUnitCost
@@ -35,5 +35,8 @@ FROM tblICInventoryReceipt r
 	LEFT JOIN tblSMLineOfBusiness lob ON lob.intLineOfBusinessId = ct.intLineOfBusinessId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = r.intLocationId
 	LEFT JOIN tblSMCurrencyExchangeRateType ex ON ex.intCurrencyExchangeRateTypeId = ri.intForexRateTypeId
+	LEFT JOIN vyuCTContractHeaderView hd ON ri.intSourceId = hd.intContractHeaderId
+	LEFT JOIN vyuSCTicketInventoryReceiptView st ON st.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+		AND st.intInventoryReceiptId = r.intInventoryReceiptId
 WHERE r.ysnPosted = 1
 	AND ri.dblBillQty <> ri.dblOpenReceive
