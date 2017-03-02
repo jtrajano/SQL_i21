@@ -98,83 +98,69 @@ DECLARE @tblDerivative TABLE (
 
 IF (ISNULL(@ysnVendorProducer,0)=0)
 BEGIN	
-		INSERT INTO @tblDerivative (intRowNum,intContractHeaderId,strContractSeq,strEntityName,dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalValume,dblPurchaseOpenQty,
-									dblPurchaseContractBasisPrice,dblPurchaseFuturesPrice,dblPurchaseCashPrice,dblFixedPurchaseValue,dblUnPurchaseOpenQty,
-									dblUnPurchaseContractBasisPrice,dblUnPurchaseFuturesPrice,dblUnPurchaseCashPrice,dblUnfixedPurchaseValue,dblTotalCommitedValue)
-        SELECT convert(int,row_number() OVER(ORDER BY strEntityName)) intRowNum,intContractHeaderId,strContractSeq,
-				strEntityName,
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblOpenQty else 0 end) dblFixedPurchaseVolume,
-                (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblOpenQty else 0 end) dblUnfixedPurchaseVolume,
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblOpenQty else 0 end) + 
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblOpenQty else 0 end) dblTotalValume,	
+INSERT INTO @tblDerivative (intRowNum,intContractHeaderId,strContractSeq,strEntityName,dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalValume,dblPurchaseOpenQty,
+						dblPurchaseContractBasisPrice,dblPurchaseFuturesPrice,dblPurchaseCashPrice,dblFixedPurchaseValue,dblUnPurchaseOpenQty,
+						dblUnPurchaseContractBasisPrice,dblUnPurchaseFuturesPrice,dblUnPurchaseCashPrice,dblUnfixedPurchaseValue,dblTotalCommitedValue)
+SELECT convert(int,row_number() OVER(ORDER BY strEntityName)) intRowNum,intContractHeaderId,strContractSeq,
+	strEntityName,
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblOpenQty else 0 end) dblFixedPurchaseVolume,
+    (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblOpenQty else 0 end) dblUnfixedPurchaseVolume,
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblOpenQty else 0 end) + 
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblOpenQty else 0 end) dblTotalValume,	
 
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblPValueQty else 0 end) dblPurchaseOpenQty,
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblPContractBasis else 0 end) dblPurchaseContractBasisPrice,
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblPFutures else 0 end) dblPurchaseFuturesPrice,
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblPContractBasis else 0 end) +
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblPFutures else 0 end) as dblPurchaseCashPrice,
-                (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblQtyPrice else 0 end) dblFixedPurchaseValue,
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblPValueQty else 0 end) dblPurchaseOpenQty,
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblPContractBasis else 0 end) dblPurchaseContractBasisPrice,
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblPFutures else 0 end) dblPurchaseFuturesPrice,
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblPContractBasis else 0 end) +
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblPFutures else 0 end) as dblPurchaseCashPrice,
+    (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblQtyPrice else 0 end) dblFixedPurchaseValue,
                      
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblUPValueQty else 0 end) dblUnPurchaseOpenQty,
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblUPContractBasis else 0 end) dblUnPurchaseContractBasisPrice,
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblUPFutures else 0 end) dblUnPurchaseFuturesPrice,
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblUPContractBasis else 0 end) +
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblUPFutures else 0 end) as dblUnPurchaseCashPrice,
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblQtyUnFixedPrice else 0 end) dblUnfixedPurchaseValue,
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblUPValueQty else 0 end) dblUnPurchaseOpenQty,
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblUPContractBasis else 0 end) dblUnPurchaseContractBasisPrice,
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblUPFutures else 0 end) dblUnPurchaseFuturesPrice,
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblUPContractBasis else 0 end) +
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblUPFutures else 0 end) as dblUnPurchaseCashPrice,
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblQtyUnFixedPrice else 0 end) dblUnfixedPurchaseValue,
 
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblQtyPrice else 0 end) + 
-				(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblQtyUnFixedPrice else 0 end) dblTotalCommitedValue
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Priced' then dblQtyPrice else 0 end) + 
+	(CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' then dblQtyUnFixedPrice else 0 end) dblTotalCommitedValue
 					 		
-           FROM(                                  
-				SELECT ch.intContractHeaderId,fd.strContractSeq, fd.strEntityName,fd.dblOpenQty as dblOpenQty,
-					CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced' 
-							WHEN  ISNULL(strPriOrNotPriOrParPriced,'') = '' THEN 'Priced'
-							WHEN  strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced' 
-							ELSE strPriOrNotPriOrParPriced END strPriOrNotPriOrParPriced,
-
-							(dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty))) dblPValueQty, 
+FROM(                                  
+	SELECT ch.intContractHeaderId,fd.strContractSeq, fd.strEntityName,fd.dblOpenQty as dblOpenQty,
+		CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced' 
+				WHEN  ISNULL(strPriOrNotPriOrParPriced,'') = '' THEN 'Priced'
+				WHEN  strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced' 
+				ELSE strPriOrNotPriOrParPriced END strPriOrNotPriOrParPriced,
+				0.0 dblPValueQty,							
+				ISNULL(fd.dblContractBasis,0) dblPContractBasis ,
+				ISNULL(fd.dblFutures,0) dblPFutures,
+				dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
+                fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
+                        fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))/
+                        case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyPrice,  
 							
-							dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                 ((isnull(fd.dblContractBasis,0))))) dblPContractBasis,
+				(dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
+                fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
+                        fd.dblOpenQty))) dblUPValueQty, 
+							
+				isnull(fd.dblContractBasis,0) dblUPContractBasis,
 								 
-								dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                 ((isnull(fd.dblFutures,0))))) dblPFutures,
-
-				           dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))/
-                                  case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyPrice,  
-							
-							(dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty))) dblUPValueQty, 
-							
-							dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                 ((isnull(fd.dblContractBasis,0))))) dblUPContractBasis,
-								 
-								dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                 ((isnull(fd.dblFuturePrice,0))))) dblUPFutures,
+				isnull(fd.dblFuturePrice,0) dblUPFutures,
 								       
-                           dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))/
-                                  case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyUnFixedPrice  
-				FROM #temp  fd
-				JOIN tblCTContractDetail det on fd.intContractDetailId=det.intContractDetailId
-				join tblCTContractHeader ch on ch.intContractHeaderId=det.intContractHeaderId
-				JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId                                   
-				JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-				JOIN tblAPVendor e on e.intEntityVendorId=fd.intEntityId
-				LEFT JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId
-				LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
-				WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)') 
-			)t WHERE  strEntityName = @strVendorName 
+                dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
+                fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
+                        fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))/
+                        case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyUnFixedPrice  
+	FROM #temp  fd
+	JOIN tblCTContractDetail det on fd.intContractDetailId=det.intContractDetailId
+	join tblCTContractHeader ch on ch.intContractHeaderId=det.intContractHeaderId
+	JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId                                   
+	JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
+	JOIN tblAPVendor e on e.intEntityVendorId=fd.intEntityId
+	LEFT JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId
+	LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
+	WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)') 
+)t WHERE  strEntityName = @strVendorName 
 
 END
 
@@ -215,17 +201,11 @@ INSERT INTO @tblDerivative (intRowNum,intContractHeaderId,strContractSeq,strEnti
 							WHEN  strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced' 
 							ELSE strPriOrNotPriOrParPriced END strPriOrNotPriOrParPriced,
 
-							(dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty))) dblPValueQty, 
+							0.0 dblPValueQty, 
 							
-							dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                 ((isnull(fd.dblContractBasis,0))))) dblPContractBasis,
-								 
-								dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                 ((isnull(fd.dblFutures,0))))) dblPFutures,
+							ISNULL(fd.dblContractBasis,0) dblPContractBasis ,
+
+							ISNULL(fd.dblFutures,0) dblPFutures,
 
 				           dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                            fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
@@ -234,16 +214,9 @@ INSERT INTO @tblDerivative (intRowNum,intContractHeaderId,strContractSeq,strEnti
 							
 							(dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                            fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty))) dblUPValueQty, 
-							
-							dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                 ((isnull(fd.dblContractBasis,0))))) dblUPContractBasis,
-								 
-								dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                 ((isnull(fd.dblFuturePrice,0))))) dblUPFutures,
-								       
+                                  fd.dblOpenQty))) dblUPValueQty, 							
+							isnull(fd.dblContractBasis,0) dblUPContractBasis,								 
+							isnull(fd.dblFuturePrice,0) dblUPFutures,								       
                            dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                            fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
                                   fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))/
