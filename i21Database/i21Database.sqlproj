@@ -5058,6 +5058,8 @@
     <Build Include="dbo\Views\vyuCRMAllLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetSubLocations.sql" />
     <Build Include="dbo\Views\vyuCTMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetQualityPropertiesByWO.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
