@@ -5083,6 +5083,8 @@
     <Build Include="dbo\Views\vyuRKSourcingReportDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportDetail.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultForexRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLPostRevalue.sql" />
+    <Build Include="dbo\Functions\fnGLGetRevalueAccountTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

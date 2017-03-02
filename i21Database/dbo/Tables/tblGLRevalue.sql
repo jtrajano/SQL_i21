@@ -1,5 +1,4 @@
-﻿
-CREATE TABLE [dbo].[tblGLRevalue](
+﻿CREATE TABLE [dbo].[tblGLRevalue](
 	[intConsolidationId] [int] IDENTITY(1,1) NOT NULL,
 	[strConsolidationNumber]   NVARCHAR(20) COLLATE Latin1_General_CI_AS ,
 	[intGLFiscalYearPeriodId] [int] NOT NULL,
@@ -12,6 +11,7 @@ CREATE TABLE [dbo].[tblGLRevalue](
 	[dblForexRate] [numeric](10, 6) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intRateTypeId] [int] NOT NULL,
+	[ysnPosted] [bit] NULL CONSTRAINT [DF_tblGLRevalue_ysnPosted]  DEFAULT ((0))
  CONSTRAINT [PK_tblGLRevalue] PRIMARY KEY CLUSTERED 
 (
 	[intConsolidationId] ASC
