@@ -4063,8 +4063,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @Logi
 INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@LogisticsParentMenuId)
 
 DECLARE @LoadSchedulesMenuId INT
-SELECT  @LoadSchedulesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Load Schedules' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Load Schedules' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId)
+SELECT  @LoadSchedulesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Load / Shipment Schedules' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Load / Shipment Schedules' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @LoadSchedulesMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@LoadSchedulesMenuId)
