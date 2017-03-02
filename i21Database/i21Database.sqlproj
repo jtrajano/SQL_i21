@@ -5064,6 +5064,8 @@
     <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposureDetail.sql" />
     <Build Include="dbo\Views\vyuCTMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuRKSourcingReportDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetQualityPropertiesByWO.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

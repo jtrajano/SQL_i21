@@ -15,3 +15,4 @@ JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 		'Are the weights below the MAV?'
 		,'Is there any positive results?'
 		) OR P.ysnNotify =1)
+	AND TR.dtmLastModified > (GETDATE() - 1)
