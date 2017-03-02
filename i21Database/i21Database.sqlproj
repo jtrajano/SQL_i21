@@ -5066,6 +5066,10 @@
     <Build Include="dbo\Stored Procedures\uspMFGetQualityPropertiesByWO.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportDetail.sql" />
+    <Build Include="dbo\Functions\fnGLGetRevalueAccountTable.sql" />
+    <Build Include="dbo\Tables\tblGLRevalueDetails.sql" />
+    <Build Include="dbo\Tables\tblGLRevalue.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLPostRevalue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
