@@ -5074,6 +5074,7 @@
     <Build Include="dbo\Views\vyuICItemSubLocations.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposureDetail.sql" />
     <Build Include="dbo\Views\vyuGLMulticurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuGLSearchMulticurrencyRevalue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

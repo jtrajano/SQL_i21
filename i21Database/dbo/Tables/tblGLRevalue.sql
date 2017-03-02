@@ -1,16 +1,17 @@
-﻿CREATE TABLE [dbo].[tblGLRevalue](
+﻿
+CREATE TABLE [dbo].[tblGLRevalue](
 	[intConsolidationId] [int] IDENTITY(1,1) NOT NULL,
-	[strConsolidationNumber]  NVARCHAR(20) COLLATE Latin1_General_CI_AS ,
+	[strConsolidationNumber]   NVARCHAR(20) COLLATE Latin1_General_CI_AS ,
+	[intGLFiscalYearPeriodId] [int] NOT NULL,
 	[intFiscalYearId] [int] NOT NULL,
-    [intGLFiscalYearPeriodId] [int] NOT NULL,
-	[dtmDate] [date] NOT NULL,
-	[dtmReverseDate] [date] NOT NULL,
+	[dtmDate] [datetime] NULL,
+	[dtmReverseDate] [datetime] NULL,
 	[intFunctionalCurrencyId] [int] NOT NULL,
 	[intTransactionCurrencyId] [int] NOT NULL,
-	[strTransactionType] [nvarchar](20) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strTransactionType] [nvarchar](20) COLLATE Latin1_General_CI_AS,
 	[dblForexRate] [numeric](10, 6) NOT NULL,
+	[intConcurrencyId] [int] NOT NULL,
 	[intRateTypeId] [int] NOT NULL,
-	[intConcurrencyId] [int] NOT NULL
  CONSTRAINT [PK_tblGLRevalue] PRIMARY KEY CLUSTERED 
 (
 	[intConsolidationId] ASC
@@ -18,7 +19,5 @@
 ) ON [PRIMARY]
 
 GO
-
-
 
 

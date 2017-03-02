@@ -1,29 +1,30 @@
 ﻿CREATE TABLE [dbo].[tblGLRevalueDetails](
 	[intConsolidationDetailId] [int] IDENTITY(1,1) NOT NULL,
 	[intConsolidationId] [int] NOT NULL,
-	[strTransactionType] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strTransactionId] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
-	[dtmDate] [date] NOT NULL,
+	[strTransactionType] [nvarchar](30) COLLATE Latin1_General_CI_AS,
+	[strTransactionId] [nvarchar](30) COLLATE Latin1_General_CI_AS,
+	[dtmDate] [date] NULL,
 	[dtmDueDate] [date] NULL,
-	[strVendorName] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strCommodity] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strLineOfBusiness] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strLocation] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strTicket] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strContractId] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strItem] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strVendorName] [nvarchar](100) COLLATE Latin1_General_CI_AS,
+	[strCommodity] [nvarchar](100) COLLATE Latin1_General_CI_AS,
+	[strLineOfBusiness] [nvarchar](30) COLLATE Latin1_General_CI_AS,
+	[strLocation] [nvarchar](50) COLLATE Latin1_General_CI_AS,
+	[strTicket] [nvarchar](50) COLLATE Latin1_General_CI_AS,
+	[strContractId] [nvarchar](50) COLLATE Latin1_General_CI_AS,
+	[strItemId] [nvarchar](50) COLLATE Latin1_General_CI_AS,
 	[intQuantity] [int] NULL,
 	[dblUnitPrice] [numeric](18, 6) NULL,
 	[dblTransactionAmount] [numeric](18, 6) NULL,
 	[intCurrencyId] [int] NULL,
 	[intCurrencyExchangeRateTypeId] [int] NULL,
 	[dblHistoricForexRate] [numeric](18, 6) NOT NULL,
-	[dblHistoricAmount] [numeric](18, 6) NOT NULL ,
+	[dblHistoricAmount] [numeric](18, 6) NOT NULL,
 	[dblNewForexRate] [numeric](18, 6) NOT NULL,
 	[dblNewAmount] [numeric](18, 6) NOT NULL,
 	[dblUnrealizedGain] [numeric](18, 6) NOT NULL,
 	[dblUnrealizedLoss] [numeric](18, 6) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
+	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS,
  CONSTRAINT [PK_tblGLRevalueDetails] PRIMARY KEY CLUSTERED 
 (
 	[intConsolidationDetailId] ASC
@@ -52,6 +53,7 @@ GO
 
 ALTER TABLE [dbo].[tblGLRevalueDetails]  WITH CHECK ADD  CONSTRAINT [FK_tblGLRevalueDetails_tblGLRevalue] FOREIGN KEY([intConsolidationId])
 REFERENCES [dbo].[tblGLRevalue] ([intConsolidationId])
+ON DELETE CASCADE
 GO
 
 ALTER TABLE [dbo].[tblGLRevalueDetails] CHECK CONSTRAINT [FK_tblGLRevalueDetails_tblGLRevalue]
