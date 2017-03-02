@@ -63,6 +63,7 @@ BEGIN TRY
 		,strDestinationCountry
 		,strDestinationRegion
 		,strForwardingAgent
+		,strForwardingAgentAddress
 		,strForwardingAgentPostalCode
 		,strForwardingAgentCity
 		,strForwardingAgentTelePhoneNo
@@ -73,6 +74,7 @@ BEGIN TRY
 		,strContractBasisDesc
 		,strBillOfLading
 		,strShippingLine
+		,strShippingLineAddress
 		,strShippingLinePostalCode
 		,strShippingLineCity
 		,strShippingLineTelePhoneNo
@@ -193,6 +195,7 @@ BEGIN TRY
 		,DCountry.strISOCode strDestinationCountry
 		,'' strDestinationRegion
 		,L.strForwardingAgent
+		,FAEL.strAddress
 		,FAEL.strZipCode
 		,FAEL.strCity
 		,FAEL.strPhone
@@ -217,6 +220,7 @@ BEGIN TRY
 			)
 		,L.strBLNumber
 		,L.strShippingLine
+		,SLEL.strAddress
 		,SLEL.strZipCode
 		,SLEL.strCity
 		,SLEL.strPhone
