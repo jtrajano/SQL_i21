@@ -5070,6 +5070,7 @@
     <Build Include="dbo\Tables\tblGLRevalueDetails.sql" />
     <Build Include="dbo\Tables\tblGLRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostRevalue.sql" />
+    <Build Include="dbo\Views\vyuARCustomerContractHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
