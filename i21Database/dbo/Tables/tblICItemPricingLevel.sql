@@ -25,12 +25,14 @@ Type the overview for the table here.
 		[dblUnitPrice] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[strCommissionOn] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dblCommissionRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[intCurrencyId] [int] NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemPricingLevel] PRIMARY KEY ([intItemPricingLevelId]), 
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
-		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+		CONSTRAINT [FK_tblICItemPricingLevel_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 	)
 
 	GO
