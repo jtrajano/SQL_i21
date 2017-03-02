@@ -56,7 +56,8 @@ Ext.define('Inventory.model.ItemPricingLevel', {
         { name: 'strUnitMeasure', type: 'string'},
         { name: 'strUPC', type: 'string'},
         { name: 'intCurrencyId', type: 'int', allowNull: true },
-        { name: 'strCurrency', type: 'string'}
+        { name: 'strCurrency', type: 'string'},
+        { name: 'dblForexRate', type: 'float' }
     ],
 
     validators: [
