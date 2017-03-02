@@ -50,15 +50,15 @@ BEGIN
 		,dblYTDGals2SeasonsAgo = ISNULL(J.dblTotalGallons,0.0)
 		,dblSiteBurnRate = A.dblBurnRate
 		,dblSiteEstimatedGallonsLeft = A.dblEstimatedGallonsLeft
-		,dblSeasonExpectedUsage = CAST((F.intProjectedDegreeDay / A.dblBurnRate) AS NUMERIC(18,6))
+		,dblSeasonExpectedUsage = CAST((CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END) AS NUMERIC(18,6))
 		,dblRequiredQuantity = CAST((CASE WHEN @strCalculateBudgetFor = 'Next Year' AND @ysnIncludeEstimatedTankInventory = 1 
-										THEN (F.intProjectedDegreeDay / A.dblBurnRate) - dblEstimatedGallonsLeft
+										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END) - dblEstimatedGallonsLeft
 									WHEN @strCalculateBudgetFor = 'This Year' AND @ysnIncludeEstimatedTankInventory = 1
-										THEN (F.intProjectedDegreeDay / A.dblBurnRate) - (ISNULL(H.dblTotalGallons,0.0) - A.dblEstimatedGallonsLeft)
+										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE  F.intProjectedDegreeDay / A.dblBurnRate END) - (ISNULL(A.dblYTDGalsThisSeason,0.0) - A.dblEstimatedGallonsLeft)
 									WHEN @strCalculateBudgetFor = 'Next Year' AND @ysnIncludeEstimatedTankInventory = 0
-										THEN (F.intProjectedDegreeDay / A.dblBurnRate)
+										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END)
 									WHEN @strCalculateBudgetFor = 'This Year' AND @ysnIncludeEstimatedTankInventory = 0
-										THEN (F.intProjectedDegreeDay / A.dblBurnRate) - ISNULL(H.dblTotalGallons,0.0)
+										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END) - ISNULL(A.dblYTDGalsThisSeason,0.0)
 									ELSE 0
 									END) AS NUMERIC(18,6))
 		,dblCurrentARBalance = CAST((ISNULL(G.dbl0Days,0.0) + ISNULL(G.dbl10Days,0.0) + ISNULL(G.dbl30Days,0.0) + ISNULL(G.dbl60Days,0.0) + ISNULL(G.dbl90Days,0.0) + ISNULL(G.dbl91Days,0.0) + ISNULL(G.dblFuture,0.0) - ISNULL(G.dblUnappliedCredits,0.0)) AS NUMERIC(18,6))
@@ -67,7 +67,7 @@ BEGIN
 		,intEntityCustomerId = C.intEntityId
 		,A.intLocationId
 		,intSiteItemId = A.intProduct
-		,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(G.dblTotalDue,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+		,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(G.dblBudgetAmount,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
 		,A.intFillMethodId
 		--,dblPrice = 
 		--,dblEstimatedBudget = 

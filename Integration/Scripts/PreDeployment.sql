@@ -149,7 +149,7 @@
 :r "..\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
-:r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
+--:r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
 :r "..\dbo\Stored Procedures\uspTMUpdateCustomerBudgetOrigin.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateOpenCallEntryView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateOpenWorkOrderView.sql"
