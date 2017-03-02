@@ -391,7 +391,10 @@ BEGIN
 						,@ItemDescription		   = @strItemDescription
 						,@ItemUOMId				   = @intItemUOMId
 						,@ItemContractDetailId     = @intContractDetailId
+						,@ItemCurrencyExchangeRateTypeId = NULL            
+                        ,@ItemCurrencyExchangeRateId = NULL            
 						,@RecomputeTax			   = 0
+
 				LOGDETAILENTRY:
 				IF 	LTRIM(@strErrorMessage) != ''
 				BEGIN		

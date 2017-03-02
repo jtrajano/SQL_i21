@@ -17,7 +17,7 @@ BEGIN TRANSACTION;
 
 
 --=====================================================================================================================================
--- 	POPULATE JOURNALS TO POST TEMPORARY TABLE
+-- 	POPULATE FIXEDASSETS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE #AssetID(
 			[intAssetId] [int] NOT NULL,
@@ -28,7 +28,7 @@ ELSE
 	INSERT INTO #AssetID SELECT [intAssetId] FROM tblFAFixedAsset
 	
 --=====================================================================================================================================
--- 	UNPOSTING JOURNAL TRANSACTIONS ysnPost = 0
+-- 	UNPOSTING FIXEDASSETS TRANSACTIONS ysnPost = 0
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF ISNULL(@ysnPost, 0) = 0
 	BEGIN
@@ -103,7 +103,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		SELECT 
 			 [strTransactionId]		= A.[strAssetId]
 			,[intTransactionId]		= A.[intAssetId]
-			,[intAccountId]			= A.[intAccumulatedAccountId]
+			,[intAccountId]			= A.[intDepreciationAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= ''
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -220,7 +220,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 
 
 --=====================================================================================================================================
--- 	UPDATE JOURNAL TABLE
+-- 	UPDATE FIXEDASSETS TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
 UPDATE tblFAFixedAsset
 	SET [ysnDepreciated] = 1
@@ -231,7 +231,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 
 
 --=====================================================================================================================================
--- 	RETURN TOTAL NUMBER OF VALID JOURNALS
+-- 	RETURN TOTAL NUMBER OF VALID FIXEDASSETS
 ---------------------------------------------------------------------------------------------------------------------------------------
 SET @successfulCount = ISNULL(@successfulCount,0) + (SELECT COUNT(*) FROM #AssetID)
 
