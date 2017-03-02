@@ -11,16 +11,16 @@ BEGIN
 		@NewLayoutTitle NVARCHAR(50),
 		@NewLayoutTitleWithCounter NVARCHAR(50),
 		@counter INT
-	SELECT @LayoutTitle = strLayoutTitle, @NewLayoutTitle = strLayoutTitle + '-copy' FROM tblSMImportFileHeader 
+	SELECT @LayoutTitle = strLayoutTitle, @NewLayoutTitle = 'DUP: ' + strLayoutTitle FROM tblSMImportFileHeader 
 	WHERE intImportFileHeaderId = @ImportFileHeaderId
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @NewLayoutTitle)
 	BEGIN
 		SET @counter = 1
-		SET @NewLayoutTitleWithCounter = @NewLayoutTitle + (CAST(@counter AS NVARCHAR(50)))
+		SET @NewLayoutTitleWithCounter = @NewLayoutTitle + '(' + (CAST(@counter AS NVARCHAR(50))) + ')'
 		WHILE EXISTS(SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @NewLayoutTitleWithCounter)
 		BEGIN
 			SET @counter += 1
-			SET @NewLayoutTitleWithCounter = @NewLayoutTitle + (CAST(@counter AS NVARCHAR(50)))
+			SET @NewLayoutTitleWithCounter = @NewLayoutTitle + '(' + (CAST(@counter AS NVARCHAR(50))) + ')'
 		END
 		SET @NewLayoutTitle = @NewLayoutTitleWithCounter
 	END
