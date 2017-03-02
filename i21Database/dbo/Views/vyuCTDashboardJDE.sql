@@ -52,6 +52,8 @@ SELECT
 	,ISNULL(CD.ysnInvoice,0) AS ysnInvoice
 	,ISNULL(CD.ysnProvisionalInvoice,0) AS ysnProvisionalInvoice
 	,ISNULL(CD.ysnQuantityFinal,0) AS ysnQuantityFinal
+	,CH.strInternalComment
+	,LG.dblQuantity AS dblShippingInsQty
 FROM vyuCTContractSequence CSeq
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = CSeq.intContractDetailId
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CSeq.intContractHeaderId
@@ -80,3 +82,9 @@ LEFT JOIN tblICCertification Certification ON Certification.intCertificationId =
 LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = CSeq.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure U7 ON U7.intUnitMeasureId = WU.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure U8 ON 1 = 1 AND U8.strUnitMeasure = 'Metric Ton'
+LEFT JOIN (
+		SELECT intPContractDetailId,SUM(LD.dblQuantity) dblQuantity FROM tblLGLoad LO
+		JOIN tblLGLoadDetail LD ON LO.intLoadId = LD.intLoadId
+		WHERE LO.intShipmentType = 2
+		GROUP BY intPContractDetailId
+) LG ON LG.intPContractDetailId = CD.intContractDetailId
