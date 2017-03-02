@@ -1111,7 +1111,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 116
 			,[strTransactionType]	= N'Revalue Transaction'
-			,[strPrefix]			= N'CON-'
+			,[strPrefix]			= N'REVAL-'
 			,[intNumber]			= 1
 			,[strModule]			= 'General Ledger'
 			,[ysnEnable]			= 1
