@@ -34,3 +34,9 @@
 	,[dtmDueDate]				DATETIME
 	,[intConcurrencyId]			INT NOT NULL	DEFAULT 0
 	)
+
+GO
+
+CREATE NONCLUSTERED INDEX [PIndex1]
+ON [dbo].[tblARCollectionOverdueDetail] ([intEntityCustomerId])
+INCLUDE ([intCompanyLocationId],[strCompanyName],[strCompanyAddress],[strCompanyPhone],[strCustomerNumber],[strCustomerName],[strCustomerAddress],[strCustomerPhone],[strAccountNumber],[intInvoiceId],[strInvoiceNumber],[strBOLNumber],[dblCreditLimit],[intTermId],[strTerm],[dblTotalAR],[dblFuture],[dbl0Days],[dbl10Days],[dbl30Days],[dbl60Days],[dbl90Days],[dbl120Days],[dbl121Days],[dblTotalDue],[dblAmountPaid],[dblInvoiceTotal],[dblCredits],[dblPrepaids],[dtmDate],[dtmDueDate])

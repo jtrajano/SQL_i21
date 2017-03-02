@@ -174,6 +174,14 @@ BEGIN
 	WHERE intInvoiceId = @intInvoiceId
 
 END
+
+GO
+
+CREATE NONCLUSTERED INDEX [PIndex3]
+ON [dbo].[tblARInvoice] ([ysnPaid],[strTransactionType])
+INCLUDE ([intInvoiceId])
+
+
 GO
 CREATE NONCLUSTERED INDEX [PIndex2]
     ON [dbo].[tblARInvoice]([dblInvoiceSubtotal] ASC, [dblShipping] ASC, [dblTax] ASC, [dblInvoiceTotal] ASC, [dblDiscount] ASC, [dblAmountDue] ASC, [dblPayment] ASC, [strTransactionType] ASC, [intPaymentMethodId] ASC, [intAccountId] ASC, [ysnPosted] ASC, [ysnPaid] ASC);
