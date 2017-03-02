@@ -701,6 +701,21 @@ Harness.start(
                         ]
                     }
                 ]
+            },
+
+            {
+                group: 'StorageLocations',
+                items: [
+                    {
+                        url: 'BusinessDomain/StorageLocation/17xOpenSearchStorageLocationScreen.js?v=' + version,
+                        title: '17xOpenSearchStorageLocationScreen',
+                        preload: [
+                            functionalTest,
+                            commonIC
+
+                        ]
+                    }
+                ]
             }
 
 
