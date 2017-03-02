@@ -24,6 +24,7 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitPrice { get; set; }
         public string strCommissionOn { get; set; }
         public decimal? dblCommissionRate { get; set; }
+        public int? intCurrencyId { get; set; }
         public int? intSort { get; set; }
 
         private string _location;
@@ -102,9 +103,53 @@ namespace iRely.Inventory.Model
                 _upc = value;
             }
         }
-
+        private string _currency;
+        [NotMapped]
+        public string strCurrency
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_currency))
+                    if (tblSMCurrency != null)
+                        return tblSMCurrency.strCurrency;
+                    else
+                        return null;
+                else
+                    return _currency;
+            }
+            set
+            {
+                _currency = value;
+            }
+        }
         public tblICItem tblICItem { get; set; }
         public tblICItemLocation tblICItemLocation { get; set; }
         public tblICItemUOM tblICItemUOM { get; set; }
+        public tblSMCurrency tblSMCurrency { get; set; }
+    }
+
+    public class ItemPricingLevelVM
+    {
+        public int intItemPricingLevelId { get; set; }
+        public int intItemId { get; set; }
+        public int? intItemLocationId { get; set; }
+        public string strPriceLevel { get; set; }
+        public int? intItemUnitMeasureId { get; set; }
+        public decimal? dblUnit { get; set; }
+        public decimal? dblMin { get; set; }
+        public decimal? dblMax { get; set; }
+        public string strPricingMethod { get; set; }
+        public decimal? dblAmountRate { get; set; }
+        public decimal? dblUnitPrice { get; set; }
+        public string strCommissionOn { get; set; }
+        public decimal? dblCommissionRate { get; set; }
+        public int? intCurrencyId { get; set; }
+        public int? intSort { get; set; }
+        public string strLocationName { get; set; }
+        public int? intLocationId { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strUPC { get; set; }
+        public string strCurrency { get; set; }
+        public int? intConcurrencyId { get; set; }
     }
 }

@@ -20,10 +20,9 @@ Ext.define('Inventory.model.ItemPricingLevel', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
-                            extraParams: { include: 'tblICItemUOM.tblICUnitMeasure, tblICItemLocation.vyuICGetItemLocation' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemPricingLevel/Get'
+                                read: '../Inventory/api/ItemPricingLevel/GetItemPricingLevel'
                             },
                             reader: {
                                 type: 'json',
@@ -55,7 +54,9 @@ Ext.define('Inventory.model.ItemPricingLevel', {
 
         { name: 'strLocationName', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'},
-        { name: 'strUPC', type: 'string'}
+        { name: 'strUPC', type: 'string'},
+        { name: 'intCurrencyId', type: 'int', allowNull: true },
+        { name: 'strCurrency', type: 'string'}
     ],
 
     validators: [

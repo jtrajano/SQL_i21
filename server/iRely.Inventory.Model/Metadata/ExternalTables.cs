@@ -115,6 +115,7 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
 
         public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
+        public ICollection<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
     }
 
     public class tblSTStore : BaseEntity

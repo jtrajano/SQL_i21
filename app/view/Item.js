@@ -4660,6 +4660,54 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelCurrency',
+                                                                        minWidth: 80,
+                                                                        dataIndex: 'strFieldName',
+                                                                        text: 'Currency',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCurrencyID',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCurrency',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Currency',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'ysnSubCurrency',
+                                                                                    dataType: 'boolean',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intMainCurrencyId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intSubCurrencyCent',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'SubCurrency Cent',
+                                                                                    hidden: true
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboPricingLevelCurrency',
+                                                                            displayField: 'strCurrency',
+                                                                            valueField: 'strCurrency'
+                                                                        }
+                                                                    },
+                                                                    {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelAmount',
                                                                         minWidth: 110,
