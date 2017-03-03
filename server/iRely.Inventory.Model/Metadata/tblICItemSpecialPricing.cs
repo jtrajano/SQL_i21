@@ -27,7 +27,6 @@ namespace iRely.Inventory.Model
         public decimal? dblAccumulatedQty { get; set; }
         public decimal? dblAccumulatedAmount { get; set; }
         public int? intCurrencyId { get; set; }
-        public decimal? dblForexRate { get; set; }
         public int? intSort { get; set; }
 
         private string _location;
@@ -152,7 +151,6 @@ namespace iRely.Inventory.Model
         public decimal? dblAccumulatedQty { get; set; }
         public decimal? dblAccumulatedAmount { get; set; }
         public int? intCurrencyId { get; set; }
-        public decimal? dblForexRate { get; set; }
         public int? intSort { get; set; }
         public string strLocationName { get; set; }
         public string strUnitMeasure { get; set; }

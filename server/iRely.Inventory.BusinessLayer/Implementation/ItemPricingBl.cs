@@ -91,7 +91,6 @@ namespace iRely.Inventory.BusinessLayer
                     strUnitMeasure = p.tblICItemUOM.tblICUnitMeasure.strUnitMeasure,
                     strUPC = p.tblICItemUOM.strUpcCode,
                     strCurrency = p.tblSMCurrency.strCurrency,
-                    dblForexRate = p.dblForexRate,
                     intConcurrencyId = p.intConcurrencyId
                 })
                 .Filter(param, true);
@@ -140,7 +139,6 @@ namespace iRely.Inventory.BusinessLayer
                     dblAccumulatedQty = p.dblAccumulatedQty,
                     dblAccumulatedAmount = p.dblAccumulatedAmount,
                     intCurrencyId = p.intCurrencyId,
-                    dblForexRate = p.dblForexRate,
                     intSort = p.intSort,
                     strLocationName = p.tblICItemLocation.vyuICGetItemLocation.strLocationName,
                     strUnitMeasure = p.tblICItemUOM.tblICUnitMeasure.strUnitMeasure,

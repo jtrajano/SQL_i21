@@ -10727,50 +10727,6 @@
                                                             "userConfig": {
                                                                 "align": "right",
                                                                 "dataIndex": "strFieldName",
-                                                                "itemId": "colPricingLevelForexRate",
-                                                                "text": "Forex Rate"
-                                                            },
-                                                            "name": "MyNumberColumn17",
-                                                            "designerId": "7d3c6a1a-8263-41e0-bafd-5ba72fb44cdd",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.Number",
-                                                                    "reference": {
-                                                                        "name": "editor",
-                                                                        "type": "object"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|createAlias": "numberfield",
-                                                                        "fieldStyle": "text-align:right",
-                                                                        "hideTrigger": true,
-                                                                        "quantityField": true
-                                                                    },
-                                                                    "name": "MyNumberField36",
-                                                                    "configAlternates": {
-                                                                        "quantityField": "boolean"
-                                                                    },
-                                                                    "designerId": "6897de1b-396b-4975-b2b6-3804edc4e00f",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "quantityField",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Number",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "align": "right",
-                                                                "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "format": null,
                                                                 "itemId": "colPricingLevelAmount",
@@ -10822,7 +10778,7 @@
                                                                 "flex": null,
                                                                 "format": null,
                                                                 "itemId": "colPricingLevelUnitPrice",
-                                                                "text": "Unit Price"
+                                                                "text": "Retail Price"
                                                             },
                                                             "name": "MyNumberColumn42",
                                                             "designerId": "1ad0e5a5-0246-44b9-a119-1da2f60a5bf5",
@@ -11496,54 +11452,10 @@
                                                             "userConfig": {
                                                                 "align": "right",
                                                                 "dataIndex": "strFieldName",
-                                                                "itemId": "colSpecialPricingForexRate",
-                                                                "text": "Forex Rate"
-                                                            },
-                                                            "name": "MyNumberColumn22",
-                                                            "designerId": "bc026ac5-9625-49cb-9a87-5fba9e08feed",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.Number",
-                                                                    "reference": {
-                                                                        "name": "editor",
-                                                                        "type": "object"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|createAlias": "numberfield",
-                                                                        "fieldStyle": "text-align:right",
-                                                                        "hideTrigger": true,
-                                                                        "quantityField": true
-                                                                    },
-                                                                    "name": "MyNumberField68",
-                                                                    "configAlternates": {
-                                                                        "quantityField": "boolean"
-                                                                    },
-                                                                    "designerId": "8253ebfa-f3b7-4f63-8dd4-d223e906f88b",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "quantityField",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Number",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "align": "right",
-                                                                "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "format": null,
                                                                 "itemId": "colSpecialPricingUnitPrice",
-                                                                "text": "Unit Price",
+                                                                "text": "Retail Price",
                                                                 "width": 69
                                                             },
                                                             "name": "MyNumberColumn32",

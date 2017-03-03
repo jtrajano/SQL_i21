@@ -1009,8 +1009,7 @@ Ext.define('Inventory.view.ItemViewController', {
                             value: false
                         }]
                     }
-                },
-                colPricingLevelForexRate: 'dblForexRate'
+                }
             },
 
             grdSpecialPricing: {
@@ -1069,8 +1068,7 @@ Ext.define('Inventory.view.ItemViewController', {
                             value: false
                         }]
                     }
-                },
-                colSpecialPricingForexRate: 'dblForexRate'
+                }
             },
 
             //---------//
@@ -1578,6 +1576,14 @@ Ext.define('Inventory.view.ItemViewController', {
         if (cepPricing){
             cepPricing.on({
                 edit: me.onEditPricing,
+                scope: me
+            });
+        }
+
+        var cepSpecialPricing = grdSpecialPricing.getPlugin('cepSpecialPricing');
+        if (cepSpecialPricing) {
+            cepSpecialPricing.on({
+                edit: me.onEditSpecialPricing,
                 scope: me
             });
         }
@@ -3059,8 +3065,6 @@ Ext.define('Inventory.view.ItemViewController', {
         if (combo.column.itemId === 'colPricingLevelLocation'){
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
             current.set('intLocationId', records[0].get('intLocationId'));
-            current.set('intCurrencyId', i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'));
-            current.set('strCurrency', i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency'));
         }
         else if (combo.column.itemId === 'colPricingLevelUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
@@ -3123,8 +3127,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             }
             current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
-            current.set('intCurrencyId', i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'));
-            current.set('strCurrency', i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency'));
         }
         else if (combo.column.itemId === 'colSpecialPricingUnit') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
@@ -3324,7 +3326,20 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             }
         }
+
+        if (iRely.Functions.isEmpty(context.record.get('strCurrency'))) {
+            context.record.set('intCurrencyId', i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'));
+            context.record.set('strCurrency', i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency'));
+        }
     },
+
+     onEditSpecialPricing: function (editor, context, eOpts) { 
+         
+        if (iRely.Functions.isEmpty(context.record.get('strCurrency'))) {
+            context.record.set('intCurrencyId', i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'));
+            context.record.set('strCurrency', i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency'));
+        }
+     },
 
     onEditPricing: function (editor, context, eOpts) {
         var me = this;
