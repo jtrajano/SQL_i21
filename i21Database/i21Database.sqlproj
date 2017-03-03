@@ -5024,9 +5024,6 @@
     <Build Include="dbo\Tables\tblIPLSPPartner.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportBasisComponent.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptForReturn.sql" />
-    <Build Include="dbo\Tables\tblIPItemSubLocationStage.sql" />
-    <Build Include="dbo\Tables\tblIPItemSubLocationError.sql" />
-    <Build Include="dbo\Tables\tblIPItemSubLocationArchive.sql" />
     <Build Include="dbo\Tables\tblCRMLostRevenueConfig.sql" />
     <Build Include="dbo\Functions\fnEscapeXML.sql" />
     <Build Include="dbo\Views\vyuCRMAllLocation.sql" />
