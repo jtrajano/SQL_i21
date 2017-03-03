@@ -53,17 +53,33 @@ Begin
 			EXEC dbo.uspSMGetStartingNumber 23, @strReceiptNo OUTPUT
 
 			--Receipt
-			Insert into tblICInventoryReceipt(strReceiptType,intSourceType,intEntityVendorId,intLocationId,
-			strReceiptNumber,dtmReceiptDate,intCurrencyId,intReceiverId,ysnPrepaid,ysnInvoicePaid,intShipFromId,strBillOfLading,intCreatedUserId,intEntityId)
-			Select TOP 1 'Purchase Contract',2,ld.intVendorEntityId,@intLocationId,@strReceiptNo,
-			@dtmReceiptDate,v.intCurrencyId,@intUserId,0,0,el.intEntityLocationId,l.strBLNumber,@intUserId,@intUserId
-			From tblIPReceiptItemStage ri Join tblICItem i on ri.strItemNo=i.strItemNo
-			Join tblLGLoadDetail ld on ld.intItemId=i.intItemId AND ld.strExternalShipmentItemNumber=ri.strDeliveryItemNo
-			Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityVendorId
-			Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
-			Join tblLGLoad l on l.intLoadId=ld.intLoadId
-			Where ri.intStageReceiptId=@intMinRowNo AND ISNULL(ri.dblQuantity,0)=0
-			 
+			If Exists (Select 1 From tblIPReceiptItemStage Where intStageReceiptId=@intMinRowNo AND ISNULL(dblQuantity,0)=0) --Batch Split
+			Begin
+				Insert into tblICInventoryReceipt(strReceiptType,intSourceType,intEntityVendorId,intLocationId,
+				strReceiptNumber,dtmReceiptDate,intCurrencyId,intReceiverId,ysnPrepaid,ysnInvoicePaid,intShipFromId,strBillOfLading,intCreatedUserId,intEntityId)
+				Select TOP 1 'Purchase Contract',2,ld.intVendorEntityId,@intLocationId,@strReceiptNo,
+				@dtmReceiptDate,v.intCurrencyId,@intUserId,0,0,el.intEntityLocationId,l.strBLNumber,@intUserId,@intUserId
+				From tblIPReceiptItemStage ri Join tblICItem i on ri.strItemNo=i.strItemNo
+				Join tblLGLoadDetail ld on ld.intItemId=i.intItemId AND ld.strExternalShipmentItemNumber=ri.strDeliveryItemNo
+				Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityVendorId
+				Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
+				Join tblLGLoad l on l.intLoadId=ld.intLoadId AND l.intLoadId=@intLoadId
+				Where ri.intStageReceiptId=@intMinRowNo AND ISNULL(ri.dblQuantity,0)=0
+			End
+			Else
+			Begin
+				Insert into tblICInventoryReceipt(strReceiptType,intSourceType,intEntityVendorId,intLocationId,
+				strReceiptNumber,dtmReceiptDate,intCurrencyId,intReceiverId,ysnPrepaid,ysnInvoicePaid,intShipFromId,strBillOfLading,intCreatedUserId,intEntityId)
+				Select TOP 1 'Purchase Contract',2,ld.intVendorEntityId,@intLocationId,@strReceiptNo,
+				@dtmReceiptDate,v.intCurrencyId,@intUserId,0,0,el.intEntityLocationId,l.strBLNumber,@intUserId,@intUserId
+				From tblIPReceiptItemStage ri Join tblICItem i on ri.strItemNo=i.strItemNo
+				Join tblLGLoadDetail ld on ld.intItemId=i.intItemId AND ld.strExternalShipmentItemNumber=ri.strDeliveryItemNo
+				Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityVendorId
+				Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
+				Join tblLGLoad l on l.intLoadId=ld.intLoadId AND l.intLoadId=@intLoadId
+				Where ri.intStageReceiptId=@intMinRowNo
+			End
+						 
 			SET @intReceiptId = SCOPE_IDENTITY();
 
 			--Receipt Items
@@ -71,8 +87,8 @@ Begin
 			intItemId,intContainerId,intSubLocationId,dblOrderQty,dblOpenReceive,intStorageLocationId,
 			intUnitMeasureId,intWeightUOMId,dblUnitCost,dblGross,dblNet,intConcurrencyId,dblLineTotal,dblUnitRetail,intCostUOMId)
 			Select @intReceiptId,ct.intContractDetailId,ct.intContractHeaderId,ld.intLoadDetailId,
-			i.intItemId,cl.intLoadContainerId,csl.intCompanyLocationSubLocationId,ri.dblQuantity,ri.dblQuantity,sl.intStorageLocationId,
-			iu.intItemUOMId,iu.intItemUOMId,ct.dblCashPrice,ri.dblQuantity,ri.dblQuantity,1,ri.dblQuantity * ct.dblCashPrice ,ct.dblCashPrice,ct.intPriceItemUOMId
+			i.intItemId,cl.intLoadContainerId,csl.intCompanyLocationSubLocationId,cl.dblQuantity,cl.dblQuantity,sl.intStorageLocationId,
+			cl.intItemUOMId,iu.intItemUOMId,ct.dblCashPrice,ri.dblQuantity,ri.dblQuantity,1,ri.dblQuantity * ct.dblCashPrice ,ct.dblCashPrice,ct.intPriceItemUOMId
 			From tblIPReceiptItemStage ri Join tblICItem i on ri.strItemNo=i.strItemNo
 			Join tblICItemLocation il on i.intItemId=il.intItemId AND il.intLocationId=@intLocationId
 			Join tblICItemUOM iu on i.intItemId=iu.intItemId
@@ -91,8 +107,8 @@ Begin
 			Insert into tblICInventoryReceiptItemLot (intInventoryReceiptItemId,strLotNumber,intSubLocationId,intStorageLocationId,dblQuantity,
 			intItemUnitMeasureId,dblCost,dblGrossWeight,dblTareWeight,intConcurrencyId,strContainerNo)
 			Select ri.intInventoryReceiptItemId,CASE WHEN UPPER(cd.strCommodityCode)='COFFEE' THEN c.strContainerNumber ELSE NULL END,
-			ri.intSubLocationId,ri.intStorageLocationId,ri.dblNet,
-			ri.intWeightUOMId,ri.dblUnitCost,ri.dblNet,0,1,c.strContainerNumber
+			ri.intSubLocationId,ri.intStorageLocationId,ri.dblOrderQty,
+			ri.intUnitMeasureId,ri.dblUnitCost,ri.dblNet,0,1,c.strContainerNumber
 			From tblICInventoryReceiptItem ri 
 			Join tblLGLoadContainer c on ri.intContainerId=c.intLoadContainerId
 			Join tblICItem i on ri.intItemId=i.intItemId
