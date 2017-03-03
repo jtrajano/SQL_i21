@@ -168,6 +168,14 @@ Begin
 		GOTO NEXT_SHIPMENT
 	End
 
+	If ISNULL(@strExternalDeliveryNumber,'')=''
+	Begin
+		Select @strExternalDeliveryNumber=strExternalShipmentNumber From tblLGLoad Where intLoadId=@intLoadId
+		Update tblLGLoadLSPStg Set strExternalShipmentNumber=@strExternalDeliveryNumber Where intLoadStgId=@intLoadStgId
+		If ISNULL(@strExternalDeliveryNumber,'')=''
+			GOTO NEXT_SHIPMENT
+	End
+
 	Select @strIDOCHeader=dbo.fnIPGetSAPIDOCHeader('LSP SHIPMENT')
 
 	Set @strXml =  '<ZE1EDL43_PH>'
@@ -416,7 +424,7 @@ Begin
 					Set @strContainerXml = NULL
 					Select @strContainerXml=COALESCE(@strContainerXml, '') 
 							+ '<E1EDL24 SEGMENT="1">'
-							+ '<POSNR>' + ISNULL(CONVERT(VARCHAR,(900000 + ROW_NUMBER() OVER(ORDER BY c.intLoadContainerId ASC))),'') + '</POSNR>' 
+							+ '<POSNR>' + CASE WHEN ISNULL(lc.strExternalContainerId,'')='' THEN ISNULL(CONVERT(VARCHAR,(900000 + ROW_NUMBER() OVER(ORDER BY c.intLoadContainerId ASC))),'') ELSE ISNULL(lc.strExternalContainerId,'') END+ '</POSNR>' 
 							+ '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
 							+ '<ARKTX>'  +  ISNULL(@strItemDesc,'') + '</ARKTX>' 
 							+ '<WERKS>'  +  '' + '</WERKS>' 
