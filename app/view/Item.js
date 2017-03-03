@@ -4709,19 +4709,6 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        itemId: 'colPricingLevelForexRate',
-                                                                        align: 'right',
-                                                                        dataIndex: 'strFieldName',
-                                                                        text: 'Forex Rate',
-                                                                        editor: {
-                                                                            xtype: 'numberfield',
-                                                                            quantityField: true,
-                                                                            fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelAmount',
                                                                         minWidth: 110,
                                                                         align: 'right',
@@ -4739,7 +4726,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'colPricingLevelUnitPrice',
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Unit Price',
+                                                                        text: 'Retail Price',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             quantityField: true,
@@ -5025,24 +5012,11 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        itemId: 'colSpecialPricingForexRate',
-                                                                        align: 'right',
-                                                                        dataIndex: 'strFieldName',
-                                                                        text: 'Forex Rate',
-                                                                        editor: {
-                                                                            xtype: 'numberfield',
-                                                                            quantityField: true,
-                                                                            fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colSpecialPricingUnitPrice',
                                                                         width: 69,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Unit Price',
+                                                                        text: 'Retail Price',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             quantityField: true,

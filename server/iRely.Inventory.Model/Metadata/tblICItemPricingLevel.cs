@@ -25,7 +25,6 @@ namespace iRely.Inventory.Model
         public string strCommissionOn { get; set; }
         public decimal? dblCommissionRate { get; set; }
         public int? intCurrencyId { get; set; }
-        public decimal? dblForexRate { get; set; }
         public int? intSort { get; set; }
 
         private string _location;
@@ -152,6 +151,5 @@ namespace iRely.Inventory.Model
         public string strUPC { get; set; }
         public string strCurrency { get; set; }
         public int? intConcurrencyId { get; set; }
-        public decimal? dblForexRate { get; set; }
     }
 }
