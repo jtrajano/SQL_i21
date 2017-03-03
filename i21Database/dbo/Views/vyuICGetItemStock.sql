@@ -75,7 +75,7 @@ SELECT
 
 	dblOnOrder = ISNULL(ItemStock.dblOnOrder, 0),
 	dblInTransitInbound = ISNULL(ItemStock.dblInTransitInbound, 0),
-	dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0),
+	dblUnitOnHand = CAST(ISNULL(ItemStock.dblUnitOnHand, 0) AS NUMERIC(38, 7)),
 	dblInTransitOutbound = ISNULL(ItemStock.dblInTransitOutbound, 0),
 	dblBackOrder =	CASE	-- Compute the back order qty when committed > available Qty. 
 							WHEN	ISNULL(ItemStock.dblOrderCommitted, 0) > ((ISNULL(ItemStock.dblUnitOnHand, 0) - (ISNULL(ItemStock.dblBackOrder, 0) + ISNULL(ItemStock.dblUnitReserved, 0) + ISNULL(ItemStock.dblInTransitOutbound, 0) + ISNULL(ItemStock.dblConsignedSale, 0))) )
