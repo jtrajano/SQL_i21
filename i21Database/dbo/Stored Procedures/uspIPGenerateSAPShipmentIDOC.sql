@@ -123,15 +123,15 @@ Begin
 	Select TOP 1 @strVendorAccountNo=v.strVendorAccountNum 
 	From tblLGLoadDetail ld Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityId Where intLoadId = @intLoadId
 
-	--If ISNULL(@strExternalDeliveryNumber,'')<>''
-	--	Set @strHeaderRowState='MODIFIED'
-	--Else
-	--	Set @strHeaderRowState='ADDED'
-
 	If (Select intLoadShippingInstructionId From tblLGLoad Where intLoadId=@intLoadId AND intShipmentType=1) is not null
 		Set @strHeaderRowState='MODIFIED'
 
 	If UPPER(@strHeaderRowState)='MODIFIED' AND ISNULL(@strExternalDeliveryNumber,'')=''
+		GOTO NEXT_SHIPMENT
+
+	--if ack is not received for the previous feed do not send the current feed
+	If (Select TOP 1 strFeedStatus From tblLGLoadStg Where intLoadId=@intLoadId AND strTransactionType='Shipment' 
+		AND intLoadStgId < @intLoadStgId Order By intLoadStgId Desc)<>'Ack Rcvd'
 		GOTO NEXT_SHIPMENT
 
 	Set @strXml =  '<DELVRY07>'
@@ -145,6 +145,18 @@ Begin
 		Set @strXml +=	@strUpdateIDOCHeader
 	Set @strXml +=	'</EDI_DC40>'
 	
+	If UPPER(@strHeaderRowState)='DELETE'
+	Begin
+		Set @strXml += '<E1EDL20 SEGMENT="1">'
+		Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
+
+		Set @strXml += '<E1EDL18 SEGMENT="1">'
+		Set @strXml += '<QUALF>' + 'DEL' + '</QUALF>'
+		Set @strXml +=	'</E1EDL18>'
+
+		GOTO END_TAG
+	End
+
 	--Header
 	Set @strXml += '<E1EDL20 SEGMENT="1">'
 	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
@@ -417,6 +429,8 @@ Begin
 
 	--Final Xml
 	Set @strXml += ISNULL(@strItemXml,'')
+
+	END_TAG:
 
 	Set @strXml += '</E1EDL20>'
 	Set @strXml += '</IDOC>'
