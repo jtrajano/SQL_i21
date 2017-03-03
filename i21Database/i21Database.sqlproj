@@ -5030,6 +5030,9 @@
     <Build Include="dbo\Stored Procedures\uspCTGetSubLocations.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetQualityPropertiesByWO.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
+    <Build Include="dbo\Tables\tblIPItemSubLocationStage.sql" />
+    <Build Include="dbo\Tables\tblIPItemSubLocationError.sql" />
+    <Build Include="dbo\Tables\tblIPItemSubLocationArchive.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
