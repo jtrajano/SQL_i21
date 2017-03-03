@@ -57,7 +57,7 @@ SET
 	,[strItemTermDiscountBy]	= ISNULL([strItemTermDiscountBy], 'Amount') 
 	,[intSubCurrencyId]			= ISNULL([intSubCurrencyId], @CurrencyId)
 	,[dblSubCurrencyRate]		= CASE WHEN ISNULL([dblSubCurrencyRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblSubCurrencyRate] END
-	,[dblCurrencyExchangeRate] 	= CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblSubCurrencyRate] END
+	,[dblCurrencyExchangeRate] 	= CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 	
