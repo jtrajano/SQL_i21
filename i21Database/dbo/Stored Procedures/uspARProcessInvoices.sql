@@ -703,7 +703,7 @@ BEGIN
 					,@ItemTermDiscount				= [dblItemTermDiscount]
 					,@ItemTermDiscountBy			= [strItemTermDiscountBy]
 					,@ItemPrice						= [dblPrice]
-					,@ItemPricing					= [strPricing]
+					,@ItemPricing					= CASE WHEN ISNULL([strPricing],'') = '' THEN CONCAT('Subsystem - ', strSourceTransaction) ELSE [strPricing] END
 					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 					,@RefreshPrice					= [ysnRefreshPrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
