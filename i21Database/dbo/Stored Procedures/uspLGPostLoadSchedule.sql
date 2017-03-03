@@ -36,6 +36,11 @@ BEGIN
 					@ysnPost = @ysnPost
 				   ,@strTransactionId = @strLoadNumber
 				   ,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+			IF(@ysnPost = 0)
+			BEGIN
+				UPDATE tblLGLoad SET intShipmentStatus = 1 WHERE intLoadId = @intLoadId
+			END
 	END
 	ELSE IF @intPurchaseSale = 3
 	BEGIN
