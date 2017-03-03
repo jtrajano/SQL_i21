@@ -305,4 +305,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\Relink_Line_Of_Business.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\Remove_Unused_Shipment_Item_Fields.sql" />
+  </ItemGroup>
 </Project>

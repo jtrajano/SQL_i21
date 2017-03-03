@@ -162,7 +162,7 @@ BEGIN
 												*	CASE 
 														WHEN ISNULL(Shipment.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ShipmentItem.dblForexRate, 0) <> 0 THEN 
 															-- Convert the foreign price to transaction currency. 
-															ISNULL(ShipmentItem.dblForeignUnitPrice, 0) * ISNULL(ShipmentItem.dblForexRate, 0) 
+															ISNULL(ShipmentItem.dblUnitPrice, 0) * ISNULL(ShipmentItem.dblForexRate, 0) 
 														ELSE 
 															ISNULL(ShipmentItem.dblUnitPrice, 0)
 													END
