@@ -99,6 +99,7 @@ BEGIN
 			,@strTargetWeight NVARCHAR(50)
 			,@intShiftId INT
 			,@strLotCode1 NVARCHAR(50)
+			,@strScreenSize nvarchar(50)
 
 		SELECT @dtmPlannedDate = dtmPlannedDate
 			,@intPlannedShiftId = intPlannedShiftId
@@ -110,13 +111,18 @@ BEGIN
 		WHERE intWorkOrderId = @intProductValueId
 
 		SELECT @strItemNo = strItemNo
-			,@strTargetWeight = strWeightControlCode
+			,@strScreenSize = strWeightControlCode
+			,@strTargetWeight = Convert(numeric(18,0),dblBlendWeight)
 		FROM tblICItem
 		WHERE intItemId = @intItemId
+
+		IF @strScreenSize IS NULL
+			SELECT @strScreenSize = ''
 
 		IF @strTargetWeight IS NULL
 			SELECT @strTargetWeight = ''
 
+		
 		SELECT @strLotCode1 = ''
 
 		SELECT @intShiftId = MIN(intShiftId)
@@ -406,13 +412,13 @@ BEGIN
 			,PP.intSequenceNo
 			,PPV.dtmValidFrom
 			,PPV.dtmValidTo
-			,Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace((
+			,Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace((
 																	CASE 
 																		WHEN PRT.strDefaultValue = ''
 																			THEN PPV.strPropertyRangeText
 																		ELSE PRT.strDefaultValue
 																		END
-																	), '{Lot Code}', @strLotCode), '{Product}', @strItemNo), '{Raw Material}', @strRawMaterial), '{Packing Material - Pouch}', @strPackingMaterial), '{Packing Material - Case}', @strPackingMaterial1), '{Country of Origin}', @strCountryOfOrigin), '{Raw Material Lot Code 1}', @strPalletId1), '{Raw Material Lot Code 2}', @strPalletId2), '{Raw Material Lot Code 3}', @strPalletId3), '{Packing Material Lot Code 1}', @strPackagingLotCode1), '{Packing Material Lot Code 2}', @strPackagingLotCode2), '{Packing Material Lot Code 3}', @strPackagingLotCode3), '{Target Weight}', @strTargetWeight) AS strPropertyRangeText
+																	), '{Lot Code}', @strLotCode), '{Product}', @strItemNo), '{Raw Material}', @strRawMaterial), '{Packing Material - Pouch}', @strPackingMaterial), '{Packing Material - Case}', @strPackingMaterial1), '{Country of Origin}', @strCountryOfOrigin), '{Raw Material Lot Code 1}', @strPalletId1), '{Raw Material Lot Code 2}', @strPalletId2), '{Raw Material Lot Code 3}', @strPalletId3), '{Packing Material Lot Code 1}', @strPackagingLotCode1), '{Packing Material Lot Code 2}', @strPackagingLotCode2), '{Packing Material Lot Code 3}', @strPackagingLotCode3), '{Target Weight}', @strTargetWeight), '{Screen Size}', @strScreenSize) AS strPropertyRangeText
 			,PPV.dblMinValue
 			,PPV.dblMaxValue
 			,PPV.dblLowValue
