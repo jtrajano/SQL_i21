@@ -988,6 +988,8 @@
     <Build Include="testi21Database\Stored Procedures\test shipment with lotted items.sql" />
     <Build Include="testi21Database\Stored Procedures\test shipment with other charges.sql" />
     <Build Include="testi21Database\Stored Procedures\test shipment results table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting MT to LB.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting LB to MT.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">
