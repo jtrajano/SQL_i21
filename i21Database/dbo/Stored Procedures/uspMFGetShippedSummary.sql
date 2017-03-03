@@ -19,18 +19,18 @@ JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId
 WHERE strName = @strCustomerName
 	AND strEntityNo <> ''
 
-SELECT DT.strReferenceNumber
-	,DT.strShipmentNumber
-	,DT.strName
-	,DT.strProNumber
-	,DT.strItemNo
-	,DT.strDescription
-	,DT.strParentLotNumber
+SELECT DT.strReferenceNumber AS [Reference Number]
+	,DT.strShipmentNumber AS [Shipment Number]
+	,DT.strName AS Customer
+	,DT.strProNumber [Tracking No]
+	,DT.strItemNo AS Item
+	,DT.strDescription AS ItemDesc
+	,DT.strParentLotNumber AS [Lot No]
 	,SUM(DT.dblQuantityShipped) dblQuantityShipped
-	,DT.strUnitMeasure
-	,DT.dtmCreated
-	,DT.strCompletedDate
-	,DT.dtmShipDate
+	,DT.strUnitMeasure AS UOM
+	,DT.dtmCreated AS [Created Date]
+	,IsNULL(DT.strCompletedDate,DT.dtmShipDate) AS [Completed Date]
+	,DT.dtmShipDate AS [Ship Date]
 FROM (
 	SELECT InvS.strReferenceNumber
 		,InvS.strShipmentNumber
@@ -59,10 +59,10 @@ FROM (
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId
 	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-	Left JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = LI.intItemOwnerId
+	LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = LI.intItemOwnerId
 	WHERE InvS.dtmShipDate BETWEEN @dtmFromDate
 			AND @dtmToDate
-		--AND IO1.intOwnerId = @intOwnerId
+				--AND IO1.intOwnerId = @intOwnerId
 	) AS DT
 GROUP BY DT.strReferenceNumber
 	,DT.strShipmentNumber

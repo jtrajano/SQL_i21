@@ -19,22 +19,22 @@ JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId
 WHERE strName = @strCustomerName
 	AND strEntityNo <> ''
 
-SELECT DT.strReceiptNumber
-	,DT.strBillOfLading
+SELECT DT.strReceiptNumber AS [Receipt Number]
+	,DT.strBillOfLading AS [BOL]
 	,ROW_NUMBER() OVER (
 		PARTITION BY DT.strReceiptNumber ORDER BY DT.strReceiptNumber
 			,DT.strItemNo
-		) strLineNo
-	,DT.strItemNo
-	,DT.strDescription
-	,DT.strVendorLotId
-	,DT.strParentLotNumber
-	,SUM(DT.dblQuantity) AS dblQuantity
-	,DT.strUnitMeasure
-	,DT.dtmCreated
-	,DT.dtmReceiptDate
-	,DT.strPutawayDate
-	,DT.strCompletedDate
+		) [Line No]
+	,DT.strItemNo AS [Item No]
+	,DT.strDescription AS [Item Desc]
+	,DT.strVendorLotId [Vendor Lot No]
+	,DT.strParentLotNumber AS [Lot No]
+	,SUM(DT.dblQuantity) AS Quantity
+	,DT.strUnitMeasure AS [UOM]
+	,DT.dtmCreated AS [Created Date]
+	,DT.dtmReceiptDate AS [Receipt Date]
+	,IsNULL(DT.strPutawayDate,DT.dtmReceiptDate) AS [Putaway Date]
+	,IsNULL(DT.strCompletedDate,DT.dtmReceiptDate) AS [Completed Date]
 FROM (
 	SELECT IR.strReceiptNumber
 		,IR.strBillOfLading
@@ -66,10 +66,10 @@ FROM (
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = IRL.intItemUnitMeasureId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = IRL.intLotId
-	Left JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = LI.intItemOwnerId
+	LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = LI.intItemOwnerId
 	WHERE IR.dtmReceiptDate BETWEEN @dtmFromDate
 			AND @dtmToDate
-		--AND IO1.intOwnerId = @intOwnerId
+				--AND IO1.intOwnerId = @intOwnerId
 	) AS DT
 GROUP BY DT.strReceiptNumber
 	,DT.strBillOfLading
