@@ -88,6 +88,7 @@ FROM
 		,dblFranchiseWeight		=	WC2Details.dblFranchiseWeight
 		,dblClaimAmount			=	WC2Details.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
+		,strContainerNumber		=	LCointainer.strContainerNumber
 	FROM tblAPBill WC2
 	INNER JOIN tblAPBillDetail WC2Details ON WC2.intBillId = WC2Details.intBillId
 	INNER JOIN tblICItem Item ON Item.intItemId = WC2Details.intItemId
@@ -117,7 +118,7 @@ FROM
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	MainCurrency.strCurrency
 		,strConcern				=	CASE WHEN Receipt.intInventoryReceiptId IS NOT NULL AND Receipt.strReceiptType = 'Inventory Return'
-										THEN  'Container Rejection'
+										THEN  'Container Rejection Commodity cost' 
 										WHEN DMDetails.intLoadId > 0 THEN 'Weight Claim'
 										ELSE ''
 										END
@@ -136,6 +137,7 @@ FROM
 		,dblFranchiseWeight		=	0 --DMDetails.dblFranchiseWeight
 		,dblClaimAmount			=	0 --DMDetails.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
+		,strContractNumber		=	LCointainer.strContainerNumber
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
@@ -153,6 +155,7 @@ FROM
 			ON ContractDetail.intItemContractId = ItemContract.intItemContractId
 	LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = Item.intOriginId
 	LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
+	LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
 	WHERE DM.intTransactionType = 3
 	UNION ALL -- Voucher
 	--SELECT
@@ -262,6 +265,7 @@ FROM
 		,dblFranchiseWeight		=	0 --DMDetails.dblFranchiseWeight
 		,dblClaimAmount			=	0 --DMDetails.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
+		,strContractNumber		=	LCointainer.strContainerNumber
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
@@ -284,6 +288,7 @@ FROM
 	LEFT JOIN tblICItem ContractItem ON ContractItem.intItemId = ContractDetail.intItemId
 	LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = ContractItem.intOriginId
 	LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
+	LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
 	WHERE DM.intTransactionType = 1
 ) transactions
 INNER JOIN tblAPBill A ON transactions.intBillId = A.intBillId

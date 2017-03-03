@@ -53,32 +53,16 @@ Begin
 			EXEC dbo.uspSMGetStartingNumber 23, @strReceiptNo OUTPUT
 
 			--Receipt
-			If Exists (Select 1 From tblIPReceiptItemStage Where intStageReceiptId=@intMinRowNo AND ISNULL(dblQuantity,0)=0) --Batch Split
-			Begin
-				Insert into tblICInventoryReceipt(strReceiptType,intSourceType,intEntityVendorId,intLocationId,
-				strReceiptNumber,dtmReceiptDate,intCurrencyId,intReceiverId,ysnPrepaid,ysnInvoicePaid,intShipFromId,strBillOfLading,intCreatedUserId,intEntityId)
-				Select TOP 1 'Purchase Contract',2,ld.intVendorEntityId,@intLocationId,@strReceiptNo,
-				@dtmReceiptDate,v.intCurrencyId,@intUserId,0,0,el.intEntityLocationId,l.strBLNumber,@intUserId,@intUserId
-				From tblIPReceiptItemStage ri Join tblICItem i on ri.strItemNo=i.strItemNo
-				Join tblLGLoadDetail ld on ld.intItemId=i.intItemId AND ld.strExternalShipmentItemNumber=ri.strDeliveryItemNo
-				Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityVendorId
-				Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
-				Join tblLGLoad l on l.intLoadId=ld.intLoadId AND l.intLoadId=@intLoadId
-				Where ri.intStageReceiptId=@intMinRowNo AND ISNULL(ri.dblQuantity,0)=0
-			End
-			Else
-			Begin
-				Insert into tblICInventoryReceipt(strReceiptType,intSourceType,intEntityVendorId,intLocationId,
-				strReceiptNumber,dtmReceiptDate,intCurrencyId,intReceiverId,ysnPrepaid,ysnInvoicePaid,intShipFromId,strBillOfLading,intCreatedUserId,intEntityId)
-				Select TOP 1 'Purchase Contract',2,ld.intVendorEntityId,@intLocationId,@strReceiptNo,
-				@dtmReceiptDate,v.intCurrencyId,@intUserId,0,0,el.intEntityLocationId,l.strBLNumber,@intUserId,@intUserId
-				From tblIPReceiptItemStage ri Join tblICItem i on ri.strItemNo=i.strItemNo
-				Join tblLGLoadDetail ld on ld.intItemId=i.intItemId AND ld.strExternalShipmentItemNumber=ri.strDeliveryItemNo
-				Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityVendorId
-				Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
-				Join tblLGLoad l on l.intLoadId=ld.intLoadId AND l.intLoadId=@intLoadId
-				Where ri.intStageReceiptId=@intMinRowNo
-			End
+			Insert into tblICInventoryReceipt(strReceiptType,intSourceType,intEntityVendorId,intLocationId,
+			strReceiptNumber,dtmReceiptDate,intCurrencyId,intReceiverId,ysnPrepaid,ysnInvoicePaid,intShipFromId,strBillOfLading,intCreatedUserId,intEntityId)
+			Select TOP 1 'Purchase Contract',2,ld.intVendorEntityId,@intLocationId,@strReceiptNo,
+			@dtmReceiptDate,v.intCurrencyId,@intUserId,0,0,el.intEntityLocationId,l.strBLNumber,@intUserId,@intUserId
+			From tblIPReceiptItemStage ri Join tblICItem i on ri.strItemNo=i.strItemNo
+			Join tblLGLoadDetail ld on ld.intItemId=i.intItemId AND ld.strExternalShipmentItemNumber=ri.strDeliveryItemNo
+			Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityVendorId
+			Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
+			Join tblLGLoad l on l.intLoadId=ld.intLoadId AND l.intLoadId=@intLoadId
+			Where ri.intStageReceiptId=@intMinRowNo
 						 
 			SET @intReceiptId = SCOPE_IDENTITY();
 
