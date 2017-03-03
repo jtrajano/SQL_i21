@@ -82,6 +82,13 @@ BEGIN
 		,dblDailyUse = (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END)
 		,intDeliveryTermId = (CASE WHEN A.intDeliveryTermID IS NULL THEN H.intTermsId ELSE A.intDeliveryTermID END)
 		,intStartBudgetMonth = MONTH(I.dtmBudgetBeginDate)
+		,dblNonHeatUsage = (CASE WHEN @strCalculateBudgetFor = 'Next Year'
+								THEN
+									(365 * (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END))
+								ELSE
+									(30 * ISNULL(@intNumberOfMonthsInBudget,0) * (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END))
+								END
+								)
 	INTO #tmpStage1
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
