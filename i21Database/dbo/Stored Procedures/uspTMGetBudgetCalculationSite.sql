@@ -54,11 +54,11 @@ BEGIN
 		,dblRequiredQuantity = CAST((CASE WHEN @strCalculateBudgetFor = 'Next Year' AND @ysnIncludeEstimatedTankInventory = 1 
 										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END) - dblEstimatedGallonsLeft
 									WHEN @strCalculateBudgetFor = 'This Year' AND @ysnIncludeEstimatedTankInventory = 1
-										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE  F.intProjectedDegreeDay / A.dblBurnRate END) - (ISNULL(A.dblYTDGalsThisSeason,0.0) - A.dblEstimatedGallonsLeft)
+										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE  F.intProjectedDegreeDay / A.dblBurnRate END) - (ISNULL(H.dblTotalGallons,0.0) - A.dblEstimatedGallonsLeft)
 									WHEN @strCalculateBudgetFor = 'Next Year' AND @ysnIncludeEstimatedTankInventory = 0
 										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END)
 									WHEN @strCalculateBudgetFor = 'This Year' AND @ysnIncludeEstimatedTankInventory = 0
-										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END) - ISNULL(A.dblYTDGalsThisSeason,0.0)
+										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END) - ISNULL(H.dblTotalGallons,0.0)
 									ELSE 0
 									END) AS NUMERIC(18,6))
 								+ (CASE WHEN @strCalculateBudgetFor = 'Next Year'
@@ -79,14 +79,14 @@ BEGIN
 		--,dblPrice = 
 		--,dblEstimatedBudget = 
 		,intCustomerId = A.intCustomerID
-		,dblDailyUse = (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END)
-		,intDeliveryTermId = (CASE WHEN A.intDeliveryTermID IS NULL THEN H.intTermsId ELSE A.intDeliveryTermID END)
-		,intStartBudgetMonth = MONTH(I.dtmBudgetBeginDate)
+		,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END) 
+		,intDeliveryTermId = (CASE WHEN A.intDeliveryTermID IS NULL THEN K.intTermsId ELSE A.intDeliveryTermID END)
+		,intStartBudgetMonth = MONTH(K.dtmBudgetBeginDate)
 		,dblNonHeatUsage = (CASE WHEN @strCalculateBudgetFor = 'Next Year'
 								THEN
-									(365 * (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END))
+									(365 * (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END))
 								ELSE
-									(30 * ISNULL(@intNumberOfMonthsInBudget,0) * (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END))
+									(30 * ISNULL(@intNumberOfMonthsInBudget,0) * (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END) )
 								END
 								)
 	INTO #tmpStage1
@@ -109,10 +109,9 @@ BEGIN
 		ON A.intSiteID = I.intSiteId AND (I.intCurrentSeasonYear - 1) = I.intSeasonYear
 	LEFT JOIN vyuTMSiteDeliveryHistoryTotal J
 		ON A.intSiteID = J.intSiteId AND (J.intCurrentSeasonYear - 2) = J.intSeasonYear
-	LEFT JOIN tblEMEntityLocation K
-		ON C.intEntityId = K.intEntityId
-	LEFT JOIN tblARCustomer L
-		ON C.intEntityId = L.intEntityCustomerId
+	LEFT JOIN tblARCustomer K
+		ON C.intEntityId = K.intEntityCustomerId
+
 
 	IF OBJECT_ID('tempdb..#tmpStage2') IS NOT NULL 
 	BEGIN DROP TABLE #tmpStage2 END

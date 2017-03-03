@@ -140,8 +140,8 @@ BEGIN
 			ON C.intEntityId = F.intCustomerNumber
 		INNER JOIN tblTMSite G
 			ON F.intCustomerID = G.intCustomerID
-		INNER JOIN tblEMEntityLocation D
-			ON C.intEntityId = D.intEntityId AND D.ysnDefaultLocation = 1
+		INNER JOIN tblARCustomer D
+			ON C.intEntityId = D.intEntityCustomerId
 		,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') E
 		' + @strWhereClause
 		)
