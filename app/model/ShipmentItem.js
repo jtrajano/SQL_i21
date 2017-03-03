@@ -64,18 +64,17 @@ Ext.define('Inventory.model.ShipmentItem', {
         { name: 'strStorageTypeDescription', type: 'string' },
         { name: 'intForexRateTypeId', type: 'int', allowNull: true },
         { name: 'strForexRateType', type: 'string'},
-        { name: 'dblForexRate', type: 'float', allowNull: true },
-        { name: 'dblForeignLineTotal', type: 'float',
-            persist: false,
-            convert: function(value, record){
-                var qty = iRely.Functions.isEmpty(record.get('dblQuantity')) ? 0 : record.get('dblQuantity');
-                var price = iRely.Functions.isEmpty(record.get('dblForeignUnitPrice')) ? 0 : record.get('dblForeignUnitPrice');
+        { name: 'dblForexRate', type: 'float', allowNull: true }
+        // { name: 'dblForeignLineTotal', type: 'float',
+        //     persist: false,
+        //     convert: function(value, record){
+        //         var qty = iRely.Functions.isEmpty(record.get('dblQuantity')) ? 0 : record.get('dblQuantity');
+        //         var price = iRely.Functions.isEmpty(record.get('dblForeignUnitPrice')) ? 0 : record.get('dblForeignUnitPrice');
 
-                return qty * price;
-            },
-            depends: ['dblQuantity', 'dblForeignUnitPrice']
-        },
-        { name: 'dblForeignUnitPrice', type: 'float' }       
+        //         return qty * price;
+        //     },
+        //     depends: ['dblQuantity', 'dblForeignUnitPrice']
+        // }
     ],
 
     validators: [
