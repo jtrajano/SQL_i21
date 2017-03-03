@@ -147,21 +147,25 @@ INNER JOIN
 			strCustomerNumber
 	 FROM 
 		dbo.tblARCustomer) AS C ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
-OUTER APPLY
-	--(SELECT TOP 1 strName, strEmail, intEntityContactId FROM vyuEMEntityContact WHERE intEntityContactId = I.intEntityContactId) EC	
-	(SELECT TOP 1 EME.strName, 
-				EMEC.strEmail, 
-				EMETC.intEntityContactId 
-	 FROM 
-		dbo.tblEMEntity AS EME			
-	 INNER JOIN (SELECT [intEntityId], 
-					   [intEntityContactId]					  
-				FROM 
-					dbo.[tblEMEntityToContact]) EMETC ON EME.[intEntityId] = EMETC.[intEntityId] 
-				INNER JOIN (SELECT intEntityId,
-									strEmail
-							FROM
-								dbo.tblEMEntity) EMEC ON EMETC.[intEntityContactId] = EMEC.[intEntityId] ) EC
+LEFT JOIN tblEMEntity EC 
+		on I.intEntityContactId = EC.intEntityId
+--OUTER APPLY
+--	--(SELECT TOP 1 strName, strEmail, intEntityContactId FROM vyuEMEntityContact WHERE intEntityContactId = I.intEntityContactId) EC	
+--	(SELECT TOP 1 EME.strName, 
+--				EMEC.strEmail, 
+--				EMETC.intEntityContactId,
+--				strContactName = EMEC.strName
+--	 FROM 
+--		dbo.tblEMEntity AS EME			
+--	 INNER JOIN (SELECT [intEntityId], 
+--					   [intEntityContactId]					  
+--				FROM 
+--					dbo.[tblEMEntityToContact]) EMETC ON EME.[intEntityId] = EMETC.[intEntityId] 
+--				INNER JOIN (SELECT intEntityId,
+--									strEmail,
+--									strName
+--							FROM
+--								dbo.tblEMEntity) EMEC ON EMETC.[intEntityContactId] = EMEC.[intEntityId] ) EC
 INNER JOIN
 	(SELECT intEntityId,
 			strName
