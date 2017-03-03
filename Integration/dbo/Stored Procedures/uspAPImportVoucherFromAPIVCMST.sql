@@ -148,11 +148,15 @@ SELECT
 										ELSE 1
 										END
 									END),
-	[dblDiscount]			=	CASE WHEN A.apivc_net_amt + ISNULL(A.apivc_disc_taken,0) = A.apivc_orig_amt THEN 
-										(CASE WHEN ISNULL(A.apivc_disc_taken,0) > 0 THEN ISNULL(A.apivc_disc_taken,0) ELSE 0 END)
+	[dblDiscount]			=	CASE WHEN ISNULL(A.apivc_disc_taken,0) > 0 AND A.apivc_net_amt + ISNULL(A.apivc_disc_taken,0) = A.apivc_orig_amt
+											THEN ISNULL(A.apivc_disc_taken,0)
+									WHEN ISNULL(A.apivc_disc_avail,0) > 0 AND A.apivc_net_amt + ISNULL(A.apivc_disc_avail,0) = A.apivc_orig_amt
+											THEN ISNULL(A.apivc_disc_avail,0)
 								ELSE 0 END, --THERE ARE DISCOUNT TAKE BUT DID NOT DEDUCTED TO CHECK AMOUNT
-	[dblInterest]			=	CASE WHEN A.apivc_net_amt + ISNULL(A.apivc_disc_taken,0) = A.apivc_orig_amt THEN 
-									(CASE WHEN A.apivc_disc_taken < 0 THEN A.apivc_disc_taken * -1 ELSE 0 END) --it is interest if its value is negative
+	[dblInterest]			=	CASE WHEN A.apivc_disc_taken < 0 AND A.apivc_net_amt - ISNULL(ABS(A.apivc_disc_taken),0) = A.apivc_orig_amt
+											THEN A.apivc_disc_taken --it is interest if its value is negative
+									WHEN A.apivc_disc_avail < 0 AND A.apivc_net_amt - ISNULL(ABS(A.apivc_disc_avail),0) = A.apivc_orig_amt
+											THEN ABS(A.apivc_disc_avail) --it is interest if its value is negative
 								ELSE 0 END, 
 	[dblWithheld]			=	A.apivc_wthhld_amt,
 	[intShipToId]			=	@userLocation,
