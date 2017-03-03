@@ -29,7 +29,7 @@ Declare @strUserName NVARCHAR(100)
 Declare @strFinalErrMsg NVARCHAR(MAX)=''
 
 Select @intMinItem=MIN(intStageItemId) From tblIPItemStage
-/*
+
 While(@intMinItem is not null)
 Begin
 Begin Try
@@ -246,7 +246,7 @@ BEGIN CATCH
 END CATCH
 
 	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem
-End*/
+End
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
 
