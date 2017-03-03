@@ -12,5 +12,6 @@
 	[intSort]								INT				NOT NULL DEFAULT 0,
     [intConcurrencyId]						INT				NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_tblSMApprovalListUserSecurity_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES tblSMUserSecurity([intEntityUserSecurityId]),
-	CONSTRAINT [FK_tblSMApprovalListUserSecurity_tblSMUserSecurity_Alternate] FOREIGN KEY ([intAlternateEntityUserSecurityId]) REFERENCES tblSMUserSecurity([intEntityUserSecurityId])
+	CONSTRAINT [FK_tblSMApprovalListUserSecurity_tblSMUserSecurity_Alternate] FOREIGN KEY ([intAlternateEntityUserSecurityId]) REFERENCES tblSMUserSecurity([intEntityUserSecurityId]), 
+    CONSTRAINT [FK_tblSMApprovalListUserSecurity_tblSMApproverGroup] FOREIGN KEY ([intApproverGroupId]) REFERENCES [tblSMApproverGroup]([intApproverGroupId])
 )
