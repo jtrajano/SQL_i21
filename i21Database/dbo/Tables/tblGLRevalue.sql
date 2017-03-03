@@ -1,8 +1,8 @@
 CREATE TABLE [dbo].[tblGLRevalue](
 	[intConsolidationId] [int] IDENTITY(1,1) NOT NULL,
 	[strConsolidationNumber]   NVARCHAR(20) COLLATE Latin1_General_CI_AS ,
-	[intGLFiscalYearPeriodId] [int] NOT NULL,
-	[intFiscalYearId] [int] NOT NULL,
+	[intGLFiscalYearPeriodId] [int] NULL,
+	[intFiscalYearId] [int] NULL,
 	[dtmDate] [datetime] NULL,
 	[dtmReverseDate] [datetime] NULL,
 	[intFunctionalCurrencyId] [int] NOT NULL,
