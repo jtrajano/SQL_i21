@@ -39,10 +39,7 @@ BEGIN
 					WHEN ItemUOMFrom.dblUnitQty = 1 THEN 
 						dbo.fnMultiply(@dblCost, ItemUOMTo.dblUnitQty)
 
-					WHEN ItemUOMTo.dblUnitQty = 1 AND ItemUOMFrom.dblUnitQty < 1 THEN 
-						dbo.fnMultiply(@dblCost, ItemUOMFrom.dblUnitQty)
-
-					WHEN ItemUOMTo.dblUnitQty = 1 AND ItemUOMFrom.dblUnitQty > 1 THEN 
+					WHEN ItemUOMTo.dblUnitQty = 1 THEN 
 						dbo.fnDivide(@dblCost, ItemUOMFrom.dblUnitQty)
 
 					ELSE 
