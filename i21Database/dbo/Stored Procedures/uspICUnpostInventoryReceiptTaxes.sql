@@ -131,12 +131,12 @@ BEGIN
 
 				,intTransactionTypeId				= @intTransactionTypeId
 				,intCurrencyId						= Receipt.intCurrencyId
-				,dblExchangeRate					= ReceiptItem.dblForexRate
+				,dblExchangeRate					= ISNULL(ReceiptItem.dblForexRate, 0)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
 				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
-				,dblForexRate						= ReceiptItem.dblForexRate
+				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 0)
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId		
 				INNER JOIN dbo.tblICItemLocation ItemLocation

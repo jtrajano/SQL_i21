@@ -128,11 +128,11 @@ BEGIN
 													END 
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= Receipt.intCurrencyId
-				,dblExchangeRate					= ReceiptItem.dblForexRate
+				,dblExchangeRate					= ISNULL(ReceiptItem.dblForexRate, 0)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
 				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
-				,dblForexRate						= ReceiptItem.dblForexRate
+				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 0)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
