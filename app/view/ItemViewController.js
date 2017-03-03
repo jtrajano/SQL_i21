@@ -3170,7 +3170,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var msrpPrice = price.msrpPrice;
         var standardCost = price.standardCost;
         var amt = price.amount;
-        var qty = price.qty;
+        var qty = 1 //This will now default to 1 based on IC-2642.
         var retailPrice = 0;
         switch (price.pricingMethod) {
             case 'Discount Retail Price':
