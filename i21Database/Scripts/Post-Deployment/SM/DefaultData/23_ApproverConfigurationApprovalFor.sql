@@ -4,29 +4,29 @@
 	DECLARE @PurchaseOrderId INT
 	SELECT @PurchaseOrderId = intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.PurchaseOrder'
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMApproverConfigurationApprovalFor WHERE intScreenId = @PurchaseOrderId AND strApprovalFor = 'Vendor')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMApproverConfigurationApprovalFor WHERE intScreenId = @PurchaseOrderId AND strApprovalFor = 'Entity Group')
 	BEGIN
 		INSERT INTO tblSMApproverConfigurationApprovalFor(intScreenId, strNamespace, strType, strApprovalFor, strDisplayField, strValueField)
-		VALUES(@PurchaseOrderId, 'i21.component.combobox.EntityOnGroup', 'Combobox', 'Vendor', 'strName', 'intEntityId')
+		VALUES(@PurchaseOrderId, 'i21.component.combobox.EntityOnGroup', 'Combobox', 'Entity Group', 'strEntityGroupName', 'intEntityGroupId')
 	END
 	ELSE
 	BEGIN
-		UPDATE tblSMApproverConfigurationApprovalFor SET strNamespace = 'i21.component.combobox.EntityOnGroup'
-		WHERE intScreenId = @PurchaseOrderId AND strApprovalFor = 'Vendor'
+		UPDATE tblSMApproverConfigurationApprovalFor SET strNamespace = 'i21.component.combobox.EntityOnGroup', strDisplayField = 'strEntityGroupName', strValueField = 'intEntityGroupId'
+		WHERE intScreenId = @PurchaseOrderId AND strApprovalFor = 'Entity Group'
 	END
 
 	DECLARE @VoucherId INT
 	SELECT @VoucherId = intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher'
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMApproverConfigurationApprovalFor WHERE intScreenId = @VoucherId AND strApprovalFor = 'Vendor')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMApproverConfigurationApprovalFor WHERE intScreenId = @VoucherId AND strApprovalFor = 'Entity Group')
 	BEGIN
 		INSERT INTO tblSMApproverConfigurationApprovalFor(intScreenId, strNamespace, strType, strApprovalFor, strDisplayField, strValueField)
-		VALUES(@VoucherId, 'i21.component.combobox.EntityOnGroup', 'Combobox', 'Vendor', 'strName', 'intEntityId')
+		VALUES(@VoucherId, 'i21.component.combobox.EntityOnGroup', 'Combobox', 'Entity Group', 'strEntityGroupName', 'intEntityGroupId')
 	END
 	ELSE
 	BEGIN
-		UPDATE tblSMApproverConfigurationApprovalFor SET strNamespace = 'i21.component.combobox.EntityOnGroup'
-		WHERE intScreenId = @VoucherId AND strApprovalFor = 'Vendor'
+		UPDATE tblSMApproverConfigurationApprovalFor SET strNamespace = 'i21.component.combobox.EntityOnGroup', strDisplayField = 'strEntityGroupName', strValueField = 'intEntityGroupId'
+		WHERE intScreenId = @VoucherId AND strApprovalFor = 'Entity Group'
 	END
 
 	DECLARE @ContractId INT
