@@ -86,8 +86,9 @@ SELECT
 										FROM
 											tblGLDetail G
 										INNER JOIN
-											tblEMEntity E
-												ON G.intEntityId = E.intEntityId
+											(SELECT intEntityId,
+													strName
+											 FROM tblEMEntity) E ON G.intEntityId = E.intEntityId
 										WHERE
 											I.intInvoiceId = G.intTransactionId
 											AND I.strInvoiceNumber = G.strTransactionId
@@ -100,35 +101,107 @@ SELECT
 	,strContactName					= EC.strName
 	,strTicketNumbers				= dbo.fnARGetScaleTicketNumbersFromInvoice(I.intInvoiceId)
 	,strCustomerReferences			= dbo.fnARGetCustomerReferencesFromInvoice(I.intInvoiceId)
-	,ysnHasEmailSetup				= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = I.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + I.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	,ysnHasEmailSetup				= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = I.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + I.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	
+	,strCurrencyDescription			= CUR.strDescription
 FROM         
-	dbo.tblARInvoice AS I 
+	(SELECT intInvoiceId,
+			strInvoiceNumber,
+			strTransactionType,
+			strType,
+			strPONumber,
+			strBOLNumber,
+			intTermId,
+			intAccountId,
+			dtmDate,
+			dtmDueDate,
+			dtmPostDate,
+			dtmShipDate,
+			ysnPosted,
+			ysnPaid,
+			ysnProcessed,
+			ysnForgiven,
+			ysnCalculated,
+			ysnRecurring,
+			dblInvoiceTotal,				
+			dblDiscount, 
+			dblDiscountAvailable, 
+			dblInterest, 
+			dblAmountDue, 
+			dblPayment,	 
+			dblInvoiceSubtotal, 
+			dblShipping, 
+			dblTax,		 
+			intPaymentMethodId,	 
+			intCompanyLocationId, 
+			strComments,		 
+			intCurrencyId,
+			intEntityId,
+			intEntityCustomerId,
+			intEntityContactId,
+			intShipViaId,
+			intEntitySalespersonId	
+	 FROM
+	  dbo.tblARInvoice) AS I 
 INNER JOIN
-	dbo.tblARCustomer AS C 
-		ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
-OUTER APPLY
-	(SELECT TOP 1 strName, strEmail, intEntityContactId FROM vyuEMEntityContact WHERE intEntityContactId = I.intEntityContactId) EC	
+	(SELECT intEntityCustomerId,
+			strCustomerNumber
+	 FROM 
+		dbo.tblARCustomer) AS C ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
+LEFT JOIN tblEMEntity EC 
+		on I.intEntityContactId = EC.intEntityId
+--OUTER APPLY
+--	--(SELECT TOP 1 strName, strEmail, intEntityContactId FROM vyuEMEntityContact WHERE intEntityContactId = I.intEntityContactId) EC	
+--	(SELECT TOP 1 EME.strName, 
+--				EMEC.strEmail, 
+--				EMETC.intEntityContactId,
+--				strContactName = EMEC.strName
+--	 FROM 
+--		dbo.tblEMEntity AS EME			
+--	 INNER JOIN (SELECT [intEntityId], 
+--					   [intEntityContactId]					  
+--				FROM 
+--					dbo.[tblEMEntityToContact]) EMETC ON EME.[intEntityId] = EMETC.[intEntityId] 
+--				INNER JOIN (SELECT intEntityId,
+--									strEmail,
+--									strName
+--							FROM
+--								dbo.tblEMEntity) EMEC ON EMETC.[intEntityContactId] = EMEC.[intEntityId] ) EC
 INNER JOIN
-	dbo.tblEMEntity AS CE 
-		ON C.[intEntityCustomerId] = CE.intEntityId 
+	(SELECT intEntityId,
+			strName
+	 FROM 
+		dbo.tblEMEntity) AS CE ON C.[intEntityCustomerId] = CE.intEntityId 
 LEFT OUTER JOIN
-	dbo.tblSMTerm AS T 
-		ON I.intTermId = T.intTermID 
+	(SELECT intTermID,
+			strTerm
+	 FROM 
+		dbo.tblSMTerm) AS T ON I.intTermId = T.intTermID 
 LEFT OUTER JOIN
-	dbo.tblSMCompanyLocation AS L 
-		ON I.intCompanyLocationId  = L.intCompanyLocationId 
+	(SELECT intCompanyLocationId,
+			strLocationName
+	 FROM 
+		dbo.tblSMCompanyLocation) AS L ON I.intCompanyLocationId  = L.intCompanyLocationId 
 LEFT OUTER JOIN
-	dbo.tblSMPaymentMethod AS P 
-		ON I.intPaymentMethodId = P.intPaymentMethodID
+	(SELECT intPaymentMethodID,
+			strPaymentMethod
+	 FROM 
+		dbo.tblSMPaymentMethod) AS P ON I.intPaymentMethodId = P.intPaymentMethodID
 LEFT OUTER JOIN
-	dbo.tblSMShipVia AS SV 
-		ON I.intShipViaId = SV.[intEntityShipViaId]
+	(SELECT intEntityShipViaId,
+			strShipVia
+	 FROM 
+		dbo.tblSMShipVia) AS SV ON I.intShipViaId = SV.[intEntityShipViaId]
 LEFT OUTER JOIN
-	dbo.tblEMEntity AS SE 
-		ON I.[intEntitySalespersonId] = SE.intEntityId 
+	(SELECT intEntityId,
+			strName
+	 FROM 
+		dbo.tblEMEntity) AS SE ON I.[intEntitySalespersonId] = SE.intEntityId 
 LEFT OUTER JOIN
-	dbo.tblSMCurrency CUR
-		ON I.intCurrencyId = CUR.intCurrencyID
+	(SELECT intCurrencyID,
+			strCurrency,
+			strDescription
+	 FROM 
+		dbo.tblSMCurrency) CUR ON I.intCurrencyId = CUR.intCurrencyID
 LEFT OUTER JOIN
 	dbo.tblEMEntity AS EB 
 		ON I.[intEntityId] = EB.intEntityId
@@ -155,4 +228,4 @@ LEFT OUTER JOIN
 --	) GL
 --		ON I.intInvoiceId = GL.intTransactionId
 --		AND I.intAccountId = GL.intAccountId
---		AND I.strInvoiceNumber = GL.strTransactionId					 
+--		AND I.strInvoiceNumber = GL.strTransactionId		
