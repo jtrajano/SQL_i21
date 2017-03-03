@@ -62,7 +62,9 @@ Declare @intMinHeader				INT,
 		@strLSPPartnerNo			NVARCHAR(100),
 		@strWarehouseVendorAccNo	NVARCHAR(100),
 		@strMVessel					NVARCHAR(200),
-		@strMVoyageNumber			NVARCHAR(200)
+		@strMVoyageNumber			NVARCHAR(200),
+		@intPositionId				INT,
+		@strPositionType			NVARCHAR(50)
 
 Declare @tblDetail AS Table
 (
@@ -142,8 +144,14 @@ Begin
 		@strMVoyageNumber			=	strMVoyageNumber
 	From tblLGLoadLSPStg Where intLoadStgId=@intMinHeader
 
-	Select TOP 1 @strPackingDesc=ct.strPackingDescription From tblCTContractDetail ct Join tblLGLoadDetail ld on ct.intContractDetailId=ld.intPContractDetailId 
+	Set @intPositionId=NULL
+
+	Select TOP 1 @strPackingDesc=ct.strPackingDescription,@intPositionId=ch.intPositionId From tblCTContractDetail ct Join tblLGLoadDetail ld on ct.intContractDetailId=ld.intPContractDetailId 
+	Join tblCTContractHeader ch on ch.intContractHeaderId=ct.intContractHeaderId
 	Where ld.intLoadId=@intLoadId
+
+	Set @strPositionType=''
+	Select TOP 1 @strPositionType=strPositionType From tblCTPosition Where intPositionId=@intPositionId
 
 	Set @strLSPPartnerNo=''
 	Select TOP 1 @strLSPPartnerNo=strPartnerNo From tblIPLSPPartner Where strWarehouseVendorAccNo=@strWarehouseVendorAccNo
@@ -151,6 +159,12 @@ Begin
 	If ISNULL(@strLSPPartnerNo,'') =''
 	Begin
 		Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='Invalid LSP Partner' Where intLoadStgId=@intLoadStgId
+		GOTO NEXT_SHIPMENT
+	End
+
+	If ISNULL(@strPositionType,'') ='Spot'
+	Begin
+		Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='It is a Spot Contract' Where intLoadStgId=@intLoadStgId
 		GOTO NEXT_SHIPMENT
 	End
 
@@ -182,16 +196,29 @@ Begin
 	Set @strAddressXml=NULL
 	Select @strAddressXml=COALESCE(@strAddressXml, '') 
 		+ '<E1ADRM4 SEGMENT="1">'
-		+ '<PARTNER_Q>'		+ 'SP'													+ '</PARTNER_Q>'
-		+ '<PARTNER_ID>'	+ ISNULL(@strVendorAccountNo,'')						+ '</PARTNER_ID>'
-		+ '<LANGUAGE>'		+ 'EN'													+ '</LANGUAGE>'
-		+ '<NAME1>'			+ dbo.fnEscapeXML(ISNULL(strVendorName,''))				+ '</NAME1>'
-		+ '<STREET1>'		+ dbo.fnEscapeXML(ISNULL(strVendorAddress,''))			+ '</STREET1>'
-		+ '<POSTL_COD1>'	+ dbo.fnEscapeXML(ISNULL(strVendorPostalCode,''))		+ '</POSTL_COD1>'
-		+ '<CITY1>'			+ dbo.fnEscapeXML(ISNULL(strVendorCity,''))				+ '</CITY1>'
-		+ '<TELEPHONE1>'	+ ISNULL(strVendorTelePhoneNo,'')						+ '</TELEPHONE1>'
-		+ '<TELEFAX>'		+ ISNULL(strVendorTeleFaxNo,'')							+ '</TELEFAX>'
-		+ '<COUNTRY1>'		+ ISNULL(strVendorCountry,'')							+ '</COUNTRY1>'
+		+ '<PARTNER_Q>'		+ 'SP'															+ '</PARTNER_Q>'
+		+ '<PARTNER_ID>'	+ ISNULL(strForwardingAgentAccNo,'')							+ '</PARTNER_ID>'
+		+ '<LANGUAGE>'		+ 'EN'															+ '</LANGUAGE>'
+		+ '<NAME1>'			+ dbo.fnEscapeXML(ISNULL(strForwardingAgent,''))				+ '</NAME1>'
+		+ '<STREET1>'		+ dbo.fnEscapeXML(ISNULL(strForwardingAgentAddress,''))			+ '</STREET1>'
+		+ '<POSTL_COD1>'	+ dbo.fnEscapeXML(ISNULL(strForwardingAgentPostalCode,''))		+ '</POSTL_COD1>'
+		+ '<CITY1>'			+ dbo.fnEscapeXML(ISNULL(strForwardingAgentCity,''))			+ '</CITY1>'
+		+ '<TELEPHONE1>'	+ dbo.fnEscapeXML(ISNULL(strForwardingAgentTelePhoneNo,''))		+ '</TELEPHONE1>'
+		+ '<TELEFAX>'		+ dbo.fnEscapeXML(ISNULL(strForwardingAgentTeleFaxNo,''))		+ '</TELEFAX>'
+		+ '<COUNTRY1>'		+ ISNULL(strForwardingAgentCountry,'')							+ '</COUNTRY1>'
+		+ '</E1ADRM4>'
+
+		+ '<E1ADRM4 SEGMENT="1">'
+		+ '<PARTNER_Q>'		+ 'TF'														+ '</PARTNER_Q>'
+		+ '<PARTNER_ID>'	+ ISNULL(strShippingLineAccountNo,'')						+ '</PARTNER_ID>'
+		+ '<LANGUAGE>'		+ 'EN'														+ '</LANGUAGE>'
+		+ '<NAME1>'			+ dbo.fnEscapeXML(ISNULL(strShippingLine,''))				+ '</NAME1>'
+		+ '<STREET1>'		+ dbo.fnEscapeXML(ISNULL(strShippingLineAddress,''))		+ '</STREET1>'
+		+ '<POSTL_COD1>'	+ dbo.fnEscapeXML(ISNULL(strShippingLinePostalCode,''))		+ '</POSTL_COD1>'
+		+ '<CITY1>'			+ dbo.fnEscapeXML(ISNULL(strShippingLineCity,''))			+ '</CITY1>'
+		+ '<TELEPHONE1>'	+ dbo.fnEscapeXML(ISNULL(strShippingLineTelePhoneNo,''))	+ '</TELEPHONE1>'
+		+ '<TELEFAX>'		+ dbo.fnEscapeXML(ISNULL(strShippingLineTeleFaxNo,''))		+ '</TELEFAX>'
+		+ '<COUNTRY1>'		+ ISNULL(strShippingLineCountry,'')							+ '</COUNTRY1>'
 		+ '</E1ADRM4>'
 
 		+ '<E1EDK33 SEGMENT="1">'
@@ -204,8 +231,8 @@ Begin
 		+ '<STREET1>'		+ dbo.fnEscapeXML(ISNULL(strOriginAddress,''))			+ '</STREET1>'
 		+ '<POSTL_COD1>'	+ dbo.fnEscapeXML(ISNULL(strOriginPostalCode,''))		+ '</POSTL_COD1>'
 		+ '<CITY1>'			+ dbo.fnEscapeXML(ISNULL(strOriginCity,''))				+ '</CITY1>'
-		+ '<TELEPHONE1>'	+ ISNULL(strOriginTelePhoneNo,'')						+ '</TELEPHONE1>'
-		+ '<TELEFAX>'		+ ISNULL(strOriginTeleFaxNo,'')							+ '</TELEFAX>'
+		+ '<TELEPHONE1>'	+ dbo.fnEscapeXML(ISNULL(strOriginTelePhoneNo,''))		+ '</TELEPHONE1>'
+		+ '<TELEFAX>'		+ dbo.fnEscapeXML(ISNULL(strOriginTeleFaxNo,''))		+ '</TELEFAX>'
 		+ '<COUNTRY1>'		+ ISNULL(strOriginCountry,'')							+ '</COUNTRY1>'
 		+ '</E1ADRM6>'
 		+ '</E1EDT44>'
@@ -218,8 +245,8 @@ Begin
 		+ '<STREET1>'		+ dbo.fnEscapeXML(ISNULL(strDestinationAddress,''))			+ '</STREET1>'
 		+ '<POSTL_COD1>'	+ dbo.fnEscapeXML(ISNULL(strDestinationPostalCode,''))		+ '</POSTL_COD1>'
 		+ '<CITY1>'			+ dbo.fnEscapeXML(ISNULL(strDestinationCity,''))			+ '</CITY1>'
-		+ '<TELEPHONE1>'	+ ISNULL(strDestinationTelePhoneNo,'')						+ '</TELEPHONE1>'
-		+ '<TELEFAX>'		+ ISNULL(strDestinationTeleFaxNo,'')						+ '</TELEFAX>'
+		+ '<TELEPHONE1>'	+ dbo.fnEscapeXML(ISNULL(strDestinationTelePhoneNo,''))		+ '</TELEPHONE1>'
+		+ '<TELEFAX>'		+ dbo.fnEscapeXML(ISNULL(strDestinationTeleFaxNo,''))		+ '</TELEFAX>'
 		+ '<COUNTRY1>'		+ ISNULL(strDestinationCountry,'')							+ '</COUNTRY1>'
 		+ '</E1ADRM6>'
 		+ '</E1EDT44>'
@@ -360,7 +387,7 @@ Begin
 			Set @strCertificates=NULL
 			Select @strCertificates=COALESCE(@strCertificates, '') 
 				+ '<ZE1EDL43_PH SEGMENT="1">'
-				+ '<ZZCOFFEE>'  +  dbo.fnEscapeXML(ISNULL(strCertificationName,'')) + '</ZZCOFFEE>' 
+				+ '<ZZCOFFEE>'  +  dbo.fnEscapeXML(ISNULL(strCertificationCode,'')) + '</ZZCOFFEE>' 
 				+ '</ZE1EDL43_PH>'
 			From tblCTContractCertification cc Join tblICCertification c on cc.intCertificationId=c.intCertificationId
 			Where cc.intContractDetailId=(Select intPContractDetailId From tblLGLoadDetail Where intLoadDetailId=@intLoadDetailId)

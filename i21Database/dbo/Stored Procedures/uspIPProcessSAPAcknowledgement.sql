@@ -216,6 +216,10 @@ Begin
 				--update the delivery Details in modified loads both instruction and advice
 				Update tblLGLoadStg Set strExternalShipmentNumber=@strParam Where strShippingInstructionNumber=@strRefNo AND ISNULL(strFeedStatus,'')=''
 
+				--update shipping advice with delivery no  
+				Update tblLGLoad  Set strExternalShipmentNumber=@strParam,intConcurrencyId=intConcurrencyId+1
+				Where intLoadShippingInstructionId=@intLoadId
+
 				Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 				Values(@strMesssageType,'Success',@strRefNo,@strParam)
 			End

@@ -56,11 +56,6 @@ Begin
 		Select @strItemNo=strItemNo,@strSubLocation=strSubLocation,@dblQuantity=dblQuantity,@strSessionId=strSessionId
 		From @tblStock Where intRowNo=@intMinRowNo
 
-		Select TOP 1 @dblInspectionQuantity=ISNULL(dblInspectionQuantity,0),@dblBlockedQuantity=ISNULL(dblBlockedQuantity,0) From tblIPStockStage 
-		Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
-
-		Set @dblQuantity = @dblQuantity + @dblInspectionQuantity + @dblBlockedQuantity
-
 		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
 		Select @intSubLocationId=intCompanyLocationSubLocationId 
 		From tblSMCompanyLocationSubLocation Where strSubLocationName=@strSubLocation AND intCompanyLocationId=@intLocationId

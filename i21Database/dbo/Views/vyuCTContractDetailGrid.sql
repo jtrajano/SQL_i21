@@ -52,7 +52,8 @@ AS
 			dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)	AS	dblExchangeRate,
 			IM.intProductTypeId,
 			CQ.dblBulkQuantity ,
-			CQ.dblQuantity AS dblBagQuantity
+			CQ.dblQuantity AS dblBagQuantity,
+			CAST(1 AS BIT) ysnItemUOMIdExist
 
 FROM		tblCTContractDetail			CD
 	 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=		CD.intContractHeaderId	

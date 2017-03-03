@@ -20,7 +20,8 @@ AS
 			RY.strCountry strOrigin,
 			CL.strLocationName,
 			CL.intCompanyLocationId AS	intLocationId,
-			IM.strStatus
+			IM.strStatus,
+			IM.intProductTypeId
 
 	FROM	tblICItemContract		IC
 	JOIN	tblICItem				IM	ON	IM.intItemId			=	IC.intItemId
