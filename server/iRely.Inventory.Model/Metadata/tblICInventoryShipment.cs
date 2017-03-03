@@ -195,7 +195,6 @@ namespace iRely.Inventory.Model
         public int? intCurrencyId { get; set; }
         public int? intWeightUOMId { get; set; }
         public decimal? dblUnitPrice { get; set; }
-        public decimal? dblForeignUnitPrice { get; set; }
         public int? intDockDoorId { get; set; }
         public string strNotes { get; set; }
         public int? intGradeId { get; set; }

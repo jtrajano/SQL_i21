@@ -168,7 +168,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
             this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
             this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
-            this.Property(t => t.dblForeignUnitPrice).HasColumnName("dblForeignUnitPrice").HasPrecision(38, 20);
 
             this.HasMany(p => p.tblICInventoryShipmentItemLots)
                 .WithRequired(p => p.tblICInventoryShipmentItem)

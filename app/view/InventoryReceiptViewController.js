@@ -1902,7 +1902,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         },
                         function(failureResponse){
                             var jsonData = Ext.decode(failureResponse.responseText);
-                            iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                            //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                            iRely.Functions.showErrorDialog('Something went wrong while getting the forex rates.');
                         }
                     );                      
                 }
