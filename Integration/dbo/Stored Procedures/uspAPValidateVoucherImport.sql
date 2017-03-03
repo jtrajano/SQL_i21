@@ -209,7 +209,7 @@ SELECT DISTINCT
 	'Please fix the check # ''00000000'' of invoice # ' + A.apivc_ivc_no + ' and for vendor ' + dbo.fnTrim(A.apivc_vnd_no) AS strDescription
 INTO #tmpZeroCheckNumber
 FROM apivcmst A
-WHERE A.apivc_chk_no = '00000000' AND A.apivc_trans_type = 'A'
+WHERE A.apivc_chk_no = '00000000' AND (A.apivc_trans_type = 'A' OR A.apivc_trans_type = 'C')
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 					THEN
 						CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
