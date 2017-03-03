@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspGLPostRevalue]
+﻿CREATE PROCEDURE [dbo].[uspGLPostRevalue]
 	@intConsolidationId			AS INT = 1,
 	@ysnRecap					AS BIT				= 0,
 	@intEntityId				AS INT				= 1
