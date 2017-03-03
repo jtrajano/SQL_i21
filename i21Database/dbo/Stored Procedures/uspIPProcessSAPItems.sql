@@ -182,9 +182,10 @@ Begin --Update
 	Insert Into tblICItemSubLocation(intItemLocationId,intSubLocationId)
 	Select il.intItemLocationId,sl.intCompanyLocationSubLocationId
 	From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName 
-	Join tblICItemLocation il on sl.intCompanyLocationId=il.intLocationId
+	Join tblICItemLocation il on sl.intCompanyLocationId=il.intLocationId AND il.intItemId=@intItemId
 	where s.intStageItemId=@intStageItemId AND 
-	sl.intCompanyLocationSubLocationId NOT IN (Select intSubLocationId From tblICItemSubLocation Where intItemId=@intItemId)
+	sl.intCompanyLocationSubLocationId NOT IN (Select isl.intSubLocationId From tblICItemSubLocation isl 
+	Join tblICItemLocation il on isl.intItemLocationId=il.intItemLocationId Where il.intItemId=@intItemId)
 
 	--Delete the SubLocation if it is marked for deletion
 	Delete From tblICItemSubLocation
