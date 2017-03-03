@@ -17,6 +17,7 @@ BEGIN
 		,@intBlendAttributeId INT
 		,@strBlendAttributeValue NVARCHAR(MAX)
 		,@dtmCurrentDateTime DATETIME
+		,@strPackagingCategory NVARCHAR(50)
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -27,6 +28,11 @@ BEGIN
 	SELECT @strBlendAttributeValue = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intAttributeId = @intBlendAttributeId
+		AND strAttributeValue <> ''
+
+	SELECT @strPackagingCategory = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intAttributeId = 46
 		AND strAttributeValue <> ''
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
@@ -214,12 +220,12 @@ BEGIN
 	SELECT @strShowShrtgWithAvlblUnblendedTea = 'No'
 		,@strShowShrtgWithUnvlblUnblendedTea = 'No'
 
-	IF @strShowStorage = 'With Available Unblended Tea'
+	IF @strShowStorage = 'With Available Unblended Items'
 	BEGIN
 		SELECT @strShowShrtgWithAvlblUnblendedTea = 'Yes'
 	END
 
-	IF @strShowStorage = 'Without available Unblended Tea'
+	IF @strShowStorage = 'Without available Unblended Items'
 	BEGIN
 		SELECT @strShowShrtgWithUnvlblUnblendedTea = 'Yes'
 	END
@@ -470,7 +476,11 @@ BEGIN
 				,I.strDescription
 				,CL.intCompanyLocationId
 				,CL.strLocationName
-				,SUM(RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity)
+				,CASE 
+					WHEN C.strCategoryCode = @strPackagingCategory
+						THEN CAST(CEILING(SUM(RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity)) AS NUMERIC(38, 20))
+					ELSE SUM(RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity)
+					END
 				,'' AS strName
 				,W.dtmPlannedDate
 				,'' strWorkInstruction
@@ -509,6 +519,7 @@ BEGIN
 				,CL.intCompanyLocationId
 				,CL.strLocationName
 				,W.dtmPlannedDate
+				,C.strCategoryCode
 			ORDER BY I.strItemNo
 				,W.dtmPlannedDate
 				,W.strWorkOrderNo
@@ -533,7 +544,7 @@ BEGIN
 			SELECT '' AS strCellName
 				,0 intWorkOrderId
 				,InvS.strShipmentNumber
-				,NULL
+				,InvS.dtmShipDate
 				,I.intItemId
 				,I.strItemNo
 				,I.strDescription
@@ -757,6 +768,7 @@ BEGIN
 		,dtmPlannedDate
 		,strComments
 		,strQtyType
+		,dblQuantity
 		,intDisplayOrder
 		)
 	SELECT ''
@@ -772,8 +784,9 @@ BEGIN
 		,dtmPlannedDate
 		,strComments
 		,'Total'
+		,(Select SUM( WIP1.dblItemRequired) from @tblMFWIPItem WIP1 Where WIP1.intItemId=WIP.intItemId)
 		,1
-	FROM @tblMFWIPItem
+	FROM @tblMFWIPItem WIP
 	GROUP BY strCellName
 		,intItemId
 		,strItemNo
@@ -1064,7 +1077,8 @@ BEGIN
 			ELSE dblQuantity
 			END
 	WHERE strWorkOrderNo LIKE 'Inventory -%'
-		OR strWorkOrderNo LIKE 'Demand Total%' OR strWorkOrderNo = 'Available Inventory'
+		OR strWorkOrderNo LIKE 'Demand Total%'
+		OR strWorkOrderNo = 'Available Inventory'
 
 	UPDATE @tblMFFinalWIPItem
 	SET dtmPlannedDateTime = IsNULL(SW.dtmPlannedStartDate, W.dtmPlannedDate + IsNULL(S.dtmShiftStartTime, 0) + IsNULL(S.intStartOffset, 0))
