@@ -5060,6 +5060,7 @@
     <Build Include="dbo\Views\vyuICItemSubLocations.sql" />
     <Build Include="dbo\Views\vyuICItemLot.sql" />
     <Build Include="dbo\Views\vyuGLMulticurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuGLSearchMulticurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuAPMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposureDetail.sql" />
     <Build Include="dbo\Views\vyuCTMultiCurrencyRevalue.sql" />
