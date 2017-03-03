@@ -393,7 +393,7 @@ BEGIN
 																WHEN RawData.intSourceType = 2 THEN -- Inbound Shipment
 																	ISNULL(LogisticsView.dblQuantity, 0)
 																WHEN RawData.intSourceType = 3 THEN -- Transport
-																	ISNULL(ISNULL(TransportView_New.dblOrderedQuantity, TransportView_Old.dblOrderedQuantity), 0) 
+																	ISNULL(TransportView.dblOrderedQuantity, 0)
 																ELSE 
 																	NULL
 														END
@@ -483,14 +483,9 @@ BEGIN
 					AND RawData.strReceiptType = 'Purchase Contract'
 					AND RawData.intSourceType = 2
 
-				-- 5. Transport Loads (New tables)
-				LEFT JOIN vyuTRTransportReceipt_New TransportView_New
-					ON TransportView_New.intTransportReceiptId = RawData.intSourceId
-					AND RawData.intSourceType = 3
-
-				-- 6. Transport Loads (Old tables) 
-				LEFT JOIN vyuTRTransportReceipt_Old TransportView_Old
-					ON TransportView_Old.intTransportReceiptId = RawData.intSourceId
+				-- 5. Transport Loads 
+				LEFT JOIN vyuTRGetLoadReceipt TransportView
+					ON TransportView.intTransportReceiptId = RawData.intSourceId
 					AND RawData.intSourceType = 3
 
 		WHERE RawHeaderData.intId = @intId
