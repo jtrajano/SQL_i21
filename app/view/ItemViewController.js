@@ -3079,6 +3079,10 @@ Ext.define('Inventory.view.ItemViewController', {
         }
         else if (combo.column.itemId === 'colPricingLevelCurrency'){
             current.set('intCurrencyId', records[0].get('intCurrencyID'));
+
+            if (records[0].get('intCurrencyID') !== i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId')) {
+                current.set('dblUnitPrice', 0);
+            }
         }
     },
 
@@ -3245,7 +3249,8 @@ Ext.define('Inventory.view.ItemViewController', {
     updatePricingLevel: function (item, pricing, data) {
         var me = this;
         _.each(item.tblICItemPricingLevels().data.items, function (p) {
-            if (p.data.intItemLocationId === pricing.data.intItemLocationId) {
+            if (p.data.intItemLocationId === pricing.data.intItemLocationId 
+                && p.data.intCurrencyId === i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId')) {
                 var retailPrice = me.getPricingLevelUnitPrice({
                     pricingMethod: p.data.strPricingMethod,
                     salePrice: data.unitPrice,
@@ -3283,7 +3288,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     onEditPricingLevel: function (editor, context, eOpts) {
         var me = this;
-        if (context.field === 'strPricingMethod' || context.field === 'dblAmountRate') {
+        if (context.field === 'strPricingMethod' || context.field === 'dblAmountRate' || context.field === 'strCurrency') {
             if (context.record) {
                 var win = context.grid.up('window');
                 var grdPricing = win.down('#grdPricing');
@@ -3319,8 +3324,14 @@ Ext.define('Inventory.view.ItemViewController', {
                                 amount: amount,
                                 qty: qty
                             });
-
-                            context.record.set('dblUnitPrice', retailPrice);
+                            if (context.record.get('intCurrencyId') === i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId')) {
+                                context.record.set('dblUnitPrice', retailPrice);
+                            }
+                            else {
+                                if (context.field === 'strCurrency') {
+                                    context.record.set('dblUnitPrice', 0);
+                                }
+                            }
                         }
                     }
                 }
