@@ -305,7 +305,7 @@ BEGIN TRY
 				, tblEMEntityLocation.strCity AS strOriginCity
 				, tblEMEntityLocation.strState AS strOriginState
 				, tblSMCompanyLocation.strLocationName AS strCustomerName
-				, NULL AS strCustomerFEIN
+				, tblSMCompanySetup.strEin AS strCustomerFEIN
 				, NULL AS strAccountStatusCode
 				, tblSMShipVia.strShipVia
 				, tblSMShipVia.strTransporterLicense
@@ -427,7 +427,7 @@ BEGIN TRY
 				, tblEMEntityLocation.strCity AS strOriginCity
 				, tblEMEntityLocation.strState AS strOriginState
 				, tblSMCompanyLocation.strLocationName AS strCustomerName
-				, NULL AS strCustomerFEIN
+				, tblSMCompanySetup.strEin AS strCustomerFEIN
 				, NULL AS strAccountStatusCode
 				, tblSMShipVia.strShipVia
 				, tblSMShipVia.strTransporterLicense
