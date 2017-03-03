@@ -26,7 +26,6 @@ Type the overview for the table here.
 		[strCommissionOn] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dblCommissionRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intCurrencyId] [int] NULL,
-		[dblForexRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemPricingLevel] PRIMARY KEY ([intItemPricingLevelId]), 

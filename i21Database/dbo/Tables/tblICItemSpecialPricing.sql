@@ -28,7 +28,6 @@ Type the overview for the table here.
 		[dblAccumulatedQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblAccumulatedAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intCurrencyId] [int] NULL,
-		[dblForexRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemSpecialPricing] PRIMARY KEY ([intItemSpecialPricingId]), 
