@@ -948,7 +948,7 @@ BEGIN
 			END
 			
 		--l. Customer - Customer Location - Item (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)		
-		SET @SpecialPriceId = (SELECT TOP 1 intSpecialPriceId FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND (ISNULL(strInvoiceType,'') = ISNULL(@InvoiceType,'') OR ISNULL(strInvoiceType,'') = '' OR ISNULL(@InvoiceType,'') = '') AND (ISNULL(intVendorLocationId,0) = 0 OR ISNULL(intVendorLocationId,0) = @VendorShipFromLocationId) AND (ISNULL(intVendorId,0) = 0 OR ISNULL(intVendorId,0) = @ItemVendorId) AND intItemId = @ItemId AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 intSpecialPriceId FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND (ISNULL(strInvoiceType,'') = ISNULL(@InvoiceType,'') OR ISNULL(strInvoiceType,'') = '' OR ISNULL(@InvoiceType,'') = '') AND intItemId = @ItemId AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				SET @intSort = @intSort + 1
@@ -1789,4 +1789,3 @@ BEGIN
 			
 	RETURN;				
 END
-
