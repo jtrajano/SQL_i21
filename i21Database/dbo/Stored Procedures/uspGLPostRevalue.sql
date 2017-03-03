@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspGLPostRevalue]
+﻿ALTER PROCEDURE [dbo].[uspGLPostRevalue]
 	@intConsolidationId			AS INT = 1,
 	@ysnRecap					AS BIT				= 0,
 	@intEntityId				AS INT				= 1
@@ -51,7 +51,7 @@ BEGIN TRY
 			,Offset = 0
 		FROM [dbo].tblGLRevalueDetails A INNER JOIN [dbo].tblGLRevalue B 
 			ON A.intConsolidationId = B.intConsolidationId
-			WHERE B.intConsolidationId = 10
+			WHERE B.intConsolidationId = @intConsolidationId
 		),cte1 AS
 		(
 			SELECT 
@@ -223,7 +223,6 @@ BEGIN TRY
 		BEGIN
 			EXEC uspGLBookEntries @PostGLEntries, 1
 			EXEC uspGLBookEntries @ReversePostGLEntries, 1
-			UPDATE tblGLRevalue SET ysnPosted = 1 WHERE intConsolidationId = @intConsolidationId
 		END
 		ELSE
 		BEGIN
@@ -299,8 +298,32 @@ BEGIN TRY
 			FROM @ReversePostGLEntries
 			EXEC uspGLPostRecap @RecapTable, @intEntityId
 		END
-		
+		if @ysnRecap = 0
+		BEGIN
+			UPDATE tblGLRevalue SET ysnPosted = 1 WHERE intConsolidationId = @intConsolidationId
+			DECLARE @intGLFiscalYearPeriodId INT, @strTransactionType NVARCHAR(4)
+			SELECT @intGLFiscalYearPeriodId= intGLFiscalYearPeriodId ,@strTransactionType = strTransactionType  FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
+
 			
+			IF @strTransactionType = 'AR' 
+				UPDATE tblGLFiscalYearPeriod SET ysnARRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+			IF @strTransactionType = 'AP' 
+				UPDATE tblGLFiscalYearPeriod SET ysnAPRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+			IF @strTransactionType = 'INV' 
+				UPDATE tblGLFiscalYearPeriod SET ysnINVRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+			IF @strTransactionType = 'CT' 
+				UPDATE tblGLFiscalYearPeriod SET ysnCTRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+
+			IF @strTransactionType = 'All' 
+				UPDATE tblGLFiscalYearPeriod SET 
+					ysnARRevalued =		1,
+					ysnAPRevalued =		1,
+					ysnINVRevalued =	1,
+					ysnCTRevalued =		1
+				WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+
+			
+		END
 
 	COMMIT TRANSACTION
 	SELECT @strPostBatchId PostBatchId,	@strReversePostBatchId ReversePostBatchId
@@ -321,5 +344,4 @@ BEGIN CATCH
                @ErrorState -- State.  
                );  
 END CATCH
-
 

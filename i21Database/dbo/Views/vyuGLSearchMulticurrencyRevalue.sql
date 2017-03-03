@@ -7,7 +7,8 @@ intConsolidationId,
 B.strPeriod,
 D.strCurrency,
 strTransactionType,
-C.strCurrencyExchangeRateType
+C.strCurrencyExchangeRateType,
+A.ysnPosted
 from tblGLRevalue A
 LEFT JOIN tblGLFiscalYearPeriod B
 ON A.intGLFiscalYearPeriodId = B.intGLFiscalYearPeriodId
