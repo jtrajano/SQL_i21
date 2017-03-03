@@ -26,7 +26,6 @@ Type the overview for the table here.
 		[intCurrencyId] INT NULL,
 		[intWeightUOMId] INT NULL,
 		[dblUnitPrice] NUMERIC(38, 20) NULL DEFAULT ((0)), 
-		[dblForeignUnitPrice] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[intDockDoorId] INT NULL, 
 		[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intGradeId] INT NULL,
