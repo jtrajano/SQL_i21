@@ -37,6 +37,20 @@ BEGIN
 		AND CAST(@TransactionDate AS DATE) >= CAST([dtmValidFromDate] AS DATE) 
 	ORDER BY
 		[dtmValidFromDate]
+
+
+	IF NOT EXISTS(SELECT TOP 1 NULL FROM @returntable ORDER BY [intCurrencyExchangeRateTypeId])
+		INSERT @returntable(
+			 [intCurrencyExchangeRateTypeId]
+			,[strCurrencyExchangeRateType]
+			,[intCurrencyExchangeRateId]
+			,[dblCurrencyExchangeRate]
+		)
+		SELECT
+			 [intCurrencyExchangeRateTypeId]	= NULL
+			,[strCurrencyExchangeRateType]		= ''
+			,[intCurrencyExchangeRateId]		= NULL
+			,[dblCurrencyExchangeRate]			= 1.000000
 		
 	RETURN
 END
