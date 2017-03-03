@@ -485,7 +485,7 @@ BEGIN
 
 				-- 5. Transport Loads 
 				LEFT JOIN vyuTRGetLoadReceipt TransportView
-					ON TransportView.intTransportReceiptId = RawData.intSourceId
+					ON TransportView.intLoadReceiptId = RawData.intSourceId
 					AND RawData.intSourceType = 3
 
 		WHERE RawHeaderData.intId = @intId
