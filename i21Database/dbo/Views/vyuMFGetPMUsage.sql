@@ -12,9 +12,9 @@ SELECT DISTINCT W.dtmPlannedDate [Dump Date]
 	,W.strWorkOrderNo AS [Job #]
 	,I1.strItemNo AS [WSI Item]
 	,I1.strDescription [WSI Item Description]
-	,SUM(WC.dblIssuedQuantity) + SUM(IsNULL(WC1.dblIssuedQuantity, 0)) AS [Total consumed]
-	,SUM(WC.dblIssuedQuantity) AS [Consumed Quantity]
-	,UM1.strUnitMeasure AS [Consumed Quantity UOM]
+	,SUM(WC.dblIssuedQuantity) + SUM(IsNULL(WC1.dblIssuedQuantity, 0)) AS [Total Consumed Quantity]
+	,SUM(WC.dblIssuedQuantity) AS [Used in Packaging]
+	,UM1.strUnitMeasure AS [UOM]
 	,SUM(IsNULL(WC1.dblIssuedQuantity, 0)) AS [Damaged]
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intWorkOrderId = W.intWorkOrderId
