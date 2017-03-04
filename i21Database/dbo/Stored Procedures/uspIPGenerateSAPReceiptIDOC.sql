@@ -81,8 +81,6 @@ Declare @tblOutput AS Table
 	strMessageType NVARCHAR(50)
 )
 
---Select @strReceiptIDOCHeader=dbo.fnIPGetSAPIDOCHeader('RECEIPT')
-
 Insert Into @tblReceiptHeader(intInventoryReceiptId,strDeliveryNo,dtmReceiptDate,intLoadId,strReceiptNo)
 Select DISTINCT r.intInventoryReceiptId,l.strExternalShipmentNumber,r.dtmReceiptDate,l.intLoadId,r.strReceiptNumber
 From tblICInventoryReceiptItem ri 
@@ -130,25 +128,11 @@ Begin
 		End
 	End
 
-	--Update Delivery Item No
-	--Update d Set d.strDeliveryItemNo=t.strDeliveryItemNo
-	--From @tblReceiptDetail d Join 
-	--(Select intInventoryReceiptItemId, (10 * ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId ASC)) strDeliveryItemNo From @tblReceiptDetail) t
-	--on d.intInventoryReceiptItemId=t.intInventoryReceiptItemId
-
 	If UPPER(@strCommodityCode)='COFFEE' AND @ysnBatchSplit=1 AND @ysnWMMBXY=0
 		Update @tblReceiptDetail Set strContainerNo=''
 
 	If UPPER(@strCommodityCode)='TEA'
 		Update d Set d.strContainerNo=ct.strERPBatchNumber From @tblReceiptDetail d Join tblCTContractDetail ct on d.intContractDetailId=ct.intContractDetailId
-
-	--Set @strXml =  '<DELVRY07>'
-	--Set @strXml += '<IDOC BEGIN="1">'
-
-	----IDOC Header
-	--Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
-	--Set @strXml +=	@strReceiptIDOCHeader
-	--Set @strXml +=	'</EDI_DC40>'
 
 	If UPPER(@strCommodityCode)='COFFEE' AND @ysnWMMBXY=1
 	Begin
