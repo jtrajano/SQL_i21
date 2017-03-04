@@ -421,6 +421,15 @@ Begin --Sales Order Pick List
 			Left Join tblSMTerm tm on so.intTermId=tm.intTermID
 			Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
 			WHERE pl.intPickListId=@intPickListId 
+
+			--Delete duplicate item records
+			DELETE t FROM @tblItems t 
+				WHERE EXISTS (
+					SELECT *
+					FROM @tblItems t1
+					WHERE t.strItemNo = t1.strItemNo
+					AND t.intSalesOrderDetailId > t1.intSalesOrderDetailId
+					)
 		End
 	Else
 		Begin
