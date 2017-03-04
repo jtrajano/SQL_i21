@@ -55,7 +55,8 @@ Declare @intMinSeq					INT,
 		@strCondXXml				NVARCHAR(MAX),
 		@strTextXml					NVARCHAR(MAX),
 		@strSeq						NVARCHAR(MAX),
-		@strProductType				NVARCHAR(100)
+		@strProductType				NVARCHAR(100),
+		@strVendorBatch				NVARCHAR(100)
 
 Declare @tblOutput AS Table
 (
@@ -218,6 +219,9 @@ Begin
 		Select TOP 1 @strProductType=ca.strDescription from tblICItem i Join tblICCommodityAttribute ca on i.intProductTypeId=ca.intCommodityAttributeId 
 		Where ca.strType='ProductType' And i.strItemNo=@strItemNo
 
+		Set @strVendorBatch=''
+		Select @strVendorBatch=strVendorLotID From tblCTContractDetail Where intContractDetailId=@intContractDetailId
+
 		--Find Doc Type
 		If @strContractBasis IN ('FCA','EXW','DDP','DAP','DDU')
 			Set @strDocType='ZHDE'
@@ -353,6 +357,8 @@ Begin
 					Set @strItemXml += '<VEND_PART>'	+ ISNULL(@strTerm,'')			+ '</VEND_PART>'
 				Else
 					Set @strItemXml += '<VEND_PART>'	+ ''			+ '</VEND_PART>'
+				If UPPER(@strCommodityCode)='TEA'
+					Set @strItemXml += '<VENDRBATCH>'	+ ISNULL(@strVendorBatch,'')			+ '</VENDRBATCH>'
 				Set @strItemXml += '<PO_PRICE>'		+ '1'	+ '</PO_PRICE>'
 				Set @strItemXml +=	'</E1BPMEPOITEM>'
 
@@ -387,6 +393,13 @@ Begin
 					Set @strItemXXml += '<VEND_PART>'	+ 'X'		+ '</VEND_PART>'
 				Else
 					Set @strItemXXml += '<VEND_PART>'	+ ' '		+ '</VEND_PART>'
+				If UPPER(@strCommodityCode)='TEA' 
+				Begin
+					If ISNULL(@strVendorBatch,'')<>''
+						Set @strItemXXml += '<VENDRBATCH>'	+ 'X'		+ '</VENDRBATCH>'
+					Else
+						Set @strItemXXml += '<VENDRBATCH>'	+ ' '		+ '</VENDRBATCH>'
+				End
 				Set @strItemXXml += '<PO_PRICE>'			+ 'X'		+ '</PO_PRICE>'
 				Set @strItemXXml +=	'</E1BPMEPOITEMX>'
 

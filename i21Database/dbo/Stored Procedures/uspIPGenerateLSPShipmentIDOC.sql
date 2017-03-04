@@ -488,7 +488,7 @@ Begin
 					Set @strContainerItemXml=NULL
 					Select @strContainerItemXml=COALESCE(@strContainerItemXml, '') 
 					+ '<E1EDL44 SEGMENT="1">'
-					+ '<POSNR>'  +  ISNULL(CONVERT(VARCHAR,(10 * @intNoOfContainer * ROW_NUMBER() OVER(ORDER BY cl.intLoadDetailContainerLinkId ASC))),'') + '</POSNR>'
+					+ '<POSNR>'  +  CASE WHEN ISNULL(cl.strExternalContainerId,'')='' THEN  ISNULL(CONVERT(VARCHAR,(10 * @intNoOfContainer * ROW_NUMBER() OVER(ORDER BY cl.intLoadDetailContainerLinkId ASC))),'') ELSE ISNULL(cl.strExternalContainerId,'') END + '</POSNR>'
 					+ '<VEMNG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),cl.dblQuantity)),'') + '</VEMNG>'
 					+ '<VEMEH>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(ld.strUnitOfMeasure,'')) + '</VEMEH>'
 					+ '</E1EDL44>'			 
