@@ -127,8 +127,15 @@ Begin
 		Set @strHeaderRowState='MODIFIED'
 
 	If UPPER(@strHeaderRowState)='MODIFIED' AND ISNULL(@strExternalDeliveryNumber,'')=''
-		GOTO NEXT_SHIPMENT
+		Begin
+			--update deliveryno for shipping advice from instruction
+			Select @strExternalDeliveryNumber=strExternalShipmentNumber From tblLGLoad 
+			Where intLoadId=(Select intLoadShippingInstructionId From tblLGLoad Where intLoadId=@intLoadId)
+			Update tblLGLoad Set strExternalShipmentNumber=@strExternalDeliveryNumber Where intLoadId=@intLoadId
 
+			If ISNULL(@strExternalDeliveryNumber,'')=''
+				GOTO NEXT_SHIPMENT
+		End
 	--if ack is not received for the previous feed do not send the current feed
 	If (Select TOP 1 strFeedStatus From tblLGLoadStg Where intLoadId=@intLoadId AND strTransactionType='Shipment' 
 		AND intLoadStgId < @intLoadStgId Order By intLoadStgId Desc)<>'Ack Rcvd'
@@ -257,6 +264,9 @@ Begin
 			@strWeightUOM				=	dbo.fnIPConverti21UOMToSAP(strWeightUOM),
 			@strRowState				=	strRowState
 		From @tblDetail Where intRowNo=@intMinDetail
+
+			--update strExternalShipmentItemNumber if null
+			Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@intLoadDetailId AND ISNULL(strExternalShipmentItemNumber,'')=''
 
 			Set @strItemXml += '<E1EDL24 SEGMENT="1">'
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strDeliveryItemNo,'') + '</POSNR>' 
