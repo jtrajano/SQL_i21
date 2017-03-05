@@ -6,22 +6,51 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE	@ErrMsg NVARCHAR(MAX)
 
 	
-	DECLARE @TotalQuantity DECIMAL(24,10)
-	DECLARE @TotalNetQuantity DECIMAL(24,10)
-	DECLARE @dblNoOfLots NVARCHAR(20)
+	DECLARE @TotalQuantity DECIMAL(24,10),
+			@TotalNetQuantity DECIMAL(24,10),
+			@dblNoOfLots NVARCHAR(20),
 
-	DECLARE @IntNoOFUniFormItemUOM INT
-	DECLARE @IntNoOFUniFormNetWeightUOM INT
-		
+			@IntNoOFUniFormItemUOM INT,
+			@IntNoOFUniFormNetWeightUOM INT,
+			@intLastApprovedContractId INT,
+			@intPrevApprovedContractId INT,
+			@strAmendedColumns NVARCHAR(MAX),
+			@intContractDetailId INT
+
+	DECLARE @Amend TABLE (intContractDetailId INT, strAmendedColumns NVARCHAR(MAX))
+
 	SELECT @IntNoOFUniFormItemUOM=COUNT(DISTINCT intItemUOMId)  FROM tblCTContractDetail WHERE intContractHeaderId= @intContractHeaderId
 	SELECT @IntNoOFUniFormNetWeightUOM=COUNT(DISTINCT intNetWeightUOMId)  FROM tblCTContractDetail WHERE intContractHeaderId= @intContractHeaderId
 
 	SELECT  @dblNoOfLots = dblNoOfLots FROM tblCTContractHeader WHERE intContractHeaderId=@intContractHeaderId
 	SELECT  @TotalQuantity = dblQuantity FROM tblCTContractHeader WHERE intContractHeaderId=@intContractHeaderId
 	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WHERE intContractHeaderId=@intContractHeaderId
+
+	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
+
+	WHILE ISNULL(@intContractDetailId,0) > 0
+	BEGIN
+		SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId
+		FROM   tblCTApprovedContract 
+		WHERE  intContractDetailId = @intContractDetailId AND strApprovalType IN ('Contract','Contract Amendment ')
+		ORDER BY intApprovedContractId DESC
+
+		SELECT TOP 1 @intPrevApprovedContractId =  intApprovedContractId
+		FROM   tblCTApprovedContract 
+		WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId <> @intLastApprovedContractId 
+		ORDER BY intApprovedContractId DESC
+             
+		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intLastApprovedContractId,'intApprovedById,dtmApproved', @strAmendedColumns OUTPUT
+
+		INSERT INTO @Amend
+		SELECT @intContractDetailId,@strAmendedColumns
+
+		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
+	END
+	
 
 
 	SELECT	CD.intContractHeaderId,
@@ -32,7 +61,7 @@ BEGIN TRY
 			CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
 					WHEN 	CD.intPricingTypeId = 2	THEN LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth + CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0 THEN ' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)' ELSE '' END 	
 			END	AS	strPrice,
-			IM.strDescription,
+			ISNULL(IC.strContractItemName,IM.strDescription) strDescription,
 			BM.strBagMark,
 			CD.strReference,
 			GETDATE() AS dtmETD,
@@ -64,7 +93,8 @@ BEGIN TRY
 				NULL 
 			END
 			AS  strTotalDesc,
-			dbo.fnRemoveTrailingZeroes(@dblNoOfLots) AS dblNoOfLots			
+			dbo.fnRemoveTrailingZeroes(@dblNoOfLots) AS dblNoOfLots,
+			AM.strAmendedColumns			
 	FROM	tblCTContractDetail CD	
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
 	JOIN	tblICItemUOM		QM	ON	QM.intItemUOMId			=	CD.intItemUOMId			LEFT
@@ -80,7 +110,9 @@ BEGIN TRY
 	JOIN	tblICItemUOM		NM	ON	NM.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
 	JOIN	tblICItemUOM		WU	ON	WU.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
 	JOIN	tblICUnitMeasure	U7	ON	U7.intUnitMeasureId		=	WU.intUnitMeasureId		LEFT
-	JOIN	tblICUnitMeasure	NU	ON	NU.intUnitMeasureId		=	NM.intUnitMeasureId
+	JOIN	tblICUnitMeasure	NU	ON	NU.intUnitMeasureId		=	NM.intUnitMeasureId		LEFT
+	JOIN	@Amend				AM	ON	AM.intContractDetailId	=	CD.intContractDetailId	LEFT
+	JOIN	tblICItemContract	IC	ON	IC.intItemContractId	=	CD.intItemContractId
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 
 END TRY
