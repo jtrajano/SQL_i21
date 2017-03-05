@@ -23,7 +23,7 @@ BEGIN TRY
 		SET @strRowState = 'Added'
 	END
 
-	IF (@strRowState = 'Added')
+	IF (@strRowState IN ('Added','Delete'))
 	BEGIN
 		INSERT INTO tblLGLoadStg (
 			intLoadId
@@ -427,7 +427,7 @@ BEGIN TRY
 		END
 	END
 
-	IF (@intShipmentType = 1 AND @dtmCurrentETAPOD IS NOT NULL)
+	IF (@intShipmentType = 1 AND @dtmCurrentETAPOD IS NOT NULL AND @strRowState <> 'Delete')
 	BEGIN
 		IF NOT EXISTS (SELECT 1 FROM tblLGETATracking WHERE intLoadId = @intLoadId AND strTrackingType = 'ETA POD')
 		BEGIN
@@ -469,7 +469,7 @@ BEGIN TRY
 		END
 	END
 
-	IF (@intShipmentType = 1 AND @dtmCurrentETSPOL IS NOT NULL)
+	IF (@intShipmentType = 1 AND @dtmCurrentETSPOL IS NOT NULL AND @strRowState <> 'Delete')
 	BEGIN
 		IF NOT EXISTS (SELECT 1 FROM tblLGETATracking WHERE intLoadId = @intLoadId AND strTrackingType = 'ETS POL')
 		BEGIN
