@@ -128,3 +128,7 @@ EXEC sp_addmessage 90027,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90028) EXEC sp_dropmessage 90028, 'us_english'	
 SET @strmessage = '%s is not taken for the line %s. Please take the sample and then start the work order'
 EXEC sp_addmessage 90028,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90029) EXEC sp_dropmessage 90029, 'us_english'	
+SET @strmessage = 'Manufacturing Process cannot be blank'
+EXEC sp_addmessage 90029,11,@strmessage,'us_english','False'
