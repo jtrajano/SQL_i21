@@ -37,6 +37,19 @@ BEGIN TRY
 			,intUserId INT
 			)
 
+	IF NOT EXISTS (
+			SELECT *
+			FROM tblMFManufacturingProcess
+			WHERE intManufacturingProcessId = @intManufacturingProcessId
+			)
+	BEGIN
+		RAISERROR (
+				90029
+				,11
+				,1
+				)
+	END
+
 	SELECT @intTransactionCount = @@TRANCOUNT
 
 	IF @intTransactionCount = 0
@@ -68,7 +81,8 @@ BEGIN TRY
 			)
 
 		SELECT @intYieldId = SCOPE_IDENTITY()
-		SELECT @intConcurrencyId=1
+
+		SELECT @intConcurrencyId = 1
 	END
 	ELSE
 	BEGIN
