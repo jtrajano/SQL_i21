@@ -117,6 +117,8 @@ SELECT TOP 1 L.intLoadId
 	,L.strShippingMode
 	,L.strMVessel
 	,L.strMVoyageNumber
+	,L.strFVessel
+	,L.strFVoyageNumber
 	,ForAgent.strName AS strForwardingAgent
 	,BLDraft.strName AS strBLDraftToBeSent
 	,L.strDocPresentationType
@@ -468,6 +470,7 @@ SELECT TOP 1 L.intLoadId
 	,@strLogisticsPrintSignOff AS strLogisticsPrintSignOff
 	,@strPrintableRemarks AS strPrintableRemarks
 	,(SELECT TOP 1 strInboundText FROM tblSMCity WHERE strCity = L.strDestinationPort) AS strContractText
+	,CD.strERPPONumber
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN intPContractDetailId ELSE intSContractDetailId END
