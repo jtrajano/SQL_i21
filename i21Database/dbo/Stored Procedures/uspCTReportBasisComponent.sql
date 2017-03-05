@@ -62,7 +62,8 @@ AS
 			CD.strPriceUOM,
 			CD.dblBasis,
 			CD.dblCashPrice,
-			1 AS intDisplayOrder
+			1 AS intDisplayOrder,
+			CD.strInternalComment
 
 	FROM	vyuCTSearchContractDetail	CD
 	JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
@@ -94,7 +95,8 @@ AS
 			CD.strPriceUOM,
 			CD.dblBasis,
 			CD.dblCashPrice,
-			2 AS intDisplayOrder
+			2 AS intDisplayOrder,
+			CD.strInternalComment
 
 	FROM	vyuCTSearchContractDetail	CD
 	WHERE	CD.intContractDetailId IN (SELECT * FROM dbo.fnSplitString(@intContractDetailId,','))
@@ -123,7 +125,8 @@ AS
 			CD.strPriceUOM,
 			CD.dblBasis,
 			CD.dblCashPrice,
-			3 AS intDisplayOrder
+			3 AS intDisplayOrder,
+			CD.strInternalComment
 
 	FROM	vyuCTSearchContractDetail	CD
 	WHERE	CD.intContractDetailId IN (SELECT * FROM dbo.fnSplitString(@intContractDetailId,','))

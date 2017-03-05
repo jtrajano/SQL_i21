@@ -8,14 +8,39 @@ AS
 			CD.strCreatedByNo,				CH.strTerm,					CD.strPurchasingGroup,	CH.strEntityNumber				AS strEntityNo,	
 			CH.strContractNumber,			CD.strERPPONumber,			CD.intContractSeq,		CD.strItemNo,
 			CD.strStorageLocation,			CD.dblQuantity,										CD.strItemUOM					AS strQuantityUOM,
-			CD.dtmPlannedAvailabilityDate,	CD.dblBasis,				CD.strCurrency,			CD.dblCashPrice / 100.0			AS dblUnitCashPrice,	
-			CD.strPriceUOM,					CH.dtmContractDate,			CD.dtmStartDate,		CD.dtmEndDate,
+			CD.dtmPlannedAvailabilityDate,	CD.strCurrency,										CD.dblCashPrice / 100.0			AS dblUnitCashPrice,	
+			CASE	WHEN	PT.strDescription LIKE '%Arabica%'
+					THEN	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,LB.intUnitMeasureId,PU.intUnitMeasureId,CD.dblBasis)*100
+					WHEN	PT.strDescription = 'Robusta'
+					THEN	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,TN.intUnitMeasureId,PU.intUnitMeasureId,CD.dblBasis)
+					ELSE	CD.dblBasis
+			END		dblBasis,				
+			CASE	WHEN	PT.strDescription LIKE '%Arabica%'
+					THEN	LB.strUnitMeasure
+					WHEN	PT.strDescription = 'Robusta'
+					THEN	TN.strUnitMeasure
+					ELSE	CD.strPriceUOM
+			END		strPriceUOM,					
+			CH.dtmContractDate,				CD.dtmStartDate,			CD.dtmEndDate,
 			CD.dblNetWeight,				CD.strNetWeightUOM,			VE.strVendorAccountNum,	AE.intEntityId					AS intSubmittedById,
 			CH.strTermCode,					CD.strContractItemNo,		CD.strContractItemName,	AE.strName						AS strSubmittedBy,
 			CD.strERPItemNumber,			CD.strERPBatchNumber,		CD.intContractStatusId,	ISNULL(AE.strExternalERPId,UE.strExternalERPId)			AS strSubmittedByNo,
 			OG.strCountry	AS strOrigin,
-			CASE	WHEN	CD.intPricingTypeId = 1 THEN	CD.dblFutures
-					WHEN	CD.intPricingTypeId = 6	THEN	CD.dblCashPrice
+			CASE	WHEN	CD.intPricingTypeId = 1 THEN	
+							CASE	WHEN	PT.strDescription LIKE '%Arabica%'
+									THEN	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,LB.intUnitMeasureId,PU.intUnitMeasureId,CD.dblFutures)*100
+									WHEN	PT.strDescription = 'Robusta'
+									THEN	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,TN.intUnitMeasureId,PU.intUnitMeasureId,CD.dblFutures)
+									ELSE	CD.dblFutures
+							END	
+			
+					WHEN	CD.intPricingTypeId = 6	THEN	
+							CASE	WHEN	PT.strDescription LIKE '%Arabica%'
+									THEN	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,LB.intUnitMeasureId,PU.intUnitMeasureId,CD.dblCashPrice)*100
+									WHEN	PT.strDescription = 'Robusta'
+									THEN	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,TN.intUnitMeasureId,PU.intUnitMeasureId,CD.dblCashPrice)
+									ELSE	CD.dblFutures
+							END	
 					ELSE	0
 			END	dblCashPrice
 			
@@ -23,8 +48,12 @@ AS
 	JOIN	vyuCTContractHeaderView	CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
 	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId			LEFT
 	JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId	LEFT
+	JOIN	tblICUnitMeasure		LB	ON	LB.strUnitMeasure			=	'LB'					LEFT
+	JOIN	tblICUnitMeasure		TN	ON	TN.strUnitMeasure			=	'TON'					LEFT
 	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId			
 										AND	CA.strType					=	'Origin'				LEFT
+	JOIN	tblICCommodityAttribute	PT	ON	PT.intCommodityAttributeId	=	IM.intProductTypeId			
+										AND	PT.strType					=	'ProductType'			LEFT
 	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID			LEFT
 	JOIN	(
 					SELECT	TOP 1 TR.intRecordId, AP.intSubmittedById 
