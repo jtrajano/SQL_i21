@@ -132,13 +132,13 @@ BEGIN
 END
 
 SET @query = 'DECLARE @temp_aging_table TABLE(
-	 [strInvoiceNumber]			NVARCHAR(100)
+     [strCustomerName]			NVARCHAR(100)
+	,[strCustomerNumber]		NVARCHAR(100)
+	,[strInvoiceNumber]			NVARCHAR(100)
 	,[strRecordNumber]			NVARCHAR(100)
-	,[intInvoiceId]				INT
-	,[strCustomerName]			NVARCHAR(100)
+	,[intInvoiceId]				INT	
 	,[strBOLNumber]				NVARCHAR(100)
-	,[intEntityCustomerId]		INT
-	,[strCustomerNumber]		NVARCHAR(100)			
+	,[intEntityCustomerId]		INT	
 	,[dblCreditLimit]			NUMERIC(18,6)
 	,[dblTotalAR]				NUMERIC(18,6)
 	,[dblFuture]				NUMERIC(18,6)
