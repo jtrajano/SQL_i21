@@ -86,6 +86,7 @@ SELECT   L.intLoadId
 		,CAST((CASE WHEN ISNULL(LDCL.dblReceivedQty ,0) = 0 THEN 0 ELSE 1 END) AS BIT) AS  ysnReceived
 		,PDetail.dblCashPrice AS dblPCashPrice
 		,SDetail.dblCashPrice AS dblSCashPrice
+		,LDCL.strExternalContainerId
 
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId

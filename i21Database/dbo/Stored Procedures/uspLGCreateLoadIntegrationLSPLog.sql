@@ -429,6 +429,7 @@ BEGIN TRY
 		,LC.dblNetWt
 		,LC.dblGrossWt
 		,LC.strWeightUnitMeasure
+		,LC.strExternalContainerId
 		,@strRowState
 		,GETDATE()
 	FROM vyuLGLoadContainerView LC
