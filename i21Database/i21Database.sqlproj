@@ -5089,6 +5089,12 @@
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
     <Build Include="dbo\Tables\tblSTTransLogPMMorris.sql" />
     <Build Include="dbo\Tables\tblSTTransLogPMReynolds.sql" />
+    <Build Include="dbo\Tables\tblSMDocument.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentType.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentTypeField.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentSourceFolder.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentTypeFieldValue.sql" />
+    <Build Include="dbo\Tables\tblSMNewDocument.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
