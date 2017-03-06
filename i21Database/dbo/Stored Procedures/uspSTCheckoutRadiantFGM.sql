@@ -1,11 +1,17 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantFGM]
-@intCheckoutId Int,
-@strXML nvarchar(MAX)
+@intCheckoutId Int
 AS
 BEGIN
 
 	DECLARE @intStoreId Int
 	Select @intStoreId = intStoreId from dbo.tblSTCheckoutHeader Where intCheckoutId = @intCheckoutId
+
+	--Update values that are '' empty
+	Update #tempCheckoutInsert
+	Set FuelGradeSalesVolume = 1
+	WHERE FuelGradeSalesVolume IS NULL OR FuelGradeSalesVolume = '' OR FuelGradeSalesVolume = '0'
+
+	Select * FROM #tempCheckoutInsert
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 	BEGIN
