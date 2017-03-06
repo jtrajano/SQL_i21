@@ -613,7 +613,8 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId						 
 				WHERE
 					ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(D.dblBaseInterest,0.00)) - ISNULL(D.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - D.dblBasePayment),0) <> 0
-					AND  (@GainLossAccount IS NULL OR @GainLossAccount = 0)	
+					AND  (@GainLossAccount IS NULL OR @GainLossAccount = 0)
+					AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) = ((D.dblPayment - D.dblInterest) + D.dblDiscount)	
 					
 				--+overpayment
 				INSERT INTO
@@ -1415,7 +1416,7 @@ IF @post = 1
 													CASE WHEN @intWriteOffAccount IS NOT NULL THEN @intWriteOffAccount ELSE @WriteOffAccount END
 												ELSE A.intAccountId END)
 											END
-			,dblDebit					= (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END) * (A.dblBaseAmountPaid + (SELECT SUM(ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - ARPD.dblBasePayment),0)) FROM tblARPaymentDetail ARPD INNER JOIN tblARInvoice C ON ARPD.intInvoiceId = C.intInvoiceId  WHERE ARPD.intPaymentId = A.intPaymentId))
+			,dblDebit					= (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END) * (A.dblBaseAmountPaid + ISNULL((SELECT SUM(ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - ARPD.dblBasePayment),0)) FROM tblARPaymentDetail ARPD INNER JOIN tblARInvoice C ON ARPD.intInvoiceId = C.intInvoiceId  WHERE ARPD.intPaymentId = A.intPaymentId AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) = ((ARPD.dblPayment - ARPD.dblInterest) + ARPD.dblDiscount)),0))
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
@@ -1783,6 +1784,7 @@ IF @post = 1
 				ON A.intPaymentId = P.intPaymentId 
 		WHERE
 			((ISNULL(((((ISNULL(I.dblBaseAmountDue, 0.00) + ISNULL(B.dblBaseInterest,0.00)) - ISNULL(B.dblBaseDiscount,0.00) * (CASE WHEN I.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - B.dblBasePayment),0)))  <> 0
+			AND ((I.dblAmountDue + I.dblInterest) - I.dblDiscount) = ((B.dblPayment - B.dblInterest) + B.dblDiscount)
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
