@@ -43,6 +43,8 @@ SELECT
     ,CD.intContractSeq
     ,IC.intCommodityId
     ,H.ysnProcessed
+	,D.intCurrencyExchangeRateTypeId
+	,D.dblCurrencyExchangeRate 
 FROM         
     [tblSOSalesOrderDetail] D
 LEFT JOIN    
