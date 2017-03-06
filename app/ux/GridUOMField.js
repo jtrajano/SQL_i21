@@ -226,7 +226,7 @@ Ext.define('Inventory.ux.GridUOMField', {
                     };
                     me.syncModifiedRow(param.id, param.data);
                 }
-                me.fireEvent('onUOMSelect', records);
+                me.fireEvent('onUOMSelect', plugin, records, combo);
             }
         });
     },
