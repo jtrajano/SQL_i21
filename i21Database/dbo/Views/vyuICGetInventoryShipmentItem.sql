@@ -29,6 +29,8 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strOrderUOM = ShipmentItemSource.strOrderUOM
 	, strUnitMeasure = UOM.strUnitMeasure
 	, dblItemUOMConv = ItemUOM.dblUnitQty
+	, intDecimalPlaces = UOM.intDecimalPlaces
+	, intUnitMeasureId = UOM.intUnitMeasureId
 	, strUnitType = UOM.strUnitType
 	, intCurrencyId = Currency.intCurrencyID
 	, Currency.strCurrency
