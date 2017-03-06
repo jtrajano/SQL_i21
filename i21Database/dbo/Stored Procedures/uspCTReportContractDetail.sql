@@ -33,6 +33,7 @@ BEGIN TRY
 
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
+		SELECT @strAmendedColumns = ''
 		SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId
 		FROM   tblCTApprovedContract 
 		WHERE  intContractDetailId = @intContractDetailId AND strApprovalType IN ('Contract','Contract Amendment ')
@@ -43,7 +44,12 @@ BEGIN TRY
 		WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId <> @intLastApprovedContractId 
 		ORDER BY intApprovedContractId DESC
              
-		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intLastApprovedContractId,'intApprovedById,dtmApproved', @strAmendedColumns OUTPUT
+		IF @intPrevApprovedContractId IS NOT NULL AND @intLastApprovedContractId IS NOT NULL
+		BEGIN
+			EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intLastApprovedContractId,'intApprovedById,dtmApproved,
+			intContractBasisId,dtmPlannedAvailabilityDate,strOrigin,dblNetWeight,intNetWeightUOMId,
+			intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType', @strAmendedColumns OUTPUT
+		END
 
 		INSERT INTO @Amend
 		SELECT @intContractDetailId,@strAmendedColumns
@@ -93,7 +99,12 @@ BEGIN TRY
 				NULL 
 			END
 			AS  strTotalDesc,
-			dbo.fnRemoveTrailingZeroes(@dblNoOfLots) AS dblNoOfLots,
+			CASE	WHEN	CD.intPricingTypeId = 1 THEN NULL
+					WHEN 	CD.intPricingTypeId = 2	THEN 'Lots :'
+			END	AS	lblLots,
+			CASE	WHEN	CD.intPricingTypeId = 1 THEN NULL
+					WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(@dblNoOfLots)
+			END	AS	dblNoOfLots,
 			AM.strAmendedColumns			
 	FROM	tblCTContractDetail CD	
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
