@@ -2642,6 +2642,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 { dataIndex: 'intDestinationWeightId', text: 'Destination Weight Id', width: 100, dataType: 'numeric', hidden: true },
                 { dataIndex: 'strDestinationWeights', text: 'Destination Weights', width: 100, dataType: 'string' },
 
+                { dataIndex: 'intForexRateTypeId', text: 'Forex Rate Type Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strForexRateType', text: 'Forex Rate Type', width: 100, dataType: 'string', hidden: true },
+                { xtype: 'numbercolumn', dataIndex: 'dblForexRate', text: 'Forex Rate', width: 100, dataType: 'float', hidden: true },               
+
                 {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', hidden: true },
                 {dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hidden: true },
                 {dataIndex: 'intSourceId', text: 'intSourceId', width: 100, dataType: 'numeric', hidden: true },
@@ -2803,7 +2807,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 strDestinationWeights: order.get('strDestinationWeights'),
                                 strOwnershipType: 'Own',
                                 intOwnershipType: 1,
-                                intCommodityId: order.get('intCommodityId')
+                                intCommodityId: order.get('intCommodityId'),
+                                intForexRateTypeId: order.get('intForexRateTypeId'),
+                                strForexRateType: order.get('strForexRateType'),
+                                dblForexRate: order.get('dblForexRate')                                
                             };
 
                             // Check if the shipment location matches the location of the order.
