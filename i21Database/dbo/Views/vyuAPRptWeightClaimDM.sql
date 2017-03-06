@@ -225,7 +225,7 @@ FROM
 										END
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
-												THEN NULL 
+												THEN ContractCostCurrency.strCurrency 
 										WHEN DMDetails.intContractDetailId IS NULL  AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL
 										WHEN DMDetails.ysnSubCurrency > 0 AND SubCurrency.intConcurrencyId > 0
 										THEN SubCurrency.strCurrency
@@ -277,6 +277,7 @@ FROM
 	LEFT JOIN tblCTContractDetail ContractDetail ON DMDetails.intContractDetailId = ContractDetail.intContractDetailId
 	LEFT JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId
 	LEFT JOIN tblCTContractCost ContractCost ON ContractDetail.intContractDetailId = ContractCost.intContractDetailId AND DMDetails.intContractCostId = ContractCost.intContractCostId
+	LEFT JOIN tblSMCurrency ContractCostCurrency ON ContractCost.intCurrencyId = ContractCostCurrency.intCurrencyID
 	LEFT JOIN (tblICItemUOM ContractCostItemUOM LEFT JOIN tblICUnitMeasure ContractCostItemMeasure ON ContractCostItemUOM.intUnitMeasureId = ContractCostItemMeasure.intUnitMeasureId)
 								ON ContractCostItemUOM.intItemUOMId = ContractCost.intItemUOMId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptDetail LEFT JOIN tblICInventoryReceipt Receipt ON ReceiptDetail.intInventoryReceiptId = Receipt.intInventoryReceiptId
