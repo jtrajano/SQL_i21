@@ -64,7 +64,7 @@
 			b.intEntityCustomerId,
 			d.intWarehouseId,
 			g.intItemUOMId,
-			NULL,
+			(SELECT TOP 1 intDefaultCountryId FROM tblSMCompanyPreference),
 			cast(GetDate() as date),
 			1,
 			null,		
@@ -86,9 +86,7 @@
 			null,	
 			'Standard',
 			null,
-			0,	
-		    (SELECT TOP 1 intDefaultCountryId FROM tblSMCompanyPreference)	
-					
+			0		    					
 		) c
  
 	 WHERE g.strItemNo is not null

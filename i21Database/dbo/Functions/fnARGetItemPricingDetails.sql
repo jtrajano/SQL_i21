@@ -27,7 +27,6 @@
 	,@InvoiceType				NVARCHAR(200)
 	,@TermId					INT
 	,@GetAllAvailablePricing	BIT
-	,@SpecialPricingCurrencyId	INT
 )
 RETURNS @returntable TABLE
 (
@@ -158,7 +157,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 						,@VendorLocationId
 						,@InvoiceType
 						,0
-						,@SpecialPricingCurrencyId
+						,@CurrencyId
 					);
 			
 			
@@ -212,7 +211,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 						,@VendorLocationId
 						,@InvoiceType
 						,@GetAllAvailablePricing
-						,@SpecialPricingCurrencyId
+						,@CurrencyId
 					)
 			END				
 	END
@@ -242,6 +241,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 						,@PricingLevelId
 						,@TermId
 						,0
+						,@CurrencyId
 					);
 			
 			
@@ -294,6 +294,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 						,@PricingLevelId
 						,@TermId
 						,@GetAllAvailablePricing
+						,@CurrencyId
 					);
 			END								
 	END

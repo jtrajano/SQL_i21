@@ -68,7 +68,7 @@ CROSS APPLY (
         ,A.intCustomerNumber
         ,A.intLocationId
         ,NULL
-		,NULL
+		,(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference  )
         ,GETDATE()
         ,1
         ,NULL  --@ContractHeaderId		INT
@@ -90,8 +90,7 @@ CROSS APPLY (
         ,NULL
         ,NULL
         ,NULL --TermId
-        ,NULL --@GetAllAvailablePricing
-		,(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference  )
+        ,NULL --@GetAllAvailablePricing		
         )
 ) B
 

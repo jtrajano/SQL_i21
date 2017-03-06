@@ -82,7 +82,6 @@ AS
 			,@InvoiceType
 			,@TermId
 			,@GetAllAvailablePricing
-			,@CurrencyId
 		)
 
 RETURN 0
