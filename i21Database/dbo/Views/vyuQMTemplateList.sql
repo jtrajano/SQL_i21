@@ -14,15 +14,15 @@ SELECT DISTINCT P.intProductId
 	,'' AS strUnitMeasure
 	,(
 		Stuff((
-				SELECT ',' + strControlPointName
+				SELECT ',' + strSampleTypeName
 				FROM (
-					SELECT PT.strControlPointName
+					SELECT ST.strSampleTypeName
 					FROM tblQMProduct AS P1
 					JOIN tblQMProductControlPoint PC ON PC.intProductId = P1.intProductId
-					JOIN tblQMControlPoint PT ON PT.intControlPointId = PC.intControlPointId
+					JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
 					WHERE P1.intProductId = P.intProductId
 					) t
-				ORDER BY ',' + strControlPointName
+				ORDER BY ',' + strSampleTypeName
 				FOR XML Path('')
 				), 1, 1, '')
 		) 'strControlPoints'
@@ -53,15 +53,15 @@ SELECT DISTINCT P.intProductId
 	,UOM.strUnitMeasure
 	,(
 		Stuff((
-				SELECT ',' + strControlPointName
+				SELECT ',' + strSampleTypeName
 				FROM (
-					SELECT PT.strControlPointName
+					SELECT ST.strSampleTypeName
 					FROM tblQMProduct AS P1
 					JOIN tblQMProductControlPoint PC ON PC.intProductId = P1.intProductId
-					JOIN tblQMControlPoint PT ON PT.intControlPointId = PC.intControlPointId
+					JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
 					WHERE P1.intProductId = P.intProductId
 					) t
-				ORDER BY ',' + strControlPointName
+				ORDER BY ',' + strSampleTypeName
 				FOR XML Path('')
 				), 1, 1, '')
 		) 'strControlPoints'
@@ -94,15 +94,15 @@ SELECT DISTINCT P.intProductId
 	,'' AS strUnitMeasure
 	,(
 		Stuff((
-				SELECT ',' + strControlPointName
+				SELECT ',' + strSampleTypeName
 				FROM (
-					SELECT PT.strControlPointName
+					SELECT ST.strSampleTypeName
 					FROM tblQMProduct AS P1
 					JOIN tblQMProductControlPoint PC ON PC.intProductId = P1.intProductId
-					JOIN tblQMControlPoint PT ON PT.intControlPointId = PC.intControlPointId
+					JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
 					WHERE P1.intProductId = P.intProductId
 					) t
-				ORDER BY ',' + strControlPointName
+				ORDER BY ',' + strSampleTypeName
 				FOR XML Path('')
 				), 1, 1, '')
 		) 'strControlPoints'
@@ -129,15 +129,15 @@ SELECT DISTINCT P.intProductId
 	,'' AS strUnitMeasure
 	,(
 		Stuff((
-				SELECT ',' + strControlPointName
+				SELECT ',' + strSampleTypeName
 				FROM (
-					SELECT PT.strControlPointName
+					SELECT ST.strSampleTypeName
 					FROM tblQMProduct AS P1
 					JOIN tblQMProductControlPoint PC ON PC.intProductId = P1.intProductId
-					JOIN tblQMControlPoint PT ON PT.intControlPointId = PC.intControlPointId
+					JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
 					WHERE P1.intProductId = P.intProductId
 					) t
-				ORDER BY ',' + strControlPointName
+				ORDER BY ',' + strSampleTypeName
 				FOR XML Path('')
 				), 1, 1, '')
 		) 'strControlPoints'
@@ -164,15 +164,15 @@ SELECT DISTINCT P.intProductId
 	,'' AS strUnitMeasure
 	,(
 		Stuff((
-				SELECT ',' + strControlPointName
+				SELECT ',' + strSampleTypeName
 				FROM (
-					SELECT PT.strControlPointName
+					SELECT ST.strSampleTypeName
 					FROM tblQMProduct AS P1
 					JOIN tblQMProductControlPoint PC ON PC.intProductId = P1.intProductId
-					JOIN tblQMControlPoint PT ON PT.intControlPointId = PC.intControlPointId
+					JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
 					WHERE P1.intProductId = P.intProductId
 					) t
-				ORDER BY ',' + strControlPointName
+				ORDER BY ',' + strSampleTypeName
 				FOR XML Path('')
 				), 1, 1, '')
 		) 'strControlPoints'

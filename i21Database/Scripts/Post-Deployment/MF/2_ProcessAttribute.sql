@@ -514,6 +514,26 @@ BEGIN
 END
 GO
 IF NOT EXISTS (
+		SELECT 1
+		FROM tblMFAttribute
+		WHERE intAttributeId = 25
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 25
+		,'Sample Type'
+		,5
+		,1
+		,'Select convert(varchar,intSampleTypeId) as ValueMember,strSampleTypeName as DisplayMember from tblQMSampleType Order by strSampleTypeName'
+END
+GO
+IF NOT EXISTS (
 		SELECT *
 		FROM dbo.tblMFAttribute
 		WHERE intAttributeId = 26

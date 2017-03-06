@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMGetTemplateNumber]
 	@intItemId INT
 	,@intControlPointId INT
+	,@intSampleTypeId INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -17,7 +18,7 @@ SET @intProductId = (
 		JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 		WHERE P.intProductTypeId = 2 -- Item
 			AND P.intProductValueId = @intItemId
-			AND PC.intControlPointId = @intControlPointId
+			AND PC.intSampleTypeId = @intSampleTypeId
 			AND P.ysnActive = 1
 		)
 
@@ -34,7 +35,7 @@ BEGIN
 			JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 			WHERE P.intProductTypeId = 1 -- Item Category
 				AND P.intProductValueId = @intCategoryId
-				AND PC.intControlPointId = @intControlPointId
+				AND PC.intSampleTypeId = @intSampleTypeId
 				AND P.ysnActive = 1
 			)
 END
