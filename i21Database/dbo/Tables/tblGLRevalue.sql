@@ -14,7 +14,7 @@ CREATE TABLE [dbo].[tblGLRevalue](
 	[ysnPosted] [bit] NULL CONSTRAINT [DF_tblGLRevalue_ysnPosted]  DEFAULT ((0)),
 	[intReverseId] [int] NULL,
 	[strDescription] [nvarchar](300) COLLATE Latin1_General_CI_AS,
-	[intEntityId] INT,
+	[intEntityId] INT NULL,
  CONSTRAINT [PK_tblGLRevalue] PRIMARY KEY CLUSTERED
 (
 	[intConsolidationId] ASC
