@@ -418,68 +418,72 @@ INSERTDATE:
 		IF (@strShipmentType = 'Shipment' AND ISNULL(@ysnContainerAddedAlready,0) = 0)
 		BEGIN
 			INSERT INTO tblLGLoadContainerStg
-			SELECT @intLoadStdId
-				,@intLoadId
-				,LC.intLoadContainerId
-				,LC.strContainerNumber
-				,CASE 
-					WHEN CT.strContainerType LIKE '%20%'
-						THEN '000000000010003243'
-					WHEN CT.strContainerType LIKE '%40%'
-						THEN '000000000010003244'
-					ELSE CT.strContainerType
-					END
-				,'0002'
-				,L.strExternalShipmentNumber
-				,ROW_NUMBER() OVER (
-					PARTITION BY LC.intLoadId ORDER BY LC.intLoadId
-					) AS Seq
-				,LC.dblQuantity
-				,UM.strUnitMeasure strItemUOM
-				,LC.dblNetWt
-				,LC.dblGrossWt
-				,LUM.strUnitMeasure strWeightUnitMeasure
-				,NULL
-				,'Modified'
-				,GETDATE()
-			FROM tblLGLoadContainer LC
-			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
-			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
-			JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intWeightUnitMeasureId
-			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
-			--LEFT JOIN tblLGLoadContainerLog LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId AND LDCL.intLoadLogId = (SELECT MIN(intLoadLogId) FROM tblLGLoadLog)
-			WHERE LC.intLoadId = @intLoadId
-
-			UNION
-
-			SELECT @intLoadStdId
-				,@intLoadId
-				,intLoadContainerId
-				,strContainerNo COLLATE Latin1_General_CI_AS
-				,strContainerSizeCode COLLATE Latin1_General_CI_AS
-				,'0002' COLLATE Latin1_General_CI_AS
-				,strExternalPONumber COLLATE Latin1_General_CI_AS
-				,strSeq COLLATE Latin1_General_CI_AS
-				,dblContainerQty
-				,strContainerUOM COLLATE Latin1_General_CI_AS
-				,dblNetWt
-				,dblGrossWt
-				,strWeightUOM
-				,strExternalContainerId
-				,'Delete' Collate Latin1_General_CI_AS
-				,GETDATE()
-			FROM tblLGLoadContainerLog
-			WHERE intLoadId = @intLoadId
-				AND intLoadContainerId NOT IN (
-					SELECT LC.intLoadContainerId
-					FROM tblLGLoadContainer LC
-					JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
-					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
-					JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intWeightUnitMeasureId
-					LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
-					LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
-					WHERE LC.intLoadId = @intLoadId
-			)
+			SELECT *
+			FROM (
+				SELECT @intLoadStdId intLoadStdId
+					,@intLoadId intLoadId
+					,LC.intLoadContainerId
+					,LC.strContainerNumber
+					,CASE 
+						WHEN CT.strContainerType LIKE '%20%'
+							THEN '000000000010003243'
+						WHEN CT.strContainerType LIKE '%40%'
+							THEN '000000000010003244'
+						ELSE CT.strContainerType
+						END strContainerSizeCode
+					,'0002' strPackagingMaterialType
+					,L.strExternalShipmentNumber
+					,ROW_NUMBER() OVER (
+						PARTITION BY LC.intLoadId ORDER BY LC.intLoadId
+						) AS Seq
+					,LC.dblQuantity
+					,UM.strUnitMeasure strItemUOM
+					,LC.dblNetWt
+					,LC.dblGrossWt
+					,LUM.strUnitMeasure strWeightUnitMeasure
+					,NULL strExternalContainerId
+					,'Modified' strRowState
+					,GETDATE() dtmFeedCreated
+				FROM tblLGLoadContainer LC
+				JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
+				JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intWeightUnitMeasureId
+				LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+				--LEFT JOIN tblLGLoadContainerLog LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId AND LDCL.intLoadLogId = (SELECT MIN(intLoadLogId) FROM tblLGLoadLog)
+				WHERE LC.intLoadId = @intLoadId
+	
+				UNION
+	
+				SELECT @intLoadStdId
+					,@intLoadId
+					,intLoadContainerId
+					,strContainerNo COLLATE Latin1_General_CI_AS
+					,strContainerSizeCode COLLATE Latin1_General_CI_AS
+					,'0002' COLLATE Latin1_General_CI_AS
+					,strExternalPONumber COLLATE Latin1_General_CI_AS
+					,strSeq COLLATE Latin1_General_CI_AS
+					,dblContainerQty
+					,strContainerUOM COLLATE Latin1_General_CI_AS
+					,dblNetWt
+					,dblGrossWt
+					,strWeightUOM
+					,strExternalContainerId
+					,'Delete' Collate Latin1_General_CI_AS
+					,GETDATE()
+				FROM tblLGLoadContainerLog
+				WHERE intLoadId = @intLoadId
+					AND intLoadContainerId NOT IN (
+						SELECT LC.intLoadContainerId
+						FROM tblLGLoadContainer LC
+						JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+						JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
+						JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intWeightUnitMeasureId
+						LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+						LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+						WHERE LC.intLoadId = @intLoadId
+						)
+				) tbl
+			ORDER BY intLoadContainerId
 		END
 	END
 		
