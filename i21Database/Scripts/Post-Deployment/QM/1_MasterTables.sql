@@ -667,6 +667,12 @@ WHERE ysnEnableSampleTypeByUserRole IS NULL
 GO
 
 GO
+UPDATE tblQMCompanyPreference
+SET ysnShowSampleFromAllLocation = 0
+WHERE ysnShowSampleFromAllLocation IS NULL
+GO
+
+GO
 UPDATE tblQMReportProperty SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
 GO
 
