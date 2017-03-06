@@ -11,13 +11,26 @@ CREATE TABLE [dbo].[tblGLRevalue](
 	[dblForexRate] [numeric](10, 6) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intRateTypeId] [int] NOT NULL,
-	[ysnPosted] [bit] NULL CONSTRAINT [DF_tblGLRevalue_ysnPosted]  DEFAULT ((0))
+	[ysnPosted] [bit] NULL CONSTRAINT [DF_tblGLRevalue_ysnPosted]  DEFAULT ((0)),
+	[intReverseId] [int] NULL,
+	[strDescription] [nvarchar](300) COLLATE Latin1_General_CI_AS,
+	[intEntityId] INT NULL,
  CONSTRAINT [PK_tblGLRevalue] PRIMARY KEY CLUSTERED
 (
 	[intConsolidationId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 
+
 GO
+
+ALTER TABLE [dbo].[tblGLRevalue]  WITH CHECK ADD  CONSTRAINT [FK_tblGLRevalue_tblGLRevalue] FOREIGN KEY([intReverseId])
+REFERENCES [dbo].[tblGLRevalue] ([intConsolidationId])
+GO
+
+ALTER TABLE [dbo].[tblGLRevalue] CHECK CONSTRAINT [FK_tblGLRevalue_tblGLRevalue]
+GO
+
+
 
 

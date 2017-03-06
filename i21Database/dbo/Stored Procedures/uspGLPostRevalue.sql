@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspGLPostRevalue]
 	@intConsolidationId			AS INT = 1,
-	@ysnRecap					AS BIT				= 0,
-	@intEntityId				AS INT				= 1
+	@ysnRecap					AS BIT = 0,
+	@intEntityId				AS INT = 1
 AS
 
 DECLARE @PostGLEntries RecapTableType
@@ -12,6 +12,8 @@ DECLARE @strReversePostBatchId NVARCHAR(100) = ''
 BEGIN TRY
 	BEGIN TRANSACTION
 		DECLARE @errorNum INT
+		DECLARE @dateNow DATETIME
+		SELECT @dateNow = GETDATE()
 		IF EXISTS(SELECT TOP 1 'Transaction is already posted' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId AND ysnPosted = 1)
 				RAISERROR (60006,11,1)
 		IF @ysnRecap = 0
@@ -20,7 +22,7 @@ BEGIN TRY
 			SELECT @strPostBatchId =  NEWID()
 
 		;WITH cte as(
-		SELECT 
+			SELECT 
 			 [strTransactionId]		= B.strConsolidationNumber
 			,[intTransactionId]		= B.intConsolidationId
 			,[strDescription]		= A.strTransactionId
@@ -37,8 +39,8 @@ BEGIN TRY
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= B.intFunctionalCurrencyId
 			,[intUserId]			= 0
-			,[intEntityId]			= 1			
-			,[dtmDateEntered]		= GETDATE()
+			,[intEntityId]			= @intEntityId		
+			,[dtmDateEntered]		= @dateNow
 			,[strBatchId]			= @strPostBatchId
 			,[strCode]				= 'REVAL'
 			,[strJournalLineDescription] = ''
@@ -164,10 +166,182 @@ BEGIN TRY
 		SELECT TOP 1 @dtmReverseDate = dtmReverseDate FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
 		
 		IF @ysnRecap = 0
-			EXEC [dbo].uspGLGetNewID 3, @strReversePostBatchId OUTPUT 		
-		ELSE
-			SELECT @strReversePostBatchId =  NEWID()
+			BEGIN
+				DECLARE @strReverseRevalueId NVARCHAR(100)
+				DECLARE @intReverseID INT
+				EXEC [dbo].uspGLGetNewID 3, @strReversePostBatchId OUTPUT 		
+				EXEC [dbo].uspGLGetNewID 116, @strReverseRevalueId OUTPUT 	
 
+
+				INSERT INTO [dbo].[tblGLRevalue]
+				   ([strConsolidationNumber]
+				   ,[intGLFiscalYearPeriodId]
+				   ,[intFiscalYearId]
+				   ,[dtmDate] 
+				   ,[intFunctionalCurrencyId]
+				   ,[intTransactionCurrencyId]
+				   ,[strTransactionType]
+				   ,[dblForexRate]
+				   ,[intConcurrencyId]
+				   ,[intRateTypeId]
+				   ,[ysnPosted]
+				   ,strDescription
+				   ,intEntityId)
+				SELECT 
+					@strReverseRevalueId
+				   ,[intGLFiscalYearPeriodId]
+				   ,[intFiscalYearId]
+				   ,[dtmDate]= dtmReverseDate
+				   ,[intFunctionalCurrencyId]
+				   ,[intTransactionCurrencyId]
+				   ,[strTransactionType] 
+				   ,[dblForexRate]
+				   ,[intConcurrencyId]=1
+				   ,[intRateTypeId]
+				   ,0
+				   ,'Reversal of ' + strConsolidationNumber
+				   ,@intEntityId
+				 FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
+
+				SELECT @intReverseID = SCOPE_IDENTITY()
+				UPDATE tblGLRevalue SET intReverseId = @intReverseID WHERE intConsolidationId = @intConsolidationId
+				INSERT INTO [dbo].[tblGLRevalueDetails]
+				   ([intConsolidationId]
+				   ,[strTransactionType]
+				   ,[strTransactionId]
+				   ,[dtmDate]
+				   ,[dtmDueDate]
+				   ,[strVendorName]
+				   ,[strCommodity]
+				   ,[strLineOfBusiness]
+				   ,[strLocation]
+				   ,[strTicket]
+				   ,[strContractId]
+				   ,[strItemId]
+				   ,[intQuantity]
+				   ,[dblUnitPrice]
+				   ,[dblTransactionAmount]
+				   ,[intCurrencyId]
+				   ,[intCurrencyExchangeRateTypeId]
+				   ,[dblHistoricForexRate]
+				   ,[dblHistoricAmount]
+				   ,[dblNewForexRate]
+				   ,[dblNewAmount]
+				   ,[dblUnrealizedGain]
+				   ,[dblUnrealizedLoss]
+				   ,[intConcurrencyId]
+				   ,[strType])
+				SELECT 
+					@intReverseID
+				   ,[strTransactionType]
+				   ,[strTransactionId]
+				   ,[dtmDate]
+				   ,[dtmDueDate]
+				   ,[strVendorName]
+				   ,[strCommodity]
+				   ,[strLineOfBusiness]
+				   ,[strLocation]
+				   ,[strTicket]
+				   ,[strContractId]
+				   ,[strItemId]
+				   ,[intQuantity]
+				   ,[dblUnitPrice]
+				   ,[dblTransactionAmount]
+				   ,[intCurrencyId]
+				   ,[intCurrencyExchangeRateTypeId]
+				   ,[dblHistoricForexRate]
+				   ,[dblHistoricAmount]
+				   ,[dblNewForexRate]
+				   ,[dblNewAmount]
+				   ,[dblUnrealizedGain] = [dblUnrealizedLoss]
+				   ,[dblUnrealizedLoss] = [dblUnrealizedGain]
+				   ,[intConcurrencyId]
+				   ,[strType]
+				FROM tblGLRevalueDetails
+				WHERE intConsolidationId = @intConsolidationId
+				;WITH cte as(
+			SELECT 
+			 [strTransactionId]		= B.strConsolidationNumber
+			,[intTransactionId]		= B.intConsolidationId
+			,[strDescription]		= A.strTransactionId
+			
+			,[dtmTransactionDate]	= B.dtmDate
+			,[dblDebit]				= A.dblUnrealizedLoss
+			,[dblCredit]			= A.dblUnrealizedGain
+			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
+			,[ysnIsUnposted]		= 0 
+			,[intConcurrencyId]		= 1
+			,[intCurrencyId]		= B.intFunctionalCurrencyId
+			,[intUserId]			= 0
+			,[intEntityId]			= B.intEntityId	
+			,[dtmDateEntered]		= @dateNow
+			,[strBatchId]			= @strReversePostBatchId
+			,[strCode]				= 'REVAL'
+			,[strJournalLineDescription] = ''
+			,[intJournalLineNo]		= A.[intConsolidationDetailId]			
+			,[strTransactionType]	= 'Revalue Currency Reversal'
+			,[strTransactionForm]	= 'Revalue Currency'
+			,B.dtmReverseDate
+			,strModule = B.strTransactionType
+			,A.strType
+			,Offset = 0
+		FROM [dbo].tblGLRevalueDetails A INNER JOIN [dbo].tblGLRevalue B 
+			ON A.intConsolidationId = B.intConsolidationId
+			WHERE B.intConsolidationId = @intReverseID
+		),cte1 AS
+		(
+			SELECT 
+				 [strTransactionId]		
+				,[intTransactionId]		
+				,[strDescription]		
+				,[dtmTransactionDate]	
+				,[dblDebit]	
+				,[dblCredit]
+				,[dtmDate]				
+				,[ysnIsUnposted]		
+				,[intConcurrencyId]		
+				,[intCurrencyId]		
+				,[intUserId]			
+				,[intEntityId]			
+				,[dtmDateEntered]		
+				,strBatchId
+				,[strCode]				
+				,[strJournalLineDescription] 
+				,[intJournalLineNo]		
+				,[strTransactionType]	
+				,[strTransactionForm]
+				,strModule	
+				,OffSet = 0
+				,strType
+			FROM
+			cte 
+			UNION ALL
+			SELECT 
+				 [strTransactionId]		
+				,[intTransactionId]		
+				,[strDescription]		
+				,[dtmTransactionDate]	
+				,[dblDebit]				= dblCredit				
+				,[dblCredit]			= dblDebit			
+				,[dtmDate]				
+				,[ysnIsUnposted]		
+				,[intConcurrencyId]		
+				,[intCurrencyId]		
+				,[intUserId]			
+				,[intEntityId]			
+				,[dtmDateEntered]	
+				,strBatchId	
+				,[strCode]				
+				,[strJournalLineDescription] 
+				,[intJournalLineNo]		
+				,[strTransactionType]	
+				,[strTransactionForm]	
+				,strModule
+				,OffSet = 1
+				,strType
+			FROM
+			cte 
+		)
 		INSERT INTO @ReversePostGLEntries(
 			 [strTransactionId]
 			,[intTransactionId]
@@ -194,11 +368,11 @@ BEGIN TRY
 		 SELECT
 			 [strTransactionId]
 			,[intTransactionId]
-			,[intAccountId]
+			,[intAccountId] = G.AccountId
 			,[strDescription]
 			,[dtmTransactionDate]
-			,[dblDebit] = [dblCredit]
-			,[dblCredit] = [dblDebit]
+			,[dblDebit]  
+			,[dblCredit] 
 			,[dtmDate] = @dtmReverseDate
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
@@ -210,21 +384,24 @@ BEGIN TRY
 			,[strCode]			
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
-			,[strTransactionType] = 'Reverse Revalue Currency'
+			,[strTransactionType] = 'Revalue Currency Reversal'
 			,[strTransactionForm]
 			,''
 		FROM
-			 @PostGLEntries
-
-
-
-
-		IF @ysnRecap = 0
-		BEGIN
-			EXEC uspGLBookEntries @PostGLEntries, 1
-			EXEC uspGLBookEntries @ReversePostGLEntries, 1
-		END
+			 cte1 A
+		OUTER APPLY (
+			SELECT TOP 1 AccountId from dbo.fnGLGetRevalueAccountTable() f 
+			WHERE A.strType COLLATE Latin1_General_CI_AS = f.strType COLLATE Latin1_General_CI_AS 
+			AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS
+			AND f.OffSet  = A.OffSet
+		)G
+				EXEC uspGLBookEntries @PostGLEntries, 1
+				EXEC uspGLBookEntries @ReversePostGLEntries, 1
+				--GENERATE REVERSE ID HERE
+			END
 		ELSE
+			
+	
 		BEGIN
 			DECLARE @RecapTable RecapTableType
 			INSERT INTO @RecapTable (
@@ -272,35 +449,37 @@ BEGIN TRY
 				,[strTransactionType]
 				,[strTransactionForm]
 				,strModuleName
-			FROM @PostGLEntries UNION ALL
-			SELECT
-				 [strTransactionId]
-				,[intTransactionId]
-				,[intAccountId]
-				,[strDescription]
-				,[dtmTransactionDate]
-				,[dblDebit] 
-				,[dblCredit]
-				,[dtmDate] 
-				,[ysnIsUnposted]
-				,[intConcurrencyId]	
-				,[intCurrencyId]
-				,[intUserId]
-				,[intEntityId]			
-				,[dtmDateEntered]
-				,[strBatchId]=@strReversePostBatchId
-				,[strCode]			
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,strModuleName
-			FROM @ReversePostGLEntries
+			FROM @PostGLEntries
+			-- UNION ALL
+			--SELECT
+			--	 [strTransactionId]
+			--	,[intTransactionId]
+			--	,[intAccountId]
+			--	,[strDescription]
+			--	,[dtmTransactionDate]
+			--	,[dblDebit] 
+			--	,[dblCredit]
+			--	,[dtmDate] 
+			--	,[ysnIsUnposted]
+			--	,[intConcurrencyId]	
+			--	,[intCurrencyId]
+			--	,[intUserId]
+			--	,[intEntityId]			
+			--	,[dtmDateEntered]
+			--	,[strBatchId]=@strReversePostBatchId
+			--	,[strCode]			
+			--	,[strJournalLineDescription]
+			--	,[intJournalLineNo]
+			--	,[strTransactionType]
+			--	,[strTransactionForm]
+			--	,strModuleName
+			--FROM @ReversePostGLEntries
 			EXEC uspGLPostRecap @RecapTable, @intEntityId
 		END
 		if @ysnRecap = 0
 		BEGIN
-			UPDATE tblGLRevalue SET ysnPosted = 1 WHERE intConsolidationId = @intConsolidationId
+			UPDATE tblGLRevalue SET ysnPosted = 1 WHERE intConsolidationId in ( @intConsolidationId, @intReverseID)
+			
 			DECLARE @intGLFiscalYearPeriodId INT, @strTransactionType NVARCHAR(4)
 			SELECT @intGLFiscalYearPeriodId= intGLFiscalYearPeriodId ,@strTransactionType = strTransactionType  FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
 
@@ -326,7 +505,7 @@ BEGIN TRY
 		END
 
 	COMMIT TRANSACTION
-	SELECT @strPostBatchId PostBatchId,	@strReversePostBatchId ReversePostBatchId
+	SELECT @strPostBatchId PostBatchId--,	@strReversePostBatchId ReversePostBatchId
 END TRY
 BEGIN CATCH
 
@@ -344,4 +523,5 @@ BEGIN CATCH
                @ErrorState -- State.  
                );  
 END CATCH
+
 
