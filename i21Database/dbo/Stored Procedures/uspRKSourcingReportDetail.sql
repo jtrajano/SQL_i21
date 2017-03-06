@@ -87,7 +87,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 			  (SELECT DISTINCT
                dbo.fnCTConvertQtyToTargetCommodityUOM
 			   (@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,det.dblBasis)
-				/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
+				--/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
               FROM vyuCTSearchPriceContract det
 			  JOIN tblCTContractDetail tcd on det.intContractDetailId = tcd.intContractDetailId
 			  JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId
