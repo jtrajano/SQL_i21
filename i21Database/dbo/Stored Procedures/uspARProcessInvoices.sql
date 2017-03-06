@@ -712,7 +712,7 @@ BEGIN
 					,@ItemTermDiscount				= [dblItemTermDiscount]
 					,@ItemTermDiscountBy			= [strItemTermDiscountBy]
 					,@ItemPrice						= [dblPrice]
-					,@ItemPricing					= [strPricing]
+					,@ItemPricing					= CASE WHEN ISNULL([strPricing],'') = '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + strSourceTransaction COLLATE Latin1_General_CI_AS ELSE [strPricing] COLLATE Latin1_General_CI_AS END
 					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 					,@RefreshPrice					= [ysnRefreshPrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]

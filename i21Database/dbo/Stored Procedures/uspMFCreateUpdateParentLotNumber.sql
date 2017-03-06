@@ -18,6 +18,7 @@ BEGIN
 		,@intBusinessShiftId INT
 		,@dtmCurrentDateTime DATETIME
 		,@ysnRequireCustomerApproval BIT
+		,@intItemOwnerId INT
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -117,29 +118,49 @@ BEGIN
 			WHERE intLotId = @intLotId
 			)
 	BEGIN
-		Declare @strLotNumber nvarchar(50),@intBondStatusId int
-		Select @strLotNumber=strLotNumber from tblICLot Where intLotId=@intLotId
+		DECLARE @strLotNumber NVARCHAR(50)
+			,@intBondStatusId INT
 
-		Select @intBondStatusId=NULL
+		SELECT @strLotNumber = strLotNumber
+		FROM tblICLot
+		WHERE intLotId = @intLotId
 
-		Select @intBondStatusId=LI.intBondStatusId from tblMFLotInventory LI JOIN tblICLot L on L.intLotId=LI.intLotId Where L.strLotNumber=@strLotNumber
+		SELECT @intBondStatusId = NULL
+
+		SELECT @intBondStatusId = LI.intBondStatusId
+			,@intItemOwnerId = LI.intItemOwnerId
+		FROM tblMFLotInventory LI
+		JOIN tblICLot L ON L.intLotId = LI.intLotId
+		WHERE L.strLotNumber = @strLotNumber
 
 		SELECT @ysnRequireCustomerApproval = ysnRequireCustomerApproval
 		FROM tblICItem
 		WHERE intItemId = @intItemId
 
+		IF @intItemOwnerId IS NULL
+		BEGIN
+			SELECT @intItemOwnerId = intItemOwnerId
+			FROM tblICItemOwner
+			WHERE intItemId = @intItemId
+				AND ysnDefault = 1
+		END
+
 		INSERT INTO tblMFLotInventory (
 			intLotId
 			,intBondStatusId
+			,intItemOwnerId
 			)
 		SELECT @intLotId
-			,IsNULL(@intBondStatusId,(CASE 
-				WHEN @ysnRequireCustomerApproval = 1
-					THEN (
-							SELECT intBondStatusId
-							FROM tblMFCompanyPreference
-							)
-				ELSE NULL
-				END))
+			,IsNULL(@intBondStatusId, (
+					CASE 
+						WHEN @ysnRequireCustomerApproval = 1
+							THEN (
+									SELECT intBondStatusId
+									FROM tblMFCompanyPreference
+									)
+						ELSE NULL
+						END
+					))
+			,@intItemOwnerId
 	END
 END

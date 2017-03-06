@@ -32,7 +32,8 @@ Declare @intMinHeader				INT,
 		@strContainerSizeCode		NVARCHAR(100),
 		@intLoadContainerId			INT,
 		@intNoOfContainer			INT,
-		@strReceiptNo				NVARCHAR(50)
+		@strReceiptNo				NVARCHAR(50),
+		@ysnWMMBXY					bit=1
 
 Declare @tblReceiptHeader AS Table
 (
@@ -76,10 +77,9 @@ Declare @tblOutput AS Table
 	strReceiptDetailIds NVARCHAR(MAX),
 	strRowState NVARCHAR(50),
 	strXml NVARCHAR(MAX),
-	strReceiptNo NVARCHAR(100)
+	strReceiptNo NVARCHAR(100),
+	strMessageType NVARCHAR(50)
 )
-
-Select @strReceiptIDOCHeader=dbo.fnIPGetSAPIDOCHeader('RECEIPT')
 
 Insert Into @tblReceiptHeader(intInventoryReceiptId,strDeliveryNo,dtmReceiptDate,intLoadId,strReceiptNo)
 Select DISTINCT r.intInventoryReceiptId,l.strExternalShipmentNumber,r.dtmReceiptDate,l.intLoadId,r.strReceiptNumber
@@ -111,7 +111,7 @@ Begin
 
 	--Coffee Multiple Container/Batch Split
 	Set @ysnBatchSplit=0
-	If UPPER(@strCommodityCode)='COFFEE'
+	If UPPER(@strCommodityCode)='COFFEE' AND @ysnWMMBXY=0
 	Begin
 		If Exists (Select 1 From @tblReceiptDetail Group By intLoadDetailId Having COUNT(intLoadDetailId)>1)
 		Begin
@@ -128,38 +128,51 @@ Begin
 		End
 	End
 
-	--Update Delivery Item No
-	--Update d Set d.strDeliveryItemNo=t.strDeliveryItemNo
-	--From @tblReceiptDetail d Join 
-	--(Select intInventoryReceiptItemId, (10 * ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId ASC)) strDeliveryItemNo From @tblReceiptDetail) t
-	--on d.intInventoryReceiptItemId=t.intInventoryReceiptItemId
-
-	If UPPER(@strCommodityCode)='COFFEE' AND @ysnBatchSplit=1
+	If UPPER(@strCommodityCode)='COFFEE' AND @ysnBatchSplit=1 AND @ysnWMMBXY=0
 		Update @tblReceiptDetail Set strContainerNo=''
 
 	If UPPER(@strCommodityCode)='TEA'
 		Update d Set d.strContainerNo=ct.strERPBatchNumber From @tblReceiptDetail d Join tblCTContractDetail ct on d.intContractDetailId=ct.intContractDetailId
 
-	Set @strXml =  '<DELVRY07>'
-	Set @strXml += '<IDOC BEGIN="1">'
+	If UPPER(@strCommodityCode)='COFFEE' AND @ysnWMMBXY=1
+	Begin
+		Set @strXml =  '<WMMBID02>'
+		Set @strXml += '<IDOC BEGIN="1">'
 
-	--IDOC Header
-	Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
-	Set @strXml +=	@strReceiptIDOCHeader
-	Set @strXml +=	'</EDI_DC40>'
+		--IDOC Header
+		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
+		Set @strXml +=	dbo.fnIPGetSAPIDOCHeader('RECEIPT WMMBXY')
+		Set @strXml +=	'</EDI_DC40>'
 
-	Set @strXml += '<E1EDL20 SEGMENT="1">'
-	Set @strXml += '<VBELN>' + ISNULL(@strSAPDeliveryNo,'') + '</VBELN>'
-	Set @strXml += '<LIFEX>' + ISNULL(@strReceiptNo,'') + '</LIFEX>'
+		Set @strXml += '<E1MBXYH SEGMENT="1">'
+		Set @strXml += '<BLDAT>' + ISNULL(CONVERT(VARCHAR(10),@dtmReceiptDate,112),'') + '</BLDAT>'
+		Set @strXml += '<BUDAT>' + ISNULL(CONVERT(VARCHAR(10),@dtmReceiptDate,112),'') + '</BUDAT>'
+		Set @strXml += '<XBLNR>' + ISNULL(@strReceiptNo,'') + '</XBLNR>'
+		Set @strXml += '<TCODE>' + 'MIGO' + '</TCODE>'
+	End
+	Else
+	Begin
+		Set @strXml =  '<DELVRY07>'
+		Set @strXml += '<IDOC BEGIN="1">'
 
-	Set @strXml += '<E1EDL18 SEGMENT="1">'
-	Set @strXml += '<QUALF>' + 'PGI' + '</QUALF>'
-	Set @strXml += '</E1EDL18>'
+		--IDOC Header
+		Set @strXml +=	'<EDI_DC40 SEGMENT="1">'
+		Set @strXml +=	dbo.fnIPGetSAPIDOCHeader('RECEIPT WHSCON')
+		Set @strXml +=	'</EDI_DC40>'
 
-	Set @strXml += '<E1EDT13 SEGMENT="1">'
-	Set @strXml += '<QUALF>' + '019' + '</QUALF>'
-	Set @strXml += '<NTANF>' + ISNULL(CONVERT(VARCHAR(10),@dtmReceiptDate,112),'') + '</NTANF>'
-	Set @strXml += '</E1EDT13>'
+		Set @strXml += '<E1EDL20 SEGMENT="1">'
+		Set @strXml += '<VBELN>' + ISNULL(@strSAPDeliveryNo,'') + '</VBELN>'
+		Set @strXml += '<LIFEX>' + ISNULL(@strReceiptNo,'') + '</LIFEX>'
+
+		Set @strXml += '<E1EDL18 SEGMENT="1">'
+		Set @strXml += '<QUALF>' + 'PGI' + '</QUALF>'
+		Set @strXml += '</E1EDL18>'
+
+		Set @strXml += '<E1EDT13 SEGMENT="1">'
+		Set @strXml += '<QUALF>' + '019' + '</QUALF>'
+		Set @strXml += '<NTANF>' + ISNULL(CONVERT(VARCHAR(10),@dtmReceiptDate,112),'') + '</NTANF>'
+		Set @strXml += '</E1EDT13>'
+	End
 
 	Set @strItemXml=''
 
@@ -177,13 +190,30 @@ Begin
 			@strStorageLocation			=	strStorageLocation,
 			@strContainerNo				=	strContainerNo,
 			@dblQuantity				=	dblQuantity,
-			@strUOM						=	dbo.fnIPConverti21UOMToSAP(strUOM),
-			@strPONo					=	strPONo,
+			@strUOM						=	strUOM,
 			@intContractDetailId		=	intContractDetailId	
 		From @tblReceiptDetail Where intRowNo=@intMinDetail
 
-		Select @strPOLineItemNo=strERPItemNumber From tblCTContractDetail Where intContractDetailId=@intContractDetailId
-			
+		Select @strPONo=strERPPONumber,@strPOLineItemNo=strERPItemNumber From tblCTContractDetail Where intContractDetailId=@intContractDetailId
+	
+		If UPPER(@strCommodityCode)='COFFEE' AND @ysnWMMBXY=1
+		Begin
+			Set @strItemXml += '<E1MBXYI SEGMENT="1">'
+			Set @strItemXml += '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
+			Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
+			Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
+			Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
+			Set @strItemXml += '<BWART>'  +  '101' + '</BWART>' 
+			Set @strItemXml += '<ERFMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblQuantity)),'') + '</ERFMG>' 
+			Set @strItemXml += '<ERFME>'  +  ISNULL(@strUOM,'') + '</ERFME>' 
+			Set @strItemXml += '<EBELN>'  +  ISNULL(@strPONo,'') + '</EBELN>' 
+			Set @strItemXml += '<EBELP>'  +  ISNULL(@strPOLineItemNo,'') + '</EBELP>' 
+			Set @strItemXml += '<UMWRK>'  +  ISNULL(@strSubLocation,'') + '</UMWRK>' 
+			Set @strItemXml += '<KZBEW>'  +  'B' + '</KZBEW>' 
+			Set @strItemXml += '</E1MBXYI>'
+		End
+		Else
+		Begin			
 			Set @strItemXml += '<E1EDL24 SEGMENT="1">'
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strDeliveryItemNo,'') + '</POSNR>' 
 			Set @strItemXml += '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
@@ -197,7 +227,7 @@ Begin
 				Set @strItemXml += '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblQuantity)),'') + '</LFIMG>'
 			Else
 				Set @strItemXml += '<LFIMG>'  +  '' + '</LFIMG>'
-			Set @strItemXml += '<VRKME>'  +  ISNULL(@strUOM,'') + '</VRKME>' 
+			Set @strItemXml += '<VRKME>'  +  ISNULL(dbo.fnIPConverti21UOMToSAP(@strUOM),'') + '</VRKME>' 
 			If ISNULL(@ysnBatchSplit,0)=1
 				Set @strItemXml += '<HIPOS>'  +  ISNULL(@strDeliveryItemNo,'') + '</HIPOS>'
 
@@ -234,6 +264,7 @@ Begin
 
 				Set @strItemXml += ISNULL(@strContainerXml,'')
 			End
+		End
 
 		Select @intMinDetail=Min(intRowNo) From @tblReceiptDetail Where intRowNo>@intMinDetail
 	End --Loop Detail End
@@ -241,17 +272,27 @@ Begin
 	--Final Xml
 	Set @strXml += ISNULL(@strItemXml,'')
 
-	Set @strXml += '</E1EDL20>'
+	If UPPER(@strCommodityCode)='COFFEE' AND @ysnWMMBXY=1
+	Begin
+		Set @strXml += '</E1MBXYH>'
 
-	Set @strXml += '</IDOC>'
-	Set @strXml +=  '</DELVRY07>'
+		Set @strXml += '</IDOC>'
+		Set @strXml +=  '</WMMBID02>'
+	End
+	Else
+	Begin
+		Set @strXml += '</E1EDL20>'
+
+		Set @strXml += '</IDOC>'
+		Set @strXml +=  '</DELVRY07>'
+	End
 
 	Set @strReceiptDetailIds=NULL
 	Select @strReceiptDetailIds=COALESCE(CONVERT(VARCHAR,@strReceiptDetailIds) + ',', '') + CONVERT(VARCHAR,intInventoryReceiptItemId) 
 	From vyuICGetInventoryReceiptItem Where intInventoryReceiptId=@intMinHeader
 
-	INSERT INTO @tblOutput(strReceiptDetailIds,strRowState,strXml,strReceiptNo)
-	VALUES(@strReceiptDetailIds,'CREATE',@strXml,@strReceiptNo)
+	INSERT INTO @tblOutput(strReceiptDetailIds,strRowState,strXml,strReceiptNo,strMessageType)
+	VALUES(@strReceiptDetailIds,'CREATE',@strXml,@strReceiptNo,CASE WHEN @ysnWMMBXY=1 THEN 'WMMBXY' ELSE 'WHSCON' END)
 
 	Select @intMinHeader=Min(intInventoryReceiptId) From @tblReceiptHeader Where intInventoryReceiptId>@intMinHeader
 End

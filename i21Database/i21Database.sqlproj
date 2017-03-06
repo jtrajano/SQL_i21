@@ -5085,6 +5085,10 @@
     <Build Include="dbo\Stored Procedures\uspGLPostRevalue.sql" />
     <Build Include="dbo\Functions\fnGLGetRevalueAccountTable.sql" />
     <Build Include="dbo\Views\vyuARCustomerContractHeader.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceFee.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
+    <Build Include="dbo\Tables\tblSTstgRebatesPMMorris.sql" />
+    <Build Include="dbo\Tables\tblSTstgRebatesRJReynolds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

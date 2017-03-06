@@ -123,15 +123,22 @@ Begin
 	Select TOP 1 @strVendorAccountNo=v.strVendorAccountNum 
 	From tblLGLoadDetail ld Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityId Where intLoadId = @intLoadId
 
-	--If ISNULL(@strExternalDeliveryNumber,'')<>''
-	--	Set @strHeaderRowState='MODIFIED'
-	--Else
-	--	Set @strHeaderRowState='ADDED'
-
 	If (Select intLoadShippingInstructionId From tblLGLoad Where intLoadId=@intLoadId AND intShipmentType=1) is not null
 		Set @strHeaderRowState='MODIFIED'
 
 	If UPPER(@strHeaderRowState)='MODIFIED' AND ISNULL(@strExternalDeliveryNumber,'')=''
+		Begin
+			--update deliveryno for shipping advice from instruction
+			Select @strExternalDeliveryNumber=strExternalShipmentNumber From tblLGLoad 
+			Where intLoadId=(Select intLoadShippingInstructionId From tblLGLoad Where intLoadId=@intLoadId)
+			Update tblLGLoad Set strExternalShipmentNumber=@strExternalDeliveryNumber Where intLoadId=@intLoadId
+
+			If ISNULL(@strExternalDeliveryNumber,'')=''
+				GOTO NEXT_SHIPMENT
+		End
+	--if ack is not received for the previous feed do not send the current feed
+	If (Select TOP 1 strFeedStatus From tblLGLoadStg Where intLoadId=@intLoadId AND strTransactionType='Shipment' 
+		AND intLoadStgId < @intLoadStgId Order By intLoadStgId Desc)<>'Ack Rcvd'
 		GOTO NEXT_SHIPMENT
 
 	Set @strXml =  '<DELVRY07>'
@@ -145,6 +152,18 @@ Begin
 		Set @strXml +=	@strUpdateIDOCHeader
 	Set @strXml +=	'</EDI_DC40>'
 	
+	If UPPER(@strHeaderRowState)='DELETE'
+	Begin
+		Set @strXml += '<E1EDL20 SEGMENT="1">'
+		Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
+
+		Set @strXml += '<E1EDL18 SEGMENT="1">'
+		Set @strXml += '<QUALF>' + 'DEL' + '</QUALF>'
+		Set @strXml +=	'</E1EDL18>'
+
+		GOTO END_TAG
+	End
+
 	--Header
 	Set @strXml += '<E1EDL20 SEGMENT="1">'
 	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
@@ -245,6 +264,9 @@ Begin
 			@strWeightUOM				=	dbo.fnIPConverti21UOMToSAP(strWeightUOM),
 			@strRowState				=	strRowState
 		From @tblDetail Where intRowNo=@intMinDetail
+
+			--update strExternalShipmentItemNumber if null
+			Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@intLoadDetailId AND ISNULL(strExternalShipmentItemNumber,'')=''
 
 			Set @strItemXml += '<E1EDL24 SEGMENT="1">'
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strDeliveryItemNo,'') + '</POSNR>' 
@@ -417,6 +439,8 @@ Begin
 
 	--Final Xml
 	Set @strXml += ISNULL(@strItemXml,'')
+
+	END_TAG:
 
 	Set @strXml += '</E1EDL20>'
 	Set @strXml += '</IDOC>'

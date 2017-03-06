@@ -130,10 +130,13 @@ BEGIN
 			,dblCreditReport			= GLEntries.dblCreditReport
 			,dblReportingRate			= GLEntries.dblReportingRate
 			,dblForeignRate				= GLEntries.dblForeignRate
+			,strRateType				= currencyRateType.strCurrencyExchangeRateType			
 	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
 				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
 				AND GLEntries.intTransactionId = Reversal.intTransactionId
 				AND GLEntries.strTransactionId = Reversal.strTransactionId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = Reversal.intForexRateTypeId
 	WHERE	Reversal.strBatchId = @strBatchId
 			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
 			AND Reversal.intTransactionTypeId <> @InventoryTransactionTypeId_AutoVariance
@@ -174,6 +177,7 @@ BEGIN
 			,dblCreditReport			= GLEntries.dblCreditReport
 			,dblReportingRate			= GLEntries.dblReportingRate
 			,dblForeignRate				= GLEntries.dblForeignRate
+			,strRateType				= currencyRateType.strCurrencyExchangeRateType
 	FROM	tblGLDetail GLEntries INNER JOIN (	
 				tblICInventoryTransaction Reversal INNER JOIN tblICInventoryReturned rtn
 					ON Reversal.intInventoryTransactionId = rtn.intInventoryTransactionId
@@ -182,6 +186,8 @@ BEGIN
 				ON GLEntries.intJournalLineNo = Reversal.intInventoryTransactionId
 				AND GLEntries.intTransactionId = rtn.intTransactionId
 				AND GLEntries.strTransactionId = rtn.strTransactionId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = Reversal.intForexRateTypeId
 
 	WHERE	rtn.intTransactionId = @intTransactionId
 			AND rtn.strTransactionId = @strTransactionId
@@ -224,6 +230,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NULL 
+			,strRateType				= NULL 
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
@@ -232,6 +239,7 @@ BEGIN
 				ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
 			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
@@ -269,6 +277,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NULL 
+			,strRateType				= NULL 
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
@@ -277,6 +286,7 @@ BEGIN
 				ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
 			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0

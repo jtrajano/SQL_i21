@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuICGetShipmentAddSalesOrder]
 AS
--- intKey - intLocationId, intEntityCustomerId, intLineNo
 SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, SODetail.intEntityCustomerId, intSalesOrderDetailId) AS INT)
 	, strOrderType = 'Sales Order'
 	, strSourceType = 'None'
@@ -50,6 +49,9 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, S
 	, intCurrencyId = SO.intCurrencyId
 	, intFreightTermId = OSO.intFreightTermId
 	, intShipToLocationId = OSO.intShipToLocationId
+	, intForexRateTypeId = SODetail.intCurrencyExchangeRateTypeId
+	, strForexRateType = currencyRateType.strCurrencyExchangeRateType
+	, dblForexRate = SODetail.dblCurrencyExchangeRate
 FROM vyuSOSalesOrderDetail SODetail
 	INNER JOIN vyuSOSalesOrderSearch SO ON SODetail.intSalesOrderId = SO.intSalesOrderId
 	INNER JOIN tblSOSalesOrder OSO ON OSO.intSalesOrderId = SO.intSalesOrderId
@@ -59,6 +61,8 @@ FROM vyuSOSalesOrderDetail SODetail
 		ON SubLocation.intCompanyLocationSubLocationId = DefaultFromItemLocation.intSubLocationId
 	LEFT JOIN dbo.tblICStorageLocation StorageLocation
 		ON StorageLocation.intStorageLocationId = DefaultFromItemLocation.intStorageLocationId
+	LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+		ON currencyRateType.intCurrencyExchangeRateTypeId = SODetail.intCurrencyExchangeRateTypeId
 --WHERE ysnProcessed = 0
 WHERE	ISNULL(SODetail.dblQtyShipped, 0) < ISNULL(SODetail.dblQtyOrdered, 0) 
 		AND ISNULL(SO.strOrderStatus, '') IN ('Open', 'Partial', 'Pending')

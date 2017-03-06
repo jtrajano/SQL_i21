@@ -7,6 +7,31 @@ BEGIN TRY
 	DECLARE @intLoadStgId INT
 	DECLARE @intLoadLogId INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
+	DECLARE @intLoadDetailWarehouseId INT
+	DECLARE @strWarehouseVendorNo NVARCHAR(100)
+	DECLARE @strWarehouseVendorName NVARCHAR(100)
+	DECLARE @strWarehouseVendorAddress NVARCHAR(100)
+	DECLARE @strWarehouseVendorPostalCode NVARCHAR(100)
+	DECLARE @strWarehouseVendorCity NVARCHAR(100)
+	DECLARE @strWarehouseVendorCountry NVARCHAR(100)
+	DECLARE @strWarehouseVendorAccNo NVARCHAR(100)
+
+	SELECT TOP 1 @strWarehouseVendorNo = WE.strEntityNo
+			  ,  @strWarehouseVendorName = WE.strName
+			  ,  @strWarehouseVendorAddress = EL.strAddress
+			  ,  @strWarehouseVendorPostalCode = EL.strZipCode
+			  ,  @strWarehouseVendorCity = EL.strCity
+			  ,  @strWarehouseVendorCountry = (SELECT TOP 1 SM.strISOCode
+												FROM tblSMCountry SM
+												WHERE SM.strCountry = EL.strCountry)
+			  ,  @strWarehouseVendorAccNo = A.strVendorAccountNum
+	FROM tblLGLoadDetail LD
+	JOIN tblCTContractDetail CD ON LD.intPContractDetailId = CD.intContractDetailId
+	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+	LEFT JOIN tblEMEntity WE ON WE.intEntityId = CLSL.intVendorId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = WE.intEntityId
+	LEFT JOIN tblAPVendor A ON A.intEntityVendorId = WE.intEntityId
+	WHERE LD.intLoadId = @intLoadId
 
 	IF EXISTS (
 			SELECT 1
@@ -122,13 +147,13 @@ BEGIN TRY
 			WHERE LD.intLoadId = L.intLoadId
 			) strSubLocationName
 		,'EN' strLanguage
-		,strWarehouseVendorNo = WE.strEntityNo
-		,strWarehouseVendorName = WE.strName
-		,strWarehouseVendorAddress = EL.strAddress
-		,strWarehouseVendorPostalCode = EL.strZipCode
-		,strWarehouseVendorCity = EL.strCity
-		,strWarehouseVendorCountry = (SELECT TOP 1 SM.strISOCode FROM tblSMCountry SM WHERE SM.strCountry = EL.strCountry)
-		,strWarehouseVendorAccNo = A.strVendorAccountNum
+		,strWarehouseVendorNo = CASE WHEN ISNULL(WE.strEntityNo,'') = '' THEN @strWarehouseVendorNo ELSE WE.strEntityNo END
+		,strWarehouseVendorName = CASE WHEN ISNULL(WE.strName,'') = '' THEN @strWarehouseVendorName ELSE WE.strName END
+		,strWarehouseVendorAddress = CASE WHEN ISNULL(EL.strAddress,'') = '' THEN @strWarehouseVendorAddress ELSE EL.strAddress END
+		,strWarehouseVendorPostalCode = CASE WHEN ISNULL( EL.strZipCode,'') = '' THEN @strWarehouseVendorPostalCode ELSE  EL.strZipCode END
+		,strWarehouseVendorCity = CASE WHEN ISNULL( EL.strCity,'') = '' THEN @strWarehouseVendorCity ELSE  EL.strCity END
+		,strWarehouseVendorCountry = CASE WHEN ISNULL((SELECT TOP 1 SM.strISOCode FROM tblSMCountry SM WHERE SM.strCountry = EL.strCountry),'') = '' THEN @strWarehouseVendorCountry ELSE  (SELECT TOP 1 SM.strISOCode FROM tblSMCountry SM WHERE SM.strCountry = EL.strCountry) END
+		,strWarehouseVendorAccNo = CASE WHEN ISNULL( A.strVendorAccountNum,'') = '' THEN @strWarehouseVendorAccNo ELSE  A.strVendorAccountNum END
 		,(
 			SELECT TOP 1 E.strEntityName
 			FROM tblLGLoadDetail LD

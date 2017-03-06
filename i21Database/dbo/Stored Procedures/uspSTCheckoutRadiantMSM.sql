@@ -1,63 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantMSM]
-@intCheckoutId Int,
-@strXML NVARCHAR(MAX)
+@intCheckoutId Int
 AS
 BEGIN
 
     DECLARE @intStoreId int
     SELECT @intStoreId = intStoreId FROM dbo.tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId
-
---START Convert XML to temporary table
-If(OBJECT_ID('tempdb..#Temp') Is Not Null)
-Begin
-    Drop Table #Temp
-End
-create table #Temp
-(
-    MiscellaneousSummaryCode int, 
-    MiscellaneousSummarySubCode int, 
-    MiscellaneousSummarySubCodeModifier nvarchar(MAX), 
-    TenderCode int, 
-    TenderSubCode int,
-    CurrencyCode nvarchar(MAX),
-    CurrencySubCode nvarchar(MAX), 
-    TenderTransactionsCount int, 
-    ManualEntryFlag nvarchar(5),
-	MiscellaneousSummaryAmount decimal(18,6),
-	MiscellaneousSummaryCount bigint
-)
---start to convert XML string to XML
-Declare @xml XML = @strXML
-;WITH XMLNAMESPACES ('http://www.naxml.org/POSBO/Vocabulary/2003-10-16' as b)
-INSERT INTO #Temp
-SELECT
-	MiscellaneousSummaryCode, 
-    MiscellaneousSummarySubCode, 
-    MiscellaneousSummarySubCodeModifier, 
-    TenderCode, 
-    TenderSubCode,
-    CurrencyCode,
-    CurrencySubCode, 
-    TenderTransactionsCount, 
-    ManualEntryFlag,
-	MiscellaneousSummaryAmount,
-	MiscellaneousSummaryCount
-FROM
-(SELECT  
-        ISNULL(x.u.value('(../b:MiscellaneousSummaryCodes/b:MiscellaneousSummaryCode)[1]', 'int'), 0) as MiscellaneousSummaryCode,
-		ISNULL(x.u.value('(../b:MiscellaneousSummaryCodes/b:MiscellaneousSummarySubCode)[1]', 'int'), 0) as MiscellaneousSummarySubCode,
-		CAST(ISNULL(x.u.value('(../b:MiscellaneousSummaryCodes/b:MiscellaneousSummarySubCodeModifier)[1]', 'nvarchar(MAX)'), 0) as bigint) as MiscellaneousSummarySubCodeModifier,
-
-		ISNULL(x.u.value('(b:Tender/b:TenderCode)[1]', 'int'), 0) as TenderCode,
-		ISNULL(x.u.value('(b:Tender/b:TenderSubCode)[1]', 'int'), 0) as TenderSubCode,
-		ISNULL(x.u.value('(b:Currency/b:CurrencyCode)[1]', 'nvarchar(MAX)'), '') as CurrencyCode,
-		ISNULL(x.u.value('(b:Currency/b:CurrencySubCode)[1]', 'nvarchar(MAX)'), '') as CurrencySubCode,
-		ISNULL(x.u.value('(b:TenderTransactionsCount)[1]', 'int'), 0) as TenderTransactionsCount,
-		ISNULL(x.u.value('(b:ManualEntryFlag/@value)[1]', 'nvarchar(5)'), 0) as ManualEntryFlag,
-        CAST(ISNULL(x.u.value('(b:MiscellaneousSummaryAmount)[1]', 'money'), 0) as decimal(18,6)) as MiscellaneousSummaryAmount,
-        CAST(ISNULL(x.u.value('(b:MiscellaneousSummaryCount)[1]', 'money'), 0) as bigint) as MiscellaneousSummaryCount
-FROM    @xml.nodes('//b:MiscellaneousSummaryMovement/b:MSMDetail/b:MSMSalesTotals') x(u)) as S
---END
 
  --   Update dbo.tblSTCheckoutPaymentOptions
  --   SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
@@ -67,18 +14,18 @@ FROM    @xml.nodes('//b:MiscellaneousSummaryMovement/b:MSMDetail/b:MSMSalesTotal
  --   JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
  --   JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
  --   WHERE S.intStoreId = @intStoreId AND intCheckoutId = @intCheckoutId AND tblSTCheckoutPaymentOptions.intPaymentOptionId = PO.intPaymentOptionId
-
-    --Update tblSTCheckoutPaymentOptions
+       
+	----Update tblSTCheckoutPaymentOptions
 	Update dbo.tblSTCheckoutPaymentOptions
     SET dblRegisterAmount = s.TotalSummaryAmount
     , intRegisterCount = s.TotalSummaryCount
 	, dblAmount = s.TotalSummaryAmount
-    FROM #Temp ST
+    FROM #tempCheckoutInsert ST
 	JOIN (
 			SELECT ISNULL(CAST(TenderSubCode as int) ,0) as TenderSubCode,
-			       SUM(ISNULL(CAST(MiscellaneousSummaryCount as decimal(18,6)) ,0)) as TotalSummaryCount,
-			       SUM(ISNULL(CAST(MiscellaneousSummaryAmount as decimal(18,6)) ,0)) as TotalSummaryAmount
-			FROM #Temp
+			       SUM(ISNULL(CAST(MiscellaneousSummaryCount as money) ,0)) as TotalSummaryCount,
+			       SUM(ISNULL(CAST(MiscellaneousSummaryAmount as money) ,0)) as TotalSummaryAmount
+			FROM #tempCheckoutInsert
 			GROUP BY TenderSubCode
 	     ) s ON ST.TenderSubCode = s.TenderSubCode
     JOIN tblSTPaymentOption PO ON PO.intRegisterMop = ST.TenderSubCode
@@ -155,16 +102,17 @@ FROM    @xml.nodes('//b:MiscellaneousSummaryMovement/b:MSMDetail/b:MSMSalesTotal
     --SET dblCustomerCount = (SELECT SUM(CAST(TenderTransactionsCount as int)) FROM #tempCheckoutInsert) 
     --WHERE intCheckoutId = @intCheckoutId
 
+
 	--Update TenderTransactionsCount
 	Update dbo.tblSTCheckoutHeader
 	SET dblCustomerCount = (S.TenderTransactionsCount)
 	FROM
 	(SELECT 
-		SUM(TenderTransactionsCount) as TenderTransactionsCount
-    FROM #Temp ST
-    JOIN tblSTPaymentOption PO ON PO.intRegisterMop = ST.TenderSubCode
-    JOIN tblSTStore Store ON Store.intStoreId = PO.intStoreId
-	JOIN tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
+		SUM(CAST(TenderTransactionsCount as int)) as TenderTransactionsCount
+    FROM #tempCheckoutInsert ST
+    JOIN dbo.tblSTPaymentOption PO ON PO.intRegisterMop = ST.TenderSubCode
+    JOIN dbo.tblSTStore Store ON Store.intStoreId = PO.intStoreId
+	JOIN dbo.tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
     WHERE ST.TenderSubCode <> ''
 	AND Store.intStoreId = @intStoreId  
 	AND intCheckoutId = @intCheckoutId) as S

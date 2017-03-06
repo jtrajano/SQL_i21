@@ -69,8 +69,7 @@ BEGIN
 		,@AllowQtyToExceed		
 		,@InvoiceType			
 		,@TermId				
-		,@GetAllAvailablePricing
-		,(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference ))
+		,@GetAllAvailablePricing)
 
 	RETURN
 END

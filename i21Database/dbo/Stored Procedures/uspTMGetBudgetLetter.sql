@@ -26,6 +26,7 @@ BEGIN
 		DECLARE @idoc int
 		DECLARE @strCustomerIds NVARCHAR(MAX)
 		DECLARE @strLocationIds NVARCHAR(MAX)
+		DECLARE @strTermIds NVARCHAR(MAX)
 		DECLARE @strFirstPaymentDue DATETIME
 		DECLARE @intBudgetLetterId INT
 		DECLARE @strWhereClause NVARCHAR(MAX)
@@ -80,6 +81,22 @@ BEGIN
 				SET @strWhereClause = @strWhereClause + ' AND G.intLocationId IN (' + @strLocationIds + ') '
 			END
 		END
+
+		---Term Ids Parameter	
+		SELECT @strLocationIds = [from]
+		FROM @temp_params where [fieldname] = 'strTermIds'
+		
+		IF (ISNULL(@strLocationIds,'') != '')
+		BEGIN
+			IF (@strWhereClause = '')
+			BEGIN
+				SET @strWhereClause = ' WHERE D.intTermsId IN (' + @strLocationIds + ') '
+			END
+			ELSE
+			BEGIN
+				SET @strWhereClause = @strWhereClause + ' AND D.intTermsId IN (' + @strLocationIds + ') '
+			END
+		END
 		
 		---@dtmFirstPaymentDue
 		SELECT @strFirstPaymentDue = [from] 
@@ -115,6 +132,7 @@ BEGIN
 			,dtmFirstDueDate = CAST(''' + @strFirstPaymentDue + ''' AS DATETIME)
 			,blbLetterBody = E.blbMessage 
 			,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
+			,intDeliveryTermId = D.intTermsId
 		FROM (SELECT TOP 1 * FROM tblSMCompanySetup) A, tblARCustomer B
 		INNER JOIN tblEMEntity C
 			ON B.intEntityCustomerId = C.intEntityId
@@ -122,8 +140,8 @@ BEGIN
 			ON C.intEntityId = F.intCustomerNumber
 		INNER JOIN tblTMSite G
 			ON F.intCustomerID = G.intCustomerID
-		INNER JOIN tblEMEntityLocation D
-			ON C.intEntityId = D.intEntityId AND D.ysnDefaultLocation = 1
+		INNER JOIN tblARCustomer D
+			ON C.intEntityId = D.intEntityCustomerId
 		,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') E
 		' + @strWhereClause
 		)

@@ -128,11 +128,11 @@ BEGIN
 													END 
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= Receipt.intCurrencyId
-				,dblExchangeRate					= ReceiptItem.dblForexRate
+				,dblExchangeRate					= ISNULL(ReceiptItem.dblForexRate, 0)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
 				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
-				,dblForexRate						= ReceiptItem.dblForexRate
+				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 0)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -189,20 +189,20 @@ BEGIN
 			,strRateType				= ForGLEntries_CTE.strRateType 
 	FROM	ForGLEntries_CTE LEFT JOIN dbo.tblGLAccount GLAccount 
 				ON GLAccount.intAccountId = ForGLEntries_CTE.intPurchaseTaxAccountId
-			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblTax) Debit
-			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblTax) Credit
-			CROSS APPLY dbo.fnGetDebitForeign(
+			CROSS APPLY dbo.fnGetDebitFunctional(
 				ForGLEntries_CTE.dblTax
 				,ForGLEntries_CTE.intCurrencyId
 				,@intFunctionalCurrencyId
 				,ForGLEntries_CTE.dblForexRate
-			) DebitForeign
-			CROSS APPLY dbo.fnGetCreditForeign(
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
 				ForGLEntries_CTE.dblTax
 				,ForGLEntries_CTE.intCurrencyId
 				,@intFunctionalCurrencyId
 				,ForGLEntries_CTE.dblForexRate
-			) CreditForeign
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblTax) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblTax) CreditForeign
 
 	UNION ALL 
 	SELECT	
@@ -231,9 +231,9 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= DebitForeign.Value 
+			,dblDebitForeign			= CreditForeign.Value
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CreditForeign.Value
+			,dblCreditForeign			= DebitForeign.Value 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -243,20 +243,20 @@ BEGIN
 				AND ForGLEntries_CTE.intItemLocationId = InventoryAccounts.intItemLocationId
 			LEFT JOIN dbo.tblGLAccount GLAccount 
 				ON GLAccount.intAccountId = InventoryAccounts.intContraInventoryId
-			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblTax) Debit
-			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblTax) Credit
-			CROSS APPLY dbo.fnGetDebitForeign(
+			CROSS APPLY dbo.fnGetDebitFunctional(
 				ForGLEntries_CTE.dblTax
 				,ForGLEntries_CTE.intCurrencyId
 				,@intFunctionalCurrencyId
 				,ForGLEntries_CTE.dblForexRate
-			) DebitForeign
-			CROSS APPLY dbo.fnGetCreditForeign(
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
 				ForGLEntries_CTE.dblTax
 				,ForGLEntries_CTE.intCurrencyId
 				,@intFunctionalCurrencyId
 				,ForGLEntries_CTE.dblForexRate
-			) CreditForeign
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblTax) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblTax) CreditForeign
 	;
 END
 

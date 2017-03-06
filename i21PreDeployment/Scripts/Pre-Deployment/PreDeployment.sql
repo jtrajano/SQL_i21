@@ -138,6 +138,7 @@
 
 :r .\12_EM\16_CleanCustomerProductVersion.sql
 :r .\12_EM\20_CleanCustomerSpecialPrice.sql
+:r .\12_EM\21_CleanAPBillMissingContact.sql
 --RK
 :r .\13_RK\01_DropTableScript.sql
 
@@ -177,4 +178,5 @@
 :r .\12_EM\16_Drop_tblEntity_related_constraints.sql -- THIS IS ON THE OUTSKIRT OF SCRIPT DUE TO ITS SENSITIVITY
 
 --MFT
-:r .\23_MFT\Remove_Unused_Tables_FK.sql
+:r .\23_MFT\1_CleanUp_Data.sql
+:r .\23_MFT\0_Remove_Unused_Tables_FK.sql

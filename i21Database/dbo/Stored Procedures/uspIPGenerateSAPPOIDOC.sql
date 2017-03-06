@@ -54,7 +54,9 @@ Declare @intMinSeq					INT,
 		@strCondXml					NVARCHAR(MAX),
 		@strCondXXml				NVARCHAR(MAX),
 		@strTextXml					NVARCHAR(MAX),
-		@strSeq						NVARCHAR(MAX)
+		@strSeq						NVARCHAR(MAX),
+		@strProductType				NVARCHAR(100),
+		@strVendorBatch				NVARCHAR(100)
 
 Declare @tblOutput AS Table
 (
@@ -213,6 +215,13 @@ Begin
 			Set @dblCashPrice=ISNULL(@dblCashPrice,0)/100
 		End
 
+		Set @strProductType=''
+		Select TOP 1 @strProductType=ca.strDescription from tblICItem i Join tblICCommodityAttribute ca on i.intProductTypeId=ca.intCommodityAttributeId 
+		Where ca.strType='ProductType' And i.strItemNo=@strItemNo
+
+		Set @strVendorBatch=''
+		Select @strVendorBatch=strVendorLotID From tblCTContractDetail Where intContractDetailId=@intContractDetailId
+
 		--Find Doc Type
 		If @strContractBasis IN ('FCA','EXW','DDP','DAP','DDU')
 			Set @strDocType='ZHDE'
@@ -335,7 +344,10 @@ Begin
 				Set @strItemXml += '<PO_UNIT>'		+ ISNULL(@strQuantityUOM,'')		+ '</PO_UNIT>'
 				Set @strItemXml += '<ORDERPR_UN>'	+ ISNULL(@strPriceUOM,'')			+ '</ORDERPR_UN>'
 				Set @strItemXml += '<NET_PRICE>'	+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblCashPrice)),'0.00')	+ '</NET_PRICE>'
-				Set @strItemXml += '<PRICE_UNIT>'	+ '1'	+ '</PRICE_UNIT>'
+				If UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Washed Arabica','Unwashed Arabica')
+					Set @strItemXml += '<PRICE_UNIT>'	+ '100'	+ '</PRICE_UNIT>'
+				Else
+					Set @strItemXml += '<PRICE_UNIT>'	+ '1'	+ '</PRICE_UNIT>'
 				If ISNULL(@dblCashPrice,0)=0
 					Set @strItemXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
 				Else
@@ -345,6 +357,8 @@ Begin
 					Set @strItemXml += '<VEND_PART>'	+ ISNULL(@strTerm,'')			+ '</VEND_PART>'
 				Else
 					Set @strItemXml += '<VEND_PART>'	+ ''			+ '</VEND_PART>'
+				If UPPER(@strCommodityCode)='TEA'
+					Set @strItemXml += '<VENDRBATCH>'	+ ISNULL(@strVendorBatch,'')			+ '</VENDRBATCH>'
 				Set @strItemXml += '<PO_PRICE>'		+ '1'	+ '</PO_PRICE>'
 				Set @strItemXml +=	'</E1BPMEPOITEM>'
 
@@ -379,6 +393,13 @@ Begin
 					Set @strItemXXml += '<VEND_PART>'	+ 'X'		+ '</VEND_PART>'
 				Else
 					Set @strItemXXml += '<VEND_PART>'	+ ' '		+ '</VEND_PART>'
+				If UPPER(@strCommodityCode)='TEA' 
+				Begin
+					If ISNULL(@strVendorBatch,'')<>''
+						Set @strItemXXml += '<VENDRBATCH>'	+ 'X'		+ '</VENDRBATCH>'
+					Else
+						Set @strItemXXml += '<VENDRBATCH>'	+ ' '		+ '</VENDRBATCH>'
+				End
 				Set @strItemXXml += '<PO_PRICE>'			+ 'X'		+ '</PO_PRICE>'
 				Set @strItemXXml +=	'</E1BPMEPOITEMX>'
 
@@ -420,7 +441,10 @@ Begin
 				Set @strCondXml += '<COND_VALUE>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblBasis)),'')	+ '</COND_VALUE>'
 				Set @strCondXml += '<CURRENCY>'			+ ISNULL(@strCurrency,'')		+ '</CURRENCY>'
 				Set @strCondXml += '<COND_UNIT>'		+ ISNULL(@strPriceUOM,'')		+ '</COND_UNIT>'
-				Set @strCondXml += '<COND_P_UNT>'		+ '1'	+ '</COND_P_UNT>'
+				If UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Washed Arabica','Unwashed Arabica')
+					Set @strCondXml += '<COND_P_UNT>'		+ '100'	+ '</COND_P_UNT>'
+				Else
+					Set @strCondXml += '<COND_P_UNT>'		+ '1'	+ '</COND_P_UNT>'
 				Set @strCondXml += '<CHANGE_ID>'		+ 'U' + '</CHANGE_ID>'
 				Set @strCondXml += '</E1BPMEPOCOND>'
 

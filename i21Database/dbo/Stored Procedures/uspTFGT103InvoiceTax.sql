@@ -305,7 +305,7 @@ BEGIN TRY
 				, tblEMEntityLocation.strCity AS strOriginCity
 				, tblEMEntityLocation.strState AS strOriginState
 				, tblSMCompanyLocation.strLocationName AS strCustomerName
-				, NULL AS strCustomerFEIN
+				, tblSMCompanySetup.strEin AS strCustomerFEIN
 				, NULL AS strAccountStatusCode
 				, tblSMShipVia.strShipVia
 				, tblSMShipVia.strTransporterLicense
@@ -333,9 +333,10 @@ BEGIN TRY
 			INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 			INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				ON tblICInventoryTransferDetail.intItemId = tblICItemMotorFuelTax.intItemId
-			INNER JOIN tblTRLoadReceipt ON tblICInventoryTransfer.intInventoryTransferId = tblTRLoadReceipt.intInventoryTransferId
+			INNER JOIN tblTRLoadReceipt ON tblICInventoryTransferDetail.intSourceId = tblTRLoadReceipt.intLoadReceiptId
 			INNER JOIN tblTRLoadHeader ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
+				AND tblTRLoadDistributionHeader.intCompanyLocationId = tblICInventoryTransfer.intToLocationId
 			INNER JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityShipViaId
 			INNER JOIN tblEMEntity ON tblSMShipVia.intEntityShipViaId = tblEMEntity.intEntityId
 			INNER JOIN tblAPVendor ON tblTRLoadReceipt.intTerminalId = tblAPVendor.intEntityVendorId
@@ -350,7 +351,8 @@ BEGIN TRY
 			LEFT OUTER JOIN tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId
 			LEFT OUTER JOIN tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId
 			CROSS JOIN tblSMCompanySetup
-			WHERE tblTFReportingComponent.intReportingComponentId = @RCId
+			WHERE tblICInventoryTransfer.intSourceType = 3
+				AND tblTFReportingComponent.intReportingComponentId = @RCId
 				AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
 				AND (tblARInvoice.strBOLNumber IS NULL)
 				AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
@@ -427,7 +429,7 @@ BEGIN TRY
 				, tblEMEntityLocation.strCity AS strOriginCity
 				, tblEMEntityLocation.strState AS strOriginState
 				, tblSMCompanyLocation.strLocationName AS strCustomerName
-				, NULL AS strCustomerFEIN
+				, tblSMCompanySetup.strEin AS strCustomerFEIN
 				, NULL AS strAccountStatusCode
 				, tblSMShipVia.strShipVia
 				, tblSMShipVia.strTransporterLicense
@@ -455,9 +457,10 @@ BEGIN TRY
 			INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 			INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				ON tblICInventoryTransferDetail.intItemId = tblICItemMotorFuelTax.intItemId
-			INNER JOIN tblTRLoadReceipt ON tblICInventoryTransfer.intInventoryTransferId = tblTRLoadReceipt.intInventoryTransferId
+			INNER JOIN tblTRLoadReceipt ON tblICInventoryTransferDetail.intSourceId = tblTRLoadReceipt.intLoadReceiptId
 			INNER JOIN tblTRLoadHeader ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
+				AND tblTRLoadDistributionHeader.intCompanyLocationId = tblICInventoryTransfer.intToLocationId
 			INNER JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityShipViaId
 			INNER JOIN tblEMEntity ON tblSMShipVia.intEntityShipViaId = tblEMEntity.intEntityId
 			INNER JOIN tblAPVendor ON tblTRLoadReceipt.intTerminalId = tblAPVendor.intEntityVendorId
@@ -472,7 +475,8 @@ BEGIN TRY
 			LEFT OUTER JOIN tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId
 			LEFT OUTER JOIN tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId
 			CROSS JOIN tblSMCompanySetup
-			WHERE tblTFReportingComponent.intReportingComponentId = @RCId
+			WHERE tblICInventoryTransfer.intSourceType = 3
+				AND tblTFReportingComponent.intReportingComponentId = @RCId
 				AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
 				AND (tblARInvoice.strBOLNumber IS NULL)
 				AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)

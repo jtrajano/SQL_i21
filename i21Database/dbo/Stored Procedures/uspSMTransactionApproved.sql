@@ -4,9 +4,15 @@
 AS
 BEGIN
 
-    IF @type = 'ContractManagement.view.Contract'
+    IF @type = 'ContractManagement.view.Contract' OR @type = 'ContractManagement.view.Amendments'
 		BEGIN
-			--Call your sp here
+			DECLARE @intTransactionId INT, @intApprovalId INT
+
+			SELECT  @intTransactionId	=	intTransactionId FROM tblSMTransaction WHERE intRecordId = @recordId
+			SELECT	TOP 1	@intApprovalId	=	intApprovalId FROM tblSMApproval WHERE strStatus = 'Approved'  AND intTransactionId  = @intTransactionId ORDER BY 1 DESC
+
+			EXEC	uspCTContractApproved @recordId,@intApprovalId
+
 		RETURN
 	END
 
