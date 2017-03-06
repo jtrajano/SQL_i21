@@ -228,6 +228,7 @@ BEGIN TRY
 			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 			WHERE LC.intLoadId = @intLoadId
+			ORDER BY LC.intLoadContainerId
 		END
 	END
 	ELSE 
@@ -430,6 +431,7 @@ BEGIN TRY
 			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 			WHERE LC.intLoadId = @intLoadId
+			ORDER BY LC.intLoadContainerId
 		END
 	END
 
