@@ -1903,7 +1903,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         function(failureResponse){
                             var jsonData = Ext.decode(failureResponse.responseText);
                             //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
-                            iRely.Functions.showErrorDialog('Something went wrong while getting the forex rates.');
+                            iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
                         }
                     );                      
                 }
@@ -1924,6 +1924,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 itemUOM: intItemUnitMeasureId,
                 validDate: dtmReceiptDate
             }
+            
             me.getVendorCost(vendorCostCfg, processVendorCostOnSuccess, processVendorCostOnFailure);
 
             current.set('intItemId', records[0].get('intItemId'));
