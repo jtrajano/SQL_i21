@@ -3208,6 +3208,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var currentHeader = win.viewModel.data.current;        
         var field = context ? context.field : null;
 
+        var transactionCurrencyId = currentHeader.get('intCurrencyId');
+        var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');           
+        
         // If editing the qty, check if there is a new sales price appropriate with the shipped qty. 
         if (currentItem) {
             if (field === 'dblQuantity') {
@@ -3332,6 +3335,32 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onGumUOMSelect: function(plugin, records) {
+        if (records.length <= 0)
+            return;
+
+        var me = this;
+        var win = me.getView().screenMgr.window;
+        var grid = win.down('grid');
+        var current = plugin.getActiveRecord();
+
+        var dblUnitQty = records[0].get('dblUnitQty');
+        var dblLastCost = records[0].get('dblLastCost');
+        var dblSalesPrice = records[0].get('dblSalePrice');
+        var dblSalesPriceForeign = records[0].get('dblSalePrice');
+        var intItemUOMId = records[0].get('intItemUnitMeasureId');
+        var dblForexRate = current.get('dblForexRate');
+
+        // Convert the sales price from functional currency to the transaction currency. 
+        dblSalesPriceForeign = dblForexRate !== 0 ? dblSalesPrice / dblForexRate : dblLastCost;
+        dblSalesPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblSalesPriceForeign, 6);            
+
+        current.set('dblItemUOMConv', dblUnitQty);
+        current.set('dblUnitCost', dblLastCost);
+        current.set('dblUnitPrice', dblSalesPrice);
+        current.set('intItemUOMId', intItemUOMId);
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -3448,6 +3477,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             "#cboCurrency": {
                 drilldown: this.onCurrencyDrilldown
                 //select: this.onCurrencySelect
+            },
+            "#gumQuantity": {
+                onUOMSelect: this.onGumUOMSelect
             }
         })
     }

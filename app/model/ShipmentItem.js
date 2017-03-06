@@ -50,6 +50,7 @@ Ext.define('Inventory.model.ShipmentItem', {
         { name: 'strWeightUOM', type: 'string'},
         { name: 'strSubLocationName', type: 'string'},
         { name: 'strStorageLocationName', type: 'string'},
+        { name: 'intDecimalPlaces', type: 'int', allowNull: true },
 
         { name: 'dblLineTotal', type: 'float',
             persist: false,

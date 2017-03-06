@@ -206,6 +206,40 @@ namespace iRely.Inventory.Model
         public int? intForexRateTypeId { get; set; }
         public decimal? dblForexRate { get; set; }
 
+        private int? _decimalPlaces;
+        [NotMapped]
+        public int? intDecimalPlaces
+        {
+            get
+            {
+                if (vyuICGetInventoryShipmentItem != null)
+                    return vyuICGetInventoryShipmentItem.intDecimalPlaces;
+                else
+                    return _decimalPlaces;
+            }
+            set
+            {
+                _decimalPlaces = value;
+            }
+        }
+
+        private int? _unitMeasureId;
+        [NotMapped]
+        public int? intUnitMeasureId
+        {
+            get
+            {
+                if (vyuICGetInventoryShipmentItem != null)
+                    return vyuICGetInventoryShipmentItem.intUnitMeasureId;
+                else
+                    return _unitMeasureId;
+            }
+            set
+            {
+                _unitMeasureId = value;
+            }
+        }
+
         private string _orderNumber;
         [NotMapped]
         public string strOrderNumber
@@ -737,6 +771,8 @@ namespace iRely.Inventory.Model
         public string strStorageLocationName { get; set; }
         public string strOrderUOM { get; set; }
         public string strUnitMeasure { get; set; }
+        public int? intDecimalPlaces { get; set; }
+        public int? intUnitMeasureId { get; set; }
         public decimal? dblItemUOMConv { get; set; }
         public string strUnitType { get; set; }
         public int? intCurrencyId { get; set; }
