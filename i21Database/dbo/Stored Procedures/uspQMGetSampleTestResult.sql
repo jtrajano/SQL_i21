@@ -3,6 +3,7 @@
 	,@intProductTypeId INT
 	,@intProductValueId INT
 	,@intControlPointId INT
+	,@intSampleTypeId INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -11,6 +12,10 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN
+	SELECT @intControlPointId = intControlPointId
+	FROM tblQMSampleType
+	WHERE intSampleTypeId = @intSampleTypeId
+
 	SELECT TR.intSampleId
 		,TR.intTestResultId
 		,TR.intProductId

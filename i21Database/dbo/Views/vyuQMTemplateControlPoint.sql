@@ -1,7 +1,9 @@
 ﻿CREATE VIEW vyuQMTemplateControlPoint
 AS
-SELECT DISTINCT CP.intControlPointId
+SELECT DISTINCT ST.intSampleTypeId
+	,ST.strSampleTypeName
+	,ST.strDescription
+	,CP.intControlPointId
 	,CP.strControlPointName
-	,CP.strDescription
-FROM tblQMControlPoint CP
-JOIN tblQMSampleType ST ON ST.intControlPointId = CP.intControlPointId
+FROM tblQMSampleType ST
+JOIN tblQMControlPoint CP ON CP.intControlPointId = ST.intControlPointId

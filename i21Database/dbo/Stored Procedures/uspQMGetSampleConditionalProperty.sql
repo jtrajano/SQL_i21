@@ -4,6 +4,7 @@
 	,@intProductValueId INT
 	,@intItemId INT
 	,@intControlPointId INT
+	,@intSampleTypeId INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -108,7 +109,7 @@ BEGIN
 		) DT
 	JOIN dbo.tblQMProduct AS PRD ON PRD.intProductId = DT.intProductId
 	JOIN dbo.tblQMProductControlPoint PC ON PC.intProductId = PRD.intProductId
-		AND PC.intControlPointId = @intControlPointId
+		AND PC.intSampleTypeId = @intSampleTypeId
 	JOIN dbo.tblQMTest AS T ON T.intTestId = DT.intTestId
 	JOIN dbo.tblQMTestProperty AS TP ON TP.intPropertyId = DT.intPropertyId
 		AND TP.intTestId = DT.intTestId
