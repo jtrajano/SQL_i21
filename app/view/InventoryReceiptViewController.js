@@ -3715,6 +3715,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (context.record) {
                 // Calculate the gross weight.
                 me.calculateGrossNet(context.record, 1);
+
+                //set default values to lot
+                var pnlLotTracking = win.down('#pnlLotTracking');
+                if (!pnlLotTracking.hidden) {
+                    var currentReceiptItemVM = vw.data.currentReceiptItem;
+                    //Check if lot table has no record except for dummy
+                    if (currentReceiptItemVM.tblICInventoryReceiptItemLots().getRange().length == 1) {
+                        var newReceiptItemLot = Ext.create('Inventory.model.ReceiptItemLot', {
+                                intInventoryReceiptItemId: context.record.get('intInventoryReceiptItemId'),
+                                intSubLocationId: context.record.get('intSubLocationId'),
+                                intStorageLocationId: context.record.get('intStorageLocationId'),
+                                dblQuantity: context.record.get('dblOpenReceive'),
+                                dblGrossWeight: context.record.get('dblGross'),
+                                dblTareWeight: context.record.get('dblGross') - context.record.get('dblNet'),
+                                dblNetWeight: context.record.get('dblNet'),
+                                intItemUnitMeasureId: context.record.get('intUnitMeasureId'),
+                                strWeightUOM: context.record.get('strWeightUOM'),
+                                strStorageLocation: context.record.get('strStorageLocationName'),
+                                strSubLocationName:  context.record.get('strSubLocationName'),
+                                strUnitMeasure: context.record.get('strUnitMeasure'),
+                                dblLotUOMConvFactor: context.record.get('dblItemUOMConvFactor')
+                        });
+                        currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
+                    }
+                }
             }
         }
 
@@ -5472,6 +5497,29 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 me.calculateGrossNet(currentReceiptItem, 1);
                             }
                         }
+                        
+                        //Add default values to lot if item is lot-tracked
+                        if (!iRely.Functions.isEmpty(order.get('strLotTracking')) && order.get('strLotTracking') !== 'No') {
+                            var currentReceiptItemVM = me.getViewModel().data.currentReceiptItem;
+
+                            var newReceiptItemLot = Ext.create('Inventory.model.ReceiptItemLot', {
+                                intInventoryReceiptItemId: newReceiptItem.get('intInventoryReceiptItemId'),
+                                intSubLocationId: newReceiptItem.get('intSubLocationId'),
+                                intStorageLocationId: newReceiptItem.get('intStorageLocationId'),
+                                dblQuantity: newReceiptItem.get('dblOpenReceive'),
+                                dblGrossWeight: newReceiptItem.get('dblGross'),
+                                dblTareWeight: newReceiptItem.get('dblGross') - newReceiptItem.get('dblNet'),
+                                dblNetWeight: newReceiptItem.get('dblNet'),
+                                intItemUnitMeasureId: newReceiptItem.get('intUnitMeasureId'),
+                                strWeightUOM: newReceiptItem.get('strWeightUOM'),
+                                strStorageLocation: newReceiptItem.get('strStorageLocationName'),
+                                strSubLocationName:  newReceiptItem.get('strSubLocationName'),
+                                strUnitMeasure: newReceiptItem.get('strUnitMeasure'),
+                                dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor')
+                            });
+                            currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
+                        }
+
                     });
                     search.close();
                     //win.context.data.saveRecord();
