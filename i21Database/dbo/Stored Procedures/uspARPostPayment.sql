@@ -86,10 +86,11 @@ DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Receive Payments'
 DECLARE @CODE NVARCHAR(25) = 'AR'
 
-DECLARE @ARAccount INT
-		,@DiscountAccount INT
-		,@WriteOffAccount INT
-		,@IncomeInterestAccount INT
+DECLARE  @ARAccount				INT
+		,@DiscountAccount		INT
+		,@WriteOffAccount		INT
+		,@IncomeInterestAccount	INT
+		,@GainLossAccount		INT
 		
 DECLARE @totalInvalid INT
 DECLARE @totalRecords INT
@@ -101,11 +102,13 @@ SET @WriteOffAccount = NULL
 SET @IncomeInterestAccount = NULL
 SET @intWriteOff = NULL
 SET @intWriteOffAccount = NULL
+SET @GainLossAccount = NULL
 		
 SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 SET @DiscountAccount = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
 SET @WriteOffAccount = (SELECT TOP 1 intWriteOffAccountId FROM tblARCompanyPreference WHERE intWriteOffAccountId IS NOT NULL AND intWriteOffAccountId <> 0)
 SET @IncomeInterestAccount = (SELECT TOP 1 intInterestIncomeAccountId FROM tblARCompanyPreference WHERE intInterestIncomeAccountId IS NOT NULL AND intInterestIncomeAccountId <> 0)
+SET @GainLossAccount = (SELECT TOP 1 intAccountsReceivableRealizedId FROM tblSMMultiCurrency WHERE intAccountsReceivableRealizedId IS NOT NULL AND intAccountsReceivableRealizedId <> 0)
 
 DECLARE @UserEntityID			INT
 	,@AllowOtherUserToPost		BIT
@@ -586,7 +589,31 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId
 				WHERE
 					B.dblPayment <> 0
-					AND CAST(C.dtmPostDate AS DATE) > CAST(A.dtmDatePaid AS DATE)					
+					AND CAST(C.dtmPostDate AS DATE) > CAST(A.dtmDatePaid AS DATE)				
+					
+				--Income Interest Account
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					'The Accounts Receivable Realized Gain or Loss account in Company Configuration was not set.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPaymentDetail D
+				INNER JOIN
+					tblARPayment A
+						ON D.intPaymentId = A.intPaymentId
+				INNER JOIN
+					tblARInvoice C
+						ON D.intInvoiceId = C.intInvoiceId 
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId						 
+				WHERE
+					ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(D.dblBaseInterest,0.00)) - ISNULL(D.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - D.dblBasePayment),0) <> 0
+					AND  (@GainLossAccount IS NULL OR @GainLossAccount = 0)	
 					
 				--+overpayment
 				INSERT INTO
@@ -1388,7 +1415,7 @@ IF @post = 1
 													CASE WHEN @intWriteOffAccount IS NOT NULL THEN @intWriteOffAccount ELSE @WriteOffAccount END
 												ELSE A.intAccountId END)
 											END
-			,dblDebit					= A.dblBaseAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+			,dblDebit					= (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END) * (A.dblBaseAmountPaid + (SELECT SUM(ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - ARPD.dblBasePayment),0)) FROM tblARPaymentDetail ARPD INNER JOIN tblARInvoice C ON ARPD.intInvoiceId = C.intInvoiceId  WHERE ARPD.intPaymentId = A.intPaymentId))
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
@@ -1704,6 +1731,67 @@ IF @post = 1
 		--	,A.intCurrencyId
 		--	,A.ysnInvoicePrepayment
 			
+		UNION ALL
+
+		--GAIN LOSS
+		SELECT
+			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
+			,strBatchID					= @batchId
+			,intAccountId				= @GainLossAccount
+			,dblDebit					= CASE WHEN (ISNULL(((((ISNULL(I.dblBaseAmountDue, 0.00) + ISNULL(B.dblBaseInterest,0.00)) - ISNULL(B.dblBaseDiscount,0.00) * (CASE WHEN I.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - B.dblBasePayment),0)) > 0 THEN 0 ELSE ABS((ISNULL(((((ISNULL(I.dblBaseAmountDue, 0.00) + ISNULL(B.dblBaseInterest,0.00)) - ISNULL(B.dblBaseDiscount,0.00) * (CASE WHEN I.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - B.dblBasePayment),0))) END
+			,dblCredit					= CASE WHEN ((ISNULL(((((ISNULL(I.dblBaseAmountDue, 0.00) + ISNULL(B.dblBaseInterest,0.00)) - ISNULL(B.dblBaseDiscount,0.00) * (CASE WHEN I.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - B.dblBasePayment),0))) > 0 THEN ABS((ISNULL(((((ISNULL(I.dblBaseAmountDue, 0.00) + ISNULL(B.dblBaseInterest,0.00)) - ISNULL(B.dblBaseDiscount,0.00) * (CASE WHEN I.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - B.dblBasePayment),0))) ELSE 0 END
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.intAccountId) 
+			,strCode					= @CODE
+			,strReference				= C.strCustomerNumber
+			,intCurrencyId				= A.intCurrencyId 
+			,dblExchangeRate			= 0
+			,dtmDateEntered				= @PostDate
+			,dtmTransactionDate			= A.dtmDatePaid
+			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
+			,intJournalLineNo			= A.intPaymentId
+			,ysnIsUnposted				= 0
+			,intUserId					= @userId
+			,intEntityId				= @UserEntityID				
+			,strTransactionId			= A.strRecordNumber
+			,intTransactionId			= A.intPaymentId
+			,strTransactionType			= @SCREEN_NAME
+			,strTransactionForm			= @SCREEN_NAME
+			,strModuleName				= @MODULE_NAME
+			,intConcurrencyId			= 1
+			,[dblDebitForeign]			= 0
+			,[dblDebitReport]			= 0
+			,[dblCreditForeign]			= 0
+			,[dblCreditReport]			= 0
+			,[dblReportingRate]			= 0
+			,[dblForeignRate]			= 0
+			,[strRateType]				= ''				 
+		FROM
+			tblARPaymentDetail B
+		INNER JOIN 
+			tblARPayment A  
+				ON B.intPaymentId = A.intPaymentId
+		INNER JOIN 
+			tblARCustomer C 
+				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+		INNER JOIN
+			tblARInvoice I
+				ON B.intInvoiceId = I.intInvoiceId
+		INNER JOIN
+			@ARReceivablePostData P
+				ON A.intPaymentId = P.intPaymentId 
+		WHERE
+			((ISNULL(((((ISNULL(I.dblBaseAmountDue, 0.00) + ISNULL(B.dblBaseInterest,0.00)) - ISNULL(B.dblBaseDiscount,0.00) * (CASE WHEN I.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - B.dblBasePayment),0)))  <> 0
+		--GROUP BY
+		--	A.intPaymentId
+		--	,A.strRecordNumber
+		--	,B.intAccountId
+		--	,C.strCustomerNumber
+		--	,A.dtmDatePaid
+		--	,A.intCurrencyId
+		--	,A.ysnInvoicePrepayment
+
 		UNION ALL
 		
 		SELECT
