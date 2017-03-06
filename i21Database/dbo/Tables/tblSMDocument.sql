@@ -15,10 +15,3 @@
 	CONSTRAINT [FK_tblSMDocument_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
     CONSTRAINT [PK_dbo.tblSMDocument] PRIMARY KEY CLUSTERED ([intDocumentId] ASC)
 );
-
-
-
-
-
-
-

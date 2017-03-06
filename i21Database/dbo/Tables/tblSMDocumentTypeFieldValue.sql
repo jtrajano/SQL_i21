@@ -8,10 +8,3 @@
 	CONSTRAINT [FK_tblSMDocumentTypeFieldValue_tblSMDocument] FOREIGN KEY ([intDocumentId]) REFERENCES [dbo].[tblSMDocument] ([intDocumentId]) ON DELETE CASCADE,
     CONSTRAINT [PK_dbo.tblSMDocumentTypeValue] PRIMARY KEY CLUSTERED ([intDocumentTypeFieldId] ASC)
 );
-
-
-
-
-
-
-

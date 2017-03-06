@@ -4,10 +4,3 @@
     [intConcurrencyId]	INT				NOT NULL,
     CONSTRAINT [PK_dbo.tblSMDocumentType] PRIMARY KEY CLUSTERED ([intDocumentTypeId] ASC)
 );
-
-
-
-
-
-
-
