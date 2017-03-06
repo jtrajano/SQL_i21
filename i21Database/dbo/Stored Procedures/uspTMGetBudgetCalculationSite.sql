@@ -105,6 +105,7 @@ BEGIN
 		ON A.intClockID = E.intClockID
 	LEFT JOIN tblEMEntityLocation H
 		ON C.intEntityId = H.intEntityId
+			AND H.ysnDefaultLocation = 1
 	LEFT JOIN tblARCustomer I
 		ON C.intEntityId = I.intEntityCustomerId
 
