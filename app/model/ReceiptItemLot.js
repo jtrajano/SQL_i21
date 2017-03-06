@@ -90,7 +90,8 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'strSubLocationName', type: 'string' },
         { name: 'dblStatedNetPerUnit', type: 'float' },
         { name: 'dblStatedTotalNet', type: 'float' },
-        { name: 'dblPhysicalVsStated', type: 'float' }
+        { name: 'dblPhysicalVsStated', type: 'float' },
+        { name: 'strUnitMeasure', type: 'string'}
     ],
 
     validators: [
