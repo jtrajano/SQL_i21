@@ -837,8 +837,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         ],
                                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                             selType: 'checkboxmodel',
-                                                                            allowDeselect: true,
-                                                                            mode: 'SINGLE'
+                                                                            allowDeselect: true
                                                                         }),
                                                                         columns: [
                                                                             {
