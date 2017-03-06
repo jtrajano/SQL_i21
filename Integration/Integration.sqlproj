@@ -403,5 +403,6 @@
     <None Include="dbo\Stored Procedures\uspTRImportTruck.sql" />
     <None Include="dbo\Stored Procedures\uspMFImportRecipe.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportSupplyPoint.sql" />
+    <None Include="dbo\Stored Procedures\uspTRImportSupplyPointRackPriceEquation.sql" />
   </ItemGroup>
 </Project>
