@@ -25,7 +25,8 @@ BEGIN
 	-- Add the G/L entries from the temporary table to the permanent table (tblGLDetail)
 	DECLARE @intCompanyId INT
 	SELECT TOP 1 @intCompanyId=intCompanySetupID from tblSMCompanySetup
-
+	DECLARE @dtmDateEntered DATETIME
+	SELECT @dtmDateEntered = GETDATE()
 	INSERT INTO dbo.tblGLDetail (
 			[dtmDate]
 			,[strBatchId]
@@ -74,7 +75,7 @@ BEGIN
 			,[strReference]
 			,[intCurrencyId]
 			,[dblExchangeRate]
-			,[dtmDateEntered]
+			,@dtmDateEntered
 			,dbo.fnRemoveTimeOnDate([dtmTransactionDate])
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
