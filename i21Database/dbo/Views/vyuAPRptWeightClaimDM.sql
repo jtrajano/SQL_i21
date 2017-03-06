@@ -88,7 +88,7 @@ FROM
 		,dblFranchiseWeight		=	WC2Details.dblFranchiseWeight
 		,dblClaimAmount			=	WC2Details.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
-		,strContainerNumber		=	LCointainer.strContainerNumber
+		,strContainerNumber		=	ISNULL(LCointainer.strContainerNumber, (SELECT TOP 1 LoadContainer.strContainerNumber FROM tblLGLoadContainer LoadContainer WHERE LoadContainer.intLoadId = WC2Details.intLoadId))
 	FROM tblAPBill WC2
 	INNER JOIN tblAPBillDetail WC2Details ON WC2.intBillId = WC2Details.intBillId
 	INNER JOIN tblICItem Item ON Item.intItemId = WC2Details.intItemId
@@ -118,7 +118,7 @@ FROM
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	MainCurrency.strCurrency
 		,strConcern				=	CASE WHEN Receipt.intInventoryReceiptId IS NOT NULL AND Receipt.strReceiptType = 'Inventory Return'
-										THEN  'Container Rejection Commodity cost' 
+										THEN  'Container Rejection - Commodity cost' 
 										WHEN DMDetails.intLoadId > 0 THEN 'Weight Claim'
 										ELSE ''
 										END
