@@ -11,8 +11,11 @@ BEGIN
 			SELECT  @intTransactionId	=	intTransactionId FROM tblSMTransaction WHERE intRecordId = @recordId
 			SELECT	TOP 1	@intApprovalId	=	intApprovalId FROM tblSMApproval WHERE strStatus = 'Approved'  AND intTransactionId  = @intTransactionId ORDER BY 1 DESC
 
-			EXEC	uspCTContractApproved @recordId,@intApprovalId
-
+			BEGIN TRY
+				EXEC	uspCTContractApproved @recordId,@intApprovalId
+			END TRY
+			BEGIN CATCH
+			END CATCH
 		RETURN
 	END
 
