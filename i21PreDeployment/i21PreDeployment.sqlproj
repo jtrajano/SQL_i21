@@ -153,7 +153,8 @@
     <None Include="Scripts\Pre-Deployment\11_IC\Update_M2M_Computation_Setup.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\9_DropTblSMAlternateApproverGroup.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\10_DropTblSMApproverConfigurationForTransaction.sql" />
-    <None Include="Scripts\Pre-Deployment\23_MFT\Remove_Unused_Tables_FK.sql" />
+    <None Include="Scripts\Pre-Deployment\23_MFT\0_Remove_Unused_Tables_FK.sql" />
+    <None Include="Scripts\Pre-Deployment\23_MFT\1_CleanUp_Data.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
