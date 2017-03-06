@@ -48,7 +48,12 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intCompanyLocationId, intEntityI
 	, strDestinationWeights = ContractView.strWeight
 	, intDestinationWeightId = ContractView.intWeightId
 	, intCurrencyId = ContractView.intCurrencyId
-FROM vyuCTContractDetailView ContractView
+	, intForexRateTypeId = ContractView.intRateTypeId
+	, strForexRateType = currencyRateType.strCurrencyExchangeRateType
+	, dblForexRate = ContractView.dblRate
+FROM	vyuCTContractDetailView ContractView
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+			ON currencyRateType.intCurrencyExchangeRateTypeId = ContractView.intRateTypeId
 WHERE ysnAllowedToShow = 1
 	AND strContractType = 'Sale'
 	AND ContractView.dblAvailableQty > 0
