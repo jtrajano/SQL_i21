@@ -10,6 +10,7 @@
 	,@PricingLevelId			INT
 	,@TermId					INT
 	,@GetAllAvailablePricing	BIT
+	,@CurrencyId				INT	
 )
 RETURNS @returntable TABLE
 (
@@ -93,6 +94,7 @@ BEGIN
 		ICISP.intItemId = @ItemId 
 		AND ICISP.intItemLocationId = @ItemLocationId 
 		AND ICISP.intItemUnitMeasureId = @ItemUOMId
+		AND ICISP.intCurrencyId = @CurrencyId
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ICISP.dtmBeginDate AS DATE) AND CAST(ISNULL(ICISP.dtmEndDate,@TransactionDate) AS DATE)
  	ORDER BY
 		dtmBeginDate DESC
@@ -184,6 +186,7 @@ BEGIN
 					AND PL.intItemId = @ItemId
 					AND PL.intItemLocationId = @ItemLocationId
 					AND PL.intItemUnitMeasureId = @ItemUOMId
+					AND PL.intCurrencyId = @CurrencyId
 					AND ((@Quantity BETWEEN PL.dblMin AND PL.dblMax) OR (PL.dblMin = 0 AND PL.dblMax = 0))
 				ORDER BY
 					PL.dblMin
@@ -228,6 +231,7 @@ BEGIN
 		AND ICPL.intItemId = @ItemId
 		AND ICPL.intItemLocationId = @ItemLocationId
 		AND ICPL.intItemUnitMeasureId = @ItemUOMId
+		AND ICPL.intCurrencyId = @CurrencyId
 		AND ((@Quantity BETWEEN ICPL.dblMin AND ICPL.dblMax) OR (ICPL.dblMin = 0 AND ICPL.dblMax = 0))
 	ORDER BY
 		ICPL.dblMin

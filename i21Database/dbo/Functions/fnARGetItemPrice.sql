@@ -22,7 +22,6 @@
 	,@VendorLocationId			INT
 	,@InvoiceType				NVARCHAR(200)
 	,@GetAllAvailablePricing	BIT
-	,@SpecialPricingCurrencyId	INT
 )
 RETURNS NUMERIC(18,6)
 AS
@@ -60,7 +59,6 @@ BEGIN
 			,@InvoiceType
 			,NULL
 			,@GetAllAvailablePricing
-			,@SpecialPricingCurrencyId
 		)
 
 	RETURN @ItemPrice

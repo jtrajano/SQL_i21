@@ -138,7 +138,7 @@ CROSS APPLY
 		,ARI.[intEntityCustomerId]	--@CustomerId
 		,ARI.[intCompanyLocationId]	--@LocationId
 		,ARID.[intItemUOMId]		--@ItemUOMId
-		,ARI.[intCurrencyId]		--@CurrencyId
+		,ISNULL(ARI.intCurrencyId, (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference))		--@CurrencyId
 		,ARI.[dtmDate]				--@TransactionDate
 		,ARID.[dblQtyShipped]		--@Quantity
 		,NULL						--@ContractHeaderId
@@ -161,7 +161,6 @@ CROSS APPLY
 		,ARI.[strType]				--@InvoiceType
 		,ARI.[intTermId]			--@TermId
 		,1							--@GetAllAvailablePricing
-		,ISNULL(ARI.intCurrencyId, (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference))
 		) AS IP
 WHERE
 	NOT EXISTS(	SELECT TOP 1 NULL 
@@ -335,7 +334,6 @@ CROSS APPLY
 		,SO.[strType]				--@InvoiceType
 		,SO.[intTermId]				--@TermId
 		,1							--@GetAllAvailablePricing
-		,ISNULL(SO.intCurrencyId, (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference))
 		) AS IP
 WHERE
 	NOT EXISTS(	SELECT TOP 1 NULL 
