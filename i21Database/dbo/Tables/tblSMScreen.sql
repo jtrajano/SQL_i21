@@ -8,8 +8,9 @@
 	[ysnApproval]	   BIT NULL,
 	[ysnActivity]	   BIT NULL,
 	[ysnCustomTab]	   BIT NULL,
-    [intConcurrencyId] INT CONSTRAINT [DF__tblSMScre__intCo__381B131F] DEFAULT ((1)) NOT NULL,
-    CONSTRAINT [PK__tblSMScr__552B34714D4B3A2F] PRIMARY KEY CLUSTERED ([intScreenId] ASC)
+    [ysnDocumentSource] BIT NULL, 
+    [intConcurrencyId] INT CONSTRAINT [DF__tblSMScreen] DEFAULT ((1)) NOT NULL,
+    CONSTRAINT [PK_tblSMScreen] PRIMARY KEY CLUSTERED ([intScreenId] ASC)
 );
 
 
