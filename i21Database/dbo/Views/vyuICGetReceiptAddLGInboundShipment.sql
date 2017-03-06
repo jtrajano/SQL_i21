@@ -63,6 +63,9 @@ FROM (
 		, dblGross					= CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
 		, dblNet					= CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
 		, LC.ysnRejected
+		, intForexRateTypeId		= CAST(NULL AS INT) -- Add dummy fields for the meantime. 
+		, strForexRateType			= currencyType.strCurrencyExchangeRateType -- Add dummy fields for the meantime. 
+		, dblForexRate				= CAST(NULL AS NUMERIC(18, 6)) -- Add dummy fields for the meantime. 
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency 
 				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
 			LEFT JOIN dbo.tblICItemUOM ItemUOM 
@@ -79,7 +82,10 @@ FROM (
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN dbo.tblICItemLocation ItemLocation
 				ON ItemLocation.intItemId = LogisticsView.intItemId AND ItemLocation.intLocationId = LogisticsView.intCompanyLocationId
-			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LogisticsView.intLoadContainerId
+			LEFT JOIN tblLGLoadContainer LC 
+				ON LC.intLoadContainerId = LogisticsView.intLoadContainerId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyType 
+				ON currencyType.intCurrencyExchangeRateTypeId = NULL 
 	WHERE LogisticsView.dblBalanceToReceive > 0 
 		  AND LogisticsView.intSourceType = 2 
 		  AND LogisticsView.intTransUsedBy = 1 
