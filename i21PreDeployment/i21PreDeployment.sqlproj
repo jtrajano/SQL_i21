@@ -150,6 +150,7 @@
     <None Include="Scripts\Pre-Deployment\21_PR\2_1630_to_1640.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\20_CleanCustomerSpecialPrice.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\Remove_Unused_Shipment_Charges.sql" />
+    <None Include="Scripts\Pre-Deployment\23_MFT\1_CleanUp_Data.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
@@ -290,6 +291,6 @@
     <None Include="Scripts\Pre-Deployment\11_IC\Clean_Cost_Bucket_Indexes.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\23_MFT\Remove_Unused_Tables_FK.sql" />
+    <None Include="Scripts\Pre-Deployment\23_MFT\0_Remove_Unused_Tables_FK.sql" />
   </ItemGroup>
 </Project>
