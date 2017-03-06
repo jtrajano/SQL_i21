@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantMCM]
-@intCheckoutId Int,
-@strXML nvarchar(MAX)
+@intCheckoutId Int
 AS
 BEGIN
 
+	
 	DECLARE @intStoreId Int
 	Select @intStoreId = intStoreId from dbo.tblSTCheckoutHeader Where intCheckoutId = @intCheckoutId
 
