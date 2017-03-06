@@ -1810,7 +1810,7 @@ UNION ALL SELECT intFilingPacketId = 1144, strFormCode = 'Form 83', strScheduleC
 UNION ALL SELECT intFilingPacketId = 1145, strFormCode = 'Form 83', strScheduleCode = '10', strType = 'Ethanol', ysnStatus = 1, intFrequency = 2
 UNION ALL SELECT intFilingPacketId = 1146, strFormCode = 'Form 83', strScheduleCode = '10', strType = 'Biodiesel', ysnStatus = 1, intFrequency = 2
 UNION ALL SELECT intFilingPacketId = 1147, strFormCode = 'Form 83', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 2
-UNION ALL SELECT intFilingPacketId = 1148, strFormCode = 'EDI', strScheduleCode = '', strType = 'EDI', ysnStatus = 1, intFrequency = 2
+UNION ALL SELECT intFilingPacketId = 1148, strFormCode = 'NE EDI', strScheduleCode = '', strType = 'EDI', ysnStatus = 1, intFrequency = 2
 
 EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
