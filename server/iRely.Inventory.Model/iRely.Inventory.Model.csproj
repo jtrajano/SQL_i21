@@ -149,7 +149,6 @@
     <Compile Include="Configuration\tblICM2MComputationMap.cs" />
     <Compile Include="Configuration\vyuICItemUOMMap.cs" />
     <Compile Include="Configuration\vyuICLotHistoryMap.cs" />
-    <Compile Include="InventoryEntities.Views.cs" />
     <Compile Include="Metadata\tblICItemSubLocation.cs" />
     <Compile Include="Metadata\tblICM2MComputation.cs" />
     <Compile Include="Configuration\tblICParentLotMap.cs" />

@@ -1360,6 +1360,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 Quantity: 0, // Default ship qty. 
                 ShipToLocationId: shipToLocationId
             }
+
             me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure);
 
             current.set('intItemId', records[0].get('intItemId'));
@@ -2641,6 +2642,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 { dataIndex: 'intDestinationWeightId', text: 'Destination Weight Id', width: 100, dataType: 'numeric', hidden: true },
                 { dataIndex: 'strDestinationWeights', text: 'Destination Weights', width: 100, dataType: 'string' },
 
+                { dataIndex: 'intForexRateTypeId', text: 'Forex Rate Type Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strForexRateType', text: 'Forex Rate Type', width: 100, dataType: 'string', hidden: true },
+                { xtype: 'numbercolumn', dataIndex: 'dblForexRate', text: 'Forex Rate', width: 100, dataType: 'float', hidden: true },               
+
                 {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', hidden: true },
                 {dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hidden: true },
                 {dataIndex: 'intSourceId', text: 'intSourceId', width: 100, dataType: 'numeric', hidden: true },
@@ -2802,7 +2807,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 strDestinationWeights: order.get('strDestinationWeights'),
                                 strOwnershipType: 'Own',
                                 intOwnershipType: 1,
-                                intCommodityId: order.get('intCommodityId')
+                                intCommodityId: order.get('intCommodityId'),
+                                intForexRateTypeId: order.get('intForexRateTypeId'),
+                                strForexRateType: order.get('strForexRateType'),
+                                dblForexRate: order.get('dblForexRate')                                
                             };
 
                             // Check if the shipment location matches the location of the order.
@@ -3218,6 +3226,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 var dblUnitPrice = currentItem.get('dblUnitPrice');
                 var dblForexRate = currentItem.get('dblForexRate');
 
+                // Get the transaction and functional currency. 
+                var transactionCurrencyId = currentHeader.get('intCurrencyId');
+                var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');           
+
                 dblQuantity = Ext.isNumeric(dblQuantity) ? dblQuantity : 0;
                 dblUnitPrice = Ext.isNumeric(dblUnitPrice) ? dblUnitPrice : 0;
                 dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
@@ -3261,8 +3273,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 }
                 
                 // Call the pricing hierarchy if the order type is not a Sales Contract. 
-                var orderType_SalesContract = 1;
-                if (currentHeader.get('intOrderType') != orderType_SalesContract)
+                //var orderType_SalesContract = 1;
+
+                // Call the pricing hierarchy if the line item does not have an Order Id. Meaning, it is not linked to any other transactions like SO or Contracts. 
+                var intOrderId = currentItem.get('intOrderId');
+                if (!(intOrderId && Ext.isNumeric(intOrderId) && intOrderId > 0))
                 {
                     // Do an ajax call to retrieve the latest sales price from the pricing hierarchy. 
                     me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure);

@@ -1368,6 +1368,10 @@ namespace iRely.Inventory.Model
         public int? intDestinationWeightId { get; set; }
         public string strDestinationWeights { get; set; }
         public string strDestinationGrades { get; set; }
+        public int? intCurrencyId { get; set; }
+        public int? intForexRateTypeId { get; set; }
+        public string strForexRateType { get; set; }
+        public decimal? dblForexRate { get; set; }
     }
 
     public class vyuICGetShipmentAddSalesContract
@@ -1419,6 +1423,9 @@ namespace iRely.Inventory.Model
         public string strDestinationWeights { get; set; }
         public string strDestinationGrades { get; set; }
         public int? intCurrencyId { get; set; }
+        public int? intForexRateTypeId { get; set; }
+        public string strForexRateType { get; set; }
+        public decimal? dblForexRate { get; set; }
     }
 
     public class vyuICGetShipmentAddSalesOrder
@@ -1472,6 +1479,9 @@ namespace iRely.Inventory.Model
         public int? intCurrencyId { get; set; }
         public int? intFreightTermId { get; set; }
         public int? intShipToLocationId { get; set; }
+        public int? intForexRateTypeId { get; set; }
+        public string strForexRateType { get; set; }
+        public decimal? dblForexRate { get; set; }
     }
 
     public class vyuICShipmentInvoice

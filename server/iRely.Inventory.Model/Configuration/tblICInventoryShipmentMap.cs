@@ -510,7 +510,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
             this.Property(t => t.intFreightTermId).HasColumnName("intFreightTermId");
             this.Property(t => t.intShipToLocationId).HasColumnName("intShipToLocationId");
-            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
+            this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
         }
     }
 
@@ -573,6 +575,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
             this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
             this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
+            this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
         }
     }
 
@@ -631,6 +637,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
             this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
             this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
+            this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
         }
     }
 }
