@@ -5089,6 +5089,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
     <Build Include="dbo\Tables\tblSTstgRebatesPMMorris.sql" />
     <Build Include="dbo\Tables\tblSTstgRebatesRJReynolds.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFCreateFeeDebitMemo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

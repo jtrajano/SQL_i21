@@ -354,6 +354,7 @@ BEGIN
 			DECLARE @intFeeProfileId		INT			
 			DECLARE @dtmInvoiceDate			DATETIME	
 
+			
 			WHILE (EXISTS(SELECT 1 FROM @tblCFInvoiceFeesTemp))
 			BEGIN
 			
@@ -627,10 +628,14 @@ BEGIN
 
 					DELETE FROM @tblCFInvoiceFeesTemp WHERE intAccountId = @intLoopId
 					END
-			
+				ELSE
+					BEGIN
+						DELETE FROM @tblCFInvoiceFeesTemp WHERE intAccountId = @intLoopId
+					END
 				END
-			
+				
 			END
+			
 			-------------SET GROUP VOLUME TO OUTPUT---------------
 
 
