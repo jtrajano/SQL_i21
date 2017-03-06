@@ -3215,6 +3215,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 var dblUnitPrice = currentItem.get('dblUnitPrice');
                 var dblForexRate = currentItem.get('dblForexRate');
 
+                // Get the transaction and functional currency. 
+                var transactionCurrencyId = currentHeader.get('intCurrencyId');
+                var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');           
+
                 dblQuantity = Ext.isNumeric(dblQuantity) ? dblQuantity : 0;
                 dblUnitPrice = Ext.isNumeric(dblUnitPrice) ? dblUnitPrice : 0;
                 dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
