@@ -132,7 +132,7 @@ BEGIN
 			) ForexRate
 			CROSS APPLY
 			(
-				SELECT SUM(dblTotal * A.dblRate) AS dblTotal
+				SELECT SUM((dblTotal + dblTax) * A.dblRate) AS dblTotal
 				FROM dbo.tblAPBillDetail A 
 				WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 			) Details
