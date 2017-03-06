@@ -1360,6 +1360,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 Quantity: 0, // Default ship qty. 
                 ShipToLocationId: shipToLocationId
             }
+
             me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure);
 
             current.set('intItemId', records[0].get('intItemId'));
@@ -3262,8 +3263,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 }
                 
                 // Call the pricing hierarchy if the order type is not a Sales Contract. 
-                var orderType_SalesContract = 1;
-                if (currentHeader.get('intOrderType') != orderType_SalesContract)
+                //var orderType_SalesContract = 1;
+
+                // Call the pricing hierarchy if the line item does not have an Order Id. Meaning, it is not linked to any other transactions like SO or Contracts. 
+                var intOrderId = currentItem.get('intOrderId');
+                if (!(intOrderId && Ext.isNumeric(intOrderId) && intOrderId > 0))
                 {
                     // Do an ajax call to retrieve the latest sales price from the pricing hierarchy. 
                     me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure);
