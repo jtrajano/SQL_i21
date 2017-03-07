@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuAPVoucherForPayment]
+﻿CREATE VIEW [dbo].[vyuAPMultiCurrencyRevalue]
 AS
 SELECT DISTINCT
 	strTransactionType		=	'Voucher',
