@@ -5061,6 +5061,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetQualityPropertiesByWO.sql" />
     <Build Include="dbo\Views\vyuICItemSubLocations.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
