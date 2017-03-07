@@ -20,8 +20,8 @@ BEGIN TRY
 
 	Insert Into tblIPPreShipmentSampleStage(dtmSampleDate,strPOItemNo,strItemNo,dblQuantity,strUOM,strSampleNo,strReferenceNo,strStatus,strLotNo,strSessionId)
 	SELECT   
-			CASE WHEN ISDATE(DATUM)=0 THEN NULL 
-			ELSE DATUM + ' ' + (select STUFF(STUFF(REPLICATE('0',6-LEN(ISNULL(UZEIT,''))) + convert(VARCHAR(6),ISNULL(UZEIT,'')),3,0,':'),6,0,':')) END
+			CASE WHEN ISDATE(RIGHT(DATUM,4) + SUBSTRING(DATUM,3,2) + LEFT(DATUM,2))=0 THEN NULL --sample date in ddmmyyyy format
+			ELSE (RIGHT(DATUM,4) + SUBSTRING(DATUM,3,2) + LEFT(DATUM,2)) + ' ' + (select STUFF(STUFF(REPLICATE('0',6-LEN(ISNULL(UZEIT,''))) + convert(VARCHAR(6),ISNULL(UZEIT,'')),3,0,':'),6,0,':')) END
 			,POSNR
 			,ITEMNUM
 			,QUANTITY
