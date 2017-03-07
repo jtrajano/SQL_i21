@@ -64,7 +64,7 @@ BEGIN TRY
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
 	BEGIN
 		SELECT TOP 1 @RCId = intReportingComponentId FROM #tmpRC
-		
+		DELETE FROM @TFTransaction
 		INSERT INTO @TFTransaction(intId
 			, intInvoiceDetailId
 			, intTaxAuthorityId
@@ -240,6 +240,7 @@ BEGIN TRY
 
 		IF(@CriteriaCount > 0) 
 		BEGIN
+			DELETE FROM @TFTransaction
 			INSERT INTO @TFTransaction(intId
 				, intInvoiceDetailId
 				, intTaxAuthorityId
@@ -569,57 +570,56 @@ BEGIN TRY
 				, dtmReportingPeriodEnd
 				, leaf)
 			SELECT DISTINCT @Guid
-				, MIN(TRANS.intTaxAuthorityId)
-				, MIN(strTaxAuthorityCode)
-				, MIN(strFormCode)
-				, MIN(intReportingComponentId)
-				, MIN(strScheduleCode)
-				, MIN(strType)
-				, MIN(intProductCode)
-				, MIN(strProductCode)
-				, MIN(intItemId)
-				, SUM(dblQtyShipped)
-				, SUM(dblGross)
-				, SUM(dblNet)
-				, SUM(dblBillQty)
-				, SUM(dblTax)
-				, SUM(dblTaxExempt)
-				, MIN(strInvoiceNumber)
-				, MIN(strPONumber)
-				, MIN(strBillOfLading)
-				, MIN(dtmDate)
-				, MIN(strDestinationCity)
+				, TRANS.intTaxAuthorityId
+				, strTaxAuthorityCode
+				, strFormCode
+				, intReportingComponentId
+				, strScheduleCode
+				, strType
+				, intProductCode
+				, strProductCode
+				, intItemId
+				, dblQtyShipped
+				, dblGross
+				, dblNet
+				, dblBillQty
+				, dblTax
+				, dblTaxExempt
+				, strInvoiceNumber
+				, strPONumber
+				, strBillOfLading
+				, dtmDate
+				, strDestinationCity
 				, strDestinationState
-				, MIN(strOriginCity)
-				, MIN(strOriginState)
+				, strOriginCity
+				, strOriginState
 				, strCustomerName
 				, strCustomerFEIN
-				, MIN(strShipVia)
-				, MIN(strTransporterLicense)
-				, MIN(strTransportationMode)
-				, MIN(strTransporterName)
-				, MIN(strTransporterFEIN)
-				, MIN(strConsignorName)
-				, MIN(strConsignorFEIN)
-				, MIN(strTaxCode)
-				, MIN(strTerminalControlNumber)
-				, MIN(strVendorName)
-				, MIN(strVendorFederalTaxId)
-				, MIN(strHeaderCompanyName)
-				, MIN(strHeaderAddress)
-				, MIN(strHeaderCity)
-				, MIN(strHeaderState)
-				, MIN(strHeaderZip)
-				, MIN(strHeaderPhone)
-				, MIN(strHeaderStateTaxID)
-				, MIN(strHeaderFederalTaxID)
-				, MIN(@DateFrom)
-				, MIN(@DateTo)
+				, strShipVia
+				, strTransporterLicense
+				, strTransportationMode
+				, strTransporterName
+				, strTransporterFEIN
+				, strConsignorName
+				, strConsignorFEIN
+				, strTaxCode
+				, strTerminalControlNumber
+				, strVendorName
+				, strVendorFederalTaxId
+				, strHeaderCompanyName
+				, strHeaderAddress
+				, strHeaderCity
+				, strHeaderState
+				, strHeaderZip
+				, strHeaderPhone
+				, strHeaderStateTaxID
+				, strHeaderFederalTaxID
+				, @DateFrom
+				, @DateTo
 				, 1
 			FROM @TFTransaction TRANS
 			LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = TRANS.intTaxAuthorityId
-			GROUP BY strCustomerFEIN, strCustomerName, strDestinationState
-			ORDER BY MIN(strProductCode)
+
 		END
 		ELSE
 		BEGIN
