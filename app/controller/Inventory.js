@@ -132,7 +132,13 @@ Ext.define('Inventory.controller.Inventory', {
     },
 
     roundDecimalFormat: function(number, precision) {
-        return parseFloat(parseFloat(Math.round(number * 100) / 100).toFixed(precision));
+        //return parseFloat(parseFloat(Math.round(number * 100) / 100).toFixed(precision));
+        var zeroes = "";
+        for(var i = 0; i < precision; i++) {
+            zeroes += "0";
+        }
+        var pattern = "0.[" + zeroes + "]";
+        return parseFloat(numeral(number).format(pattern));
     },
 
     roundDecimalValue: function(number, precision) {
