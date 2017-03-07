@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPGenerateSAPPOIDOC]
+	@ysnUpdateFeedStatusOnRead bit=0
 AS
 
 Declare @intMinSeq					INT,
@@ -234,6 +235,19 @@ Begin
 		
 		If ISNULL(@strDocType,'')='' Set @strDocType='ZHUB'
 
+		If UPPER(@strHeaderState)='MODIFIED'	
+		Begin
+			--update first entry in feed table if empty
+			Update tblCTContractFeed Set strDocType=@strDocType Where intContractFeedId=
+			(Select TOP 1 intContractFeedId From tblCTContractFeed Where intContractDetailId=@intContractDetailId)
+			AND ISNULL(strDocType,'')=''
+
+			Select TOP 1 @strDocType=strDocType From tblCTContractFeed Where intContractDetailId=@intContractDetailId
+		End
+
+		--update in feed table
+		Update tblCTContractFeed Set strDocType=@strDocType Where intContractFeedId=@intContractFeedId
+
 		--Header Start Xml
 		If ISNULL(@strXmlHeaderStart,'')=''
 		Begin
@@ -346,6 +360,8 @@ Begin
 				Set @strItemXml += '<NET_PRICE>'	+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblCashPrice)),'0.00')	+ '</NET_PRICE>'
 				If UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Washed Arabica','Unwashed Arabica')
 					Set @strItemXml += '<PRICE_UNIT>'	+ '100'	+ '</PRICE_UNIT>'
+				Else if UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Robusta')
+					Set @strItemXml += '<PRICE_UNIT>'	+ '1000'	+ '</PRICE_UNIT>'
 				Else
 					Set @strItemXml += '<PRICE_UNIT>'	+ '1'	+ '</PRICE_UNIT>'
 				If ISNULL(@dblCashPrice,0)=0
@@ -443,6 +459,8 @@ Begin
 				Set @strCondXml += '<COND_UNIT>'		+ ISNULL(@strPriceUOM,'')		+ '</COND_UNIT>'
 				If UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Washed Arabica','Unwashed Arabica')
 					Set @strCondXml += '<COND_P_UNT>'		+ '100'	+ '</COND_P_UNT>'
+				Else if UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Robusta')
+					Set @strCondXml += '<COND_P_UNT>'		+ '1000'	+ '</COND_P_UNT>'
 				Else
 					Set @strCondXml += '<COND_P_UNT>'		+ '1'	+ '</COND_P_UNT>'
 				Set @strCondXml += '<CHANGE_ID>'		+ 'U' + '</CHANGE_ID>'
@@ -538,9 +556,16 @@ Begin
 	--Final Xml
 	Set @strXml = @strXmlHeaderStart + @strItemXml + @strItemXXml + @strScheduleXml + @strScheduleXXml + @strCondXml + @strCondXXml + @strTextXml + @strXmlHeaderEnd
 
+	If @ysnUpdateFeedStatusOnRead=1
+	Begin
+		Declare @strSql nvarchar(max)='Update tblCTContractFeed Set strFeedStatus=''Awt Ack'' Where intContractFeedId IN (' + @strContractFeedIds + ')'
+	
+		Exec sp_executesql @strSql
+	End
+
 	INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml,strContractNo,strPONo)
 	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,ISNULL(@strContractNumber,''),ISNULL(@strERPPONumber,''))
-
+	
 	NEXT_PO:
 	Select @intMinRowNo=Min(intRowNo) From @tblHeader Where intRowNo>@intMinRowNo
 End --End Header Loop

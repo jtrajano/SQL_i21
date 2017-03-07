@@ -248,7 +248,7 @@ Begin
 		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
 
 		If Exists(Select 1 From tblLGLoad Where intLoadShippingInstructionId=@intLoadId)
-			Select TOP 1 @intLoadId=intLoadId From tblLGLoad Where intLoadShippingInstructionId=@intLoadId
+			Select TOP 1 @intLoadId=intLoadId,@strRefNo=@strRefNo + ' / ' + strLoadNumber From tblLGLoad Where intLoadShippingInstructionId=@intLoadId
 
 		If @strStatus IN (52,53) --Success
 		Begin
