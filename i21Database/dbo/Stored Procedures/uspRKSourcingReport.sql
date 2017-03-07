@@ -58,8 +58,8 @@ SELECT e.strName,strContractNumber,
 		  ,(SELECT DISTINCT
                dbo.fnCTConvertQtyToTargetCommodityUOM
 			   (@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,
-					((((SUM(dblFixationPrice*dblBalanceNoOfLots) OVER (PARTITION BY det.intContractDetailId )  
-					 + (isnull(dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
+					((((SUM(detcd.dblFixationPrice*detcd.dblBalanceNoOfLots) OVER (PARTITION BY det.intContractDetailId )  
+					 + (isnull(detcd.dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
 					 )/ cd.dblNoOfLots)
 					 +det.dblBasis)
 					 * 
@@ -73,7 +73,7 @@ SELECT e.strName,strContractNumber,
 			  JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=ch.intCommodityUOMId               
 			  JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
               JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-              WHERE strStatus in('Partially Priced')
+              WHERE detcd.strStatus in('Partially Priced')
               AND det.intContractDetailId=cd.intContractDetailId
               ) as dblParPriced,
 
