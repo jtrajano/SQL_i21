@@ -355,7 +355,7 @@ function getTemplateColumns(name) {
         //         "Include Zero on Hand","Include on Hand","Scanned Count Entry","Count by Lots","Count by Pallets","Recount Mismatch",
         //         "External","Recount","Reference Count No"];
         case "Inventory Count":
-            return ["Location", "Count Group", "Description", "Date", "Item No", "Sub Location", "Storage Location", "Last Cost", 
+            return ["Location", "Count Group", "Description", "Date", "Item No", "Sub Location", "Storage Location", 
                 "Physical Count", "UOM", "Lot No", "Pallets", "Qty Per Pallet", "Count by Lots", "Count by Pallets", "Recount"];
         case "Item Pricing":
             return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "Pricing Method",
