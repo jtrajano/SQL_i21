@@ -6710,6 +6710,80 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         );        
     },
 
+    onGumUOMSelect: function(plugin, records, combo) {
+        if (records.length <= 0)
+            return;
+
+        var me = this;
+        var win = me.getView().screenMgr.window;
+        var grid = win.down('#grdInventoryReceipt');
+        var current = plugin.getActiveRecord();
+        
+        current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
+        current.set('dblItemUOMConvFactor', records[0].get('dblUnitQty'));
+        current.set('strUnitType', records[0].get('strUnitType'));
+
+        if (current.get('dblWeightUOMConvFactor') === 0) {
+            current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
+        }
+
+        var origCF = current.get('dblOrderUOMConvFactor');
+        var newCF = current.get('dblItemUOMConvFactor');
+        var received = current.get('dblReceived');
+        var ordered = current.get('dblOrderQty');
+        var qtyToReceive = ordered - received;
+        if (origCF > 0 && newCF > 0) {
+            //qtyToReceive = (qtyToReceive * origCF) / newCF;
+            qtyToReceive = me.convertQtyBetweenUOM(origCF, newCF, qtyToReceive);
+            current.set('dblOpenReceive', qtyToReceive);
+            plugin.getActiveEditor().field.setValue(qtyToReceive);
+        }
+
+        //current.tblICInventoryReceiptItemLots().store.load();
+
+        if (current.tblICInventoryReceiptItemLots()) {
+            Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
+                if (!lot.dummy) {
+                    //Set Default Value for Lot Wgt UOM 
+                    if (lot.get('strWeightUOM') === null || lot.get('strWeightUOM') === '') {
+                        lot.set('strWeightUOM', records[0].get('strUnitMeasure'));
+                        lot.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
+                    }
+                }
+            });
+        }
+
+        if (iRely.Functions.isEmpty(current.get('intCostUOMId'))) {
+            current.set('intCostUOMId', records[0].get('intItemUnitMeasureId'));
+            current.set('dblCostUOMConvFactor', records[0].get('dblUnitQty'));
+            current.set('strCostUOM', records[0].get('strUnitMeasure'));
+
+            var dblCost = records[0].get('dblLastCost');
+            if (win.viewModel.data.current.get('strReceiptType') === 'Purchase Contract') {
+                dblCost = current.get('dblUnitCost');
+                if (current.get('strOrderUOM') !== records[0].get('strUnitMeasure')) {
+                    var orderUOMCF = current.get('dblOrderUOMConvFactor');
+                    var receiptUOMCF = records[0].get('dblUnitQty');
+                    if (orderUOMCF !== receiptUOMCF) {
+                        var currentCost = current.get('dblUnitCost');
+                        var perUnitCost = currentCost / orderUOMCF;
+                        dblCost = perUnitCost * receiptUOMCF;
+                    }
+                }
+            }
+            current.set('dblUnitCost', dblCost);
+            current.set('dblUnitRetail', dblCost);
+        }
+
+        //Set Default Value for Gross/Net UOM if Receipt Unit Type is Weight or Volume and Gross/Net UOM has no current value
+        if ((records[0].get('strUnitType') === 'Weight' || records[0].get('strUnitType') === 'Volume') &&
+            (current.get('strWeightUOM') === null || current.get('strWeightUOM') === '')) {
+            current.set('strWeightUOM', records[0].get('strUnitMeasure'));
+            current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
+            current.set('dblWeightUOMConvFactor', current.get('dblItemUOMConvFactor'));
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -6948,8 +7022,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#cboChargeForexRateType": {
                 select: this.onChargeSelect,
                 change: this.onChargeForexRateTypeChange
+            },
+            "#gumReceiveQty": {
+                onUOMSelect: this.onGumUOMSelect
             }
-
         })
     }
 
