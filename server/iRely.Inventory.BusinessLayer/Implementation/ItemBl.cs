@@ -300,10 +300,17 @@ namespace iRely.Inventory.BusinessLayer
 
             if (excludePhasedOutZeroStockItem)
             {
-                var query = _db.GetQuery<vyuICGetItemStock>()
-                .Include(p => p.tblICItemAccounts)
-                .Include(p => p.tblICItemPricings).Filter(param, true)
-                .Where(p => p.strStatus != "Discontinued" || (p.strStatus == "Phased Out" && p.dblAvailable > 0));
+                var query = 
+                        _db.GetQuery<vyuICGetItemStock>()
+                        .Include(p => p.tblICItemAccounts)
+                        .Include(p => p.tblICItemPricings).Filter(param, true)
+                        .Where(p => 
+                            // Use ternary operators. It is translated as CASE WHEN statements in SQL: 
+                            true ==
+                                (p.strStatus == "Phased Out" && p.dblAvailable <= 0) ? false :
+                                (p.strStatus == "Discontinued") ? false : 
+                                true
+                        );
 
                 var data = await query.ExecuteProjection(param, "strItemNo").ToListAsync();
 
