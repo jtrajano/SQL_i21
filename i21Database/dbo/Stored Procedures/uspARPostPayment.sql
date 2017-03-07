@@ -1587,7 +1587,7 @@ IF @post = 1
 			,[dblCreditReport]			= 0
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
-			,[strRateType]				= ''	 
+			,[strRateType]				= SMCERT.strCurrencyExchangeRateType 	 
 		FROM
 			tblARPayment A 
 		INNER JOIN
@@ -1599,6 +1599,15 @@ IF @post = 1
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
+		LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
 			B.dblDiscount <> 0
 			AND B.dblPayment <> 0
@@ -1643,7 +1652,7 @@ IF @post = 1
 			,[dblCreditReport]			= 0
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
-			,[strRateType]				= ''	 			 
+			,[strRateType]				= SMCERT.strCurrencyExchangeRateType	 			 
 		FROM
 			tblARPayment A 
 		INNER JOIN
@@ -1655,6 +1664,15 @@ IF @post = 1
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
+		LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
 			B.dblInterest <> 0
 			AND B.dblPayment <> 0
@@ -1709,7 +1727,7 @@ IF @post = 1
 										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
-			,[strRateType]				= ''				 
+			,[strRateType]				= SMCERT.strCurrencyExchangeRateType				 
 		FROM
 			tblARPayment A 
 		INNER JOIN 
@@ -1720,7 +1738,16 @@ IF @post = 1
 				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
 		INNER JOIN
 			@ARReceivablePostData P
-				ON A.intPaymentId = P.intPaymentId 
+				ON A.intPaymentId = P.intPaymentId
+		LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
 			B.dblPayment <> 0
 		--GROUP BY
@@ -1767,7 +1794,7 @@ IF @post = 1
 			,[dblCreditReport]			= 0
 			,[dblReportingRate]			= 0
 			,[dblForeignRate]			= 0
-			,[strRateType]				= ''				 
+			,[strRateType]				= SMCERT.strCurrencyExchangeRateType				 
 		FROM
 			tblARPaymentDetail B
 		INNER JOIN 
@@ -1781,7 +1808,16 @@ IF @post = 1
 				ON B.intInvoiceId = I.intInvoiceId
 		INNER JOIN
 			@ARReceivablePostData P
-				ON A.intPaymentId = P.intPaymentId 
+				ON A.intPaymentId = P.intPaymentId
+		LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
 			((ISNULL(((((ISNULL(I.dblBaseAmountDue, 0.00) + ISNULL(B.dblBaseInterest,0.00)) - ISNULL(B.dblBaseDiscount,0.00) * (CASE WHEN I.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - B.dblBasePayment),0)))  <> 0
 			AND ((I.dblAmountDue + I.dblInterest) - I.dblDiscount) = ((B.dblPayment - B.dblInterest) + B.dblDiscount)
@@ -1828,7 +1864,7 @@ IF @post = 1
 			,[dblCreditReport]			= B.dblDiscount
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
-			,[strRateType]				= ''		 
+			,[strRateType]				= SMCERT.strCurrencyExchangeRateType		 
 		FROM
 			tblARPayment A 
 		INNER JOIN
@@ -1840,6 +1876,15 @@ IF @post = 1
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
+		LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
 			B.dblDiscount <> 0
 			AND B.dblPayment <> 0
@@ -1884,7 +1929,7 @@ IF @post = 1
 			,[dblCreditReport]			= B.dblInterest
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
-			,[strRateType]				= ''		  
+			,[strRateType]				= SMCERT.strCurrencyExchangeRateType		  
 		FROM
 			tblARPayment A 
 		INNER JOIN
@@ -1896,6 +1941,15 @@ IF @post = 1
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
+		LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
 			B.dblInterest <> 0
 			AND B.dblPayment <> 0
@@ -2055,6 +2109,7 @@ IF @recap = 1
 			,[strTransactionType]
 			,[strAccountId]
 			,[strAccountGroup]
+			,[strRateType]
 		)
 		SELECT
 			[strTransactionId]
@@ -2083,6 +2138,7 @@ IF @recap = 1
 			,A.[strTransactionType]
 			,B.strAccountId
 			,C.strAccountGroup
+			,A.[strRateType]
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId
