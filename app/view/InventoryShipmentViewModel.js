@@ -232,6 +232,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
     },
 
     formulas: {
+        intCurrencyId: function(get) {
+            return get('current.intCurrencyId');
+        },
+        
         getShipButtonText: function(get) {
             if (get('current.ysnPosted')) {
                 return 'Unpost';
