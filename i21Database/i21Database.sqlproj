@@ -5091,6 +5091,7 @@
     <Build Include="dbo\Tables\tblSTstgRebatesRJReynolds.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCreateFeeDebitMemo.sql" />
     <Build Include="dbo\Tables\tblSTTranslogRebates.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderTranslog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
