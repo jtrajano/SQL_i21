@@ -19,8 +19,13 @@ SELECT
 	, dblShipmentAmount = si.dblQuantity * t.dblCost + t.dblValue
 	, dblInTransitAmount = ISNULL(it.dblQty * it.dblCost + it.dblValue, 0.0)
 	, dblCOGSAmount = ISNULL(-(t.dblQty) * t.dblCost + t.dblValue, 0.0)
-	, dblQtyToInvoice = CASE iv.ysnPosted WHEN 0 THEN ivd.dblQtyShipped ELSE 0.0 END
-	, dblQtyInvoiced = CASE iv.ysnPosted WHEN 1 THEN ivd.dblQtyShipped ELSE 0.0 END
+	, dblQtyToInvoice = 
+			CASE 
+				WHEN iv.ysnPosted = 0 THEN ivd.dblQtyShipped
+				WHEN iv.ysnPosted IS NULL THEN si.dblQuantity 
+				ELSE 0.0 
+			END
+	, dblQtyInvoiced = CASE WHEN iv.ysnPosted = 1 THEN ivd.dblQtyShipped ELSE 0.0 END
 	, intCurrencyId = currency.intCurrencyID
 	, strCurrency = currency.strCurrency
 FROM tblICInventoryShipment s
