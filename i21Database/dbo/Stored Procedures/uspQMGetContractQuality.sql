@@ -18,6 +18,10 @@ BEGIN TRY
 		,@PropList NVARCHAR(MAX)
 		,@ErrMsg NVARCHAR(MAX)
 		,@SQL NVARCHAR(MAX)
+	DECLARE @ysnShowSampleFromAllLocation BIT
+
+	SELECT @ysnShowSampleFromAllLocation = ISNULL(ysnShowSampleFromAllLocation, 0)
+	FROM tblQMCompanyPreference
 
 	SET @SQL = 'SELECT @PropList = Stuff((  
     SELECT ''],['' + strPropertyName  
@@ -27,9 +31,14 @@ BEGIN TRY
      JOIN tblEMEntity AS E ON E.intEntityId = CH.intEntityId  
      JOIN tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId  
      JOIN tblICItem AS I ON I.intItemId = CD.intItemId  
-     JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
-		AND S.intLocationId =' + @strLocationId + '
-     JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
+     JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId'
+
+	IF @ysnShowSampleFromAllLocation = 0
+	BEGIN
+		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
+	END
+
+	SET @SQL = @SQL + ' JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
 
 	IF (@strUserRoleID <> '0')
 	BEGIN
@@ -87,10 +96,14 @@ BEGIN TRY
 		JOIN tblEMEntity AS E ON E.intEntityId = CH.intEntityId
 		JOIN tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId
 		JOIN tblICItem AS I ON I.intItemId = CD.intItemId
-		JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
-			AND S.intLocationId = ' 
-		+ @strLocationId + '
-		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId '
+		JOIN tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId'
+
+	IF @ysnShowSampleFromAllLocation = 0
+	BEGIN
+		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
+	END
+
+	SET @SQL = @SQL + ' JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId '
 
 	IF (@strUserRoleID <> '0')
 	BEGIN

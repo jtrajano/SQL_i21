@@ -18,6 +18,10 @@ BEGIN TRY
 		,@PropList NVARCHAR(MAX)
 		,@ErrMsg NVARCHAR(MAX)
 		,@SQL NVARCHAR(MAX)
+	DECLARE @ysnShowSampleFromAllLocation BIT
+
+	SELECT @ysnShowSampleFromAllLocation = ISNULL(ysnShowSampleFromAllLocation, 0)
+	FROM tblQMCompanyPreference
 
 	SET @SQL = 'SELECT @PropList = Stuff((  
     SELECT ''],['' + strPropertyName  
@@ -29,9 +33,14 @@ BEGIN TRY
 	   JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 	   JOIN tblQMSample AS S ON S.intWorkOrderId = W.intWorkOrderId
 			AND S.intProductTypeId = 12
-			AND S.intProductValueId = W.intWorkOrderId
-			AND S.intLocationId =' + @strLocationId + '
-	   JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
+			AND S.intProductValueId = W.intWorkOrderId'
+
+	IF @ysnShowSampleFromAllLocation = 0
+	BEGIN
+		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
+	END
+
+	SET @SQL = @SQL + ' JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
 
 	IF (@strUserRoleID <> '0')
 	BEGIN
@@ -84,10 +93,14 @@ BEGIN TRY
 		JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 		JOIN tblQMSample AS S ON S.intWorkOrderId = W.intWorkOrderId
 			AND S.intProductTypeId = 12
-			AND S.intProductValueId = W.intWorkOrderId
-			AND S.intLocationId =' + @strLocationId + 
-		'
-		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
+			AND S.intProductValueId = W.intWorkOrderId'
+
+	IF @ysnShowSampleFromAllLocation = 0
+	BEGIN
+		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
+	END
+
+	SET @SQL = @SQL + ' JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
 
 	IF (@strUserRoleID <> '0')
 	BEGIN
