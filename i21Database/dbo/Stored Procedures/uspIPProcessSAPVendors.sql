@@ -177,9 +177,9 @@ Begin
 	--Add Audit Trail Record
 	Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intEntityId) + '","keyValue":' + CONVERT(VARCHAR,@intEntityId) + ',"iconCls":"small-new-plus","leaf":true}'
 	
-	Select @dtmDate=dtmCreated From tblIPEntityStage Where intStageEntityId=@intStageEntityId
+	Select @dtmDate=DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmCreated) From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 	If @dtmDate is null
-		Set @dtmDate =  GETDATE()
+		Set @dtmDate =  GETUTCDATE()
 
 	Select @strUserName=strCreatedUserName From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 	Select @intUserId=e.intEntityId From tblEMEntity e Join tblEMEntityType et on e.intEntityId=et.intEntityId  Where e.strExternalERPId=@strUserName AND et.strType='User'
