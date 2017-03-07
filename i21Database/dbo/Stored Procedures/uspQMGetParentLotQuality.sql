@@ -18,6 +18,10 @@ BEGIN TRY
 		,@PropList NVARCHAR(MAX)
 		,@ErrMsg NVARCHAR(MAX)
 		,@SQL NVARCHAR(MAX)
+	DECLARE @ysnShowSampleFromAllLocation BIT
+
+	SELECT @ysnShowSampleFromAllLocation = ISNULL(ysnShowSampleFromAllLocation, 0)
+	FROM tblQMCompanyPreference
 
 	SET @SQL = 'SELECT @PropList = Stuff((  
     SELECT ''],['' + strPropertyName  
@@ -30,8 +34,12 @@ BEGIN TRY
 		JOIN tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
 		JOIN tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId
-			AND S.intProductTypeId = 11
-			AND S.intLocationId =' + @strLocationId
+			AND S.intProductTypeId = 11'
+
+	IF @ysnShowSampleFromAllLocation = 0
+	BEGIN
+		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
+	END
 
 	IF (@strUserRoleID <> '0')
 	BEGIN
@@ -88,9 +96,12 @@ BEGIN TRY
 		JOIN tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
 		JOIN tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId
-			AND S.intProductTypeId = 11
-			AND S.intLocationId =' 
-		+ @strLocationId
+			AND S.intProductTypeId = 11'
+
+	IF @ysnShowSampleFromAllLocation = 0
+	BEGIN
+		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
+	END
 
 	IF (@strUserRoleID <> '0')
 	BEGIN

@@ -13,6 +13,10 @@ BEGIN TRY
 		,@PropList NVARCHAR(MAX)
 		,@ErrMsg NVARCHAR(MAX)
 		,@SQL NVARCHAR(MAX)
+	DECLARE @ysnShowSampleFromAllLocation BIT
+
+	SELECT @ysnShowSampleFromAllLocation = ISNULL(ysnShowSampleFromAllLocation, 0)
+	FROM tblQMCompanyPreference
 
 	SET @SQL = 'SELECT @PropList = Stuff((  
 	SELECT ''] INT,['' + strPropertyName  
@@ -22,9 +26,14 @@ BEGIN TRY
 	   JOIN tblMFWorkOrder W ON W.intWorkOrderId = TR.intProductValueId AND TR.intProductTypeId = 12
 	   JOIN tblICItem AS I ON I.intItemId = W.intItemId  
 	   JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
-	   JOIN tblQMSample AS S ON S.intSampleId = TR.intSampleId
-		  AND S.intLocationId =' + @strLocationId + '
-	   JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
+	   JOIN tblQMSample AS S ON S.intSampleId = TR.intSampleId'
+
+	IF @ysnShowSampleFromAllLocation = 0
+	BEGIN
+		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
+	END
+
+	SET @SQL = @SQL + ' JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
 
 	IF (@strUserRoleID <> '0')
 	BEGIN
