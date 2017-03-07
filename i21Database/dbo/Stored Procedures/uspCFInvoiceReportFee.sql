@@ -23,6 +23,10 @@ BEGIN
 			,strFee						 = ''
 			,strInvoiceFormat			 = ''
 			,dblFeeTotalAmount			 = 0.0
+			,strInvoiceReportNumber		 = ''
+			,intCustomerId				 = 0
+			,intTermID					 = 0
+			,intSalesPersonId			 = 0
 			RETURN;
 		END
 		ELSE
@@ -288,6 +292,11 @@ BEGIN
 			 ,strFeeDescription			NVARCHAR(MAX)
 			 ,strFee					NVARCHAR(MAX)
 			 ,strInvoiceFormat			NVARCHAR(MAX)
+			 ,strInvoiceReportNumber	NVARCHAR(MAX)
+			 ,intCustomerId				INT
+			 ,intTermID					INT
+			 ,intSalesPersonId			INT
+			 ,dtmInvoiceDate			DATETIME
 		)
 
 			-------------VARIABLES------------
@@ -353,16 +362,24 @@ BEGIN
 			DECLARE @dtmLastBillingDate		DATETIME
 			DECLARE @intFeeProfileId		INT			
 			DECLARE @dtmInvoiceDate			DATETIME	
-
+			DECLARE @strInvoiceReportNumber NVARCHAR(MAX)
+			DECLARE @intCustomerId			INT
+			DECLARE @intTermID				INT
+			DECLARE @intSalesPersonId		INT
+			
 			
 			WHILE (EXISTS(SELECT 1 FROM @tblCFInvoiceFeesTemp))
 			BEGIN
 			
 				---GET ACCOUNT AND FEE PROFILE ID---
 				SELECT TOP 1
-				 @intLoopId				= intAccountId 
-				,@intFeeProfileId		= intFeeProfileId
-				,@dtmInvoiceDate		= dtmInvoiceDate
+				 @intLoopId					= intAccountId 
+				,@intFeeProfileId			= intFeeProfileId
+				,@dtmInvoiceDate			= dtmInvoiceDate
+				,@strInvoiceReportNumber	= strInvoiceReportNumber
+				,@intCustomerId				= intCustomerId
+				,@intTermID					= intTermID
+				,@intSalesPersonId			= intSalesPersonId
 				FROM @tblCFInvoiceFeesTemp
 
 				---GET LAST BILLING CYCLE DATE---
@@ -386,7 +403,7 @@ BEGIN
 					
 
 					----------GET FEE DETAILS------------
-					INSERT INTO @tblCFInvoiceFeeDetail
+				INSERT INTO @tblCFInvoiceFeeDetail
 				(
 				 intFeeProfileId				
 				,strFeeProfileId				
@@ -569,6 +586,11 @@ BEGIN
 						,strFee	
 						,strInvoiceFormat
 						,dblFeeAmount	
+						,strInvoiceReportNumber
+						,intCustomerId
+						,intTermID
+						,intSalesPersonId
+						,dtmInvoiceDate
 					)
 					SELECT 
 						 @intFeeLoopId
@@ -609,6 +631,11 @@ BEGIN
 										END
 							END 
 						)
+						,@strInvoiceReportNumber
+						,@intCustomerId				
+						,@intTermID					
+						,@intSalesPersonId	
+						,@dtmInvoiceDate		
 						FROM @tblCFInvoiceFeeDetail cffee
 						WHERE intFeeId = @intFeeLoopId
 						GROUP BY 
@@ -644,7 +671,26 @@ BEGIN
 			----------------------------------
 
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------
-			SELECT *
+			SELECT 
+			 intFeeLoopId			
+			,intAccountId			
+			,strCalculationType	
+			,dblFeeRate			
+			,intTransactionId		
+			,dtmTransactionDate	
+			,dtmStartDate			
+			,dtmEndDate			
+			,dblQuantity			
+			,intCardId				
+			,dblFeeAmount			
+			,strFeeDescription		
+			,strFee				
+			,strInvoiceFormat		
+			,strInvoiceReportNumber
+			,intCustomerId			
+			,intTermID				
+			,intSalesPersonId		
+			,dtmInvoiceDate
 			,dblFeeTotalAmount = (SELECT ROUND(SUM(dblFeeAmount),2) FROM ##tblCFInvoiceFeeOutput) 
 			FROM ##tblCFInvoiceFeeOutput
 					
@@ -659,6 +705,12 @@ BEGIN
 			-------------DROP TEMPORARY TABLES---------------
 		END TRY
 		BEGIN CATCH
+			
+			declare @error int, @message varchar(4000), @xstate int;
+			select @error = ERROR_NUMBER(),
+            @message = ERROR_MESSAGE(), 
+            @xstate = XACT_STATE();
+			
 			-------------DROP TEMPORARY TABLES---------------
 			IF OBJECT_ID(N'tempdb..##tmpInvoiceFee', N'U') IS NOT NULL 
 			DROP TABLE ##tmpInvoiceFee;
