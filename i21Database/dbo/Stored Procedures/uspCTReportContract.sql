@@ -77,7 +77,7 @@ BEGIN TRY
 
 	IF (SELECT COUNT(1) FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved') >1	
 	BEGIN	
-		SET @strApprovalText='This document concerns the Confirmed Agreement between Parties. Please sign in twofold and return to KDE as follows: one signed original by mail and one PDF-copy of the signed original by e-mail.'	
+		SET @strApprovalText='This document concerns the Confirmed Agreement between Parties. Please sign in twofold and return to KDE as follows: one PDF-copy of the signed original by e-mail.'	
 		SET @IsFullApproved=1    
 	END
 	ELSE
