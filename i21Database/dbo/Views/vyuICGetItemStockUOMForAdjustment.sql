@@ -17,10 +17,10 @@ SELECT	StockUOM.intItemStockUOMId
 		,SubLocation.strSubLocationName
 		,StorageLocation.intStorageLocationId
 		,strStorageLocationName	= StorageLocation.strName
-		,dblOnHand				= ISNULL(StockUOM.dblOnHand, 0) 
-		,dblOnOrder				= ISNULL(StockUOM.dblOnOrder, 0)
-		,dblUnitQty				= ISNULL(ItemUOM.dblUnitQty, 0)
-		,ysnStockUnit			= ISNULL(ItemUOM.ysnStockUnit, 0)
+		,dblOnHand				= CAST(ISNULL(StockUOM.dblOnHand, 0) AS NUMERIC(18, 6)) 
+		,dblOnOrder				= CAST(ISNULL(StockUOM.dblOnOrder, 0) AS NUMERIC(18, 6)) 
+		,dblUnitQty				= CAST(ISNULL(ItemUOM.dblUnitQty, 0) AS NUMERIC(18, 6)) 
+		,ysnStockUnit			= CAST(ISNULL(ItemUOM.ysnStockUnit, 0) AS BIT)
 FROM	tblICItem Item INNER JOIN tblICItemUOM ItemUOM
 			ON Item.intItemId = ItemUOM.intItemId
 		LEFT JOIN tblICItemStockUOM StockUOM
