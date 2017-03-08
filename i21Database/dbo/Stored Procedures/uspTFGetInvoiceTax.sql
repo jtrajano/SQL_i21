@@ -528,6 +528,8 @@ BEGIN TRY
 						OR NOT EXISTS (SELECT TOP 1 1 FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId))
 					AND (tblARCustomerAccountStatus.intAccountStatusId IN (SELECT intAccountStatusId FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId)
 						OR NOT EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId))
+					AND (tblTFReportingComponentCriteria.strCriteria <> '= 0' 
+					OR tblTFReportingComponentCriteria.strCriteria IS NULL)
 			)tblTransactions
 		
 		IF (@ReportingComponentId <> '')
