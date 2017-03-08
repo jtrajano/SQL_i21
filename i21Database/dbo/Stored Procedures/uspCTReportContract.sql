@@ -159,7 +159,7 @@ BEGIN TRY
 	BEGIN
 		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intLastApprovedContractId,'intApprovedById,dtmApproved,
 		intContractBasisId,dtmPlannedAvailabilityDate,strOrigin,dblNetWeight,intNetWeightUOMId,
-		intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType', @strAmendedColumns OUTPUT
+		intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType,strVendorLotID', @strAmendedColumns OUTPUT
 	END
 
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
