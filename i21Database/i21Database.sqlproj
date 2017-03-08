@@ -5036,6 +5036,7 @@
     <Build Include="dbo\Views\vyuLGNotifications.sql" />
     <Build Include="dbo\Tables\tblAPVendorTerm.sql" />
     <None Include="Scripts\Post-Deployment\EM\039_MoveDefaultTermsToVendorTerm.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCancelLoadSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
