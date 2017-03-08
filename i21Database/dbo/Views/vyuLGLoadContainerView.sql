@@ -80,6 +80,14 @@ SELECT   L.intLoadId
 									THEN 'Outbound transit'
 								WHEN 6
 									THEN 'Delivered'
+								WHEN 7
+									THEN 'Instruction created'
+								WHEN 8
+									THEN 'Partial Shipment Created'
+								WHEN 9
+									THEN 'Full Shipment Created'
+								WHEN 10
+									THEN 'Cancelled'
 								ELSE ''
 							  END
 		,LDCL.dblReceivedQty AS dblContainerReceivedQty

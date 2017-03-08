@@ -100,6 +100,14 @@ SELECT -- Load Header
 			THEN 'Outbound transit'
 		WHEN 6
 			THEN 'Delivered'
+		WHEN 7
+			THEN 'Instruction created'
+		WHEN 8
+			THEN 'Partial Shipment Created'
+		WHEN 9
+			THEN 'Full Shipment Created'
+		WHEN 10
+			THEN 'Cancelled'
 		ELSE ''
 		END COLLATE Latin1_General_CI_AS
 	,strCalenderInfo = LOAD.[strLoadNumber] + ' - ' + CASE 
@@ -123,6 +131,14 @@ SELECT -- Load Header
 			THEN 'Outbound transit'
 		WHEN 6
 			THEN 'Delivered'
+		WHEN 7
+			THEN 'Instruction created'
+		WHEN 8
+			THEN 'Partial Shipment Created'
+		WHEN 9
+			THEN 'Full Shipment Created'
+		WHEN 10
+			THEN 'Cancelled'
 		ELSE ''
 		END + CASE 
 		WHEN ISNULL(LOAD.strExternalLoadNumber, '') <> ''
