@@ -28,8 +28,14 @@ BEGIN TRY
 			@SecondApprovalId       INT,
 			@FirstApprovalSign      VARBINARY(MAX),
 			@SecondApprovalSign     VARBINARY(MAX),
-			@IsFullApproved         BIT = 0
-						
+			@IsFullApproved         BIT = 0,
+			@ysnFairtrade			BIT = 0,
+
+			@intLastApprovedContractId INT,
+			@intPrevApprovedContractId INT,
+			@strAmendedColumns NVARCHAR(MAX),
+			@intContractDetailId INT			
+
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
       
@@ -127,13 +133,44 @@ BEGIN TRY
 	FROM	tblCTContractHeader CH						
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
 
+	IF EXISTS
+	(
+				SELECT	TOP 1 1 
+				FROM	tblCTContractCertification	CC
+				JOIN	tblCTContractDetail			CH	ON	CC.intContractDetailId	=	CH.intContractDetailId
+				JOIN	tblICCertification			CF	ON	CF.intCertificationId	=	CC.intCertificationId	
+				WHERE	UPPER(CF.strCertificationName) = 'FAIRTRADE' AND CH.intContractHeaderId = @intContractHeaderId
+	)
+	BEGIN
+		SET @ysnFairtrade = 1
+	END
+
+	SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId,@intContractDetailId = intContractDetailId 
+    FROM   tblCTApprovedContract 
+    WHERE  intContractHeaderId = @intContractHeaderId AND strApprovalType IN ('Contract','Contract Amendment ')
+    ORDER BY intApprovedContractId DESC
+
+	SELECT TOP 1 @intPrevApprovedContractId =  intApprovedContractId
+    FROM   tblCTApprovedContract 
+    WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId <> @intLastApprovedContractId 
+    ORDER BY intApprovedContractId DESC
+
+	IF @intPrevApprovedContractId IS NOT NULL AND @intLastApprovedContractId IS NOT NULL
+	BEGIN
+		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intLastApprovedContractId,'intApprovedById,dtmApproved,
+		intContractBasisId,dtmPlannedAvailabilityDate,strOrigin,dblNetWeight,intNetWeightUOMId,
+		intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType,strVendorLotID', @strAmendedColumns OUTPUT
+	END
+
+	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
+
 	SELECT	CH.intContractHeaderId,
 
 			TP.strContractType + ' Contract:- ' + CH.strContractNumber AS strCaption,
 			@strCompanyName + ' - '+TP.strContractType+' Contract' AS strTeaCaption,
 
 			CH.dtmContractDate,
-			'The contract has been closed on the conditions of the '+ AN.strComment + '('+AN.strName+')'+' latest edition.' strAssociation,
+			'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition.' strAssociation,
 			CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END AS strBuyerRefNo,
 			CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber ELSE CH.strCustomerContract END AS strSellerRefNo,
 			CH.strContractNumber,
@@ -155,7 +192,7 @@ BEGIN TRY
 			'Quality as per approved sample ' + ' - ' + W2.strWeightGradeDesc + ' and subject to consignment conforming to ' + @strCompanyName + '''s standard quality criteria.' AS strQaulityAndInspection,
 
 			@strContractDocuments strContractDocuments,
-			'Rules of arbitration of '+ AN.strComment + '  as per latest edition for quality and principle.' + CHAR(13)+CHAR(10) +
+			'Rules of arbitration of '+ AN.strComment + '  as per latest edition for quality and principle. ' + CHAR(13)+CHAR(10) +
 			'Place of jurisdiction is ' + AB.strState +', '+RY.strCountry AS strArbitration,
 			@strCompanyName + ', '  + CHAR(13)+CHAR(10) +
 			ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
@@ -167,8 +204,11 @@ BEGIN TRY
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState)) END,'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'') +
-			ISNULL( CHAR(13)+CHAR(10) +'FLO ID: '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
+			CASE WHEN @ysnFairtrade = 1 THEN
+				ISNULL( CHAR(13)+CHAR(10) +'FLO ID: '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
+			ELSE '' END
 			AS	strOtherPartyAddress,
+			
 			CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END AS strBuyer,
 			CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END AS strSeller,
 			CH.dblQuantity,
@@ -202,15 +242,21 @@ BEGIN TRY
 			CASE WHEN ISNULL(AN.strComment,'') <>'' AND ISNULL(AB.strState,'') <>'' AND ISNULL(RY.strCountry,'') <>'' THEN 'Arbitration:' ELSE NULL END AS lblArbitration,
 			CASE WHEN ISNULL(@strContractConditions,'') <>'' THEN 'Conditions:' ELSE NULL END AS lblContractCondition,
 			SQ.strLocationName+', '+CONVERT(CHAR(11),CH.dtmContractDate,13) AS strLocationWithDate,
-	        'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+') '+' latest edition and the particular conditions mentioned below.' strCondition,
-		    PO.strPosition +' ('+SQ.strPackingDescription +') ' AS strPositionWithPackDesc,
+	        CASE WHEN LEN(LTRIM(RTRIM(@strAmendedColumns))) = 0 THEN
+			'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition and the particular conditions mentioned below.' 
+		    ELSE
+				'Subject - Contract Amendment' + CHAR(13) + CHAR(10) + 'The field highlighted in bold have been amended.'
+			END strCondition,
+			PO.strPosition +' ('+SQ.strPackingDescription +') ' AS strPositionWithPackDesc,
 			TX.strText+' '+CH.strPrintableRemarks AS strText,
 			SQ.strContractCompanyName,
 			SQ.strContractPrintSignOff,
 			LTRIM(RTRIM(EY.strEntityName))AS strCompanyName,
 			@strApprovalText AS strApprovalText,
 			CASE WHEN @IsFullApproved=1 THEN @FirstApprovalSign ELSE NULL END AS FirstApprovalSign,
-			CASE WHEN @IsFullApproved=1 THEN @SecondApprovalSign ELSE NULL END AS SecondApprovalSign
+			CASE WHEN @IsFullApproved=1 THEN @SecondApprovalSign ELSE NULL END AS SecondApprovalSign,
+
+			@strAmendedColumns strAmendedColumns
 
 	FROM	tblCTContractHeader CH
 	JOIN	tblCTContractType	TP	ON	TP.intContractTypeId	=	CH.intContractTypeId

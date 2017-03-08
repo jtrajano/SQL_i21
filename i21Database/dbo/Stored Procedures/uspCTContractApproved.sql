@@ -7,7 +7,15 @@ AS
 BEGIN TRY
 
 	DECLARE @ErrMsg	NVARCHAR(MAX),
-			@intApprovedContractId	INT
+			@intApprovedContractId	INT,
+			@intTransactionId INT, 
+			@intScreenId INT,
+			@strScreenName NVARCHAR(100)
+
+	SELECT	@intScreenId = intScreenId from tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
+	SELECT  @intTransactionId	=	intTransactionId FROM tblSMTransaction WHERE intRecordId = @intContractHeaderId AND intScreenId = @intScreenId
+	SELECT	TOP 1	@intScreenId	=	intScreenId FROM tblSMApproval WHERE strStatus = 'Approved'  AND intTransactionId  = @intTransactionId ORDER BY intApprovalId DESC
+	SELECT	@strScreenName = strScreenName FROM tblSMScreen WHERE  @intScreenId = intScreenId
 
 	DECLARE	@SCOPE_IDENTITY TABLE (intApprovedContractId INT)
 
@@ -23,7 +31,8 @@ BEGIN TRY
 			intPriceUOMId,			intSubLocationId,		intStorageLocationId,
 			intPurchasingGroupId,	intApprovedById,		dtmApproved,
 			strOrigin,				dblNetWeight,			intNetWeightUOMId,
-			intItemContractId
+			intItemContractId,		strApprovalType,		strVendorLotID,
+			dblNoOfLots
 	)
 	OUTPUT	inserted.intApprovedContractId INTO @SCOPE_IDENTITY
 	SELECT	CD.intContractHeaderId,
@@ -56,7 +65,10 @@ BEGIN TRY
 			OG.strCountry AS strOrigin,
 			CD.dblNetWeight,
 			WU.intUnitMeasureId AS intNetWeightUOMId,
-			CD.intItemContractId
+			CD.intItemContractId,
+			@strScreenName,
+			CD.strVendorLotID,
+			CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 1 THEN CH.dblNoOfLots  ELSE CD.dblNoOfLots END
 
 	FROM	tblCTContractDetail		CD 
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT

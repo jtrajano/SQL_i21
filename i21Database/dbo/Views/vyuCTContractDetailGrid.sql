@@ -53,7 +53,8 @@ AS
 			IM.intProductTypeId,
 			CQ.dblBulkQuantity ,
 			CQ.dblQuantity AS dblBagQuantity,
-			CAST(1 AS BIT) ysnItemUOMIdExist
+			CAST(1 AS BIT) ysnItemUOMIdExist,
+			RM.strUnitMeasure strContainerUOM
 
 FROM		tblCTContractDetail			CD
 	 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=		CD.intContractHeaderId	
@@ -125,4 +126,5 @@ LEFT JOIN	(
 				) t
 				WHERE intRowNum = 1
 			)							QA	ON	QA.intContractDetailId			=		CD.intContractDetailId
-LEFT JOIN	tblLGContainerTypeCommodityQty CQ ON CQ.intCommodityId = CH.intCommodityId AND CQ.intContainerTypeId = CD.intContainerTypeId AND CQ.intCommodityAttributeId = IM.intOriginId
+LEFT JOIN	tblLGContainerTypeCommodityQty	CQ	ON	CQ.intCommodityId = CH.intCommodityId AND CQ.intContainerTypeId = CD.intContainerTypeId AND CQ.intCommodityAttributeId = IM.intOriginId
+LEFT JOIN	tblICUnitMeasure				RM	ON	RM.intUnitMeasureId				=		CQ.intUnitMeasureId
