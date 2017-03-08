@@ -1448,13 +1448,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onChargeCreateRecord: function (config, action) {
         var win = config.grid.up('window');
         //var current = win.viewModel.data.current;
-        var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
-        var strDefaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
+        // var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+        // var strDefaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
 
         var record = Ext.create('Inventory.model.ReceiptCharge');
         record.set('strAllocateCostBy', 'Unit');
-        record.set('intCurrencyId', intDefaultCurrencyId);
-        record.set('strCurrency', strDefaultCurrency);
+        // record.set('intCurrencyId', intDefaultCurrencyId);
+        // record.set('strCurrency', strDefaultCurrency);
 
         action(record);
     },
@@ -5090,20 +5090,37 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = plugin.getActiveRecord();
         var masterRecord = win.viewModel.data.current;
         var cboVendor = win.down('#cboVendor');
+        var cboCurrency = win.down('#cboCurrency');
 
         if (combo.itemId === 'cboOtherCharge') {
+            // Get the default Forex Rate Type from the Company Preference. 
+            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
+
+            // Get the functional currency:
+            var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+            var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
+
+            // Get the transaction currency
+            var chargeCurrencyId = cboCurrency.getValue();
+
             current.set('intChargeId', record.get('intItemId'));
             current.set('ysnInventoryCost', record.get('ysnInventoryCost'));
             current.set('ysnAccrue', record.get('ysnAccrue'));
             current.set('ysnPrice', record.get('ysnPrice'));
 
+            // If other charge is accrue, default the vendor and currency from the transaction vendor and currency. 
             if (record.get('ysnAccrue') === true) {
                 current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
                 current.set('strVendorName', cboVendor.getRawValue());
+                current.set('intCurrencyId', chargeCurrencyId);
+                current.set('strCurrency', cboCurrency.getRawValue());
             }
             else {
                 current.set('intEntityVendorId', null);
                 current.set('strVendorName', null);
+                current.set('intCurrencyId', functionalCurrencyId);
+                current.set('strCurrency', strFunctionalCurrency);
+
             }
 
             current.set('intCostUOMId', record.get('intCostUOMId'));
@@ -5114,12 +5131,61 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strCostMethod', 'Percentage');
             }
 
+            var dblAmount = record.get('dblAmount');
+            dblAmount = Ext.isNumeric(dblAmount) ? dblAmount : 0;
+
             if(record.get('strCostMethod') === 'Amount') {
-                current.set('dblAmount', record.get('dblAmount'));
+                current.set('dblAmount', dblAmount);
             }
             else {
-                current.set('dblRate', record.get('dblAmount'));
+                current.set('dblRate', dblAmount);
             }
+			
+            // function variable to process the default forex rate. 
+            var processForexRateOnSuccess = function(successResponse, isItemLastCost){
+                if (successResponse && successResponse.length > 0 ){
+                    var dblForexRate = successResponse[0].dblRate;
+                    var strRateType = successResponse[0].strRateType;             
+
+                    dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+
+                    // Convert the last cost to the transaction currency.
+                    // and round it to six decimal places.  
+                    if (chargeCurrencyId != functionalCurrencyId){
+                        dblAmount = dblForexRate != 0 ?  dblAmount / dblForexRate : 0;
+                        dblAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(dblAmount, 6);
+
+                        if(record.get('strCostMethod') === 'Amount') {                           
+                            current.set('dblAmount', dblAmount);
+                        }
+                        else {
+                            current.set('dblRate', dblAmount);
+                        }                           
+                    }                 
+                    
+                    current.set('intForexRateTypeId', intRateType);
+                    current.set('strForexRateType', strRateType);
+                    current.set('dblForexRate', dblForexRate);
+                }
+            }
+
+            // If transaction currency is a foreign currency, get the default forex rate type, forex rate, and convert the last cost to the transaction currency. 
+            if (chargeCurrencyId != functionalCurrencyId && intRateType){
+                iRely.Functions.getForexRate(
+                    chargeCurrencyId,
+                    intRateType,
+                    masterRecord.get('dtmReceiptDate'),
+                    function(successResponse){
+                        processForexRateOnSuccess(successResponse);
+                    },
+                    function(failureResponse){
+                        var jsonData = Ext.decode(failureResponse.responseText);
+                        //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                        iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
+                    }
+                );                      
+            }
+			            
         }
 
         if (combo.itemId === 'cboChargeCurrency') {
@@ -5134,11 +5200,106 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         if (combo.itemId === 'cboCostVendor') {
+            // Convert the current amount (or rate) to the functional currency; 
+            var dblAmount = null;
+            var dblCurrentForexRate = current.get('dblForexRate');
+            dblCurrentForexRate = Ext.isNumeric(dblCurrentForexRate) ? dblCurrentForexRate : 0;
+
+            if(current.get('strCostMethod') === 'Amount') {
+                dblAmount = current.get('dblAmount');
+            }
+            else {
+                dblAmount = current.get('dblRate');
+            }
+
+            dblAmount = Ext.isNumeric(dblAmount) ? dblAmount : 0;                
+            dblAmount = dblCurrentForexRate != 0 ? dblAmount * dblCurrentForexRate : dblAmount; 
+            dblAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(dblAmount, 6);
+
+            if(current.get('strCostMethod') === 'Amount') {
+                current.set('dblAmount', dblAmount);
+            }
+            else {
+                current.set('dblRate', dblAmount);
+            }
+
+            // Clear the forex rate
+            current.set('dblForexRate', null);
+
             //Do not compute tax for Third Party Vendor
             if(current.get('intEntityVendorId') !== masterRecord.get('intEntityVendorId')) {
                 current.set('intTaxGroupId', null);
                 current.set('strTaxGroup', null);
                 current.set('dblTax', 0);
+
+                // Get and set the vendor currency. 
+                var thirdPartyVendorCurrencyId = record.get('intCurrencyId');
+                var thirdPartyVendorCurrency = record.get('strCurrency');
+
+                current.set('intCurrencyId', thirdPartyVendorCurrencyId);
+                current.set('strCurrency', thirdPartyVendorCurrency);
+
+                // Get the functional currency:
+                var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');               
+
+                // Get the current forex rate type
+                var intRateType = current.get('intForexRateTypeId');
+
+                // function variable to process the default forex rate. 
+                var processForexRateOnSuccess = function(successResponse, isItemLastCost){
+                    if (successResponse && successResponse.length > 0 ){
+                        var dblForexRate = successResponse[0].dblRate;
+                        var strRateType = successResponse[0].strRateType;             
+
+                        dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+
+                        // Convert the last cost to the transaction currency.
+                        // and round it to six decimal places.  
+                        if (chargeCurrencyId != functionalCurrencyId){
+                            dblAmount = dblForexRate != 0 ?  dblAmount / dblForexRate : 0;
+                            dblAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(dblAmount, 6);
+
+                            if(current.get('strCostMethod') === 'Amount') {                           
+                                current.set('dblAmount', dblAmount);
+                            }
+                            else {
+                                current.set('dblRate', dblAmount);
+                            }                           
+                        }                 
+                        
+                        current.set('dblForexRate', dblForexRate);
+                        current.set('intForexRateTypeId', intRateType);
+                        current.set('strForexRateType', strRateType);                        
+                    }
+                }
+
+                // If transaction currency is a foreign currency, get the default forex rate type, forex rate, and convert the last cost to the transaction currency. 
+                if (thirdPartyVendorCurrencyId != functionalCurrencyId){
+
+                    // If intRateType is invalid, get the default Forex Rate Type from the Company Preference.
+                    if (!intRateType){
+                         intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
+                    }
+
+                    iRely.Functions.getForexRate(
+                        thirdPartyVendorCurrencyId,
+                        intRateType,
+                        masterRecord.get('dtmReceiptDate'),
+                        function(successResponse){
+                            processForexRateOnSuccess(successResponse);
+                        },
+                        function(failureResponse){
+                            var jsonData = Ext.decode(failureResponse.responseText);
+                            //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                            iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
+                        }
+                    );                      
+                }
+                else {
+                    // Since 3rd party vendor currency is in functional, clear the forex rate type. 
+                    current.set('intForexRateTypeId', null);
+                    current.set('strForexRateType', null);                    
+                }
             }
         }
 
@@ -5148,7 +5309,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('dblForexRate', null);
 
             iRely.Functions.getForexRate(
-                //win.viewModel.data.current.get('intCurrencyId'),
                 current.get('intCurrencyId'),
                 current.get('intForexRateTypeId'),
                 win.viewModel.data.current.get('dtmReceiptDate'),
@@ -5159,7 +5319,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 function(failureResponse){
                     var jsonData = Ext.decode(failureResponse.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                    //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                    iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');                    
                 }
             );            
         }        

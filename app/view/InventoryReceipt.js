@@ -2702,13 +2702,38 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     dataIndex: 'strVendorId',
                                                                                     dataType: 'string',
                                                                                     text: 'Vendor No',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    defaultSort: true
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strName',
                                                                                     dataType: 'string',
                                                                                     text: 'Vendor Name',
                                                                                     flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intCurrencyId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Currency Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intSubCurrencyCent',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'SubCurrency Cent',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intDefaultLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Default Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCurrency',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Currency',
+                                                                                    hidden: true
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboCostVendor',
