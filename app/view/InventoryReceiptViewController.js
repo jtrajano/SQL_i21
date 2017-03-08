@@ -5120,7 +5120,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strVendorName', null);
                 current.set('intCurrencyId', functionalCurrencyId);
                 current.set('strCurrency', strFunctionalCurrency);
-
+                chargeCurrencyId = functionalCurrencyId;
             }
 
             current.set('intCostUOMId', record.get('intCostUOMId'));
