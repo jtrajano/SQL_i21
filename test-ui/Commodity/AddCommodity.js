@@ -23,15 +23,19 @@ StartTest (function (t) {
         .enterData('Text Field','Description','Commodity with UOM and No Attribute Setup')
         .clickCheckBox('ExchangeTraded',true)
         .enterData('Text Field','DecimalsOnDpr','6.00')
-        .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','LB','strUnitMeasure')
-        .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('Uom',3,'strUnitMeasure','Bushels','strUnitMeasure')
-        .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
+
+        .enterUOMGridData('Uom', 1, 'colUnitQty', 'strUnitMeasure', 1, 'LB')
+        .enterUOMGridData('Uom', 2, 'colUnitQty', 'strUnitMeasure', 50, '50 lb bag')
+        .enterUOMGridData('Uom', 3, 'colUnitQty', 'strUnitMeasure', 56, 'Bushels')
+        .enterUOMGridData('Uom', 4, 'colUnitQty', 'strUnitMeasure', 55.1156, '25 kg bag')
+
         .clickGridCheckBox('Uom',1,'strUnitMeasure', 'LB', 'ysnStockUnit', true)
-        .verifyGridData('Uom', 1, 'colUOMUnitQty', '1')
-        .verifyGridData('Uom', 2, 'colUOMUnitQty', '50')
-        .verifyGridData('Uom', 3, 'colUOMUnitQty', '56')
-        .verifyGridData('Uom', 4, 'colUOMUnitQty', '55.1156')
+
+		.verifyUOMGridData('Uom', 1, 'colUnitQty', 1, 'LB', 'equal')
+		.verifyUOMGridData('Uom', 2, 'colUnitQty', 50, '50 lb bag', 'equal')
+		.verifyUOMGridData('Uom', 3, 'colUnitQty', 56, 'Bushels', 'equal')
+        .verifyUOMGridData('Uom', 4, 'colUnitQty', 55.1156, '25 kg bag', 'equal')
+        
         .clickButton('Save')
         .waitUntilLoaded()
         .verifyStatusMessage('Saved')
@@ -47,15 +51,18 @@ StartTest (function (t) {
         .enterData('Text Field','Description','Commodity with UOM and Attribute Setup')
         .clickCheckBox('ExchangeTraded',true)
         .enterData('Text Field','DecimalsOnDpr','6.00')
-        .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','LB','strUnitMeasure')
-        .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('Uom',3,'strUnitMeasure','Bushels','strUnitMeasure')
-        .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
+        
+        .enterUOMGridData('Uom', 1, 'colUnitQty', 'strUnitMeasure', 1, 'LB')
+        .enterUOMGridData('Uom', 2, 'colUnitQty', 'strUnitMeasure', 50, '50 lb bag')
+        .enterUOMGridData('Uom', 3, 'colUnitQty', 'strUnitMeasure', 56, 'Bushels')
+        .enterUOMGridData('Uom', 4, 'colUnitQty', 'strUnitMeasure', 55.1156, '25 kg bag')
+
         .clickGridCheckBox('Uom',1,'strUnitMeasure', 'LB', 'ysnStockUnit', true)
-        .verifyGridData('Uom', 1, 'colUOMUnitQty', '1')
-        .verifyGridData('Uom', 2, 'colUOMUnitQty', '50')
-        .verifyGridData('Uom', 3, 'colUOMUnitQty', '56')
-        .verifyGridData('Uom', 4, 'colUOMUnitQty', '55.1156')
+
+		.verifyUOMGridData('Uom', 1, 'colUnitQty', 1, 'LB', 'equal')
+		.verifyUOMGridData('Uom', 2, 'colUnitQty', 50, '50 lb bag', 'equal')
+		.verifyUOMGridData('Uom', 3, 'colUnitQty', 56, 'Bushels', 'equal')
+        .verifyUOMGridData('Uom', 4, 'colUnitQty', 55.1156, '25 kg bag', 'equal')
 
         .clickTab('Attribute')
         .enterGridData('ProductType', 1, 'strDescription', 'Test Product Type')
@@ -74,15 +81,19 @@ StartTest (function (t) {
         .doubleClickSearchRowValue('AAA - Commodity 1', 'strOrderType', 1)
         .waitUntilLoaded('iccommodity')
         .enterData('Text Field','Description','Updated Commodity')
-        .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','LB','strUnitMeasure')
-        .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('Uom',3,'strUnitMeasure','Bushels','strUnitMeasure')
-        .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
-        .clickGridCheckBox('Uom',0,'strUnitMeasure', 'LB', 'ysnStockUnit', true)
-        .verifyGridData('Uom', 1, 'colUOMUnitQty', '1')
-        .verifyGridData('Uom', 2, 'colUOMUnitQty', '50')
-        .verifyGridData('Uom', 3, 'colUOMUnitQty', '56')
-        .verifyGridData('Uom', 4, 'colUOMUnitQty', '55.1156')
+        
+        .enterUOMGridData('Uom', 1, 'colUnitQty', 'strUnitMeasure', 1, 'LB')
+        .enterUOMGridData('Uom', 2, 'colUnitQty', 'strUnitMeasure', 50, '50 lb bag')
+        .enterUOMGridData('Uom', 3, 'colUnitQty', 'strUnitMeasure', 56, 'Bushels')
+        .enterUOMGridData('Uom', 4, 'colUnitQty', 'strUnitMeasure', 55.1156, '25 kg bag')
+
+        .clickGridCheckBox('Uom',1,'strUnitMeasure', 'LB', 'ysnStockUnit', true)
+
+		.verifyUOMGridData('Uom', 1, 'colUnitQty', 1, 'LB', 'equal')
+		.verifyUOMGridData('Uom', 2, 'colUnitQty', 50, '50 lb bag', 'equal')
+		.verifyUOMGridData('Uom', 3, 'colUnitQty', 56, 'Bushels', 'equal')
+        .verifyUOMGridData('Uom', 4, 'colUnitQty', 55.1156, '25 kg bag', 'equal')
+        
         .verifyStatusMessage('Edited')
         .clickButton('Save')
         .waitUntilLoaded()
@@ -92,10 +103,12 @@ StartTest (function (t) {
         .doubleClickSearchRowValue('AAA - Commodity 1', 'strOrderType', 1)
         .waitUntilLoaded('iccommodity')
         .verifyData('Text Field','Description','Updated Commodity')
-        .verifyGridData('Uom', 1, 'colUOMUnitQty', '1')
-        .verifyGridData('Uom', 2, 'colUOMUnitQty', '50')
-        .verifyGridData('Uom', 3, 'colUOMUnitQty', '56')
-        .verifyGridData('Uom', 4, 'colUOMUnitQty', '55.1156')
+        
+        .verifyUOMGridData('Uom', 1, 'colUnitQty', 1, 'LB', 'equal')
+		.verifyUOMGridData('Uom', 2, 'colUnitQty', 50, '50 lb bag', 'equal')
+		.verifyUOMGridData('Uom', 3, 'colUnitQty', 56, 'Bushels', 'equal')
+        .verifyUOMGridData('Uom', 4, 'colUnitQty', 55.1156, '25 kg bag', 'equal')
+        
         .clickButton('Close')
         //endregion
 
