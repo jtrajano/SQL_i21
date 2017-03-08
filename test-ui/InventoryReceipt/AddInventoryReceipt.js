@@ -12,8 +12,9 @@ StartTest (function (t) {
         .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
         .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','NLTI - 02','strItemNo')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100000')
+		
+		.enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', 100000, 'LB')
+        		
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
@@ -24,8 +25,8 @@ StartTest (function (t) {
 
        .addFunction(function (next){
             var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblGrossWgt').text;
-            if (total == 'Gross: 100,000.00') {
+               total = win.down('#txtGrossWgt').value;
+            if (total == 100000) {
                 t.ok(true, 'Gross is correct.');
             }
             else {
@@ -35,8 +36,8 @@ StartTest (function (t) {
         })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblNetWgt').text;
-           if (total == 'Net: 100,000.00') {
+               total = win.down('#txtNetWgt').value;
+           if (total == 100000) {
                t.ok(true, 'Net is correct.');
            }
            else {
@@ -46,8 +47,8 @@ StartTest (function (t) {
        })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000,000.00') {
+                total = win.down('#txtTotal').value;
+           if (total == 1000000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -56,7 +57,7 @@ StartTest (function (t) {
            next();
        })
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -80,8 +81,7 @@ StartTest (function (t) {
         .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
         .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','LTI - 02','strItemNo')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100000')
+		.enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', 100000, 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
@@ -103,8 +103,8 @@ StartTest (function (t) {
 
         .addFunction(function (next){
             var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblGrossWgt').text;
-            if (total == 'Gross: 100,000.00') {
+               total = win.down('#txtGrossWgt').value;
+            if (total == 100000) {
                 t.ok(true, 'Gross is correct.');
             }
             else {
@@ -114,8 +114,8 @@ StartTest (function (t) {
         })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblNetWgt').text;
-           if (total == 'Net: 100,000.00') {
+               total = win.down('#txtNetWgt').value;
+           if (total == 100000) {
                t.ok(true, 'Net is correct.');
            }
            else {
@@ -125,8 +125,8 @@ StartTest (function (t) {
        })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000,000.00') {
+                total = win.down('#txtTotal').value;
+           if (total == 1000000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -135,7 +135,7 @@ StartTest (function (t) {
            next();
        })
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -176,7 +176,7 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+		.verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
@@ -186,8 +186,8 @@ StartTest (function (t) {
 
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
+                total = win.down('#txtTotal').value;
+           if (total == 1000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -196,7 +196,7 @@ StartTest (function (t) {
            next();
        })
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -237,14 +237,14 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
         .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
         .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM','LB','strWeightUOM')
         .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
         .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
@@ -262,8 +262,8 @@ StartTest (function (t) {
         .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblGrossWgt').text;
-           if (total == 'Gross: 100.00') {
+                total = win.down('#txtGrossWgt').value;
+           if (total == 100) {
                t.ok(true, 'Gross is correct.');
            }
            else {
@@ -273,8 +273,8 @@ StartTest (function (t) {
        })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblNetWgt').text;
-           if (total == 'Net: 100.00') {
+                total = win.down('#txtNetWgt').value;
+           if (total == 100) {
                t.ok(true, 'Net is correct.');
            }
            else {
@@ -284,8 +284,8 @@ StartTest (function (t) {
        })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 1000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -293,7 +293,7 @@ StartTest (function (t) {
            }
            next();
        })
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -344,7 +344,7 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
@@ -353,8 +353,8 @@ StartTest (function (t) {
 
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 1000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -363,7 +363,7 @@ StartTest (function (t) {
            next();
        })
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -406,14 +406,14 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
         .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
         .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
 
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM','LB','strWeightUOM')
         .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
         .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
@@ -432,19 +432,19 @@ StartTest (function (t) {
 
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblGrossWgt').text;
-           if (total == 'Gross: 100.00') {
+               total = win.down('#txtGrossWgt').value;
+           if (total == 100) {
                t.ok(true, 'Gross is correct.');
            }
            else {
-               t.ok(false, 'Grossl is incorrect.');
+               t.ok(false, 'Gross is incorrect.');
            }
            next();
        })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblNetWgt').text;
-           if (total == 'Net: 100.00') {
+               total = win.down('#txtNetWgt').value;
+           if (total == 100) {
                t.ok(true, 'Net is correct.');
            }
            else {
@@ -454,8 +454,8 @@ StartTest (function (t) {
        })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 1000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -464,7 +464,7 @@ StartTest (function (t) {
            next();
        })
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -516,14 +516,14 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
         .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
         .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
 
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM','LB','strWeightUOM')
         .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
         .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
@@ -541,19 +541,19 @@ StartTest (function (t) {
         .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblGrossWgt').text;
-           if (total == 'Gross: 100.00') {
+               total = win.down('#txtGrossWgt').value;
+           if (total == 100) {
                t.ok(true, 'Gross is correct.');
            }
            else {
-               t.ok(false, 'Grossl is incorrect.');
+               t.ok(false, 'Gross is incorrect.');
            }
            next();
        })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblNetWgt').text;
-           if (total == 'Net: 100.00') {
+               total = win.down('#txtNetWgt').value;
+           if (total == 100) {
                t.ok(true, 'Net is correct.');
            }
            else {
@@ -563,8 +563,8 @@ StartTest (function (t) {
        })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 1000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -573,7 +573,7 @@ StartTest (function (t) {
            next();
        })
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -635,7 +635,7 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
@@ -643,8 +643,8 @@ StartTest (function (t) {
 
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 1000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -653,7 +653,7 @@ StartTest (function (t) {
            next();
        })
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -717,13 +717,13 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
 
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM','LB','strWeightUOM')
         .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
         .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
@@ -743,8 +743,8 @@ StartTest (function (t) {
         .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblGrossWgt').text;
-           if (total == 'Gross: 100.00') {
+               total = win.down('#txtGrossWgt').value;
+           if (total == 100) {
                t.ok(true, 'Gross is correct.');
            }
            else {
@@ -754,8 +754,8 @@ StartTest (function (t) {
        })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblNetWgt').text;
-           if (total == 'Net: 100.00') {
+               total = win.down('#txtNetWgt').value;
+           if (total == 100) {
                t.ok(true, 'Net is correct.');
            }
            else {
@@ -765,8 +765,8 @@ StartTest (function (t) {
        })
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 1000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -774,7 +774,7 @@ StartTest (function (t) {
            }
            next();
        })
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -849,7 +849,7 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
@@ -859,8 +859,8 @@ StartTest (function (t) {
 
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 1000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -869,7 +869,7 @@ StartTest (function (t) {
            next();
        })
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -943,7 +943,7 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
@@ -967,8 +967,8 @@ StartTest (function (t) {
 
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 1000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -977,7 +977,7 @@ StartTest (function (t) {
            next();
        })
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -1080,7 +1080,7 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
@@ -1104,8 +1104,8 @@ StartTest (function (t) {
 
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 1000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -1114,7 +1114,7 @@ StartTest (function (t) {
            next();
        })
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -1217,7 +1217,7 @@ StartTest (function (t) {
         .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
@@ -1231,8 +1231,8 @@ StartTest (function (t) {
 
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 1000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -1241,7 +1241,7 @@ StartTest (function (t) {
            next();
        })
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -1268,7 +1268,7 @@ StartTest (function (t) {
         .addResult('Successfully Opened',4000)
         .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 02')
         .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100000')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100000, 'LB', 'equal')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
@@ -1276,8 +1276,8 @@ StartTest (function (t) {
 
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 1,000,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 1000000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -1290,7 +1290,7 @@ StartTest (function (t) {
         .waitUntilLoaded('icinventoryreceipt')
         .addResult('Successfully Unposted',3000)
         .selectComboBoxRowValue('Vendor', 'Frito-Lay', 'Vendor',1)
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '1000')
+        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 1000, 'LB', 'equal')
         .clickButton('Save')
         .waitUntilLoaded('')
 
@@ -1299,8 +1299,8 @@ StartTest (function (t) {
 
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 10,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 10000) {
                t.ok(true, 'Total is correct.');
            }
            else {
@@ -1310,7 +1310,7 @@ StartTest (function (t) {
        })
 
 
-        .clickButton('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -1331,8 +1331,8 @@ StartTest (function (t) {
 
        .addFunction(function (next){
            var win =  Ext.WindowManager.getActive(),
-               total = win.down('#lblTotal').text;
-           if (total == 'Total: 10,000.00') {
+               total = win.down('#txtTotal').value;
+           if (total == 10000) {
                t.ok(true, 'Total is correct.');
            }
            else {
