@@ -5062,6 +5062,8 @@
     <Build Include="dbo\Views\vyuICItemSubLocations.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAuditLog.sql" />
+    <Build Include="dbo\Tables\tblAPVendorTerm.sql" />
+    <None Include="Scripts\Post-Deployment\EM\039_MoveDefaultTermsToVendorTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
