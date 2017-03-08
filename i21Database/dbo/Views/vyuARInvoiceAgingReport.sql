@@ -454,11 +454,4 @@ LEFT JOIN tblEMEntityLocation BILLTOLOCATION ON INVOICE.intBillToLocationId = BI
 LEFT JOIN tblEMEntityLocation DEFAULTLOCATION ON AGING.intEntityCustomerId = DEFAULTLOCATION.intEntityId AND DEFAULTLOCATION.ysnDefaultLocation = 1
 LEFT JOIN tblEMEntityLocation DEFAULTSHIPTO ON C.intShipToId = DEFAULTSHIPTO.intEntityLocationId AND C.intEntityCustomerId = DEFAULTSHIPTO.intEntityId
 LEFT JOIN tblEMEntityLocation DEFAULTBILLTO ON C.intBillToId = DEFAULTBILLTO.intEntityLocationId AND C.intEntityCustomerId = DEFAULTBILLTO.intEntityId
-LEFT JOIN (
-		(SELECT SUM(PD.dblPayment) + SUM(PD.dblDiscount) - SUM(PD.dblInterest) AS dblPayment
-			  , PD.intInvoiceId 
-			FROM tblARPaymentDetail PD INNER JOIN 
-				 tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
-			GROUP BY PD.intInvoiceId)
-		) TOTALPAYMENT ON AGING.intInvoiceId = TOTALPAYMENT.intInvoiceId
-WHERE INVOICE.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0 
+WHERE INVOICE.ysnPaid = 0
