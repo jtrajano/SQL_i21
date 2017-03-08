@@ -346,7 +346,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\036_MoveTheTermsPerType.sql
 :r .\EM\037_DefaultDataLocationPayee.sql
 :r .\EM\038_UpdateEncryptionUsed.sql
-
+:r .\EM\039_MoveDefaultTermsToVendorTerm.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
