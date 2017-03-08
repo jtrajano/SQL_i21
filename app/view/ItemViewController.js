@@ -435,6 +435,24 @@ Ext.define('Inventory.view.ItemViewController', {
                 colLocationCostingMethod: 'strCostingMethod'
             },
 
+            grdItemSubLocations: {
+                colsubSubLocationName: {
+                    dataIndex: 'strSubLocationName',
+                    editor: {
+                        store: '{subLocations}',
+                        origValueField: 'intCompanyLocationSubLocationId',
+                        origUpdateField: 'intSubLocationId',
+                        defaultFilters: [
+                            {
+                                column: 'intCompanyLocationId',
+                                value: '{grdLocationStore.selection.intCompanyLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                }
+            },
+
             //--------------//
             //GL Account Tab//
             //--------------//
@@ -467,14 +485,9 @@ Ext.define('Inventory.view.ItemViewController', {
                         defaultFilters: [
                             {
                                 column: 'strAccountCategory',
-                                value: '{accountCategoryFilter1}',
-                                conjunction: 'or'
-                            },
-                            {
-                                column: 'strAccountCategory',
-                                value: '{accountCategoryFilter2}',
-                                conjunction: 'or'
-                            }                            
+                                value: '{accountCategoryFilter}',
+                                conjunction: 'and'
+                            }
                         ]
                     }
                 },
@@ -986,7 +999,17 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{commissionsOn}'
                     }
                 },
-                colPricingLevelCommissionRate: 'dblCommissionRate'
+                colPricingLevelCommissionRate: 'dblCommissionRate',
+                colPricingLevelCurrency: {
+                    dataIndex: 'strCurrency',
+                    editor: {
+                        store: '{currency}',
+                        defaultFilters: [{
+                            column: 'ysnSubCurrency',
+                            value: false
+                        }]
+                    }
+                }
             },
 
             grdSpecialPricing: {
@@ -1035,7 +1058,17 @@ Ext.define('Inventory.view.ItemViewController', {
                 colSpecialPricingDiscQty: 'dblDiscountThruQty',
                 colSpecialPricingDiscAmount: 'dblDiscountThruAmount',
                 colSpecialPricingAccumQty: 'dblAccumulatedQty',
-                colSpecialPricingAccumAmount: 'dblAccumulatedAmount'
+                colSpecialPricingAccumAmount: 'dblAccumulatedAmount',
+                colSpecialPricingCurrency: {
+                    dataIndex: 'strCurrency',
+                    editor: {
+                        store: '{currency}',
+                        defaultFilters: [{
+                            column: 'ysnSubCurrency',
+                            value: false
+                        }]
+                    }
+                }
             },
 
             //---------//
@@ -1319,7 +1352,7 @@ Ext.define('Inventory.view.ItemViewController', {
             grdManufacturingCellAssociation = win.down('#grdManufacturingCellAssociation'),
             grdOwner = win.down('#grdOwner'),
             grdMotorFuelTax = win.down('#grdMotorFuelTax'),
-
+            grdItemSubLocations = win.down('#grdItemSubLocations'),
             grdPricing = win.down('#grdPricing'),
             grdPricingLevel = win.down('#grdPricingLevel'),
             grdSpecialPricing = win.down('#grdSpecialPricing'),
@@ -1344,7 +1377,6 @@ Ext.define('Inventory.view.ItemViewController', {
             enableCustomTab: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             onSaveClick: me.saveAndPokeGrid(win, grdUOM),
-            
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
@@ -1363,7 +1395,16 @@ Ext.define('Inventory.view.ItemViewController', {
                         grid: grdLocationStore,
                         deleteButton : grdLocationStore.down('#btnDeleteLocation'),
                         position: 'none'
-                    })
+                    }),
+                    details: [
+                        {
+                            key: 'tblICItemSubLocations',
+                            component: Ext.create('iRely.mvvm.grid.Manager', {
+                                grid: grdItemSubLocations,
+                                deleteButton : grdItemSubLocations.down('#btnDeleteItemSubLocation')
+                            })
+                        }
+                    ]
                 },
                 {
                     key: 'tblICItemVendorXrefs',
@@ -1535,6 +1576,14 @@ Ext.define('Inventory.view.ItemViewController', {
         if (cepPricing){
             cepPricing.on({
                 edit: me.onEditPricing,
+                scope: me
+            });
+        }
+
+        var cepSpecialPricing = grdSpecialPricing.getPlugin('cepSpecialPricing');
+        if (cepSpecialPricing) {
+            cepSpecialPricing.on({
+                edit: me.onEditSpecialPricing,
                 scope: me
             });
         }
@@ -3028,6 +3077,13 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             }
         }
+        else if (combo.column.itemId === 'colPricingLevelCurrency'){
+            current.set('intCurrencyId', records[0].get('intCurrencyID'));
+
+            if (records[0].get('intCurrencyID') !== i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId')) {
+                current.set('dblUnitPrice', 0);
+            }
+        }
     },
 
     onSpecialPricingBeforeQuery: function (obj) {
@@ -3106,6 +3162,10 @@ Ext.define('Inventory.view.ItemViewController', {
             }
             else { current.set('dblDiscountedPrice', 0.00); }
         }
+
+        else if (combo.column.itemId === 'colSpecialPricingCurrency'){
+            current.set('intCurrencyId', records[0].get('intCurrencyID'));
+        }
     },
 
     /* TODO: Create unit test for getPricingLevelUnitPrice */
@@ -3114,7 +3174,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var msrpPrice = price.msrpPrice;
         var standardCost = price.standardCost;
         var amt = price.amount;
-        var qty = price.qty;
+        var qty = 1 //This will now default to 1 based on IC-2642.
         var retailPrice = 0;
         switch (price.pricingMethod) {
             case 'Discount Retail Price':
@@ -3189,7 +3249,8 @@ Ext.define('Inventory.view.ItemViewController', {
     updatePricingLevel: function (item, pricing, data) {
         var me = this;
         _.each(item.tblICItemPricingLevels().data.items, function (p) {
-            if (p.data.intItemLocationId === pricing.data.intItemLocationId) {
+            if (p.data.intItemLocationId === pricing.data.intItemLocationId 
+                && p.data.intCurrencyId === i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId')) {
                 var retailPrice = me.getPricingLevelUnitPrice({
                     pricingMethod: p.data.strPricingMethod,
                     salePrice: data.unitPrice,
@@ -3227,7 +3288,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     onEditPricingLevel: function (editor, context, eOpts) {
         var me = this;
-        if (context.field === 'strPricingMethod' || context.field === 'dblAmountRate') {
+        if (context.field === 'strPricingMethod' || context.field === 'dblAmountRate' || context.field === 'strCurrency') {
             if (context.record) {
                 var win = context.grid.up('window');
                 var grdPricing = win.down('#grdPricing');
@@ -3263,14 +3324,33 @@ Ext.define('Inventory.view.ItemViewController', {
                                 amount: amount,
                                 qty: qty
                             });
-
-                            context.record.set('dblUnitPrice', retailPrice);
+                            if (context.record.get('intCurrencyId') === i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId')) {
+                                context.record.set('dblUnitPrice', retailPrice);
+                            }
+                            else {
+                                if (context.field === 'strCurrency') {
+                                    context.record.set('dblUnitPrice', 0);
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+
+        if (iRely.Functions.isEmpty(context.record.get('strCurrency'))) {
+            context.record.set('intCurrencyId', i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'));
+            context.record.set('strCurrency', i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency'));
+        }
     },
+
+     onEditSpecialPricing: function (editor, context, eOpts) { 
+         
+        if (iRely.Functions.isEmpty(context.record.get('strCurrency'))) {
+            context.record.set('intCurrencyId', i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'));
+            context.record.set('strCurrency', i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency'));
+        }
+     },
 
     onEditPricing: function (editor, context, eOpts) {
         var me = this;
@@ -3947,6 +4027,26 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    // onLocationSelectionChange: function(selModel, selected, oOpts) {
+    //     if (selModel) {
+    //         if (selModel.view === null || selModel.view == 'undefined') {
+    //             if (selModel.views == 'undefined' || selModel.views === null || selModel.views.length == 0)
+    //                 return;
+    //         }
+    //         var win = selModel.view.grid.up('window');
+    //         var vm = win.viewModel;
+    //         var grid = win.down('#grdItemSubLocations');
+
+    //         if (selected.length > 0) {
+    //             var current = selected[0];
+                
+    //             if(!current.phantom && !current.dirty) {
+                    
+    //             }
+    //         }
+    //     }
+    // },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -4009,6 +4109,9 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboPricingLevelCommissionOn": {
                 select: this.onPricingLevelSelect
             },
+             "#cboPricingLevelCurrency": {
+                select: this.onPricingLevelSelect
+            },
             "#cboSpecialPricingLocation": {
                 select: this.onSpecialPricingSelect
             },
@@ -4021,6 +4124,9 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboSpecialPricingDiscountBy": {
                 select: this.onSpecialPricingSelect,
                 beforequery: this.onSpecialPricingBeforeQuery
+            },
+            "#cboSpecialPricingCurrency": {
+                select: this.onSpecialPricingSelect
             },
             "#cboBundleUOM": {
                 select: this.onBundleSelect
@@ -4055,7 +4161,8 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#grdLocationStore": {
                 itemdblclick: this.onLocationDoubleClick,
-                cellclick: this.onLocationCellClick
+                cellclick: this.onLocationCellClick,
+                //selectionchange: this.onLocationSelectionChange
             },
             "#cboTracking": {
                 specialKey: this.onSpecialKeyTab

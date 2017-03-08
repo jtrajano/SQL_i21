@@ -31,6 +31,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'EntityManagement.store.VendorBuffered',
         'EntityManagement.store.CustomerBuffered',
         'i21.store.CompanyLocationBuffered',
+        'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.CountryBuffered',
         'i21.store.TaxGroupMasterBuffered',
         'i21.store.CompanyLocationPricingLevelBuffered',
@@ -42,10 +43,14 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Patronage.store.BufferedPatronageCategory',
         'TaxForm.store.BufferedTaxAuthority',
         'TaxForm.store.BufferedProductCode',
-        'Inventory.store.BufferedM2MComputation'
+        'Inventory.store.BufferedM2MComputation',
+        'i21.store.CurrencyBuffered'
     ],
 
     stores: {
+        subLocations: {
+            type: 'smcompanylocationsublocationbuffered'
+        },
         m2mComputations: {
             type: 'icbufferedm2mcomputation',
             
@@ -905,29 +910,27 @@ Ext.define('Inventory.view.ItemViewModel', {
                 direction: 'ASC',
                 property: 'intSort'
             }
+        },
+        currency: {
+            type: 'currencybuffered'
         }
     },
     
 
     formulas: {
-        accountCategoryFilter1: function(get) {
+        accountCategoryFilter: function(get) {
             var category = get('grdGlAccounts.selection.strAccountCategory');
-            return category;
-        },         
-        accountCategoryFilter2: function(get) {
-            var category = get('grdGlAccounts.selection.strAccountCategory');
-            
-            /** If selected category is Other Charge Income or Other Charge Expenses,
-             * display accounts under General category **/
-            switch (category) {
-                case 'Other Charge Expense':
-                case 'Other Charge Income':
-                    return 'General';
-                    break;            
-                default:
+            switch(category) {
+                case 'AP Clearing':
+                case 'Inventory':
+                case 'Work In Progress':
+                case 'Inventory In-Transit':
                     return category;
+                default:
+                    return 'General|^|' + category;
             }
-        },       
+        },
+
         checkLotTracking: function (get) {
             if (get('current.strLotTracking') === 'No') {
                 this.data.current.set('strInventoryTracking', 'Item Level');

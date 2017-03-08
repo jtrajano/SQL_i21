@@ -7,8 +7,8 @@ Ext.define('Inventory.model.ItemStockDetailPricing', {
     requires: [
         'Ext.data.Field'
     ],
-
-    idProperty: 'intItemPricingId',
+    //idProperty: 'intItemPricingId',
+    idProperty: 'intItemUnitMeasureId',
 
     fields: [
         { name: 'intItemPricingId', type: 'int'},
@@ -53,7 +53,7 @@ Ext.define('Inventory.model.ItemStockDetailPricing', {
         { name: 'dblStandardCost', type: 'float' },
         { name: 'dblAverageCost', type: 'float' },
         { name: 'dblEndMonthCost', type: 'float' },
-        { name: 'intDecimalPlaces', type: 'int' },
+        { name: 'intDecimalPlaces', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true }
     ]
 });

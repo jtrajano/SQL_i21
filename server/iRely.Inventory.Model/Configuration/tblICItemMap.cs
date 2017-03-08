@@ -405,8 +405,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strStockUOMType).HasColumnName("strStockUOMType");
             this.Property(t => t.dblStockUnitQty).HasColumnName("dblStockUnitQty").HasPrecision(38, 20);
             this.Property(t => t.intReceiveUOMId).HasColumnName("intReceiveUOMId");
+            this.Property(t => t.intReceiveUnitMeasureId).HasColumnName("intReceiveUnitMeasureId");
             this.Property(t => t.dblReceiveUOMConvFactor).HasColumnName("dblReceiveUOMConvFactor").HasPrecision(38, 20);
             this.Property(t => t.intIssueUOMId).HasColumnName("intIssueUOMId");
+            this.Property(t => t.intIssueUnitMeasureId).HasColumnName("intIssueUnitMeasureId");
             this.Property(t => t.dblIssueUOMConvFactor).HasColumnName("dblIssueUOMConvFactor").HasPrecision(38, 20);
             this.Property(t => t.strReceiveUOMType).HasColumnName("strReceiveUOMType");
             this.Property(t => t.strIssueUOMType).HasColumnName("strIssueUOMType");
@@ -888,6 +890,20 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strName).HasColumnName("strName");
             this.Property(t => t.strCustomerNumber).HasColumnName("strCustomerNumber");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+        }
+    }
+
+    public class vyuICItemSubLocationsMap: EntityTypeConfiguration<vyuICItemSubLocations>
+    {
+        public vyuICItemSubLocationsMap()
+        {
+            this.HasKey(p => p.intItemSubLocationId);
+            this.ToTable("vyuICItemSubLocations");
+            this.Property(t => t.intItemSubLocationId).HasColumnName("intItemSubLocationId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
         }
     }
 

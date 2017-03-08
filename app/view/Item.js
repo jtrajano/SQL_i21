@@ -516,15 +516,12 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Unit Qty',
-                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             quantityField: true,
                                                             validateOnChange: false,
                                                             fieldStyle: 'text-align:right',
-                                                            hideTrigger: true,
-                                                            decimalPrecision: 20,
-                                                            minValue: 0.000001
+                                                            hideTrigger: true
                                                         }
                                                     },
                                                     {
@@ -923,24 +920,6 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strAccountCategory',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Account Category',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'intAccountGroupId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Account Group Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strAccountGroup',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Account Group',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
                                                                                     dataIndex: 'strAccountType',
                                                                                     dataType: 'string',
                                                                                     text: 'Account Type',
@@ -991,9 +970,12 @@ Ext.define('Inventory.view.Item', {
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
-                                                                flex: 1,
+                                                                flex: 3,
+                                                                reference: 'grdLocationStore',
                                                                 itemId: 'grdLocationStore',
                                                                 margin: -1,
+                                                                width: 593,
+                                                                title: 'Company Locations',
                                                                 columnLines: true,
                                                                 dockedItems: [
                                                                     {
@@ -1103,6 +1085,115 @@ Ext.define('Inventory.view.Item', {
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel'
                                                                 })
+                                                            },
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                flex: 2,
+                                                                itemId: 'grdItemSubLocations',
+                                                                margin: '0 0 0 10',
+                                                                title: 'Sub Locations',
+                                                                forceFit: true,
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions1',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnAddItemSubLocation',
+                                                                                iconCls: 'small-insert',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteItemSubLocation',
+                                                                                iconCls: 'small-remove',
+                                                                                text: 'Remove'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colsubSubLocationName',
+                                                                        width: 244,
+                                                                        text: 'Sub Location',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationSubLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Sub Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strSubLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Sub Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strSubLocationDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboItemSubLocations',
+                                                                            displayField: 'strSubLocationName',
+                                                                            valueField: 'strSubLocationName'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        hidden: true,
+                                                                        itemId: 'colsubItemSubLocationId',
+                                                                        dataIndex: 'intItemSubLocationId',
+                                                                        text: 'Id'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        hidden: true,
+                                                                        itemId: 'colsubSubLocationId',
+                                                                        dataIndex: 'intSubLocationId',
+                                                                        text: 'Sub Location Id'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        hidden: true,
+                                                                        itemId: 'colsubItemLocationId',
+                                                                        dataIndex: 'intItemLocationId',
+                                                                        text: 'Item Location Id'
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvItemSubLocations'
+                                                                },
+                                                                selModel: {
+                                                                    selType: 'checkboxmodel'
+                                                                },
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepItemSubLocations',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     },
@@ -4233,9 +4324,9 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Last Cost',
                                                         flex: 0.8,
-                                                        format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
@@ -4246,9 +4337,9 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Standard Cost',
                                                         flex: 0.8,
-                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            quantityField: true,
                                                             itemId: 'txtStandardCost'
                                                         }
                                                     },
@@ -4260,9 +4351,9 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Average Cost',
                                                         flex: 0.8,
-                                                        format: '0,000.000000',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
@@ -4300,10 +4391,9 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Amount/Percent',
                                                         flex: 0.8,
-                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            decimalPrecision: 6
+                                                            currencyField: true
                                                         }
                                                     },
                                                     {
@@ -4314,10 +4404,9 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Retail Price',
                                                         flex: 0.8,
-                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            decimalPrecision: 6
+                                                            quantityField: true
                                                         }
                                                     },
                                                     {
@@ -4571,18 +4660,65 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelCurrency',
+                                                                        minWidth: 80,
+                                                                        dataIndex: 'strCurrency',
+                                                                        text: 'Currency',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCurrencyID',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCurrency',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Currency',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'ysnSubCurrency',
+                                                                                    dataType: 'boolean',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intMainCurrencyId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intSubCurrencyCent',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'SubCurrency Cent',
+                                                                                    hidden: true
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboPricingLevelCurrency',
+                                                                            displayField: 'strCurrency',
+                                                                            valueField: 'strCurrency'
+                                                                        }
+                                                                    },
+                                                                    {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelAmount',
                                                                         minWidth: 110,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Amount/Percent',
-                                                                        format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true,
-                                                                            decimalPrecision: 6
+                                                                            hideTrigger: true
                                                                         }
                                                                     },
                                                                     {
@@ -4590,13 +4726,12 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'colPricingLevelUnitPrice',
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Unit Price',
-                                                                        format: '0,000.000000',
+                                                                        text: 'Retail Price',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true,
-                                                                            decimalPrecision: 6
+                                                                            hideTrigger: true
                                                                         }
                                                                     },
                                                                     {
@@ -4819,13 +4954,60 @@ Ext.define('Inventory.view.Item', {
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Discount Amount/Percent',
-                                                                        format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            currencyField: true,
                                                                             itemId: 'txtSpecialPricingDiscount',
                                                                             fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true,
-                                                                            decimalPrecision: 6
+                                                                            hideTrigger: true
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colSpecialPricingCurrency',
+                                                                        minWidth: 80,
+                                                                        dataIndex: 'strCurrency',
+                                                                        text: 'Currency',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCurrencyID',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCurrency',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Currency',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'ysnSubCurrency',
+                                                                                    dataType: 'boolean',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intMainCurrencyId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intSubCurrencyCent',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'SubCurrency Cent',
+                                                                                    hidden: true
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboSpecialPricingCurrency',
+                                                                            displayField: 'strCurrency',
+                                                                            valueField: 'strCurrency'
                                                                         }
                                                                     },
                                                                     {
@@ -4834,10 +5016,10 @@ Ext.define('Inventory.view.Item', {
                                                                         width: 69,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Unit Price',
-                                                                        format: '0,000.000000',
+                                                                        text: 'Retail Price',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            quantityField: true,
                                                                             itemId: 'txtSpecialPricingUnitPrice',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true,

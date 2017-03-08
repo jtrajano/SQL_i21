@@ -169,6 +169,7 @@ namespace iRely.Inventory.Model
         public bool? ysnPosted { get; set; }
         public int? intWarehouseInstructionHeaderId { get; set; }
         public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
 
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
     }
@@ -194,7 +195,6 @@ namespace iRely.Inventory.Model
         public int? intCurrencyId { get; set; }
         public int? intWeightUOMId { get; set; }
         public decimal? dblUnitPrice { get; set; }
-        public decimal? dblForeignUnitPrice { get; set; }
         public int? intDockDoorId { get; set; }
         public string strNotes { get; set; }
         public int? intGradeId { get; set; }
@@ -205,6 +205,40 @@ namespace iRely.Inventory.Model
         public int? intDestinationWeightId { get; set; }
         public int? intForexRateTypeId { get; set; }
         public decimal? dblForexRate { get; set; }
+
+        private int? _decimalPlaces;
+        [NotMapped]
+        public int? intDecimalPlaces
+        {
+            get
+            {
+                if (vyuICGetInventoryShipmentItem != null)
+                    return vyuICGetInventoryShipmentItem.intDecimalPlaces;
+                else
+                    return _decimalPlaces;
+            }
+            set
+            {
+                _decimalPlaces = value;
+            }
+        }
+
+        private int? _unitMeasureId;
+        [NotMapped]
+        public int? intUnitMeasureId
+        {
+            get
+            {
+                if (vyuICGetInventoryShipmentItem != null)
+                    return vyuICGetInventoryShipmentItem.intUnitMeasureId;
+                else
+                    return _unitMeasureId;
+            }
+            set
+            {
+                _unitMeasureId = value;
+            }
+        }
 
         private string _orderNumber;
         [NotMapped]
@@ -737,6 +771,8 @@ namespace iRely.Inventory.Model
         public string strStorageLocationName { get; set; }
         public string strOrderUOM { get; set; }
         public string strUnitMeasure { get; set; }
+        public int? intDecimalPlaces { get; set; }
+        public int? intUnitMeasureId { get; set; }
         public decimal? dblItemUOMConv { get; set; }
         public string strUnitType { get; set; }
         public int? intCurrencyId { get; set; }
@@ -1230,6 +1266,8 @@ namespace iRely.Inventory.Model
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
         public decimal? dblNetWeight { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
     }
 
     public class vyuICGetShipmentAddOrder
@@ -1330,6 +1368,10 @@ namespace iRely.Inventory.Model
         public int? intDestinationWeightId { get; set; }
         public string strDestinationWeights { get; set; }
         public string strDestinationGrades { get; set; }
+        public int? intCurrencyId { get; set; }
+        public int? intForexRateTypeId { get; set; }
+        public string strForexRateType { get; set; }
+        public decimal? dblForexRate { get; set; }
     }
 
     public class vyuICGetShipmentAddSalesContract
@@ -1381,6 +1423,9 @@ namespace iRely.Inventory.Model
         public string strDestinationWeights { get; set; }
         public string strDestinationGrades { get; set; }
         public int? intCurrencyId { get; set; }
+        public int? intForexRateTypeId { get; set; }
+        public string strForexRateType { get; set; }
+        public decimal? dblForexRate { get; set; }
     }
 
     public class vyuICGetShipmentAddSalesOrder
@@ -1434,6 +1479,9 @@ namespace iRely.Inventory.Model
         public int? intCurrencyId { get; set; }
         public int? intFreightTermId { get; set; }
         public int? intShipToLocationId { get; set; }
+        public int? intForexRateTypeId { get; set; }
+        public string strForexRateType { get; set; }
+        public decimal? dblForexRate { get; set; }
     }
 
     public class vyuICShipmentInvoice
@@ -1457,5 +1505,7 @@ namespace iRely.Inventory.Model
         public decimal? dblCOGSAmount { get; set; }
         public decimal? dblQtyToInvoice { get; set; }
         public decimal? dblInTransitAmount { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set;  }
     }
 }

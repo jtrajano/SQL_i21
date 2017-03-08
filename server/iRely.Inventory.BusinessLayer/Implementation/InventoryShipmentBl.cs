@@ -321,21 +321,7 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<SearchResult> GetAddOrders(GetParameter param, int CustomerId, string OrderType, string SourceType)
         {
-            if (OrderType == "Sales Order" && SourceType == "None")
-            {
-                var query = _db.GetQuery<vyuICGetShipmentAddSalesOrder>()
-                    .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
-                    .Filter(param, true);
-                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
-
-                return new SearchResult()
-                {
-                    data = data.AsQueryable(),
-                    total = await query.CountAsync(),
-                    summaryData = await query.ToAggregateAsync(param.aggregates)
-                };
-            }
-            else if (OrderType == "Sales Contract" && SourceType == "None")
+            if (OrderType == "Sales Contract" && SourceType == "None")
             {
                 var query = _db.GetQuery<vyuICGetShipmentAddSalesContract>()
                     .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
@@ -363,11 +349,11 @@ namespace iRely.Inventory.BusinessLayer
                     summaryData = await query.ToAggregateAsync(param.aggregates)
                 };
             }
-            else
+            else if (OrderType == "Sales Order" && SourceType == "None")
             {
-                var query = _db.GetQuery<vyuICGetShipmentAddOrder>()
-                       .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
-                       .Filter(param, true);
+                var query = _db.GetQuery<vyuICGetShipmentAddSalesOrder>()
+                    .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
+                    .Filter(param, true);
                 var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
 
                 return new SearchResult()
@@ -376,8 +362,31 @@ namespace iRely.Inventory.BusinessLayer
                     total = await query.CountAsync(),
                     summaryData = await query.ToAggregateAsync(param.aggregates)
                 };
-
             }
+            else {
+                // return an empty search result. 
+                return new SearchResult()
+                {
+                    data = null,
+                    total = 0,
+                    summaryData = null
+                };
+            }
+            //else
+            //{
+            //    var query = _db.GetQuery<vyuICGetShipmentAddOrder>()
+            //           .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
+            //           .Filter(param, true);
+            //    var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+            //    return new SearchResult()
+            //    {
+            //        data = data.AsQueryable(),
+            //        total = await query.CountAsync(),
+            //        summaryData = await query.ToAggregateAsync(param.aggregates)
+            //    };
+
+            //}
         }
 
         public async Task<SearchResult> ShipmentInvoice(GetParameter param)

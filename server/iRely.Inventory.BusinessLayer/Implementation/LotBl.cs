@@ -20,6 +20,19 @@ namespace iRely.Inventory.BusinessLayer
         {
             _db = db;
         }
+
+        public async Task<SearchResult> GetLots(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICItemLot>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "strItemNo", "ASC").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
         #endregion
 
         public async Task<SearchResult> GetHistory(GetParameter param)

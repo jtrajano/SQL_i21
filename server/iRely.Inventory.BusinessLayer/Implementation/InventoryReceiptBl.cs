@@ -492,6 +492,9 @@ namespace iRely.Inventory.BusinessLayer
             param.sort = sorts;
 
             var data = await query.ExecuteProjection(param, "intInventoryReceiptId").ToListAsync();
+            var countDistinctUOM = await query.Select(q => q.strUnitMeasure).Distinct().CountAsync();
+
+            param.aggregates = countDistinctUOM == 1? param.aggregates : param.aggregates.Replace("dblQtyToReceive|sum:", "");
 
             return new SearchResult()
             {

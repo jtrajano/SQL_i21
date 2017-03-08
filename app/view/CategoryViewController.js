@@ -131,14 +131,9 @@ Ext.define('Inventory.view.CategoryViewController', {
                         defaultFilters: [
                             {
                                 column: 'strAccountCategory',
-                                value: '{accountCategoryFilter1}',
-                                conjunction: 'or'
-                            },
-                            {
-                                column: 'strAccountCategory',
-                                value: '{accountCategoryFilter2}',
-                                conjunction: 'or'
-                            }  
+                                value: '{accountCategoryFilter}',
+                                conjunction: 'and'
+                            }
                         ]
                     }
                 },

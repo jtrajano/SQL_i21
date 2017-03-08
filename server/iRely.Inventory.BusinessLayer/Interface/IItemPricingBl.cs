@@ -17,11 +17,11 @@ namespace iRely.Inventory.BusinessLayer
 
     public interface IItemPricingLevelBl : IBusinessLayer<tblICItemPricingLevel>
     {
-
+        Task<SearchResult> GetItemPricingLevel(GetParameter param);
     }
 
     public interface IItemSpecialPricingBl : IBusinessLayer<tblICItemSpecialPricing>
     {
-        
+        Task<SearchResult> GetItemSpecialPricing(GetParameter param);
     }
 }

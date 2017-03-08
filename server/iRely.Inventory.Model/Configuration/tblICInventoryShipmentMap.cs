@@ -79,6 +79,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblQtyToInvoice).HasColumnName("dblQtyToInvoice");
             this.Property(t => t.dblInTransitAmount).HasColumnName("dblInTransitAmount");
             this.Property(t => t.dblShipmentAmount).HasColumnName("dblShipmentAmount");
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.strCurrency).HasColumnName("strCurrency");
         }
     }
 
@@ -129,6 +131,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strComment).HasColumnName("strComment");
             this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.strCurrency).HasColumnName("strCurrency");
         }
     }
 
@@ -165,7 +168,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
             this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
             this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
-            this.Property(t => t.dblForeignUnitPrice).HasColumnName("dblForeignUnitPrice").HasPrecision(38, 20);
 
             this.HasMany(p => p.tblICInventoryShipmentItemLots)
                 .WithRequired(p => p.tblICInventoryShipmentItem)
@@ -302,6 +304,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
             this.Property(t => t.strOrderUOM).HasColumnName("strOrderUOM");
             this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.intDecimalPlaces).HasColumnName("intDecimalPlaces");
+            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.dblItemUOMConv).HasColumnName("dblItemUOMConv").HasPrecision(38, 20);
             this.Property(t => t.strUnitType).HasColumnName("strUnitType");
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
@@ -385,6 +389,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblGrossWeight).HasColumnName("dblGrossWeight").HasPrecision(38, 20);
             this.Property(t => t.dblTareWeight).HasColumnName("dblTareWeight").HasPrecision(38, 20);
             this.Property(t => t.dblNetWeight).HasColumnName("dblNetWeight").HasPrecision(38, 20);
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.strCurrency).HasColumnName("strCurrency");
         }
     }
 
@@ -504,7 +510,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
             this.Property(t => t.intFreightTermId).HasColumnName("intFreightTermId");
             this.Property(t => t.intShipToLocationId).HasColumnName("intShipToLocationId");
-            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
+            this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
         }
     }
 
@@ -567,6 +575,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
             this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
             this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
+            this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
         }
     }
 
@@ -625,6 +637,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
             this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
             this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
+            this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
         }
     }
 }

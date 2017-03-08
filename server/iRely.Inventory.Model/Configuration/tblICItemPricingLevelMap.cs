@@ -25,6 +25,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblUnitPrice).HasColumnName("dblUnitPrice").HasPrecision(18, 6);
             this.Property(t => t.strCommissionOn).HasColumnName("strCommissionOn");
             this.Property(t => t.dblCommissionRate).HasColumnName("dblCommissionRate").HasPrecision(18, 6);
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.tblICItemLocation)
@@ -33,6 +34,9 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICItemUOM)
                 .WithMany(p => p.tblICItemPricingLevels)
                 .HasForeignKey(p => p.intItemUnitMeasureId);
+            this.HasOptional(p => p.tblSMCurrency)
+              .WithMany(p => p.tblICItemPricingLevels)
+              .HasForeignKey(p => p.intCurrencyId);
         }
     }
 }

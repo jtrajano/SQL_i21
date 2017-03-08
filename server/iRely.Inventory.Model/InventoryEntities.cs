@@ -16,7 +16,7 @@ namespace iRely.Inventory.Model
         }
 
         public InventoryEntities()
-            : base(Common.Security.GetCompanyName())
+            : base(Security.GetCompanyName())
         {
             Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;
@@ -57,6 +57,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICItemKitMap());
             modelBuilder.Configurations.Add(new tblICItemKitDetailMap());
             modelBuilder.Configurations.Add(new tblICItemLocationMap());
+            modelBuilder.Configurations.Add(new tblICItemSubLocationMap());
+            modelBuilder.Configurations.Add(new vyuICItemSubLocationsMap());
             modelBuilder.Configurations.Add(new tblICItemCommodityCostMap());
             modelBuilder.Configurations.Add(new tblICItemNoteMap());
             modelBuilder.Configurations.Add(new tblICItemOwnerMap());
@@ -96,6 +98,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICUnitMeasureMap());
             modelBuilder.Configurations.Add(new tblICUnitMeasureConversionMap());
             modelBuilder.Configurations.Add(new tblICLotMap());
+            modelBuilder.Configurations.Add(new vyuICItemLotMap());
             modelBuilder.Configurations.Add(new tblICParentLotMap());
 
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityClassVariant>(p => p.Requires("strType").HasValue("Class"));
@@ -205,6 +208,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptChargeMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptVoucherMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemViewMap());
+            modelBuilder.Configurations.Add(new vyuICGetItemUOMMap());
 
             modelBuilder.Configurations.Add(new vyuICInventoryReceiptLookUpMap());
             modelBuilder.Configurations.Add(new vyuICInventoryReceiptItemLookUpMap());            

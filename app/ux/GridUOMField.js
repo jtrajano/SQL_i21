@@ -226,7 +226,7 @@ Ext.define('Inventory.ux.GridUOMField', {
                     };
                     me.syncModifiedRow(param.id, param.data);
                 }
-                me.fireEvent('onUOMSelect', records);
+                me.fireEvent('onUOMSelect', plugin, records, combo);
             }
         });
     },
@@ -397,6 +397,9 @@ Ext.define('Inventory.ux.GridUOMField', {
 
         if(!me.isNullOrEmpty(display))
             currentRecord.set(me.getDisplayField(), display);
+        
+        var decimal = lookupRecord.get(me.getLookupDecimalPrecisionField());
+        currentRecord.set(me.getDecimalPrecisionField(), decimal);
     },
 
     updateExtraFields: function(currentRecord, lookupRecord) {
@@ -519,6 +522,11 @@ Ext.define('Inventory.ux.GridUOMField', {
     getLookupDecimalPrecisionField: function() {
         var me = this;
         return me.decimalsField ? me.decimalsField : 'intDecimalPlaces';
+    },
+
+    getDecimalPrecisionField: function() {
+        var me = this;
+        return me.column && me.column.decimalPrecisionField ? me.column.decimalPrecisionField : 'intDecimalPlaces';
     },
 
     items: [

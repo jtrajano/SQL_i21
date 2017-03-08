@@ -138,6 +138,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
     editable: false,
 
     formulas: {
+        intCurrencyId: function(get) {
+            return get('current.intCurrencyId');
+        },
+        
         formulaShowLotNumberEditor: function(get){
             var me = this;
             var posted = get('current.ysnPosted');

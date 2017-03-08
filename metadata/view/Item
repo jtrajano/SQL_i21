@@ -924,7 +924,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter19",
                                                     "designerId": "52f90830-2c84-4dba-9ab6-9ab530dad629",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1022,7 +1022,7 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0,000.000000",
+                                                "format": null,
                                                 "itemId": "colDetailUnitQty",
                                                 "modelValidation": true,
                                                 "text": "Unit Qty",
@@ -1039,12 +1039,12 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "decimalPrecision": 20,
+                                                        "decimalPrecision": null,
                                                         "decimalSeparator": null,
                                                         "designer|createAlias": "numberfield",
                                                         "fieldStyle": "text-align:right",
                                                         "hideTrigger": true,
-                                                        "minValue": 0.000001,
+                                                        "minValue": null,
                                                         "quantityField": true,
                                                         "validateOnChange": false
                                                     },
@@ -1889,7 +1889,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter12",
+                                                                    "name": "filter110",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -1997,24 +1997,6 @@
                                                                             "dataIndex: 'strDescription',",
                                                                             "dataType: 'string',",
                                                                             "text: 'Description',",
-                                                                            "flex: 1",
-                                                                            "},",
-                                                                            "{",
-                                                                            "dataIndex: 'strAccountCategory',",
-                                                                            "dataType: 'string',",
-                                                                            "text: 'Account Category',",
-                                                                            "flex: 1",
-                                                                            "},",
-                                                                            "{",
-                                                                            "dataIndex: 'intAccountGroupId',",
-                                                                            "dataType: 'numeric',",
-                                                                            "text: 'Account Group Id',",
-                                                                            "hidden: true",
-                                                                            "},",
-                                                                            "{",
-                                                                            "dataIndex: 'strAccountGroup',",
-                                                                            "dataType: 'string',",
-                                                                            "text: 'Account Group',",
                                                                             "flex: 1",
                                                                             "},",
                                                                             "{",
@@ -2159,9 +2141,11 @@
                                                         "columnLines": true,
                                                         "designer|createAlias": "advancefiltergrid",
                                                         "itemId": "grdLocationStore",
-                                                        "layout|flex": 1,
+                                                        "layout|flex": 3,
                                                         "margin": -1,
-                                                        "title": null
+                                                        "reference": "grdLocationStore",
+                                                        "title": "Company Locations",
+                                                        "width": 593
                                                     },
                                                     "name": "MyGridPanel2",
                                                     "designerId": "10c8e6a0-0373-40d2-94e1-27058a5f58b7",
@@ -2397,6 +2381,239 @@
                                                             "codeClass": "Ext.selection.CheckboxModel",
                                                             "name": "MyCheckboxSelectionModel",
                                                             "designerId": "017982c6-a9e7-452f-aad9-071a9ae3c69d"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.grid.Panel",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "forceFit": true,
+                                                        "itemId": "grdItemSubLocations",
+                                                        "layout|flex": 2,
+                                                        "margin": "0 0 0 10",
+                                                        "padding": null,
+                                                        "title": "Sub Locations"
+                                                    },
+                                                    "name": "MyGridPanel18",
+                                                    "configAlternates": {
+                                                        "viewConfig": "object"
+                                                    },
+                                                    "designerId": "b2a87234-9a0c-445c-a751-80f5de420ddf",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.toolbar.Toolbar",
+                                                            "reference": {
+                                                                "name": "dockedItems",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "container|padding": "0 0 0 1",
+                                                                "dock": "top",
+                                                                "itemId": "tlbGridOptions1"
+                                                            },
+                                                            "name": "MyToolbar1",
+                                                            "designerId": "02370f1a-5067-49ca-a383-c77e18d77d53",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-insert",
+                                                                        "itemId": "btnAddItemSubLocation",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Insert"
+                                                                    },
+                                                                    "name": "MyButton10",
+                                                                    "designerId": "cb9d7d06-8ab3-4047-80f7-ca3421a2fc13"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-remove",
+                                                                        "itemId": "btnDeleteItemSubLocation",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Remove"
+                                                                    },
+                                                                    "name": "MyButton12",
+                                                                    "designerId": "72841ac0-c09c-42f7-96f9-ea87fb71c54e"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "colsubSubLocationName",
+                                                                "text": "Sub Location",
+                                                                "width": 244
+                                                            },
+                                                            "name": "MyColumn81",
+                                                            "designerId": "44269d90-4438-48f3-97f3-ccc75d33ddbd",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "    {",
+                                                                            "        dataIndex: 'intCompanyLocationSubLocationId',",
+                                                                            "        dataType: 'numeric',",
+                                                                            "        text: 'Sub Location Id',",
+                                                                            "        hidden: true",
+                                                                            "    },",
+                                                                            "    {",
+                                                                            "        dataIndex: 'intCompanyLocationId',",
+                                                                            "        dataType: 'numeric',",
+                                                                            "        text: 'Location Id',",
+                                                                            "        hidden: true",
+                                                                            "    },",
+                                                                            "    {",
+                                                                            "        dataIndex: 'strSubLocationName',",
+                                                                            "        dataType: 'string',",
+                                                                            "        text: 'Sub Location Name',",
+                                                                            "        flex: 1",
+                                                                            "    },",
+                                                                            "    {",
+                                                                            "        dataIndex: 'strSubLocationDescription',",
+                                                                            "        dataType: 'string',",
+                                                                            "        text: 'Description',",
+                                                                            "        flex: 1",
+                                                                            "    }",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strSubLocationName",
+                                                                        "itemId": "cboItemSubLocations",
+                                                                        "valueField": "strSubLocationName"
+                                                                    },
+                                                                    "name": "MyComboBox85",
+                                                                    "configAlternates": {
+                                                                        "columns": "object"
+                                                                    },
+                                                                    "designerId": "403d15e6-4e92-4fa2-be27-5479110418be",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "intItemSubLocationId",
+                                                                "hidden": true,
+                                                                "itemId": "colsubItemSubLocationId",
+                                                                "text": "Id"
+                                                            },
+                                                            "name": "MyColumn74",
+                                                            "designerId": "4dd138f6-cdec-4cb6-a3c8-f4f15dd7814c"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "intSubLocationId",
+                                                                "hidden": true,
+                                                                "itemId": "colsubSubLocationId",
+                                                                "text": "Sub Location Id"
+                                                            },
+                                                            "name": "MyColumn82",
+                                                            "designerId": "07c05b42-b3ef-49c7-9df9-f44886fc6ec7"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "intItemLocationId",
+                                                                "hidden": true,
+                                                                "itemId": "colsubItemLocationId",
+                                                                "text": "Item Location Id"
+                                                            },
+                                                            "name": "MyColumn83",
+                                                            "designerId": "fe3e3d60-c6e1-447e-a59f-42d6a568718f"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.View",
+                                                            "reference": {
+                                                                "name": "viewConfig",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "grvItemSubLocations"
+                                                            },
+                                                            "name": "MyGridView1",
+                                                            "designerId": "233a10b4-cbd4-4de2-b33a-decba52cdf9a"
+                                                        },
+                                                        {
+                                                            "type": "Ext.selection.CheckboxModel",
+                                                            "reference": {
+                                                                "name": "selModel",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "name": "MyCheckboxSelectionModel14",
+                                                            "designerId": "c9266364-a6af-4215-8e09-938f5f41c5d5"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.plugin.CellEditing",
+                                                            "reference": {
+                                                                "name": "plugins",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "clicksToEdit": 1,
+                                                                "pluginId": "cepItemSubLocations"
+                                                            },
+                                                            "name": "MyCellEditingPlugin4",
+                                                            "designerId": "3180b5ea-b992-4e84-b38f-1dcce853d7df"
                                                         }
                                                     ]
                                                 }
@@ -3985,7 +4202,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter13",
+                                                                            "name": "filter111",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4188,7 +4405,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter14",
+                                                                            "name": "filter112",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -6166,7 +6383,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter15",
+                                                                    "name": "filter113",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6463,7 +6680,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter114",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -7026,7 +7243,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter17",
+                                                                            "name": "filter115",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -7233,7 +7450,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter18",
+                                                                            "name": "filter116",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -7468,7 +7685,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter19",
+                                                                    "name": "filter117",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -7818,7 +8035,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter110",
+                                                                    "name": "filter118",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -8704,7 +8921,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter111",
+                                                                    "name": "filter119",
                                                                     "designerId": "49c3fb54-0e26-4ccf-ade0-359ab372f04f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -9441,7 +9658,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter112",
+                                                    "name": "filter120",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -9531,7 +9748,7 @@
                                                 "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": 0.8,
-                                                "format": "0,000.000000",
+                                                "format": null,
                                                 "itemId": "colPricingLastCost",
                                                 "text": "Last Cost",
                                                 "width": 80
@@ -9547,13 +9764,22 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "designer|createAlias": "numberfield"
+                                                        "designer|createAlias": "numberfield",
+                                                        "quantityField": true
                                                     },
                                                     "name": "MyNumberField3",
                                                     "configAlternates": {
-                                                        "currencyField": "boolean"
+                                                        "currencyField": "boolean",
+                                                        "quantityField": "boolean"
                                                     },
-                                                    "designerId": "13ca2953-fff4-4d2a-a24d-bcfa11599b16"
+                                                    "designerId": "13ca2953-fff4-4d2a-a24d-bcfa11599b16",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -9568,7 +9794,7 @@
                                                 "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": 0.8,
-                                                "format": "0,000.000000",
+                                                "format": null,
                                                 "itemId": "colPricingStandardCost",
                                                 "text": "Standard Cost",
                                                 "width": 120
@@ -9585,13 +9811,22 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "numberfield",
-                                                        "itemId": "txtStandardCost"
+                                                        "itemId": "txtStandardCost",
+                                                        "quantityField": true
                                                     },
                                                     "name": "MyNumberField23",
                                                     "configAlternates": {
-                                                        "currencyField": "boolean"
+                                                        "currencyField": "boolean",
+                                                        "quantityField": "boolean"
                                                     },
-                                                    "designerId": "cf5cdd6b-e7de-40a8-93c7-945407da6775"
+                                                    "designerId": "cf5cdd6b-e7de-40a8-93c7-945407da6775",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -9606,7 +9841,7 @@
                                                 "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": 0.8,
-                                                "format": "0,000.000000",
+                                                "format": null,
                                                 "itemId": "colPricingAverageCost",
                                                 "text": "Average Cost",
                                                 "width": 90
@@ -9622,13 +9857,22 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "designer|createAlias": "numberfield"
+                                                        "designer|createAlias": "numberfield",
+                                                        "quantityField": true
                                                     },
                                                     "name": "MyNumberField54",
                                                     "configAlternates": {
-                                                        "currencyField": "binding"
+                                                        "currencyField": "binding",
+                                                        "quantityField": "boolean"
                                                     },
-                                                    "designerId": "bc12049e-53ab-4b20-bd26-c5002d3ff8a4"
+                                                    "designerId": "bc12049e-53ab-4b20-bd26-c5002d3ff8a4",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -9722,7 +9966,7 @@
                                                 "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": 0.8,
-                                                "format": "0,000.000000",
+                                                "format": null,
                                                 "itemId": "colPricingAmount",
                                                 "text": "Amount/Percent",
                                                 "width": 110
@@ -9738,14 +9982,22 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "decimalPrecision": 6,
+                                                        "currencyField": true,
+                                                        "decimalPrecision": null,
                                                         "designer|createAlias": "numberfield"
                                                     },
                                                     "name": "MyNumberField58",
                                                     "configAlternates": {
                                                         "currencyField": "boolean"
                                                     },
-                                                    "designerId": "ee9276b7-802b-453a-8183-644ea412b211"
+                                                    "designerId": "ee9276b7-802b-453a-8183-644ea412b211",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "currencyField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -9760,7 +10012,7 @@
                                                 "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": 0.8,
-                                                "format": "0,000.000000",
+                                                "format": null,
                                                 "itemId": "colPricingRetailPrice",
                                                 "text": "Retail Price",
                                                 "width": 80
@@ -9776,14 +10028,23 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "decimalPrecision": 6,
-                                                        "designer|createAlias": "numberfield"
+                                                        "decimalPrecision": null,
+                                                        "designer|createAlias": "numberfield",
+                                                        "quantityField": true
                                                     },
                                                     "name": "MyNumberField56",
                                                     "configAlternates": {
-                                                        "currencyField": "boolean"
+                                                        "currencyField": "boolean",
+                                                        "quantityField": "boolean"
                                                     },
-                                                    "designerId": "39375935-72f1-4294-985a-1c5ce9d90197"
+                                                    "designerId": "39375935-72f1-4294-985a-1c5ce9d90197",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -9996,7 +10257,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter113",
+                                                                    "name": "filter121",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -10376,6 +10637,87 @@
                                                             ]
                                                         },
                                                         {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strCurrency",
+                                                                "itemId": "colPricingLevelCurrency",
+                                                                "minWidth": 80,
+                                                                "text": "Currency"
+                                                            },
+                                                            "name": "MyColumn74",
+                                                            "designerId": "911119f7-df91-43de-bbd0-3064e5e8ffb9",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intCurrencyID',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strCurrency',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Currency',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strDescription',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Description',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'ysnSubCurrency',",
+                                                                            "\t\tdataType: 'boolean',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intMainCurrencyId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "        dataIndex: 'intSubCurrencyCent',",
+                                                                            "        dataType: 'numeric',",
+                                                                            "        text: 'SubCurrency Cent',",
+                                                                            "        hidden: true",
+                                                                            "    }",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strCurrency",
+                                                                        "itemId": "cboPricingLevelCurrency",
+                                                                        "valueField": "strCurrency"
+                                                                    },
+                                                                    "name": "MyComboBox85",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "55da8359-7921-4464-b3e2-1222b75a8249",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
                                                             "type": "Ext.grid.column.Number",
                                                             "reference": {
                                                                 "name": "columns",
@@ -10386,7 +10728,7 @@
                                                                 "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
-                                                                "format": "0,000.000000",
+                                                                "format": null,
                                                                 "itemId": "colPricingLevelAmount",
                                                                 "minWidth": 110,
                                                                 "text": "Amount/Percent"
@@ -10402,7 +10744,8 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "decimalPrecision": 6,
+                                                                        "currencyField": true,
+                                                                        "decimalPrecision": null,
                                                                         "designer|createAlias": "numberfield",
                                                                         "fieldStyle": "text-align:right",
                                                                         "hideTrigger": true
@@ -10411,7 +10754,14 @@
                                                                     "configAlternates": {
                                                                         "currencyField": "boolean"
                                                                     },
-                                                                    "designerId": "86640978-71bf-4780-bd8e-97c232730d57"
+                                                                    "designerId": "86640978-71bf-4780-bd8e-97c232730d57",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "currencyField",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
                                                         },
@@ -10426,9 +10776,9 @@
                                                                 "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
-                                                                "format": "0,000.000000",
+                                                                "format": null,
                                                                 "itemId": "colPricingLevelUnitPrice",
-                                                                "text": "Unit Price"
+                                                                "text": "Retail Price"
                                                             },
                                                             "name": "MyNumberColumn42",
                                                             "designerId": "1ad0e5a5-0246-44b9-a119-1da2f60a5bf5",
@@ -10441,16 +10791,25 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "decimalPrecision": 6,
+                                                                        "decimalPrecision": null,
                                                                         "designer|createAlias": "numberfield",
                                                                         "fieldStyle": "text-align:right",
-                                                                        "hideTrigger": true
+                                                                        "hideTrigger": true,
+                                                                        "quantityField": true
                                                                     },
                                                                     "name": "MyNumberField28",
                                                                     "configAlternates": {
-                                                                        "currencyField": "boolean"
+                                                                        "currencyField": "boolean",
+                                                                        "quantityField": "boolean"
                                                                     },
-                                                                    "designerId": "ec746f07-493d-4dfb-bb5c-b24a80cca674"
+                                                                    "designerId": "ec746f07-493d-4dfb-bb5c-b24a80cca674",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "quantityField",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
                                                         },
@@ -10662,7 +11021,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter114",
+                                                                    "name": "filter122",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -10964,7 +11323,7 @@
                                                                 "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
-                                                                "format": "0,000.000000",
+                                                                "format": null,
                                                                 "itemId": "colSpecialPricingDiscountRate",
                                                                 "text": "Discount Amount/Percent",
                                                                 "width": 150
@@ -10980,7 +11339,8 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "decimalPrecision": 6,
+                                                                        "currencyField": true,
+                                                                        "decimalPrecision": null,
                                                                         "designer|createAlias": "numberfield",
                                                                         "fieldStyle": "text-align:right",
                                                                         "hideTrigger": true,
@@ -10990,7 +11350,95 @@
                                                                     "configAlternates": {
                                                                         "currencyField": "boolean"
                                                                     },
-                                                                    "designerId": "f65915ba-2414-46bc-9ad5-69b7eba996b2"
+                                                                    "designerId": "f65915ba-2414-46bc-9ad5-69b7eba996b2",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "currencyField",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strCurrency",
+                                                                "itemId": "colSpecialPricingCurrency",
+                                                                "minWidth": 80,
+                                                                "text": "Currency"
+                                                            },
+                                                            "name": "MyColumn6",
+                                                            "designerId": "5d015268-3e90-41e9-8fd7-132b3d512978",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intCurrencyID',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strCurrency',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Currency',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strDescription',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Description',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'ysnSubCurrency',",
+                                                                            "\t\tdataType: 'boolean',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intMainCurrencyId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "        dataIndex: 'intSubCurrencyCent',",
+                                                                            "        dataType: 'numeric',",
+                                                                            "        text: 'SubCurrency Cent',",
+                                                                            "        hidden: true",
+                                                                            "    }",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strCurrency",
+                                                                        "itemId": "cboSpecialPricingCurrency",
+                                                                        "valueField": "strCurrency"
+                                                                    },
+                                                                    "name": "MyComboBox77",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "d8f7949e-4039-4614-a284-b6ca1f0921df",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
                                                         },
@@ -11005,9 +11453,9 @@
                                                                 "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
-                                                                "format": "0,000.000000",
+                                                                "format": null,
                                                                 "itemId": "colSpecialPricingUnitPrice",
-                                                                "text": "Unit Price",
+                                                                "text": "Retail Price",
                                                                 "width": 69
                                                             },
                                                             "name": "MyNumberColumn32",
@@ -11025,13 +11473,22 @@
                                                                         "designer|createAlias": "numberfield",
                                                                         "fieldStyle": "text-align:right",
                                                                         "hideTrigger": true,
-                                                                        "itemId": "txtSpecialPricingUnitPrice"
+                                                                        "itemId": "txtSpecialPricingUnitPrice",
+                                                                        "quantityField": true
                                                                     },
                                                                     "name": "MyNumberField31",
                                                                     "configAlternates": {
-                                                                        "currencyField": "boolean"
+                                                                        "currencyField": "boolean",
+                                                                        "quantityField": "boolean"
                                                                     },
-                                                                    "designerId": "9ebdfaa5-372d-41c0-a817-3e49a5c1a1f6"
+                                                                    "designerId": "9ebdfaa5-372d-41c0-a817-3e49a5c1a1f6",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "quantityField",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
                                                         },
@@ -11416,7 +11873,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter115",
+                                                    "name": "filter123",
                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -12267,7 +12724,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter116",
+                                                                    "name": "filter124",
                                                                     "designerId": "74ebd405-7763-4163-a329-69eecae2fbea",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -12667,7 +13124,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter117",
+                                                    "name": "filter125",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -13057,7 +13514,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter118",
+                                                    "name": "filter126",
                                                     "designerId": "336a12a5-7629-4f16-aedc-1c6511cd8165",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -13453,7 +13910,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter119",
+                                                    "name": "filter127",
                                                     "designerId": "49a9508d-505d-4de5-977b-f8ebc7227c15",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -13640,7 +14097,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter120",
+                                                    "name": "filter128",
                                                     "designerId": "6e3091f8-4c8b-4ab7-bb33-40607d9656f6",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -14123,7 +14580,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter121",
+                                                                    "name": "filter129",
                                                                     "designerId": "2bbc0808-5b40-4515-bf7e-466c3903a1c4",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -14346,7 +14803,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter122",
+                                                                    "name": "filter130",
                                                                     "designerId": "f1bbb210-cf31-4fe7-8040-6808d9375e23",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -14618,7 +15075,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter123",
+                                                                    "name": "filter131",
                                                                     "designerId": "49a6fdf8-831b-4540-9826-f339161f9600",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -15008,7 +15465,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging13",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

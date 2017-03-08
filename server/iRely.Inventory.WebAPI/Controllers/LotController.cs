@@ -23,6 +23,12 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
+        public async Task<HttpResponseMessage> GetLots(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetLots(param));
+        }
+
+        [HttpGet]
         public async Task<HttpResponseMessage> GetHistory(GetParameter param)
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetHistory(param));

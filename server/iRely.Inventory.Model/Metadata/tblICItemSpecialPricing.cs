@@ -26,6 +26,7 @@ namespace iRely.Inventory.Model
         public decimal? dblDiscountThruAmount { get; set; }
         public decimal? dblAccumulatedQty { get; set; }
         public decimal? dblAccumulatedAmount { get; set; }
+        public int? intCurrencyId { get; set; }
         public int? intSort { get; set; }
 
         private string _location;
@@ -107,8 +108,55 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _currency;
+        [NotMapped]
+        public string strCurrency
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_currency))
+                    if (tblSMCurrency != null)
+                        return tblSMCurrency.strCurrency;
+                    else
+                        return null;
+                else
+                    return _currency;
+            }
+            set
+            {
+                _currency = value;
+            }
+        }
         public tblICItem tblICItem { get; set; }
         public tblICItemLocation tblICItemLocation { get; set; }
         public tblICItemUOM tblICItemUOM { get; set; }
+        public tblSMCurrency tblSMCurrency { get; set; }
+    }
+
+    public class ItemSpecialPricingVM
+    {
+        public int intItemSpecialPricingId { get; set; }
+        public int intItemId { get; set; }
+        public int? intItemLocationId { get; set; }
+        public string strPromotionType { get; set; }
+        public DateTime? dtmBeginDate { get; set; }
+        public DateTime? dtmEndDate { get; set; }
+        public int? intItemUnitMeasureId { get; set; }
+        public decimal? dblUnit { get; set; }
+        public string strDiscountBy { get; set; }
+        public decimal? dblDiscount { get; set; }
+        public decimal? dblUnitAfterDiscount { get; set; }
+        public decimal? dblDiscountThruQty { get; set; }
+        public decimal? dblDiscountThruAmount { get; set; }
+        public decimal? dblAccumulatedQty { get; set; }
+        public decimal? dblAccumulatedAmount { get; set; }
+        public int? intCurrencyId { get; set; }
+        public int? intSort { get; set; }
+        public string strLocationName { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strUPC { get; set; }
+        public decimal? dblDiscountedPrice { get; set; }
+        public string strCurrency { get; set; }
+        public int? intConcurrencyId { get; set; }
     }
 }

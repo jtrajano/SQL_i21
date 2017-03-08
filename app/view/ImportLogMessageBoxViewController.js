@@ -21,7 +21,9 @@ Ext.define('Inventory.view.ImportLogMessageBoxViewController', {
     onBtnCloseClick: function(button, e, eOpts) {
         "use strict";
         var win = button.up('window');
-        win.close();
+        win.close(function() {
+            console.log(arguments);
+        });
     },
 
     setupContext : function(options){

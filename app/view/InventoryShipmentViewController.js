@@ -21,6 +21,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'int'},
                 {dataIndex: 'strCustomerNumber', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerNo'},
                 {dataIndex: 'strCustomerName', text: 'Customer Name', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerName'},
+                {dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                 {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'},
 
                 {dataIndex: 'strReferenceNumber', text: 'Reference Number', flex: 1, dataType: 'string', hidden: true },
@@ -96,6 +97,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'int'},
                         {dataIndex: 'strCustomerNumber', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Customer', drillDownClick: 'onViewCustomerNo', hidden: true },
                         {dataIndex: 'strCustomerName', text: 'Customer Name', flex: 1, dataType: 'string', drillDownText: 'View Customer', drillDownClick: 'onViewCustomerName', hidden: true },
+                        {dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                         {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
 
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
@@ -123,6 +125,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'int'},
                         {dataIndex: 'strCustomerNumber', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerNo', hidden: true },
                         {dataIndex: 'strCustomerName', text: 'Customer Name', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerName', hidden: true },
+                        {dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                         {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
 
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
@@ -154,6 +157,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         { dataIndex: 'strCustomerName', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Customer', drillDownClick: 'onViewCustomerName' },
                         { dataIndex: 'strDestination', text: 'Destination', flex: 1, dataType: 'string' },
                         { dataIndex: 'dtmShipDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
+                        { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
                         { dataIndex: 'strItemNo', text: 'Item', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
                         { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float'},
                         { xtype: 'numbercolumn', dataIndex: 'dblQtyShipped', text: 'Qty Shipped', flex: 1, dataType: 'float'},
@@ -559,26 +563,26 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colUnitCost: 'dblUnitCost',
                 colUnitPrice: {
                     dataIndex: 'dblUnitPrice',
-                    hidden: '{hideFunctionalCurrencyColumn}',
+                    //hidden: '{hideFunctionalCurrencyColumn}',
                     editor: {
                         readOnly: '{disableFieldInShipmentGrid}'
                     }
                 },
-                colForeignUnitPrice: {
-                    dataIndex: 'dblForeignUnitPrice',
-                    hidden: '{hideForeignColumn}',
-                    editor: {
-                        readOnly: '{disableFieldInShipmentGrid}'
-                    }
-                },                
+                // colForeignUnitPrice: {
+                //     dataIndex: 'dblForeignUnitPrice',
+                //     hidden: '{hideForeignColumn}',
+                //     editor: {
+                //         readOnly: '{disableFieldInShipmentGrid}'
+                //     }
+                // },                
                 colLineTotal: {
-                    dataIndex: 'dblLineTotal',
-                    hidden: '{hideFunctionalCurrencyColumn}',
+                    dataIndex: 'dblLineTotal'
+                    //hidden: '{hideFunctionalCurrencyColumn}',
                 },
-                colForeignLineTotal: {
-                    dataIndex:  'dblForeignLineTotal',
-                    hidden: '{hideForeignColumn}'
-                },
+                // colForeignLineTotal: {
+                //     dataIndex:  'dblForeignLineTotal',
+                //     hidden: '{hideForeignColumn}'
+                // },
                 colNotes: 'strNotes',
                 colForexRateType: {
                     dataIndex: 'strForexRateType',
@@ -1162,8 +1166,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     current.set('dblQuantity', records[0].get('dblBalance'));
                     current.set('strOrderUOM', records[0].get('strItemUOM'));
                     current.set('dblQtyOrdered', records[0].get('dblDetailQuantity'));
-                    current.set('dblUnitPrice', records[0].get('dblCashPrice'));
-                    current.set('dblForeignUnitPrice', records[0].get('dblCashPrice'));
+                    current.set('dblUnitPrice', records[0].get('dblCashPrice'));                    
                     current.set('intOwnershipType', 1);
                     current.set('strOwnershipType', 'Own');
 
@@ -1189,7 +1192,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     current.set('strOrderUOM', records[0].get('strUnitMeasure'));
                     current.set('dblQtyOrdered', records[0].get('dblQtyOrdered'));
                     current.set('dblUnitPrice', records[0].get('dblPrice'));
-                    current.set('dblForeignUnitPrice', records[0].get('dblPrice'));
                     current.set('intOwnershipType', 1);
                     current.set('strOwnershipType', 'Own');
 
@@ -1216,10 +1218,50 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    getItemSalesPrice: function(cfg, successFn, failureFn){
+        // Sanitize parameters; 
+        cfg = cfg ? cfg : {}; 
+        successFn = successFn && (successFn instanceof Function) ? successFn : function(){ /*empty function*/ };
+        failureFn = failureFn && (failureFn instanceof Function) ? failureFn : function(){ /*empty function*/ };
+
+        ic.utils.ajax({
+            url: '../accountsreceivable/api/common/getitemprice',
+            params: {
+                intItemId: cfg.ItemId,
+                intCustomerId: cfg.CustomerId,
+                intCurrencyId: cfg.CurrencyId,
+                intLocationId: cfg.LocationId,
+                intItemUOMId: null,
+                dtmTransactionDate: cfg.TransactionDate,
+                dblQuantity: cfg.Quantity,
+                intContractHeaderId: null,
+                intContractDetailId: null,
+                strContractNumber: null,
+                ysnCustomerPricingOnly: false,
+                ysnItemPricingOnly: false,
+                intContractSeq: null,
+                dblOriginalQuantity: null,
+                intShipToLocationId: cfg.ShipToLocationId,
+                strInvoiceType: null, 
+                intTermId: null
+            },
+            method: 'post'
+        })
+        .subscribe(
+            function(response){
+                successFn(response);                
+            },
+            function(response) {
+                failureFn(response);
+            }
+        );
+    },
+
     onItemNoSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
+        var me = this;
         var win = combo.up('window');
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItem');
@@ -1227,14 +1269,107 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var pnlLotTracking = win.down('#pnlLotTracking');
         
         if (combo.itemId === 'cboItemNo') {
+
+            // Get the default Forex Rate Type from the Company Preference. 
+            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
+
+            // Get the functional currency:
+            var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');           
+
+            // Get the important header data: 
+            var currentHeader = win.viewModel.data.current;
+            var transactionCurrencyId = currentHeader.get('intCurrencyId');
+            var customerId = currentHeader.get('intEntityCustomerId');            
+            var shipFromLocationId = currentHeader.get('intShipFromLocationId');
+            var shipToLocationId = currentHeader.get('intShipToLocationId');            
+            var dtmShipDate = currentHeader.get('dtmShipDate');
+
+            // Get the sales price
+            var dblUnitPrice = records[0].get('dblIssueSalePrice');
+            dblUnitPrice = Ext.isNumeric(dblUnitPrice) ? dblUnitPrice : 0;            
+
+            // function variable to process the default forex rate. 
+            var processForexRateOnSuccess = function(successResponse, isItemRetailPrice){
+                if (successResponse && successResponse.length > 0 ){
+                    var dblForexRate = successResponse[0].dblRate;
+                    var strRateType = successResponse[0].strRateType;             
+
+                    dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+
+                    // Convert the sales price to the transaction currency.
+                    // and round it to six decimal places.  
+                    if (transactionCurrencyId != functionalCurrencyId && isItemRetailPrice){
+                        dblUnitPrice = dblForexRate != 0 ?  dblUnitPrice / dblForexRate : 0;
+                        dblUnitPrice = i21.ModuleMgr.Inventory.roundDecimalFormat(dblUnitPrice, 6);
+                    }
+                    
+                    current.set('intForexRateTypeId', intRateType);
+                    current.set('strForexRateType', strRateType);
+                    current.set('dblForexRate', dblForexRate);
+                    current.set('dblUnitPrice', dblUnitPrice);                                 
+                }
+            }            
+
+            var processCustomerPriceOnSuccess = function(successResponse){
+                var jsonData = Ext.decode(successResponse.responseText);
+                var isItemRetailPrice = true;                
+
+                // If there is a customer cost, replace dblUnitPrice with the customer sales price. 
+                var itemPricing = jsonData ? jsonData.itemPricing : null;
+                if (itemPricing) {
+                    dblUnitPrice = itemPricing.dblPrice; 
+                    current.set('dblUnitPrice', dblUnitPrice);
+
+                    if (itemPricing.strPricing !== 'Inventory - Standard Pricing'){
+                        isItemRetailPrice = false;
+                    }                    
+                }
+
+                // If transaction currency is a foreign currency, get the default forex rate type, forex rate, and convert the last cost to the transaction currency. 
+                if (transactionCurrencyId != functionalCurrencyId && intRateType){
+                    // Do ajax call to retrieve the forex rate. 
+                    iRely.Functions.getForexRate(
+                        transactionCurrencyId,
+                        intRateType,
+                        dtmShipDate,
+                        function(successResponse){
+                            processForexRateOnSuccess(successResponse, isItemRetailPrice);
+                        },
+                        function(failureResponse){
+                            var jsonData = Ext.decode(failureResponse.responseText);
+                            //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                            iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
+                        }
+                    );                      
+                }
+
+            };
+
+            var processCustomerPriceOnFailure = function(failureResponse){
+                var jsonData = Ext.decode(failureResponse.responseText);
+                iRely.Functions.showErrorDialog('Something went wrong while getting the item price from the customer pricing hierarchy.');
+            };            
+
+            // Get the customer cost from the hierarchy.  
+            var customerPriceCfg = {
+                ItemId: records[0].get('intItemId'),
+                CustomerId: customerId,
+                CurrencyId: transactionCurrencyId,
+                LocationId: shipFromLocationId,
+                TransactionDate: dtmShipDate,
+                Quantity: 0, // Default ship qty. 
+                ShipToLocationId: shipToLocationId
+            }
+
+            me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure);
+
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
             current.set('strLotTracking', records[0].get('strLotTracking'));
             current.set('intCommodityId', records[0].get('intCommodityId'));
             current.set('intItemUOMId', records[0].get('intIssueUOMId'));
             current.set('strUnitMeasure', records[0].get('strIssueUOM'));
-            current.set('dblUnitPrice', records[0].get('dblIssueSalePrice'));
-            current.set('dblForeignUnitPrice', records[0].get('dblIssueSalePrice'));
+            current.set('dblUnitPrice', dblUnitPrice);            
             current.set('dblItemUOMConvFactor', records[0].get('dblIssueUOMConvFactor'));
             current.set('strUnitType', records[0].get('strIssueUOMType'));
             current.set('intOwnershipType', 1);
@@ -1254,11 +1389,21 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     
         }
         else if (combo.itemId === 'cboUOM') {
-            current.set('dblItemUOMConv', records[0].get('dblUnitQty'));
-            current.set('dblUnitCost', records[0].get('dblLastCost'));
-            current.set('dblUnitPrice', records[0].get('dblSalePrice'));
-            current.set('dblForeignUnitPrice', records[0].get('dblSalePrice'));
-            current.set('intItemUOMId', records[0].get('intItemUnitMeasureId'));
+            var dblUnitQty = records[0].get('dblUnitQty');
+            var dblLastCost = records[0].get('dblLastCost');
+            var dblSalesPrice = records[0].get('dblSalePrice');
+            var dblSalesPriceForeign = records[0].get('dblSalePrice');
+            var intItemUOMId = records[0].get('intItemUnitMeasureId');
+            var dblForexRate = current.get('dblForexRate');
+
+            // Convert the sales price from functional currency to the transaction currency. 
+            dblSalesPriceForeign = dblForexRate != 0 ? dblSalesPrice / dblForexRate : dblLastCost;
+            dblSalesPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblSalesPriceForeign, 6);            
+
+            current.set('dblItemUOMConv', dblUnitQty);
+            current.set('dblUnitCost', dblLastCost);
+            current.set('dblUnitPrice', dblSalesPrice);
+            current.set('intItemUOMId', intItemUOMId);
         }
         else if (combo.itemId === 'cboSubLocation') {
             if (current.get('intSubLocationId') !== records[0].get('intSubLocationId')) {
@@ -1303,6 +1448,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
 
         else if (combo.itemId === 'cboForexRateType') {
+            var oldForexRate = current.get('dblForexRate');
+
             current.set('intForexRateTypeId', records[0].get('intCurrencyExchangeRateTypeId'));
             current.set('strForexRateType', records[0].get('strCurrencyExchangeRateType'));
             current.set('dblForexRate', null);
@@ -1314,13 +1461,18 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 function(successResponse){
                     if (successResponse && successResponse.length > 0){
                         var dblRate = successResponse[0].dblRate;
-                        var dblUnitPrice = current.get('dblUnitPrice');
 
+                        // Convert the unit price to the functional currency. 
+                        var dblUnitPrice = current.get('dblUnitPrice');
+                        dblUnitPrice = Ext.isNumeric(dblUnitPrice) ? dblUnitPrice : 0;
+                        dblUnitPrice = Ext.isNumeric(oldForexRate) && oldForexRate != 0 ? dblUnitPrice * oldForexRate : dblUnitPrice;
+
+                        // And then convert it to the newly selected currency. 
                         dblRate = Ext.isNumeric(dblRate) ? dblRate : 0;
                         dblUnitPrice = Ext.isNumeric(dblUnitPrice) ? dblUnitPrice : 0;
 
-                        current.set('dblForexRate', dblRate);
-                        current.set('dblForeignUnitPrice', dblRate != 0 ? dblUnitPrice / dblRate : dblUnitPrice);                        
+                        current.set('dblForexRate', dblRate);                        
+                        current.set('dblUnitPrice', dblRate != 0 ? dblUnitPrice / dblRate : dblUnitPrice);
                     }
                 },
                 function(failureResponse){
@@ -2490,6 +2642,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 { dataIndex: 'intDestinationWeightId', text: 'Destination Weight Id', width: 100, dataType: 'numeric', hidden: true },
                 { dataIndex: 'strDestinationWeights', text: 'Destination Weights', width: 100, dataType: 'string' },
 
+                { dataIndex: 'intForexRateTypeId', text: 'Forex Rate Type Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strForexRateType', text: 'Forex Rate Type', width: 100, dataType: 'string', hidden: true },
+                { xtype: 'numbercolumn', dataIndex: 'dblForexRate', text: 'Forex Rate', width: 100, dataType: 'float', hidden: true },               
+
                 {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', hidden: true },
                 {dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hidden: true },
                 {dataIndex: 'intSourceId', text: 'intSourceId', width: 100, dataType: 'numeric', hidden: true },
@@ -2553,7 +2709,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                         //dblQtyOrdered: lot.get('dblSalesOrderedQty'),
                                                         dblQtyOrdered: lot.get('dblDetailQuantity'),
                                                         dblUnitPrice: lot.get('dblCashPrice'),
-                                                        dblForeignUnitPrice: lot.get('dblCashPrice'),
                                                         intOwnershipType: lot.get('intOwnershipType'),
                                                         strOwnershipType: lot.get('strOwnershipType'),
                                                         intSubLocationId: lot.get('intSubLocationId'),
@@ -2627,7 +2782,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 intItemUOMId: order.get('intItemUOMId'),
                                 intWeightUOMId: order.get('intWeightUOMId'),
                                 dblUnitPrice: order.get('dblUnitPrice'),
-                                dblForeignUnitPrice: order.get('dblUnitPrice'),
                                 strItemNo: order.get('strItemNo'),
                                 strUnitMeasure: order.get('strItemUOM'),
                                 strWeightUOM: order.get('strWeightUOM'),
@@ -2653,7 +2807,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 strDestinationWeights: order.get('strDestinationWeights'),
                                 strOwnershipType: 'Own',
                                 intOwnershipType: 1,
-                                intCommodityId: order.get('intCommodityId')
+                                intCommodityId: order.get('intCommodityId'),
+                                intForexRateTypeId: order.get('intForexRateTypeId'),
+                                strForexRateType: order.get('strForexRateType'),
+                                dblForexRate: order.get('dblForexRate')                                
                             };
 
                             // Check if the shipment location matches the location of the order.
@@ -3055,18 +3212,76 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var win = editor.grid.up('window');
         var me = win.controller;
         var vw = win.viewModel;
-        //var currentShipment = vw.data.current;
+        var currentItem = context ? context.record : null; 
+        var currentHeader = win.viewModel.data.current;        
+        var field = context ? context.field : null;
 
-        // If editing the foreign unit price, change the unit price as well. 
-        if (context.field === 'dblForeignUnitPrice') {
-            if (context.record) {
-                var dblForeignUnitPrice = context.value;
-                var dblForexRate = context.record.get('dblForexRate');
+        var transactionCurrencyId = currentHeader.get('intCurrencyId');
+        var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');           
+        
+        // If editing the qty, check if there is a new sales price appropriate with the shipped qty. 
+        if (currentItem) {
+            if (field === 'dblQuantity') {
+                var dblQuantity = context.value;
+                var dblUnitPrice = currentItem.get('dblUnitPrice');
+                var dblForexRate = currentItem.get('dblForexRate');
 
-                dblForeignUnitPrice = Ext.isNumeric(dblForeignUnitPrice) ? dblForeignUnitPrice : 0;
+                // Get the transaction and functional currency. 
+                var transactionCurrencyId = currentHeader.get('intCurrencyId');
+                var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');           
+
+                dblQuantity = Ext.isNumeric(dblQuantity) ? dblQuantity : 0;
+                dblUnitPrice = Ext.isNumeric(dblUnitPrice) ? dblUnitPrice : 0;
                 dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
 
-                context.record.set('dblUnitPrice', dblForeignUnitPrice * dblForexRate);
+                var processCustomerPriceOnSuccess = function(successResponse){
+                    var jsonData = Ext.decode(successResponse.responseText);
+                    var isItemRetailPrice = true;                
+
+                    // If there is a customer cost, replace dblUnitPrice with the customer sales price. 
+                    var itemPricing = jsonData ? jsonData.itemPricing : null;
+                    if (itemPricing) {
+                        dblUnitPrice = itemPricing.dblPrice; 
+                        if (itemPricing.strPricing !== 'Inventory - Standard Pricing'){
+                            isItemRetailPrice = false;
+                        }                    
+                    }
+
+                    // If transaction currency is a foreign currency, convert the sales price to the transaction currency. 
+                    if (transactionCurrencyId != functionalCurrencyId && isItemRetailPrice){
+                        dblUnitPrice = dblUnitPrice * dblForexRate;                        
+                    }
+
+                    // Set the new sales price. 
+                    currentItem.set('dblUnitPrice', dblUnitPrice);
+                };
+
+                var processCustomerPriceOnFailure = function(failureResponse){
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog('Something went wrong while getting the item price from the customer pricing hierarchy.');
+                };            
+
+                // Get the customer cost from the hierarchy.  
+                var customerPriceCfg = {
+                    ItemId: currentItem.get('intItemId'),
+                    CustomerId: currentHeader.get('intEntityCustomerId'),
+                    CurrencyId: currentHeader.get('intCurrencyId'),
+                    LocationId: currentHeader.get('intShipFromLocationId'),
+                    TransactionDate: currentHeader.get('dtmShipDate'),
+                    Quantity: dblQuantity,
+                    ShipToLocationId: currentHeader.get('intShipToLocationId')
+                }
+                
+                // Call the pricing hierarchy if the order type is not a Sales Contract. 
+                //var orderType_SalesContract = 1;
+
+                // Call the pricing hierarchy if the line item does not have an Order Id. Meaning, it is not linked to any other transactions like SO or Contracts. 
+                var intOrderId = currentItem.get('intOrderId');
+                if (!(intOrderId && Ext.isNumeric(intOrderId) && intOrderId > 0))
+                {
+                    // Do an ajax call to retrieve the latest sales price from the pricing hierarchy. 
+                    me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure);
+                }
             }
         }       
     },
@@ -3116,6 +3331,51 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             )
     },
 
+    onCustomerDrilldown: function (combo) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityCustomer', { action: 'new', viewConfig: { modal: true } });
+        }
+        else {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityCustomer', {
+                filters: [
+                    {
+                        column: 'intEntityId',
+                        value: current.get('intEntityCustomerId')
+                    }
+                ]
+            });
+        }
+    },
+
+    onGumUOMSelect: function(plugin, records) {
+        if (records.length <= 0)
+            return;
+
+        var me = this;
+        var win = me.getView().screenMgr.window;
+        var grid = win.down('grid');
+        var current = plugin.getActiveRecord();
+
+        var dblUnitQty = records[0].get('dblUnitQty');
+        var dblLastCost = records[0].get('dblLastCost');
+        var dblSalesPrice = records[0].get('dblSalePrice');
+        var dblSalesPriceForeign = records[0].get('dblSalePrice');
+        var intItemUOMId = records[0].get('intItemUnitMeasureId');
+        var dblForexRate = current.get('dblForexRate');
+
+        // Convert the sales price from functional currency to the transaction currency. 
+        dblSalesPriceForeign = dblForexRate !== 0 ? dblSalesPrice / dblForexRate : dblLastCost;
+        dblSalesPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblSalesPriceForeign, 6);            
+
+        current.set('dblItemUOMConv', dblUnitQty);
+        current.set('dblUnitCost', dblLastCost);
+        current.set('dblUnitPrice', dblSalesPrice);
+        current.set('intItemUOMId', intItemUOMId);
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -3127,7 +3387,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 select: this.onShipLocationSelect
             },
             "#cboCustomer": {
-                select: this.onCustomerSelect
+                select: this.onCustomerSelect,
+                drilldown: this.onCustomerDrilldown
             },
             "#cboOrderNumber": {
                 select: this.onOrderNumberSelect
@@ -3231,6 +3492,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             "#cboCurrency": {
                 drilldown: this.onCurrencyDrilldown
                 //select: this.onCurrencySelect
+            },
+            "#gumQuantity": {
+                onUOMSelect: this.onGumUOMSelect
             }
         })
     }

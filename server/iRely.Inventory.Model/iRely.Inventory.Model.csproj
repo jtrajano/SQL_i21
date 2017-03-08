@@ -82,8 +82,8 @@
       <HintPath>..\packages\IdeaBlade.DevForce.Core.7.4.0\lib\net45\IdeaBlade.Validation.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="iRely.Common, Version=17.1.6240.5281, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\iRely.Common.17.1.6240.5281\lib\net45\iRely.Common.dll</HintPath>
+    <Reference Include="iRely.Common, Version=17.1.6268.6790, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\iRely.Common.17.1.6268.6790\lib\net45\iRely.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
@@ -145,10 +145,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\tblICItemSubLocationMap.cs" />
     <Compile Include="Configuration\tblICM2MComputationMap.cs" />
     <Compile Include="Configuration\vyuICItemUOMMap.cs" />
     <Compile Include="Configuration\vyuICLotHistoryMap.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
+    <Compile Include="Metadata\tblICItemSubLocation.cs" />
     <Compile Include="Metadata\tblICM2MComputation.cs" />
     <Compile Include="Configuration\tblICParentLotMap.cs" />
     <Compile Include="Configuration\tblICItemMotorFuelTaxMap.cs" />
@@ -210,6 +212,7 @@
     <Compile Include="Configuration\tblICUnitMeasureMap.cs" />
     <Compile Include="Configuration\tblPATPatronageCategoryMap.cs" />
     <Compile Include="Configuration\tblSMCompanyLocationPricingLevelMap.cs" />
+    <Compile Include="Configuration\vyuICGetItemUOMMap.cs" />
     <Compile Include="InventoryEntities.cs" />
     <Compile Include="Metadata\tblICInventoryReceiptItemLot.cs" />
     <Compile Include="Metadata\tblICInventoryReceiptItemLot2.cs" />
@@ -274,6 +277,7 @@
     <Compile Include="Metadata\tblPATPatronageCategory.cs" />
     <Compile Include="Metadata\vyuICGetInventoryReceiptItemLot2.cs" />
     <Compile Include="Metadata\tblSMCompanyLocationPricingLevel.cs" />
+    <Compile Include="Metadata\vyuICGetItemUOM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stored Procedures\ConvertToStockUnit.cs" />
     <Compile Include="Stored Procedures\CopyItemLocation.cs" />

@@ -2,9 +2,9 @@
     "name": "Inventory",
     "settings": {
         "cmd": {
-            "license": "",
-            "cmdVersion": "",
-            "frameworkVersion": ""
+            "license": "commercial",
+            "cmdVersion": "6.1.2.15",
+            "frameworkVersion": "5.0.1.1255"
         },
         "canvasControls": {
             "viewportSize": {

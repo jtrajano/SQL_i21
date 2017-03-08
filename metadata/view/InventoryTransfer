@@ -1183,7 +1183,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter114",
+                                                    "name": "filter19",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1862,7 +1862,7 @@
                                                 "align": "right",
                                                 "dataIndex": "dblQuantity",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
+                                                "format": null,
                                                 "itemId": "colTransferQty",
                                                 "text": "Transfer Qty",
                                                 "width": 100
@@ -2094,7 +2094,7 @@
                                                 "align": "right",
                                                 "dataIndex": "dblCost",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
+                                                "format": null,
                                                 "itemId": "colCost",
                                                 "text": "Cost",
                                                 "width": 65
@@ -2116,11 +2116,22 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "quantityField": true
+                                                    },
                                                     "name": "MyNumberField4",
                                                     "configAlternates": {
-                                                        "currencyField": "boolean"
+                                                        "currencyField": "boolean",
+                                                        "quantityField": "boolean"
                                                     },
-                                                    "designerId": "a50b6383-555d-48f5-9688-cecbf0b546d0"
+                                                    "designerId": "a50b6383-555d-48f5-9688-cecbf0b546d0",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -2342,7 +2353,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging13",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

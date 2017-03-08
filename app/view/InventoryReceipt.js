@@ -309,7 +309,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         flex: 1,
                                                         itemId: 'cboVendor',
                                                         margin: '0 5 0 0',
-                                                        fieldLabel: 'Vendor',
+                                                        fieldLabel: 'Vendor<font color="red"> *</font>',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
                                                         displayField: 'strName',
@@ -837,8 +837,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         ],
                                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                             selType: 'checkboxmodel',
-                                                                            allowDeselect: true,
-                                                                            mode: 'SINGLE'
+                                                                            allowDeselect: true
                                                                         }),
                                                                         columns: [
                                                                             {
@@ -1081,6 +1080,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataIndex: 'strLifeTimeType',
                                                                                             dataType: 'string',
                                                                                             hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intReceiveUnitMeasureId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
                                                                                         }
                                                                                     ],
                                                                                     itemId: 'cboItem',
@@ -1252,7 +1256,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colItemSubCurrency',
-                                                                                text: 'Cost Currency'
+                                                                                text: 'Currency Unit'
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1260,11 +1264,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 120,
                                                                                 dataIndex: 'dblUnitCost',
                                                                                 text: 'Cost',
-                                                                                format: '0,000.000###',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
+                                                                                    quantityField: true,
                                                                                     itemId: 'txtUnitCost',
-                                                                                    decimalPrecision: 6,
                                                                                     minValue: 0
                                                                                 }
                                                                             },
@@ -2616,9 +2619,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'colRate',
                                                                         modelValidation: true,
                                                                         text: 'Rate',
-                                                                        format: '0,000.000000',
                                                                         editor: {
                                                                             xtype: 'numericfield',
+                                                                            quantityField: true,
                                                                             modelValidation: true
                                                                         }
                                                                     },
@@ -2665,9 +2668,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'colChargeAmount',
                                                                         dataIndex: 'dblAmount',
                                                                         text: 'Amount',
-                                                                        format: '0,000.00####',
                                                                         editor: {
                                                                             xtype: 'numericfield',
+                                                                            currencyField: true,
                                                                             modelValidation: true
                                                                         }
                                                                     },
@@ -2699,13 +2702,38 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     dataIndex: 'strVendorId',
                                                                                     dataType: 'string',
                                                                                     text: 'Vendor No',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    defaultSort: true
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strName',
                                                                                     dataType: 'string',
                                                                                     text: 'Vendor Name',
                                                                                     flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intCurrencyId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Currency Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intSubCurrencyCent',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'SubCurrency Cent',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intDefaultLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Default Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCurrency',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Currency',
+                                                                                    hidden: true
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboCostVendor',

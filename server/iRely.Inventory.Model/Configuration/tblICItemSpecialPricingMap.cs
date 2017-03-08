@@ -27,6 +27,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblDiscountThruAmount).HasColumnName("dblDiscountThruAmount").HasPrecision(18, 6);
             this.Property(t => t.dblAccumulatedQty).HasColumnName("dblAccumulatedQty").HasPrecision(18, 6);
             this.Property(t => t.dblAccumulatedAmount).HasColumnName("dblAccumulatedAmount").HasPrecision(18, 6);
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.tblICItemLocation)
@@ -36,6 +37,10 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICItemUOM)
                 .WithMany(p => p.tblICItemSpecialPricings)
                 .HasForeignKey(p => p.intItemUnitMeasureId);
+
+            this.HasOptional(p => p.tblSMCurrency)
+              .WithMany(p => p.tblICItemSpecialPricings)
+              .HasForeignKey(p => p.intCurrencyId);
         }
     }
 }

@@ -170,24 +170,18 @@ Ext.define('Inventory.view.CategoryViewModel', {
     },
 
     formulas: {
-        accountCategoryFilter1: function(get) {
+        accountCategoryFilter: function(get) {
             var category = get('grdGlAccounts.selection.strAccountCategory');
-            return category;
-        },         
-        accountCategoryFilter2: function(get) {
-            var category = get('grdGlAccounts.selection.strAccountCategory');
-            
-            /** If selected category is Other Charge Income or Other Charge Expenses,
-             * display accounts under General category **/
-            switch (category) {
-                case 'Other Charge Expense':
-                case 'Other Charge Income':
-                    return 'General';
-                    break;            
-                default:
+            switch(category) {
+                case 'AP Clearing':
+                case 'Inventory':
+                case 'Work In Progress':
+                case 'Inventory In-Transit':
                     return category;
+                default:
+                    return 'General|^|' + category;
             }
-        }, 
+        },
 
         checkMaterialFee: function(get){
             if (iRely.Functions.isEmpty(get('current.strMaterialFee')) || get('current.strMaterialFee') === 'No'){
