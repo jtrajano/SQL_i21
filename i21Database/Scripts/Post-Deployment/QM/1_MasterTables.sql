@@ -981,7 +981,6 @@ END
 GO
 
 -- To insert sample type in template for existing templates. This script should run only once for a client
--- After that, check in the db which have sample type as null, create sample type for those control points and re-run the script once
 GO
 IF EXISTS (
 		SELECT 1
@@ -1024,6 +1023,34 @@ BEGIN
 		INTO tblQMProductControlPoint_Org
 		FROM tblQMProductControlPoint
 	END
+
+	-- create sample type for the control points which is not available in Sample Type
+	INSERT INTO tblQMSampleType (
+		intConcurrencyId
+		,strSampleTypeName
+		,strDescription
+		,intControlPointId
+		,ysnFinalApproval
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+		)
+	SELECT DISTINCT 1
+		,CP.strControlPointName
+		,CP.strControlPointName
+		,PCP.intControlPointId
+		,0
+		,PCP.intCreatedUserId
+		,PCP.dtmCreated
+		,PCP.intLastModifiedUserId
+		,PCP.dtmLastModified
+	FROM tblQMProductControlPoint PCP
+	JOIN tblQMControlPoint CP ON CP.intControlPointId = PCP.intControlPointId
+	WHERE PCP.intControlPointId NOT IN (
+			SELECT intControlPointId
+			FROM tblQMSampleType
+			)
 
 	INSERT INTO @ProductControlPoint
 	SELECT intProductControlPointId
