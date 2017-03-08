@@ -3649,6 +3649,8 @@ IF @post = 1
 				,intSubLocationId
 				,intStorageLocationId
 				,strActualCostId
+				,intForexRateTypeId
+				,dblForexRate
 			) 
 			SELECT 
 				 intItemId					= Detail.intItemId  
@@ -3693,6 +3695,8 @@ IF @post = 1
 				,intSubLocationId			= Detail.intCompanyLocationSubLocationId 
 				,intStorageLocationId		= Detail.intStorageLocationId
 				,strActualCostId			= CASE WHEN (ISNULL(Header.intDistributionHeaderId,0) <> 0 OR ISNULL(Header.intLoadDistributionHeaderId,0) <> 0) THEN Header.strActualCostId ELSE NULL END
+				,intForexRateTypeId			= Detail.intCurrencyExchangeRateTypeId
+				,dblForexRate				= Detail.dblCurrencyExchangeRate
 			FROM 
 				tblARInvoiceDetail Detail
 			INNER JOIN
@@ -3754,6 +3758,8 @@ IF @post = 1
 				,intSubLocationId			= ARID.intCompanyLocationSubLocationId
 				,intStorageLocationId		= ARID.intStorageLocationId
 				,strActualCostId			= CASE WHEN (ISNULL(ARI.intDistributionHeaderId,0) <> 0 OR ISNULL(ARI.intLoadDistributionHeaderId,0) <> 0) THEN ARI.strActualCostId ELSE NULL END
+				,intForexRateTypeId			= ARID.intCurrencyExchangeRateTypeId
+				,dblForexRate				= ARID.dblCurrencyExchangeRate
 			FROM
 				vyuARGetItemComponents ARIC
 			INNER JOIN
@@ -3885,6 +3891,8 @@ IF @post = 1
 					,[intSourceTransactionDetailId] 
 					,[intFobPointId] 
 					,[intInTransitSourceLocationId]
+					,[intForexRateTypeId]
+					,[dblForexRate]
 			)
 			SELECT
 					[intItemId]					= t.intItemId
@@ -3908,6 +3916,8 @@ IF @post = 1
 					,[intSourceTransactionDetailId] = t.intTransactionDetailId
 					,[intFobPointId]				= t.intFobPointId
 					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
+					,intForexRateTypeId			= id.intCurrencyExchangeRateTypeId
+					,dblForexRate				= id.dblCurrencyExchangeRate
 			FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
 						ON i.intInvoiceId = id.intInvoiceId
 					INNER JOIN tblICInventoryShipmentItem si
