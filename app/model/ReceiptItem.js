@@ -43,6 +43,7 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'dblOpenReceive', type: 'float' },
         { name: 'dblReceived', type: 'float' },
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },
+        { name: 'intCostUOMId', type: 'int', allowNull: true },
         { name: 'intWeightUOMId', type: 'int', allowNull: true },
         { name: 'dblUnitCost', type: 'float' },
         { name: 'dblUnitRetail', type: 'float' },

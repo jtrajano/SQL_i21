@@ -7,8 +7,8 @@ Ext.define('Inventory.model.ItemStockDetailPricing', {
     requires: [
         'Ext.data.Field'
     ],
-
-    idProperty: 'intItemPricingId',
+    //idProperty: 'intItemPricingId',
+    idProperty: 'intItemUnitMeasureId',
 
     fields: [
         { name: 'intItemPricingId', type: 'int'},
