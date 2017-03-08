@@ -11,7 +11,7 @@ BEGIN
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET ANSI_WARNINGS OFF
+--SET ANSI_WARNINGS OFF
 	
 DECLARE @DateNow			DATETIME
 	  , @DefaultCurrencyId	INT
@@ -47,13 +47,17 @@ WHILE EXISTS(SELECT NULL FROM @PaymentsForImport)
 			  , @strPaymentInfo				NVARCHAR(50)
 			  , @ErrorMessage				NVARCHAR(250) = ''	  
 			  , @intCurrentPaymentCount     INT
+
+		OPEN SYMMETRIC KEY i21EncryptionSymKey
+		DECRYPTION BY CERTIFICATE i21EncryptionCert
+		WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 			  		
 		SELECT TOP 1 @intImportLogDetailId	= intImportLogDetailId FROM @PaymentsForImport ORDER BY intImportLogDetailId
 		SELECT @intCurrentPaymentCount		= COUNT(*) FROM @PaymentsForImport     
 		SELECT  @intEntityCustomerId		= (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = ILD.strCustomerNumber)
 			  , @intCompanyLocationId		= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = ILD.strLocationName)
 			  , @intUndepositedAccountId	= (SELECT TOP 1 intUndepositedFundsId FROM tblSMCompanyLocation WHERE strLocationName = ILD.strLocationName)
-			  , @intBankAccountId			= (SELECT TOP 1 intBankAccountId FROM vyuCMBankAccount WHERE RTRIM(LTRIM(strBankAccountNo)) = ILD.strBankAccountNo)
+			  , @intBankAccountId			= (SELECT TOP 1 intBankAccountId FROM vyuCMBankAccount WHERE RTRIM(LTRIM(dbo.fnAESDecrypt(strBankAccountNo))) = RTRIM(LTRIM(ILD.strBankAccountNo)))
 			  , @intPaymentMethodId			= (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = (CASE WHEN ILD.strPaymentMethod = 'C' THEN 'Check' ELSE NULL END))
 			  , @strPaymentInfo				= ILD.strCheckNumber
 			  , @dtmDatePaid				= ILD.dtmDatePaid
@@ -61,6 +65,8 @@ WHILE EXISTS(SELECT NULL FROM @PaymentsForImport)
 		FROM 
 			tblARImportLogDetail ILD
 		WHERE ILD.intImportLogDetailId = @intImportLogDetailId
+
+		CLOSE SYMMETRIC KEY i21EncryptionSymKey
 
 		SET @ErrorMessage = ''
 
