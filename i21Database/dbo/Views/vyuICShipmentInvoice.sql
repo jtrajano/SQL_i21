@@ -17,8 +17,16 @@ SELECT
 	 , dblUnitCost = t.dblCost
 	 , dblQtyShipped = si.dblQuantity
 	 , dblShipmentAmount = si.dblQuantity * t.dblCost + t.dblValue
-	 , dblInTransitAmount = ISNULL(it.dblQty * it.dblCost + it.dblValue, 0.0)
-	 , dblCOGSAmount = ISNULL(-(t.dblQty) * t.dblCost + t.dblValue, 0.0)
+	 , dblInTransitAmount = --ISNULL(it.dblQty * it.dblCost + it.dblValue, 0.0)
+			CASE 
+				WHEN freightTerms.strFobPoint = 'Destination' THEN ISNULL(-(t.dblQty) * t.dblCost + t.dblValue, 0.0)
+				ELSE ISNULL(it.dblQty * it.dblCost + it.dblValue, 0.0)
+			END
+	 , dblCOGSAmount = --ISNULL(-(t.dblQty) * t.dblCost + t.dblValue, 0.0)
+			CASE
+				WHEN freightTerms.strFobPoint = 'Destination' THEN ISNULL(it.dblQty * it.dblCost + it.dblValue, 0.0)
+				ELSE ISNULL(-(t.dblQty) * t.dblCost + t.dblValue, 0.0)
+			END
 	 , dblQtyToInvoice = 
 		   CASE 
 				WHEN iv.ysnPosted = 0 THEN ivd.dblQtyShipped
@@ -63,4 +71,6 @@ FROM tblICInventoryShipment s
 	 ) AS ot ON ot.intOrderTypeId = s.intOrderType
 	 LEFT JOIN tblSMCurrency currency
 		ON currency.intCurrencyID = s.intCurrencyId
+	 LEFT JOIN tblSMFreightTerms freightTerms
+		ON freightTerms.intFreightTermId = s.intFreightTermId
 WHERE s.ysnPosted = 1
