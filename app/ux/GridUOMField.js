@@ -190,6 +190,11 @@ Ext.define('Inventory.ux.GridUOMField', {
         var me = this,
             plugin = me.getEditingPlugin();
 
+        me.txtQuantity.on('focus', function() {
+            if(this.selectOnFocus)
+                this.inputEl.dom.select();
+        });
+
         me.txtQuantity.on('keypress', function(field, event) {
             if(event.keyCode === 13) {
                 plugin.completeEdit();
@@ -348,7 +353,9 @@ Ext.define('Inventory.ux.GridUOMField', {
                 }
                 
                 me.value = newValue;
-                me.txtQuantity.setValue(newValue);     
+                me.txtQuantity.setValue(newValue);
+                if(me.txtQuantity.selectOnFocus && me.txtQuantity.hasFocus)
+                    me.txtQuantity.inputEl.dom.select();
              }
          });
 
@@ -383,7 +390,6 @@ Ext.define('Inventory.ux.GridUOMField', {
         
         me.value = newValue;
         me.txtQuantity.setValue(newValue);
-
         return me;
     },
 
@@ -542,6 +548,7 @@ Ext.define('Inventory.ux.GridUOMField', {
                 {
                     xtype: 'numberfield',
                     flex: 1,
+                    selectOnFocus: true,
                     margin: '0 2 0 0',
                     decimalPrecision: 6,
                     decimalToDisplay: 6,
