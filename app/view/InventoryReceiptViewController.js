@@ -420,9 +420,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnCalculateCharges: {
                 hidden: '{isReceiptReadonly}'
             },
-            // btnshowOtherCharges: {
-            //     hidden: '{current.ysnPosted}'
-            // },
             btnVoucher: {
                 hidden: '{hideVoucherButton}',
                 disabled: '{current.ysnOrigin}'
@@ -584,7 +581,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colItemSubCurrency: {
                     dataIndex: 'strSubCurrency'
                 },
-                colUOM: {
+                /*colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         readOnly: '{disableFieldInReceiptGrid}',
@@ -602,7 +599,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             }
                         ]
                     }
-                },
+                },*/
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
@@ -627,11 +624,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colCostUOM: {
                     dataIndex: 'strCostUOM',
-                    editor: {
-                        readOnly: '{readOnlyUnitCost}',
+                    editor: {                        
                         origValueField: 'intItemUnitMeasureId',
                         origUpdateField: 'intCostUOMId',
-                        store: '{costUOM}',
+                        readOnly: '{readOnlyUnitCost}',
+                        store: '{costUOM}',                        
                         defaultFilters: [
                             {
                                 column: 'intItemId',
@@ -1930,10 +1927,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
             current.set('strLotTracking', records[0].get('strLotTracking'));
-            current.set('intUnitMeasureId', records[0].get('intReceiveUOMId'));
-            current.set('strUnitMeasure', records[0].get('strReceiveUOM'));
-            current.set('intCostUOMId', records[0].get('intReceiveUOMId'));
+            current.set('strUnitMeasure', records[0].get('strReceiveUOM'));            
+            current.set('intUnitMeasureId', records[0].get('intReceiveUOMId'));            
             current.set('strCostUOM', records[0].get('strReceiveUOM'));
+            current.set('intCostUOMId', records[0].get('intReceiveUOMId'));
             current.set('dblUnitCost', dblLastCost);
             current.set('dblUnitRetail', dblLastCost);
             current.set('dblItemUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
@@ -3431,94 +3428,94 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    onRecapClick: function (button, e, eOpts) {
-        var me = this;
-        var win = button.up('window');
-        var cboCurrency = win.down('#cboCurrency');
-        var context = win.context;
-        var pnlLotTracking = win.down('#pnlLotTracking');
-        var grdInventoryReceipt = win.down('#grdInventoryReceipt');
+    // onRecapClick: function (button, e, eOpts) {
+    //     var me = this;
+    //     var win = button.up('window');
+    //     var cboCurrency = win.down('#cboCurrency');
+    //     var context = win.context;
+    //     var pnlLotTracking = win.down('#pnlLotTracking');
+    //     var grdInventoryReceipt = win.down('#grdInventoryReceipt');
 
-        //Hide Lot Tracking Grid
-        pnlLotTracking.setVisible(false);
-        //Deselect all rows in Item Grid
-        grdInventoryReceipt.getSelectionModel().deselectAll();
+    //     //Hide Lot Tracking Grid
+    //     pnlLotTracking.setVisible(false);
+    //     //Deselect all rows in Item Grid
+    //     grdInventoryReceipt.getSelectionModel().deselectAll();
 
-        var doRecap = function (recapButton, currentRecord, currency) {
+    //     var doRecap = function (recapButton, currentRecord, currency) {
 
-            // Call the buildRecapData to generate the recap data
-            CashManagement.common.BusinessRules.buildRecapData({
-                postURL: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
-                strTransactionId: currentRecord.get('strReceiptNumber'),
-                ysnPosted: currentRecord.get('ysnPosted'),
-                scope: me,
-                success: function () {
-                    // If data is generated, show the recap screen.
+    //         // Call the buildRecapData to generate the recap data
+    //         CashManagement.common.BusinessRules.buildRecapData({
+    //             postURL: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
+    //             strTransactionId: currentRecord.get('strReceiptNumber'),
+    //             ysnPosted: currentRecord.get('ysnPosted'),
+    //             scope: me,
+    //             success: function () {
+    //                 // If data is generated, show the recap screen.
 
-                    // Hide the post/unpost button if: 
-                    var showButton;
-                    switch (currentRecord.get('intSourceType')) {
-                        case 1: // Scale  
-                        case 3: // Transport Load
-                        case 4: // Settle Storage 
-                            showButton = false; 
-                            break; 
-                        default:  
-                            showButton = true;
-                            break;   
-                    }
+    //                 // Hide the post/unpost button if: 
+    //                 var showButton;
+    //                 switch (currentRecord.get('intSourceType')) {
+    //                     case 1: // Scale  
+    //                     case 3: // Transport Load
+    //                     case 4: // Settle Storage 
+    //                         showButton = false; 
+    //                         break; 
+    //                     default:  
+    //                         showButton = true;
+    //                         break;   
+    //                 }
 
-                    CashManagement.common.BusinessRules.showRecap({
-                        strTransactionId: currentRecord.get('strReceiptNumber'),
-                        ysnPosted: currentRecord.get('ysnPosted'),
-                        dtmDate: currentRecord.get('dtmReceiptDate'),
-                        strCurrencyId: currency,
-                        dblExchangeRate: 1,
-                        scope: me,
-                        showPostButton: showButton,
-                        showUnpostButton: showButton,
-                        postCallback: function () {
-                            me.onReceiveClick(recapButton);
-                        },
-                        unpostCallback: function () {
-                            me.onReceiveClick(recapButton);
-                        }
-                    });
-                },
-                failure: function (message) {
-                    // Show why recap failed.
-                    var msgBox = iRely.Functions;
-                    msgBox.showCustomDialog(
-                        msgBox.dialogType.ERROR,
-                        msgBox.dialogButtonType.OK,
-                        message
-                    );
-                }
-            });
-        };
+    //                 CashManagement.common.BusinessRules.showRecap({
+    //                     strTransactionId: currentRecord.get('strReceiptNumber'),
+    //                     ysnPosted: currentRecord.get('ysnPosted'),
+    //                     dtmDate: currentRecord.get('dtmReceiptDate'),
+    //                     strCurrencyId: currency,
+    //                     dblExchangeRate: 1,
+    //                     scope: me,
+    //                     showPostButton: showButton,
+    //                     showUnpostButton: showButton,
+    //                     postCallback: function () {
+    //                         me.onReceiveClick(recapButton);
+    //                     },
+    //                     unpostCallback: function () {
+    //                         me.onReceiveClick(recapButton);
+    //                     }
+    //                 });
+    //             },
+    //             failure: function (message) {
+    //                 // Show why recap failed.
+    //                 var msgBox = iRely.Functions;
+    //                 msgBox.showCustomDialog(
+    //                     msgBox.dialogType.ERROR,
+    //                     msgBox.dialogButtonType.OK,
+    //                     message
+    //                 );
+    //             }
+    //         });
+    //     };
 
-        // If there is no data change, calculate the charge and do the recap. 
-        if (!context.data.hasChanges()) {
-            me.doOtherChargeCalculate(win);
-            var task = new Ext.util.DelayedTask(function () {
-                doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
-            });
-            task.delay(3000);
+    //     // If there is no data change, calculate the charge and do the recap. 
+    //     if (!context.data.hasChanges()) {
+    //         me.doOtherChargeCalculate(win);
+    //         var task = new Ext.util.DelayedTask(function () {
+    //             doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+    //         });
+    //         task.delay(3000);
 
-            return;
-        }
+    //         return;
+    //     }
 
-        // Save has data changes first before anything else. 
-        context.data.saveRecord({
-            successFn: function () {
-                me.doOtherChargeCalculate(win);
-                var task = new Ext.util.DelayedTask(function () {
-                    doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
-                });
-                task.delay(3000);
-            }
-        });
-    },
+    //     // Save has data changes first before anything else. 
+    //     context.data.saveRecord({
+    //         successFn: function () {
+    //             me.doOtherChargeCalculate(win);
+    //             var task = new Ext.util.DelayedTask(function () {
+    //                 doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+    //             });
+    //             task.delay(3000);
+    //         }
+    //     });
+    // },
 
     onAfterReceive: function (success, message) {
         if (success === true) {
@@ -6837,12 +6834,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#btnUnpost": {
                 click: this.onReceiveClick
             },
-            "#btnPostPreview": {
+            /*"#btnPostPreview": {
                 click: this.onRecapClick
             },
             "#btnUnpostPreview": {
                 click: this.onRecapClick
-            },
+            },*/
             "#btnReturn": {
                 click: this.onReturnClick
             },
