@@ -67,18 +67,18 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 57,name = 'Maintenance Sales' UNION ALL
 			SELECT id = 58,name = 'Deferred Revenue' UNION ALL
 			SELECT id = 59,name = 'Deferred Payable'UNION ALL
-			SELECT id = 60,name = 'Unrealized Gain or Loss AR' UNION ALL --GL-3286
-			SELECT id = 61,name = 'Unrealized Gain or Loss AP' UNION ALL --GL-3286
-			SELECT id = 62,name = 'Unrealized Gain or Loss CM' UNION ALL --GL-3286
+			SELECT id = 60,name = 'Unrealized Gain or Loss Accounts Receivable' UNION ALL --GL-3286
+			SELECT id = 61,name = 'Unrealized Gain or Loss Accounts Payable' UNION ALL --GL-3286
+			SELECT id = 62,name = 'Unrealized Gain or Loss Cash Management' UNION ALL --GL-3286
 			SELECT id = 63,name = 'Unrealized Gain or Loss Inventory' UNION ALL --GL-3286
-			SELECT id = 64,name = 'Unrealized Gain or Loss Purchase Contract' UNION ALL --GL-3286
-			SELECT id = 65,name = 'Unrealized Gain or Loss Sales Contract'  UNION ALL --GL-3286
+			SELECT id = 64,name = 'Unrealized Gain or Loss Contract Purchase' UNION ALL --GL-3286
+			SELECT id = 65,name = 'Unrealized Gain or Loss Contract Sales'  UNION ALL --GL-3286
 			SELECT id = 66,name = 'Unrealized Gain or Loss Offset AR' UNION ALL --GL-3286
 			SELECT id = 67,name = 'Unrealized Gain or Loss Offset AP' UNION ALL --GL-3286
 			SELECT id = 68,name = 'Unrealized Gain or Loss Offset CM' UNION ALL --GL-3286
 			SELECT id = 69,name = 'Unrealized Gain or Loss Offset Inventory' UNION ALL --GL-3286
-			SELECT id = 70,name = 'Unrealized Gain or Loss Offset Purchase Contract' UNION ALL --GL-3286
-			SELECT id = 71,name = 'Unrealized Gain or Loss Offset Sales Contract' UNION ALL--GL-3286
+			SELECT id = 70,name = 'Unrealized Gain or Loss Offset Contract Purchase' UNION ALL --GL-3286
+			SELECT id = 71,name = 'Unrealized Gain or Loss Offset Contract Sales' UNION ALL--GL-3286
 			SELECT id = 72,name = 'Realized Gain or Loss Payables' UNION ALL--GL-3286
 			SELECT id = 73,name = 'Realized Gain or Loss Receivables' --GL-3286
 
