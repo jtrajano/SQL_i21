@@ -225,8 +225,8 @@ FROM
 										END
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
-												THEN ContractCostCurrency.strCurrency 
-										WHEN DMDetails.intContractDetailId IS NULL  AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL
+												THEN ISNULL(ContractCostCurrency.strCurrency,MainCurrency.strCurrency) --AP-3308
+										WHEN DMDetails.intContractDetailId IS NULL  AND DMDetails.intInventoryReceiptItemId IS NULL THEN MainCurrency.strCurrency
 										WHEN DMDetails.ysnSubCurrency > 0 AND SubCurrency.intConcurrencyId > 0
 										THEN SubCurrency.strCurrency
 									ELSE MainCurrency.strCurrency
@@ -249,13 +249,13 @@ FROM
 		,intBillId				=	DM.intBillId
 		,dblQtyReceived			=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 												THEN NULL
-										WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL
+										--WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL AP-3308
 										WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight
 									 ELSE DMDetails.dblQtyReceived 
 									END
 		,dblCost				=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
-												THEN NULL
-											WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL
+												THEN DMDetails.dblCost --AP-3308
+											WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN DMDetails.dblCost
 										ELSE DMDetails.dblCost
 											END
 		,dblTotal				=	DMDetails.dblTotal
