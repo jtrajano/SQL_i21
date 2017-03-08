@@ -248,7 +248,7 @@ FROM
 		,intContractSeqId		=	ContractDetail.intContractSeq
 		,intBillId				=	DM.intBillId
 		,dblQtyReceived			=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
-												THEN NULL
+												THEN dblQtyReceived
 										--WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL AP-3308
 										WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight
 									 ELSE DMDetails.dblQtyReceived 
