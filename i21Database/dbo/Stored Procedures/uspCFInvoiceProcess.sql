@@ -160,23 +160,23 @@ BEGIN TRY
 		SET @ysnHasError = 1
 	END
 
-	EXEC	@return_value = [dbo].[uspCFCreateFeeDebitMemo]
-			@xmlParam = @xmlParam,
-			@entityId = @entityId,
-			@ErrorMessage = @ErrorMessage OUTPUT,
-			@CreatedIvoices = @CreatedIvoices OUTPUT,
-			@UpdatedIvoices = @UpdatedIvoices OUTPUT,
-			@ysnDevMode = @ysnDevMode
+	--EXEC	@return_value = [dbo].[uspCFCreateFeeDebitMemo]
+	--		@xmlParam = @xmlParam,
+	--		@entityId = @entityId,
+	--		@ErrorMessage = @ErrorMessage OUTPUT,
+	--		@CreatedIvoices = @CreatedIvoices OUTPUT,
+	--		@UpdatedIvoices = @UpdatedIvoices OUTPUT,
+	--		@ysnDevMode = @ysnDevMode
 
-	IF (@ErrorMessage IS NOT NULL)
-	BEGIN
-		SET @ysnHasError = 1
-	END
+	--IF (@ErrorMessage IS NOT NULL)
+	--BEGIN
+	--	SET @ysnHasError = 1
+	--END
 
-	SELECT	'Debit Memo'			AS 'Process'
-			,@ErrorMessage			AS 'ErrorMessage'
-			,@CreatedIvoices		AS 'CreatedIvoices'
-			,@UpdatedIvoices		AS 'UpdatedIvoices'
+	--SELECT	'Debit Memo'			AS 'Process'
+	--		,@ErrorMessage			AS 'ErrorMessage'
+	--		,@CreatedIvoices		AS 'CreatedIvoices'
+	--		,@UpdatedIvoices		AS 'UpdatedIvoices'
 
 
 

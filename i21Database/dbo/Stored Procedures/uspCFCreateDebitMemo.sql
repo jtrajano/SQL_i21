@@ -64,6 +64,31 @@ BEGIN
 		,dtmPostedDate					DATETIME
 )
 
+		CREATE TABLE #tblCFInvoiceFee
+		(
+			 intFeeLoopId				INT
+			,intAccountId				INT
+			,strCalculationType			NVARCHAR(MAX)
+			,dblFeeRate					NUMERIC(18,6)
+			,intTransactionId			INT
+			,dtmTransactionDate			DATETIME
+			,dtmStartDate				DATETIME
+			,dtmEndDate					DATETIME
+			,dblQuantity				NUMERIC(18,6)
+			,intCardId					INT
+			,dblFeeAmount				NUMERIC(18,6)
+			,strFeeDescription			NVARCHAR(MAX)
+			,strFee						NVARCHAR(MAX)
+			,strInvoiceFormat			NVARCHAR(MAX)
+			,strInvoiceReportNumber		NVARCHAR(MAX)
+			,intCustomerId				INT
+			,intTermID					INT
+			,intSalesPersonId			INT
+			,dtmInvoiceDate				DATETIME
+			,dblFeeTotalAmount 			NUMERIC(18,6)
+			,intItemId					INT
+		)
+
 		SET @executedLine = 2
 		CREATE TABLE #tblCFInvoiceResult	
 		(
@@ -84,6 +109,12 @@ BEGIN
 		SET @executedLine = 4
 		INSERT INTO #tblCFInvoiceDiscount
 		EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
+		----------------------------------------
+
+		--------------INVOICE FEE LIST--------------
+		SET @executedLine = 4
+		INSERT INTO #tblCFInvoiceFee
+		EXEC "dbo"."uspCFInvoiceReportFee" @xmlParam=@xmlParam
 		----------------------------------------
 
 		----------ENTRIES FOR INVOICE-----------
@@ -265,6 +296,187 @@ BEGIN
 		,intTermID
 		,dtmInvoiceDate
 		,intSalesPersonId
+		----------------------------------------
+
+		----------FEE ENTRIES FOR INVOICE-----------
+		SET @executedLine = 5
+		INSERT INTO @EntriesForInvoice(
+			 [strTransactionType]
+			,[strSCInvoiceNumber]		
+			,[intSalesAccountId]
+			,[strSourceTransaction]
+			,[intSourceId]
+			,[strSourceId]
+			,[intInvoiceId]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[dtmDate]
+			,[dtmDueDate]
+			,[dtmShipDate]
+			,[intEntitySalespersonId]
+			,[intFreightTermId]
+			,[intShipViaId]
+			,[intPaymentMethodId]
+			,[strInvoiceOriginId]
+			,[ysnUseOriginIdAsInvoiceNumber]
+			,[strPONumber]
+			,[strBOLNumber]
+			,[strDeliverPickup]
+			,[strComments]
+			,[intShipToLocationId]
+			,[intBillToLocationId]
+			,[ysnTemplate]
+			,[ysnForgiven]
+			,[ysnCalculated]
+			,[ysnSplitted]
+			,[intPaymentId]
+			,[intSplitId]
+			,[intLoadDistributionHeaderId]
+			,[strActualCostId]
+			,[intShipmentId]
+			,[intTransactionId]
+			,[intEntityId]
+			,[ysnResetDetails]
+			,[ysnPost]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[ysnInventory]
+			,[strItemDescription]
+			,[intItemUOMId]
+			,[dblQtyOrdered]
+			,[dblQtyShipped]
+			,[dblDiscount]
+			,[dblPrice]
+			,[ysnRefreshPrice]
+			,[strMaintenanceType]
+			,[strFrequency]
+			,[dtmMaintenanceDate]
+			,[dblMaintenanceAmount]
+			,[dblLicenseAmount]
+			,[intTaxGroupId]
+			,[ysnRecomputeTax]
+			,[intSCInvoiceId]
+			,[intInventoryShipmentItemId]
+			,[strShipmentNumber]
+			,[intSalesOrderDetailId]
+			,[strSalesOrderNumber]
+			,[intContractHeaderId]
+			,[intContractDetailId]
+			,[intShipmentPurchaseSalesContractId]
+			,[intTicketId]
+			,[intTicketHoursWorkedId]
+			,[intSiteId]
+			,[strBillingBy]
+			,[dblPercentFull]
+			,[dblNewMeterReading]
+			,[dblPreviousMeterReading]
+			,[dblConversionFactor]
+			,[intPerformerId]
+			,[ysnLeaseBilling]
+			,[ysnVirtualMeterReading]
+			,[ysnClearDetailTaxes]					
+			,[intTempDetailIdForTaxes]
+			,[strType]
+			,[ysnUpdateAvailableDiscount]
+			,[strItemTermDiscountBy]
+			,[dblItemTermDiscount]
+			,[strDocumentNumber]
+		)
+		SELECT
+			 [strTransactionType]					= 'Debit Memo'
+			,[strSCInvoiceNumber]					= ''
+			,[intSalesAccountId]					= @accountId
+			,[strSourceTransaction]					= 'CF Invoice'
+			,[intSourceId]							= 1											-- TEMPORARY
+			,[strSourceId]							= strInvoiceReportNumber
+			,[intInvoiceId]							= NULL --(SELECT TOP 1 intInvoiceId FROM tblARInvoice WHERE strInvoiceNumber COLLATE Latin1_General_CI_AS = strInvoiceReportNumber COLLATE Latin1_General_CI_AS) 
+			,[intEntityCustomerId]					= intCustomerId
+			,[intCompanyLocationId]					= @companyLocationId						--CF Company Configuration
+			,[intCurrencyId]						= NULL
+			,[intTermId]							= intTermID
+			,[dtmDate]								= dtmInvoiceDate								
+			,[dtmDueDate]							= NULL
+			,[dtmShipDate]							= dtmInvoiceDate							-- TEMPORARY
+			,[intEntitySalespersonId]				= intSalesPersonId										-- TEMPORARY
+			,[intFreightTermId]						= NULL 
+			,[intShipViaId]							= NULL 
+			,[intPaymentMethodId]					= NULL
+			,[strInvoiceOriginId]					= strInvoiceReportNumber
+			,[ysnUseOriginIdAsInvoiceNumber]		= 1
+			,[strPONumber]							= NULL
+			,[strBOLNumber]							= ''
+			,[strDeliverPickup]						= NULL
+			,[strComments]							= ''
+			,[intShipToLocationId]					= NULL
+			,[intBillToLocationId]					= NULL
+			,[ysnTemplate]							= 0
+			,[ysnForgiven]							= 0
+			,[ysnCalculated]						= 0
+			,[ysnSplitted]							= 0
+			,[intPaymentId]							= NULL
+			,[intSplitId]							= NULL
+			,[intLoadDistributionHeaderId]			= NULL
+			,[strActualCostId]						= ''
+			,[intShipmentId]						= NULL
+			,[intTransactionId]						= NULL
+			,[intEntityId]							= @entityId											-- TEMPORARY
+			,[ysnResetDetails]						= 0
+			,[ysnPost]								= 1
+			,[intInvoiceDetailId]					= NULL
+			,[intItemId]							= null--intItemId
+			,[ysnInventory]							= 0
+			,[strItemDescription]					= NULL
+			,[intItemUOMId]							= NULL
+			,[dblQtyOrdered]						= NULL
+			,[dblQtyShipped]						= 1 -- DEFAULT TO 1
+			,[dblDiscount]							= NULL
+			,[dblPrice]								= dblFeeAmount--dblFeeTotalAmount
+			,[ysnRefreshPrice]						= 0
+			,[strMaintenanceType]					= ''
+			,[strFrequency]							= ''
+			,[dtmMaintenanceDate]					= NULL
+			,[dblMaintenanceAmount]					= NULL
+			,[dblLicenseAmount]						= NULL
+			,[intTaxGroupId]						= NULL
+			,[ysnRecomputeTax]						= 0
+			,[intSCInvoiceId]						= NULL
+			,[intInventoryShipmentItemId]			= NULL
+			,[strShipmentNumber]					= ''
+			,[intSalesOrderDetailId]				= NULL
+			,[strSalesOrderNumber]					= ''
+			,[intContractHeaderId]					= NULL
+			,[intContractDetailId]					= NULL
+			,[intShipmentPurchaseSalesContractId]	= NULL
+			,[intTicketId]							= NULL
+			,[intTicketHoursWorkedId]				= NULL
+			,[intSiteId]							= NULL
+			,[strBillingBy]							= ''
+			,[dblPercentFull]						= NULL
+			,[dblNewMeterReading]					= NULL
+			,[dblPreviousMeterReading]				= NULL
+			,[dblConversionFactor]					= NULL
+			,[intPerformerId]						= NULL
+			,[ysnLeaseBilling]						= NULL
+			,[ysnVirtualMeterReading]				= NULL
+			,[ysnClearDetailTaxes]					= 1
+			,[intTempDetailIdForTaxes]				= NULL
+			,[strType]								= 'CF Invoice'
+			,[ysnUpdateAvailableDiscount]			= 1
+			,[strItemTermDiscountBy]				= ''
+			,[dblItemTermDiscount]					= 0
+			,[strDocumentNumber]					= strInvoiceReportNumber
+		FROM #tblCFInvoiceFee
+		--GROUP BY 
+		--intCustomerId
+		--,strInvoiceReportNumber
+		--,dblAccountTotalAmount
+		--,dblTotalQuantity
+		--,dblAccountTotalDiscount
+		--,intTermID
+		--,dtmInvoiceDate
+		--,intSalesPersonId
 		----------------------------------------
 
 		--SELECT * FROM @EntriesForInvoice
