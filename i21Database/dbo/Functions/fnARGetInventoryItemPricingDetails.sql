@@ -92,7 +92,7 @@ BEGIN
 							END) 									
 		,@DiscountBy	= ICISP.strDiscountBy
 		,@PromotionType	= ICISP.strPromotionType
-		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblDiscount ELSE 0.000000 END)
+		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ISNULL((ISNULL(ICISP.dblDiscount, 0.00)/ISNULL(ICISP.dblUnit,0.00)) * @Quantity,0.00) ELSE 0.000000 END)
 		,@Pricing		= 'Inventory Promotional Pricing' + ISNULL('(' + ICISP.strPromotionType + ')','')	
 	FROM
 		tblICItemSpecialPricing ICISP
