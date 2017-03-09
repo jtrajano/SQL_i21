@@ -71,9 +71,19 @@ SELECT CD.intContractDetailId
 	,S.strSampleTypeName
 	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) AS strTestingStartDate
 	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
-	,S.intCompanyLocationSubLocationId
-	,S.strSubLocationName
+	,CASE 
+		WHEN S.intCompanyLocationSubLocationId IS NULL
+			THEN CD.intSubLocationId
+		ELSE S.intCompanyLocationSubLocationId
+		END AS intCompanyLocationSubLocationId
+	,CASE 
+		WHEN ISNULL(S.strSubLocationName, '') = ''
+			THEN CLSL.strSubLocationName
+		ELSE S.strSubLocationName
+		END AS strSubLocationName
 	,S.dblRepresentingQty AS dblContainerQty
+	,SL.strName AS strStorageLocationName
+	,CD.intStorageLocationId
 	,intShipmentType = 1
 	,CD.strERPPONumber
 FROM tblCTContractHeader CH
@@ -93,6 +103,8 @@ LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -211,9 +223,19 @@ SELECT CD.intContractDetailId
 	,S.strSampleTypeName
 	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) AS strTestingStartDate
 	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
-	,S.intCompanyLocationSubLocationId
-	,S.strSubLocationName
+	,CASE 
+		WHEN S.intCompanyLocationSubLocationId IS NULL
+			THEN CD.intSubLocationId
+		ELSE S.intCompanyLocationSubLocationId
+		END AS intCompanyLocationSubLocationId
+	,CASE 
+		WHEN ISNULL(S.strSubLocationName, '') = ''
+			THEN CLSL.strSubLocationName
+		ELSE S.strSubLocationName
+		END AS strSubLocationName
 	,S.dblRepresentingQty AS dblContainerQty
+	,SL.strName AS strStorageLocationName
+	,CD.intStorageLocationId
 	,intShipmentType = 2
 	,CD.strERPPONumber
 FROM tblCTContractHeader CH
@@ -233,6 +255,8 @@ LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -310,3 +334,7 @@ GROUP BY CD.intContractDetailId
 	,S.dblRepresentingQty
 	,CD.strERPPONumber
 	,ysnValidateExternalPONo
+	,CD.intSubLocationId
+	,CLSL.strSubLocationName
+	,SL.strName
+	,CD.intStorageLocationId
