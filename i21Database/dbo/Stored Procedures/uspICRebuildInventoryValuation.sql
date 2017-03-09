@@ -592,7 +592,6 @@ BEGIN
 			,@intTransactionId AS INT 
 			,@strTransactionId AS NVARCHAR(50)
 			,@GLEntries AS RecapTableType 
-			--,@intItemId AS INT 
 			,@intReturnId AS INT
 			,@ysnPost AS BIT 
 			,@dblQty AS NUMERIC(38, 20)
@@ -661,6 +660,7 @@ BEGIN
 
 			-- Clear the data on @ItemsToPost
 			DELETE FROM @ItemsToPost
+			DELETE FROM @ItemsForInTransitCosting
 
 			-- Repost the cost adjustments
 			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment'))
@@ -1441,7 +1441,7 @@ BEGIN
 			END
 			
 			-- Repost 'Inventory Shipment'
-			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Inventory Shipment'))
+			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Inventory Shipment')) 
 			BEGIN 
 				SET @intFobPointId = NULL 
 
@@ -1503,12 +1503,15 @@ BEGIN
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
 
-				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICInventoryShipment shipment
+				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemLocation ItemLocation 
+							ON ICTrans.intItemLocationId = ItemLocation.intItemLocationId 
+						INNER JOIN tblICInventoryShipment shipment
 							ON ICTrans.strTransactionId = shipment.strShipmentNumber
 						INNER JOIN tblICInventoryShipmentItem shipmentItem
 							ON shipmentItem.intInventoryShipmentId = shipment.intInventoryShipmentId
 							AND shipmentItem.intInventoryShipmentItemId = ICTrans.intTransactionDetailId
 							AND shipmentItem.intItemId = ICTrans.intItemId
+							AND shipmentItem.intItemId = ISNULL(@intItemId, shipmentItem.intItemId)
 						LEFT JOIN tblICInventoryShipmentItemLot shipmentItemLot
 							ON shipmentItemLot.intInventoryShipmentItemId = shipmentItem.intInventoryShipmentItemId 
 							AND ISNULL(shipmentItemLot.intLotId, 0) = ICTrans.intLotId
@@ -1519,6 +1522,7 @@ BEGIN
 							ON lot.intLotId = shipmentItemLot.intLotId
 				WHERE	strBatchId = @strBatchId
 						AND ICTrans.dblQty < 0 
+						AND ItemLocation.intLocationId IS NOT NULL
 					
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -1570,7 +1574,7 @@ BEGIN
 					,@strAccountToCounterInventory
 					,@intEntityUserSecurityId
 					,@strGLDescription
-					,NULL 
+					,@strAccountToCounterInventory 
 					,@intItemId -- This is only used when rebuilding the stocks. 
 					
 				IF @intReturnId <> 0 
@@ -1629,12 +1633,13 @@ BEGIN
 						AND t.ysnIsUnposted = 0 
 						AND t.strBatchId = @strBatchId
 						AND @intFobPointId = @FOB_DESTINATION
-						AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 				
+						AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
+						AND t.intItemId = ISNULL(@intItemId, t.intItemId)
 
 				EXEC dbo.uspICRepostInTransitCosting
 					@ItemsForInTransitCosting
 					,@strBatchId
-					,@strAccountToCounterInventory
+					,NULL 
 					,@intEntityUserSecurityId
 					,@strGLDescription
 
@@ -1687,7 +1692,7 @@ BEGIN
 			END
 			 				
 			-- Repost 'Invoice'
-			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Inventory Shipment')) OR @strTransactionId LIKE 'SI%'
+			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Invoice')) OR @strTransactionId LIKE 'SI%'
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -1778,6 +1783,7 @@ BEGIN
 				WHERE	RebuilInvTrans.strBatchId = @strBatchId
 						AND RebuilInvTrans.intTransactionId = @intTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
+						AND RebuilInvTrans.intItemId = ISNULL(@intItemId, RebuilInvTrans.intItemId)
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -1883,16 +1889,18 @@ BEGIN
 						,[intSourceTransactionDetailId] = t.intTransactionDetailId
 						,[intFobPointId]				= t.intFobPointId
 						,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
-					FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id 
-								ON i.intInvoiceId = id.intInvoiceId
-							INNER JOIN tblICInventoryShipmentItem si 
-								ON si.intInventoryShipmentItemId = id.intInventoryShipmentItemId
-							INNER JOIN tblICInventoryTransaction t
-								ON t.intTransactionId = si.intInventoryShipmentId
-								AND t.intTransactionDetailId = si.intInventoryShipmentItemId
-								AND t.ysnIsUnposted = 0 
+					FROM	
+						tblARInvoice i INNER JOIN tblARInvoiceDetail id 
+							ON i.intInvoiceId = id.intInvoiceId
+						INNER JOIN tblICInventoryShipmentItem si 
+							ON si.intInventoryShipmentItemId = id.intInventoryShipmentItemId
+						INNER JOIN tblICInventoryTransaction t
+							ON t.intTransactionId = si.intInventoryShipmentId
+							AND t.intTransactionDetailId = si.intInventoryShipmentItemId
+							AND t.ysnIsUnposted = 0 
 				WHERE	t.intFobPointId = @FOB_DESTINATION
 						AND i.strInvoiceNumber = @strTransactionId
+						AND id.intItemId = ISNULL(@intItemId, id.intItemId)
 
 				EXEC dbo.uspICRepostInTransitCosting
 					@ItemsForInTransitCosting
@@ -2116,22 +2124,7 @@ BEGIN
 															)
 															,ItemUOM.dblUnitQty
 														)
-											END 		
-																				
-										---- When it is a credit memo:
-										-- WHEN (RebuilInvTrans.dblQty > 0 AND RebuilInvTrans.strTransactionId LIKE 'SI%') THEN 
-											
-										--	CASE	WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-										--				-- If using Average Costing, use Ave Cost.
-										--				dbo.fnGetItemAverageCost(
-										--					RebuilInvTrans.intItemId
-										--					, RebuilInvTrans.intItemLocationId
-										--					, RebuilInvTrans.intItemUOMId
-										--				) 
-										--			ELSE
-										--				-- Otherwise, get the last cost. 
-										--				ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId))
-										--	END 
+											END 								
 
 										 ELSE 
 											RebuilInvTrans.dblCost
@@ -2150,7 +2143,9 @@ BEGIN
 						,RebuilInvTrans.intForexRateTypeId
 						,RebuilInvTrans.dblForexRate
 
-				FROM	#tmpICInventoryTransaction RebuilInvTrans LEFT JOIN dbo.tblICInventoryReceipt Receipt
+				FROM	#tmpICInventoryTransaction RebuilInvTrans INNER JOIN tblICItemLocation ItemLocation 
+							ON RebuilInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
+						LEFT JOIN dbo.tblICInventoryReceipt Receipt
 							ON Receipt.intInventoryReceiptId = RebuilInvTrans.intTransactionId
 							AND Receipt.strReceiptNumber = RebuilInvTrans.strTransactionId			
 						LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem
@@ -2177,6 +2172,7 @@ BEGIN
 							ON lot.intLotId = RebuilInvTrans.intLotId 
 				WHERE	RebuilInvTrans.strBatchId = @strBatchId
 						AND RebuilInvTrans.intTransactionId = @intTransactionId
+						AND ItemLocation.intLocationId IS NOT NULL 
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
