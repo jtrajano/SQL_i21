@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportFee](
+﻿
+CREATE PROCEDURE [dbo].[uspCFInvoiceReportFee](
 	@xmlParam NVARCHAR(MAX)=null
 )
 AS
@@ -28,6 +29,7 @@ BEGIN
 			,intTermID					 = 0
 			,intSalesPersonId			 = 0
 			,intItemId					 = 0
+			,intARLocationId			 = 0
 			RETURN;
 		END
 		ELSE
@@ -245,6 +247,7 @@ BEGIN
 				 ,dtmPostedDate				DATETIME
 				 ,strTransactionType		NVARCHAR(MAX)
 				 ,intNetworkId				INT
+				 ,intARLocationId			INT
 
 			)
 
@@ -299,6 +302,7 @@ BEGIN
 			 ,intSalesPersonId			INT
 			 ,dtmInvoiceDate			DATETIME
 			 ,intItemId					INT
+			 ,intARLocationId			INT
 		)
 
 			-------------VARIABLES------------
@@ -353,6 +357,7 @@ BEGIN
 			,dtmPostedDate		
 			,strTransactionType	
 			,intNetworkId
+			,intARLocationId
 			FROM ##tmpInvoiceFee
 
 			-------------SET GROUP VOLUME TO OUTPUT---------------
@@ -369,6 +374,7 @@ BEGIN
 			DECLARE @intCustomerId			INT
 			DECLARE @intTermID				INT
 			DECLARE @intSalesPersonId		INT
+			DECLARE @intARLocationId		INT
 			
 			
 			WHILE (EXISTS(SELECT 1 FROM @tblCFInvoiceFeesTemp))
@@ -383,6 +389,7 @@ BEGIN
 				,@intCustomerId				= intCustomerId
 				,@intTermID					= intTermID
 				,@intSalesPersonId			= intSalesPersonId
+				,@intARLocationId		= intARLocationId
 				FROM @tblCFInvoiceFeesTemp
 
 				---GET LAST BILLING CYCLE DATE---
@@ -585,6 +592,7 @@ BEGIN
 						,intSalesPersonId
 						,dtmInvoiceDate
 						,intItemId
+						,intARLocationId
 					)
 					SELECT 
 						 @intFeeLoopId
@@ -631,6 +639,7 @@ BEGIN
 						,@intSalesPersonId	
 						,@dtmInvoiceDate	
 						,intItemId	
+						,@intARLocationId
 						FROM @tblCFInvoiceFeeDetail cffee
 						WHERE intFeeId = @intFeeLoopId
 						GROUP BY 
@@ -688,6 +697,7 @@ BEGIN
 			,dtmInvoiceDate
 			,dblFeeTotalAmount = (SELECT ROUND(SUM(dblFeeAmount),2) FROM ##tblCFInvoiceFeeOutput) 
 			,intItemId
+			,intARLocationId
 			FROM ##tblCFInvoiceFeeOutput
 					
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------

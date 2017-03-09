@@ -87,6 +87,7 @@ BEGIN
 			,dtmInvoiceDate				DATETIME
 			,dblFeeTotalAmount 			NUMERIC(18,6)
 			,intItemId					INT
+			,intARLocationId			INT
 		)
 
 		SET @executedLine = 2
@@ -242,7 +243,7 @@ BEGIN
 			,[intTransactionId]						= NULL
 			,[intEntityId]							= @entityId											-- TEMPORARY
 			,[ysnResetDetails]						= 0
-			,[ysnPost]								= 1
+			,[ysnPost]								= NULL--1
 			,[intInvoiceDetailId]					= NULL
 			,[intItemId]							= NULL
 			,[ysnInventory]							= 0
@@ -387,7 +388,10 @@ BEGIN
 		SELECT
 			 [strTransactionType]					= 'Debit Memo'
 			,[strSCInvoiceNumber]					= ''
-			,[intSalesAccountId]					= @accountId
+			,[intSalesAccountId]					= (SELECT TOP 1 intGeneralAccountId 
+														FROM vyuARGetItemAccount 
+														WHERE intItemId = intItemId 
+														AND intLocationId = intARLocationId)--178--@accountId
 			,[strSourceTransaction]					= 'CF Invoice'
 			,[intSourceId]							= 1											-- TEMPORARY
 			,[strSourceId]							= strInvoiceReportNumber
@@ -423,9 +427,9 @@ BEGIN
 			,[intTransactionId]						= NULL
 			,[intEntityId]							= @entityId											-- TEMPORARY
 			,[ysnResetDetails]						= 0
-			,[ysnPost]								= 1
+			,[ysnPost]								= -NULL-1
 			,[intInvoiceDetailId]					= NULL
-			,[intItemId]							= null--intItemId
+			,[intItemId]							= intItemId
 			,[ysnInventory]							= 0
 			,[strItemDescription]					= NULL
 			,[intItemUOMId]							= NULL
