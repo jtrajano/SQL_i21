@@ -22,6 +22,7 @@ SELECT CD.intContractDetailId
 	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) AS strEndDate
 	,CD.dtmStartDate
 	,CD.dtmEndDate
+	,CD.dtmPlannedAvailabilityDate
 	,EY.intDefaultLocationId
 	,ISNULL(CD.dblScheduleQty, 0) AS dblScheduleQty
 	,CH.strCustomerContract
@@ -161,6 +162,7 @@ SELECT CD.intContractDetailId
 	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) AS strEndDate
 	,CD.dtmStartDate
 	,CD.dtmEndDate
+	,CD.dtmPlannedAvailabilityDate
 	,EY.intDefaultLocationId
 	,ISNULL((SELECT SUM(LD.dblQuantity)
 			 FROM tblLGLoadDetail LD
@@ -303,6 +305,7 @@ GROUP BY CD.intContractDetailId
 	,EY.strEntityName
 	,CD.dtmStartDate
 	,CD.dtmEndDate
+	,CD.dtmPlannedAvailabilityDate
 	,EY.intDefaultLocationId
 	,CH.strCustomerContract
 	,CD.intContractStatusId
