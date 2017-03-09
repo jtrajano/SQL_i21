@@ -78,7 +78,10 @@ DECLARE	 @Price				NUMERIC(18,6)
 		SET @ExcludeContractPricing = 0		
 		
 	IF @GetAllAvailablePricing IS NULL
-		SET @GetAllAvailablePricing = 0					
+		SET @GetAllAvailablePricing = 0
+		
+	IF @CurrencyId IS NULL
+		SET @CurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)			
 		
 	IF NOT(@CustomerPricingOnly = 1 OR @ExcludeContractPricing = 1) AND @ItemPricingOnly = 0
 	BEGIN
