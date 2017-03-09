@@ -12,12 +12,12 @@ SELECT TL.intLoadHeaderId
 	, strCustomerLocation = NULL
 	, intCustomerCompanyLocationId = NULL
 	, strCustomerCompanyLocation = NULL
-	, intEntityVendorId = SP.intEntityVendorId
+	, intEntityVendorId = CAST(SP.intEntityVendorId AS NVARCHAR(100))
 	, SP.strFuelSupplier
-	, intVendorLocationId = SP.intEntityLocationId
+	, intVendorLocationId = CAST(SP.intEntityLocationId AS NVARCHAR(100))
 	, SP.strSupplyPoint
 	, strBOL = TR.strBillOfLading
-	, intReceiptCompanyLocationId = Location.intCompanyLocationId
+	, intReceiptCompanyLocationId = CAST(Location.intCompanyLocationId AS NVARCHAR(100))
 	, strReceiptCompanyLocation = Location.strLocationName
 	, Item.intItemId
 	, strItem = Item.strItemNo
@@ -122,7 +122,7 @@ LEFT JOIN(
 		, STUFF(
 				(SELECT	DISTINCT ', ' + CD.strBillOfLading
 				FROM vyuTRLinkedReceipts CD
-				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
+				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId 
 				AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
 				FOR XML PATH('')), 1, 2, ''
 				) strBillOfLading
