@@ -32,6 +32,9 @@ DECLARE @intId AS INT
 		,@intSubLocationId AS INT
 		,@intStorageLocationId AS INT 
 		,@strActualCostId AS NVARCHAR(50)
+		,@intForexRateTypeId AS INT
+		,@dblForexRate NUMERIC(38, 20)
+
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)		
@@ -74,7 +77,7 @@ SELECT  intId
 		,dblCost
 		,dblSalesPrice
 		,intCurrencyId
-		,dblExchangeRate
+		--,dblExchangeRate
 		,intTransactionId
 		,intTransactionDetailId
 		,strTransactionId
@@ -83,6 +86,8 @@ SELECT  intId
 		,intSubLocationId
 		,intStorageLocationId
 		,strActualCostId
+		,intForexRateTypeId
+		,dblForexRate 
 FROM	@ItemsToPost
 
 OPEN loopItems;
@@ -99,7 +104,7 @@ FETCH NEXT FROM loopItems INTO
 	,@dblCost
 	,@dblSalesPrice
 	,@intCurrencyId
-	,@dblExchangeRate
+	--,@dblExchangeRate
 	,@intTransactionId
 	,@intTransactionDetailId
 	,@strTransactionId
@@ -107,7 +112,10 @@ FETCH NEXT FROM loopItems INTO
 	,@intLotId
 	,@intSubLocationId
 	,@intStorageLocationId
-	,@strActualCostId;
+	,@strActualCostId
+	,@intForexRateTypeId
+	,@dblForexRate;
+
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -147,14 +155,16 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			,@dblExchangeRate
+			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intEntityUserSecurityId;
+			,@intEntityUserSecurityId
+			,@intForexRateTypeId 
+			,@dblForexRate;
 	END
 
 	-- FIFO 
@@ -172,14 +182,16 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			,@dblExchangeRate
+			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intEntityUserSecurityId;
+			,@intEntityUserSecurityId
+			,@intForexRateTypeId 
+			,@dblForexRate;
 	END
 
 	-- LIFO 
@@ -197,14 +209,16 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			,@dblExchangeRate
+			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intEntityUserSecurityId;
+			,@intEntityUserSecurityId
+			,@intForexRateTypeId 
+			,@dblForexRate;
 	END
 
 	-- LOT 
@@ -223,14 +237,16 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			,@dblExchangeRate
+			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intEntityUserSecurityId;
+			,@intEntityUserSecurityId
+			,@intForexRateTypeId 
+			,@dblForexRate;
 	END
 
 	-- ACTUAL COST 
@@ -266,7 +282,7 @@ BEGIN
 					,@dblCost
 					,@dblSalesPrice
 					,@intCurrencyId
-					,@dblExchangeRate
+					--,@dblExchangeRate
 					,@intTransactionId
 					,@intTransactionDetailId
 					,@strTransactionId
@@ -274,6 +290,8 @@ BEGIN
 					,@intTransactionTypeId
 					,@strTransactionForm
 					,@intEntityUserSecurityId
+					,@intForexRateTypeId 
+					,@dblForexRate;
 			END 
 
 			ELSE IF @intCostingMethod = @FIFO
@@ -290,14 +308,16 @@ BEGIN
 					,@dblCost
 					,@dblSalesPrice
 					,@intCurrencyId
-					,@dblExchangeRate
+					--,@dblExchangeRate
 					,@intTransactionId
 					,@intTransactionDetailId
 					,@strTransactionId
 					,@strBatchId
 					,@intTransactionTypeId
 					,@strTransactionForm
-					,@intEntityUserSecurityId;
+					,@intEntityUserSecurityId
+					,@intForexRateTypeId 
+					,@dblForexRate;
 			END 
 
 			ELSE IF @intCostingMethod = @LIFO
@@ -314,14 +334,16 @@ BEGIN
 					,@dblCost
 					,@dblSalesPrice
 					,@intCurrencyId
-					,@dblExchangeRate
+					--,@dblExchangeRate
 					,@intTransactionId
 					,@intTransactionDetailId
 					,@strTransactionId
 					,@strBatchId
 					,@intTransactionTypeId
 					,@strTransactionForm
-					,@intEntityUserSecurityId;
+					,@intEntityUserSecurityId
+					,@intForexRateTypeId 
+					,@dblForexRate;
 			END 
 
 			ELSE IF @intCostingMethod = @LOTCOST
@@ -339,14 +361,16 @@ BEGIN
 					,@dblCost
 					,@dblSalesPrice
 					,@intCurrencyId
-					,@dblExchangeRate
+					--,@dblExchangeRate
 					,@intTransactionId
 					,@intTransactionDetailId
 					,@strTransactionId
 					,@strBatchId
 					,@intTransactionTypeId
 					,@strTransactionForm
-					,@intEntityUserSecurityId;
+					,@intEntityUserSecurityId
+					,@intForexRateTypeId 
+					,@dblForexRate;
 			END 
 		END 
 		ELSE 
@@ -364,7 +388,7 @@ BEGIN
 				,@dblCost 
 				,@dblSalesPrice 
 				,@intCurrencyId 
-				,@dblExchangeRate 
+				--,@dblExchangeRate 
 				,@intTransactionId 
 				,@intTransactionDetailId 
 				,@strTransactionId 
@@ -372,42 +396,10 @@ BEGIN
 				,@intTransactionTypeId 
 				,@strTransactionForm 
 				,@intEntityUserSecurityId 
-				;
+				,@intForexRateTypeId 
+				,@dblForexRate;
 		END 
 	END
-
-	-- Update the Lot's Qty and Weights. 
-	--BEGIN 
-	--	--UPDATE	Lot 
-	--	--SET		Lot.dblQty = dbo.fnCalculateLotQty(Lot.intItemUOMId, @intItemUOMId, Lot.dblQty, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-	--	--		,Lot.dblWeight = dbo.fnCalculateLotWeight(Lot.intItemUOMId, Lot.intWeightUOMId, @intItemUOMId, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-	--	--		,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
-	--	--FROM	dbo.tblICLot Lot
-	--	--WHERE	Lot.intItemLocationId = @intItemLocationId
-	--	--		AND Lot.intLotId = @intLotId
-
-	--	UPDATE	Lot 
-	--	SET		Lot.dblQty =	dbo.fnCalculateLotQty(
-	--								Lot.intItemUOMId
-	--								, @intItemUOMId
-	--								, Lot.dblQty
-	--								, Lot.dblWeight
-	--								, @dblQty 
-	--								, Lot.dblWeightPerQty
-	--							)
-	--			,Lot.dblWeight = dbo.fnCalculateLotWeight(
-	--									Lot.intItemUOMId
-	--									, Lot.intWeightUOMId
-	--									, @intItemUOMId 
-	--									, Lot.dblWeight
-	--									, @dblQty 
-	--									, Lot.dblWeightPerQty
-	--								)
-	--			,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
-	--	FROM	dbo.tblICLot Lot
-	--	WHERE	Lot.intItemLocationId = @intItemLocationId
-	--			AND Lot.intLotId = @intLotId
-	--END 
 
 	--------------------------------------------------
 	-- Adjust the average cost and units on hand. 
@@ -506,7 +498,7 @@ BEGIN
 		,@dblCost
 		,@dblSalesPrice
 		,@intCurrencyId
-		,@dblExchangeRate
+		--,@dblExchangeRate
 		,@intTransactionId
 		,@intTransactionDetailId
 		,@strTransactionId
@@ -515,6 +507,8 @@ BEGIN
 		,@intSubLocationId
 		,@intStorageLocationId
 		,@strActualCostId
+		,@intForexRateTypeId
+		,@dblForexRate;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
