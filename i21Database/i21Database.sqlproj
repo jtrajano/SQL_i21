@@ -5095,6 +5095,7 @@
     <Build Include="dbo\Tables\tblSMDocumentSourceFolder.sql" />
     <Build Include="dbo\Tables\tblSMDocumentTypeFieldValue.sql" />
     <Build Include="dbo\Tables\tblSMNewDocument.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDeleteDocumentSourceFolder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
