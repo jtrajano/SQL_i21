@@ -4701,6 +4701,9 @@ Ext.define('iRely.FunctionalTest', {
 				function (next) {
 					t.type(combo, uom, next);
 				},
+                function (next) {
+                    t.type(combo, '[RETURN]', next);
+                },
 				function (next) {
 					var store = combo.store;
 					
