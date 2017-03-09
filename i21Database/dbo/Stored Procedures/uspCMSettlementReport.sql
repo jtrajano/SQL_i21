@@ -161,8 +161,8 @@ BEGIN
 	BillDtl.dblTotal,
 	BillDtl.dblTax,
 	CNTRCT.strContractNumber,
-	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
+	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 
@@ -173,11 +173,11 @@ BEGIN
 	0 as OutboundGrossDollars,
 	BillDtl.dblTax as InboundTax,
 	0 as OutboundTax,
-	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
 	0 as OutboundDiscount,
-	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as InboundNetDue,
+	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as InboundNetDue,
 	0 as OutboundNetDue,
-	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
 	0 as SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount
 	 
@@ -385,8 +385,8 @@ BEGIN
 	BillDtl.dblTotal,
 	BillDtl.dblTax,
 	CNTRCT.strContractNumber,
-	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
+	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 
@@ -397,11 +397,11 @@ BEGIN
 	0 as OutboundGrossDollars,
 	BillDtl.dblTax as InboundTax,
 	0 as OutboundTax,
-	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
 	0 as OutboundDiscount,
-	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as InboundNetDue,
+	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as InboundNetDue,
 	0 as OutboundNetDue,
-	ISNULL((SELECT SUM(dblCost) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
 	0 as SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount
 	 
