@@ -120,10 +120,10 @@ SELECT
 									ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
 	[dblTotal] 				=	CASE WHEN A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A' THEN A.apivc_orig_amt
 									ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
-	[dblPayment]			=	CASE WHEN A.apivc_status_ind = 'P' THEN
-									(CASE WHEN (A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A') THEN A.apivc_orig_amt
-										ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END)
-									- (CASE WHEN A.apivc_net_amt + ISNULL(A.apivc_disc_taken,0) = A.apivc_orig_amt THEN ISNULL(A.apivc_disc_taken,0) ELSE 0 END) --DO NOT USE apivc_net_amt directly as there are origin transaction that the net amount do not subtract the discount
+	[dblPayment]			=	CASE WHEN B.apivc_status_ind = 'P' OR ISNULL(B.apivc_chk_no,'') != '' THEN B.apivc_net_amt
+									--(CASE WHEN (A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A') THEN A.apivc_orig_amt
+									--	ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END)
+									--- (CASE WHEN A.apivc_net_amt + ISNULL(A.apivc_disc_taken,0) = A.apivc_orig_amt THEN ISNULL(A.apivc_disc_taken,0) ELSE 0 END) --DO NOT USE apivc_net_amt directly as there are origin transaction that the net amount do not subtract the discount
 								ELSE 0 END,
 	[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = 'P' THEN 0 ELSE 
 										CASE WHEN A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A' THEN A.apivc_orig_amt
