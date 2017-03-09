@@ -931,3 +931,24 @@ BEGIN
 		AND [strType] = N'Contracts w/o 4C'
 END
 GO
+
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Mail Not Sent For' AND [strType] = N'Approved Contract')
+BEGIN
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+	SELECT  [strReminder]       =		 N'Mail Not Sent For',
+			[strType]        	=        N'Approved Contract',
+			[strMessage]		=        N'{0} {1} {2} Not Sent.',
+			[strQuery]  		=        N'	SELECT	intContractHeaderId 
+											FROM	tblCTContractHeader CH	
+											CROSS JOIN tblCTEvent EV											
+											JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
+											JOIN	tblSMTransaction	TN	ON	TN.intRecordId	=	CH.intContractHeaderId
+											JOIN	tblSMScreen			SN	ON	SN.intScreenId	=	TN.intScreenId AND SN.strNamespace IN (''ContractManagement.view.Contract'', ''ContractManagement.view.Amendments'')
+											WHERE	ISNULL(ysnMailSent,0) = 0 AND TN.ysnOnceApproved = 1
+											AND		EV.strEventName  =  ''Approved Contract Mail Not Sent'' AND ER.intEntityId = {0}
+											',
+			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Approved Not Sent', 
+			[intSort]            =        25
+END
+GO

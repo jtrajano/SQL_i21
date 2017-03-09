@@ -21,8 +21,9 @@ AS
 			CU.intMainCurrencyId,	CU.strCurrency,			PU.intUnitMeasureId			AS	intPriceUnitMeasureId,
 			CY.strCurrency			AS	strMainCurrency,	WM.strUnitMeasure			AS	strNetWeightUOM,
 			IC.strContractItemNo,	IC.strContractItemName,	REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')AS	strFutureMonth,
-			SL.strName AS strStorageLocation,				UL.strSubLocationName		AS	strSubLocation,
-			PG.strName	AS strPurchasingGroup,				CE.strEntityNo				AS	strCreatedByNo,
+			SL.strName				AS strStorageLocation,	UL.strSubLocationName		AS	strSubLocation,
+			PG.strName	COLLATE Latin1_General_CI_AS		AS strPurchasingGroup ,				
+			CE.strEntityNo			AS	strCreatedByNo,
 
 			--Detail Computed Columns
 			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)									AS	ysnSubCurrency,
