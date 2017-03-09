@@ -567,7 +567,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     hidden: '{checkHideOrderNo}',
                     dataIndex: 'dblReceived'
                 },
-                colQtyToReceive: {
+                colUOMQtyToReceive: {
                     dataIndex: 'dblOpenReceive',
                     text: '{changeQtyToReceiveText}',
                     editor: {
