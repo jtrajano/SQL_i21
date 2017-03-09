@@ -21,7 +21,17 @@ BEGIN
 
 	IF @post = 1
 	BEGIN
-
+		--You cannot post foreign transaction that has no rate. 
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			A.strBillId + ' '  + 'is using Foreign currency. Please check transaction if has a forex rate.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
+		AND A.intCurrencyId ! = (SELECT TOP 1 intDefaultCurrencyId  FROM dbo.tblSMCompanyPreference) AND dblRate = 0
 
 		--You cannot post recurring transaction.
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
