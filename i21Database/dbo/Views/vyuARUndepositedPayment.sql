@@ -33,6 +33,7 @@ WHERE
 	AND A.ysnImportedFromOrigin <> 1
 	AND CM.intSourceTransactionId IS NULL
 	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
+	AND ISNULL(A.dblAmountPaid, 0) > 0
 	
 UNION ALL	
 	
