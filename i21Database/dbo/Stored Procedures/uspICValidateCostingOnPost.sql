@@ -245,6 +245,7 @@ FROM	@ItemsToValidate iv
 WHERE	ISNULL(iv.dblForexRate, 0) = 0 
 		AND iv.intCurrencyId IS NOT NULL 
 		AND iv.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+		AND iv.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency WHERE ysnSubCurrency = 1 AND intMainCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
 
 IF @intItemId IS NOT NULL 
 BEGIN 
