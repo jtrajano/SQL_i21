@@ -3720,7 +3720,7 @@ IF @post = 1
 				vyuICGetItemStock IST
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId
-			CROSS APPLY
+			OUTER APPLY
 				dbo.[fnGetLoadDetailLots](Detail.intLoadDetailId) LGL
 
 			WHERE				
