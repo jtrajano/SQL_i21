@@ -2131,7 +2131,7 @@ Ext.define('iRely.FunctionalTest', {
             var t = this,
                 win = Ext.WindowManager.getActive();
             if (win) {
-                var grid = item.editingPlugin ? item : win.down('#grd'+item + [RETURN]);
+                var grid = item.editingPlugin ? item : win.down('#grd'+item);
                 if (grid) {
                     if(row > 0) row = row - 1;
                     if(index > 0) index = index - 1;
@@ -2162,7 +2162,7 @@ Ext.define('iRely.FunctionalTest', {
                         }
 
                         if (plugin.activeEditor) {
-                            me.logEvent('Entering combobox data on ' + item + ' grid' );
+                            me.logEvent('Entering combobox data on ' + item + ' grid');
 
                             var editor = plugin.activeEditor,
                                 els = (function() {
@@ -4636,18 +4636,20 @@ Ext.define('iRely.FunctionalTest', {
 
                             me.logEvent('Entering Quantity on ' + item + ' grid');
 							
-							t.selectText(field.txtQuantity, 0, 50);
-                            t.type(field.txtQuantity, quantity, function() {
-                                row.set(column.dataIndex,quantity);
-								//editor.completeEdit();
-								me.logSuccess('Quantity successfully entered');
-                                //next();
-								var task = new Ext.util.DelayedTask(function () {
-									me.selectUom(me, next, chain, t, editor, item, comboColumn, field.cboUom, uom);
+							//t.selectText(field.txtQuantity, 0, 50);
+							var tsk = new Ext.util.DelayedTask(function() {
+								t.type(field.txtQuantity, quantity, function() {
+									row.set(column.dataIndex,quantity);
+									//editor.completeEdit();
+									me.logSuccess('Quantity successfully entered');
+									//next();
+									var task = new Ext.util.DelayedTask(function () {
+										me.selectUom(me, next, chain, t, editor, item, comboColumn, field.cboUom, uom);
+									});
+									task.delay(1000);
 								});
-								task.delay(1000);
-                            });
-							
+							});
+							tsk.delay(1000);
                         } else {
                             me.logFailed('Editor is not found');
                             next();
