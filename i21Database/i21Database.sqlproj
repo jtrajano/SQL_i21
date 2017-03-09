@@ -4673,6 +4673,7 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentAccountStatusCode.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentVendor.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
