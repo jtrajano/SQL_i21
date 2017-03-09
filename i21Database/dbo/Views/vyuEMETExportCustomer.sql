@@ -19,19 +19,25 @@
 		,AcctStat.strAccountStatusCode AS chrStatusCode
 		,TaxCode.strCounty as county
 		,Cus.dblCreditLimit AS credit
-		,CASE WHEN Cus.ysnTaxExempt = 1 THEN 'Y' ELSE 'N' END AS tax
+		--,CASE WHEN Cus.ysnTaxExempt = 1 THEN 'Y' ELSE 'N' END AS tax
 
 		,CASE WHEN Cus.strCustomerNumber = '' THEN Entity.strEntityNo ELSE Cus.strCustomerNumber END AS cust_id
 		,'' AS lien
 		,'N' AS cshonl
 		,Entity.strName AS alphasort		
 		,Con.strPhone2 AS SecondPhoneNo
-		,Con.ysnActive AS active
+		--,Con.ysnActive AS active
+		
+		--,credit = Cus.dblCreditLimit
+		,active = Cus.ysnActive
+		,tax = case when Cus.ysnApplyPrepaidTax = 1 then 'P' 
+				when Cus.ysnApplySalesTax = 1 then 'Y'
+				else 'N' END
 
  	FROM tblEMEntity AS Entity  
 		INNER JOIN tblEMEntityType as EntType
 			ON Entity.intEntityId = EntType.intEntityId and EntType.strType = 'Customer'
-		INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]  
+		INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]  and Cus.ysnActive = 1
 		INNER JOIN [tblEMEntityToContact] as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1  
 		LEFT JOIN tblEMEntity as Con ON CusToCon.[intEntityContactId] = Con.[intEntityId]  
 		LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.intEntityCustomerId = Loc.intEntityId AND Loc.ysnDefaultLocation = 1  
