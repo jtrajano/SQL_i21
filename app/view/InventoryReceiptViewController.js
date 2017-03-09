@@ -6942,6 +6942,39 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onChargeCurrencyBeforeQuery: function (obj) {
+         if (obj.combo) {
+            var grid = obj.combo.up('grid');
+            var plugin = grid.getPlugin('cepCharges');
+            var current = plugin.getActiveRecord();
+            
+            if (obj.combo.itemId === 'cboChargeCurrency') {
+                if (iRely.Functions.isEmpty(current.get('strContractNumber'))) {
+                    obj.combo.defaultFilters = [
+                        {
+                            column: 'ysnSubCurrency',
+                            value: false
+                        }
+                    ];
+                }
+                else {
+                     obj.combo.defaultFilters = [
+                        {
+                            column: 'ysnSubCurrency',
+                            value: true,
+                            conjunction: 'or'
+                        },
+                        {
+                            column: 'ysnSubCurrency',
+                            value: false,
+                            conjunction: 'or'
+                        }
+                    ];
+                }
+            }
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -7135,6 +7168,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 click: this.onReplicateBalanceLotClick
             },
             "#cboChargeCurrency": {
+                beforequery: this.onChargeCurrencyBeforeQuery,
                 select: this.onChargeSelect
             },
             "#cboItemSubCurrency": {
