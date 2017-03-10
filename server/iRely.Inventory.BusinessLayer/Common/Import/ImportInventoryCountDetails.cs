@@ -67,15 +67,15 @@ namespace iRely.Inventory.BusinessLayer
                         if (string.IsNullOrEmpty(value))
                         {
                             valid = false;
-                            //dr.Messages.Add(new ImportDataMessage()
-                            //{
-                            //    Column = header,
-                            //    Row = row,
-                            //    Type = TYPE_INNER_WARN,
-                            //    Status = REC_SKIP,
-                            //    Message = "Location should not be blank."
-                            //});
-                            //dr.Info = INFO_WARN;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_WARN,
+                                Status = REC_SKIP,
+                                Message = "Location should not be blank."
+                            });
+                            dr.Info = INFO_WARN;
                             break;
                         }
                         lu = GetLookUpId<tblSMCompanyLocation>(
@@ -90,6 +90,7 @@ namespace iRely.Inventory.BusinessLayer
                                 fh = new tblICInventoryCount();
                                 fh.ysnPosted = false;
                                 fh.intStatus = 1;
+                                fh.intImportFlagInternal = 1; // 1 - Needs to update system count, 0 or NULL - Updated
                                 fh.ysnIncludeZeroOnHand = false;
                                 fh.ysnIncludeOnHand = false;
                                 fh.ysnScannedCountEntry = false;
@@ -181,15 +182,15 @@ namespace iRely.Inventory.BusinessLayer
                         if (string.IsNullOrEmpty(val))
                         {
                             valid = false;
-                            //dr.Messages.Add(new ImportDataMessage()
-                            //{
-                            //    Column = header,
-                            //    Row = row,
-                            //    Type = TYPE_INNER_ERROR,
-                            //    Status = REC_SKIP,
-                            //    Message = "Item No should not be blank."
-                            //});
-                            //dr.Info = INFO_WARN;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
+                                Message = "Item No should not be blank."
+                            });
+                            dr.Info = INFO_WARN;
                             break;
                         }
                         lu = GetLookUpId<tblICItem>(
@@ -211,29 +212,6 @@ namespace iRely.Inventory.BusinessLayer
                                 if (il != null)
                                 {
                                     fc.intItemLocationId = (int)il;
-                                }
-                            }
-
-                            var query = context.GetQuery<vyuICGetItemStockUOM>()
-                                .Where(w => w.intLocationId == fh.intLocationId && w.intItemId == intItemId)
-                                .GroupBy(o => o.intLocationId)
-                                .Select(g => new { dblOnHand = g.Sum(x => x.dblOnHand) });
-                            if (query != null)
-                            {
-                                var data = query.ToList();
-                                if (data != null)
-                                {
-                                    var d = data.AsQueryable();
-
-                                    if (d != null && d.Count() > 0)
-                                    {
-                                        var f = d.First();
-                                        if (f != null)
-                                        {
-                                            var systemCount = f.dblOnHand;
-                                            fc.dblSystemCount = systemCount;
-                                        }
-                                    }
                                 }
                             }
                         }
@@ -265,12 +243,19 @@ namespace iRely.Inventory.BusinessLayer
                         if (fh != null && fc.dblQtyPerPallet > 0)
                             fh.ysnCountByPallets = true;
                         break;
-                    case "last cost":
-                        SetDecimal(value, del => fc.dblLastCost = del, "Last Cost", dr, header, row);
-                        break;
                     case "uom":
                         if (string.IsNullOrEmpty(value))
                         {
+                            valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_ERROR,
+                                Status = STAT_INNER_COL_SKIP,
+                                Message = "UOM should not be blank."
+                            });
+                            dr.Info = INFO_WARN;
                             break;
                         }
                         if (fc != null && fc.intItemId != null)
@@ -388,7 +373,7 @@ namespace iRely.Inventory.BusinessLayer
             return fc;
         }
 
-        public new ImportDataResult Import()
+        public override ImportDataResult Import()
         {
             MemoryStream ms = new MemoryStream(data);
             ImportDataResult dr = new ImportDataResult()
@@ -442,40 +427,52 @@ namespace iRely.Inventory.BusinessLayer
                             LogItems.Clear();
                             dr.IsUpdate = false;
 
-
-                            tblICInventoryCountDetail entity = ProcessRow(row, fieldCount, headers, csv, dr);
-
-                            if (entity != null)
+                            try
                             {
-                                context.Save();
-                                LogTransaction(ref entity, dr);
-                                dr.Messages.Add(new ImportDataMessage()
+                                tblICInventoryCountDetail entity = ProcessRow(row, fieldCount, headers, csv, dr);
+                                if (entity != null)
                                 {
-                                    Message = "Record " + (dr.IsUpdate ? "updated" : "imported") + " successfully.",
-                                    Row = row,
-                                    Status = STAT_INNER_SUCCESS,
-                                    Type = TYPE_INNER_INFO
-                                });
-                                if (dr.Info == INFO_ERROR)
+                                    context.Save();
+                                    LogTransaction(ref entity, dr);
+                                    dr.Messages.Add(new ImportDataMessage()
+                                    {
+                                        Message = "Record " + (dr.IsUpdate ? "updated" : "imported") + " successfully.",
+                                        Row = row,
+                                        Status = STAT_INNER_SUCCESS,
+                                        Type = TYPE_INNER_INFO
+                                    });
+                                    if (dr.Info == INFO_ERROR)
+                                        hasErrors = true;
+                                    if (dr.Info == INFO_WARN)
+                                        hasWarnings = true;
+                                    transaction.Commit();
+                                }
+                                else
+                                {
+                                    dr.Messages.Add(new ImportDataMessage()
+                                    {
+                                        Message = "Invalid values found. Items that were auto created or modified in this record will be rolled back.",
+                                        Exception = null,
+                                        Row = row,
+                                        Status = "Record import failed.",
+                                        Type = TYPE_INNER_ERROR
+                                    });
+                                    dr.Info = INFO_ERROR;
                                     hasErrors = true;
-                                if (dr.Info == INFO_WARN)
-                                    hasWarnings = true;
-                                transaction.Commit();
+                                    transaction.Rollback();
+                                    continue;
+                                }
                             }
-                            else
+                            catch(Exception ex)
                             {
                                 dr.Messages.Add(new ImportDataMessage()
                                 {
-                                    Message = "Invalid values found. Items that were auto created or modified in this record will be rolled back.",
+                                    Message = ex.Message + ". Items that were auto created or modified in this record will be rolled back.",
                                     Exception = null,
                                     Row = row,
                                     Status = "Record import failed.",
                                     Type = TYPE_INNER_ERROR
                                 });
-                                dr.Info = INFO_ERROR;
-                                hasErrors = true;
-                                transaction.Rollback();
-                                continue;
                             }
                         }
                         catch (Exception ex)
@@ -509,7 +506,29 @@ namespace iRely.Inventory.BusinessLayer
 
             if (hasErrors)
                 dr.Info = INFO_ERROR;
+
+            CalculateSystemCount(dr);
+
             return dr;
+        }
+
+        private void CalculateSystemCount(ImportDataResult dr)
+        {
+            try
+            {
+                context.ContextManager.Database.ExecuteSqlCommand("dbo.uspICUpdateSystemCount");
+            }
+            catch (Exception ex)
+            {
+                dr.Messages.Add(new ImportDataMessage()
+                {
+                    Message = "Unable to calculate system count. " + ex.Message + ". Please delete the imported inventory count as this will result to discrepancies in system count.",
+                    Exception = ex,
+                    Row = -1,
+                    Status = TYPE_INNER_ERROR,
+                    Type = TYPE_INNER_ERROR
+                });
+            }
         }
     }
 }
