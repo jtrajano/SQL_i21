@@ -1466,6 +1466,7 @@ BEGIN
 							ON shipmentItem.intInventoryShipmentId = shipment.intInventoryShipmentId
 							AND shipmentItem.intInventoryShipmentItemId = ICTrans.intTransactionDetailId
 							AND shipmentItem.intItemId = ICTrans.intItemId
+							AND shipmentItem.intItemId = ISNULL(@intItemId, shipmentItem.intItemId)
 						LEFT JOIN tblICInventoryShipmentItemLot shipmentItemLot
 							ON shipmentItemLot.intInventoryShipmentItemId = shipmentItem.intInventoryShipmentItemId 
 							AND ISNULL(shipmentItemLot.intLotId, 0) = ICTrans.intLotId
@@ -1586,6 +1587,7 @@ BEGIN
 						AND t.strBatchId = @strBatchId
 						AND @intFobPointId = @FOB_DESTINATION
 						AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 				
+						AND t.intItemId = ISNULL(@intItemId, t.intItemId)
 
 				EXEC dbo.uspICRepostInTransitCosting
 					@ItemsForInTransitCosting
@@ -1728,6 +1730,7 @@ BEGIN
 				WHERE	RebuilInvTrans.strBatchId = @strBatchId
 						AND RebuilInvTrans.intTransactionId = @intTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
+						AND RebuilInvTrans.intItemId = ISNULL(@intItemId, RebuilInvTrans.intItemId)
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -1842,6 +1845,7 @@ BEGIN
 								AND t.ysnIsUnposted = 0 
 				WHERE	t.intFobPointId = @FOB_DESTINATION
 						AND i.strInvoiceNumber = @strTransactionId
+						AND t.intItemId = ISNULL(@intItemId, t.intItemId)
 
 				EXEC dbo.uspICRepostInTransitCosting
 					@ItemsForInTransitCosting
@@ -2268,6 +2272,11 @@ END
 --	EXEC uspICCompareGLSnapshotOnRebuildInventoryValuation
 --		@dtmRebuildDate
 --END
+
+-- Call the COGS sp 
+BEGIN 
+	EXEC uspARRepostCOGS @dtmStartDate
+END 
 
 COMMIT TRANSACTION 
 GOTO _EXIT
