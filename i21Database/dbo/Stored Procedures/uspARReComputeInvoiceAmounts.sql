@@ -48,7 +48,7 @@ SET
 	,[dblItemWeight]			= ISNULL([dblItemWeight], 1.00)
 	,[dblShipmentNetWt]			= ISNULL([dblShipmentNetWt], [dblQtyShipped])
 	,[dblPrice]					= ISNULL([dblPrice], @ZeroDecimal)
-	,[dblBasePrice]				= ISNULL([dblBasePrice], @ZeroDecimal)
+	,[dblBasePrice]				= CASE WHEN [dblBasePrice] <> [dblPrice] AND [dblBasePrice] = @ZeroDecimal THEN (ISNULL([dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END)) ELSE ISNULL([dblBasePrice], @ZeroDecimal) END
 	,[dblTotalTax]				= ISNULL([dblTotalTax], @ZeroDecimal)
 	,[dblBaseTotalTax]			= ISNULL([dblBaseTotalTax], @ZeroDecimal)
 	,[dblTotal]					= ISNULL([dblTotal], @ZeroDecimal)
