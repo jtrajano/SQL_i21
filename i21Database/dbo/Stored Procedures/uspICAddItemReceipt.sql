@@ -480,10 +480,8 @@ BEGIN
 
 		SELECT TOP 1 
 				@valueItemId = RawData.intItemId
-		FROM	@ReceiptEntries RawData	   
-				OUTER APPLY (
-					SELECT TOP 1 intItemId FROM tblICItem i WHERE i.intItemId = RawData.intItemId
-				) i
+		FROM	@ReceiptEntries RawData	LEFT JOIN tblICItem i
+					ON i.intItemId = RawData.intItemId
 		WHERE	i.intItemId IS NULL 
 
 		IF @valueItemId IS NOT NULL 
@@ -501,10 +499,8 @@ BEGIN
 
 		SELECT TOP 1 
 				@valueTaxGroupId = RawData.intTaxGroupId
-		FROM	@ReceiptEntries RawData
-				OUTER APPLY (
-					SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup tg WHERE tg.intTaxGroupId = RawData.intTaxGroupId
-				) tg
+		FROM	@ReceiptEntries RawData LEFT JOIN tblSMTaxGroup tg
+					ON tg.intTaxGroupId = RawData.intTaxGroupId
 		WHERE	tg.intTaxGroupId IS NULL 
 
 		IF @valueTaxGroupId IS NOT NULL 
@@ -521,10 +517,8 @@ BEGIN
 		
 		SELECT TOP 1 
 				@valueContractHeaderId = RawData.intContractHeaderId
-		FROM	@ReceiptEntries RawData 	   
-				OUTER APPLY (
-					SELECT TOP 1 intContractHeaderId FROM tblCTContractHeader ch WHERE ch.intContractHeaderId = RawData.intContractHeaderId
-				) ch
+		FROM	@ReceiptEntries RawData LEFT JOIN tblCTContractHeader ch 
+					ON ch.intContractHeaderId = RawData.intContractHeaderId
 		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) = 'purchase contract'
 				AND ch.intContractHeaderId IS NULL 
 
@@ -542,10 +536,8 @@ BEGIN
 
 		SELECT	TOP 1 
 				@valueContractHeaderId = RawData.intContractHeaderId
-		FROM	@ReceiptEntries RawData	  
-				OUTER APPLY (
-					SELECT TOP 1 intContractDetailId FROM tblCTContractDetail cd WHERE cd.intContractHeaderId = RawData.intContractHeaderId
-				) cd
+		FROM	@ReceiptEntries RawData	LEFT JOIN tblCTContractDetail cd 
+					ON cd.intContractHeaderId = RawData.intContractHeaderId
 		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) = 'purchase contract'
 				AND cd.intContractDetailId IS NULL 
 
@@ -563,10 +555,8 @@ BEGIN
 
 		SELECT TOP 1 
 				@getItemId = RawData.intItemId
-		FROM	@ReceiptEntries RawData 
-				OUTER APPLY (
-					SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemUOMId = RawData.intItemUOMId
-				) iu
+		FROM	@ReceiptEntries RawData LEFT JOIN tblICItemUOM iu 
+					ON iu.intItemUOMId = RawData.intItemUOMId
 		WHERE	iu.intItemUOMId IS NULL 
 
 		IF @getItemId IS NOT NULL 
@@ -588,10 +578,8 @@ BEGIN
 		SELECT TOP 1 
 				@valueSubLocationId = RawData.intSubLocationId
 				,@getItemId = RawData.intItemId
-		FROM	@ReceiptEntries	RawData
-				OUTER APPLY (
-					SELECT TOP 1 intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation sub WHERE sub.intCompanyLocationSubLocationId = RawData.intSubLocationId
-				) sub
+		FROM	@ReceiptEntries	RawData LEFT JOIN tblSMCompanyLocationSubLocation sub 
+					ON sub.intCompanyLocationSubLocationId = RawData.intSubLocationId
 		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) <> 'transfer order'
 				AND sub.intCompanyLocationSubLocationId IS NULL 		
 				AND RawData.intSubLocationId IS NOT NULL 		
@@ -615,10 +603,8 @@ BEGIN
 		SELECT TOP 1 
 				@valueStorageLocationId = RawData.intStorageLocationId
 				, @getItemId = RawData.intItemId
-		FROM	@ReceiptEntries RawData 	  
-				OUTER APPLY (
-					SELECT TOP 1 intStorageLocationId FROM tblICStorageLocation storage WHERE storage.intStorageLocationId = RawData.intStorageLocationId
-				) storage
+		FROM	@ReceiptEntries RawData LEFT JOIN tblICStorageLocation storage 
+					ON storage.intStorageLocationId = RawData.intStorageLocationId
 		WHERE	storage.intStorageLocationId IS NULL 
 				AND RawData.intStorageLocationId IS NOT NULL 
 
@@ -639,10 +625,8 @@ BEGIN
 
 		SELECT TOP 1 
 				@getItemId = RawData.intItemId
-		FROM	@ReceiptEntries RawData 	   
-				OUTER APPLY (
-					SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemUOMId = RawData.intGrossNetUOMId
-				) iu
+		FROM	@ReceiptEntries RawData LEFT JOIN tblICItemUOM iu 
+					ON iu.intItemUOMId = RawData.intGrossNetUOMId
 		WHERE	iu.intItemUOMId IS NULL 
 				AND RawData.intGrossNetUOMId IS NOT NULL 
 
@@ -663,10 +647,8 @@ BEGIN
 
 		SELECT TOP 1 
 				@getItemId = RawData.intItemId
-		FROM	@ReceiptEntries RawData
-				OUTER APPLY (
-					SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemUOMId = RawData.intCostUOMId
-				) iu
+		FROM	@ReceiptEntries RawData LEFT JOIN tblICItemUOM iu 
+					ON iu.intItemUOMId = RawData.intCostUOMId
 		WHERE	iu.intItemUOMId IS NULL 
 				AND RawData.intCostUOMId IS NOT NULL 
 
@@ -689,10 +671,8 @@ BEGIN
 		SELECT TOP 1 
 				@valueLotId = RawData.intLotId
 				, @getItemId = RawData.intItemId
-		FROM	@ReceiptEntries RawData	   
-				OUTER APPLY (
-					SELECT TOP 1 intLotId FROM tblICLot lot WHERE lot.intLotId = RawData.intLotId
-				) lot
+		FROM	@ReceiptEntries RawData	LEFT JOIN tblICLot lot 
+					ON lot.intLotId = RawData.intLotId
 		WHERE	lot.intLotId IS NULL
 				AND RawData.intLotId IS NOT NULL 
 
@@ -876,10 +856,8 @@ BEGIN
 
 		-- Validate Other Charge Entity Id
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM	@OtherCharges RawData 
-				OUTER APPLY (
-					SELECT intEntityId FROM tblEMEntity e WHERE e.intEntityId = RawData.intEntityVendorId
-				) e
+		FROM	@OtherCharges RawData LEFT JOIN tblEMEntity e 
+					ON e.intEntityId = RawData.intEntityVendorId
 		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) <> 'transfer order'
 				AND e.intEntityId IS NULL 
 				AND RawData.intEntityVendorId IS NOT NULL 
@@ -920,10 +898,8 @@ BEGIN
 
 		SELECT TOP 1 
 				@valueChargeId = RawData.intChargeId
-		FROM	@OtherCharges RawData 
-				OUTER APPLY (
-					SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation loc WHERE loc.intCompanyLocationId = RawData.intLocationId
-				) loc 
+		FROM	@OtherCharges RawData LEFT JOIN tblSMCompanyLocation loc 
+					ON loc.intCompanyLocationId = RawData.intLocationId
 		WHERE	loc.intCompanyLocationId IS NULL 
 		
 		IF @valueChargeId IS NOT NULL
@@ -942,10 +918,8 @@ BEGIN
 		SET @valueCharge = NULL
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM	@OtherCharges RawData
-				OUTER APPLY (
-					SELECT TOP 1 intEntityShipViaId FROM tblSMShipVia shipVia WHERE shipVia.intEntityShipViaId = RawData.intShipViaId
-				) shipVia
+		FROM	@OtherCharges RawData LEFT JOIN tblSMShipVia shipVia 
+					ON shipVia.intEntityShipViaId = RawData.intShipViaId
 		WHERE	RawData.intShipViaId IS NOT NULL 
 				AND shipVia.intEntityShipViaId IS NULL 
 
@@ -965,10 +939,8 @@ BEGIN
 		SET @valueCharge = NULL
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM	@OtherCharges RawData
-				OUTER APPLY (
-					SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation e WHERE e.intEntityLocationId = RawData.intShipFromId
-				) e
+		FROM	@OtherCharges RawData LEFT JOIN tblEMEntityLocation e 
+					ON e.intEntityLocationId = RawData.intShipFromId				
 		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) <> 'transfer order'
 				AND e.intEntityLocationId IS NULL 
 				AND RawData.intShipFromId IS NOT NULL 				
@@ -988,10 +960,8 @@ BEGIN
 		SET @valueCharge = NULL
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM	@OtherCharges RawData 
-				OUTER APPLY (
-					SELECT TOP 1 intCurrencyID FROM tblSMCurrency currency WHERE currency.intCurrencyID = RawData.intCurrencyId
-				) currency
+		FROM	@OtherCharges RawData LEFT JOIN tblSMCurrency currency 
+					ON currency.intCurrencyID = RawData.intCurrencyId
 		WHERE	RawData.intCurrencyId IS NOT NULL 
 				AND currency.intCurrencyID IS NULL 
 
@@ -1008,10 +978,9 @@ BEGIN
 		-- Validate Other Charge Item Id
 		IF EXISTS(
 			SELECT	TOP 1 1
-			FROM	@OtherCharges RawData  
-					OUTER APPLY (
-						SELECT TOP 1 intItemId FROM tblICItem charge WHERE charge.strType = 'Other Charge' AND charge.intItemId = RawData.intChargeId
-					) charge
+			FROM	@OtherCharges RawData  LEFT JOIN tblICItem charge 
+						ON charge.strType = 'Other Charge' 
+						AND charge.intItemId = RawData.intChargeId
 			WHERE	RawData.intChargeId IS NULL 
 					OR charge.intItemId IS NULL 
 		)
