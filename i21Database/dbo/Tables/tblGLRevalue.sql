@@ -24,10 +24,6 @@ CREATE TABLE [dbo].[tblGLRevalue](
 
 GO
 
-ALTER TABLE [dbo].[tblGLRevalue]  WITH CHECK ADD  CONSTRAINT [FK_tblGLRevalue_tblGLRevalue] FOREIGN KEY([intReverseId])
-REFERENCES [dbo].[tblGLRevalue] ([intConsolidationId])
-GO
-
 ALTER TABLE [dbo].[tblGLRevalue] CHECK CONSTRAINT [FK_tblGLRevalue_tblGLRevalue]
 GO
 
