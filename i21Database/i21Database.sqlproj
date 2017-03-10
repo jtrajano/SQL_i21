@@ -5074,6 +5074,7 @@
     <Build Include="dbo\Stored Procedures\uspGLPostRevalue.sql" />
     <Build Include="dbo\Views\vyuARCustomerContractHeader.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultForexRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
