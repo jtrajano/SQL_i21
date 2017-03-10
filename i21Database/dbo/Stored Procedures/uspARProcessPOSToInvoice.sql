@@ -107,7 +107,7 @@ SELECT
 	,[intEntityCustomerId]					= POS.intEntityCustomerId
 	,[intCompanyLocationId]					= POS.intCompanyLocationId
 	,[intCurrencyId]						= POS.intCurrencyId
-	,[intTermId]							= NULL --Check this one
+	,[intTermId]							= isnull(Cus.intTermsId, Loc.intTermsId)--NULL --Check this one
 	,[dtmDate]								= POS.dtmDate
 	,[dtmDueDate]							= NULL
 	,[dtmShipDate]							= POS.dtmDate
@@ -184,6 +184,8 @@ SELECT
 
 FROM tblARPOS POS 
 INNER JOIN tblARPOSDetail POSDetail ON POS.intPOSId = POSDetail.intPOSId
+JOIN tblARCustomer Cus on Cus.intEntityCustomerId = POS.intEntityCustomerId
+JOIN tblEMEntityLocation Loc on Loc.intEntityId = Cus.intEntityCustomerId and Loc.ysnDefaultLocation = 1
 Where POS.intPOSId = @intPOSId
 
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
