@@ -151,6 +151,8 @@ Begin
 		AND intLoadStgId < @intLoadStgId Order By intLoadStgId Desc)<>'Ack Rcvd'
 		GOTO NEXT_SHIPMENT
 
+	Update tblLGLoadStg Set strMessageState=@strHeaderRowState  Where intLoadStgId=@intLoadStgId
+
 	Set @strXml =  '<DELVRY07>'
 	Set @strXml += '<IDOC BEGIN="1">'
 	

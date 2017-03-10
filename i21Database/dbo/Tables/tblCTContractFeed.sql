@@ -45,7 +45,8 @@
 	strMessage				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strFeedStatus			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	dtmFeedCreated			DATETIME,
+	ysnMailSent				BIT
 	
 			
-	CONSTRAINT [PK_tblCTContractFeed_intContractFeedId] PRIMARY KEY CLUSTERED (intContractFeedId ASC)
+	CONSTRAINT [PK_tblCTContractFeed_intContractFeedId] PRIMARY KEY CLUSTERED (intContractFeedId ASC) DEFAULT 0
 )
