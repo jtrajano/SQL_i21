@@ -732,7 +732,7 @@ Ext.define('iRely.FunctionalTest', {
                 win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
 
             if (win) {
-                var tab = win.down('pge'+item) || win.down('tabpanel [text='+ item  +']');
+                var tab = win.down('pge'+item) || win.down('tabpanel [text='+ item  +']' || win.down('tab'+item));
 
                 if (tab) {
                     if(tab.xtype == 'panel') tab = tab.tab;
@@ -2131,7 +2131,7 @@ Ext.define('iRely.FunctionalTest', {
             var t = this,
                 win = Ext.WindowManager.getActive();
             if (win) {
-                var grid = item.editingPlugin ? item : win.down('#grd'+item + [RETURN]);
+                var grid = item.editingPlugin ? item : win.down('#grd'+item);
                 if (grid) {
                     if(row > 0) row = row - 1;
                     if(index > 0) index = index - 1;
@@ -2162,7 +2162,7 @@ Ext.define('iRely.FunctionalTest', {
                         }
 
                         if (plugin.activeEditor) {
-                            me.logEvent('Entering combobox data on ' + item + ' grid' );
+                            me.logEvent('Entering combobox data on ' + item + ' grid');
 
                             var editor = plugin.activeEditor,
                                 els = (function() {
