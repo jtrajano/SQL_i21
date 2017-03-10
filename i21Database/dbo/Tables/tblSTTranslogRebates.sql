@@ -16,7 +16,7 @@
 	[intTermMsgSN] int NULL,
 	[intPeriodLevel] int NULL,
 	[intPeriodSeq] int NULL,
-	[intPeriodName] int NULL,
+	[strPeriodName] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 	[strPeriod] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strDate] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intDuration] bigint NULL,

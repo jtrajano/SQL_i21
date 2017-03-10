@@ -20,7 +20,7 @@ BEGIN
 		, intTermMsgSN
 		, intPeriodLevel
 		, intPeriodSeq
-		, intPeriodName 
+		, strPeriodName 
 		, strPeriod
 		, strDate
 		, intDuration
