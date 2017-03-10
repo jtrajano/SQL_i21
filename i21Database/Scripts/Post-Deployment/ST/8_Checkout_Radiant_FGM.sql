@@ -504,7 +504,7 @@ BEGIN
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,31
 			   ,3			 				,'FGMPriceTierSummary'		   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,26
+			   ,NULL		 			    ,'Header'					   ,26
 			   ,NULL					    ,1							   ,1)
 END
 
