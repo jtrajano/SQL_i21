@@ -1,20 +1,21 @@
 StartTest (function (t) {
+    var commonICST = Ext.create('Inventory.CommonICSmokeTest');
+    var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
-        //region Scenario 1. Add Maintenance Screens
-        .displayText('=====   Scenario 2. Add Maintenance Screens ====')
-        //region Scenario 1.1: Add Storage Locations
-        .displayText('===== Scenario 2.1: Add Storage Locations =====')
+
+        //region Scenario 1: Add New Storage Location
+        .displayText('===== Scenario 1: Adding New Storage Location. =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Storage Locations','Screen')
         .clickButton('New')
         .waitUntilLoaded('icstorageunit')
-        .enterData('Text Field','Name','ICSmoke - SL')
-        .enterData('Text Field','Description','ICSmoke - SL')
-        .selectComboBoxRowValue('UnitType', 'Bin', 'UnitType',0)
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
-        .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
-        .selectComboBoxRowValue('ParentUnit', 'RM Storage', 'ParentUnit',0)
+        .enterData('Text Field','Name','Smoke Storage')
+        .enterData('Text Field','Description','Test Smoke Storage')
+        .selectComboBoxRowNumber('UnitType',6,0)
+        .selectComboBoxRowNumber('Location',1,0)
+        .selectComboBoxRowNumber('SubLocation',6,0)
+        .selectComboBoxRowNumber('ParentUnit',1,0)
         .enterData('Text Field','Aisle','Test Aisle - 01')
         .clickCheckBox('AllowConsume', true)
         .clickCheckBox('AllowMultipleItems', true)
@@ -24,11 +25,12 @@ StartTest (function (t) {
         .clickButton('Save')
         .verifyStatusMessage('Saved')
         .clickButton('Close')
-        .displayText('===== Scenario 2.1: Add Storage Locations Done=====')
+        .displayText('===== Storage Location Created =====')
+        //endregion
 
 
-        //region Scenario 1.2. Add Inventory UOM
-        .displayText('===== Scenario 1.2. Add Inventory UOM =====')
+        //region Scenario 2. Add Inventory UOM
+        .displayText('===== Scenario 2. Add Inventory UOM =====')
         .clickMenuScreen('Inventory UOM','Screen')
         .clickButton('New')
         .waitUntilLoaded('icinventoryuom')
@@ -37,51 +39,45 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('UnitType',6,0)
         .verifyStatusMessage('Edited')
         .clickButton('Save')
+        .waitUntilLoaded()
         .verifyStatusMessage('Saved')
         .clickButton('Close')
 
+
+        //Add Inventory UOM with Conversion 5 lb bag
         .clickButton('New')
         .waitUntilLoaded('icinventoryuom')
         .enterData('Text Field','UnitMeasure','Smoke 5 LB bag')
         .enterData('Text Field','Symbol','Smoke 5 LB bag')
         .selectComboBoxRowNumber('UnitType',7,0)
-        .selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
+        .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+        //.selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
         .enterGridData('Conversion', 1, 'dblConversionToStock', '5')
         .verifyStatusMessage('Edited')
         .clickButton('Save')
         .verifyStatusMessage('Saved')
         .clickButton('Close')
 
+
+        //Add Inventory UOM with Conversion 10 lb bag
         .clickButton('New')
         .waitUntilLoaded('icinventoryuom')
         .enterData('Text Field','UnitMeasure','Smoke 10 LB bag')
         .enterData('Text Field','Symbol','Smoke 10 LB bag')
         .selectComboBoxRowNumber('UnitType',7,0)
-        .selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
+        .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+        //.selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
         .enterGridData('Conversion', 1, 'dblConversionToStock', '10')
         .verifyStatusMessage('Edited')
         .clickButton('Save')
         .verifyStatusMessage('Saved')
         .clickButton('Close')
+        .displayText('===== Inventory UOM Created =====')
         //endregion
 
-        .clickButton('New')
-        .waitUntilLoaded('icinventoryuom')
-        .enterData('Text Field','UnitMeasure','Smoke KG')
-        .enterData('Text Field','Symbol','Smoke KG')
-        .selectComboBoxRowNumber('UnitType',6,0)
-        .selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        .enterGridData('Conversion', 1, 'dblConversionToStock', '2.20462')
-        .verifyStatusMessage('Edited')
-        .clickButton('Save')
-        .verifyStatusMessage('Saved')
-        .clickButton('Close')
-        .displayText('===== Scenario 1.2. Add Inventory UOM Done=====')
-        //endregion
 
-        //region Scenario 1.3: Add New Fuel Type, Fuel Category, Feed Stock, Fuel Code, Production Process, Feed Stock UOM
-        //Fuel Category
-        .displayText('===== Scenario 1.3: Add New Fuel Type, Fuel Category, Feed Stock, Fuel Code, Production Process, Feed Stock UOM =====')
+        //region Fuel Category
+        .displayText('===== Scenario 3: Add New Fuel Type, Fuel Category, Feed Stock, Fuel Code, Production Process, Feed Stock UOM =====')
         .clickMenuScreen('Fuel Types','Screen')
         .clickButton('Close')
         .clickButton('FuelCategory')
@@ -136,13 +132,18 @@ StartTest (function (t) {
 
         //Fuel Type
         .clickButton('New')
-        .selectComboBoxRowValue('FuelCategory', 'ICSmokeFuelCategory', 'FuelCategory',0)
-        .selectComboBoxRowValue('FeedStock', 'ICSmokeFeedStock', 'FeedStock',0)
+        .selectComboBoxRowNumber('FuelCategory',1,0)
+        //.selectComboBoxRowValue('FuelCategory', 'ICSmokeFuelCategory', 'FuelCategory',0)
+        .selectComboBoxRowNumber('FeedStock',1,0)
+        //.selectComboBoxRowValue('FeedStock', 'ICSmokeFeedStock', 'FeedStock',0)
         .enterData('Text Field','BatchNo','1')
         .verifyData('Text Field','EquivalenceValue','ICSmokeFuelCategory_EV')
-        .selectComboBoxRowValue('FuelCode', 'ICSmokeFuelCode', 'FuelCode',0)
-        .selectComboBoxRowValue('ProductionProcess', 'ICSmokeProductionProcess', 'ProductionProcess',0)
-        .selectComboBoxRowValue('FeedStockUom', 'Smoke_LB', 'FeedStockUom',0)
+        .selectComboBoxRowNumber('FuelCode',1,0)
+        //.selectComboBoxRowValue('FuelCode', 'ICSmokeFuelCode', 'FuelCode',0)
+        .selectComboBoxRowNumber('ProductionProcess',1,0)
+        //.selectComboBoxRowValue('ProductionProcess', 'ICSmokeProductionProcess', 'ProductionProcess',0)
+        .selectComboBoxRowNumber('FeedStockUom',1,0)
+        //.selectComboBoxRowValue('FeedStockUom', 'Smoke_LB', 'FeedStockUom',0)
         .enterData('Text Field','FeedStockFactor','10')
         .clickCheckBox('RenewableBiomass', true)
         .enterData('Text Field','PercentOfDenaturant','25')
@@ -150,252 +151,58 @@ StartTest (function (t) {
         .clickButton('Save')
         .verifyStatusMessage('Saved')
         .clickButton('Close')
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('===== Add Fuel Type Done =====')
         //endregion
 
 
-        //region Scenario 1.4: Add Category
-        .displayText('===== Scenario 1.4: Add Category =====')
-        .clickMenuScreen('Categories','Screen')
-        .clickButton('New')
-        .waitUntilLoaded('iccategory')
-        .enterData('Text Field','CategoryCode','Smoke Inventory Category')
-        .enterData('Text Field','Description','Test Inventory Category')
-        .selectComboBoxRowNumber('InventoryType',2,0)
-        .selectComboBoxRowNumber('CostingMethod',1,0)
-        .selectGridComboBoxRowValue('Tax',1,'strTaxClass','State Sales Tax (SST)','strTaxClass')
+        //Add Category
+        .displayText('===== Scenario 4: Add Category =====')
+        .addFunction(function(next){
+            commonIC.addCategory (t,next, 'SC - Category - 01', 'Test Smoke Category Description', 2)
+        })
 
-        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        .clickGridCheckBox('UnitOfMeasure', 0,'strUnitMeasure', 'Smoke_LB', 'ysnStockUnit', true)
-        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','Smoke 5 LB bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Smoke 10 LB bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',4,'strUnitMeasure','Smoke KG','strUnitMeasure')
+        //Add Commodity
+        .displayText('===== Scenario 6: Add Commodity =====')
+        .addFunction(function(next){
+            commonIC.addCommodity (t,next, 'SC - Commodity - 01', 'Test Smoke Commodity Description')
+        })
 
-        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
-        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '5')
-        .verifyGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '10')
-        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '2.20462')
+        //Add Lotted Item
+        .displayText('===== Scenario 5: Add Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addInventoryItem
+            (t,next,
+                'Smoke - LTI - 01'
+                , 'Test Lotted Item For Other Smoke Testing'
+                , 'SC - Category - 01'
+                , 'SC - Commodity - 01'
+                , 3
+                , 'LB'
+                , 'LB'
+                , 10
+                , 10
+                , 40
+            )
+        })
 
-        .displayText('===== Setup GL Accounts=====')
-        .clickTab('GL Accounts')
-        .clickButton('AddRequired')
-        .waitUntilLoaded()
-        .verifyGridData('GlAccounts', 1, 'colAccountCategory', 'AP Clearing')
-        .verifyGridData('GlAccounts', 2, 'colAccountCategory', 'Inventory')
-        .verifyGridData('GlAccounts', 3, 'colAccountCategory', 'Cost of Goods')
-        .verifyGridData('GlAccounts', 4, 'colAccountCategory', 'Sales Account')
-        .verifyGridData('GlAccounts', 5, 'colAccountCategory', 'Inventory In-Transit')
-        .verifyGridData('GlAccounts', 6, 'colAccountCategory', 'Inventory Adjustment')
-        .verifyGridData('GlAccounts', 7, 'colAccountCategory', 'Auto-Variance')
-        .selectGridComboBoxRowValue('GlAccounts', 1, 'strAccountId', '21000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 2, 'strAccountId', '16000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 3, 'strAccountId', '50000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 4, 'strAccountId', '40010-0001-006', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 5, 'strAccountId', '16050-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16040-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 7, 'strAccountId', '16010-0000-000', 'strAccountId')
-
-        .clickButton('Save')
-        .verifyStatusMessage('Saved')
-        .clickButton('Close')
-        .displayText('===== Scenario 1.4: Add Category Done =====')
-        //endregion
-
-        //region Scenario 1.5: Add Commodity
-        .displayText('===== Scenario 1.5: Add Commodity =====')
-        .clickMenuScreen('Commodities','Screen')
-        .clickButton('New')
-        .waitUntilLoaded('iccommodity')
-        .enterData('Text Field','CommodityCode','Smoke Commodity')
-        .enterData('Text Field','Description','Test Smoke Commodity')
-        .clickCheckBox('ExchangeTraded',true)
-        .enterData('Text Field','DecimalsOnDpr','6.00')
-        .enterData('Text Field','ConsolidateFactor','6.00')
-
-        .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        .clickGridCheckBox('Uom', 0,'strUnitMeasure', 'Smoke_LB', 'ysnStockUnit', true)
-        .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','Smoke 5 LB bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('Uom',3,'strUnitMeasure','Smoke 10 LB bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','Smoke KG','strUnitMeasure')
-
-        .verifyGridData('Uom', 1, 'colUOMUnitQty', '1')
-        .verifyGridData('Uom', 2, 'colUOMUnitQty', '5')
-        .verifyGridData('Uom', 3, 'colUOMUnitQty', '10')
-        .verifyGridData('Uom', 4, 'colUOMUnitQty', '2.20462')
-        .clickButton('Save')
-        .verifyStatusMessage('Saved')
-        .clickButton('Close')
-        .displayText('===== Scenario 1.5: Add Commodity Done =====')
-        //endregion
-
-        //region Scenario 1.6: Add Lotted Item
-        .displayText('===== Scenario 1.6: Add Lotted Item =====')
-        .clickMenuScreen('Items','Screen')
-        .clickButton('New')
-        .waitUntilLoaded('icitem')
-        .enterData('Text Field','ItemNo','Smoke - LTI - 01')
-        .enterData('Text Field','Description','Smoke - LTI - 01 Lotted Item Manual')
-        .selectComboBoxRowValue('Category', 'Smoke Inventory Category', 'Category',0)
-        .selectComboBoxRowValue('Commodity', 'Smoke Commodity', 'Commodity',0)
-        .selectComboBoxRowNumber('LotTracking',1,0)
-        .verifyData('Combo Box','Tracking','Lot Level')
-
-        .displayText('===== Setup Item UOM=====')
-        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','Smoke 5 LB bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Smoke 10 LB bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',4,'strUnitMeasure','Smoke KG','strUnitMeasure')
-        .clickGridCheckBox('UnitOfMeasure', 0,'strUnitMeasure', 'Smoke_LB', 'ysnStockUnit', true)
-        .waitUntilLoaded('')
-
-        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
-        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '5')
-        .verifyGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '10')
-        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '2.20462')
-
-
-        .displayText('===== Setup Item GL Accounts=====')
-        .clickTab('Setup')
-        .clickButton('AddRequiredAccounts')
-        .verifyGridData('GlAccounts', 1, 'colGLAccountCategory', 'AP Clearing')
-        .verifyGridData('GlAccounts', 2, 'colGLAccountCategory', 'Inventory')
-        .verifyGridData('GlAccounts', 3, 'colGLAccountCategory', 'Cost of Goods')
-        .verifyGridData('GlAccounts', 4, 'colGLAccountCategory', 'Sales Account')
-        .verifyGridData('GlAccounts', 5, 'colGLAccountCategory', 'Inventory In-Transit')
-        .verifyGridData('GlAccounts', 6, 'colGLAccountCategory', 'Inventory Adjustment')
-        .verifyGridData('GlAccounts', 7, 'colGLAccountCategory', 'Auto-Variance')
-        .selectGridComboBoxRowValue('GlAccounts', 1, 'strAccountId', '21000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 2, 'strAccountId', '16000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 3, 'strAccountId', '50000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 4, 'strAccountId', '40010-0001-006', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 5, 'strAccountId', '16050-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16040-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 7, 'strAccountId', '16010-0000-000', 'strAccountId')
-
-        .displayText('===== Setup Item Location=====')
-        .clickTab('Location')
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'ICSmoke - SL', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'Smoke_LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'Smoke_LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
-        .selectComboBoxRowValue('SubLocation', 'Indy', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'Indy Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-
-        .displayText('===== Setup Item Pricing=====')
-        .clickTab('Pricing')
-        .waitUntilLoaded('')
-        .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
-        .enterGridData('Pricing', 1, 'dblLastCost', '10')
-        .enterGridData('Pricing', 1, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
-        .enterGridData('Pricing', 1, 'dblAmountPercent', '40')
-
-        .verifyGridData('Pricing', 2, 'strLocationName', '0002 - Indianapolis')
-        .enterGridData('Pricing', 2, 'dblLastCost', '10')
-        .enterGridData('Pricing', 2, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('Pricing', 2, 'strPricingMethod',3)
-        .enterGridData('Pricing', 2, 'dblAmountPercent', '40')
-        .clickButton('Save')
-        .clickButton('Close')
-        .displayText('===== Scenario 1.6: Add Lotted Item Done=====')
-        //endregion
-
-
-
-        //region Scenario 1.7: Add Non Lotted Item -
-        .displayText('===== Scenario 2.7: Add Non Lotted Item - =====')
-        .clickButton('New')
-        .waitUntilLoaded('icitem')
-        .enterData('Text Field','ItemNo','Smoke - NLTI - 01')
-        .enterData('Text Field','Description','Smoke - NLTI - 01 Non Lotted Item')
-        .selectComboBoxRowValue('Category', 'Smoke Inventory Category', 'Category',0)
-        .selectComboBoxRowValue('Commodity', 'Smoke Commodity', 'Commodity',0)
-        .selectComboBoxRowNumber('LotTracking',3,0)
-        .verifyData('Combo Box','Tracking','Item Level')
-
-        .displayText('===== Setup Item UOM=====')
-        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','Smoke 5 LB bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Smoke 10 LB bag','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',4,'strUnitMeasure','Smoke KG','strUnitMeasure')
-        .clickGridCheckBox('UnitOfMeasure', 0,'strUnitMeasure', 'Smoke_LB', 'ysnStockUnit', true)
-        .waitUntilLoaded('')
-
-        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
-        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '5')
-        .verifyGridData('UnitOfMeasure', 3, 'colDetailUnitQty', '10')
-        .verifyGridData('UnitOfMeasure', 4, 'colDetailUnitQty', '2.20462')
-
-
-        .displayText('===== Setup Item GL Accounts=====')
-        .clickTab('Setup')
-        .clickButton('AddRequiredAccounts')
-        .verifyGridData('GlAccounts', 1, 'colGLAccountCategory', 'AP Clearing')
-        .verifyGridData('GlAccounts', 2, 'colGLAccountCategory', 'Inventory')
-        .verifyGridData('GlAccounts', 3, 'colGLAccountCategory', 'Cost of Goods')
-        .verifyGridData('GlAccounts', 4, 'colGLAccountCategory', 'Sales Account')
-        .verifyGridData('GlAccounts', 5, 'colGLAccountCategory', 'Inventory In-Transit')
-        .verifyGridData('GlAccounts', 6, 'colGLAccountCategory', 'Inventory Adjustment')
-        .verifyGridData('GlAccounts', 7, 'colGLAccountCategory', 'Auto-Variance')
-        .selectGridComboBoxRowValue('GlAccounts', 1, 'strAccountId', '21000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 2, 'strAccountId', '16000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 3, 'strAccountId', '50000-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 4, 'strAccountId', '40010-0001-006', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 5, 'strAccountId', '16050-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16040-0000-000', 'strAccountId')
-        .selectGridComboBoxRowValue('GlAccounts', 7, 'strAccountId', '16010-0000-000', 'strAccountId')
-
-        .displayText('===== Setup Item Location=====')
-        .clickTab('Location')
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'ICSmoke - SL', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'Smoke_LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'Smoke_LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
-        .selectComboBoxRowValue('SubLocation', 'Indy', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'Indy Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-
-        .displayText('===== Setup Item Pricing=====')
-        .clickTab('Pricing')
-        .waitUntilLoaded('')
-        .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
-        .enterGridData('Pricing', 1, 'dblLastCost', '10')
-        .enterGridData('Pricing', 1, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
-        .enterGridData('Pricing', 1, 'dblAmountPercent', '40')
-
-        .verifyGridData('Pricing', 2, 'strLocationName', '0002 - Indianapolis')
-        .enterGridData('Pricing', 2, 'dblLastCost', '10')
-        .enterGridData('Pricing', 2, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('Pricing', 2, 'strPricingMethod',3)
-        .enterGridData('Pricing', 2, 'dblAmountPercent', '40')
-        .clickButton('Save')
-        .clickButton('Close')
-        .displayText('===== Scenario 2.7: Add Non Lotted Item Done =====')
-        .displayText('=====   Add Maintenance Screens Done ====')
-        //endregion
+        //Add Non Lotted Item
+        .displayText('===== Scenario 6: Add Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addInventoryItem
+            (t,next,
+                'Smoke - NLTI - 01'
+                , 'Test Non Lotted Item Smoke Testing'
+                , 'SC - Category - 01'
+                , 'SC - Commodity - 01'
+                , 4
+                , 'LB'
+                , 'LB'
+                , 10
+                , 10
+                , 40
+            )
+        })
 
         .done();
 

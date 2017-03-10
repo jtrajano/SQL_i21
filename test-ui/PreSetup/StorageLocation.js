@@ -10,9 +10,9 @@ StartTest (function (t) {
         .enterData('Text Field','Name','Indy Storage')
         .enterData('Text Field','Description','Indy Storage')
         .selectComboBoxRowNumber('UnitType',6,0)
-        .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
-        .selectComboBoxRowValue('SubLocation', 'Indy', 'SubLocation',0)
-        .selectComboBoxRowValue('ParentUnit', 'RM Storage', 'ParentUnit',0)
+        .selectComboBoxRowNumber('Location',2,0)
+        .selectComboBoxRowNumber('SubLocation',1,0)
+        .selectComboBoxRowNumber('ParentUnit',1,0)
         .enterData('Text Field','Aisle','Test Aisle - 01')
         .clickCheckBox('AllowConsume', true)
         .clickCheckBox('AllowMultipleItems', true)
@@ -23,6 +23,11 @@ StartTest (function (t) {
         .verifyStatusMessage('Saved')
         .clickButton('Close')
         //endregion
+
+
+
+
+
 
 
         .done();

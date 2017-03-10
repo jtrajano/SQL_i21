@@ -1,0 +1,106 @@
+StartTest (function (t) {
+    new iRely.FunctionalTest().start(t)
+
+        //region Scenario 1: Delete Unused Inventory UOM
+        .displayText('=====  Scenario 1: Delete Unused Inventory UOM =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Inventory UOM','Screen')
+        .doubleClickSearchRowValue('Test_5 LB bag', 'strUnitMeasure', 1)
+        .waitUntilLoaded('icinventoryuom')
+        .clickButton('Delete')
+        .waitUntilLoaded()
+        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded()
+        .clearTextFilter('FilterGrid')
+        .displayText('=====  Scenario 1: Delete Unused Inventory UOM Done=====')
+        //endregion
+
+        //region Scenario 2: Delete Used Inventory UOM
+        .displayText('===== Scenario 2: Delete Used Inventory UOM  =====')
+        .doubleClickSearchRowValue('KG', 'strUnitMeasure', 1)
+        .waitUntilLoaded('icinventoryuom')
+        .clickButton('Delete')
+        .waitUntilLoaded()
+        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded()
+        .verifyMessageBox('iRely i21','The record you are trying to delete is being used.','ok','error')
+        .clickMessageBoxButton('ok')
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded()
+        .clearTextFilter('FilterGrid')
+        .displayText('=====  Scenario 2: Delete Used Inventory UOM Done=====')
+        //endregion
+
+        //region Scenario 3: Delete a single Inventory UOM conversion record.
+        .displayText('===== Scenario 3: Delete a single Inventory UOM conversion record. =====')
+        .doubleClickSearchRowValue('Test_10 LB bag - Updated', 'strUnitMeasure', 1)
+        .waitUntilLoaded('icinventoryuom')
+        .selectGridRowNumber('Conversion',[1])
+        .clickButton('DeleteConversion')
+        .waitUntilLoaded()
+        //.verifyMessageBox('iRely i21','You are about to delete 1 row.<br/>Are you sure you want to continue?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .selectSearchRowNumber(1)
+        .clickButton('OpenSelected')
+        .waitUntilLoaded('icinventoryuom')
+        .verifyData('Text Field','UnitMeasure','Test_10 LB bag - Updated')
+        .verifyData('Text Field','Symbol','Test_10 LB bag - Updated')
+        .verifyGridData('Conversion', 1, 'colConversionStockUOM', 'KG')
+        .verifyGridData('Conversion', 1, 'colConversionToStockUOM', '4.53592')
+        .verifyGridData('Conversion', 2, 'colConversionStockUOM', '50 lb bag')
+        .clickButton('Close')
+        .waitUntilLoaded()
+        .clearTextFilter('FilterGrid')
+        .displayText('===== Scenario 3: Delete a single Inventory UOM conversion record Done =====')
+        //endregion
+
+        //region Scenario 4: Delete multiple Inventory UOM conversion record.
+        .displayText('===== Scenario 3: Delete multiple Inventory UOM conversion record. =====')
+        .doubleClickSearchRowValue('Test_10 LB bag - Updated', 'strUnitMeasure', 1)
+        .waitUntilLoaded('icinventoryuom')
+        .selectGridRowNumber('Conversion',[1,2])
+        .clickButton('DeleteConversion')
+        .waitUntilLoaded()
+        //.verifyMessageBox('iRely i21','You are about to delete 2 rows.<br/>Are you sure you want to continue?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .selectSearchRowNumber(1)
+        .clickButton('OpenSelected')
+        .waitUntilLoaded('icinventoryuom')
+        .clickButton('Close')
+        .waitUntilLoaded()
+        .clearTextFilter('FilterGrid')
+        .displayText('===== Scenario 4: Delete multiple Inventory UOM conversion record Done =====')
+        //endregion
+
+
+//        //region Scenario 5: View Multiple Records and delete them.
+//        .displayText('=====  Scenario 1: Delete Unused Inventory UOM =====')
+//        .selectSearchRowNumber([42,43])
+//        .clickButton('OpenSelected')
+//        .waitUntilLoaded('icinventoryuom')
+//        .clickButton('Delete')
+//        .waitUntilLoaded()
+//        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
+//        .clickMessageBoxButton('yes')
+//        .waitUntilLoaded('icinventoryuom')
+//        .clickButton('Delete')
+//        .waitUntilLoaded()
+//        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
+//        .clickMessageBoxButton('yes')
+//        .waitUntilLoaded()
+//        .clearTextFilter('FilterGrid')
+//        .displayText('=====  Scenario 5: View Multiple Records and delete them. Done=====')
+//        //endregion
+
+        .done();
+
+})

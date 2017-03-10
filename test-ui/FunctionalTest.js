@@ -732,7 +732,7 @@ Ext.define('iRely.FunctionalTest', {
                 win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
 
             if (win) {
-                var tab = win.down('pge'+item) || win.down('tabpanel [text='+ item  +']');
+                var tab = win.down('pge'+item) || win.down('tabpanel [text='+ item  +']' || win.down('tab'+item));
 
                 if (tab) {
                     if(tab.xtype == 'panel') tab = tab.tab;
