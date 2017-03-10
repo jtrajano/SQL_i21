@@ -4675,6 +4675,7 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\27_RemoveZeroTransactionFromCMUndepositedFund.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateSystemCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
