@@ -24,8 +24,6 @@ CREATE TABLE [dbo].[tblGLRevalue](
 
 GO
 
-ALTER TABLE [dbo].[tblGLRevalue] CHECK CONSTRAINT [FK_tblGLRevalue_tblGLRevalue]
-GO
 
 
 
