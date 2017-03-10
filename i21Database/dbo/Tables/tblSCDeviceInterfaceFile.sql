@@ -8,6 +8,6 @@
     [strDeviceData] NVARCHAR(256) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[dtmScaleTime] DATETIME NULL,
 	[intEntityId] [int] NULL,
-    CONSTRAINT [PK_tblSCDeviceInterfaceFile_intDeviceInterfaceFileId] PRIMARY KEY ([intDeviceInterfaceFileId]), 
-    CONSTRAINT [FK_tblSCDeviceInterfaceFile_tblSCScaleDevice_intScaleDeviceId] FOREIGN KEY ([intScaleDeviceId]) REFERENCES [tblSCScaleDevice]([intScaleDeviceId]) 
+    CONSTRAINT [PK_tblSCDeviceInterfaceFile_intDeviceInterfaceFileId] PRIMARY KEY ([intDeviceInterfaceFileId]),
+	UNIQUE (intScaleDeviceId)
 )
