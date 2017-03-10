@@ -5037,6 +5037,7 @@
     <Build Include="dbo\Tables\tblAPVendorTerm.sql" />
     <None Include="Scripts\Post-Deployment\EM\039_MoveDefaultTermsToVendorTerm.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCancelLoadSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
