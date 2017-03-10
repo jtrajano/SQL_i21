@@ -5100,6 +5100,7 @@
     <None Include="Scripts\Post-Deployment\ST\10_Checkout_Commander_Translog.sql" />
     <Build Include="dbo\Functions\fnCTGetBasisComponentString.sql" />
     <Build Include="dbo\Views\vyuCTAlertNotificationCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
