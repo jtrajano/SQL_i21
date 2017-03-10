@@ -2,6 +2,7 @@
 GO
 --HEADER
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileHeader] WHERE [strLayoutTitle] = 'Radiant - MSM')
+BEGIN
 INSERT INTO [dbo].[tblSMImportFileHeader]
            ([strLayoutTitle]			,[strFileType]    ,[strFieldDelimiter]	,[strXMLType]
            ,[strXMLInitiater]			,[ysnActive]      ,[intConcurrencyId])
@@ -657,4 +658,5 @@ BEGIN
 
 END
 
+END
 GO

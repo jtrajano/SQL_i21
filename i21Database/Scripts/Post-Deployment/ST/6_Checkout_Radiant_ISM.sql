@@ -10,7 +10,7 @@ BEGIN
      VALUES
            ('Radiant - ISM'				,'XML'			  ,NULL		            ,'Inbound'
            ,'<?xml version="1.0" encoding="utf-8"?>'		,1		          ,0)
-END
+
 
 DECLARE @intImportFileHeaderId INT
 SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = 'Radiant - ISM'
@@ -786,4 +786,5 @@ BEGIN
 			   ,1							   ,1)
 END
 
+END
 GO
