@@ -65,7 +65,7 @@ BEGIN
 			,[ysnAccrue]
 			,[ysnPrice]
 	)
-	SELECT	[intInventoryShipmentId]			= ShipmentItem.intInventoryShipmentId
+	SELECT	[intInventoryShipmentId]		= ShipmentItem.intInventoryShipmentId
 			,[intInventoryShipmentChargeId]	= Charge.intInventoryShipmentChargeId
 			,[intInventoryShipmentItemId]	= ShipmentItem.intInventoryShipmentItemId
 			,[intChargeId]					= Charge.intChargeId
@@ -173,7 +173,6 @@ BEGIN
 														ELSE 
 															1
 												END 
-
 												, 2
 											)
 
