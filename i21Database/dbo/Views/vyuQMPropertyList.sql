@@ -9,6 +9,7 @@ SELECT P.intPropertyId
 	,P.intDecimalPlaces
 	,P.ysnActive
 	,P.strIsMandatory
+	,P.ysnNotify
 	,dbo.fnQMGetTestNames(P.intPropertyId) AS strTestNames
 FROM tblQMProperty AS P
 JOIN tblQMAnalysisType AS AT ON AT.intAnalysisTypeId = P.intAnalysisTypeId
