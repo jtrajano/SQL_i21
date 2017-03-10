@@ -24,7 +24,16 @@ Ext.define('Inventory.ux.GridUOMField', {
 
     config: {
         DEFAULT_DECIMALS: 6,
-        customValue: null
+        customValue: null,
+        readOnly: false
+    },
+
+    getReadOnly: function() {
+        return this.readOnly;
+    },
+
+    setReadOnly: function(value) {
+        this.readOnly = value;
     },
 
     txtQuantity: undefined,
@@ -390,6 +399,10 @@ Ext.define('Inventory.ux.GridUOMField', {
         
         me.value = newValue;
         me.txtQuantity.setValue(newValue);
+        if (me.readOnly) {
+            me.txtQuantity.setReadOnly(me.readOnly);
+            me.cboUom.setReadOnly(me.readOnly);
+        }
         return me;
     },
 
