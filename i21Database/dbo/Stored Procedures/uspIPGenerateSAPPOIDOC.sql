@@ -205,7 +205,8 @@ Begin
 			@strPriceUOM				= (Select TOP 1 ISNULL(strSymbol,strUnitMeasure) From tblICUnitMeasure Where strUnitMeasure = strPriceUOM) , --COND_UNIT 
 			@strRowState				= strRowState ,
 			@strFeedStatus				= strFeedStatus,
-			@strContractItemNo			= strContractItemNo
+			@strContractItemNo			= strContractItemNo,
+			@strOrigin					= strOrigin	
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
 
 		--Convert price USC to USD
@@ -487,11 +488,11 @@ Begin
 				If UPPER(@strCommodityCode)='COFFEE'
 				Begin
 					--Origin (L16)
-					If ISNULL(@strOrigin,'')<>''
+					If ISNULL(@strContractItemNo,'')<>''
 					Begin
 						Set @strTextXml += '<E1BPMEPOTEXTHEADER>'
 						Set @strTextXml += '<TEXT_ID>' + 'L16' + '</TEXT_ID>' 
-						Set @strTextXml += '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(@strOrigin,'')) + '</TEXT_LINE>' 
+						Set @strTextXml += '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(@strContractItemNo,'')) + '</TEXT_LINE>' 
 						Set @strTextXml += '</E1BPMEPOTEXTHEADER>'
 					End
 

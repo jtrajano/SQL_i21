@@ -5067,6 +5067,7 @@
     <Build Include="dbo\Stored Procedures\uspLGCancelLoadSchedule.sql" />
     <Build Include="dbo\Functions\fnCTGetBasisComponentString.sql" />
     <Build Include="dbo\Views\vyuCTAlertNotificationCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

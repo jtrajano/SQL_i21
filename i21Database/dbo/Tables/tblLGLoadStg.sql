@@ -21,4 +21,6 @@
 	[strFeedStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[dtmFeedCreated] DATETIME,
 	[strMessage] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+	[strMessageState] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[ysnMailSent]	BIT DEFAULT 0
 )
