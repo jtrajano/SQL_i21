@@ -667,6 +667,12 @@ WHERE ysnEnableSampleTypeByUserRole IS NULL
 GO
 
 GO
+UPDATE tblQMCompanyPreference
+SET ysnShowSampleFromAllLocation = 0
+WHERE ysnShowSampleFromAllLocation IS NULL
+GO
+
+GO
 UPDATE tblQMReportProperty SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
 GO
 
@@ -971,5 +977,139 @@ BEGIN
 	SET a.intSequenceNo = b.intSequenceNo
 	FROM tblQMTestProperty a
 	JOIN @TestProperty b ON b.intTestPropertyId = a.intTestPropertyId
+END
+GO
+
+-- To insert sample type in template for existing templates. This script should run only once for a client
+GO
+IF EXISTS (
+		SELECT 1
+		FROM tblQMProductControlPoint
+		WHERE intSampleTypeId IS NULL
+		)
+BEGIN
+	DECLARE @intSeqNo INT
+		,@intProductControlPointId INT
+	DECLARE @ProductControlPoint TABLE (
+		intSeqNo INT IDENTITY(1, 1)
+		,intProductControlPointId INT
+		,intConcurrencyId INT
+		,intProductId INT
+		,intControlPointId INT
+		,intCreatedUserId INT
+		,dtmCreated DATETIME
+		,intLastModifiedUserId INT
+		,dtmLastModified DATETIME
+		)
+
+	IF NOT EXISTS (
+			SELECT 1
+			FROM INFORMATION_SCHEMA.TABLES
+			WHERE TABLE_NAME = 'tblQMProduct_Org'
+			)
+	BEGIN
+		SELECT *
+		INTO tblQMProduct_Org
+		FROM tblQMProduct
+	END
+
+	IF NOT EXISTS (
+			SELECT 1
+			FROM INFORMATION_SCHEMA.TABLES
+			WHERE TABLE_NAME = 'tblQMProductControlPoint_Org'
+			)
+	BEGIN
+		SELECT *
+		INTO tblQMProductControlPoint_Org
+		FROM tblQMProductControlPoint
+	END
+
+	-- create sample type for the control points which is not available in Sample Type
+	INSERT INTO tblQMSampleType (
+		intConcurrencyId
+		,strSampleTypeName
+		,strDescription
+		,intControlPointId
+		,ysnFinalApproval
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+		)
+	SELECT DISTINCT 1
+		,CP.strControlPointName
+		,CP.strControlPointName
+		,PCP.intControlPointId
+		,0
+		,PCP.intCreatedUserId
+		,PCP.dtmCreated
+		,PCP.intLastModifiedUserId
+		,PCP.dtmLastModified
+	FROM tblQMProductControlPoint PCP
+	JOIN tblQMControlPoint CP ON CP.intControlPointId = PCP.intControlPointId
+	WHERE PCP.intControlPointId NOT IN (
+			SELECT intControlPointId
+			FROM tblQMSampleType
+			)
+
+	INSERT INTO @ProductControlPoint
+	SELECT intProductControlPointId
+		,intConcurrencyId
+		,intProductId
+		,intControlPointId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+	FROM tblQMProductControlPoint
+	WHERE intSampleTypeId IS NULL
+
+	SELECT @intSeqNo = MIN(intSeqNo)
+	FROM @ProductControlPoint
+
+	WHILE (@intSeqNo > 0)
+	BEGIN
+		SELECT @intProductControlPointId = intProductControlPointId
+		FROM @ProductControlPoint
+		WHERE intSeqNo = @intSeqNo
+
+		IF EXISTS (
+				SELECT 1
+				FROM @ProductControlPoint PCP
+				JOIN tblQMSampleType ST ON ST.intControlPointId = PCP.intControlPointId
+				WHERE PCP.intProductControlPointId = @intProductControlPointId
+				)
+		BEGIN
+			DELETE
+			FROM tblQMProductControlPoint
+			WHERE intProductControlPointId = @intProductControlPointId
+
+			INSERT INTO tblQMProductControlPoint (
+				intConcurrencyId
+				,intProductId
+				,intControlPointId
+				,intSampleTypeId
+				,intCreatedUserId
+				,dtmCreated
+				,intLastModifiedUserId
+				,dtmLastModified
+				)
+			SELECT PCP.intConcurrencyId
+				,PCP.intProductId
+				,PCP.intControlPointId
+				,ST.intSampleTypeId
+				,PCP.intCreatedUserId
+				,PCP.dtmCreated
+				,PCP.intLastModifiedUserId
+				,PCP.dtmLastModified
+			FROM @ProductControlPoint PCP
+			JOIN tblQMSampleType ST ON ST.intControlPointId = PCP.intControlPointId
+			WHERE PCP.intProductControlPointId = @intProductControlPointId
+		END
+
+		SELECT @intSeqNo = MIN(intSeqNo)
+		FROM @ProductControlPoint
+		WHERE intSeqNo > @intSeqNo
+	END
 END
 GO

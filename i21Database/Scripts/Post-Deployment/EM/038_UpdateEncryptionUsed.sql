@@ -1,8 +1,9 @@
-﻿begin transaction
+﻿
 
 PRINT ('*****BEGIN CHECKING EM change use encryption*****')
 if not exists (select top 1 1 from tblEMEntityPreferences where strPreference = 'EM change use encryption')
 begin
+	begin transaction
 	PRINT ('*****RUNNING EM CHANGE USE ENCRYPTION*****')
 	begin try
 		OPEN SYMMETRIC KEY i21EncryptionSymKey

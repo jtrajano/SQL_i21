@@ -41,7 +41,7 @@ DECLARE @EntityCustomerId		INT,
 		@InvoiceOriginId		INT,
 		@PONumber				NVARCHAR(100),
 		@BOLNumber				NVARCHAR(100),
-		@DeliverPickup			NVARCHAR(100),
+		@DeliverPickUp			NVARCHAR(100),
 		@SalesOrderComment		NVARCHAR(MAX),
 		@InvoiceComment			NVARCHAR(MAX),
 		@SoftwareComment		NVARCHAR(MAX),
@@ -433,7 +433,7 @@ SELECT TOP 1
 		@ShipViaId				=	intShipViaId,  	   
 		@PONumber				=	strPONumber,
 		@BOLNumber				=	strBOLNumber,
-		@DeliverPickup			=	'',
+		@DeliverPickUp			=	'',
 		@SalesOrderNumber		=	strSalesOrderNumber,
 		@ShipToLocationId		=	intShipToLocationId,
 		@BillToLocationId		=	intBillToLocationId,
@@ -520,7 +520,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 							@ShipViaId				=	@ShipViaId,  	   
 							@PONumber				=	@PONumber,
 							@BOLNumber				=	@BOLNumber,
-							@DeliverPickup			=	@DeliverPickup,							
+							@DeliverPickUp			=	@DeliverPickUp,							
 							@ShipToLocationId		=	@ShipToLocationId,
 							@BillToLocationId		=	@BillToLocationId,
 							@PeriodsToAccrue		=	@intAccrualPeriod,
@@ -754,7 +754,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 					,@InvoiceOriginId				= @InvoiceOriginId
 					,@PONumber						= @PONumber
 					,@BOLNumber						= @BOLNumber
-					,@DeliverPickUp					= @DeliverPickup
+					,@DeliverPickUp					= @DeliverPickUp
 					,@Comment						= @InvoiceComment
 					,@ShipToLocationId				= @ShipToLocationId
 					,@BillToLocationId				= @BillToLocationId
@@ -1101,14 +1101,18 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 			END			
 			
 		UPDATE tblARInvoice
-		SET intPeriodsToAccrue = CASE WHEN @ysnHasMaintenanceItem = 1 THEN
-									CASE WHEN @strFrequency = 'Monthly' THEN 1
-										 WHEN @strFrequency = 'Bi-Monthly' THEN 2
-										 WHEN @strFrequency = 'Quarterly' THEN 3
-										 WHEN @strFrequency = 'Semi-Annually' THEN 6
-										 WHEN @strFrequency = 'Annually' THEN 12
-									ELSE 1 END
-								 ELSE 1 END
+		SET intPeriodsToAccrue = CASE WHEN ISNULL(intPeriodsToAccrue, 0) <> 0 THEN
+									 intPeriodsToAccrue
+								 ELSE
+									 CASE WHEN @ysnHasMaintenanceItem = 1 THEN
+										CASE WHEN @strFrequency = 'Monthly' THEN 1
+											 WHEN @strFrequency = 'Bi-Monthly' THEN 2
+											 WHEN @strFrequency = 'Quarterly' THEN 3
+											 WHEN @strFrequency = 'Semi-Annually' THEN 6
+											 WHEN @strFrequency = 'Annually' THEN 12
+										ELSE 1 END
+									 ELSE 1 END
+								 END
 		WHERE intInvoiceId = @SoftwareInvoiceId
 
 		IF NOT EXISTS (SELECT NULL FROM tblSMRecurringTransaction WHERE intTransactionId = @SoftwareInvoiceId AND strTransactionType = 'Invoice')

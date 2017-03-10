@@ -88,7 +88,7 @@ FROM
 		,dblFranchiseWeight		=	WC2Details.dblFranchiseWeight
 		,dblClaimAmount			=	WC2Details.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
-		,strContainerNumber		=	LCointainer.strContainerNumber
+		,strContainerNumber		=	ISNULL(LCointainer.strContainerNumber, (SELECT TOP 1 LoadContainer.strContainerNumber FROM tblLGLoadContainer LoadContainer WHERE LoadContainer.intLoadId = WC2Details.intLoadId))
 	FROM tblAPBill WC2
 	INNER JOIN tblAPBillDetail WC2Details ON WC2.intBillId = WC2Details.intBillId
 	INNER JOIN tblICItem Item ON Item.intItemId = WC2Details.intItemId
@@ -96,7 +96,7 @@ FROM
 			ON (CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.intWeightUOMId WHEN WC2Details.intCostUOMId > 0 THEN WC2Details.intCostUOMId ELSE WC2Details.intUnitOfMeasureId END) = QtyUOM.intItemUOMId
 	INNER JOIN (tblCTContractDetail ContractDetail INNER JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId)
 			ON WC2Details.intContractDetailId = ContractDetail.intContractDetailId
-	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = WC2Details.intAccountId
+	LEFT JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = WC2Details.intAccountId
 	INNER JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = WC2Details.intCurrencyId
 	LEFT JOIN (tblICItemUOM ItemCostUOM INNER JOIN tblICUnitMeasure ItemCostUOMMeasure ON ItemCostUOM.intUnitMeasureId = ItemCostUOMMeasure.intUnitMeasureId) 
 			ON WC2Details.intCostUOMId = ItemCostUOM.intItemUOMId
@@ -118,7 +118,7 @@ FROM
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	MainCurrency.strCurrency
 		,strConcern				=	CASE WHEN Receipt.intInventoryReceiptId IS NOT NULL AND Receipt.strReceiptType = 'Inventory Return'
-										THEN  'Container Rejection Commodity cost' 
+										THEN  'Container Rejection - Commodity cost' 
 										WHEN DMDetails.intLoadId > 0 THEN 'Weight Claim'
 										ELSE ''
 										END
@@ -225,8 +225,8 @@ FROM
 										END
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
-												THEN NULL 
-										WHEN DMDetails.intContractDetailId IS NULL  AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL
+												THEN ISNULL(ContractCostCurrency.strCurrency,MainCurrency.strCurrency) --AP-3308
+										WHEN DMDetails.intContractDetailId IS NULL  AND DMDetails.intInventoryReceiptItemId IS NULL THEN MainCurrency.strCurrency
 										WHEN DMDetails.ysnSubCurrency > 0 AND SubCurrency.intConcurrencyId > 0
 										THEN SubCurrency.strCurrency
 									ELSE MainCurrency.strCurrency
@@ -248,14 +248,14 @@ FROM
 		,intContractSeqId		=	ContractDetail.intContractSeq
 		,intBillId				=	DM.intBillId
 		,dblQtyReceived			=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
-												THEN NULL
-										WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL
+												THEN dblQtyReceived
+										--WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL AP-3308
 										WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight
 									 ELSE DMDetails.dblQtyReceived 
 									END
 		,dblCost				=	CASE WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
-												THEN NULL
-											WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL
+												THEN DMDetails.dblCost --AP-3308
+											WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN DMDetails.dblCost
 										ELSE DMDetails.dblCost
 											END
 		,dblTotal				=	DMDetails.dblTotal
@@ -277,6 +277,7 @@ FROM
 	LEFT JOIN tblCTContractDetail ContractDetail ON DMDetails.intContractDetailId = ContractDetail.intContractDetailId
 	LEFT JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId
 	LEFT JOIN tblCTContractCost ContractCost ON ContractDetail.intContractDetailId = ContractCost.intContractDetailId AND DMDetails.intContractCostId = ContractCost.intContractCostId
+	LEFT JOIN tblSMCurrency ContractCostCurrency ON ContractCost.intCurrencyId = ContractCostCurrency.intCurrencyID
 	LEFT JOIN (tblICItemUOM ContractCostItemUOM LEFT JOIN tblICUnitMeasure ContractCostItemMeasure ON ContractCostItemUOM.intUnitMeasureId = ContractCostItemMeasure.intUnitMeasureId)
 								ON ContractCostItemUOM.intItemUOMId = ContractCost.intItemUOMId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptDetail LEFT JOIN tblICInventoryReceipt Receipt ON ReceiptDetail.intInventoryReceiptId = Receipt.intInventoryReceiptId

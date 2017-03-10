@@ -36,7 +36,7 @@ BEGIN
 		AND [intFunctionalCurrencyId] = [intToCurrencyId] 
 		AND CAST(@TransactionDate AS DATE) >= CAST([dtmValidFromDate] AS DATE) 
 	ORDER BY
-		[dtmValidFromDate]
+		[dtmValidFromDate] DESC
 
 
 	IF NOT EXISTS(SELECT TOP 1 NULL FROM @returntable ORDER BY [intCurrencyExchangeRateTypeId])

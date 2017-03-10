@@ -47,6 +47,12 @@ SELECT DISTINCT intKey = CAST(ROW_NUMBER() OVER(ORDER BY PickLot.intCompanyLocat
 	, intDestinationGradeId = NULL
 	, strDestinationWeights = NULL
 	, intDestinationWeightId = NULL
+	/* BEGIN The below multi-currency fields are dummy fields. Use it until LG adjusted to multi-currency. */
+	, intCurrencyId = CAST(NULL AS INT) 
+	, intForexRateTypeId = CAST(NULL AS INT)
+	, strForexRateType = CAST(NULL AS NVARCHAR(50))
+	, dblForexRate = CAST(NULL AS NUMERIC(18, 6)) 
+	/* END The above multi-currency fields are dummy fields. Use it until LG adjusted to multi-currency. */
 FROM vyuLGDeliveryOpenPickLots PickLot
 	LEFT JOIN vyuLGDeliveryOpenPickLotDetails PickLotDetail ON PickLotDetail.intPickLotHeaderId = PickLot.intPickLotHeaderId
 WHERE PickLot.ysnShipped = 0

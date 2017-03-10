@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblSTTransLogPMReynolds]
+﻿CREATE TABLE [dbo].[tblSTstgRebatesRJReynolds]
 (
 	[intRJRId] int IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	[strOutletName] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,

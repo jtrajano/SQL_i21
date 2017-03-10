@@ -48,6 +48,10 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.strMICRDescription
 				,ISNULL(dbo.fnAESDecryptASym(i21.strMICRRoutingNo),strMICRRoutingNo) COLLATE Latin1_General_CI_AS AS strMICRRoutingNo
 				,ISNULL(dbo.fnAESDecryptASym(i21.strMICRBankAccountNo),strMICRBankAccountNo) COLLATE Latin1_General_CI_AS AS strMICRBankAccountNo
+				,i21.strMICRRoutingPrefix
+				,i21.strMICRRoutingSuffix
+				,i21.strMICRBankAccountPrefix
+				,i21.strMICRBankAccountSuffix
 				,i21.intMICRBankAccountSpacesCount
 				,i21.intMICRBankAccountSpacesPosition
 				,i21.intMICRCheckNoSpacesCount
@@ -56,6 +60,16 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.intMICRCheckNoPosition
 				,i21.strMICRLeftSymbol
 				,i21.strMICRRightSymbol
+				,i21.strMICRFinancialInstitutionPrefix
+				,i21.strMICRFinancialInstitution
+				,i21.strMICRFinancialInstitutionSuffix
+				,i21.intMICRFinancialInstitutionSpacesCount
+				,i21.intMICRFinancialInstitutionSpacesPosition
+				,i21.strMICRDesignationPrefix
+				,i21.strMICRDesignation
+				,i21.strMICRDesignationSuffix
+				,i21.intMICRDesignationSpacesCount
+				,i21.intMICRDesignationSpacesPosition
 				,i21.strFractionalRoutingNumber
 				,i21.strUserDefineMessage
 				,i21.strSignatureLineCaption
@@ -224,6 +238,10 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strMICRDescription
 					,strMICRRoutingNo
 					,strMICRBankAccountNo
+					,strMICRRoutingPrefix
+					,strMICRRoutingSuffix
+					,strMICRBankAccountPrefix
+					,strMICRBankAccountSuffix
 					,intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount
@@ -232,6 +250,16 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition
 					,strMICRLeftSymbol
 					,strMICRRightSymbol
+					,strMICRFinancialInstitutionPrefix
+					,strMICRFinancialInstitution
+					,strMICRFinancialInstitutionSuffix
+					,intMICRFinancialInstitutionSpacesCount
+					,intMICRFinancialInstitutionSpacesPosition
+					,strMICRDesignationPrefix
+					,strMICRDesignation
+					,strMICRDesignationSuffix
+					,intMICRDesignationSpacesCount
+					,intMICRDesignationSpacesPosition
 					,strFractionalRoutingNumber
 					,strUserDefineMessage	
 					,strSignatureLineCaption
@@ -282,6 +310,10 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strMICRDescription					= i.strMICRDescription
 					,strMICRRoutingNo					= [dbo].fnAESEncryptASym(i.strMICRRoutingNo)
 					,strMICRBankAccountNo				= [dbo].fnAESEncryptASym(i.strMICRBankAccountNo)
+					,strMICRRoutingPrefix				= i.strMICRRoutingPrefix
+					,strMICRRoutingSuffix				= i.strMICRRoutingSuffix
+					,strMICRBankAccountPrefix			= i.strMICRBankAccountPrefix
+					,strMICRBankAccountSuffix			= i.strMICRBankAccountSuffix
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -290,6 +322,16 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 					,strMICRLeftSymbol					= i.strMICRLeftSymbol
 					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,strMICRFinancialInstitutionPrefix	= i.strMICRFinancialInstitutionPrefix
+					,strMICRFinancialInstitution		= i.strMICRFinancialInstitution
+					,strMICRFinancialInstitutionSuffix	= i.strMICRFinancialInstitutionSuffix
+					,intMICRFinancialInstitutionSpacesCount = i.intMICRFinancialInstitutionSpacesCount
+					,intMICRFinancialInstitutionSpacesPosition = i.intMICRFinancialInstitutionSpacesPosition
+					,strMICRDesignationPrefix			= i.strMICRDesignationPrefix
+					,strMICRDesignation					= i.strMICRDesignation
+					,strMICRDesignationSuffix			= i.strMICRDesignationSuffix
+					,intMICRDesignationSpacesCount		= i.intMICRDesignationSpacesCount
+					,intMICRDesignationSpacesPosition	= i.intMICRDesignationSpacesPosition
 					,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
 					,strUserDefineMessage				= i.strUserDefineMessage
 					,strSignatureLineCaption			= i.strSignatureLineCaption
@@ -458,6 +500,10 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strMICRDescription					= i.strMICRDescription
 					,strMICRRoutingNo					= [dbo].fnAESEncryptASym(i.strMICRRoutingNo)
 					,strMICRBankAccountNo				= [dbo].fnAESEncryptASym(i.strMICRBankAccountNo)
+					,strMICRRoutingPrefix				= i.strMICRRoutingPrefix
+					,strMICRRoutingSuffix				= i.strMICRRoutingSuffix
+					,strMICRBankAccountPrefix			= i.strMICRBankAccountPrefix
+					,strMICRBankAccountSuffix			= i.strMICRBankAccountSuffix
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -466,6 +512,16 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 					,strMICRLeftSymbol					= i.strMICRLeftSymbol
 					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,strMICRFinancialInstitutionPrefix	= i.strMICRFinancialInstitutionPrefix
+					,strMICRFinancialInstitution		= i.strMICRFinancialInstitution
+					,strMICRFinancialInstitutionSuffix	= i.strMICRFinancialInstitutionSuffix
+					,intMICRFinancialInstitutionSpacesCount = i.intMICRFinancialInstitutionSpacesCount
+					,intMICRFinancialInstitutionSpacesPosition = i.intMICRFinancialInstitutionSpacesPosition
+					,strMICRDesignationPrefix			= i.strMICRDesignationPrefix
+					,strMICRDesignation					= i.strMICRDesignation
+					,strMICRDesignationSuffix			= i.strMICRDesignationSuffix
+					,intMICRDesignationSpacesCount		= i.intMICRDesignationSpacesCount
+					,intMICRDesignationSpacesPosition	= i.intMICRDesignationSpacesPosition
 					,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
 					,strUserDefineMessage				= i.strUserDefineMessage
 					,strSignatureLineCaption			= i.strSignatureLineCaption

@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportFee](
+﻿
+CREATE PROCEDURE [dbo].[uspCFInvoiceReportFee](
 	@xmlParam NVARCHAR(MAX)=null
 )
 AS
@@ -23,6 +24,12 @@ BEGIN
 			,strFee						 = ''
 			,strInvoiceFormat			 = ''
 			,dblFeeTotalAmount			 = 0.0
+			,strInvoiceReportNumber		 = ''
+			,intCustomerId				 = 0
+			,intTermID					 = 0
+			,intSalesPersonId			 = 0
+			,intItemId					 = 0
+			,intARLocationId			 = 0
 			RETURN;
 		END
 		ELSE
@@ -239,6 +246,8 @@ BEGIN
 				 ,dtmTransactionDate		DATETIME
 				 ,dtmPostedDate				DATETIME
 				 ,strTransactionType		NVARCHAR(MAX)
+				 ,intNetworkId				INT
+				 ,intARLocationId			INT
 
 			)
 
@@ -256,7 +265,6 @@ BEGIN
 			,strFee									 NVARCHAR(MAX)
 			,strFeeDescription						 NVARCHAR(MAX)
 			,strCalculationType						 NVARCHAR(MAX)
-			,strCalculationCard						 NVARCHAR(MAX)
 			,strCalculationFrequency				 NVARCHAR(MAX)
 			,ysnExtendedRemoteTrans					 BIT
 			,ysnRemotesTrans						 BIT
@@ -288,6 +296,13 @@ BEGIN
 			 ,strFeeDescription			NVARCHAR(MAX)
 			 ,strFee					NVARCHAR(MAX)
 			 ,strInvoiceFormat			NVARCHAR(MAX)
+			 ,strInvoiceReportNumber	NVARCHAR(MAX)
+			 ,intCustomerId				INT
+			 ,intTermID					INT
+			 ,intSalesPersonId			INT
+			 ,dtmInvoiceDate			DATETIME
+			 ,intItemId					INT
+			 ,intARLocationId			INT
 		)
 
 			-------------VARIABLES------------
@@ -341,6 +356,8 @@ BEGIN
 			,dtmTransactionDate	
 			,dtmPostedDate		
 			,strTransactionType	
+			,intNetworkId
+			,intARLocationId
 			FROM ##tmpInvoiceFee
 
 			-------------SET GROUP VOLUME TO OUTPUT---------------
@@ -353,15 +370,26 @@ BEGIN
 			DECLARE @dtmLastBillingDate		DATETIME
 			DECLARE @intFeeProfileId		INT			
 			DECLARE @dtmInvoiceDate			DATETIME	
-
+			DECLARE @strInvoiceReportNumber NVARCHAR(MAX)
+			DECLARE @intCustomerId			INT
+			DECLARE @intTermID				INT
+			DECLARE @intSalesPersonId		INT
+			DECLARE @intARLocationId		INT
+			
+			
 			WHILE (EXISTS(SELECT 1 FROM @tblCFInvoiceFeesTemp))
 			BEGIN
 			
 				---GET ACCOUNT AND FEE PROFILE ID---
 				SELECT TOP 1
-				 @intLoopId				= intAccountId 
-				,@intFeeProfileId		= intFeeProfileId
-				,@dtmInvoiceDate		= dtmInvoiceDate
+				 @intLoopId					= intAccountId 
+				,@intFeeProfileId			= intFeeProfileId
+				,@dtmInvoiceDate			= dtmInvoiceDate
+				,@strInvoiceReportNumber	= strInvoiceReportNumber
+				,@intCustomerId				= intCustomerId
+				,@intTermID					= intTermID
+				,@intSalesPersonId			= intSalesPersonId
+				,@intARLocationId		= intARLocationId
 				FROM @tblCFInvoiceFeesTemp
 
 				---GET LAST BILLING CYCLE DATE---
@@ -381,11 +409,14 @@ BEGIN
 					DECLARE @strCalculationType		NVARCHAR(MAX)
 					DECLARE @intMinimumThreshold	INT
 					DECLARE @intMaximumThreshold	INT
+					DECLARE @intNetworkId			INT
+					DECLARE @intCardTypeId			INT
+					
 
 					
 
 					----------GET FEE DETAILS------------
-					INSERT INTO @tblCFInvoiceFeeDetail
+				INSERT INTO @tblCFInvoiceFeeDetail
 				(
 				 intFeeProfileId				
 				,strFeeProfileId				
@@ -399,7 +430,6 @@ BEGIN
 				,strFee							
 				,strFeeDescription				
 				,strCalculationType				
-				,strCalculationCard				
 				,strCalculationFrequency		
 				,ysnExtendedRemoteTrans			
 				,ysnRemotesTrans				
@@ -427,7 +457,6 @@ BEGIN
 				,strFee	
 				,strFeeDescription	
 				,strCalculationType	
-				,strCalculationCard	
 				,strCalculationFrequency	
 				,ysnExtendedRemoteTrans	
 				,ysnRemotesTrans	
@@ -461,6 +490,8 @@ BEGIN
 						,@strCalculationType	= strCalculationType
 						,@intMinimumThreshold	= intMinimumThreshold
 						,@intMaximumThreshold	= intMaximumThreshold
+						,@intNetworkId			= intNetworkId
+						,@intCardTypeId			= intCardTypeId
 						FROM @tblCFInvoiceFeeDetail
 
 
@@ -469,11 +500,11 @@ BEGIN
 						IF(@strCalculationType = 'Unit' OR @strCalculationType = 'Transaction')
 						BEGIN
 							SELECT 
-							 @intTotalCard			= COUNT(DISTINCT(intCardId))
-							,@intTotalTransaction	= COUNT(*)
-							,@dblTotalQuantity		= SUM(dblQuantity)
-							,@dblTotalAmount		= SUM(dblTotalAmount)
-							FROM @tblCFInvoiceFeesTemp WHERE intAccountId = @intLoopId
+							 @intTotalTransaction	= ISNULL(COUNT(*),0)
+							,@dblTotalQuantity		= ISNULL(SUM(dblQuantity),0)
+							FROM @tblCFInvoiceFeesTemp 
+							WHERE intAccountId = @intLoopId
+							AND intNetworkId = @intNetworkId
 							AND dblQuantity != 0
 							AND (dblQuantity < @intMinimumThreshold OR dblQuantity > @intMaximumThreshold)
 							AND 
@@ -482,42 +513,42 @@ BEGIN
 							 OR (strTransactionType = 'Extended Remote' AND @ysnExtRemoteTrans = 1
 							 OR (strTransactionType = 'Foreign Sale' AND @ysnForeignTrans = 1)))
 
-							END
-						ELSE
+						END
+
+						IF(@strCalculationType = 'Percentage')
 						BEGIN
 							SELECT 
-							 @intTotalCard			= COUNT(DISTINCT(intCardId))
-							,@intTotalTransaction	= COUNT(*)
-							,@dblTotalQuantity		= SUM(dblQuantity)
-							,@dblTotalAmount		= SUM(dblTotalAmount)
+							@dblTotalAmount		= ISNULL(SUM(dblTotalAmount),0)
 							FROM @tblCFInvoiceFeesTemp WHERE intAccountId = @intLoopId
+							AND intNetworkId = @intNetworkId
 							
 						END
 
-						 ---GET TOTAL NO. OF ACTIVE CARD---
-						IF(@strCalculationType = 'Unit' OR @strCalculationType = 'Transaction')
+						  ---GET TOTAL NO. OF CARDS---
+						IF(@strCalculationType = 'All Cards')
 						BEGIN
 							SELECT 
-							@intTotalActiveCard = COUNT(DISTINCT(cfcards.intCardId))
+							@intTotalCard = ISNULL(COUNT(DISTINCT(cfcards.intCardId)),0)
 							FROM @tblCFInvoiceFeesTemp cftrans
 							INNER JOIN tblCFCard cfcards
 							ON cftrans.intCardId = cfcards.intCardId
 							WHERE cftrans.intAccountId = @intLoopId 
-							AND cfcards.ysnActive = 1
-							AND 
-							((strTransactionType = 'Local/Network' AND @ysnLocalTrans = 1)
-							 OR (strTransactionType = 'Remote' AND @ysnRemoteTrans = 1)
-							 OR (strTransactionType = 'Extended Remote' AND @ysnExtRemoteTrans = 1
-							 OR (strTransactionType = 'Foreign Sale' AND @ysnForeignTrans = 1)))
+							AND cftrans.intNetworkId = @intNetworkId
+							AND cfcards.intCardTypeId = @intCardTypeId
 						END
-						ELSE
+
+
+						 ---GET TOTAL NO. OF ACTIVE CARD---
+						IF(@strCalculationType = 'Active Cards')
 						BEGIN
 							SELECT 
-							@intTotalActiveCard = COUNT(DISTINCT(cfcards.intCardId))
+							@intTotalActiveCard = ISNULL(COUNT(DISTINCT(cfcards.intCardId)),0)
 							FROM @tblCFInvoiceFeesTemp cftrans
 							INNER JOIN tblCFCard cfcards
 							ON cftrans.intCardId = cfcards.intCardId
 							WHERE cftrans.intAccountId = @intLoopId 
+							AND cftrans.intNetworkId = @intNetworkId
+							AND cfcards.intCardTypeId = @intCardTypeId
 							AND cfcards.ysnActive = 1
 						END
 
@@ -525,29 +556,16 @@ BEGIN
 						
 						IF (@dtmLastBillingDate IS NOT NULL)
 						BEGIN
-							IF(@strCalculationType = 'Unit' OR @strCalculationType = 'Transaction')
+							IF(@strCalculationType = 'New Cards')
 							BEGIN
 								SELECT 
-								@intTotalNewCard = COUNT(DISTINCT(cfcards.intCardId))
+								@intTotalNewCard = ISNULL(COUNT(DISTINCT(cfcards.intCardId)),0)
 								FROM @tblCFInvoiceFeesTemp cftrans
 								INNER JOIN tblCFCard cfcards
 								ON cftrans.intCardId = cfcards.intCardId
-								WHERE cftrans.intAccountId = @intLoopId 
-								AND cfcards.dtmIssueDate > @dtmLastBillingDate
-								AND 
-								((strTransactionType = 'Local/Network' AND @ysnLocalTrans = 1)
-								 OR (strTransactionType = 'Remote' AND @ysnRemoteTrans = 1)
-								 OR (strTransactionType = 'Extended Remote' AND @ysnExtRemoteTrans = 1
-								 OR (strTransactionType = 'Foreign Sale' AND @ysnForeignTrans = 1)))
-							END
-							ELSE
-							BEGIN
-								SELECT 
-								@intTotalNewCard = COUNT(DISTINCT(cfcards.intCardId))
-								FROM @tblCFInvoiceFeesTemp cftrans
-								INNER JOIN tblCFCard cfcards
-								ON cftrans.intCardId = cfcards.intCardId
-								WHERE cftrans.intAccountId = @intLoopId 
+								WHERE cftrans.intAccountId = @intLoopId  
+								AND cftrans.intNetworkId = @intNetworkId
+								AND cfcards.intCardTypeId = @intCardTypeId
 								AND cfcards.dtmIssueDate > @dtmLastBillingDate
 							END
 						END
@@ -568,6 +586,13 @@ BEGIN
 						,strFee	
 						,strInvoiceFormat
 						,dblFeeAmount	
+						,strInvoiceReportNumber
+						,intCustomerId
+						,intTermID
+						,intSalesPersonId
+						,dtmInvoiceDate
+						,intItemId
+						,intARLocationId
 					)
 					SELECT 
 						 @intFeeLoopId
@@ -589,11 +614,11 @@ BEGIN
 												THEN ROUND((@intTotalTransaction * cffee.dblFeeRate),2)
 											 WHEN cffee.strCalculationType = 'Unit' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
 												THEN ROUND((@dblTotalQuantity * cffee.dblFeeRate),2)
-											 WHEN cffee.strCalculationCard = 'All Cards'  AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+											 WHEN cffee.strCalculationType = 'All Cards'  AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
 												THEN ROUND((@intTotalCard * cffee.dblFeeRate),2)
-											 WHEN cffee.strCalculationCard = 'Active Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+											 WHEN cffee.strCalculationType = 'Active Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
 												THEN ROUND((@intTotalActiveCard * cffee.dblFeeRate),2)
-											 WHEN cffee.strCalculationCard = 'New Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+											 WHEN cffee.strCalculationType = 'New Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
 												THEN ROUND((@intTotalNewCard * cffee.dblFeeRate),2)
 											 WHEN cffee.strCalculationType = 'Flat' 
 											 AND ((cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
@@ -608,6 +633,13 @@ BEGIN
 										END
 							END 
 						)
+						,@strInvoiceReportNumber
+						,@intCustomerId				
+						,@intTermID					
+						,@intSalesPersonId	
+						,@dtmInvoiceDate	
+						,intItemId	
+						,@intARLocationId
 						FROM @tblCFInvoiceFeeDetail cffee
 						WHERE intFeeId = @intFeeLoopId
 						GROUP BY 
@@ -617,9 +649,9 @@ BEGIN
 						,cffee.dtmEndDate
 						,cffee.strFeeDescription
 						,cffee.strFee
-						,cffee.strCalculationCard
 						,cffee.strCalculationFrequency
 						,cffee.strInvoiceFormat
+						,cffee.intItemId
 
 
 						DELETE FROM @tblCFInvoiceFeeDetail WHERE intFeeId = @intFeeLoopId
@@ -627,10 +659,14 @@ BEGIN
 
 					DELETE FROM @tblCFInvoiceFeesTemp WHERE intAccountId = @intLoopId
 					END
-			
+				ELSE
+					BEGIN
+						DELETE FROM @tblCFInvoiceFeesTemp WHERE intAccountId = @intLoopId
+					END
 				END
-			
+				
 			END
+			
 			-------------SET GROUP VOLUME TO OUTPUT---------------
 
 
@@ -639,8 +675,29 @@ BEGIN
 			----------------------------------
 
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------
-			SELECT *
+			SELECT 
+			 intFeeLoopId			
+			,intAccountId			
+			,strCalculationType	
+			,dblFeeRate			
+			,intTransactionId		
+			,dtmTransactionDate	
+			,dtmStartDate			
+			,dtmEndDate			
+			,dblQuantity			
+			,intCardId				
+			,dblFeeAmount			
+			,strFeeDescription		
+			,strFee				
+			,strInvoiceFormat		
+			,strInvoiceReportNumber
+			,intCustomerId			
+			,intTermID				
+			,intSalesPersonId		
+			,dtmInvoiceDate
 			,dblFeeTotalAmount = (SELECT ROUND(SUM(dblFeeAmount),2) FROM ##tblCFInvoiceFeeOutput) 
+			,intItemId
+			,intARLocationId
 			FROM ##tblCFInvoiceFeeOutput
 					
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------
@@ -654,6 +711,12 @@ BEGIN
 			-------------DROP TEMPORARY TABLES---------------
 		END TRY
 		BEGIN CATCH
+			
+			declare @error int, @message varchar(4000), @xstate int;
+			select @error = ERROR_NUMBER(),
+            @message = ERROR_MESSAGE(), 
+            @xstate = XACT_STATE();
+			
 			-------------DROP TEMPORARY TABLES---------------
 			IF OBJECT_ID(N'tempdb..##tmpInvoiceFee', N'U') IS NOT NULL 
 			DROP TABLE ##tmpInvoiceFee;

@@ -63,6 +63,12 @@ SELECT L.intLoadId
 			THEN 'Delivered'
 		WHEN 7
 			THEN 'Instruction created'
+		WHEN 8
+			THEN 'Partial Shipment Created'
+		WHEN 9
+			THEN 'Full Shipment Created'
+		WHEN 10
+			THEN 'Cancelled'
 		ELSE ''
 		END COLLATE Latin1_General_CI_AS
 	,strEquipmentType = EQ.strEquipmentType

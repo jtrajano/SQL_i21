@@ -40,6 +40,8 @@
 	dblQuantity NUMERIC(38, 20) NOT NULL CHECK(dblQuantity > 0),
 	intItemUOMId INT NOT NULL,
 	intStorageScheduleTypeId INT NULL,
+	intForexRateTypeId INT NULL,
+	dblForexRate NUMERIC(38, 20) NULL, 
 
 	-- This is used to group lots for lotted items
 	intItemLotGroup INT NULL,

@@ -31,7 +31,8 @@ BEGIN TRY
 			intPriceUOMId,			intSubLocationId,		intStorageLocationId,
 			intPurchasingGroupId,	intApprovedById,		dtmApproved,
 			strOrigin,				dblNetWeight,			intNetWeightUOMId,
-			intItemContractId,		strApprovalType
+			intItemContractId,		strApprovalType,		strVendorLotID,
+			dblNoOfLots
 	)
 	OUTPUT	inserted.intApprovedContractId INTO @SCOPE_IDENTITY
 	SELECT	CD.intContractHeaderId,
@@ -65,7 +66,9 @@ BEGIN TRY
 			CD.dblNetWeight,
 			WU.intUnitMeasureId AS intNetWeightUOMId,
 			CD.intItemContractId,
-			@strScreenName
+			@strScreenName,
+			CD.strVendorLotID,
+			CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 1 THEN CH.dblNoOfLots  ELSE CD.dblNoOfLots END
 
 	FROM	tblCTContractDetail		CD 
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT

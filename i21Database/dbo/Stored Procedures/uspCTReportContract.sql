@@ -77,7 +77,7 @@ BEGIN TRY
 
 	IF (SELECT COUNT(1) FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved') >1	
 	BEGIN	
-		SET @strApprovalText='This document concerns the Confirmed Agreement between Parties. Please sign in twofold and return to KDE as follows: one signed original by mail and one PDF-copy of the signed original by e-mail.'	
+		SET @strApprovalText='This document concerns the Confirmed Agreement between Parties. Please sign in twofold and return to KDE as follows: one PDF-copy of the signed original by e-mail.'	
 		SET @IsFullApproved=1    
 	END
 	ELSE
@@ -139,7 +139,7 @@ BEGIN TRY
 				FROM	tblCTContractCertification	CC
 				JOIN	tblCTContractDetail			CH	ON	CC.intContractDetailId	=	CH.intContractDetailId
 				JOIN	tblICCertification			CF	ON	CF.intCertificationId	=	CC.intCertificationId	
-				WHERE	UPPER(CF.strCertificationIdName) = 'FAIRTRADE' AND CH.intContractHeaderId = @intContractHeaderId
+				WHERE	UPPER(CF.strCertificationName) = 'FAIRTRADE' AND CH.intContractHeaderId = @intContractHeaderId
 	)
 	BEGIN
 		SET @ysnFairtrade = 1
@@ -154,8 +154,15 @@ BEGIN TRY
     FROM   tblCTApprovedContract 
     WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId <> @intLastApprovedContractId 
     ORDER BY intApprovedContractId DESC
-             
-    EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intLastApprovedContractId,'intApprovedById,dtmApproved', @strAmendedColumns OUTPUT
+
+	IF @intPrevApprovedContractId IS NOT NULL AND @intLastApprovedContractId IS NOT NULL
+	BEGIN
+		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intLastApprovedContractId,'intApprovedById,dtmApproved,
+		intContractBasisId,dtmPlannedAvailabilityDate,strOrigin,dblNetWeight,intNetWeightUOMId,
+		intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType,strVendorLotID', @strAmendedColumns OUTPUT
+	END
+
+	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
 
 	SELECT	CH.intContractHeaderId,
 
@@ -235,8 +242,12 @@ BEGIN TRY
 			CASE WHEN ISNULL(AN.strComment,'') <>'' AND ISNULL(AB.strState,'') <>'' AND ISNULL(RY.strCountry,'') <>'' THEN 'Arbitration:' ELSE NULL END AS lblArbitration,
 			CASE WHEN ISNULL(@strContractConditions,'') <>'' THEN 'Conditions:' ELSE NULL END AS lblContractCondition,
 			SQ.strLocationName+', '+CONVERT(CHAR(11),CH.dtmContractDate,13) AS strLocationWithDate,
-	        'The contract has been closed on the conditions of the '+ AN.strComment + '('+AN.strName+')'+' latest edition and the particular conditions mentioned below.' strCondition,
-		    PO.strPosition +' ('+SQ.strPackingDescription +') ' AS strPositionWithPackDesc,
+	        CASE WHEN LEN(LTRIM(RTRIM(@strAmendedColumns))) = 0 THEN
+			'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition and the particular conditions mentioned below.' 
+		    ELSE
+				'Subject - Contract Amendment' + CHAR(13) + CHAR(10) + 'The field highlighted in bold have been amended.'
+			END strCondition,
+			PO.strPosition +' ('+SQ.strPackingDescription +') ' AS strPositionWithPackDesc,
 			TX.strText+' '+CH.strPrintableRemarks AS strText,
 			SQ.strContractCompanyName,
 			SQ.strContractPrintSignOff,

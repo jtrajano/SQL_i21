@@ -19,3 +19,4 @@ GO
 			PRINT 'TABLE tblTFTaxCriteria does NOT EXIST!'
 		END
 
+	

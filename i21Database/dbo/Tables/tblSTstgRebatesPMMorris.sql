@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblSTTransLogPMMorris]
+﻿CREATE TABLE [dbo].[tblSTstgRebatesPMMorris]
 (
 	[intPMMId] int IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	[intManagementOrRetailNumber] int NULL,

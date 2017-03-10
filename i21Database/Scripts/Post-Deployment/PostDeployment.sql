@@ -213,6 +213,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
 :r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
 :r .\AR\DefaultData\27_RenamePricingForContracts.sql
+:r .\AR\DefaultData\28_RemoveZeroTransactionFromCMUndepositedFund.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -347,7 +348,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\036_MoveTheTermsPerType.sql
 :r .\EM\037_DefaultDataLocationPayee.sql
 :r .\EM\038_UpdateEncryptionUsed.sql
-
+:r .\EM\039_MoveDefaultTermsToVendorTerm.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
@@ -361,6 +362,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\7_Checkout_Radiant_MCM.sql
 :r .\ST\8_Checkout_Radiant_FGM.sql
 :r .\ST\9_Checkout_Radiant_MSM.sql
+:r .\ST\10_Checkout_Commander_Translog.sql
 
 -- Motor Fuel Tax
 --:r .\TF\DefaultData\_TaxAuthority.sql

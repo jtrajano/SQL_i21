@@ -2255,7 +2255,7 @@ IF @post = 1
 				GROUP BY
 					A.[intInvoiceId]
 				) CM
-					ON A.[intInvoiceId] = CM.[intInvoiceId] 		
+					ON A.[intInvoiceId] = CM.[intInvoiceId]
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 
@@ -2478,7 +2478,7 @@ IF @post = 1
 				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
 				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
 				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
-				,[strRateType]				= ''
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -2493,7 +2493,17 @@ IF @post = 1
 			LEFT OUTER JOIN 
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 				
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
+			
 			WHERE
 				B.dblTotal <> @ZeroDecimal 
 				AND ((B.intItemId IS NULL OR B.intItemId = 0)
@@ -2608,7 +2618,7 @@ IF @post = 1
 											  ELSE 0  END
 				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
 				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
-				,[strRateType]				= ''
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -2626,7 +2636,16 @@ IF @post = 1
 			LEFT OUTER JOIN 
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 						
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId					
 			WHERE
 				B.dblLicenseAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
@@ -2737,7 +2756,7 @@ IF @post = 1
 											  END
 				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
 				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
-				,[strRateType]				= ''
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -2760,6 +2779,15 @@ IF @post = 1
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
 					AND A.intCompanyLocationId = ICIS.intLocationId 						
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId		
 			WHERE
 				B.dblLicenseAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
@@ -2863,7 +2891,7 @@ IF @post = 1
 											  ELSE 0  END
 				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
 				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
-				,[strRateType]				= ''
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -2881,7 +2909,16 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 						
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId							
 			WHERE
 				B.dblMaintenanceAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
@@ -2923,7 +2960,7 @@ IF @post = 1
 				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
 				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
 				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
-				,[strRateType]				= ''
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -2941,7 +2978,16 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId 
 			WHERE			 
 				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
@@ -2983,7 +3029,7 @@ IF @post = 1
 				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
 				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
 				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
-				,[strRateType]				= ''
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -3001,7 +3047,16 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId 
 			WHERE
 				B.dblTotal <> @ZeroDecimal  
 				AND A.strTransactionType = 'Debit Memo'
@@ -3115,7 +3170,7 @@ IF @post = 1
 											  END
 				,[dblReportingRate]			= 0
 				,[dblForeignRate]			= 0
-				,[strRateType]				= ''
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetailTax DT
 			INNER JOIN
@@ -3132,7 +3187,16 @@ IF @post = 1
 					ON A.intInvoiceId = P.intInvoiceId				
 			LEFT OUTER JOIN
 				tblSMTaxCode TC
-					ON DT.intTaxCodeId = TC.intTaxCodeId	
+					ON DT.intTaxCodeId = TC.intTaxCodeId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
 			WHERE
 				DT.dblAdjustedTax <> @ZeroDecimal
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
@@ -3171,7 +3235,7 @@ IF @post = 1
 				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,[dblReportingRate]			= 0
 				,[dblForeignRate]			= 0
-				,[strRateType]				= ''
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail D
 			INNER JOIN			
@@ -3186,7 +3250,16 @@ IF @post = 1
 					ON A.intEntityCustomerId = C.intEntityCustomerId
 			INNER JOIN 
 				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId					
+					ON A.intInvoiceId = P.intInvoiceId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId				
 			WHERE
 				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
 
@@ -3407,7 +3480,7 @@ IF @post = 1
 				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblPrice * D.dblQtyShipped) END
 				,[dblReportingRate]			= D.dblCurrencyExchangeRate
 				,[dblForeignRate]			= D.dblCurrencyExchangeRate
-				,[strRateType]				= ''
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail D
 			INNER JOIN			
@@ -3439,7 +3512,16 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON D.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
 			WHERE
 				D.dblTotal <> @ZeroDecimal
 				AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0
@@ -3482,7 +3564,7 @@ IF @post = 1
 				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblPrice * D.dblQtyShipped) ELSE 0 END
 				,[dblReportingRate]			= D.dblCurrencyExchangeRate
 				,[dblForeignRate]			= D.dblCurrencyExchangeRate
-				,[strRateType]				= ''
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail D
 			INNER JOIN			
@@ -3514,7 +3596,16 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON D.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 			WHERE
 				D.dblTotal <> @ZeroDecimal
 				AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0
@@ -3558,6 +3649,8 @@ IF @post = 1
 				,intSubLocationId
 				,intStorageLocationId
 				,strActualCostId
+				,intForexRateTypeId
+				,dblForexRate
 			) 
 			SELECT 
 				 intItemId					= Detail.intItemId  
@@ -3602,6 +3695,8 @@ IF @post = 1
 				,intSubLocationId			= Detail.intCompanyLocationSubLocationId 
 				,intStorageLocationId		= Detail.intStorageLocationId
 				,strActualCostId			= CASE WHEN (ISNULL(Header.intDistributionHeaderId,0) <> 0 OR ISNULL(Header.intLoadDistributionHeaderId,0) <> 0) THEN Header.strActualCostId ELSE NULL END
+				,intForexRateTypeId			= Detail.intCurrencyExchangeRateTypeId
+				,dblForexRate				= Detail.dblCurrencyExchangeRate
 			FROM 
 				tblARInvoiceDetail Detail
 			INNER JOIN
@@ -3625,7 +3720,7 @@ IF @post = 1
 				vyuICGetItemStock IST
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId
-			CROSS APPLY
+			OUTER APPLY
 				dbo.[fnGetLoadDetailLots](Detail.intLoadDetailId) LGL
 
 			WHERE				
@@ -3666,6 +3761,8 @@ IF @post = 1
 				,intSubLocationId			= ARID.intCompanyLocationSubLocationId
 				,intStorageLocationId		= ARID.intStorageLocationId
 				,strActualCostId			= CASE WHEN (ISNULL(ARI.intDistributionHeaderId,0) <> 0 OR ISNULL(ARI.intLoadDistributionHeaderId,0) <> 0) THEN ARI.strActualCostId ELSE NULL END
+				,intForexRateTypeId			= ARID.intCurrencyExchangeRateTypeId
+				,dblForexRate				= ARID.dblCurrencyExchangeRate
 			FROM
 				vyuARGetItemComponents ARIC
 			INNER JOIN
@@ -3797,6 +3894,8 @@ IF @post = 1
 					,[intSourceTransactionDetailId] 
 					,[intFobPointId] 
 					,[intInTransitSourceLocationId]
+					,[intForexRateTypeId]
+					,[dblForexRate]
 			)
 			SELECT
 					[intItemId]					= t.intItemId
@@ -3820,6 +3919,8 @@ IF @post = 1
 					,[intSourceTransactionDetailId] = t.intTransactionDetailId
 					,[intFobPointId]				= t.intFobPointId
 					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
+					,intForexRateTypeId			= id.intCurrencyExchangeRateTypeId
+					,dblForexRate				= id.dblCurrencyExchangeRate
 			FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
 						ON i.intInvoiceId = id.intInvoiceId
 					INNER JOIN tblICInventoryShipmentItem si
@@ -4455,6 +4556,7 @@ IF @recap = 1
 			,[strTransactionType]
 			,[strAccountId]
 			,[strAccountGroup]
+			,[strRateType]
 		)
 		SELECT
 			[strTransactionId]
@@ -4484,6 +4586,7 @@ IF @recap = 1
 			,A.[strTransactionType]
 			,B.strAccountId
 			,C.strAccountGroup
+			,A.strRateType
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId
@@ -4641,7 +4744,7 @@ IF @recap = 0
 					UPDATE ARI						
 					SET
 						 ARI.ysnPosted				= 1
-						,ARI.ysnPaid				= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 1 ELSE 0 END)
+						,ARI.ysnPaid				= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) OR ARI.dblInvoiceTotal = ARI.dblPayment THEN 1 ELSE 0 END)
 						,ARI.dblInvoiceTotal		= ARI.dblInvoiceTotal
 						,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
 						,ARI.dblDiscount			= @ZeroDecimal
@@ -4835,7 +4938,7 @@ ELSE
 		UPDATE ARI						
 		SET
 			ARI.ysnPosted				= 1
-			,ARI.ysnPaid				= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 1 ELSE 0 END)
+			,ARI.ysnPaid				= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) OR ARI.dblInvoiceTotal = ARI.dblPayment THEN 1 ELSE 0 END)
 			,ARI.dblInvoiceTotal		= ARI.dblInvoiceTotal
 			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
 			,ARI.dblDiscount			= @ZeroDecimal

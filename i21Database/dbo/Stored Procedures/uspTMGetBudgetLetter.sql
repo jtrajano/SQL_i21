@@ -83,18 +83,18 @@ BEGIN
 		END
 
 		---Term Ids Parameter	
-		SELECT @strLocationIds = [from]
-		FROM @temp_params where [fieldname] = 'strTermIds'
+		SELECT @strTermIds = [from]
+		FROM @temp_params where [fieldname] = 'strTermsIds'
 		
-		IF (ISNULL(@strLocationIds,'') != '')
+		IF (ISNULL(@strTermIds,'') != '')
 		BEGIN
 			IF (@strWhereClause = '')
 			BEGIN
-				SET @strWhereClause = ' WHERE D.intTermsId IN (' + @strLocationIds + ') '
+				SET @strWhereClause = ' WHERE D.intTermsId IN (' + @strTermIds + ') '
 			END
 			ELSE
 			BEGIN
-				SET @strWhereClause = @strWhereClause + ' AND D.intTermsId IN (' + @strLocationIds + ') '
+				SET @strWhereClause = @strWhereClause + ' AND D.intTermsId IN (' + @strTermIds + ') '
 			END
 		END
 		

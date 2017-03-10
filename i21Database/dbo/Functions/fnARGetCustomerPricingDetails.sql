@@ -32,7 +32,10 @@ BEGIN
 			,@intSort				INT
 			,@FunctionalCurrencyId	INT
 
+
 	SELECT TOP 1 @FunctionalCurrencyId = intDefaultCurrencyId  FROM tblSMCompanyPreference
+	IF @SpecialPricingCurrencyId IS NULL
+		SET @SpecialPricingCurrencyId = @FunctionalCurrencyId
 	
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	SET @intSort = 0	
@@ -971,7 +974,7 @@ BEGIN
 			
 		--m. Customer - Customer Location - Item Category (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
 		SET @SpecialPriceId = (SELECT TOP 1 intSpecialPriceId FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND (ISNULL(strInvoiceType,'') = ISNULL(@InvoiceType,'') OR ISNULL(strInvoiceType,'') = '' OR ISNULL(@InvoiceType,'') = '') AND (ISNULL(intVendorLocationId,0) = 0 OR ISNULL(intVendorLocationId,0) = @VendorShipFromLocationId) AND (ISNULL(intVendorId,0) = 0 OR ISNULL(intVendorId,0) = @ItemVendorId) AND (intCategoryId = @ItemCategoryId) AND ISNULL(dblCustomerPrice,0) <> 0)
-		IF(ISNULL(@SpecialPriceId,0) <> 0)
+		IF(ISNULL(@SpecialPriceId,0) <> 0) AND NOT EXISTS(SELECT TOP 1 intSpecialPriceId FROM @returntable WHERE intSpecialPriceId = @SpecialPriceId)
 			BEGIN
 				SET @intSort = @intSort + 1
 				INSERT @returntable(dblPrice, strPricing, intSpecialPriceId, dblPriceBasis, dblDeviation, dblUOMQuantity, intSort)

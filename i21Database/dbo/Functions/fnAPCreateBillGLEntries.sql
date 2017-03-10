@@ -92,7 +92,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
-		[dblExchangeRate]				=	0,
+		[dblExchangeRate]				=	CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	CASE WHEN intTransactionType = 1 THEN 'Posted Bill'
@@ -117,7 +117,7 @@ BEGIN
 											 ELSE A.dblAmountDue END) AS DECIMAL(18,2)),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	0,
+		[dblForeignRate]				=	CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
 		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A
@@ -132,7 +132,13 @@ BEGIN
 			) ForexRate
 			CROSS APPLY
 			(
-				SELECT SUM(dblTotal * A.dblRate) AS dblTotal
+				SELECT CASE COUNT(DISTINCT A.dblRate) WHEN 1 THEN 0 ELSE 1 END AS ysnUniqueForex
+				FROM tblAPBillDetail A
+				WHERE A.intBillId = (SELECT intTransactionId FROM @tmpTransacions)
+			) ForexRateCounter
+			CROSS APPLY
+			(
+				SELECT SUM((dblTotal + dblTax) * A.dblRate) AS dblTotal
 				FROM dbo.tblAPBillDetail A 
 				WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 			) Details

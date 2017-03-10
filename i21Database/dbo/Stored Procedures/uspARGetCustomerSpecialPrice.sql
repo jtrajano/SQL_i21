@@ -52,7 +52,6 @@ AS
 			,@InvoiceType
 			,@TermId
 			,0
-			,@CurrencyId
 		)
 
 RETURN 0

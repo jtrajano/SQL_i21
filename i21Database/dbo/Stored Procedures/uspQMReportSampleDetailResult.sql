@@ -29,6 +29,8 @@ BEGIN TRY
 		,TR.strResult
 		,TR.dblMinValue
 		,TR.dblMaxValue
+		,TR.strComment
+		,TR.dtmLastModified
 	FROM tblQMTestResult TR
 	JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 		AND TR.intSampleId = @intSampleId

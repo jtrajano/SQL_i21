@@ -19,8 +19,8 @@ BEGIN
 	WHERE P.intProductTypeId = @intProductTypeId
 		AND P.intProductValueId = @intProductValueId
 		AND P.intProductId <> @intProductId
-		AND PC.intControlPointId IN (
-			SELECT PC1.intControlPointId
+		AND PC.intSampleTypeId IN (
+			SELECT PC1.intSampleTypeId
 			FROM tblQMProductControlPoint PC1
 			WHERE PC1.intProductId = @intProductId
 			)
@@ -33,8 +33,8 @@ BEGIN
 	JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 	WHERE P.intProductTypeId = @intProductTypeId
 		AND P.intProductId <> @intProductId
-		AND PC.intControlPointId IN (
-			SELECT PC1.intControlPointId
+		AND PC.intSampleTypeId IN (
+			SELECT PC1.intSampleTypeId
 			FROM tblQMProductControlPoint PC1
 			WHERE PC1.intProductId = @intProductId
 			)

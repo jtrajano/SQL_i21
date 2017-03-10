@@ -16,13 +16,15 @@ Declare @intMinRowNo int,
 		@strSubLocation NVARCHAR(100),
 		@dblInspectionQuantity NUMERIC(38,20),
 		@dblBlockedQuantity NUMERIC(38,20),
+		@dblUnrestrictedQuantity NUMERIC(38,20),
 		@dblQuantity NUMERIC(38,20),
 		@intLocationId int,
 		@intEntityUserId int,
 		@intSourceId int=1,
 		@ErrMsg NVARCHAR(MAX),
 		@intMinRowNo1 int,
-		@strFinalErrMsg NVARCHAR(MAX)=''
+		@strFinalErrMsg NVARCHAR(MAX)='',
+		@strStockType NVARCHAR(50)
 
 DECLARE @tblStock TABLE (
 [intRowNo] INT IDENTITY(1,1),
@@ -55,6 +57,15 @@ Begin
 
 		Select @strItemNo=strItemNo,@strSubLocation=strSubLocation,@dblQuantity=dblQuantity,@strSessionId=strSessionId
 		From @tblStock Where intRowNo=@intMinRowNo
+
+		Select TOP 1 @dblInspectionQuantity=ISNULL(dblInspectionQuantity,0),@dblUnrestrictedQuantity=ISNULL(dblUnrestrictedQuantity,0),@strStockType=strStockType 
+		From tblIPStockStage 
+		Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
+
+		If @strStockType='WB' AND @dblUnrestrictedQuantity=@dblQuantity
+		Begin
+			Set @dblQuantity = @dblQuantity + @dblInspectionQuantity
+		End
 
 		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
 		Select @intSubLocationId=intCompanyLocationSubLocationId 
@@ -103,8 +114,8 @@ Begin
 		End
 
 		--Move to Archive
-		Insert Into tblIPStockArchive(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
-		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,strSessionId,'Success',''
+		Insert Into tblIPStockArchive(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
+		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,@dblUnrestrictedQuantity,dblQuantity,strSessionId,'Success',''
 		From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
 
 		Delete From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
@@ -120,8 +131,8 @@ Begin
 		SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 		--Move to Error
-		Insert Into tblIPStockError(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
-		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,strSessionId,'Failed',@ErrMsg
+		Insert Into tblIPStockError(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
+		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,@dblUnrestrictedQuantity,dblQuantity,strSessionId,'Failed',@ErrMsg
 		From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
 
 		Delete From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId

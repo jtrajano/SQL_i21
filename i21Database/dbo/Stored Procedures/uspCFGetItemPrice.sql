@@ -820,7 +820,7 @@ BEGIN
 			FROM @cfPriceProfile 
 			WHERE intSiteId = @CFSiteId
 			AND intNetworkId = @CFNetworkId
-			AND intItemId IS NULL                ------ADDED------
+			AND (intItemId IS NULL OR intItemId = 0)          ------ADDED------
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -863,7 +863,7 @@ BEGIN
 			FROM @cfPriceProfile 
 			WHERE intSiteId = @CFSiteId
 			AND intNetworkId = @CFNetworkId 
-			AND intItemId IS NULL                ------ADDED------
+			AND (intItemId IS NULL OR intItemId = 0)                 ------ADDED------
 		END
 	----------------------------------------------
 
@@ -933,7 +933,7 @@ BEGIN
 			SELECT @cfMatchProfileCount = Count(*) 
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @TransactionSiteGroup
-			AND intItemId IS NULL                ------ADDED------
+			AND (intItemId IS NULL OR intItemId = 0)             ------ADDED------
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -975,7 +975,7 @@ BEGIN
 				strType		
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @TransactionSiteGroup
-			AND intItemId IS NULL                ------ADDED------
+			AND (intItemId IS NULL OR intItemId = 0)             ------ADDED------
 		END
 	----------------------------------------------
 
@@ -990,7 +990,7 @@ BEGIN
 			FROM @cfPriceProfile 
 			WHERE intItemId = @CFItemId
 			AND intNetworkId = @CFNetworkId
-			AND intSiteId IS NULL                ------ADDED------
+			AND (intSiteId IS NULL OR intSiteId = 0)               ------ADDED------
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -1033,7 +1033,7 @@ BEGIN
 			FROM @cfPriceProfile 
 			WHERE intItemId = @CFItemId
 			AND intNetworkId = @CFNetworkId
-			AND intSiteId IS NULL                ------ADDED------
+			AND (intSiteId IS NULL OR intSiteId = 0)            ------ADDED------
 		END
 	----------------------------------------------
 
@@ -1047,7 +1047,7 @@ BEGIN
 			SELECT @cfMatchProfileCount = Count(*) 
 			FROM @cfPriceProfile 
 			WHERE intItemId = @CFItemId
-			AND intSiteId IS NULL                ------ADDED------
+			AND (intSiteId IS NULL OR intSiteId = 0)               ------ADDED------
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -1089,7 +1089,7 @@ BEGIN
 				strType		
 			FROM @cfPriceProfile 
 			WHERE intItemId = @CFItemId
-			AND intSiteId IS NULL                ------ADDED------
+			AND (intSiteId IS NULL OR intSiteId = 0)               ------ADDED------
 		END
 	----------------------------------------------
 
@@ -1102,8 +1102,8 @@ BEGIN
 		BEGIN
 			SELECT @cfMatchProfileCount = Count(*) 
 			FROM @cfPriceProfile 
-			WHERE intItemId IS NULL                ------ADDED------
-			AND intSiteId IS NULL                ------ADDED------
+			WHERE (intItemId IS NULL OR intItemId = 0)               ------ADDED------
+			AND (intSiteId IS NULL OR intSiteId = 0)               ------ADDED------
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -1144,8 +1144,8 @@ BEGIN
 				strBasis,				
 				strType		
 			FROM @cfPriceProfile 
-			WHERE intItemId IS NULL                ------ADDED------
-			AND intSiteId IS NULL                ------ADDED------
+			WHERE (intItemId IS NULL OR intItemId = 0)             ------ADDED------
+			AND (intSiteId IS NULL OR intSiteId = 0)               ------ADDED------
 		END
 	----------------------------------------------
 
@@ -1278,7 +1278,7 @@ BEGIN
 			BEGIN
 				IF(@CFTransferCost IS NOT NULL)
 					BEGIN
-						SET @CFPriceOut = @CFStandardPrice + @Rate
+						SET @CFPriceOut = @CFTransferCost + @Rate
 						SET @CFPricingOut = 'Price Profile' 
 						RETURN 1;    
 					END

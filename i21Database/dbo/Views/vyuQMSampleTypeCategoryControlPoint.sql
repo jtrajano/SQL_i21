@@ -13,7 +13,7 @@ SELECT ST.intControlPointId
 	,P.ysnActive
 	,I.intItemId AS intProductValueId
 FROM tblQMProductControlPoint PC
-JOIN tblQMSampleType ST ON ST.intControlPointId = PC.intControlPointId
+JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
 JOIN tblQMProduct P ON P.intProductId = PC.intProductId
 JOIN tblICItem I ON I.intCategoryId = P.intProductValueId
 	AND P.intProductTypeId = 1

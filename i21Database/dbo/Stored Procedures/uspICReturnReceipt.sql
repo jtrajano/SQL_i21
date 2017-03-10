@@ -10,12 +10,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- TODO: Validate
--- TODO: Validate if receipt is already posted. 
--- TODO: Validate if there are enough stocks to return. 
--- TODO: Add audit-trail on the original receipt that it was returned. 
--- TODO: Add audit-trail on the inventory return that it was created. 
-
 DECLARE @strReceiptNumber AS NVARCHAR(50)
 		,@ysnPosted AS BIT 
 		,@strReceiptType AS NVARCHAR(50)
@@ -199,6 +193,8 @@ BEGIN
 		,strComments
 		,intTaxGroupId
 		,intSourceInventoryReceiptItemId
+		,intForexRateTypeId
+		,dblForexRate
 	)
 	SELECT	intInventoryReceiptId = @intInventoryReturnId
 			,ri.intLineNo
@@ -246,6 +242,8 @@ BEGIN
 			,ri.strComments
 			,ri.intTaxGroupId
 			,intSourceInventoryReceiptItemId = ri.intInventoryReceiptItemId 
+			,ri.intForexRateTypeId
+			,ri.dblForexRate
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			LEFT JOIN tblICItemLocation il
@@ -360,6 +358,8 @@ BEGIN
 		,dblTax
 		,intConcurrencyId
 		,intTaxGroupId	
+		,intForexRateTypeId
+		,dblForexRate
 	)
 	SELECT	
 			intInventoryReceiptId = @intReceiptId
@@ -386,6 +386,8 @@ BEGIN
 			,c.dblTax
 			,c.intConcurrencyId
 			,c.intTaxGroupId
+			,c.intForexRateTypeId
+			,c.dblForexRate
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge c
 				ON r.intInventoryReceiptId = c.intInventoryReceiptId
 	WHERE	r.intInventoryReceiptId = @intReceiptId

@@ -64,8 +64,8 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
             ,(SELECT DISTINCT
                dbo.fnCTConvertQtyToTargetCommodityUOM
 			   (@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,
-					((((SUM(dblFixationPrice*dblBalanceNoOfLots) OVER (PARTITION BY det.intContractDetailId )  
-					 + (isnull(dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
+					((((SUM(detcd.dblFixationPrice*detcd.dblBalanceNoOfLots) OVER (PARTITION BY det.intContractDetailId )  
+					 + (isnull(detcd.dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
 					 )/ cd.dblNoOfLots)
 					 +det.dblBasis)
 					 * 
@@ -79,7 +79,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 			  JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=ch.intCommodityUOMId               
 			  JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
               JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-              WHERE strStatus in('Partially Priced')
+              WHERE detcd.strStatus in('Partially Priced')
               AND det.intContractDetailId=cd.intContractDetailId
               ) as dblParPriced,
 
@@ -87,7 +87,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 			  (SELECT DISTINCT
                dbo.fnCTConvertQtyToTargetCommodityUOM
 			   (@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,det.dblBasis)
-				/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
+				--/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
               FROM vyuCTSearchPriceContract det
 			  JOIN tblCTContractDetail tcd on det.intContractDetailId = tcd.intContractDetailId
 			  JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId
@@ -100,8 +100,8 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 			  (SELECT DISTINCT
                dbo.fnCTConvertQtyToTargetCommodityUOM
 			   (@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,
-					(((SUM(dblFixationPrice*dblBalanceNoOfLots) OVER (PARTITION BY det.intContractDetailId )  
-					 + (isnull(dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
+					(((SUM(detcd.dblFixationPrice*detcd.dblBalanceNoOfLots) OVER (PARTITION BY det.intContractDetailId )  
+					 + (isnull(detcd.dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
 					 )/ cd.dblNoOfLots))
 				--/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
               FROM vyuCTSearchPriceContract det
@@ -111,7 +111,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 			  JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=ch.intCommodityUOMId               
 			  JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
               JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-              WHERE strStatus in('Partially Priced')
+              WHERE detcd.strStatus in('Partially Priced')
               AND det.intContractDetailId=cd.intContractDetailId
               ) as dblParPricedAvgPrice,
 

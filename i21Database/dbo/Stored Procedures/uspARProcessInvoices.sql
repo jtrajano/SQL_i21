@@ -712,7 +712,7 @@ BEGIN
 					,@ItemTermDiscount				= [dblItemTermDiscount]
 					,@ItemTermDiscountBy			= [strItemTermDiscountBy]
 					,@ItemPrice						= [dblPrice]
-					,@ItemPricing					= CASE WHEN ISNULL([strPricing],'') = '' THEN CONCAT('Subsystem - ' COLLATE Latin1_General_CI_AS, strSourceTransaction COLLATE Latin1_General_CI_AS) ELSE [strPricing] COLLATE Latin1_General_CI_AS END
+					,@ItemPricing					= CASE WHEN ISNULL([strPricing],'') = '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + strSourceTransaction COLLATE Latin1_General_CI_AS ELSE [strPricing] COLLATE Latin1_General_CI_AS END
 					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 					,@RefreshPrice					= [ysnRefreshPrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
@@ -764,8 +764,8 @@ BEGIN
 					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 					,@ItemConversionAccountId		= [intConversionAccountId]
 					,@ItemCurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
-					,@ItemCurrencyExchangeRateId	= [dblCurrencyExchangeRate]
-					,@ItemCurrencyExchangeRate		= [intCurrencyExchangeRateTypeId]
+					,@ItemCurrencyExchangeRateId	= [intCurrencyExchangeRateId]
+					,@ItemCurrencyExchangeRate		= [dblCurrencyExchangeRate]
 					,@ItemSubCurrencyId				= [intSubCurrencyId]
 					,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
 					,@ItemIsBlended					= [ysnBlended]

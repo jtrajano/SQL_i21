@@ -81,6 +81,9 @@
 [dtmISFReceivedDate] DATETIME NULL,
 [dtmISFFiledDate] DATETIME NULL,
 [dtmStuffingDate] DATETIME NULL,
+[dtmStartDate] DATETIME NULL,
+[dtmEndDate] DATETIME NULL,
+[dtmPlannedAvailabilityDate] DATETIME NULL,
 
 [dblDemurrage] NUMERIC(18, 6) NULL,
 [intDemurrageCurrencyId] INT NULL,
@@ -102,6 +105,10 @@
 [intLoadShippingInstructionId]  INT NULL,
 [strExternalShipmentNumber]  NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [ysn4cRegistration] [bit] NULL,
+[ysnInvoice] [bit] NULL,
+[ysnProvisionalInvoice] [bit] NULL,
+[ysnQuantityFinal] [bit] NULL,
+[ysnCancelled] [bit] NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),

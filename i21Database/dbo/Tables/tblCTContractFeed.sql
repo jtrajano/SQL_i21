@@ -40,6 +40,7 @@
 	dblBasis				NUMERIC(18,6), --COND_VALUE,
 	strCurrency				NVARCHAR(50) COLLATE Latin1_General_CI_AS,--CURRENCY 
 	strPriceUOM				NVARCHAR(50) COLLATE Latin1_General_CI_AS, --COND_UNIT 
+	strDocType				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strRowState				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strMessage				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strFeedStatus			NVARCHAR(50) COLLATE Latin1_General_CI_AS,

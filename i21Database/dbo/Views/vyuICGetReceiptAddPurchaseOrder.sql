@@ -62,7 +62,7 @@ FROM (
 		, strSubCurrency = CAST(NULL AS NVARCHAR(50)) 
 		, dblGross = CAST(0 AS NUMERIC(38, 20)) -- There is no gross from PO
 		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from PO
-		, intForexRateTypeId = currencyRateType.intCurrencyExchangeRateTypeId
+		, intForexRateTypeId = POView.intForexRateTypeId
 		, strForexRateType = currencyRateType.strCurrencyExchangeRateType
 		, dblForexRate = POView.dblForexRate
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM

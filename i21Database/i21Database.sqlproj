@@ -2671,6 +2671,7 @@
     <Build Include="dbo\Tables\tblPATTransfer.sql" />
     <Build Include="dbo\Tables\tblPATTransferDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
+    <Build Include="dbo\Functions\fnGLValidateRevaluePeriod.sql" />
     <Build Include="dbo\Stored Procedures\uspPATProcessVoid.sql" />
     <Build Include="dbo\Functions\fnIsAllowUserSelfPost.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099MISC.sql" />
@@ -5096,6 +5097,21 @@
     <Build Include="dbo\Tables\tblSMDocumentTypeFieldValue.sql" />
     <Build Include="dbo\Tables\tblSMNewDocument.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDeleteDocumentSourceFolder.sql" />
+    <Build Include="dbo\Tables\tblSTstgRebatesPMMorris.sql" />
+    <Build Include="dbo\Tables\tblSTstgRebatesRJReynolds.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFCreateFeeDebitMemo.sql" />
+    <Build Include="dbo\Tables\tblSTTranslogRebates.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderTranslog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAuditLog.sql" />
+    <Build Include="dbo\Tables\tblAPVendorTerm.sql" />
+    <None Include="Scripts\Post-Deployment\EM\039_MoveDefaultTermsToVendorTerm.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCancelLoadSchedule.sql" />
+    <None Include="Scripts\Post-Deployment\ST\10_Checkout_Commander_Translog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateSystemCount.sql" />
+    <Build Include="dbo\Functions\fnCTGetBasisComponentString.sql" />
+    <Build Include="dbo\Views\vyuCTAlertNotificationCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\28_RemoveZeroTransactionFromCMUndepositedFund.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

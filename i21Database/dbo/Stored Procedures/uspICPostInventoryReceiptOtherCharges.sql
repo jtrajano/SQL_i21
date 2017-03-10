@@ -116,7 +116,7 @@ BEGIN
 	END 
 END 
 
--- VAlidate
+-- Validate
 BEGIN 
 	-- Check if the transaction is using a foreign currency and it has a missing forex rate. 
 	SELECT @strItemNo = NULL
@@ -135,6 +135,7 @@ BEGIN
 			AND OtherCharge.intCurrencyId IS NOT NULL 
 			AND OtherCharge.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND OtherCharge.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency WHERE ysnSubCurrency = 1 AND intMainCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
