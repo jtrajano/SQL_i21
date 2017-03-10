@@ -191,7 +191,7 @@ BEGIN
 
 		IF EXISTS ( SELECT *
 				    FROM @DataForReceiptHeader RawHeaderData
-					WHERE RawHeaderData.intId = @intId AND RTRIM(LTRIM(LOWER(RawHeaderData.ReceiptType))) != 'transfer order'
+					WHERE RawHeaderData.intId = @intId AND RTRIM(LTRIM(LOWER(RawHeaderData.ReceiptType))) <> 'transfer order'
 						  AND RawHeaderData.Vendor NOT IN (SELECT intEntityId FROM tblEMEntity)
 				  )
 			BEGIN
@@ -205,7 +205,7 @@ BEGIN
 
 		IF EXISTS ( SELECT *
 					FROM @DataForReceiptHeader RawHeaderData
-					WHERE RawHeaderData.intId = @intId AND RTRIM(LTRIM(LOWER(RawHeaderData.ReceiptType))) != 'transfer order'
+					WHERE RawHeaderData.intId = @intId AND RTRIM(LTRIM(LOWER(RawHeaderData.ReceiptType))) <> 'transfer order'
 					      AND RawHeaderData.ShipFrom NOT IN (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = RawHeaderData.Vendor)
 				  )
 			BEGIN
@@ -478,186 +478,236 @@ BEGIN
 		-- Validate Item Id
 		DECLARE @valueItemId INT = NULL
 
-		SELECT TOP 1 @valueItemId = RawData.intItemId
-		FROM   @ReceiptEntries RawData	   
-		WHERE RawData.intItemId NOT IN (SELECT intItemId FROM tblICItem)
+		SELECT TOP 1 
+				@valueItemId = RawData.intItemId
+		FROM	@ReceiptEntries RawData	   
+				OUTER APPLY (
+					SELECT TOP 1 intItemId FROM tblICItem i WHERE i.intItemId = RawData.intItemId
+				) i
+		WHERE	i.intItemId IS NULL 
 
-		IF @valueItemId > 0
-			BEGIN
-				DECLARE @valueItemIdStr NVARCHAR(50)
-				SET @valueItemIdStr = CAST(@valueItemId AS NVARCHAR(50))
-				-- Item Id {Item Id} invalid.
-				RAISERROR(80117, 11, 1, @valueItemIdStr);
-				GOTO _Exit_With_Rollback;
-			END
+		IF @valueItemId IS NOT NULL 
+		BEGIN
+			DECLARE @valueItemIdStr NVARCHAR(50)
+			SET @valueItemIdStr = CAST(@valueItemId AS NVARCHAR(50))
+
+			-- Item Id {Item Id} invalid.
+			RAISERROR(80117, 11, 1, @valueItemIdStr);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Tax Group Id
 		DECLARE @valueTaxGroupId INT = NULL
 
-		SELECT TOP 1 @valueTaxGroupId = RawData.intTaxGroupId
-		FROM	@ReceiptEntries RawData 	   
-		WHERE RawData.intTaxGroupId NOT IN (SELECT intTaxGroupId FROM tblSMTaxGroup) 
+		SELECT TOP 1 
+				@valueTaxGroupId = RawData.intTaxGroupId
+		FROM	@ReceiptEntries RawData
+				OUTER APPLY (
+					SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup tg WHERE tg.intTaxGroupId = RawData.intTaxGroupId
+				) tg
+		WHERE	tg.intTaxGroupId IS NULL 
 
-		IF @valueTaxGroupId > 0
-			BEGIN
-				DECLARE @valueTaxGroupIdStr NVARCHAR(50)
-				SET @valueTaxGroupIdStr = CAST(@valueTaxGroupId AS NVARCHAR(50))
-				-- Tax Group Id {Tax Group Id} is invalid.
-				RAISERROR(80116, 11, 1, @valueTaxGroupIdStr);
-				GOTO _Exit_With_Rollback;
-			END
+		IF @valueTaxGroupId IS NOT NULL 
+		BEGIN
+			DECLARE @valueTaxGroupIdStr NVARCHAR(50)
+			SET @valueTaxGroupIdStr = CAST(@valueTaxGroupId AS NVARCHAR(50))
+			-- Tax Group Id {Tax Group Id} is invalid.
+			RAISERROR(80116, 11, 1, @valueTaxGroupIdStr);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Contract Header Id
 		DECLARE @valueContractHeaderId INT = NULL
 		
-		SELECT TOP 1 @valueContractHeaderId = RawData.intContractHeaderId
+		SELECT TOP 1 
+				@valueContractHeaderId = RawData.intContractHeaderId
 		FROM	@ReceiptEntries RawData 	   
-		WHERE RawData.intContractHeaderId NOT IN (SELECT intContractHeaderId FROM tblCTContractHeader)
+				OUTER APPLY (
+					SELECT TOP 1 intContractHeaderId FROM tblCTContractHeader ch WHERE ch.intContractHeaderId = RawData.intContractHeaderId
+				) ch
+		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) = 'purchase contract'
+				AND ch.intContractHeaderId IS NULL 
 
 		IF @valueContractHeaderId > 0
-			BEGIN
-				DECLARE @valueContractHeaderIdStr NVARCHAR(50)
-				SET @valueContractHeaderIdStr = CAST(@valueContractHeaderId AS NVARCHAR(50))
-				-- Contract Header Id {Contract Header Id} is invalid.
-				RAISERROR(80118, 11, 1, @valueContractHeaderIdStr);
-				GOTO _Exit_With_Rollback;
-			END
+		BEGIN
+			DECLARE @valueContractHeaderIdStr NVARCHAR(50)
+			SET @valueContractHeaderIdStr = CAST(@valueContractHeaderId AS NVARCHAR(50))
+			-- Contract Header Id {Contract Header Id} is invalid.
+			RAISERROR(80118, 11, 1, @valueContractHeaderIdStr);
+			GOTO _Exit_With_Rollback;
+		END
 			
 		-- Validate Contract Detail Id
 		SET @valueContractHeaderId = NULL
 
-		SELECT TOP 1 @valueContractHeaderId = RawData.intContractHeaderId
-		FROM	@ReceiptEntries RawData	   
-		WHERE RawData.intContractDetailId IS NULL OR RawData.intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = RawData.intContractHeaderId)
+		SELECT	TOP 1 
+				@valueContractHeaderId = RawData.intContractHeaderId
+		FROM	@ReceiptEntries RawData	  
+				OUTER APPLY (
+					SELECT TOP 1 intContractDetailId FROM tblCTContractDetail cd WHERE cd.intContractHeaderId = RawData.intContractHeaderId
+				) cd
+		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) = 'purchase contract'
+				AND cd.intContractDetailId IS NULL 
 
-		IF @valueContractHeaderId > 0
-			BEGIN
-				SET @valueContractHeaderIdStr =  CAST(@valueContractHeaderId AS NVARCHAR(50));
-				-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
-				RAISERROR(80119, 11, 1, @valueContractHeaderIdStr);
-				GOTO _Exit_With_Rollback;
-			END
+		IF @valueContractHeaderId IS NOT NULL 
+		BEGIN
+			SET @valueContractHeaderIdStr =  CAST(@valueContractHeaderId AS NVARCHAR(50));
+			-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
+			RAISERROR(80119, 11, 1, @valueContractHeaderIdStr);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Item UOM Id
 		DECLARE @getItemId INT = NULL
 				,@getItem NVARCHAR(50) = NULL
 
-		SELECT TOP 1 @getItemId = RawData.intItemId
-		FROM	@ReceiptEntries RawData 		   
-		WHERE RawData.intItemUOMId IS NULL OR
-			  RawData.intItemUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId)
+		SELECT TOP 1 
+				@getItemId = RawData.intItemId
+		FROM	@ReceiptEntries RawData 
+				OUTER APPLY (
+					SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemUOMId = RawData.intItemUOMId
+				) iu
+		WHERE	iu.intItemUOMId IS NULL 
 
-		IF @getItemId > 0
-			BEGIN
-				SELECT @getItem = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @getItemId
+		IF @getItemId IS NOT NULL 
+		BEGIN
+			SELECT @getItem = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @getItemId
 
-				-- Item UOM Id is invalid or missing for lot {Item}.
-				RAISERROR(80120, 11, 1, @getItem);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Item UOM Id is invalid or missing for lot {Item}.
+			RAISERROR(80120, 11, 1, @getItem);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Sub Location Id
 		DECLARE @valueSubLocationId INT
 		SET @getItemId = NULL
 		SET @getItem = NULL
 
-		SELECT TOP 1 @valueSubLocationId = RawData.intSubLocationId, @getItemId = RawData.intItemId
+		SELECT TOP 1 
+				@valueSubLocationId = RawData.intSubLocationId
+				,@getItemId = RawData.intItemId
 		FROM	@ReceiptEntries	RawData
-		WHERE RawData.intSubLocationId NOT IN (SELECT intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationId = RawData.intLocationId)
-		      AND RTRIM(LTRIM(LOWER(RawData.strReceiptType))) != 'transfer order'
+				OUTER APPLY (
+					SELECT TOP 1 intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation sub WHERE sub.intCompanyLocationSubLocationId = RawData.intSubLocationId
+				) sub
+		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) <> 'transfer order'
+				AND sub.intCompanyLocationSubLocationId IS NULL 		
+				AND RawData.intSubLocationId IS NOT NULL 		
 
-		IF @valueSubLocationId > 0
-			BEGIN
-				SELECT @getItem = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @getItemId
+		IF @valueSubLocationId IS NOT NULL 
+		BEGIN
+			SELECT	@getItem = strItemNo
+			FROM	tblICItem
+			WHERE	intItemId = @getItemId
 
-				-- Sub Location is invalid or missing for item {Item}.
-				RAISERROR(80097, 11, 1,@getItem);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Sub Location is invalid or missing for item {Item}.
+			RAISERROR(80097, 11, 1,@getItem);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Storage Location Id
 		DECLARE @valueStorageLocationId INT
 		SET @getItemId = NULL
 		SET @getItem = NULL
 
-		SELECT TOP 1 @valueStorageLocationId = RawData.intStorageLocationId, @getItemId = RawData.intItemId
-		FROM	@ReceiptEntries RawData 	   
-		WHERE RawData.intStorageLocationId NOT IN (SELECT intStorageLocationId FROM tblICStorageLocation WHERE intLocationId = RawData.intLocationId AND intSubLocationId = RawData.intSubLocationId)
+		SELECT TOP 1 
+				@valueStorageLocationId = RawData.intStorageLocationId
+				, @getItemId = RawData.intItemId
+		FROM	@ReceiptEntries RawData 	  
+				OUTER APPLY (
+					SELECT TOP 1 intStorageLocationId FROM tblICStorageLocation storage WHERE storage.intStorageLocationId = RawData.intStorageLocationId
+				) storage
+		WHERE	storage.intStorageLocationId IS NULL 
+				AND RawData.intStorageLocationId IS NOT NULL 
 
-		IF @valueStorageLocationId > 0
-			BEGIN
-				SELECT @getItem = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @getItemId
+		IF @valueStorageLocationId IS NOT NULL 
+		BEGIN
+			SELECT @getItem = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @getItemId
 
-				-- Storage Location is invalid for item {Item}.
-				RAISERROR(80098, 11, 1, @getItem);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Storage Location is invalid for item {Item}.
+			RAISERROR(80098, 11, 1, @getItem);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Gross/Net UOM Id
 		SET @getItemId = NULL
 		SET @getItem = NULL
 
-		SELECT TOP 1 @getItemId = RawData.intItemId
+		SELECT TOP 1 
+				@getItemId = RawData.intItemId
 		FROM	@ReceiptEntries RawData 	   
-		WHERE RawData.intGrossNetUOMId > 0 AND (RawData.intGrossNetUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId))
+				OUTER APPLY (
+					SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemUOMId = RawData.intGrossNetUOMId
+				) iu
+		WHERE	iu.intItemUOMId IS NULL 
+				AND RawData.intGrossNetUOMId IS NOT NULL 
 
-		IF @getItemId > 0
-			BEGIN
-				SELECT @getItem = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @getItemId
+		IF @getItemId IS NOT NULL 
+		BEGIN
+			SELECT	@getItem = strItemNo
+			FROM	tblICItem
+			WHERE	intItemId = @getItemId
 
-				-- Gross/Net UOM is invalid for item {Item}.
-				RAISERROR(80121, 11, 1, @getItem);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Gross/Net UOM is invalid for item {Item}.
+			RAISERROR(80121, 11, 1, @getItem);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Cost UOM Id
 		SET @getItemId = NULL
 		SET @getItem = NULL
 
-		SELECT TOP 1 @getItemId = RawData.intItemId
-		FROM	@ReceiptEntries RawData 	   
-		WHERE RawData.intCostUOMId > 0 AND RawData.intCostUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intItemId)
+		SELECT TOP 1 
+				@getItemId = RawData.intItemId
+		FROM	@ReceiptEntries RawData
+				OUTER APPLY (
+					SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemUOMId = RawData.intCostUOMId
+				) iu
+		WHERE	iu.intItemUOMId IS NULL 
+				AND RawData.intCostUOMId IS NOT NULL 
 
-		IF @getItemId > 0
-			BEGIN
-				SELECT @getItem = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @getItemId
+		IF @getItemId IS NOT NULL 
+		BEGIN
+			SELECT @getItem = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @getItemId
 
-				-- Cost UOM is invalid or missing for item {Item}.
-				RAISERROR(80122, 11, 1, @getItem);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Cost UOM is invalid or missing for item {Item}.
+			RAISERROR(80122, 11, 1, @getItem);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Lot Id
 		DECLARE @valueLotId INT = NULL
 		SET @getItemId = NULL
 		SET @getItem = NULL
 
-		SELECT TOP 1 @valueLotId = RawData.intLotId, @getItemId = RawData.intItemId
+		SELECT TOP 1 
+				@valueLotId = RawData.intLotId
+				, @getItemId = RawData.intItemId
 		FROM	@ReceiptEntries RawData	   
-		WHERE RawData.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = RawData.intItemId)
+				OUTER APPLY (
+					SELECT TOP 1 intLotId FROM tblICLot lot WHERE lot.intLotId = RawData.intLotId
+				) lot
+		WHERE	lot.intLotId IS NULL
+				AND RawData.intLotId IS NOT NULL 
 
-		IF @valueLotId > 0
-			BEGIN
-				SELECT @getItem = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @getItemId
+		IF @valueLotId IS NOT NULL 
+		BEGIN
+			SELECT @getItem = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @getItemId
 
-				DECLARE @valueLotIdStr NVARCHAR(50)
-				SET @valueLotIdStr = CAST(@valueLotId AS NVARCHAR(50))
-				-- Lot ID {Lot Id} is invalid for item {Item}.
-				RAISERROR(80123, 11, 1, @valueLotIdStr, @getItem);
-				GOTO _Exit_With_Rollback;
-			END
+			DECLARE @valueLotIdStr NVARCHAR(50)
+			SET @valueLotIdStr = CAST(@valueLotId AS NVARCHAR(50))
+			-- Lot ID {Lot Id} is invalid for item {Item}.
+			RAISERROR(80123, 11, 1, @valueLotIdStr, @getItem);
+			GOTO _Exit_With_Rollback;
+		END
 
 		--  Flush out existing detail detail data for re-insertion
 		BEGIN 
@@ -826,106 +876,126 @@ BEGIN
 
 		-- Validate Other Charge Entity Id
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM @OtherCharges RawData
-		WHERE RawData.intEntityVendorId IS NULL OR RawData.intEntityVendorId NOT IN (SELECT intEntityId FROM tblEMEntity)
-			  AND RTRIM(LTRIM(LOWER(RawData.strReceiptType))) != 'transfer order'
+		FROM	@OtherCharges RawData 
+				OUTER APPLY (
+					SELECT intEntityId FROM tblEMEntity e WHERE e.intEntityId = RawData.intEntityVendorId
+				) e
+		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) <> 'transfer order'
+				AND e.intEntityId IS NULL 
+				AND RawData.intEntityVendorId IS NOT NULL 
 
-		IF @valueChargeId > 0
-			BEGIN
-				SELECT @valueCharge = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @valueChargeId
+		IF @valueChargeId IS NOT NULL
+		BEGIN
+			SELECT	@valueCharge = strItemNo
+			FROM	tblICItem
+			WHERE	intItemId = @valueChargeId
 
-				-- Entity Id is invalid or missing for other charge item {Other Charge Item No.}.
-				RAISERROR(80140, 11, 1, @valueCharge);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Entity Id is invalid or missing for other charge item {Other Charge Item No.}.
+			RAISERROR(80140, 11, 1, @valueCharge);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Other Charge Receipt Type --
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM @OtherCharges RawData
-		WHERE RawData.strReceiptType IS NULL OR (RTRIM(LTRIM(LOWER(RawData.strReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order'))
+		FROM	@OtherCharges RawData
+		WHERE	RawData.strReceiptType IS NULL OR (RTRIM(LTRIM(LOWER(RawData.strReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order'))
 
-		IF @valueChargeId > 0
-			BEGIN
-				SELECT @valueCharge = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @valueChargeId
+		IF @valueChargeId IS NOT NULL
+		BEGIN
+			SELECT @valueCharge = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @valueChargeId
 
-				-- Receipt type is invalid or missing for other charge item {Other Charge Item No.}.
-				RAISERROR(80141, 11, 1, @valueCharge);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Receipt type is invalid or missing for other charge item {Other Charge Item No.}.
+			RAISERROR(80141, 11, 1, @valueCharge);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Other Charge Location Id
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
-		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM @OtherCharges RawData
-		WHERE RawData.intLocationId IS NULL OR RawData.intLocationId NOT IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation)
+		SELECT TOP 1 
+				@valueChargeId = RawData.intChargeId
+		FROM	@OtherCharges RawData 
+				OUTER APPLY (
+					SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation loc WHERE loc.intCompanyLocationId = RawData.intLocationId
+				) loc 
+		WHERE	loc.intCompanyLocationId IS NULL 
 		
-		IF @valueChargeId > 0
-			BEGIN
-				SELECT @valueCharge = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @valueChargeId
+		IF @valueChargeId IS NOT NULL
+		BEGIN
+			SELECT @valueCharge = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @valueChargeId
 
-				-- Location Id is invalid or missing for other charge item {Other Charge Item No.}.
-				RAISERROR(80142, 11, 1, @valueCharge);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Location Id is invalid or missing for other charge item {Other Charge Item No.}.
+			RAISERROR(80142, 11, 1, @valueCharge);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Other Charge Ship Via Id
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM @OtherCharges RawData
-		WHERE RawData.intShipViaId > 0 AND RawData.intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)
+		FROM	@OtherCharges RawData
+				OUTER APPLY (
+					SELECT TOP 1 intEntityShipViaId FROM tblSMShipVia shipVia WHERE shipVia.intEntityShipViaId = RawData.intShipViaId
+				) shipVia
+		WHERE	RawData.intShipViaId IS NOT NULL 
+				AND shipVia.intEntityShipViaId IS NULL 
 
-		IF @valueChargeId > 0
-			BEGIN
-				SELECT @valueCharge = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @valueChargeId
+		IF @valueChargeId IS NOT NULL
+		BEGIN
+			SELECT @valueCharge = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @valueChargeId
 
-				-- Ship Via Id is invalid for other charge item {Other Charge Item No.}.
-				RAISERROR(80143, 11, 1, @valueCharge);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Ship Via Id is invalid for other charge item {Other Charge Item No.}.
+			RAISERROR(80143, 11, 1, @valueCharge);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Other Charge Ship From Id --
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM @OtherCharges RawData
-		WHERE RawData.intShipFromId IS NULL OR RawData.intShipFromId NOT IN (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = RawData.intEntityVendorId)
-			  AND RTRIM(LTRIM(LOWER(RawData.strReceiptType))) != 'transfer order'
+		FROM	@OtherCharges RawData
+				OUTER APPLY (
+					SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation e WHERE e.intEntityLocationId = RawData.intShipFromId
+				) e
+		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) <> 'transfer order'
+				AND e.intEntityLocationId IS NULL 
+				AND RawData.intShipFromId IS NOT NULL 				
 
-		IF @valueChargeId > 0
-			BEGIN
-				SELECT @valueCharge = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @valueChargeId
-				-- Ship From Id is invalid or missing for other charge item {Other Charge Item No.}.
-				RAISERROR(80144, 11, 1, @valueCharge);
-				GOTO _Exit_With_Rollback;
-			END
+		IF @valueChargeId IS NOT NULL
+		BEGIN
+			SELECT @valueCharge = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @valueChargeId
+			-- Ship From Id is invalid or missing for other charge item {Other Charge Item No.}.
+			RAISERROR(80144, 11, 1, @valueCharge);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Other Charge Currency Id
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM @OtherCharges RawData
-		WHERE RawData.intCurrencyId > 0 AND RawData.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
+		FROM	@OtherCharges RawData 
+				OUTER APPLY (
+					SELECT TOP 1 intCurrencyID FROM tblSMCurrency currency WHERE currency.intCurrencyID = RawData.intCurrencyId
+				) currency
+		WHERE	RawData.intCurrencyId IS NOT NULL 
+				AND currency.intCurrencyID IS NULL 
 
-		IF @valueChargeId > 0
+		IF @valueChargeId IS NOT NULL
 		BEGIN
 			SELECT @valueCharge = strItemNo
 			FROM tblICItem
@@ -936,35 +1006,41 @@ BEGIN
 		END
 
 		-- Validate Other Charge Item Id
-		IF EXISTS(SELECT *
-				   FROM	@OtherCharges RawData  
-				   WHERE RawData.intChargeId IS NULL OR RawData.intChargeId NOT IN (SELECT intItemId FROM tblICItem WHERE strType='Other Charge')
-				)
-					BEGIN
-						-- Other Charge Item Id is invalid or missing.
-						RAISERROR(80124, 11, 1);
-						GOTO _Exit_With_Rollback;
-					END
+		IF EXISTS(
+			SELECT	TOP 1 1
+			FROM	@OtherCharges RawData  
+					OUTER APPLY (
+						SELECT TOP 1 intItemId FROM tblICItem charge WHERE charge.strType = 'Other Charge' AND charge.intItemId = RawData.intChargeId
+					) charge
+			WHERE	RawData.intChargeId IS NULL 
+					OR charge.intItemId IS NULL 
+		)
+		BEGIN
+			-- Other Charge Item Id is invalid or missing.
+			RAISERROR(80124, 11, 1);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Cost Method
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
-		SELECT TOP 1 @valueChargeId = RawData.intChargeId
+		SELECT TOP 1 
+				@valueChargeId = RawData.intChargeId
 		FROM	@OtherCharges RawData   
-		WHERE RawData.strCostMethod IS NULL OR RTRIM(LTRIM(LOWER(RawData.strCostMethod))) NOT IN ('per unit', 'percentage', 'amount')
+		WHERE	RawData.strCostMethod IS NULL OR RTRIM(LTRIM(LOWER(RawData.strCostMethod))) NOT IN ('per unit', 'percentage', 'amount')
 		ORDER BY RawData.strCostMethod ASC
 
-		IF @valueChargeId > 0
-			BEGIN
-				SELECT @valueCharge = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @valueChargeId
+		IF @valueChargeId IS NOT NULL
+		BEGIN
+			SELECT @valueCharge = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @valueChargeId
 
-				-- Cost Method for Other Charge item {Other Charge Item No.} is invalid or missing.
-				RAISERROR(80125, 11, 1, @valueCharge);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Cost Method for Other Charge item {Other Charge Item No.} is invalid or missing.
+			RAISERROR(80125, 11, 1, @valueCharge);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Cost Currency Id
 		DECLARE @valueCostCurrencyId INT
@@ -996,111 +1072,123 @@ BEGIN
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
-		SELECT @valueChargeId = RawData.intChargeId
-		FROM   @OtherCharges RawData 
-		WHERE ((RawData.intCostUOMId > 0 AND RawData.intCostUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = RawData.intChargeId)) OR
-			  ((RawData.intCostUOMId IS NULL OR RawData.intCostUOMId < 1) AND RTRIM(LTRIM(LOWER(RawData.strCostMethod))) = 'per unit'))
+		SELECT	@valueChargeId = RawData.intChargeId
+		FROM	@OtherCharges RawData LEFT JOIN tblICItemUOM iu
+					ON RawData.intCostUOMId = iu.intItemUOMId
+		WHERE	iu.intItemUOMId IS NULL
+				AND RTRIM(LTRIM(LOWER(RawData.strCostMethod))) = 'per unit'
 
-		IF @valueChargeId > 0
-			BEGIN
-				SELECT @valueCharge = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @valueChargeId
+		IF @valueChargeId IS NOT NULL
+		BEGIN
+			SELECT @valueCharge = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @valueChargeId
 
-				-- Cost UOM is invalid or missing for item {Charge Item No.}.
-				RAISERROR(80122, 11, 1, @valueCharge);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Cost UOM is invalid or missing for item {Charge Item No.}.
+			RAISERROR(80122, 11, 1, @valueCharge);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Other Charges Vendor Id
 		DECLARE @valueOtherChargeVendorId INT
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
-		SELECT @valueOtherChargeVendorId = RawData.intOtherChargeEntityVendorId, @valueChargeId = RawData.intChargeId
-		FROM	@OtherCharges RawData
-		WHERE RawData.intOtherChargeEntityVendorId NOT IN (SELECT intEntityId FROM tblEMEntity)
+		SELECT	TOP 1
+				@valueOtherChargeVendorId = RawData.intOtherChargeEntityVendorId
+				, @valueChargeId = RawData.intChargeId
+		FROM	@OtherCharges RawData LEFT JOIN tblEMEntity e
+					ON RawData.intOtherChargeEntityVendorId = e.intEntityId
+		WHERE	e.intEntityId IS NULL 
+				AND RawData.intOtherChargeEntityVendorId IS NOT NULL 
 
-		IF @valueOtherChargeVendorId > 0
-			BEGIN
-				SELECT @valueCharge = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @valueChargeId
+		IF @valueOtherChargeVendorId IS NOT NULL
+		BEGIN
+			SELECT @valueCharge = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @valueChargeId
 
-				-- Vendor Id is invalid for other charge item {Other Charge Item No.}.
-				RAISERROR(80127, 11, 1, @valueCharge);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Vendor Id is invalid for other charge item {Other Charge Item No.}.
+			RAISERROR(80127, 11, 1, @valueCharge);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Allocate Cost By
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
-		SELECT @valueChargeId = RawData.intChargeId
+		SELECT	@valueChargeId = RawData.intChargeId
 		FROM	@OtherCharges RawData
-		WHERE RawData.strAllocateCostBy IS NOT NULL AND RTRIM(LTRIM(LOWER(RawData.strAllocateCostBy))) NOT IN ('unit', 'stock unit', 'cost')
+		WHERE	RawData.strAllocateCostBy IS NOT NULL 
+				AND RTRIM(LTRIM(LOWER(RawData.strAllocateCostBy))) NOT IN ('unit', 'stock unit', 'cost')
 
-		IF @valueChargeId > 0
-			BEGIN
-				SELECT @valueCharge = strItemNo
-				FROM tblICItem
-				WHERE intItemId = @valueChargeId
+		IF @valueChargeId IS NOT NULL
+		BEGIN
+			SELECT @valueCharge = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @valueChargeId
 
-				-- Allocate Cost By is invalid or missing for other charge item {Other Charge Item No.}.
-				RAISERROR(80128, 11, 1, @valueCharge);
-				GOTO _Exit_With_Rollback;
-			END
+			-- Allocate Cost By is invalid or missing for other charge item {Other Charge Item No.}.
+			RAISERROR(80128, 11, 1, @valueCharge);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Contract Header Id
 		DECLARE @valueOtherChargeContractHeaderId INT = NULL
 
-		SELECT TOP 1 @valueOtherChargeContractHeaderId = RawData.intContractHeaderId
-		FROM	@OtherCharges RawData
-		WHERE RawData.intContractHeaderId NOT IN (SELECT intContractHeaderId FROM tblCTContractHeader)
-		ORDER BY RawData.intContractHeaderId ASC
+		SELECT	TOP 1 
+				@valueOtherChargeContractHeaderId = RawData.intContractHeaderId
+		FROM	@OtherCharges RawData LEFT JOIN tblCTContractHeader ch
+					ON RawData.intContractHeaderId = ch.intContractHeaderId
+		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) = 'purchase contract'
+				AND ch.intContractHeaderId IS NULL 
 
-		IF @valueOtherChargeContractHeaderId > 0
-			BEGIN
-				DECLARE @valueOtherChargeContractHeaderIdStr AS NVARCHAR(50)
-				SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
-				-- Contract Header Id {Contract Header Id} is invalid.
-				RAISERROR(80118, 11, 1, @valueOtherChargeContractHeaderIdStr);
-				GOTO _Exit_With_Rollback;
-			END
+		IF @valueOtherChargeContractHeaderId IS NOT NULL
+		BEGIN
+			DECLARE @valueOtherChargeContractHeaderIdStr AS NVARCHAR(50)
+			SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
+			-- Contract Header Id {Contract Header Id} is invalid.
+			RAISERROR(80118, 11, 1, @valueOtherChargeContractHeaderIdStr);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Contract Detail Id
 		SET @valueOtherChargeContractHeaderId = NULL
 
-		SELECT TOP 1 @valueOtherChargeContractHeaderId = RawData.intContractHeaderId
-		FROM	@OtherCharges RawData
-		WHERE  (RawData.intContractHeaderId > 0 AND 
-				(RawData.intContractDetailId IS NULL OR RawData.intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = RawData.intContractHeaderId)))
-		ORDER BY RawData.intContractDetailId ASC
+		SELECT TOP 1 
+				@valueOtherChargeContractHeaderId = RawData.intContractHeaderId
+		FROM	@OtherCharges RawData LEFT JOIN tblCTContractDetail cd
+					ON RawData.intContractDetailId = cd.intContractDetailId
+					AND RawData.intContractHeaderId = cd.intContractHeaderId
+		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) = 'purchase contract'
+				AND cd.intContractDetailId IS NULL 				
 
-		IF @valueOtherChargeContractHeaderId > 0
-			BEGIN
-				SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
-				-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
-				RAISERROR(80119, 11, 1, @valueOtherChargeContractHeaderIdStr);
-				GOTO _Exit_With_Rollback;
-			END
+		IF @valueOtherChargeContractHeaderId IS NOT NULL 
+		BEGIN
+			SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
+			-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
+			RAISERROR(80119, 11, 1, @valueOtherChargeContractHeaderIdStr);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Tax Group Id
 		DECLARE @valueOtherChargeTaxGroupId INT = NULL
 
-		SELECT TOP 1 @valueOtherChargeTaxGroupId = RawData.intTaxGroupId	
-		FROM	@OtherCharges RawData
-		WHERE RawData.intTaxGroupId > 0 AND RawData.intTaxGroupId NOT IN (SELECT intTaxGroupId FROM tblSMTaxGroup) 
-		ORDER BY RawData.intTaxGroupId ASC
-
-		IF @valueOtherChargeTaxGroupId > 0
-			BEGIN
-				DECLARE @valueOtherChargeTaxGroupIdStr NVARCHAR(50)
-				SET @valueOtherChargeTaxGroupIdStr = CAST(@valueOtherChargeTaxGroupId AS NVARCHAR(50))
-				-- Tax Group Id {Tax Group Id} is invalid.
-				RAISERROR(80116, 11, 1, @valueOtherChargeTaxGroupIdStr);
-				GOTO _Exit_With_Rollback;
-			END
+		SELECT	TOP 1 
+				@valueOtherChargeTaxGroupId = RawData.intTaxGroupId	
+		FROM	@OtherCharges RawData LEFT JOIN tblSMTaxGroup tg
+					ON RawData.intTaxGroupId = tg.intTaxGroupId
+		WHERE	RawData.intTaxGroupId IS NOT NULL 
+				AND tg.intTaxGroupId IS NULL 
+		
+		IF @valueOtherChargeTaxGroupId IS NOT NULL
+		BEGIN
+			DECLARE @valueOtherChargeTaxGroupIdStr NVARCHAR(50)
+			SET @valueOtherChargeTaxGroupIdStr = CAST(@valueOtherChargeTaxGroupId AS NVARCHAR(50))
+			-- Tax Group Id {Tax Group Id} is invalid.
+			RAISERROR(80116, 11, 1, @valueOtherChargeTaxGroupIdStr);
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Insert the Other Charges
 		INSERT INTO dbo.tblICInventoryReceiptCharge (
@@ -1505,7 +1593,7 @@ BEGIN
 					-- Check if item is lot-tracked
 					IF EXISTS (SELECT * 
 							   FROM tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
-							   WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId AND Item.strLotTracking != 'No')
+							   WHERE ReceiptItem.intInventoryReceiptItemId = @currentReceiptItemId AND Item.strLotTracking <> 'No')
 					BEGIN
 
 						------------------------------------------------
