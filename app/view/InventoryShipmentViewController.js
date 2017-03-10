@@ -1231,7 +1231,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 intCustomerId: cfg.CustomerId,
                 intCurrencyId: cfg.CurrencyId,
                 intLocationId: cfg.LocationId,
-                intItemUOMId: null,
+                intItemUOMId: cfg.ItemUOMId,
                 dtmTransactionDate: cfg.TransactionDate,
                 dblQuantity: cfg.Quantity,
                 intContractHeaderId: null,
@@ -1358,7 +1358,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 LocationId: shipFromLocationId,
                 TransactionDate: dtmShipDate,
                 Quantity: 0, // Default ship qty. 
-                ShipToLocationId: shipToLocationId
+                ShipToLocationId: shipToLocationId,
+                ItemUOMId: records[0].get('intIssueUOMId')
             }
 
             me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure);
@@ -3247,10 +3248,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         }                    
                     }
 
-                    // If transaction currency is a foreign currency, convert the sales price to the transaction currency. 
+                    // Convert the sales price to the transaction currency.
+                    // and round it to six decimal places.  
                     if (transactionCurrencyId != functionalCurrencyId && isItemRetailPrice){
-                        dblUnitPrice = dblUnitPrice * dblForexRate;                        
-                    }
+                        dblUnitPrice = dblForexRate != 0 ?  dblUnitPrice / dblForexRate : 0;
+                        dblUnitPrice = i21.ModuleMgr.Inventory.roundDecimalFormat(dblUnitPrice, 6);
+                    }                    
 
                     // Set the new sales price. 
                     currentItem.set('dblUnitPrice', dblUnitPrice);
@@ -3269,7 +3272,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     LocationId: currentHeader.get('intShipFromLocationId'),
                     TransactionDate: currentHeader.get('dtmShipDate'),
                     Quantity: dblQuantity,
-                    ShipToLocationId: currentHeader.get('intShipToLocationId')
+                    ShipToLocationId: currentHeader.get('intShipToLocationId'), 
+                    ItemUOMId: currentItem.get('intItemUOMId')
                 }
                 
                 // Call the pricing hierarchy if the order type is not a Sales Contract. 
