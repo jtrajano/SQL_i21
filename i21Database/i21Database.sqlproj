@@ -5088,8 +5088,6 @@
     <Build Include="dbo\Views\vyuARCustomerContractHeader.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceFee.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
-    <Build Include="dbo\Tables\tblSTTransLogPMMorris.sql" />
-    <Build Include="dbo\Tables\tblSTTransLogPMReynolds.sql" />
     <Build Include="dbo\Tables\tblSMDocument.sql" />
     <Build Include="dbo\Tables\tblSMDocumentType.sql" />
     <Build Include="dbo\Tables\tblSMDocumentTypeField.sql" />
