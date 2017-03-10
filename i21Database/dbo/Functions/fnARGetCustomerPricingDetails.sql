@@ -32,7 +32,10 @@ BEGIN
 			,@intSort				INT
 			,@FunctionalCurrencyId	INT
 
+
 	SELECT TOP 1 @FunctionalCurrencyId = intDefaultCurrencyId  FROM tblSMCompanyPreference
+	IF @SpecialPricingCurrencyId IS NULL
+		SET @SpecialPricingCurrencyId = @FunctionalCurrencyId
 	
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	SET @intSort = 0	

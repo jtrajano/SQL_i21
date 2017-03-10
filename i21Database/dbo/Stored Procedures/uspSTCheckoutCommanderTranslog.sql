@@ -2,7 +2,7 @@
 @intCheckoutId Int
 AS
 BEGIN
-	--Insert #tempCheckoutInsert to tblSTTranslogRebates
+--Insert #tempCheckoutInsert to tblSTTranslogRebates
 	INSERT INTO dbo.tblSTTranslogRebates 
 	(
 		strOpenedTime
@@ -18,6 +18,9 @@ BEGIN
 		, strTermMsgSNtype
 		, intTermMsgSNterm
 		, intTermMsgSN
+		, intPeriodLevel
+		, intPeriodSeq
+		, strPeriodName 
 		, strPeriod
 		, strDate
 		, intDuration
@@ -64,7 +67,68 @@ BEGIN
 		, strTrpPaycode
 		, dblTrpAmt
 	)
-	SELECT *
+	SELECT 
+		openedTime
+		, closedTime
+		, insideSales
+		, insideGrand
+		, outsideSales
+		, outsideGrand
+		, overallSales
+		, overallGrand
+		, transtype
+		, transrecalled
+		, termMsgSNtype
+		, termMsgSNterm
+		, termMsgSN
+		, periodlevel
+		, periodseq
+		, periodname
+		, period
+		, date
+		, duration
+		, till
+		, cashiersysid
+		, cashierempNum
+		, cashierposNum
+		, cashierperiod
+		, cashierdrawer
+		, cashier
+		, storeNumber
+		, trFuelOnlyCst
+		, posNum
+		, trSeq
+		, trTotNoTax
+		, trTotWTax
+		, trTotTax
+		, trTax
+		, trCurrTotlocale
+		, trCurrTot
+		, trSTotalizer
+		, trGTotalizer
+		, trLinetype
+		, trlTaxes
+		, trlFlags
+		, trlDeptnumber
+		, trlDepttype
+		, trlDept
+		, trlCatnumber
+		, trlCat
+		, trlNetwCode
+		, trlQty
+		, trlSign
+		, trlUnitPrice
+		, trlLineTot
+		, trlDesc
+		, trPaylinetype
+		, trPaylinesysid
+		, trPaylinelocale
+		, trpPaycodemop
+		, trpPaycodecat
+		, trpPaycodenacstendercode
+		, trpPaycodenacstendersubcode
+		, trpPaycode
+		, trpAmt
 	FROM #tempCheckoutInsert chk
 	WHERE chk.transtype = 'sale' AND chk.trlDept = 'CIGARETTES'
 

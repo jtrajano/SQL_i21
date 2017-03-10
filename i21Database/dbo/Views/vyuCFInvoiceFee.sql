@@ -1,12 +1,14 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceFee]
+﻿
+CREATE VIEW [dbo].[vyuCFInvoiceFee]
 AS
 SELECT   ROUND(ISNULL(cfTransPrice.dblCalculatedAmount, 0), 2) AS dblTotalAmount, smTerm.intTermID, smTerm.strTerm, smTerm.strType, smTerm.dblDiscountEP, 
                          smTerm.intBalanceDue, smTerm.intDiscountDay, smTerm.dblAPR, smTerm.strTermCode, smTerm.ysnAllowEFT, smTerm.intDayofMonthDue, smTerm.intDueNextMonth, 
                          smTerm.dtmDiscountDate, smTerm.dtmDueDate, smTerm.ysnActive, smTerm.ysnEnergyTrac, smTerm.intSort, smTerm.intConcurrencyId, cfTrans.dblQuantity, 
-                         cfCardAccount.intAccountId,cfCardAccount.intCardId, cfCardAccount.intFeeProfileId, cfTrans.intTransactionId, arInv.strCustomerName, cfCardAccount.strNetwork, arInv.dtmPostDate AS dtmPostedDate, 
+                         cfCardAccount.intAccountId,cfCardAccount.intCardId, cfCardAccount.intFeeProfileId, cfTrans.intTransactionId, arInv.strCustomerName, cfCardAccount.intNetworkId, cfCardAccount.strNetwork, arInv.dtmPostDate AS dtmPostedDate, 
                          cfCardAccount.strInvoiceCycle, cfTrans.dtmTransactionDate, cfTrans.strTransactionType, cfCardAccount.intDiscountScheduleId, cfCardAccount.intCustomerId, 
                          ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupName, arInv.intInvoiceId, arInv.strInvoiceNumber, cfTrans.strInvoiceReportNumber, 
                          cfTrans.strPrintTimeStamp, cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail, cfTrans.dtmInvoiceDate, cfTrans.intSalesPersonId
+						 ,cfSiteItem.intARLocationId
 FROM         dbo.vyuCFInvoice AS arInv INNER JOIN
                          dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId AND arInv.intInvoiceId = cfTrans.intInvoiceId LEFT OUTER JOIN
                          dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
@@ -89,3 +91,6 @@ WHERE     (cfSiteItem.ysnIncludeInQuantityDiscount = 1) AND (cfTrans.ysnPosted =
                          (cfTrans.strTransactionType = 'Local/Network') OR
                          (cfTrans.strTransactionType = 'Remote') AND (cfDiscount.ysnDiscountOnRemotes = 1) OR
                          (cfTrans.strTransactionType = 'Extended Remote') AND (cfDiscount.ysnDiscountOnExtRemotes = 1)
+
+
+

@@ -5,6 +5,7 @@
 [intLoadId] INT NOT NULL,
 [intDocumentId] INT NOT NULL,
 [strDocumentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strDocumentNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intOriginal] INT NULL,
 [intCopies] INT NULL,
 [ysnSent] [bit] NULL,

@@ -43,6 +43,12 @@ BEGIN
 			,@ItemCategoryId			INT
 			,@ItemCategory				NVARCHAR(100)
 			,@UOMQuantity				NUMERIC(18,6)
+			,@FunctionalCurrencyId	INT
+
+
+	SELECT TOP 1 @FunctionalCurrencyId = intDefaultCurrencyId  FROM tblSMCompanyPreference
+	IF @CurrencyId IS NULL
+		SET @CurrencyId = @FunctionalCurrencyId
 
 	SELECT TOP 1 
 		 @ItemVendorId				= intItemVendorId
@@ -86,7 +92,7 @@ BEGIN
 							END) 									
 		,@DiscountBy	= ICISP.strDiscountBy
 		,@PromotionType	= ICISP.strPromotionType
-		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblDiscount ELSE 0.000000 END)
+		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ISNULL((ISNULL(ICISP.dblDiscount, 0.00)/ISNULL(ICISP.dblUnit,0.00)) * @Quantity,0.00) ELSE 0.000000 END)
 		,@Pricing		= 'Inventory Promotional Pricing' + ISNULL('(' + ICISP.strPromotionType + ')','')	
 	FROM
 		tblICItemSpecialPricing ICISP
@@ -94,7 +100,7 @@ BEGIN
 		ICISP.intItemId = @ItemId 
 		AND ICISP.intItemLocationId = @ItemLocationId 
 		AND ICISP.intItemUnitMeasureId = @ItemUOMId
-		AND ICISP.intCurrencyId = @CurrencyId
+		AND ISNULL(ICISP.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ICISP.dtmBeginDate AS DATE) AND CAST(ISNULL(ICISP.dtmEndDate,@TransactionDate) AS DATE)
  	ORDER BY
 		dtmBeginDate DESC
@@ -186,7 +192,7 @@ BEGIN
 					AND PL.intItemId = @ItemId
 					AND PL.intItemLocationId = @ItemLocationId
 					AND PL.intItemUnitMeasureId = @ItemUOMId
-					AND PL.intCurrencyId = @CurrencyId
+					AND ISNULL(PL.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
 					AND ((@Quantity BETWEEN PL.dblMin AND PL.dblMax) OR (PL.dblMin = 0 AND PL.dblMax = 0))
 				ORDER BY
 					PL.dblMin
@@ -231,7 +237,7 @@ BEGIN
 		AND ICPL.intItemId = @ItemId
 		AND ICPL.intItemLocationId = @ItemLocationId
 		AND ICPL.intItemUnitMeasureId = @ItemUOMId
-		AND ICPL.intCurrencyId = @CurrencyId
+		AND ISNULL(ICPL.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
 		AND ((@Quantity BETWEEN ICPL.dblMin AND ICPL.dblMax) OR (ICPL.dblMin = 0 AND ICPL.dblMax = 0))
 	ORDER BY
 		ICPL.dblMin
