@@ -24,7 +24,7 @@ BEGIN
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,1
 			   ,0			 		        ,'transSet'		               ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,0
+			   ,NULL		 			    ,'Header'						   ,0
 			   ,NULL					    ,1							   ,1)
 END
 
@@ -40,7 +40,7 @@ BEGIN
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,2
 			   ,1			 		        ,'openedTime'				   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,'Header'					   ,1
+			   ,NULL		 			    ,NULL					   ,1
 			   ,NULL					    ,1							   ,1)
 END
 
@@ -1098,6 +1098,52 @@ BEGIN
 			   ,[ysnActive]					   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileColumnDetailId	,1						   ,'number'
+			   ,NULL							,NULL					   ,'NULL'
+			   ,1							   ,1)
+
+END
+
+--LEVEL 49, Attributes(3x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId 
+AND intLevel = 49 AND strXMLTag = 'trPayline'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1
+AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+
+		INSERT INTO [dbo].[tblSMXMLTagAttribute]
+			   ([intImportFileColumnDetailId]	,[intSequence]			   ,[strTagAttribute]
+			   ,[strTable]					   ,[strColumnName]			   ,[strDefaultValue]
+			   ,[ysnActive]					   ,[intConcurrencyId])
+		 VALUES
+			   (@intImportFileColumnDetailId	,1						   ,'type'
+			   ,NULL							,NULL					   ,'NULL'
+			   ,1							   ,1)
+
+END
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'sysid' AND intSequence = 2
+AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+
+		INSERT INTO [dbo].[tblSMXMLTagAttribute]
+			   ([intImportFileColumnDetailId]	,[intSequence]			   ,[strTagAttribute]
+			   ,[strTable]					   ,[strColumnName]			   ,[strDefaultValue]
+			   ,[ysnActive]					   ,[intConcurrencyId])
+		 VALUES
+			   (@intImportFileColumnDetailId	,2						   ,'sysid'
+			   ,NULL							,NULL					   ,'NULL'
+			   ,1							   ,1)
+
+END
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'locale' AND intSequence = 3
+AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+
+		INSERT INTO [dbo].[tblSMXMLTagAttribute]
+			   ([intImportFileColumnDetailId]	,[intSequence]			   ,[strTagAttribute]
+			   ,[strTable]					   ,[strColumnName]			   ,[strDefaultValue]
+			   ,[ysnActive]					   ,[intConcurrencyId])
+		 VALUES
+			   (@intImportFileColumnDetailId	,3						   ,'locale'
 			   ,NULL							,NULL					   ,'NULL'
 			   ,1							   ,1)
 
