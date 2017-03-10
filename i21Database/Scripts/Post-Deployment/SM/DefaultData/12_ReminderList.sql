@@ -583,12 +583,11 @@ BEGIN
 											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intOutScaleDeviceId
 											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(intEntityId,0) != {0}',
 			[strNamespace]      =        N'',
-			[intSort]           =        @intMaxSortOrder + 1
+			[intSort]           =        @intMaxSortOrder + 2
 END
 ELSE
 BEGIN
 	DELETE FROM [tblSMReminderList] WHERE [strReminder] = N'Error' AND [strType] = N'Scale Service'
-	DECLARE @intMaxSortOrder INT
 	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
 	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
 	SELECT [strReminder]        =        N'Error',
@@ -609,7 +608,7 @@ BEGIN
 											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intOutScaleDeviceId
 											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(intEntityId,0) != {0}',
 			[strNamespace]      =        N'',
-			[intSort]           =        @intMaxSortOrder + 1
+			[intSort]           =        @intMaxSortOrder + 2
 END
 
 --	IF EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
