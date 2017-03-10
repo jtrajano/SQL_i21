@@ -24,7 +24,12 @@ AS
 			,G.strSerialNumber
 			,dblLeaseAmount = J.dblAmount
 			,ysnLeaseTaxable = J.ysnTaxable
-			,dblTotalUsage = ISNULL(HH.dblTotalGallons,0.0)
+			,dblTotalUsage = ISNULL((SELECT 
+								SUM(ISNULL(dblQuantityDelivered,0.0)) 
+							  FROM tblTMDeliveryHistory 
+							  WHERE intSiteID = F.intSiteID 
+								AND dtmInvoiceDate >= ISNULL(HH.dtmStartDate, DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0))
+								AND dtmInvoiceDate <= ISNULL(HH.dtmStartDate, DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0))), 0.0)
 			,dblLeaseBillingMinimum = (SELECT TOP 1 dblMinimumUsage 
 												FROM tblTMLeaseMinimumUse 
 												WHERE dblSiteCapacity >= ISNULL(F.dblTotalCapacity,0) 
@@ -64,6 +69,12 @@ AS
 			ON F.intCustomerID = K.intCustomerID 
 		LEFT JOIN tblEMEntity L
 			ON K.intCustomerNumber = L.intEntityId
-		LEFT JOIN vyuTMSiteDeliveryHistoryTotal HH
-			ON F.intSiteID = HH.intSiteId AND HH.intCurrentSeasonYear = HH.intSeasonYear
+		LEFT JOIN (
+				SELECT dtmStartDate = MAX(dtmDate)
+					,intClockID 
+				FROM tblTMDegreeDayReading
+				WHERE ysnSeasonStart = 1
+				GROUP BY intClockID
+		) HH
+			ON F.intClockID = HH.intClockID 
 GO

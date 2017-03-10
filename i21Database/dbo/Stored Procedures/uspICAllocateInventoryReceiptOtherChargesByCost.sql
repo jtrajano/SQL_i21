@@ -68,7 +68,7 @@ BEGIN
 								-- Convert the other charge amount to functional currency. 
 								SUM(
 									dblCalculatedAmount
-									* CASE WHEN ISNULL(Charge.dblForexRate, 0) = 0 AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE Charge.dblForexRate END 
+									--* CASE WHEN ISNULL(Charge.dblForexRate, 0) = 0 AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE Charge.dblForexRate END 
 								)
 							,CalculatedCharge.ysnAccrue
 							,CalculatedCharge.intEntityVendorId
@@ -100,7 +100,7 @@ BEGIN
 										END
 										, (
 											ISNULL(ReceiptItem.dblUnitCost, 0)
-											* CASE WHEN ISNULL(ReceiptItem.dblForexRate, 0) = 0 AND ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE ReceiptItem.dblForexRate END 
+											--* CASE WHEN ISNULL(ReceiptItem.dblForexRate, 0) = 0 AND ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE ReceiptItem.dblForexRate END 
 										)
 									)
 								)

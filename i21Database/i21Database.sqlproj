@@ -5102,6 +5102,7 @@
     <Build Include="dbo\Functions\fnCTGetBasisComponentString.sql" />
     <Build Include="dbo\Views\vyuCTAlertNotificationCount.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\28_RemoveZeroTransactionFromCMUndepositedFund.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
