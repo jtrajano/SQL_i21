@@ -227,7 +227,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             },
                             {
                                 column: 'dblOnHand',
-                                value: '0',
+                                value: '{getOnHandFilterValue}',
                                 conjunction: 'and',
                                 condition: 'gt'
                             },
@@ -259,7 +259,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             },
                             {
                                 column: 'dblOnHand',
-                                value: '0',
+                                value: '{getOnHandFilterValue}',
                                 conjunction: 'and',
                                 condition: 'gt'
                             }
@@ -349,9 +349,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             },
                             {
                                 column: 'dblOnHand',
-                                value: 0,
+                                value: '{getOnHandFilterValue}',
                                 conjunction: 'and',
-                                condition: 'noteq'
+                                condition: 'gt'
                             }
                         ],
                         readOnly: '{formulaShowItemUOMEditor}'
@@ -986,10 +986,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblNewQuantity', newQty);
 
             //Set Sub and Storage Locations
-            current.set('intStorageLocationId', record.get('intStorageLocationId'));
-            current.set('strStorageLocation', record.get('strStorageLocationName'));
-            current.set('intSubLocationId', record.get('intStorageLocationId'));
-            current.set('strSubLocation', record.get('strSubLocationName'));
+            if(iRely.Functions.isEmpty(record.get('intItemStockUOMId'))) {
+                current.set('intStorageLocationId', record.get('intStorageLocationId'));
+                current.set('strStorageLocation', record.get('strStorageLocationName'));
+                current.set('intSubLocationId', record.get('intStorageLocationId'));
+                current.set('strSubLocation', record.get('strSubLocationName'));
+            }
 
             //Set Available Quantity Per UOm
             current.set('dblQuantity', record.get('dblOnHand'));
