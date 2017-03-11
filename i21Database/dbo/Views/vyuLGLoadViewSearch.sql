@@ -47,7 +47,6 @@ SELECT L.intLoadId
 		ELSE CAST(0 AS BIT)
 		END
 	,strPosition = P.strPosition
-	,strPositionType = P.strPositionType
 	,strWeightUnitMeasure = UM.strUnitMeasure
 	,strShipmentStatus = CASE L.intShipmentStatus
 		WHEN 1
