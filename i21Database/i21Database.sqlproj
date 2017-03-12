@@ -5104,6 +5104,7 @@
     <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\28_RemoveZeroTransactionFromCMUndepositedFund.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTChangeContractStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

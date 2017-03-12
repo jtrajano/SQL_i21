@@ -3,19 +3,23 @@
 AS
 	WITH Header AS
 	(
-		SELECT	CH.intContractHeaderId,	CH.dblQuantity AS	dblHdrQuantity,		PT.strPricingType AS strHdrPricingType,		CH.strContractNumber,
-				CH.dtmContractDate,		CT.strContractType,			CO.strCommodityCode,	UM.strUnitMeasure		AS strHdrItemUOM,	
-				EY.strName				AS	strEntityName,			ISNULL(ysnSigned,0)		AS	ysnSigned,
-				ISNULL(ysnMailSent,0)	AS	ysnMailSent,		CY.strEntityNo AS strCreatedByNo,	
+		SELECT	CH.intContractHeaderId,	CH.dtmContractDate,		CT.strContractType,		CO.strCommodityCode,	CH.strContractNumber,
+				CH.dblQuantity			AS	dblHdrQuantity,		
+				PT.strPricingType		AS	strHdrPricingType,	
+				UM.strUnitMeasure		AS	strHdrItemUOM,	
+				EY.strName				AS	strEntityName,		
+				ISNULL(ysnSigned,0)		AS	ysnSigned,
+				ISNULL(ysnMailSent,0)	AS	ysnMailSent,		
+				CY.strEntityNo			AS	strCreatedByNo,	
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intCommodityUOMId,SU.intCommodityUnitMeasureId,CH.dblQuantity) dblQtyInStockUOM,
 
-				CD.intCurrencyId,		CD.intBookId,		CD.intSubBookId,		CD.intCompanyLocationId, 
-				CD.intContractSeq,		CD.dtmStartDate,	CD.dtmEndDate,			CD.strPurchasingGroup,
-				CD.dblQuantity,			CD.dblFutures,		CD.dblBasis,			CD.dblCashPrice,
-				CD.dblScheduleQty,		CD.dblNoOfLots,		CD.strItemNo,			CD.strPricingType,
-				CD.strFutMarketName,	CD.strItemUOM,		CD.strLocationName,		CD.strPriceUOM,
-				CD.strCurrency,			CD.strFutureMonth,	CD.strStorageLocation,	CD.strSubLocation,
-				CD.strItemDescription,
+				CD.intCurrencyId,		CD.intBookId,			CD.intSubBookId,		CD.intCompanyLocationId, 
+				CD.intContractSeq,		CD.dtmStartDate,		CD.dtmEndDate,			CD.strPurchasingGroup,
+				CD.dblQuantity,			CD.dblFutures,			CD.dblBasis,			CD.dblCashPrice,
+				CD.dblScheduleQty,		CD.dblNoOfLots,			CD.strItemNo,			CD.strPricingType,
+				CD.strFutMarketName,	CD.strItemUOM,			CD.strLocationName,		CD.strPriceUOM,
+				CD.strCurrency,			CD.strFutureMonth,		CD.strStorageLocation,	CD.strSubLocation,
+				CD.strItemDescription,	CD.intContractDetailId,	CD.strProductType,		
 				dbo.fnCTGetBasisComponentString(CD.intContractDetailId) strBasisComponent
 
 		FROM	tblCTContractHeader			CH
@@ -42,7 +46,8 @@ AS
 				CD.strCurrency,					CD.strFutureMonth,				CD.strStorageLocation,				CD.strSubLocation,
 				CD.strPurchasingGroup,			CD.strCreatedByNo,				CD.strContractNumber,				CD.dtmContractDate,
 				CD.strContractType,				CD.strCommodityCode,			CD.strEntityName,					'Unconfirmed' AS strNotificationType,
-				CD.strItemDescription,			CH.dblQtyInStockUOM,			dbo.fnCTGetBasisComponentString(CD.intContractDetailId) strBasisComponent							
+				CD.strItemDescription,			CH.dblQtyInStockUOM,			CD.intContractDetailId,				CD.strProductType,
+				dbo.fnCTGetBasisComponentString(CD.intContractDetailId) strBasisComponent							
 				
 
 		FROM	vyuCTContractSequence	CD
@@ -58,7 +63,8 @@ AS
 				CH.strCurrency,					CH.strFutureMonth,			CH.strStorageLocation,			CH.strSubLocation,
 				CH.strPurchasingGroup,			CH.strCreatedByNo,			CH.strContractNumber,			CH.dtmContractDate,
 				CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				'Empty' AS strNotificationType,
-				CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.strBasisComponent
+				CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
+				CH.strBasisComponent
 
 		FROM Header CH
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId 
@@ -73,7 +79,8 @@ AS
 				CH.strCurrency,					CH.strFutureMonth,			CH.strStorageLocation,			CH.strSubLocation,
 				CH.strPurchasingGroup,			CH.strCreatedByNo,			CH.strContractNumber,			CH.dtmContractDate,
 				CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				'Unsigned' AS strNotificationType,
-				CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.strBasisComponent
+				CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
+				CH.strBasisComponent
 
 		FROM Header CH
 		WHERE ISNULL(ysnSigned,0) = 0 
@@ -87,12 +94,13 @@ AS
 				CH.strCurrency,					CH.strFutureMonth,			CH.strStorageLocation,			CH.strSubLocation,
 				CH.strPurchasingGroup,			CH.strCreatedByNo,			CH.strContractNumber,			CH.dtmContractDate,
 				CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				'Unsubmitted' AS strNotificationType,
-				CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.strBasisComponent	
+				CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
+				CH.strBasisComponent	
 
 		FROM	Header CH
 		WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus='Submitted')
 		AND		CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE strERPPONumber IS NULL)
-
+		AND		CH.intContractHeaderId	NOT IN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intContractStatusId = 2)
 		UNION ALL
 
 		SELECT	CH.intContractHeaderId,			CH.intContractSeq,			CH.dtmStartDate,				CH.dtmEndDate,
@@ -102,7 +110,8 @@ AS
 				CH.strCurrency,					CH.strFutureMonth,			CH.strStorageLocation,			CH.strSubLocation,
 				CH.strPurchasingGroup,			CH.strCreatedByNo,			CH.strContractNumber,			CH.dtmContractDate,
 				CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				'Approved Not Sent' AS strNotificationType,
-				CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.strBasisComponent	
+				CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
+				CH.strBasisComponent	
 
 		FROM	Header CH
 		JOIN	tblSMTransaction	TN	ON	TN.intRecordId	=	CH.intContractHeaderId
