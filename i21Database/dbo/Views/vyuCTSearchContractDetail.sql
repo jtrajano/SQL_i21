@@ -42,8 +42,9 @@ AS
 
 			IC.strContractItemName,
 			IC.strContractItemNo,
-			U4.strUnitMeasure AS strWeightUOM,
-			IM.strItemNo,						
+			U4.strUnitMeasure				AS	strWeightUOM,
+			IM.strItemNo,		
+			IM.strShortName					AS	strItemShortName,		
 			FT.strFreightTerm,				
 			IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						

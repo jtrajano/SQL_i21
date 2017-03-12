@@ -1,4 +1,4 @@
-﻿CREATE VIEW dbo.vyuCTContractDetailGrid
+﻿CREATE VIEW dbo.vyuCTGridContractDetail
 AS
 	SELECT	CD.*,
 
@@ -54,7 +54,12 @@ AS
 			CQ.dblBulkQuantity ,
 			CQ.dblQuantity AS dblBagQuantity,
 			CAST(1 AS BIT) ysnItemUOMIdExist,
-			RM.strUnitMeasure strContainerUOM
+			RM.strUnitMeasure strContainerUOM,
+			SB.strSubLocationName,
+			SL.strName						AS	strStorageLocationName,		
+			LP.strCity						AS	strLoadingPoint,
+			DP.strCity						AS	strDestinationPoint,
+			AP.strApprovalStatus
 
 FROM		tblCTContractDetail			CD
 	 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=		CD.intContractHeaderId	
@@ -125,6 +130,25 @@ LEFT JOIN	(
 					WHERE	SA.intContractDetailId IS NOT NULL
 				) t
 				WHERE intRowNum = 1
-			)							QA	ON	QA.intContractDetailId			=		CD.intContractDetailId
-LEFT JOIN	tblLGContainerTypeCommodityQty	CQ	ON	CQ.intCommodityId = CH.intCommodityId AND CQ.intContainerTypeId = CD.intContainerTypeId AND CQ.intCommodityAttributeId = IM.intOriginId
-LEFT JOIN	tblICUnitMeasure				RM	ON	RM.intUnitMeasureId				=		CQ.intUnitMeasureId
+			)							QA	ON	QA.intContractDetailId			=	CD.intContractDetailId
+LEFT JOIN	tblLGContainerTypeCommodityQty	CQ	ON	CQ.intCommodityId			=	CH.intCommodityId 
+												AND CQ.intContainerTypeId		=	CD.intContainerTypeId 
+												AND CQ.intCommodityAttributeId	=	IM.intOriginId
+LEFT JOIN	tblICUnitMeasure				RM	ON	RM.intUnitMeasureId			=	CQ.intUnitMeasureId
+LEFT JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			
+LEFT JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intDestinationPortId		
+LEFT JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= CD.intSubLocationId 	
+LEFT JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	CD.intStorageLocationId		
+LEFT JOIN	(
+					SELECT * FROM 
+					(
+						SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY AP.intApprovalId DESC) intRowNum,
+								TR.intRecordId, AP.strStatus AS strApprovalStatus 
+						FROM	tblSMApproval		AP
+						JOIN	tblSMTransaction	TR	ON	TR.intTransactionId =	AP.intTransactionId
+						JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
+						WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
+													'ContractManagement.view.Amendments')
+					) t
+					WHERE intRowNum = 1
+			) AP ON AP.intRecordId = CD.intContractHeaderId					
