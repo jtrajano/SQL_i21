@@ -130,24 +130,38 @@ BEGIN TRY
 	END
 	ELSE IF (@intShipmentType = 2)
 	BEGIN
-		IF EXISTS (
-				SELECT 1
-				FROM tblLGLoad
-				WHERE intLoadShippingInstructionId = @intLoadId
-					AND intShipmentStatus <> 10
-				)
+		IF (@ysnCancel = 1)
 		BEGIN
-			RAISERROR ('Shipment has already been created for the shipping instruction. Cannot cancel.',11,1)
+			IF EXISTS (
+					SELECT 1
+					FROM tblLGLoad
+					WHERE intLoadShippingInstructionId = @intLoadId
+						AND intShipmentStatus <> 10
+					)
+			BEGIN
+				RAISERROR ('Shipment has already been created for the shipping instruction. Cannot cancel.',11,1)
+			END
+
+			UPDATE tblLGLoad
+			SET intShipmentStatus = 10
+				,ysnCancelled = @ysnCancel
+			WHERE intLoadId = @intLoadId
+
+			EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadId
+				,@strRowState = 'Delete'
+				,@intShipmentType = @intShipmentType
 		END
+		ELSE 
+		BEGIN
+			UPDATE tblLGLoad
+			SET intShipmentStatus = 1
+				,ysnCancelled = @ysnCancel
+			WHERE intLoadId = @intLoadId
 
-		UPDATE tblLGLoad
-		SET intShipmentStatus = 10
-			,ysnCancelled = @ysnCancel
-		WHERE intLoadId = @intLoadId
-
-		EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadId
-			,@strRowState = 'Delete'
-			,@intShipmentType = @intShipmentType
+			EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadId
+				,@strRowState = 'Delete'
+				,@intShipmentType = @intShipmentType
+		END
 	END
 END TRY
 
