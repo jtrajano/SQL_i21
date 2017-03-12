@@ -16,7 +16,7 @@ BEGIN TRY
 			@intContractStatusId	=	ISNULL(intContractStatusId,0),
 			@dblScheduleQty			=	ISNULL(dblScheduleQty,0),
 			@dblBalance				=	ISNULL(dblBalance,0)
-	FROM	vyuCTContractDetailGrid
+	FROM	vyuCTGridContractDetail
 	WHERE	intContractDetailId		=	@intContractDetailId
 
 	IF	@intContractStatusId	=	1 --Open

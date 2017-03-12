@@ -4022,7 +4022,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptCheckRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckSettlement.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettleStorage.sql" />
-    <Build Include="dbo\Views\vyuCTContractDetailGrid.sql" />
+    <Build Include="dbo\Views\vyuCTGridContractDetail.sql" />
     <Build Include="dbo\Views\vyuICLoadContainerReceiptContracts.sql" />
     <Build Include="dbo\Views\vyuAPPurchaseOrderPayables.sql" />
     <Build Include="dbo\Views\vyuAPReceiptPayables.sql" />
