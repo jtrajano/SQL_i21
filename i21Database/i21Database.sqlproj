@@ -5068,6 +5068,7 @@
     <Build Include="dbo\Functions\fnCTGetBasisComponentString.sql" />
     <Build Include="dbo\Views\vyuCTAlertNotificationCount.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTChangeContractStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
