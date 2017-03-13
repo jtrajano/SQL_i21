@@ -66,6 +66,7 @@ BEGIN
 					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
+					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
 					), 1, 2, '')
 		FROM vyuCTEntityToContact CH
@@ -103,6 +104,7 @@ BEGIN
 					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
+					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
 					), 1, 2, '')
 		FROM vyuCTEntityToContact CH
@@ -142,6 +144,7 @@ BEGIN
 					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
+					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
 					), 1, 2, '')
 		FROM vyuCTEntityToContact CH
@@ -181,6 +184,7 @@ BEGIN
 					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
+					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
 					), 1, 2, '')
 		FROM vyuCTEntityToContact CH
@@ -235,6 +239,7 @@ BEGIN
 					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
+					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
 					), 1, 2, '')
 		FROM vyuCTEntityToContact CH
@@ -274,6 +279,7 @@ BEGIN
 					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
 					WHERE intEntityId = @intEntityId
+					AND           ISNULL(strEmail,'') <> ''
 					FOR XML PATH('')
 					), 1, 2, '')
 		FROM vyuCTEntityToContact CH
