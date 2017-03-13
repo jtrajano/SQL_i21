@@ -23,7 +23,7 @@ BEGIN TRY
 			CASE WHEN ISDATE(RIGHT(DATUM,4) + SUBSTRING(DATUM,3,2) + LEFT(DATUM,2))=0 THEN NULL --sample date in ddmmyyyy format
 			ELSE (RIGHT(DATUM,4) + SUBSTRING(DATUM,3,2) + LEFT(DATUM,2)) + ' ' + (select STUFF(STUFF(REPLICATE('0',6-LEN(ISNULL(UZEIT,''))) + convert(VARCHAR(6),ISNULL(UZEIT,'')),3,0,':'),6,0,':')) END
 			,POSNR
-			,ITEMNUM
+			,RIGHT(ITEMNUM,8)
 			,QUANTITY
 			,UNIT
 			,BELNR
@@ -51,6 +51,8 @@ BEGIN TRY
 				BELNR NVARCHAR(100)
 			)
 	) Where strSessionId=@strSessionId
+
+	Select TOP 1 strPONo AS strInfo1, strItemNo + ' / ' +  ISNULL(strSampleNo,'') AS strInfo2 From tblIPPreShipmentSampleStage Where strSessionId=@strSessionId
 
 END TRY
 

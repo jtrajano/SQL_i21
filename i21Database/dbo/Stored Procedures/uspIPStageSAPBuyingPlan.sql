@@ -41,7 +41,7 @@ BEGIN TRY
 		,dblTotalDemand
 		,strUOM
 		)
-	SELECT RIGHT(materialNumber,18)
+	SELECT RIGHT(materialNumber,8)
 		,plantOrLocation
 		,calenderWeek
 		,plannedDemand

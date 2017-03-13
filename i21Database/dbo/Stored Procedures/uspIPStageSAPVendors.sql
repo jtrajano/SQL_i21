@@ -127,6 +127,8 @@ BEGIN TRY
 
 	Commit Tran
 
+	Select TOP 1 strAccountNo AS strInfo1,strName AS strInfo2 From @tblVendor
+
 END TRY
 
 BEGIN CATCH
