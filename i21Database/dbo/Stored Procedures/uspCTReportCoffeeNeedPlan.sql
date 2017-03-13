@@ -9,6 +9,10 @@ BEGIN
   DECLARE @FourthMonth nvarchar(100)
   DECLARE @FifthMonth nvarchar(100)
   DECLARE @SixthMonth nvarchar(100)
+  DECLARE @SeventhMonth NVARCHAR(100)
+  DECLARE @EighthMonth NVARCHAR(100)
+  DECLARE @NinthMonth NVARCHAR(100)
+  DECLARE @TenthMonth NVARCHAR(100)
 
   DECLARE @xmlDocumentId int
 
@@ -289,6 +293,55 @@ BEGIN
     ORDER BY [intColumnKey]
   END
 
+  IF @SixthMonth IS NOT NULL
+  BEGIN
+    SELECT TOP 7
+    @SeventhMonth =
+                   CASE
+                     WHEN [strColumnName] <> @SixthMonth THEN [strColumnName]
+                     ELSE NULL
+                   END
+    FROM @tblRequiredColumns
+    ORDER BY [intColumnKey]
+  END
+
+  IF @SeventhMonth IS NOT NULL
+  BEGIN
+    SELECT TOP 8
+    @EighthMonth =
+                   CASE
+                     WHEN [strColumnName] <> @SeventhMonth THEN [strColumnName]
+                     ELSE NULL
+                   END
+    FROM @tblRequiredColumns
+    ORDER BY [intColumnKey]
+  END
+
+  IF @EighthMonth IS NOT NULL
+  BEGIN
+    SELECT TOP 9
+    @NinthMonth =
+                   CASE
+                     WHEN [strColumnName] <> @EighthMonth THEN [strColumnName]
+                     ELSE NULL
+                   END
+    FROM @tblRequiredColumns
+    ORDER BY [intColumnKey]
+  END
+
+  IF @NinthMonth IS NOT NULL
+  BEGIN
+    SELECT TOP 10
+    @TenthMonth =
+                   CASE
+                     WHEN [strColumnName] <> @NinthMonth THEN [strColumnName]
+                     ELSE NULL
+                   END
+    FROM @tblRequiredColumns
+    ORDER BY [intColumnKey]
+  END
+
+
   SELECT
     @FirstMonth AS strFirstMonth,
     @SecondMonth AS strSecondMonth,
@@ -296,6 +349,10 @@ BEGIN
     @FourthMonth AS strFourthMonth,
     @FifthMonth AS strFifthMonth,
     @SixthMonth AS strSixthMonth,
+	@SeventhMonth AS strSeventhMonth,
+	@EighthMonth AS strEighthMonth,
+	@NinthMonth AS strNinthMonth,
+	@TenthMonth AS strTenthMonth,
     @IntCommodityId AS IntCommodityId,
     @IntUOMId AS IntUOMId,
     @strNeedPlan AS strNeedPlan,
