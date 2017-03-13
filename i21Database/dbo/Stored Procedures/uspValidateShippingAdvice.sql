@@ -36,6 +36,7 @@ FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 JOIN vyuLGLoadOpenContracts C ON LD.intPContractDetailId = C.intContractDetailId
 WHERE L.intLoadId = @intLoadId
+	AND ISNULL(C.ysnSampleRequired,0) = 1
 	AND C.intShipmentType = 1
 
 SELECT @intMinRecordId = MIN(intRecordId) FROM @tblContractSampleDetail
