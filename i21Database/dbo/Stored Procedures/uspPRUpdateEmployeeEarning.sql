@@ -4,7 +4,6 @@
 	,@ysnUpdateAmount BIT = 0
 	,@ysnUpdateHours BIT = 0
 	,@ysnUpdateAccount BIT = 0
-	,@ysnUpdateW2Code BIT = 0
 	,@ysnUpdateTaxCalc BIT = 0
 	,@ysnUpdateTaxes BIT = 0
 AS
@@ -15,7 +14,6 @@ BEGIN
 		SET strCalculationType = CASE WHEN (@ysnUpdateCalcType = 1) THEN Earning.strCalculationType ELSE EmpEarning.strCalculationType END,
 			dblAmount = CASE WHEN (@ysnUpdateAmount = 1) THEN Earning.dblAmount ELSE EmpEarning.dblAmount END,
 			dblDefaultHours = CASE WHEN (@ysnUpdateHours = 1) THEN Earning.dblDefaultHours ELSE EmpEarning.dblDefaultHours END,
-			strW2Code = CASE WHEN (@ysnUpdateW2Code = 1) THEN Earning.strW2Code ELSE EmpEarning.strW2Code END,
 			intAccountId = CASE WHEN (@ysnUpdateAccount = 1) THEN Earning.intAccountId ELSE EmpEarning.intAccountId END,
 			intTaxCalculationType = CASE WHEN (@ysnUpdateTaxCalc = 1) THEN Earning.intTaxCalculationType ELSE EmpEarning.intTaxCalculationType END,
 			dblRateAmount = CASE WHEN (@ysnUpdateAmount = 1) THEN
@@ -24,7 +22,8 @@ BEGIN
 									EmpEarning.dblAmount * (CASE WHEN EmpEarning.strCalculationType IN ('Rate Factor', 'Overtime') THEN ISNULL(Link.dblAmount, 1) ELSE 1 END)
 								 END,
 			intEmployeeEarningLinkId = CASE WHEN (@ysnUpdateCalcType = 1 AND Earning.strCalculationType NOT IN ('Rate Factor', 'Overtime')) THEN NULL 
-										ELSE EmpEarning.intEmployeeEarningLinkId END
+										ELSE EmpEarning.intEmployeeEarningLinkId END,
+			strW2Code = Earning.strW2Code
 		FROM tblPRTypeEarning Earning 
 			INNER JOIN tblPREmployeeEarning EmpEarning
 				ON Earning.intTypeEarningId = EmpEarning.intTypeEarningId
@@ -38,11 +37,11 @@ BEGIN
 		SET strCalculationType = CASE WHEN (@ysnUpdateCalcType = 1) THEN Earning.strCalculationType ELSE EmpEarning.strCalculationType END,
 			dblAmount = CASE WHEN (@ysnUpdateAmount = 1) THEN Earning.dblAmount ELSE EmpEarning.dblAmount END,
 			dblDefaultHours = CASE WHEN (@ysnUpdateHours = 1) THEN Earning.dblDefaultHours ELSE EmpEarning.dblDefaultHours END,
-			strW2Code = CASE WHEN (@ysnUpdateW2Code = 1) THEN Earning.strW2Code ELSE EmpEarning.strW2Code END,
 			intAccountId = CASE WHEN (@ysnUpdateAccount = 1) THEN Earning.intAccountId ELSE EmpEarning.intAccountId END,
 			intTaxCalculationType = CASE WHEN (@ysnUpdateTaxCalc = 1) THEN Earning.intTaxCalculationType ELSE EmpEarning.intTaxCalculationType END,
 			intTemplateEarningLinkId = CASE WHEN (@ysnUpdateCalcType = 1 AND Earning.strCalculationType NOT IN ('Rate Factor', 'Overtime')) THEN NULL 
-										ELSE EmpEarning.intTemplateEarningLinkId END
+										ELSE EmpEarning.intTemplateEarningLinkId END,
+			strW2Code = Earning.strW2Code
 		FROM tblPRTypeEarning Earning 
 			INNER JOIN tblPRTemplateEarning EmpEarning
 				ON Earning.intTypeEarningId = EmpEarning.intTypeEarningId
