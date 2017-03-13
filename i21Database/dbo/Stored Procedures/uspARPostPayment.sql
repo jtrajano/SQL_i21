@@ -93,7 +93,7 @@ DECLARE @totalRecords INT
 DECLARE @intWriteOff INT
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 DECLARE @intWriteOffAccount INT
-DECLARE @intCFAccount = INT
+DECLARE @intCFAccount INT
 
 SET @WriteOffAccount = NULL
 SET @IncomeInterestAccount = NULL
@@ -1539,6 +1539,7 @@ IF @post = 1
 		WHERE
 			B.dblDiscount <> 0
 			AND B.dblPayment <> 0
+			AND B.dblAmountDue = 0
 		GROUP BY
 			A.intPaymentId
 			,A.strRecordNumber
@@ -1588,6 +1589,7 @@ IF @post = 1
 		WHERE
 			B.dblInterest <> 0
 			AND B.dblPayment <> 0
+			AND B.dblAmountDue = 0
 		GROUP BY
 			A.intPaymentId
 			,A.strRecordNumber
@@ -1691,6 +1693,7 @@ IF @post = 1
 		WHERE
 			B.dblDiscount <> 0
 			AND B.dblPayment <> 0
+			AND B.dblAmountDue = 0
 		GROUP BY
 			A.intPaymentId
 			,A.strRecordNumber
@@ -1740,6 +1743,7 @@ IF @post = 1
 		WHERE
 			B.dblInterest <> 0
 			AND B.dblPayment <> 0
+			AND B.dblAmountDue = 0
 		GROUP BY
 			A.intPaymentId
 			,A.strRecordNumber
