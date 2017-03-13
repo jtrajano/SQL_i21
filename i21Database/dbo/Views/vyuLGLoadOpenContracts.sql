@@ -87,6 +87,7 @@ SELECT CD.intContractDetailId
 	,CD.intStorageLocationId
 	,intShipmentType = 1
 	,CD.strERPPONumber
+	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -100,6 +101,7 @@ JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
 			END
 		)
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
@@ -152,6 +154,7 @@ SELECT CD.intContractDetailId
 			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 			WHERE LD.intPContractDetailId = CD.intContractDetailId
 				AND L.intShipmentType = 2
+				AND ISNULL(L.ysnCancelled,0) = 0 
 			), 0) AS dblUnLoadedQuantity
 	,CH.intContractTypeId intPurchaseSale
 	,CH.intEntityId
@@ -169,6 +172,7 @@ SELECT CD.intContractDetailId
 			 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 			 WHERE CD.intContractDetailId = (CASE WHEN CH.intContractTypeId = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END)
 				 AND L.intShipmentType = 2
+				 AND ISNULL(L.ysnCancelled,0) = 0 
 			 ), 0) AS dblScheduleQty
 	,CH.strCustomerContract
 	,ISNULL(CD.dblBalance, 0) AS dblBalance
@@ -192,6 +196,7 @@ SELECT CD.intContractDetailId
 										JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 										WHERE CD.intContractDetailId = (CASE WHEN CH.intContractTypeId = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END)
 											AND L.intShipmentType = 2
+											AND ISNULL(L.ysnCancelled,0) = 0 
 										), 0) > 0
 								)
 							OR (CH.ysnUnlimitedQuantity = 1)
@@ -240,6 +245,7 @@ SELECT CD.intContractDetailId
 	,CD.intStorageLocationId
 	,intShipmentType = 2
 	,CD.strERPPONumber
+	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -253,6 +259,7 @@ JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
 			END
 		)
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
@@ -341,3 +348,4 @@ GROUP BY CD.intContractDetailId
 	,CLSL.strSubLocationName
 	,SL.strName
 	,CD.intStorageLocationId
+	,WG.ysnSample
