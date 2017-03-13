@@ -65,7 +65,8 @@ Declare @intMinHeader				INT,
 		@strMVessel					NVARCHAR(200),
 		@strMVoyageNumber			NVARCHAR(200),
 		@intPositionId				INT,
-		@strPositionType			NVARCHAR(50)
+		@strPositionType			NVARCHAR(50),
+		@str10Zeros					NVARCHAR(50)='0000000000'
 
 Declare @tblDetail AS Table
 (
@@ -367,7 +368,7 @@ Begin
 
 			Set @strItemXml += '<E1EDL24 SEGMENT="1">'
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strDeliveryItemNo,'') + '</POSNR>' 
-			Set @strItemXml += '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
+			Set @strItemXml += '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
 			Set @strItemXml += '<ARKTX>'  +  ISNULL(@strItemDesc,'') + '</ARKTX>' 
 			If ISNULL(@ysnBatchSplit,0)=0
 				Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
@@ -455,7 +456,7 @@ Begin
 					Select @strContainerXml=@strContainerXml
 							+ '<E1EDL24 SEGMENT="1">'
 							+ '<POSNR>' +   ISNULL(lc.strExternalContainerId,'') + '</POSNR>' 
-							+ '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
+							+ '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
 							+ '<ARKTX>'  +  ISNULL(@strItemDesc,'') + '</ARKTX>' 
 							+ '<WERKS>'  +  '' + '</WERKS>' 
 							+ '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 

@@ -30,6 +30,7 @@ DECLARE @intLoadId INT
 DECLARE @intReceiptId INT
 DECLARE @strDeliveryType NVARCHAR(50)
 DECLARE @strPartnerNo NVARCHAR(100)
+DECLARE @strContractSeq NVARCHAR(50)
 
 Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -144,8 +145,10 @@ Begin
 			Update tblCTContractFeed Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')=''
 
+			Select @strContractSeq=CONVERT(VARCHAR,intContractSeq) From tblCTContractDetail Where intContractDetailId=@strTrackingNo
+
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
-			Values(@strMesssageType,'Success',@strRefNo,@strParam)
+			Values(@strMesssageType,'Success',@strRefNo + ' / ' + ISNULL(@strContractSeq,''),@strParam)
 		End
 
 		If @strStatus NOT IN (52,53) --Error
@@ -160,8 +163,10 @@ Begin
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')='Awt Ack'
 
+			Select @strContractSeq=CONVERT(VARCHAR,intContractSeq) From tblCTContractDetail Where intContractDetailId=@strTrackingNo
+
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
-			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
+			Values(@strMesssageType,@strMessage,@strRefNo + ' / ' + ISNULL(@strContractSeq,''),@strParam)
 		End
 	End
 

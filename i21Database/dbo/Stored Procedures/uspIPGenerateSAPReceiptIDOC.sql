@@ -34,7 +34,8 @@ Declare @intMinHeader				INT,
 		@intLoadContainerId			INT,
 		@intNoOfContainer			INT,
 		@strReceiptNo				NVARCHAR(50),
-		@ysnWMMBXY					bit=1
+		@ysnWMMBXY					bit=1,
+		@str10Zeros					NVARCHAR(50)='0000000000'
 
 Declare @tblReceiptHeader AS Table
 (
@@ -200,7 +201,7 @@ Begin
 		If UPPER(@strCommodityCode)='COFFEE' AND @ysnWMMBXY=1
 		Begin
 			Set @strItemXml += '<E1MBXYI SEGMENT="1">'
-			Set @strItemXml += '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
+			Set @strItemXml += '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
 			Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
 			Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 			Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
@@ -217,7 +218,7 @@ Begin
 		Begin			
 			Set @strItemXml += '<E1EDL24 SEGMENT="1">'
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strDeliveryItemNo,'') + '</POSNR>' 
-			Set @strItemXml += '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
+			Set @strItemXml += '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
 			If ISNULL(@ysnBatchSplit,0)=0
 				Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
 			Else

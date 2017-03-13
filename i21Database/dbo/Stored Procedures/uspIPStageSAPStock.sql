@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPStageSAPStock]
 	@strXml nvarchar(max),
-	@strSessionId nvarchar(50) = '' out
+	@strSessionId nvarchar(50) = '' out,
+	@strInfo1 NVARCHAR(MAX)='' OUT,
+	@strInfo2 NVARCHAR(MAX)='' OUT
 AS
 
 BEGIN TRY
@@ -60,9 +62,11 @@ BEGIN TRY
 
 	--Add to Staging tables
 	Insert into tblIPStockStage(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblQuantity,strSessionId)
-	Select '0000000000' + strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblQuantity,@strSessionId
+	Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblQuantity,@strSessionId
 	From @tblStock Where (UPPER(strStockType) like 'WB%' OR UPPER(strStockType) like 'KB%' OR UPPER(strStockType) like 'LK%')
 	AND (RIGHT(strItemNo,8) like '496%' OR RIGHT(strItemNo,8) like '491%')
+
+	Select TOP 1 @strInfo1=strItemNo,@strInfo2=strSubLocation From @tblStock
 
 END TRY
 
