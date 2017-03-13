@@ -187,8 +187,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
-                                                                        flex: 1,
                                                                         quantityField: true,
+                                                                        flex: 1,
                                                                         itemId: 'txtDecimalsOnDpr',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Decimals on DPR',
@@ -268,8 +268,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
-                                                                        flex: 1,
                                                                         currencyField: true,
+                                                                        flex: 1,
                                                                         itemId: 'txtPriceChecksMax',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Max',
@@ -482,8 +482,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
-                                                                        flex: 1,
                                                                         quantityField: true,
+                                                                        flex: 1,
                                                                         itemId: 'txtMaximumUnder',
                                                                         margin: '0 0 0 15',
                                                                         fieldLabel: 'Max Under',
@@ -493,8 +493,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
-                                                                        flex: 1,
                                                                         quantityField: true,
+                                                                        flex: 1,
                                                                         itemId: 'txtMaximumOver',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Max Over',
@@ -548,18 +548,50 @@ Ext.define('Inventory.view.Commodity', {
                                                         ],
                                                         columns: [
                                                             {
-                                                                xtype: 'griduomcolumn',
-                                                                itemId: 'colUnitQty',
-                                                                align: 'right',
-                                                                dataIndex: 'dblUnitQty',
-                                                                text: 'Unit Qty',
-                                                                flex: 1,
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colUOMCode',
+                                                                dataIndex: 'strFieldName',
+                                                                text: 'UOM',
+                                                                flex: 3,
                                                                 editor: {
-                                                                    xtype: 'griduomfield',
-                                                                    valueField: 'intUnitMeasureId',
+                                                                    xtype: 'gridcombobox',
+                                                                    columns: [
+                                                                        {
+                                                                            dataIndex: 'intUnitMeasureId',
+                                                                            dataType: 'numeric',
+                                                                            text: 'Unit Of Measure ID',
+                                                                            hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strUnitMeasure',
+                                                                            dataType: 'string',
+                                                                            text: 'Unit Measure',
+                                                                            flex: 1
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strUnitType',
+                                                                            dataType: 'string',
+                                                                            text: 'Unit Type',
+                                                                            flex: 1
+                                                                        }
+                                                                    ],
+                                                                    itemId: 'cboUOM',
                                                                     displayField: 'strUnitMeasure',
-                                                                    itemId: 'gumUnitQty',
-                                                                    readOnly: false
+                                                                    valueField: 'strUnitMeasure'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                itemId: 'colUOMUnitQty',
+                                                                align: 'right',
+                                                                dataIndex: 'strFieldName',
+                                                                text: 'Unit Qty',
+                                                                flex: 3,
+                                                                editor: {
+                                                                    xtype: 'numberfield',
+                                                                    quantityField: true,
+                                                                    fieldStyle: 'text-align:right',
+                                                                    hideTrigger: true
                                                                 }
                                                             },
                                                             {
