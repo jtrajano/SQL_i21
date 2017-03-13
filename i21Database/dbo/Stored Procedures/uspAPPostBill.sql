@@ -66,6 +66,13 @@ DECLARE @validBillIds NVARCHAR(MAX)
 DECLARE @billIds NVARCHAR(MAX)
 DECLARE @totalRecords INT
 
+-- Get the functional currency
+BEGIN 
+	DECLARE @intFunctionalCurrencyId  AS INT 
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+END 
+
+
 SET @recapId = '1'
 --=====================================================================================================================================
 -- 	POPULATE JOURNALS TO POST TEMPORARY TABLE
@@ -214,9 +221,14 @@ SELECT
 		,[dblQty] 							=	CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END 
 		,[dblUOMQty] 						=	itemUOM.dblUnitQty
 		,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
-		,[dblNewCost] 						=	CASE WHEN (E2.dblForexRate != B.dblRate) THEN costAdjust.dblCost ELSE B.dblCost END --Convert to Functional Currency Rate was change.
-		,[intCurrencyId] 					=	A.intCurrencyId
-		,[dblExchangeRate] 					=	0
+		,[dblNewCost] 						=	CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 
+														-- Convert the voucher cost to the functional currency. 
+														dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) * ISNULL(B.dblRate, 0) 
+													ELSE 
+														dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost)
+												END 
+		,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
+		,[dblExchangeRate] 					=	1 -- Exchange rate is always 1. 
 		,[intTransactionId]					=	A.intBillId
 		,[intTransactionDetailId] 			=	B.intBillDetailId
 		,[strTransactionId] 				=	A.strBillId
@@ -255,18 +267,16 @@ FROM	tblAPBill A INNER JOIN tblAPBillDetail B
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 		LEFT JOIN tblICItemUOM receiptCostUOM
 			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
-		OUTER APPLY (
-			SELECT (E2.dblUnitCost * E2.dblForexRate) - (dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) * B.dblRate) AS dblCost
-		) costAdjust
-
 
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NULL 
 		-- Compare the cost used in Voucher against the IR cost. 
 		-- Compare the ForexRate use in Voucher against IR Rate
 		-- If there is a difference, add it to @adjustedEntries table variable. 
-		AND dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) != E2.dblUnitCost
-		OR E2.dblForexRate != B.dblRate
+		AND (
+			dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) <> E2.dblUnitCost
+			OR E2.dblForexRate <> B.dblRate
+		) 
 		
 IF ISNULL(@post,0) = 1
 BEGIN

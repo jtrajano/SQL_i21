@@ -122,7 +122,8 @@ DECLARE	@tOut_intInventoryTransactionId AS INT
 
 DECLARE @LoopTransactionTypeId AS INT 
 		,@CostAdjustmentTransactionType AS INT -- = @intTransactionTypeId		
-		
+		,@strNewCost AS NVARCHAR(50) 
+		,@strDescription AS NVARCHAR(255) 
 
 SELECT  @tOut_intInventoryTransactionId = t.intInventoryTransactionId
 		,@tOut_intItemId = t.intItemId 
@@ -154,6 +155,11 @@ BEGIN
 	
 	-- Calculate the Inv Adjust value.  
 	SET @InvAdjustValue = dbo.fnMultiply(@AdjustCost, @tOut_dblQty) 
+
+	SET @strNewCost = CONVERT(NVARCHAR, CAST(@InvAdjustValue AS MONEY), 1)
+	SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @tOut_strTransactionId + '.'
+	FROM	tblICItem i 
+	WHERE	i.intItemId = @tOut_intItemId
 
 	---------------------------------------------------------------------------
 	-- If stock was shipped or reduced from adj, then do the "Revalue Sold". 
@@ -198,7 +204,10 @@ BEGIN
 			,@intCostingMethod						= @AVERAGECOST
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			,@intFobPointId							= @tOut_intFobPointId 
-			,@intInTransitSourceLocationId			= @tOut_intInTransitSourceLocationId
+			,@intInTransitSourceLocationId			= @tOut_intInTransitSourceLocationId 
+			,@intForexRateTypeId					= NULL
+			,@dblForexRate							= 1
+			,@strDescription						= @strDescription		
 	END 
 
 	---------------------------------------------------------------------------
@@ -271,7 +280,10 @@ BEGIN
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			,@intFobPointId							= @tOut_intFobPointId 
 			,@intInTransitSourceLocationId			= @tOut_intInTransitSourceLocationId
-					
+			,@intForexRateTypeId					= NULL
+			,@dblForexRate							= 1
+			,@strDescription						= @strDescription
+				
 		-----------------------------------------------------------------------------------------------------------
 		-- 9. Get the 'produced/transferred/in-transit item'. Insert it in a temporary table for later processing. 
 		-----------------------------------------------------------------------------------------------------------
