@@ -303,7 +303,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 flex: 1.5,
                                                                 itemId: 'cboCustomer',
                                                                 margin: '0 5 0 0',
-                                                                fieldLabel: 'Customer<font color="red"> *</font>',
+                                                                fieldLabel: 'Customer',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 60,
                                                                 displayField: 'strName',
@@ -546,7 +546,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 ],
                                                                                 itemId: 'cboShipToAddress',
                                                                                 fieldLabel: 'Ship To',
-                                                                                labelWidth: 50,
+                                                                                labelWidth: 60,
                                                                                 displayField: 'strLocationName',
                                                                                 valueField: 'intEntityLocationId'
                                                                             },
@@ -581,7 +581,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 hidden: true,
                                                                                 itemId: 'cboShipToCompanyAddress',
                                                                                 fieldLabel: 'Ship To',
-                                                                                labelWidth: 50,
+                                                                                labelWidth: 60,
                                                                                 displayField: 'strLocationName',
                                                                                 valueField: 'intCompanyLocationId'
                                                                             },
@@ -589,8 +589,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 xtype: 'textareafield',
                                                                                 flex: 1,
                                                                                 itemId: 'txtShipToAddress',
-                                                                                margin: '-6 0 0 55',
-                                                                                labelWidth: 60,
+                                                                                margin: '-6 0 0 65',
+                                                                                labelWidth: 80,
                                                                                 grow: true
                                                                             }
                                                                         ]

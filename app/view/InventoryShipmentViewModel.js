@@ -516,6 +516,30 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             default:  
                 return false;  
             }              
-        }       
+        },
+        setCustomerFieldLabel: function(get) {
+            var win = this.getView();
+            var cboCustomer = win.down('#cboCustomer');
+        
+            if (get('current.intOrderType') == 3) {
+                cboCustomer.setFieldLabel('Customer');
+            }
+            else {
+                cboCustomer.setFieldLabel('Customer ' + '<span style="color:red">*</span>');
+            }
+        },
+
+        setShipToFieldLabel: function(get) {
+            var win = this.getView();
+            var cboShipToAddress = win.down('#cboShipToAddress');
+            var cboShipToCompanyAddress = win.down('#cboShipToCompanyAddress');
+        
+            if (get('current.intOrderType') == 3) {
+                cboShipToCompanyAddress.setFieldLabel('Ship To <span style="color:red">*</span>');
+            }
+            else {
+                cboShipToAddress.setFieldLabel('Ship To <span style="color:red">*</span>');
+            }
+        }   
     }
 });

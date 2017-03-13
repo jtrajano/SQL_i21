@@ -248,6 +248,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 value: '{current.intEntityCustomerId}',
                 store: '{customer}',
                 readOnly: '{current.ysnPosted}',
+                fieldLabel: '{setCustomerFieldLabel}',
                 defaultFilters: [{
                     column: 'ysnActive',
                     value: true
@@ -267,7 +268,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     column: 'intEntityId',
                     value: '{current.intEntityCustomerId}'
                 }],
-                hidden: '{hideShipToLocation}'
+                hidden: '{hideShipToLocation}',
+                fieldLabel: '{setShipToFieldLabel}'
             },
             cboShipToCompanyAddress: {
                 value: '{current.intShipToCompanyLocationId}',
@@ -279,7 +281,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     conjunction: 'and',
                     condition: 'noteq'
                 }],
-                hidden: '{hideShipToCompanyLocation}'
+                hidden: '{hideShipToCompanyLocation}',
+                fieldLabel: '{setShipToFieldLabel}'
             },
             txtShipToAddress: '{current.strShipToAddress}',
             txtDeliveryInstructions: {
