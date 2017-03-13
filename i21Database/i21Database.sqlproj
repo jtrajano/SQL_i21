@@ -5111,6 +5111,7 @@
     <Build Include="dbo\Views\vyuRKBasisTransactionNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MBasisTransactionValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MBasisTransactionImport.sql" />
+    <Build Include="dbo\Tables\tblSMApprovalAmendmentLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
