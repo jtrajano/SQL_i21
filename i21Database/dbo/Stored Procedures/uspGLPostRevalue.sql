@@ -483,6 +483,10 @@ BEGIN TRY
 			--	,[strTransactionForm]
 			--	,strModuleName
 			--FROM @ReversePostGLEntries
+			
+			IF EXISTS(Select TOP 1 1 FROM @PostGLEntries WHERE intAccountId IS NULL)
+				RAISERROR ('Forex Gain/Loss account setting is required in Company Configuration screen.',11,1)
+
 			EXEC uspGLPostRecap @RecapTable, @intEntityId
 		END
 		if @ysnRecap = 0
