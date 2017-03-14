@@ -9,6 +9,15 @@
  @intForecastWeeklyConsumptionUOMId INTEGER = null   
 AS
 
+if isnull(@intForecastWeeklyConsumptionUOMId,0)=0
+BEGIN
+set @intForecastWeeklyConsumption = 1
+END
+If isnull(@intForecastWeeklyConsumptionUOMId,0) = 0
+BEGIN
+set @intForecastWeeklyConsumptionUOMId = @intUOMId
+END
+
 DECLARE @strRiskView nvarchar(50) 
 SELECT @strRiskView = strRiskView FROM tblRKCompanyPreference 
 

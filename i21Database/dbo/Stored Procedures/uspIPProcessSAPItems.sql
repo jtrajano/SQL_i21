@@ -48,6 +48,8 @@ Set @ysnDeleted=0
 Select @intStageItemId=intStageItemId,@strItemNo=strItemNo,@strItemType=strItemType,@strSKUItemNo=strSKUItemNo,
 @strStockUOM=strStockUOM,@ysnDeleted=ISNULL(ysnDeleted,0),@strDescription=strDescription From tblIPItemStage Where intStageItemId=@intMinItem
 
+Select @strItemNo AS strInfo1,@strItemType AS strInfo2
+
 Select @intCategoryId=intCategoryId From tblICCategory Where strCategoryCode=@strItemType
 
 If @strItemType='ZMPN' --Contract Item

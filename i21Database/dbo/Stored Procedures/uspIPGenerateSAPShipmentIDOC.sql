@@ -51,7 +51,8 @@ Declare @intMinHeader				INT,
 		@dtmETAPOD					DATETIME,
 		@intNoOfContainer			INT,
 		@intExternalContainerNo		INT,
-		@strAdviceNumber			NVARCHAR(100)
+		@strAdviceNumber			NVARCHAR(100),
+		@str10Zeros					NVARCHAR(50)='0000000000'
 
 Declare @tblDetail AS Table
 (
@@ -283,7 +284,7 @@ Begin
 
 			Set @strItemXml += '<E1EDL24 SEGMENT="1">'
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strDeliveryItemNo,'') + '</POSNR>' 
-			Set @strItemXml += '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
+			Set @strItemXml += '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
 			If ISNULL(@ysnBatchSplit,0)=0
 				Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
 			Else
@@ -293,7 +294,7 @@ Begin
 				Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
 			Else
 				Set @strItemXml += '<CHARG>'  +  '' + '</CHARG>' 
-			Set @strItemXml += '<KDMAT>'  +  ISNULL(@strItemNo,'') + '</KDMAT>' 
+			Set @strItemXml += '<KDMAT>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</KDMAT>' 
 			If ISNULL(@ysnBatchSplit,0)=0
 				Set @strItemXml += '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblNetWeight)),'') + '</LFIMG>'
 			Else
@@ -347,11 +348,11 @@ Begin
 					Select @strContainerXml=@strContainerXml
 							+ '<E1EDL24 SEGMENT="1">'
 							+ '<POSNR>' + ISNULL(CONVERT(VARCHAR,lc.strExternalContainerId),'') + '</POSNR>' 
-							+ '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
+							+ '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
 							+ '<WERKS>'  +  '' + '</WERKS>' 
 							+ '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 							+ '<CHARG>'  +  ISNULL(lc.strContainerNo,'') + '</CHARG>' 
-							+ '<KDMAT>'  +  ISNULL(@strItemNo,'') + '</KDMAT>' 
+							+ '<KDMAT>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</KDMAT>' 
 							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),CASE WHEN UPPER(lc.strRowState)='DELETE' Then 0 ELSE lc.dblNetWt END)),'') + '</LFIMG>' 
 							+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(lc.strWeightUOM,'')) + '</VRKME>' 
 							+ '<HIPOS>' + ISNULL(@strDeliveryItemNo,'') + '</HIPOS>' 
@@ -390,7 +391,7 @@ Begin
 	End --Loop Detail End
 
 	--For Tea
-	If UPPER(@strCommodityCode)='TEA'
+	If UPPER(@strCommodityCode)='TEA' AND Exists (Select intConcurrencyId From tblLGLoadContainer Where intLoadId=@intLoadId AND intConcurrencyId<=1) 
 	Begin
 			Set @strContainerXml=''
 			Set @intNoOfContainer=1

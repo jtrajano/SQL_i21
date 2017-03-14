@@ -29,7 +29,7 @@ BEGIN TRY
 				,@fromValue = @strFromValue
 				,@toValue = @strToValue
 		
-		IF @strScreenName = 'Contract'
+		IF @strScreenName = 'ContractManagement.view.Contract'
 		BEGIN
 			UPDATE tblCTContractHeader SET ysnMailSent = 1 WHERE intContractHeaderId = @intId
 		END

@@ -56,6 +56,7 @@ BEGIN
 		, dblTrlSign
 		, dblTrlUnitPrice
 		, dblTrlLineTot
+		, strTrlUPC
 		, strTrlDesc
 		, strTrPaylineType
 		, intTrPaylineSysId
@@ -119,6 +120,7 @@ BEGIN
 		, trlSign
 		, trlUnitPrice
 		, trlLineTot
+		, trlUPC
 		, trlDesc
 		, trPaylinetype
 		, trPaylinesysid

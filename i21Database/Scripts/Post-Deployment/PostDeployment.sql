@@ -213,7 +213,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
 :r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
 :r .\AR\DefaultData\27_RenamePricingForContracts.sql
-:r .\AR\DefaultData\28_RemoveZeroTransactionFromCMUndepositedFund.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql

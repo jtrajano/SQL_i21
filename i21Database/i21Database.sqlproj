@@ -5102,7 +5102,6 @@
     <Build Include="dbo\Functions\fnCTGetBasisComponentString.sql" />
     <Build Include="dbo\Views\vyuCTAlertNotificationCount.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\28_RemoveZeroTransactionFromCMUndepositedFund.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTChangeContractStatus.sql" />
     <Build Include="dbo\Tables\tblRKM2MTransactionImport.sql" />
@@ -5111,6 +5110,7 @@
     <Build Include="dbo\Views\vyuRKBasisTransactionNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MBasisTransactionValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MBasisTransactionImport.sql" />
+    <Build Include="dbo\Tables\tblSMApprovalAmendmentLog.sql" />
     <Build Include="dbo\Views\vyuICGetSubLocationBins.sql" />
     <Build Include="dbo\Views\vyuICGetSubLocationBinDetails.sql" />
   </ItemGroup>

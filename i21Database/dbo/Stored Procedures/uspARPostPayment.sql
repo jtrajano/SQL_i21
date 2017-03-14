@@ -1614,6 +1614,7 @@ IF @post = 1
 		WHERE
 			B.dblDiscount <> 0
 			AND B.dblPayment <> 0
+			AND B.dblAmountDue = 0
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -1679,6 +1680,7 @@ IF @post = 1
 		WHERE
 			B.dblInterest <> 0
 			AND B.dblPayment <> 0
+			AND B.dblAmountDue = 0
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -1891,6 +1893,7 @@ IF @post = 1
 		WHERE
 			B.dblDiscount <> 0
 			AND B.dblPayment <> 0
+			AND B.dblAmountDue = 0
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -1956,6 +1959,7 @@ IF @post = 1
 		WHERE
 			B.dblInterest <> 0
 			AND B.dblPayment <> 0
+			AND B.dblAmountDue = 0
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -2176,6 +2180,7 @@ IF @recap = 1
 IF @recap = 0
 	BEGIN
 		BEGIN TRY 
+			--SELECT * FROM @GLEntries
 			EXEC dbo.uspGLBookEntries @GLEntries, @post
 		END TRY
 		BEGIN CATCH

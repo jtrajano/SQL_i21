@@ -8,6 +8,15 @@
         @intForecastWeeklyConsumption INTEGER = null,
         @intForecastWeeklyConsumptionUOMId INTEGER = null   
 AS  
+ 
+if isnull(@intForecastWeeklyConsumptionUOMId,0)=0
+BEGIN
+set @intForecastWeeklyConsumption = 1
+END
+If isnull(@intForecastWeeklyConsumptionUOMId,0) = 0
+BEGIN
+set @intForecastWeeklyConsumptionUOMId = @intUOMId
+END 
   
 DECLARE @strUnitMeasure nvarchar(50)  
 DECLARE @dtmFutureMonthsDate datetime  
@@ -49,16 +58,18 @@ DECLARE @List as Table (
      intFutOptTransactionHeaderId int       
      )  
 
-SELECT  DISTINCT 
-  cv.strFutureMonth,  
+select * INTO #ContractTransaction from (     
+SELECT cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
-  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,CASE WHEN @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,CASE WHEN @ysnIncludeInventoryHedge = 0 
+												then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) AS dblNoOfContract,  
   LEFT(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, 
   dtmStartDate as TransactionDate,  
   strContractType as TranType, 
   strEntityName  as CustVendor,  
   dblNoOfLots as dblNoOfLot,
-  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity,
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,case when @ysnIncludeInventoryHedge = 0 
+											then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   ,intPricingTypeId
   ,cv.strContractType
@@ -67,19 +78,104 @@ SELECT  DISTINCT
   ,cv.intFutureMarketId
   ,dtmFutureMonthsDate
   ,ysnExpired
-	   	 INTO #ContractTransaction
   FROM vyuCTContractDetailView cv  
-  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId 
   JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
-  JOIN tblICItem ic on ic.intItemId=cv.intItemId and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
-																		 JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
-																		 AND ici.intProductLineId=pl.intCommodityProductLineId)  
-  LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  
+  JOIN tblICItem ic on ic.intItemId=cv.intItemId 
+				and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
+										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
+										AND ici.intProductLineId=pl.intCommodityProductLineId)  
+  LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  	
   LEFT JOIN tblARProductType pt on pt.intProductTypeId=ic.intProductTypeId
   LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId AND um.intUnitMeasureId=cv.intUnitMeasureId
-  WHERE @intCommodityId=cv.intCommodityId and cv.intFutureMarketId=@intFutureMarketId
+  WHERE @intCommodityId=cv.intCommodityId and cv.intFutureMarketId=@intFutureMarketId and  cv.intContractStatusId <> 3 and cv.intPricingTypeId=1
+union
+--Parcial Priced
+SELECT strFutureMonth,strAccountNumber,dblFixedQty as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblFixedLots dblNoOfLot,dblFixedQty,
+intContractHeaderId,intFutOptTransactionHeaderId,intPricingTypeId,strContractType,intCommodityId,intCompanyLocationId,intFutureMarketId,dtmFutureMonthsDate,ysnExpired 
+FROM (
+SELECT cv.strFutureMonth,  
+  strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
+  0 AS dblNoOfContract,  
+  LEFT(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, 
+  dtmStartDate as TransactionDate,  
+  strContractType as TranType, 
+  strEntityName  as CustVendor,  
+  dblNoOfLots as dblNoOfLot,
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,case when @ysnIncludeInventoryHedge = 0 
+											then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity,
+  cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
+  ,1 intPricingTypeId
+  ,cv.strContractType
+  ,cv.intCommodityId
+  ,cv.intCompanyLocationId
+  ,cv.intFutureMarketId
+  ,dtmFutureMonthsDate
+  ,ysnExpired
+  ,isnull((SELECT sum(dblLotsFixed) dblNoOfLots FROM tblCTPriceFixation pf 
+		where pf.intContractHeaderId =cv.intContractHeaderId and pf.intContractDetailId=cv.intContractDetailId),0) dblFixedLots
+  ,isnull((SELECT  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,sum(dblQuantity)) dblQuantity FROM tblCTPriceFixation pf
+		 join tblCTPriceFixationDetail pd on pf.intPriceFixationId=pd.intPriceFixationId	 
+		where pf.intContractHeaderId =cv.intContractHeaderId and pf.intContractDetailId=cv.intContractDetailId),0) dblFixedQty
+  FROM vyuCTContractDetailView cv  
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId 
+  JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
+  JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
+  JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
+  JOIN tblICItem ic on ic.intItemId=cv.intItemId 
+				and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
+										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
+										AND ici.intProductLineId=pl.intCommodityProductLineId)  
+  LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  	
+  LEFT JOIN tblARProductType pt on pt.intProductTypeId=ic.intProductTypeId
+  LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId AND um.intUnitMeasureId=cv.intUnitMeasureId
+  WHERE @intCommodityId=cv.intCommodityId and cv.intFutureMarketId=@intFutureMarketId AND cv.intContractStatusId <> 3  and intPricingTypeId <> 1
+  )t where isnull(dblNoOfLot,0)-isnull(dblFixedLots,0) <> 0
+
+UNION  
+--Parcial UnPriced
+  SELECT strFutureMonth,strAccountNumber,dblQuantity-dblFixedQty as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,isnull(dblNoOfLot,0)-isnull(dblFixedLots,0) dblNoOfLot,dblQuantity-dblFixedQty dblQuantity,
+intContractHeaderId,intFutOptTransactionHeaderId,intPricingTypeId,strContractType,intCommodityId,intCompanyLocationId,intFutureMarketId,dtmFutureMonthsDate,ysnExpired 
+FROM (
+SELECT cv.strFutureMonth,  
+  strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
+  0 AS dblNoOfContract,  
+  LEFT(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, 
+  dtmStartDate as TransactionDate,  
+  strContractType as TranType, 
+  strEntityName  as CustVendor,  
+  dblNoOfLots as dblNoOfLot,
+  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,case when @ysnIncludeInventoryHedge = 0 
+											then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity,
+  cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
+  ,2 as intPricingTypeId
+  ,cv.strContractType
+  ,cv.intCommodityId
+  ,cv.intCompanyLocationId
+  ,cv.intFutureMarketId
+  ,dtmFutureMonthsDate
+  ,ysnExpired
+  ,isnull((SELECT sum(dblLotsFixed) dblNoOfLots FROM tblCTPriceFixation pf 
+		where pf.intContractHeaderId =cv.intContractHeaderId and pf.intContractDetailId=cv.intContractDetailId),0) dblFixedLots
+  ,isnull((SELECT  dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,sum(pd.dblQuantity)) dblQuantity FROM tblCTPriceFixation pf
+		 join tblCTPriceFixationDetail pd on pf.intPriceFixationId=pd.intPriceFixationId	 
+		where pf.intContractHeaderId =cv.intContractHeaderId and pf.intContractDetailId=cv.intContractDetailId),0) dblFixedQty
+  FROM vyuCTContractDetailView cv  
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId 
+  JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
+  JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
+  JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
+  JOIN tblICItem ic on ic.intItemId=cv.intItemId 
+				and cv.intItemId not in(SELECT intItemId FROM tblICItem ici    
+										JOIN tblICCommodityProductLine pl on ici.intCommodityId=pl.intCommodityId 
+										AND ici.intProductLineId=pl.intCommodityProductLineId)  
+  LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  	
+  LEFT JOIN tblARProductType pt on pt.intProductTypeId=ic.intProductTypeId
+  LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId AND um.intUnitMeasureId=cv.intUnitMeasureId
+  WHERE @intCommodityId=cv.intCommodityId and cv.intFutureMarketId=@intFutureMarketId AND cv.intContractStatusId <> 3  and intPricingTypeId <> 1
+  )t where isnull(dblNoOfLot,0)-isnull(dblFixedLots,0) <> 0)t1
 
 SELECT   
   strContractType+' - '+pl.strDescription +'(Delta='+convert(nvarchar,left(pl.dblDeltaPercent,4))+'%)' as strAccountNumber,
