@@ -3,7 +3,7 @@
 	[intActivityId] INT NOT NULL PRIMARY KEY IDENTITY,
 	[intTransactionId] [int] NULL,
 	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strSubject] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strSubject] [nvarchar](500) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intEntityContactId] [int] NULL, 
 	[intEntityId] [int] NULL, 
 	[intCompanyLocationId] [int] NULL, 
