@@ -62,7 +62,7 @@ SELECT
 	,intSourceType
 	,ysnPosted
 	,intStorageLocationId = CAST(NULL AS INT)
-	,strStorageLocationName = CAST(NULL AS INT)
+	,strStorageLocationName = CAST(NULL AS VARCHAR(50))
 FROM vyuLGLoadDetailView WHERE intLoadDetailId NOT IN (Select intLoadDetailId FROM vyuLGLoadContainerPurchaseContracts)
 
 UNION ALL
@@ -130,5 +130,5 @@ SELECT
 	,intSourceType
 	,ysnPosted
 	,intStorageLocationId = CAST(NULL AS INT)
-	,strStorageLocationName = CAST(NULL AS INT)
+	,strStorageLocationName = CAST(NULL AS VARCHAR(50))
 FROM vyuLGLoadContainerPurchaseContracts
