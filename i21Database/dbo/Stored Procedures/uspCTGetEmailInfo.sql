@@ -13,7 +13,8 @@ BEGIN
 			@strIds			NVARCHAR(MAX),
 			@intUniqueId	INT,
 			@Id				INT,
-			@routeScreen	NVARCHAR(50)
+			@routeScreen	NVARCHAR(50),
+			@intSalespersonId INT
 
 
 	DECLARE @loop TABLE
@@ -21,14 +22,15 @@ BEGIN
 		intUniqueId INT IDENTITY(1,1),
 		Id INT,
 		intEntityId INT,
-		strNumber NVARCHAR(50)
+		strNumber NVARCHAR(50),
+		intSalespersonId INT
 	)
 
 	IF @strMailType = 'Contract'
 	BEGIN
 		SET @routeScreen = 'Contract'
 		INSERT INTO @loop
-		SELECT intContractHeaderId,intEntityId,strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
+		SELECT intContractHeaderId,intEntityId,strContractNumber,intSalespersonId FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
 	END
 	ELSE IF @strMailType = 'Price Contract'
 	BEGIN
@@ -36,15 +38,17 @@ BEGIN
 		INSERT	INTO @loop
 		SELECT	PF.intPriceFixationId,
 				CH.intEntityId,
-				CH.strContractNumber
+				CH.strContractNumber,
+				CH.intSalespersonId
 		FROM	tblCTContractHeader CH
 		JOIN	tblCTPriceFixation	PF	ON	PF.intContractHeaderId	=	CH.intContractHeaderId
 		WHERE	PF.intPriceFixationId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
 	END
 
 	SELECT @intEntityId = intEntityId FROM @loop
-
 	SELECT @strEntityName = strName FROM tblEMEntity WHERE intEntityId = @intEntityId
+
+	SELECT @intSalespersonId = intSalespersonId FROM @loop
 
 	SELECT	@strIds	=	STUFF(															
 									(
@@ -95,5 +99,5 @@ BEGIN
 
 	SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 	
-	SELECT @Subject AS strSubject,@Filter AS strFilters,@body AS strMessage
+	SELECT @Subject AS strSubject,@Filter AS strFilters,@body AS strMessage, @intSalespersonId AS intSalespersonId
 END
