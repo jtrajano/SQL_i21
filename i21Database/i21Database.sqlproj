@@ -5115,6 +5115,7 @@
     <Build Include="dbo\Views\vyuICGetSubLocationBins.sql" />
     <Build Include="dbo\Views\vyuICGetSubLocationBinDetails.sql" />
     <Build Include="dbo\Views\vyuLGContractsWithoutDocuments.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSearchStatementsCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
