@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFUpgradeTaxCategories]
 	@TaxAuthorityCode NVARCHAR(10),
-	@TaxCategories TFTaxCategory READONLY
+	@TaxCategories TFTaxCategories READONLY
 
 AS
 
