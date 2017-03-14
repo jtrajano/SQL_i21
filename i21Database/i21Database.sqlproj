@@ -4022,7 +4022,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptCheckRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckSettlement.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettleStorage.sql" />
-    <Build Include="dbo\Views\vyuCTContractDetailGrid.sql" />
+    <Build Include="dbo\Views\vyuCTGridContractDetail.sql" />
     <Build Include="dbo\Views\vyuICLoadContainerReceiptContracts.sql" />
     <Build Include="dbo\Views\vyuAPPurchaseOrderPayables.sql" />
     <Build Include="dbo\Views\vyuAPReceiptPayables.sql" />
@@ -5109,7 +5109,18 @@
     <Build Include="dbo\Functions\fnCTGetBasisComponentString.sql" />
     <Build Include="dbo\Views\vyuCTAlertNotificationCount.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\28_RemoveZeroTransactionFromCMUndepositedFund.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTChangeContractStatus.sql" />
+    <Build Include="dbo\Tables\tblRKM2MTransactionImport.sql" />
+    <Build Include="dbo\Tables\tblRKM2MBasisTransaction.sql" />
+    <Build Include="dbo\Tables\tblRKM2MTransaction_ErrLog.sql" />
+    <Build Include="dbo\Views\vyuRKBasisTransactionNotMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MBasisTransactionValidate.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MBasisTransactionImport.sql" />
+    <Build Include="dbo\Tables\tblSMApprovalAmendmentLog.sql" />
+    <Build Include="dbo\Views\vyuICGetSubLocationBins.sql" />
+    <Build Include="dbo\Views\vyuICGetSubLocationBinDetails.sql" />
+    <Build Include="dbo\Views\vyuLGContractsWithoutDocuments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

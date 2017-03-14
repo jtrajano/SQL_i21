@@ -179,6 +179,8 @@ BEGIN TRY
 				GOTO CONTINUEISH
 			END
 		END
+		ELSE
+			RETURN;
 	END
 
 	SELECT	@intGRStorageId = ST.intStorageScheduleTypeId

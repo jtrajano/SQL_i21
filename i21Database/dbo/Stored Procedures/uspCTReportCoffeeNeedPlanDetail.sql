@@ -11,6 +11,10 @@ BEGIN
 	DECLARE @FourthMonth NVARCHAR(100)
 	DECLARE @FifthMonth NVARCHAR(100)
 	DECLARE @SixthMonth NVARCHAR(100)
+	DECLARE @SeventhMonth NVARCHAR(100)
+	DECLARE @EighthMonth NVARCHAR(100)
+	DECLARE @NinthMonth NVARCHAR(100)
+	DECLARE @TenthMonth NVARCHAR(100)
 
 	DECLARE @intColumnKey INT
 	DECLARE @intMonthKey INT
@@ -188,6 +192,22 @@ BEGIN
 	 BEGIN
 			SELECT TOP 6  @SixthMonth= CASE WHEN [strColumnName]<>@FifthMonth THEN [strColumnName] ELSE NULL END  FROM #tblRequiredColumns ORDER BY [intColumnKey]
 	 END
+	 IF @SixthMonth IS NOT NULL
+	 BEGIN
+			SELECT TOP 7  @SeventhMonth= CASE WHEN [strColumnName]<>@SixthMonth THEN [strColumnName] ELSE NULL END  FROM #tblRequiredColumns ORDER BY [intColumnKey]
+	 END
+	 IF @SeventhMonth IS NOT NULL
+	 BEGIN
+			SELECT TOP 8  @EighthMonth= CASE WHEN [strColumnName]<>@SeventhMonth THEN [strColumnName] ELSE NULL END  FROM #tblRequiredColumns ORDER BY [intColumnKey]
+	 END
+	 IF @EighthMonth IS NOT NULL
+	 BEGIN
+			SELECT TOP 9  @NinthMonth= CASE WHEN [strColumnName]<>@EighthMonth THEN [strColumnName] ELSE NULL END  FROM #tblRequiredColumns ORDER BY [intColumnKey]
+	 END
+	 IF @NinthMonth IS NOT NULL
+	 BEGIN
+			SELECT TOP 10  @TenthMonth= CASE WHEN [strColumnName]<>@NinthMonth THEN [strColumnName] ELSE NULL END  FROM #tblRequiredColumns ORDER BY [intColumnKey]
+	 END
 
 	 SELECT @intColumnKey = MIN(intColumnKey) FROM #tblRequiredColumns
 
@@ -281,16 +301,32 @@ BEGIN
 		IF 	@SixthMonth  IS NOT NULL														
 		SET @SqlSelect=@SqlSelect+',CASE WHEN   @SixthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' + @SixthMonth + '],0))) END ELSE NULL END AS Column11
 									,CASE WHEN  @SixthMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @SixthMonth + '],0))) ELSE NULL END AS Column12'
+        IF 	@SeventhMonth  IS NOT NULL														
+		SET @SqlSelect=@SqlSelect+',CASE WHEN   @SeventhMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' + @SeventhMonth + '],0))) END ELSE NULL END AS Column13
+									,CASE WHEN  @SeventhMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @SeventhMonth + '],0))) ELSE NULL END AS Column14'
 		
-		
+		IF 	@EighthMonth  IS NOT NULL														
+		SET @SqlSelect=@SqlSelect+',CASE WHEN   @EighthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' +@EighthMonth + '],0))) END ELSE NULL END AS Column15
+									,CASE WHEN  @EighthMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @EighthMonth + '],0))) ELSE NULL END AS Column16'
+		IF 	@NinthMonth  IS NOT NULL														
+		SET @SqlSelect=@SqlSelect+',CASE WHEN   @NinthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' +@NinthMonth + '],0))) END ELSE NULL END AS Column17
+									,CASE WHEN  @NinthMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @NinthMonth + '],0))) ELSE NULL END AS Column18'
+		IF 	@TenthMonth  IS NOT NULL														
+		SET @SqlSelect=@SqlSelect+',CASE WHEN   @TenthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' +@TenthMonth + '],0))) END ELSE NULL END AS Column19
+									,CASE WHEN  @TenthMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @TenthMonth + '],0))) ELSE NULL END AS Column20'
+
 		SET @SqlSelect=@SqlSelect+'  FROM #tblCoffeeNeedPlan
 									 GROUP BY intItemId,strItemName,strItemDescription,[intSubLocationId],[strSubLocationName] ORDER BY intItemId,[intSubLocationId] DESC '
 		
-		EXEC sp_executesql @SqlSelect,N'@FirstMonth nvarchar(MAX),@SecondMonth nvarchar(MAX),@ThirdMonth nvarchar(MAX),@FourthMonth nvarchar(MAX),@FifthMonth nvarchar(MAX),@SixthMonth nvarchar(MAX)'						
+		EXEC sp_executesql @SqlSelect,N'@FirstMonth nvarchar(MAX),@SecondMonth nvarchar(MAX),@ThirdMonth nvarchar(MAX),@FourthMonth nvarchar(MAX),@FifthMonth nvarchar(MAX),@SixthMonth nvarchar(MAX),@SeventhMonth nvarchar(MAX),@EighthMonth nvarchar(MAX),@NinthMonth nvarchar(MAX),@TenthMonth nvarchar(MAX)'						
 										,@FirstMonth=@FirstMonth
 										,@SecondMonth= @SecondMonth
 										,@ThirdMonth= @ThirdMonth
 										,@FourthMonth= @FourthMonth
 										,@FifthMonth= @FifthMonth
 										,@SixthMonth=@SixthMonth
+										,@SeventhMonth=@SeventhMonth
+										,@EighthMonth=@EighthMonth
+										,@NinthMonth=@NinthMonth
+										,@TenthMonth=@TenthMonth
 END

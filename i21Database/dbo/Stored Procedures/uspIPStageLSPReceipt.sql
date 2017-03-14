@@ -54,7 +54,7 @@ BEGIN TRY
 	)
 	SELECT 	 s.intStageReceiptId
 			,POSNR  
-			,MATNR  
+			,RIGHT(MATNR,8)  
 			,WERKS  
 			,LGORT  
 			,CHARG  
@@ -98,6 +98,8 @@ BEGIN TRY
 			,VEMNG   NVARCHAR(100)
 			,VEMEH   NVARCHAR(100)
 			) x Join tblIPReceiptStage s on x.VBELN=s.strDeliveryNo
+
+	Select TOP 1 strDeliveryNo AS strInfo1, '' strInfo2 From tblIPReceiptStage
 
 END TRY
 

@@ -125,7 +125,7 @@ SELECT
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
-		,intGrossNetUOMId			= 0
+		,intGrossNetUOMId			= NULL
 		--,intGrossNetUOMId			= ( SELECT TOP 1 ItemUOM.intItemUOMId
 		--									FROM dbo.tblICItemUOM ItemUOM INNER JOIN tblSCScaleSetup SCSetup 
 		--										ON ItemUOM.intUnitMeasureId = SCSetup.intUnitMeasureId

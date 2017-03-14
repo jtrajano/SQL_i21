@@ -57,7 +57,8 @@ Declare @intMinSeq					INT,
 		@strTextXml					NVARCHAR(MAX),
 		@strSeq						NVARCHAR(MAX),
 		@strProductType				NVARCHAR(100),
-		@strVendorBatch				NVARCHAR(100)
+		@strVendorBatch				NVARCHAR(100),
+		@str10Zeros					NVARCHAR(50)='0000000000'
 
 Declare @tblOutput AS Table
 (
@@ -205,7 +206,8 @@ Begin
 			@strPriceUOM				= (Select TOP 1 ISNULL(strSymbol,strUnitMeasure) From tblICUnitMeasure Where strUnitMeasure = strPriceUOM) , --COND_UNIT 
 			@strRowState				= strRowState ,
 			@strFeedStatus				= strFeedStatus,
-			@strContractItemNo			= strContractItemNo
+			@strContractItemNo			= strContractItemNo,
+			@strOrigin					= strOrigin	
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
 
 		--Convert price USC to USD
@@ -348,9 +350,9 @@ Begin
 				If UPPER(@strRowState)='DELETE'
 					Set @strItemXml += '<DELETE_IND>'	+ 'X'	+ '</DELETE_IND>'
 				If UPPER(@strCommodityCode)='TEA'
-					Set @strItemXml += '<MATERIAL>'		+ dbo.fnEscapeXML(ISNULL(ISNULL(@strContractItemNo,@strItemNo),''))				+ '</MATERIAL>'
+					Set @strItemXml += '<MATERIAL>'		+ dbo.fnEscapeXML(ISNULL(ISNULL(@str10Zeros + @strContractItemNo,@str10Zeros + @strItemNo),''))				+ '</MATERIAL>'
 				ELSE
-					Set @strItemXml += '<MATERIAL>'		+ dbo.fnEscapeXML(ISNULL(@strItemNo,''))				+ '</MATERIAL>'
+					Set @strItemXml += '<MATERIAL>'		+ dbo.fnEscapeXML(ISNULL(@str10Zeros + @strItemNo,''))				+ '</MATERIAL>'
 				Set @strItemXml += '<PLANT>'		+ ISNULL(@strSubLocation,'')		+ '</PLANT>'
 				Set @strItemXml += '<STGE_LOC>'		+ ISNULL(@strStorageLocation,'')	+ '</STGE_LOC>'
 				Set @strItemXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractDetailId),'')	+ '</TRACKINGNO>'
@@ -487,11 +489,11 @@ Begin
 				If UPPER(@strCommodityCode)='COFFEE'
 				Begin
 					--Origin (L16)
-					If ISNULL(@strOrigin,'')<>''
+					If ISNULL(@strContractItemNo,'')<>''
 					Begin
 						Set @strTextXml += '<E1BPMEPOTEXTHEADER>'
 						Set @strTextXml += '<TEXT_ID>' + 'L16' + '</TEXT_ID>' 
-						Set @strTextXml += '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(@strOrigin,'')) + '</TEXT_LINE>' 
+						Set @strTextXml += '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(@strContractItemNo,'')) + '</TEXT_LINE>' 
 						Set @strTextXml += '</E1BPMEPOTEXTHEADER>'
 					End
 
@@ -564,7 +566,7 @@ Begin
 	End
 
 	INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml,strContractNo,strPONo)
-	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,ISNULL(@strContractNumber,''),ISNULL(@strERPPONumber,''))
+	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,ISNULL(@strContractNumber,'') + ' / ' + ISNULL(@strSeq,''),ISNULL(@strERPPONumber,''))
 	
 	NEXT_PO:
 	Select @intMinRowNo=Min(intRowNo) From @tblHeader Where intRowNo>@intMinRowNo

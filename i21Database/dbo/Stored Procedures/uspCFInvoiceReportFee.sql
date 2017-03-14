@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFInvoiceReportFee](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportFee](
 	@xmlParam NVARCHAR(MAX)=null
 )
 AS
@@ -364,7 +363,7 @@ BEGIN
 			DECLARE @dblTotalQuantity		NUMERIC(18,6)
 			DECLARE @dblTotalAmount			NUMERIC(18,6)
 			DECLARE @intTotalTransaction	INT
-			DECLARE @intTotalCard			INT
+			DECLARE @intTotalBilledCard		INT
 			DECLARE @intTotalActiveCard		INT
 			DECLARE @intTotalNewCard		INT
 			DECLARE @dtmLastBillingDate		DATETIME
@@ -499,80 +498,319 @@ BEGIN
 						---GET TOTAL NO. OF CARD / TOTAL NO. OF TRANS / TOTAL QUANTITY / TOTAL AMOUNT / INVOICE DATE---
 						IF(@strCalculationType = 'Unit' OR @strCalculationType = 'Transaction')
 						BEGIN
-							SELECT 
-							 @intTotalTransaction	= ISNULL(COUNT(*),0)
-							,@dblTotalQuantity		= ISNULL(SUM(dblQuantity),0)
-							FROM @tblCFInvoiceFeesTemp 
-							WHERE intAccountId = @intLoopId
-							AND intNetworkId = @intNetworkId
-							AND dblQuantity != 0
-							AND (dblQuantity < @intMinimumThreshold OR dblQuantity > @intMaximumThreshold)
-							AND 
-							((strTransactionType = 'Local/Network' AND @ysnLocalTrans = 1)
-							 OR (strTransactionType = 'Remote' AND @ysnRemoteTrans = 1)
-							 OR (strTransactionType = 'Extended Remote' AND @ysnExtRemoteTrans = 1
-							 OR (strTransactionType = 'Foreign Sale' AND @ysnForeignTrans = 1)))
+							IF(ISNULL(@intNetworkId,0) > 0)
+							BEGIN
+								SELECT 
+								 @intTotalTransaction	= ISNULL(COUNT(*),0)
+								,@dblTotalQuantity		= ISNULL(SUM(dblQuantity),0)
+								FROM @tblCFInvoiceFeesTemp 
+								WHERE intAccountId = @intLoopId
+								AND intNetworkId = @intNetworkId
+								AND dblQuantity != 0
+								AND (dblQuantity < @intMinimumThreshold OR dblQuantity > @intMaximumThreshold)
+								AND 
+								((strTransactionType = 'Local/Network' AND @ysnLocalTrans = 1)
+								 OR (strTransactionType = 'Remote' AND @ysnRemoteTrans = 1)
+								 OR (strTransactionType = 'Extended Remote' AND @ysnExtRemoteTrans = 1
+								 OR (strTransactionType = 'Foreign Sale' AND @ysnForeignTrans = 1)))
+							 END
+							 ELSE
+							 BEGIN
+								SELECT 
+								 @intTotalTransaction	= ISNULL(COUNT(*),0)
+								,@dblTotalQuantity		= ISNULL(SUM(dblQuantity),0)
+								FROM @tblCFInvoiceFeesTemp 
+								WHERE intAccountId = @intLoopId
+								--AND intNetworkId = @intNetworkId
+								AND dblQuantity != 0
+								AND (dblQuantity < @intMinimumThreshold OR dblQuantity > @intMaximumThreshold)
+								AND 
+								((strTransactionType = 'Local/Network' AND @ysnLocalTrans = 1)
+								 OR (strTransactionType = 'Remote' AND @ysnRemoteTrans = 1)
+								 OR (strTransactionType = 'Extended Remote' AND @ysnExtRemoteTrans = 1
+								 OR (strTransactionType = 'Foreign Sale' AND @ysnForeignTrans = 1)))
+							 END
 
 						END
 
 						IF(@strCalculationType = 'Percentage')
 						BEGIN
-							SELECT 
-							@dblTotalAmount		= ISNULL(SUM(dblTotalAmount),0)
-							FROM @tblCFInvoiceFeesTemp WHERE intAccountId = @intLoopId
-							AND intNetworkId = @intNetworkId
+							
+							IF(ISNULL(@intNetworkId,0) > 0)
+							BEGIN
+								SELECT 
+								@dblTotalAmount		= ISNULL(SUM(dblTotalAmount),0)
+								FROM @tblCFInvoiceFeesTemp WHERE intAccountId = @intLoopId
+								AND intNetworkId = @intNetworkId
+							END
+							ELSE
+							BEGIN
+								SELECT 
+								@dblTotalAmount		= ISNULL(SUM(dblTotalAmount),0)
+								FROM @tblCFInvoiceFeesTemp WHERE intAccountId = @intLoopId
+								--AND intNetworkId = @intNetworkId
+							END
 							
 						END
 
-						  ---GET TOTAL NO. OF CARDS---
-						IF(@strCalculationType = 'All Cards')
+						  ---GET TOTAL NO. OF BILLED CARDS---
+						IF(@strCalculationType = 'Billed Cards')
 						BEGIN
-							SELECT 
-							@intTotalCard = ISNULL(COUNT(DISTINCT(cfcards.intCardId)),0)
-							FROM @tblCFInvoiceFeesTemp cftrans
-							INNER JOIN tblCFCard cfcards
-							ON cftrans.intCardId = cfcards.intCardId
-							WHERE cftrans.intAccountId = @intLoopId 
-							AND cftrans.intNetworkId = @intNetworkId
-							AND cfcards.intCardTypeId = @intCardTypeId
-						END
+							IF (ISNULL(@intCardTypeId,0) > 0)
+							BEGIN
+								IF(ISNULL(@intNetworkId,0) > 0)
+								BEGIN
+									SELECT 
+									@intTotalBilledCard = ISNULL(COUNT(DISTINCT(cfcards.intCardId)),0)
+									FROM @tblCFInvoiceFeesTemp cftrans
+									INNER JOIN tblCFCard cfcards
+									ON cftrans.intCardId = cfcards.intCardId
+									WHERE cftrans.intAccountId = @intLoopId 
+									AND cftrans.intNetworkId = @intNetworkId
+									AND cfcards.intNetworkId = @intNetworkId
+									AND cfcards.intCardTypeId = @intCardTypeId
+								END
+								ELSE
+								BEGIN
+									SELECT 
+									@intTotalBilledCard = ISNULL(COUNT(DISTINCT(cfcards.intCardId)),0)
+									FROM @tblCFInvoiceFeesTemp cftrans
+									INNER JOIN tblCFCard cfcards
+									ON cftrans.intCardId = cfcards.intCardId
+									WHERE cftrans.intAccountId = @intLoopId 
+									--AND cftrans.intNetworkId = @intNetworkId
+									--AND cfcards.intNetworkId = @intNetworkId
+									AND cfcards.intCardTypeId = @intCardTypeId
+								END
+								
+							END
+							ELSE
+							BEGIN
+							IF(ISNULL(@intNetworkId,0) > 0)
+							BEGIN
+								SELECT 
+								@intTotalBilledCard = ISNULL(COUNT(DISTINCT(cfcards.intCardId)),0)
+								FROM @tblCFInvoiceFeesTemp cftrans
+								INNER JOIN tblCFCard cfcards
+								ON cftrans.intCardId = cfcards.intCardId
+								WHERE cftrans.intAccountId = @intLoopId 
+								AND cftrans.intNetworkId = @intNetworkId
+								AND cfcards.intNetworkId = @intNetworkId
+							END
+							ELSE
+							BEGIN
+								SELECT 
+								@intTotalBilledCard = ISNULL(COUNT(DISTINCT(cfcards.intCardId)),0)
+								FROM @tblCFInvoiceFeesTemp cftrans
+								INNER JOIN tblCFCard cfcards
+								ON cftrans.intCardId = cfcards.intCardId
+								WHERE cftrans.intAccountId = @intLoopId 
+								--AND cftrans.intNetworkId = @intNetworkId
+								--AND cfcards.intNetworkId = @intNetworkId
+							END
+								
+							END
 
+							
+						END
 
 						 ---GET TOTAL NO. OF ACTIVE CARD---
 						IF(@strCalculationType = 'Active Cards')
 						BEGIN
-							SELECT 
-							@intTotalActiveCard = ISNULL(COUNT(DISTINCT(cfcards.intCardId)),0)
-							FROM @tblCFInvoiceFeesTemp cftrans
-							INNER JOIN tblCFCard cfcards
-							ON cftrans.intCardId = cfcards.intCardId
-							WHERE cftrans.intAccountId = @intLoopId 
-							AND cftrans.intNetworkId = @intNetworkId
-							AND cfcards.intCardTypeId = @intCardTypeId
-							AND cfcards.ysnActive = 1
+							DECLARE @acount INT 
+
+							IF(ISNULL(@intNetworkId,0) > 0)
+							BEGIN
+								SELECT @acount = COUNT(*) FROM @tblCFInvoiceFeesTemp 
+								WHERE intAccountId = @intLoopId AND intNetworkId = @intNetworkId
+							END
+							ELSE
+							BEGIN
+								SELECT @acount = COUNT(*) FROM @tblCFInvoiceFeesTemp 
+								WHERE intAccountId = @intLoopId --AND intNetworkId = @intNetworkId
+							END
+
+							IF (ISNULL(@intCardTypeId,0) > 0)
+							BEGIN
+								IF (ISNULL(@acount,0) > 0)
+								BEGIN
+									IF(ISNULL(@intNetworkId,0) > 0)
+									BEGIN
+										SELECT 
+										@intTotalActiveCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+										FROM tblCFCard
+										WHERE intAccountId = @intLoopId
+										AND intNetworkId = @intNetworkId
+										AND intCardTypeId = @intCardTypeId
+										AND ysnActive = 1
+									END
+									ELSE
+									BEGIN
+										SELECT 
+										@intTotalActiveCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+										FROM tblCFCard
+										WHERE intAccountId = @intLoopId
+										--AND intNetworkId = @intNetworkId
+										AND intCardTypeId = @intCardTypeId
+										AND ysnActive = 1
+									END
+								END
+							END
+							ELSE
+							BEGIN
+								IF (ISNULL(@acount,0) > 0)
+								BEGIN
+									IF(ISNULL(@intNetworkId,0) > 0)
+									BEGIN
+										SELECT 
+										@intTotalActiveCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+										FROM tblCFCard
+										WHERE intAccountId = @intLoopId
+										AND intNetworkId = @intNetworkId
+										AND ysnActive = 1
+									END
+									ELSE
+									BEGIN
+										SELECT 
+										@intTotalActiveCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+										FROM tblCFCard
+										WHERE intAccountId = @intLoopId
+										--AND intNetworkId = @intNetworkId
+										AND ysnActive = 1
+									END
+								END
+							END
+
+							
 						END
 
 						 ---GET TOTAL NO. OF NEW CARD---
-						
-						IF (@dtmLastBillingDate IS NOT NULL)
+						IF(@strCalculationType = 'New Cards')
 						BEGIN
-							IF(@strCalculationType = 'New Cards')
+							DECLARE @ncount INT 
+
+							IF(ISNULL(@intNetworkId,0) > 0)
 							BEGIN
-								SELECT 
-								@intTotalNewCard = ISNULL(COUNT(DISTINCT(cfcards.intCardId)),0)
-								FROM @tblCFInvoiceFeesTemp cftrans
-								INNER JOIN tblCFCard cfcards
-								ON cftrans.intCardId = cfcards.intCardId
-								WHERE cftrans.intAccountId = @intLoopId  
-								AND cftrans.intNetworkId = @intNetworkId
-								AND cfcards.intCardTypeId = @intCardTypeId
-								AND cfcards.dtmIssueDate > @dtmLastBillingDate
+								SELECT @ncount = COUNT(*) FROM @tblCFInvoiceFeesTemp 
+								WHERE intAccountId = @intLoopId AND intNetworkId = @intNetworkId
 							END
+							ELSE
+							BEGIN
+								SELECT @ncount = COUNT(*) FROM @tblCFInvoiceFeesTemp 
+								WHERE intAccountId = @intLoopId --AND intNetworkId = @intNetworkId
+							END
+
+
+							IF (@dtmLastBillingDate IS NOT NULL)
+							BEGIN
+
+								IF (ISNULL(@intCardTypeId,0) > 0)
+								BEGIN
+									IF (ISNULL(@ncount,0) > 0)
+									BEGIN
+										IF(ISNULL(@intNetworkId,0) > 0)
+										BEGIN
+											SELECT 
+											@intTotalNewCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+											FROM tblCFCard 
+											WHERE intAccountId = @intLoopId  
+											AND intNetworkId = @intNetworkId
+											AND intCardTypeId = @intCardTypeId
+											AND dtmIssueDate > @dtmLastBillingDate
+										END
+										ELSE
+										BEGIN
+											SELECT 
+											@intTotalNewCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+											FROM tblCFCard 
+											WHERE intAccountId = @intLoopId  
+											--AND intNetworkId = @intNetworkId
+											AND intCardTypeId = @intCardTypeId
+											AND dtmIssueDate > @dtmLastBillingDate
+										END
+									END
+								END
+								ELSE
+								BEGIN
+									IF (ISNULL(@ncount,0) > 0)
+									BEGIN
+										IF(ISNULL(@intNetworkId,0) > 0)
+										BEGIN
+											SELECT 
+											@intTotalNewCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+											FROM tblCFCard 
+											WHERE intAccountId = @intLoopId  
+											AND intNetworkId = @intNetworkId
+											AND dtmIssueDate > @dtmLastBillingDate
+										END
+										ELSE
+										BEGIN
+											SELECT 
+											@intTotalNewCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+											FROM tblCFCard 
+											WHERE intAccountId = @intLoopId  
+											--AND intNetworkId = @intNetworkId
+											AND dtmIssueDate > @dtmLastBillingDate
+										END
+									END
+								END
+
+							END
+							ELSE
+							BEGIN
+								IF (ISNULL(@intCardTypeId,0) > 0)
+								BEGIN
+									IF (ISNULL(@ncount,0) > 0)
+									BEGIN
+										IF(ISNULL(@intNetworkId,0) > 0)
+										BEGIN
+											SELECT 
+											@intTotalNewCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+											FROM tblCFCard 
+											WHERE intAccountId = @intLoopId  
+											AND intNetworkId = @intNetworkId
+											AND intCardTypeId = @intCardTypeId
+										END
+										ELSE
+										BEGIN
+											SELECT 
+											@intTotalNewCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+											FROM tblCFCard 
+											WHERE intAccountId = @intLoopId  
+											--AND intNetworkId = @intNetworkId
+											AND intCardTypeId = @intCardTypeId
+										END
+
+										
+									END
+								END
+								ELSE
+								BEGIN
+									IF (ISNULL(@ncount,0) > 0)
+									BEGIN
+										IF(ISNULL(@intNetworkId,0) > 0)
+										BEGIN
+											SELECT 
+											@intTotalNewCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+											FROM tblCFCard 
+											WHERE intAccountId = @intLoopId  
+											AND intNetworkId = @intNetworkId
+										END
+										ELSE
+										BEGIN
+											SELECT 
+											@intTotalNewCard = ISNULL(COUNT(DISTINCT(intCardId)),0)
+											FROM tblCFCard 
+											WHERE intAccountId = @intLoopId  
+											--AND intNetworkId = @intNetworkId
+										END
+									END
+								END
+							END
+
+								
 						END
-						ELSE
-						BEGIN
-							SET @intTotalNewCard = @intTotalCard
-						END
+						
 
 
 					INSERT INTO ##tblCFInvoiceFeeOutput(
@@ -611,23 +849,23 @@ BEGIN
 									THEN
 										 CASE 
 											 WHEN cffee.strCalculationType = 'Transaction' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
-												THEN ROUND((@intTotalTransaction * cffee.dblFeeRate),2)
+												THEN ROUND((ISNULL(@intTotalTransaction,0) * cffee.dblFeeRate),2)
 											 WHEN cffee.strCalculationType = 'Unit' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
-												THEN ROUND((@dblTotalQuantity * cffee.dblFeeRate),2)
-											 WHEN cffee.strCalculationType = 'All Cards'  AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
-												THEN ROUND((@intTotalCard * cffee.dblFeeRate),2)
+												THEN ROUND((ISNULL(@dblTotalQuantity,0) * cffee.dblFeeRate),2)
+											 WHEN cffee.strCalculationType = 'Billed Cards'  AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ROUND((ISNULL(@intTotalBilledCard,0) * cffee.dblFeeRate),2)
 											 WHEN cffee.strCalculationType = 'Active Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
-												THEN ROUND((@intTotalActiveCard * cffee.dblFeeRate),2)
+												THEN ROUND((ISNULL(@intTotalActiveCard,0) * cffee.dblFeeRate),2)
 											 WHEN cffee.strCalculationType = 'New Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
-												THEN ROUND((@intTotalNewCard * cffee.dblFeeRate),2)
+												THEN ROUND((ISNULL(@intTotalNewCard,0) * cffee.dblFeeRate),2)
 											 WHEN cffee.strCalculationType = 'Flat' 
 											 AND ((cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
 											 OR (cffee.strCalculationFrequency = 'Annual' AND @ysnInvoiceAnnualFee = 1)
 											 OR (cffee.strCalculationFrequency = 'Monthy' AND @ysnInvoiceMonthyFee = 1)
 											 )
-												THEN ROUND((cffee.dblFeeRate),2)
+												THEN ROUND((ISNULL(cffee.dblFeeRate,0)),2)
 											 WHEN cffee.strCalculationType = 'Percentage' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
-												THEN ROUND(((@dblTotalAmount * (cffee.dblFeeRate / 100))),2)
+												THEN ROUND(((ISNULL(@dblTotalAmount,0) * (cffee.dblFeeRate / 100))),2)
 											 ELSE
 												NULL
 										END

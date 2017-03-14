@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblSTTranslogRebates]
 (
 	[intTranslogId] int IDENTITY(1,1) NOT NULL PRIMARY KEY, 
-	[strOpenedTime] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	[strClosedTime] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[dtmOpenedTime] datetime NULL,
+	[dtmClosedTime] datetime NULL,
 	[dblInsideSales] decimal(18, 6) NULL,
 	[dblInsideGrand] decimal(18, 6) NULL,
 	[dblOutsideSales] decimal(18, 6) NULL,
@@ -18,7 +18,7 @@
 	[intPeriodSeq] int NULL,
 	[strPeriodName] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 	[strPeriod] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	[strDate] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[dtmDate] datetime NULL,
 	[intDuration] bigint NULL,
 	[intTill] int NULL,
 	[intCashierSysId] int NULL,
@@ -52,6 +52,7 @@
 	[dblTrlSign] decimal(18, 2) NULL,
 	[dblTrlUnitPrice] decimal(18, 3) NULL,
 	[dblTrlLineTot] decimal(18, 2) NULL,
+	[strTrlUPC] nvarchar(14) COLLATE Latin1_General_CI_AS NULL,
 	[strTrlDesc] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTrPaylineType] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intTrPaylineSysId] int NULL,

@@ -2,11 +2,11 @@
 @intCheckoutId Int
 AS
 BEGIN
---Insert #tempCheckoutInsert to tblSTTranslogRebates
+	--Insert #tempCheckoutInsert to tblSTTranslogRebates
 	INSERT INTO dbo.tblSTTranslogRebates 
 	(
-		strOpenedTime
-		, strClosedTime
+		dtmOpenedTime
+		, dtmClosedTime
 		, dblInsideSales
 		, dblInsideGrand
 		, dblOutsideSales
@@ -22,7 +22,7 @@ BEGIN
 		, intPeriodSeq
 		, strPeriodName 
 		, strPeriod
-		, strDate
+		, dtmDate
 		, intDuration
 		, intTill
 		, intCashierSysId
@@ -56,6 +56,7 @@ BEGIN
 		, dblTrlSign
 		, dblTrlUnitPrice
 		, dblTrlLineTot
+		, strTrlUPC
 		, strTrlDesc
 		, strTrPaylineType
 		, intTrPaylineSysId
@@ -67,9 +68,9 @@ BEGIN
 		, strTrpPaycode
 		, dblTrpAmt
 	)
-	SELECT 
-		openedTime
-		, closedTime
+	SELECT 	
+		left(REPLACE(openedTime, 'T', ' '), len(openedTime) - 6)
+		, left(REPLACE(closedTime, 'T', ' '), len(closedTime) - 6)
 		, insideSales
 		, insideGrand
 		, outsideSales
@@ -85,7 +86,7 @@ BEGIN
 		, periodseq
 		, periodname
 		, period
-		, date
+		, left(REPLACE(date, 'T', ' '), len(date) - 6)
 		, duration
 		, till
 		, cashiersysid
@@ -119,6 +120,7 @@ BEGIN
 		, trlSign
 		, trlUnitPrice
 		, trlLineTot
+		, trlUPC
 		, trlDesc
 		, trPaylinetype
 		, trPaylinesysid

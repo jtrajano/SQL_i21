@@ -460,4 +460,3 @@ SELECT inv.intItemId
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
 	 where ptitm_prc3 > 0 and ptitm_prc3 not in (ptitm_prc1,ptitm_prc2)
-

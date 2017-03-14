@@ -20,7 +20,10 @@ BEGIN
 			@strLogisticsCompanyName	NVARCHAR(MAX),
 			@strLogisticsPrintSignOff	NVARCHAR(MAX),
 			@intCompanyLocationId		INT,
-			@strInstoreTo				NVARCHAR(MAX)
+			@strInstoreTo				NVARCHAR(MAX),
+			@strReleaseOrderText		NVARCHAR(MAX),
+			@strWarehouseEntityName		NVARCHAR(MAX),
+			@strShippingLineName		NVARCHAR(MAX)
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -90,6 +93,24 @@ BEGIN
 
 	SELECT @strFullName = strFullName FROM tblSMUserSecurity WHERE strUserName = @strUserName
 
+	SELECT @strWarehouseEntityName = CASE 
+			WHEN ISNULL(E.strName, '') = ''
+				THEN CLSL.strSubLocationName
+			ELSE E.strName
+			END
+	FROM tblSMCompanyLocationSubLocation CLSL
+	JOIN tblEMEntity E ON E.intEntityId = CLSL.intVendorId
+	LEFT JOIN tblLGLoadWarehouse LW ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
+	
+	SELECT @strShippingLineName = E.strName
+	FROM tblLGLoad L
+	JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
+	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
+	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
+
+
+	SELECT @strReleaseOrderText = 'Attn '+ ISNULL(@strShippingLineName,'') +' : Please release the the cargo in favour of ' + @strWarehouseEntityName
 	
 	SELECT @strLogisticsCompanyName = strLogisticsCompanyName,
 		   @strLogisticsPrintSignOff = strLogisticsPrintSignOff
@@ -220,7 +241,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strLogisticsCompanyName AS strLogisticsCompanyName,
 				@strLogisticsPrintSignOff AS strLogisticsPrintSignOff,
 				CASE WHEN @strInstoreTo = 'Shipping Line' THEN SLETC.strName ELSE WETC.strName END AS strWarehouseContact,
-				@strInstoreTo AS strInstoreTo
+				@strInstoreTo AS strInstoreTo,
+				@strReleaseOrderText AS strReleaseOrderText
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -375,7 +397,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strLogisticsCompanyName AS strLogisticsCompanyName,
 				@strLogisticsPrintSignOff AS strLogisticsPrintSignOff,
 				CASE WHEN @strInstoreTo = 'Shipping Line' THEN SLETC.strName ELSE WETC.strName END AS strWarehouseContact,
-				@strInstoreTo AS strInstoreTo
+				@strInstoreTo AS strInstoreTo,
+				@strReleaseOrderText AS strReleaseOrderText
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId

@@ -17,16 +17,17 @@ SET ANSI_WARNINGS OFF
 
 
 UPDATE tgs SET intAccountCategoryId = tgc.intAccountCategoryId
+--select tgs.strCode , t.code, tgc.strAccountCategory
 FROM dbo.tblGLAccountSegment tgs  
 JOIN 
 (--purchase
-select distinct(SUBSTRING(CAST(agitm_pur_acct AS VARCHAR), 0, CHARINDEX('.', agitm_pur_acct))) code,'Cost of Goods' cat from agitmmst  
-where agitm_ga_com_cd is not null or agitm_phys_inv_ynbo in ('Y','O','S','B','A')
-union
----Sales Account Category
-select distinct(SUBSTRING(CAST(agitm_sls_acct AS VARCHAR), 0, CHARINDEX('.', agitm_sls_acct))) code,'Sales Account'cat from agitmmst 
-where agitm_ga_com_cd is not null or agitm_phys_inv_ynbo in ('Y','O','S','B','A')
-union
+--select distinct(SUBSTRING(CAST(agitm_pur_acct AS VARCHAR), 0, CHARINDEX('.', agitm_pur_acct))) code,'Cost of Goods' cat from agitmmst  
+--where agitm_ga_com_cd is not null or agitm_phys_inv_ynbo in ('Y','O','S','B','A')
+--union
+-----Sales Account Category
+--select distinct(SUBSTRING(CAST(agitm_sls_acct AS VARCHAR), 0, CHARINDEX('.', agitm_sls_acct))) code,'Sales Account'cat from agitmmst 
+--where agitm_ga_com_cd is not null or agitm_phys_inv_ynbo in ('Y','O','S','B','A')
+--union
 ---Inventory Category
 select distinct(SUBSTRING(CAST(agcls_inv_acct_no AS VARCHAR), 0, CHARINDEX('.', agcls_inv_acct_no))) code, 'Inventory' cat from agclsmst
 where agcls_cd in (select distinct agitm_class from agitmmst where agitm_ga_com_cd is not null or agitm_phys_inv_ynbo in ('Y','O','S','B','A'))

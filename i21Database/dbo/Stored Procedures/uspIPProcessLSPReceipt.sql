@@ -36,6 +36,8 @@ Begin
 		Select @strDeliveryNo=strDeliveryNo,@dtmReceiptDate=dtmReceiptDate,@strPartnerNo=strPartnerNo
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 
+		Select @strDeliveryNo AS strInfo1,'' AS strInfo2
+
 		If NOT EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 			RaisError('Invalid LSP Partner',16,1)
 

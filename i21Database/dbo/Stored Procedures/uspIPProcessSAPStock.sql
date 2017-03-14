@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPStock]
-@strSessionId NVARCHAR(50)=''
+@strSessionId NVARCHAR(50)='',
+@strInfo1 NVARCHAR(MAX)='' OUT,
+@strInfo2 NVARCHAR(MAX)='' OUT
 AS
 BEGIN TRY
 
@@ -70,6 +72,9 @@ Begin
 		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
 		Select @intSubLocationId=intCompanyLocationSubLocationId 
 		From tblSMCompanyLocationSubLocation Where strSubLocationName=@strSubLocation AND intCompanyLocationId=@intLocationId
+
+		Set @strInfo1=@strItemNo
+		Set @strInfo2=@strSubLocation + ' / ' + ISNULL(CONVERT(VARCHAR, dbo.fnRemoveTrailingZeroes(@dblQuantity)),'')
 
 		Begin Tran
 
