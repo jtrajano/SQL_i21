@@ -347,3 +347,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
 GO
 
 CREATE INDEX [IX_tblTMDevice_strSerialNumber] ON [dbo].[tblTMDevice] ([strSerialNumber])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTMDevice_intDeviceTypeId] ON [dbo].[tblTMDevice]
+(
+	[intDeviceTypeId] ASC
+)
+
+
+GO

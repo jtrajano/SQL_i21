@@ -56,3 +56,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
 GO
 
 CREATE INDEX [IX_tblTMCustomer_intCustomerNumber] ON [dbo].[tblTMCustomer] ([intCustomerNumber])
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTMCustomer_intCustomerID_intCustomerNumber] ON [dbo].[tblTMCustomer]
+(
+	[intCustomerID] ASC,
+	[intCustomerNumber] ASC
+)
+
+GO
