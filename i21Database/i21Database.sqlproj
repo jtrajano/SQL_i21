@@ -5069,6 +5069,7 @@
     <Build Include="dbo\Views\vyuCTAlertNotificationCount.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTChangeContractStatus.sql" />
+    <Build Include="dbo\Views\vyuLGContractsWithoutDocuments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
