@@ -92,9 +92,9 @@ select 'UNION ALL SELECT intTaxCategoryId = ' + CAST(intTaxCategoryId AS NVARCHA
 from tblTFTaxCategory
 where intTaxAuthorityId = 
 */
-DECLARE @TaxCategories AS TFTaxCategories
+DECLARE @TaxCategory AS TFTaxCategory
 
-INSERT INTO @TaxCategories(
+INSERT INTO @TaxCategory(
 	intTaxCategoryId
 	, strState
 	, strTaxCategory
@@ -115,7 +115,7 @@ UNION ALL SELECT intTaxCategoryId = 31, strState = 'NE', strTaxCategory = 'NE PR
 UNION ALL SELECT intTaxCategoryId = 33, strState = 'NE', strTaxCategory = 'NE PRF Fee Jet Fuel'
 UNION ALL SELECT intTaxCategoryId = 34, strState = 'NE', strTaxCategory = 'NE PRF Fee All Other Petroleum Products'
 
-EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = @TaxAuthorityCode, @TaxCategories = @TaxCategories
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = @TaxAuthorityCode, @TaxCategories = @TaxCategory
 
 
 -- Reporting Component
