@@ -60,7 +60,7 @@ Ext.define('Inventory.view.StockDetailViewController', {
                         { dataIndex: 'strItemNo', text: 'Item No', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                         { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, flex: 1 },
                         { dataIndex: 'strLocation', text: 'Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinLocation' },
-                        { dataIndex: 'strSubLocation', text: 'Storage Location', width: 100, flex: 1 },
+                        { dataIndex: 'strSubLocationName', text: 'Storage Location', width: 100, flex: 1 },
                         { dataIndex: 'strStorageLocation', text: 'Storage Unit', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinStorageLocation' },
                         { dataIndex: 'dblStock', text: 'Stock', xtype: 'numbercolumn', summaryType: 'sum', width: 100, flex: 1 },
                         { dataIndex: 'dblAirSpaceReading',  xtype: 'numbercolumn', text: 'Air Space Reading', width: 100, flex: 1, summaryType: 'sum' },
