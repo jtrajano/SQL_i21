@@ -66,7 +66,9 @@ AS
 				intSourceType,		 	
 				strSourceId,
 				strSourceScreenName,
-				ysnSubCurrency
+				ysnSubCurrency,
+				intForexRateTypeId,
+				dblForexRate
 		)	
 		SELECT	strReceiptType				=	'Purchase Contract',
 				intEntityVendorId			=	CH.intEntityId,
@@ -96,7 +98,9 @@ AS
 				intSourceType		 		=	0,
 				strSourceId					=	CH.strContractNumber,
 				strSourceScreenName			=	'Contract',
-				ysnSubCurrency				=	SubCurrency.ysnSubCurrency
+				ysnSubCurrency				=	SubCurrency.ysnSubCurrency,
+				intForexRateTypeId			=	CD.intRateTypeId,
+				dblForexRate				=	CD.dblRate
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
