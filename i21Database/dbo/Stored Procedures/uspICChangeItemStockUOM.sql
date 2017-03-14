@@ -113,7 +113,7 @@ BEGIN
 
 	UPDATE	ItemUOM
 	SET		dblUnitQty = 
-					CASE	WHEN dblUnitQty > @dblNewStockUnit_UnitQty THEN  
+					CASE	WHEN (dblUnitQty > @dblNewStockUnit_UnitQty OR dblUnitQty = 1) AND @dblNewStockUnit_UnitQty <> 0 THEN  
 								dbo.fnDivide(dblUnitQty, @dblNewStockUnit_UnitQty) 
 							WHEN dblUnitQty = @dblNewStockUnit_UnitQty THEN  
 								1
