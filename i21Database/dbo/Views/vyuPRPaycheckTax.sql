@@ -38,6 +38,7 @@ SELECT
 	,intConcurrencyId
 	,dblGross
 	,dblAdjustedGross
+	,ysnVoid
 FROM 
 	(SELECT 
 		PT.*
@@ -52,11 +53,11 @@ FROM
 									PC2.intEntityEmployeeId, 
 									PC2.dtmPayDate, 
 									PCT2.intTypeTaxId, 
-									PCT2.dblTotal 
+									dblTotal = CASE WHEN (PC2.ysnVoid = 1) THEN 0 ELSE PCT2.dblTotal END
 							   FROM tblPRPaycheckTax PCT2 
 							   RIGHT JOIN tblPRPaycheck PC2 
 									ON PC2.intPaycheckId = PCT2.intPaycheckId
-											AND PC2.ysnPosted = 1 AND PC2.ysnVoid = 0
+											AND PC2.ysnPosted = 1
 							 ) PCX2
 						WHERE 
 							YEAR(PCX2.dtmPayDate) = YEAR(PC.dtmPayDate)
@@ -65,8 +66,9 @@ FROM
 							AND PCX2.intTypeTaxId = PT.intTypeTaxId)
 		,PC.dblGross
 		,PC.dblAdjustedGross
+		,PC.ysnVoid
 	FROM
 		tblPRPaycheckTax PT
 		LEFT JOIN tblPRPaycheck PC ON PC.intPaycheckId = PT.intPaycheckId
 	WHERE
-		ysnPosted = 1 AND ysnVoid = 0) PaycheckTax
+		ysnPosted = 1) PaycheckTax
