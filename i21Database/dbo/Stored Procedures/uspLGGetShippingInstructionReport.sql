@@ -101,8 +101,8 @@ SELECT TOP 1 L.intLoadId
 	,L.strLoadNumber
 	,L.dtmBLDate
 	,L.dtmDeliveredDate
-	,CASE WHEN CH.ysnClaimsToProducer = 1 THEN Producer.strName ELSE Vendor.strName END AS strVendor
-	,CASE WHEN CH.ysnClaimsToProducer = 1 THEN PETC.strName ELSE VETC.strName END AS strVendorContact
+	,CASE WHEN ISNULL(CD.ysnClaimsToProducer,0) = 1 THEN DProducer.strName ELSE CASE WHEN ISNULL(CH.ysnClaimsToProducer,0) = 1 THEN Producer.strName ELSE Vendor.strName END END AS strVendor
+	,CASE WHEN ISNULL(CD.ysnClaimsToProducer,0) = 1 THEN DPETC.strName ELSE CASE WHEN ISNULL(CH.ysnClaimsToProducer,0) = 1 THEN PETC.strName ELSE VETC.strName END END AS strVendorContact
 	,Customer.strName AS strCustomer
 	,CETC.strName AS strCustomerContact
 	,L.strOriginPort
@@ -477,6 +477,11 @@ JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = CH.intProducerId
 LEFT JOIN tblEMEntityToContact PEC ON PEC.intEntityId = Producer.intEntityId
 LEFT JOIN tblEMEntity PETC ON PETC.intEntityId = PEC.intEntityContactId
+
+LEFT JOIN tblEMEntity DProducer ON DProducer.intEntityId = CD.intProducerId
+LEFT JOIN tblEMEntityToContact DPEC ON DPEC.intEntityId = DProducer.intEntityId
+LEFT JOIN tblEMEntity DPETC ON DPETC.intEntityId = DPEC.intEntityContactId
+
 LEFT JOIN tblLGLoadContainer LC ON L.intLoadId = LC.intLoadId
 LEFT JOIN tblLGLoadNotifyParties LNP ON LNP.intLoadId = L.intLoadId
 LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
