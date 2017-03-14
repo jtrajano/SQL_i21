@@ -925,8 +925,8 @@ BEGIN
 	-- If shipment is in foreign currency, then make sure the Foreign Debits and Credits are filled-in. 
 	UPDATE	glEntries
 	SET
-			dblDebitForeign = CASE WHEN dblDebit <> 0 AND dblDebitForeign = 0 THEN ISNULL(dblDebit * si.dblForexRate, 0) ELSE ISNULL(dblDebitForeign, 0) END
-			,dblCreditForeign = CASE WHEN dblCredit <> 0 AND dblCreditForeign = 0 THEN ISNULL(dblCredit * si.dblForexRate, 0) ELSE ISNULL(dblCreditForeign, 0) END 
+			dblDebitForeign = CASE WHEN dblDebit <> 0 AND dblDebitForeign = 0 AND si.dblForexRate <> 0 THEN ISNULL(dblDebit / si.dblForexRate, 0) ELSE ISNULL(dblDebitForeign, 0) END
+			,dblCreditForeign = CASE WHEN dblCredit <> 0 AND dblCreditForeign = 0 AND si.dblForexRate <> 0 THEN ISNULL(dblCredit / si.dblForexRate, 0) ELSE ISNULL(dblCreditForeign, 0) END 
 			,intCurrencyId = s.intCurrencyId
 			,dblExchangeRate = si.dblForexRate
 			,dblForeignRate = si.dblForexRate
