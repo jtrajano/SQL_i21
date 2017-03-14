@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblTFReportingComponentConfiguration](
 	[intReportingComponentConfigurationId] [int] IDENTITY(1,1) NOT NULL,
-	[intReportingComponentId] [int] NULL,
+	[intReportingComponentId] [int] NOT NULL,
 	[strTemplateItemId] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
 	[strReportSection] [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intReportItemSequence] [int] NULL,
