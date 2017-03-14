@@ -81,10 +81,8 @@ Ext.define('Inventory.ux.GridUOMField', {
         me.txtQuantity = panel.items.items[0];
         me.cboUom = panel.items.items[1];
 
-        if (me.readOnly) {
-            me.txtQuantity.setReadOnly(me.readOnly);
-            me.cboUom.setReadOnly(me.readOnly);
-        }
+        me.txtQuantity.setReadOnly(me.readOnly);
+        me.cboUom.setReadOnly(me.readOnly);
 
         me.setupBindings();
         me.setupComboboxFilters();
@@ -365,6 +363,9 @@ Ext.define('Inventory.ux.GridUOMField', {
                 me.txtQuantity.setValue(newValue);
                 if(me.txtQuantity.selectOnFocus && me.txtQuantity.hasFocus)
                     me.txtQuantity.inputEl.dom.select();
+                
+                me.txtQuantity.setReadOnly(me.readOnly);
+                me.cboUom.setReadOnly(me.readOnly);
              }
          });
 
@@ -399,10 +400,8 @@ Ext.define('Inventory.ux.GridUOMField', {
         
         me.value = newValue;
         me.txtQuantity.setValue(newValue);
-        if (me.readOnly) {
-            me.txtQuantity.setReadOnly(me.readOnly);
-            me.cboUom.setReadOnly(me.readOnly);
-        }
+        me.txtQuantity.setReadOnly(me.readOnly);
+        me.cboUom.setReadOnly(me.readOnly);
         return me;
     },
 
