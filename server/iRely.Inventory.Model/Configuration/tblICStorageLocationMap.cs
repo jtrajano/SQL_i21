@@ -161,6 +161,61 @@ namespace iRely.Inventory.Model
         }
     }
 
+    class vyuICGetSubLocationBinsMap : EntityTypeConfiguration<vyuICGetSubLocationBins>
+    {
+        public vyuICGetSubLocationBinsMap()
+        {
+            this.HasKey(p => p.intSubLocationId);
+            this.ToTable("vyuICGetSubLocationBins");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            this.Property(t => t.strLocation).HasColumnName("strLocation");
+            this.Property(t => t.strSubLocation).HasColumnName("strSubLocation");
+            this.Property(t => t.dblAvailable).HasColumnName("dblAvailable");
+            this.Property(t => t.dblCapacity).HasColumnName("dblCapacity");
+            this.Property(t => t.dblEffectiveDepth).HasColumnName("dblEffectiveDepth");
+            this.Property(t => t.dblPackFactor).HasColumnName("dblPackFactor");
+            this.Property(t => t.dblStock).HasColumnName("dblStock");
+            this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot");
+        }
+    }
+
+    class vyuICGetSubLocationBinDetailsMap : EntityTypeConfiguration<vyuICGetSubLocationBinDetails>
+    {
+        public vyuICGetSubLocationBinDetailsMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intItemLocationId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetSubLocationBinDetails");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            this.Property(t => t.strStorageLocation).HasColumnName("strStorageLocation");
+            this.Property(t => t.strUOM).HasColumnName("strUOM");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.strLocation).HasColumnName("strLocation");
+            this.Property(t => t.strDiscountCode).HasColumnName("strDiscountCode");
+            this.Property(t => t.strCommodityCode).HasColumnName("strCommodityCode");
+            this.Property(t => t.strDiscountDescription).HasColumnName("strDiscountDescription");
+            this.Property(t => t.dtmReadingDate).HasColumnName("dtmReadingDate");
+            this.Property(t => t.dblCapacity).HasColumnName("dblCapacity").HasPrecision(18, 6);
+            this.Property(t => t.dblAirSpaceReading).HasColumnName("dblAirSpaceReading").HasPrecision(18, 6);
+            this.Property(t => t.dblPhysicalReading).HasColumnName("dblPhysicalReading").HasPrecision(18, 6);
+            this.Property(t => t.dblStockVariance).HasColumnName("dblStockVariance").HasPrecision(18, 6);
+            this.Property(t => t.dblAvailable).HasColumnName("dblAvailable").HasPrecision(18, 6);
+            this.Property(t => t.dblStock).HasColumnName("dblStock").HasPrecision(18, 6);
+            this.Property(t => t.dblEffectiveDepth).HasColumnName("dblEffectiveDepth").HasPrecision(18, 6);
+            this.Property(t => t.dblPackFactor).HasColumnName("dblPackFactor").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+        }
+    }
+
     class vyuICGetStorageBinsMap : EntityTypeConfiguration<vyuICGetStorageBins>
     {
         public vyuICGetStorageBinsMap()
@@ -211,6 +266,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblEffectiveDepth).HasColumnName("dblEffectiveDepth").HasPrecision(18, 6);
             this.Property(t => t.dblPackFactor).HasColumnName("dblPackFactor").HasPrecision(18, 6);
             this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
         }
     }
 
