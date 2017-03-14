@@ -52,6 +52,7 @@
 	[dblTrlSign] decimal(18, 2) NULL,
 	[dblTrlUnitPrice] decimal(18, 3) NULL,
 	[dblTrlLineTot] decimal(18, 2) NULL,
+	[strTrlUPC] nvarchar(14) COLLATE Latin1_General_CI_AS NULL,
 	[strTrlDesc] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTrPaylineType] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intTrPaylineSysId] int NULL,

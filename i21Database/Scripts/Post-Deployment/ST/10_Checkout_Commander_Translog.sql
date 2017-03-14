@@ -750,7 +750,7 @@ BEGIN
 END
 
 --LEVEL 47
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'trlDesc' AND intLevel = 47
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'trlUPC' AND intLevel = 47
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -760,13 +760,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,47
-			   ,9			 				,'trlDesc'				       ,'tblSTPriceBookStaging'
+			   ,9			 				,'trlUPC'				       ,'tblSTPriceBookStaging'
 			   ,NULL		 			    ,NULL						   ,33
 			   ,NULL					    ,1							   ,1)
 END
 
 --LEVEL 48
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'trPaylines' AND intLevel = 48
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'trlDesc' AND intLevel = 48
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -776,13 +776,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,48
-			   ,4			 				,'trPaylines'				   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,'Header'					   ,11
+			   ,10			 				,'trlDesc'				       ,'tblSTPriceBookStaging'
+			   ,NULL		 			    ,NULL						   ,33
 			   ,NULL					    ,1							   ,1)
 END
 
 --LEVEL 49
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'trPayline' AND intLevel = 49
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'trPaylines' AND intLevel = 49
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -792,13 +792,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,49
-			   ,1			 				,'trPayline'				   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,'Header'					   ,48
+			   ,4			 				,'trPaylines'				   ,'tblSTPriceBookStaging'
+			   ,NULL		 			    ,'Header'					   ,11
 			   ,NULL					    ,1							   ,1)
 END
 
 --LEVEL 50
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'trpPaycode' AND intLevel = 50
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'trPayline' AND intLevel = 50
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -808,13 +808,13 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,50
-			   ,1			 				,'trpPaycode'				   ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,49
+			   ,1			 				,'trPayline'				   ,'tblSTPriceBookStaging'
+			   ,NULL		 			    ,'Header'					   ,49
 			   ,NULL					    ,1							   ,1)
 END
 
 --LEVEL 51
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'trpAmt' AND intLevel = 51
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'trpPaycode' AND intLevel = 51
 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
 		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -824,8 +824,24 @@ BEGIN
 			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
 		 VALUES
 			   (@intImportFileHeaderId		,NULL						   ,51
+			   ,1			 				,'trpPaycode'				   ,'tblSTPriceBookStaging'
+			   ,NULL		 			    ,NULL						   ,50
+			   ,NULL					    ,1							   ,1)
+END
+
+--LEVEL 52
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = 'trpAmt' AND intLevel = 52
+AND intImportFileHeaderId = @intImportFileHeaderId)
+BEGIN
+		INSERT INTO [dbo].[tblSMImportFileColumnDetail]
+			   ([intImportFileHeaderId]		,[intImportFileRecordMarkerId] ,[intLevel]
+			   ,[intPosition]				,[strXMLTag]				   ,[strTable]
+			   ,[strColumnName]				,[strDataType]				   ,[intLength]
+			   ,[strDefaultValue]			,[ysnActive]				   ,[intConcurrencyId])
+		 VALUES
+			   (@intImportFileHeaderId		,NULL						   ,52
 			   ,2			 				,'trpAmt'				       ,'tblSTPriceBookStaging'
-			   ,NULL		 			    ,NULL						   ,49
+			   ,NULL		 			    ,NULL						   ,50
 			   ,NULL					    ,1							   ,1)
 END
 
@@ -1104,9 +1120,9 @@ BEGIN
 
 END
 
---LEVEL 49, Attributes(3x)
+--LEVEL 50, Attributes(3x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId 
-AND intLevel = 49 AND strXMLTag = 'trPayline'
+AND intLevel = 50 AND strXMLTag = 'trPayline'
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'type' AND intSequence = 1
 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
@@ -1150,9 +1166,9 @@ BEGIN
 
 END
 
---LEVEL 50, Attributes(4x)
+--LEVEL 51, Attributes(4x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId 
-AND intLevel = 50 AND strXMLTag = 'trpPaycode'
+AND intLevel = 51 AND strXMLTag = 'trpPaycode'
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE strTagAttribute = 'mop' AND intSequence = 1
 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
