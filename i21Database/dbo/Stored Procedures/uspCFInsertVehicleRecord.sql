@@ -12,6 +12,7 @@
 	,@strVehicleDescription			NVARCHAR(MAX)	 =	 ''
 	,@strLicencePlateNumber			NVARCHAR(MAX)	 =	 ''
 	,@ysnCardForOwnUse				NVARCHAR(MAX)	 =	 'N'
+	,@ysnActive						NVARCHAR(MAX)	 =	 'Y'
 	,@strNoticeMessageLine1			NVARCHAR(MAX)	 =	 ''
 	---------------------------------------------------------
 	,@dtmLastReminderDate			DATETIME		 =	 NULL
@@ -155,6 +156,23 @@ BEGIN
 			VALUES (@strVehicleNumber,'Invalid card for own use '+ @ysnCardForOwnUse +'. Value should be Y or N only')
 			SET @ysnHasError = 1
 		END
+
+
+		IF (@ysnActive = 'N')
+		BEGIN 
+			SET @ysnActive = 0
+		END
+	ELSE IF (@ysnActive = 'Y')
+		BEGIN
+			SET @ysnActive = 1	
+		END
+	ELSE
+		BEGIN 
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strVehicleNumber,'Invalid card for own use '+ @ysnActive +'. Value should be Y or N only')
+			SET @ysnHasError = 1
+		END
+
 	---------------------------------------------------------
 
 	IF(@ysnHasError = 1)
@@ -182,7 +200,8 @@ BEGIN
 				,dtmLastReminderDate
 				,dtmLastServiceDate
 				,intLastServiceOdometer
-				,strNoticeMessageLine1)
+				,strNoticeMessageLine1
+				,ysnActive)
 			VALUES(
 				 @intAccountId
 				,@strVehicleNumber
@@ -197,7 +216,8 @@ BEGIN
 				,@dtmLastReminderDate
 				,@dtmLastServiceDate
 				,@intLastServiceOdometer
-				,@strNoticeMessageLine1)
+				,@strNoticeMessageLine1
+				,@ysnActive)
 
 			COMMIT TRANSACTION
 			RETURN 1
