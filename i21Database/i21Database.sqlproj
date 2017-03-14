@@ -5111,6 +5111,8 @@
     <Build Include="dbo\Views\vyuRKBasisTransactionNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MBasisTransactionValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MBasisTransactionImport.sql" />
+    <Build Include="dbo\Views\vyuICGetSubLocationBins.sql" />
+    <Build Include="dbo\Views\vyuICGetSubLocationBinDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
