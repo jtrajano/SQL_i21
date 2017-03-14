@@ -457,8 +457,8 @@ BEGIN TRY
 					, RCProductCode.strProductCode
 					, tblICInventoryTransferDetail.intItemId
 					, tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped
-					, tblTRLoadReceipt.dblGross
-					, tblTRLoadReceipt.dblNet
+					, tblICInventoryTransferDetail.dblQuantity AS dblGross
+					, tblICInventoryTransferDetail.dblQuantity AS dblNet
 					, tblICInventoryTransferDetail.dblQuantity
 					, NULL AS dblTax
 					, NULL AS dblTaxExempt
