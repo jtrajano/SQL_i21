@@ -100,12 +100,12 @@ BEGIN
 	END
 	
 	----GET THE TOTAL IR AMOUNT
-	SELECT @receiptAmount = SUM(A.dblLineTotal) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
+	SELECT @receiptAmount = SUM(A.dblLineTotal) + ISNULL(SUM(dblTax),0) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
 	
 	SELECT @totalCharges = ISNULL((SUM(dblUnitCost) + ISNULL(SUM(dblTax),0.00)),0.00)
 	FROM vyuICChargesForBilling WHERE intInventoryReceiptId = @receiptId
 	
-	SELECT @totalLineItem =  SUM(A.dblLineTotal)
+	SELECT @totalLineItem =   SUM(A.dblLineTotal) + ISNULL(SUM(dblTax),0)
 	FROM tblICInventoryReceiptItem A 
 	WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptId = @receiptId
 	
