@@ -5113,6 +5113,7 @@
     <Build Include="dbo\Tables\tblSMApprovalAmendmentLog.sql" />
     <Build Include="dbo\Views\vyuICGetSubLocationBins.sql" />
     <Build Include="dbo\Views\vyuICGetSubLocationBinDetails.sql" />
+    <Build Include="dbo\Views\vyuLGContractsWithoutDocuments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
