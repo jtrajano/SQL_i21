@@ -71,32 +71,32 @@ BEGIN
 		,intConcurrencyId = 1
 	FROM 
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType <> 'Tip' AND ysnSSTaxable = 1) TXBLSS OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) TXBLSS OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'Tip' AND ysnSSTaxable = 1) TXBLSSTIPS OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) TXBLSSTIPS OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnMedTaxable = 1) TXBLMED OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnMedTaxable = 1 AND ysnVoid = 0) TXBLMED OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnStateTaxable = 1) TXBLSTATE OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnStateTaxable = 1 AND ysnVoid = 0) TXBLSTATE OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnLocalTaxable = 1) TXBLLOCAL OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnLocalTaxable = 1 AND ysnVoid = 0) TXBLLOCAL OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strDeductFrom = 'Gross Pay') PRETAX OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strDeductFrom = 'Gross Pay' AND ysnVoid = 0) PRETAX OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax') FIT OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security') SSTAX OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) SSTAX OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare') MEDTAX OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
 		(SELECT strState = st.strCode, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
-			AND strPaidBy = 'Employee' AND strCalculationType = 'USA State' GROUP BY st.strCode) STATETAX OUTER APPLY
+			AND strPaidBy = 'Employee' AND strCalculationType = 'USA State' AND ysnVoid = 0 GROUP BY st.strCode) STATETAX OUTER APPLY
 		(SELECT strState = st.strCode, strLocal = lc.strLocalName, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
 				LEFT JOIN tblPRTypeTaxLocal lc ON tax.intTypeTaxLocalId = lc.intTypeTaxLocalId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
-			AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' GROUP BY st.strCode, lc.strLocalName) LOCALTAX OUTER APPLY
+			AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' AND ysnVoid = 0 GROUP BY st.strCode, lc.strLocalName) LOCALTAX OUTER APPLY
 		(SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
 				dblGrossSum = SUM(dblGross) 
 		FROM tblPRPaycheck 
@@ -126,32 +126,32 @@ BEGIN
 		,intConcurrencyId = 1
 	FROM 
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType <> 'Tip' AND ysnSSTaxable = 1) TXBLSS OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) TXBLSS OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'Tip' AND ysnSSTaxable = 1) TXBLSSTIPS OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) TXBLSSTIPS OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnMedTaxable = 1) TXBLMED OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnMedTaxable = 1 AND ysnVoid = 0) TXBLMED OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnStateTaxable = 1) TXBLSTATE OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnStateTaxable = 1 AND ysnVoid = 0) TXBLSTATE OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnLocalTaxable = 1) TXBLLOCAL OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnLocalTaxable = 1 AND ysnVoid = 0) TXBLLOCAL OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strDeductFrom = 'Gross Pay') PRETAX OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strDeductFrom = 'Gross Pay' AND ysnVoid = 0) PRETAX OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax') FIT OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security') SSTAX OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) SSTAX OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare') MEDTAX OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
 		(SELECT strState = st.strCode, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
-			AND strPaidBy = 'Employee' AND strCalculationType = 'USA State' GROUP BY st.strCode) STATETAX OUTER APPLY
+			AND strPaidBy = 'Employee' AND strCalculationType = 'USA State' AND ysnVoid = 0 GROUP BY st.strCode) STATETAX OUTER APPLY
 		(SELECT strState = st.strCode, strLocal = lc.strLocalName, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
 				LEFT JOIN tblPRTypeTaxLocal lc ON tax.intTypeTaxLocalId = lc.intTypeTaxLocalId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
-			AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' GROUP BY st.strCode, lc.strLocalName) LOCALTAX OUTER APPLY
+			AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' AND ysnVoid = 0 GROUP BY st.strCode, lc.strLocalName) LOCALTAX OUTER APPLY
 		(SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
 				dblGrossSum = SUM(dblGross) 
 		FROM tblPRPaycheck 
