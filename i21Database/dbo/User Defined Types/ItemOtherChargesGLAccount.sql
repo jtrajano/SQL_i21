@@ -6,6 +6,7 @@ CREATE TYPE [dbo].[ItemOtherChargesGLAccount] AS TABLE
 (
 	intChargeId INT NOT NULL 
 	,intItemLocationId INT NOT NULL 
+	,intAPClearing INT 
 	,intOtherChargeExpense INT
 	,intOtherChargeIncome INT
 	,intOtherChargeAsset INT
