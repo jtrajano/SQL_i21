@@ -242,7 +242,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strLogisticsPrintSignOff AS strLogisticsPrintSignOff,
 				CASE WHEN @strInstoreTo = 'Shipping Line' THEN SLETC.strName ELSE WETC.strName END AS strWarehouseContact,
 				@strInstoreTo AS strInstoreTo,
-				@strReleaseOrderText AS strReleaseOrderText
+				CASE WHEN @strInstoreTo = 'Shipping Line' THEN @strReleaseOrderText ELSE NULL END AS strReleaseOrderText
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -398,7 +398,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strLogisticsPrintSignOff AS strLogisticsPrintSignOff,
 				CASE WHEN @strInstoreTo = 'Shipping Line' THEN SLETC.strName ELSE WETC.strName END AS strWarehouseContact,
 				@strInstoreTo AS strInstoreTo,
-				@strReleaseOrderText AS strReleaseOrderText
+				CASE WHEN @strInstoreTo = 'Shipping Line' THEN @strReleaseOrderText ELSE NULL END AS strReleaseOrderText
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
