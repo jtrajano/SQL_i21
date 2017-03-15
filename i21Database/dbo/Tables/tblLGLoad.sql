@@ -109,6 +109,10 @@
 [ysnProvisionalInvoice] [bit] NULL,
 [ysnQuantityFinal] [bit] NULL,
 [ysnCancelled] [bit] NULL,
+[intShippingModeId] INT NULL,
+[intETAPOLReasonCodeId] INT NULL,
+[intETSPOLReasonCodeId] INT NULL,
+[intETAPODReasonCodeId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
@@ -139,5 +143,10 @@ CONSTRAINT [FK_tblLGLoad_tblLGContainerType_intContainerTypeId] FOREIGN KEY ([in
 CONSTRAINT [FK_tblLGLoad_tblSMCurrency_intDemurrageCurrencyId_intCurrencyID] FOREIGN KEY ([intDemurrageCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 CONSTRAINT [FK_tblLGLoad_tblSMCurrency_intDespatchCurrencyId_intCurrencyID] FOREIGN KEY ([intDespatchCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 CONSTRAINT [FK_tblLGLoad_tblICUnitMeasure_intLoadingUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intLoadingUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-CONSTRAINT [FK_tblLGLoad_tblICUnitMeasure_intDischargeUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intDischargeUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+CONSTRAINT [FK_tblLGLoad_tblICUnitMeasure_intDischargeUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intDischargeUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+
+CONSTRAINT [FK_tblLGLoad_tblLGShippingMode_intShippingModeId_intShippingModeId] FOREIGN KEY ([intShippingModeId]) REFERENCES [tblLGShippingMode]([intShippingModeId]),
+CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETAPOLReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETAPOLReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId]),
+CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETSPOLReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETSPOLReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId]),
+CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETAPODReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETAPODReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId])
 )
