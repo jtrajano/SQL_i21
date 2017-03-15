@@ -62,5 +62,7 @@
 	[strTrpPaycodenacstendercode] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 	[strTrpPaycodenacstendersubcode] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 	[strTrpPaycode] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
-	[dblTrpAmt] decimal(18, 2) NULL
+	[dblTrpAmt] decimal(18, 2) NULL,
+	[intStoreId] int NOT NULL,
+	[intCheckoutId] int NOT NULL,
 )
