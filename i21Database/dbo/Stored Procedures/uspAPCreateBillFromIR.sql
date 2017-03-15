@@ -154,7 +154,7 @@ BEGIN
 	END
 	
 	----GET THE TOTAL IR AMOUNT
-	SELECT @receiptAmount = SUM(A.dblLineTotal) + ISNULL(SUM(dblTax),0) FROM #tmpReceiptDetailData A WHERE A.intInventoryReceiptId = @receiptId;
+	SELECT @receiptAmount = ISNULL(SUM(A.dblLineTotal),0) + ISNULL(SUM(dblTax),0) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
 	
 	SELECT @totalCharges = ISNULL((SUM(dblUnitCost) + ISNULL(SUM(dblTax),0.00)),0.00)
 	FROM vyuICChargesForBilling WHERE intInventoryReceiptId = @receiptId
@@ -725,6 +725,11 @@ BEGIN
 	UPDATE A
 		SET --A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId) AP-2116
 		A.dblTax = (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
+	FROM tblAPBill A
+	WHERE intBillId = @generatedBillId
+
+	UPDATE A
+		SET A.dblSubtotal = dblTotal - (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @generatedBillId) --AP-3180 Update the subtotal when posting directly from Scale
 	FROM tblAPBill A
 	WHERE intBillId = @generatedBillId
 
