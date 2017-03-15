@@ -11,10 +11,16 @@ BEGIN TRY
 	DECLARE @dtmMaxETAPOD DATETIME
 	DECLARE @dtmCurrentETSPOL DATETIME
 	DECLARE @dtmMaxETSPOL DATETIME
+	DECLARE @strETAPODReasonCode NVARCHAR(MAX)
+	DECLARE @strETSPOLReasonCode NVARCHAR(MAX)
 
 	SELECT @dtmCurrentETAPOD = dtmETAPOD,
-		   @dtmCurrentETSPOL = dtmETSPOL
-	FROM tblLGLoad
+		   @dtmCurrentETSPOL = dtmETSPOL,
+		   @strETAPODReasonCode = PODRC.strReasonCodeDescription,
+		   @strETSPOLReasonCode = POLRC.strReasonCodeDescription
+	FROM tblLGLoad L
+	LEFT JOIN tblLGReasonCode PODRC ON PODRC.intReasonCodeId = L.intETAPOLReasonCodeId
+	LEFT JOIN tblLGReasonCode POLRC ON POLRC.intReasonCodeId = L.intETSPOLReasonCodeId
 	WHERE intLoadId = @intLoadId
 
 	IF EXISTS(SELECT 1 FROM tblLGLoadStg WHERE ISNULL(strFeedStatus,'') = '' AND intLoadId = @intLoadId AND strRowState = 'Added')
@@ -443,12 +449,14 @@ BEGIN TRY
 				intLoadId
 				,strTrackingType
 				,dtmETAPOD
+				,strETAPODReasonCode
 				,dtmModifiedOn
 				,intConcurrencyId
 				)
 			SELECT @intLoadId
 				,'ETA POD'
 				,@dtmCurrentETAPOD
+				,@strETAPODReasonCode
 				,GETDATE()
 				,1
 		END
@@ -465,12 +473,14 @@ BEGIN TRY
 					intLoadId
 					,strTrackingType
 					,dtmETAPOD
+					,strETAPODReasonCode
 					,dtmModifiedOn
 					,intConcurrencyId
 					)
 				SELECT @intLoadId
 					,'ETA POD'
 					,@dtmCurrentETAPOD
+					,@strETAPODReasonCode
 					,GETDATE()
 					,1
 			END
@@ -485,12 +495,14 @@ BEGIN TRY
 				 intLoadId
 				,strTrackingType
 				,dtmETSPOL
+				,strETSPOLReasonCode
 				,dtmModifiedOn
 				,intConcurrencyId
 				)
 			SELECT @intLoadId
 				,'ETS POL'
 				,@dtmCurrentETSPOL
+				,@strETSPOLReasonCode
 				,GETDATE()
 				,1
 		END
@@ -507,12 +519,14 @@ BEGIN TRY
 					intLoadId
 					,strTrackingType
 					,dtmETSPOL
+					,strETSPOLReasonCode
 					,dtmModifiedOn
 					,intConcurrencyId
 					)
 				SELECT @intLoadId
 					,'ETS POL'
 					,@dtmCurrentETSPOL
+					,@strETSPOLReasonCode					
 					,GETDATE()
 					,1
 			END

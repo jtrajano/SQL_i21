@@ -17,6 +17,7 @@ SELECT * FROM (
 		,L.dtmETAPOD AS dtmETAPOD
 		,L.dtmETAPOL AS dtmETAPOL
 		,L.dtmETSPOL AS dtmETSPOL
+		,DOC.strDocumentName
 		,'Contracts w/o shipping advice' AS strType
 	FROM tblCTContractHeader CH
 	JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -53,6 +54,7 @@ FROM (
 		,L.dtmETAPOD AS dtmETAPOD
 		,L.dtmETAPOL AS dtmETAPOL
 		,L.dtmETSPOL AS dtmETSPOL
+		,DOC.strDocumentName
 		,'Contracts w/o document' AS strType
 	FROM tblCTContractHeader CH
 	JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
