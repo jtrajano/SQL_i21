@@ -228,7 +228,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     ],
                     buttons: [
                         {
-                            text: 'Refresh open for voucher',
+                            text: 'Refresh Vouchers',
                             itemId: 'btnRefreshVoucher',
                             clickHandler: 'onRefreshVoucherClick',
                             width: 400
