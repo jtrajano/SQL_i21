@@ -21,6 +21,7 @@
 			,a.intAssignedTo
 			,a.ysnPrivate
 			,a.intCreatedBy
+			,intAttachment = (select convert(int,count(tblSMAttachment.intAttachmentId)) from tblSMAttachment where tblSMAttachment.strScreen = 'GlobalComponentEngine.view.Activity' and convert(int, tblSMAttachment.strRecordNo) = a.intActivityId)
 		from tblSMActivity a
 			left join tblEMEntity b on b.intEntityId = a.intEntityId
 			left join tblEMEntity c on c.intEntityId = a.intEntityContactId
