@@ -26,7 +26,10 @@ SELECT
 	,dblUnrealizedCreditGain	= 0 --Calcuate By GL
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
-FROM vyuICGetInventoryShipmentCharge sc
+	,ysnPayable					= CASE WHEN ssc.ysnAccrue = 1 AND ssc.intEntityVendorId IS NOT NULL AND b.intBillId IS NULL THEN 1 ELSE 0 END 
+	,ysnReceivable				= CASE WHEN ssc.ysnPrice = 1 AND id.intInvoiceId IS NULL THEN 1 ELSE 0 END 
+FROM 
+	vyuICGetInventoryShipmentCharge sc
 	INNER JOIN tblICInventoryShipmentCharge ssc ON ssc.intInventoryShipmentChargeId = sc.intInventoryShipmentChargeId
 	LEFT OUTER JOIN tblICInventoryShipment s ON s.intInventoryShipmentId = sc.intInventoryShipmentId
 	LEFT JOIN tblICItem i ON i.intItemId = ssc.intChargeId
@@ -36,8 +39,21 @@ FROM vyuICGetInventoryShipmentCharge sc
 	LEFT JOIN tblSMLineOfBusiness lob ON lob.intLineOfBusinessId = ct.intLineOfBusinessId
 	LEFT JOIN tblSMCurrencyExchangeRateType ex ON ex.intCurrencyExchangeRateTypeId = ssc.intForexRateTypeId
 	LEFT JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
-	LEFT JOIN tblARInvoiceDetail id ON id.intInventoryShipmentChargeId = sc.intInventoryShipmentChargeId
+	LEFT JOIN (
+		tblARInvoiceDetail id INNER JOIN tblARInvoice iv 
+			ON iv.intInvoiceId = id.intInvoiceId
+			AND iv.ysnPosted = 1
+	)
+		ON id.intInventoryShipmentChargeId = sc.intInventoryShipmentChargeId
 		AND id.intItemId = ssc.intChargeId
-	LEFT JOIN tblARInvoice iv ON iv.intInvoiceId = id.intInvoiceId
-WHERE s.ysnPosted = 1
-	AND id.intInvoiceId IS NULL
+
+	LEFT JOIN ( 
+		tblAPBillDetail bd INNER JOIN tblAPBill b 
+		ON b.intBillId = bd.intBillId		
+		AND b.ysnPosted = 1
+	)
+		ON bd.intInventoryShipmentChargeId = sc.intInventoryShipmentChargeId
+		AND bd.intItemId = ssc.intChargeId
+
+WHERE	s.ysnPosted = 1
+		AND (id.intInvoiceId IS NULL OR b.intBillId IS NULL)
