@@ -58,7 +58,12 @@ SELECT
 	B.strFLOId,
 	intCent = CASE WHEN (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId) IS NOT NULL THEN 0 ELSE E.intCent END,
 	ysnSubCurrency = ISNULL(E.ysnSubCurrency, 0),
-	intSubCurrencyCent = (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId)
+	intSubCurrencyCent = (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId),
+
+	B.strStoreFTPPath,
+	B.strStoreFTPUsername,
+	B.strStoreFTPPassword,
+	B.intStoreStoreId
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
