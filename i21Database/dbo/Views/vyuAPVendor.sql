@@ -63,7 +63,9 @@ SELECT
 	B.strStoreFTPPath,
 	B.strStoreFTPUsername,
 	B.strStoreFTPPassword,
-	B.intStoreStoreId
+	B.intStoreStoreId,
+	I.intStoreNo,
+	storeDescription = I.strDescription
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -85,3 +87,5 @@ FROM
 		ON B.intGLAccountExpenseId = F.intAccountId
 	LEFT JOIN dbo.tblSMPaymentMethod H
 		ON B.intPaymentMethodId = H.intPaymentMethodID
+	LEFT JOIN dbo.tblSTStore I
+		ON I.intStoreId = B.intStoreStoreId
