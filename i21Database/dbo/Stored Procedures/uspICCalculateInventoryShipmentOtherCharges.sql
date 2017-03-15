@@ -48,7 +48,7 @@ BEGIN
 END 
 
 -- Get the default currency ID
-DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 -- Calculate the cost method for "Per Unit"
 BEGIN 
@@ -65,7 +65,7 @@ BEGIN
 			,[ysnAccrue]
 			,[ysnPrice]
 	)
-	SELECT	[intInventoryShipmentId]			= ShipmentItem.intInventoryShipmentId
+	SELECT	[intInventoryShipmentId]		= ShipmentItem.intInventoryShipmentId
 			,[intInventoryShipmentChargeId]	= Charge.intInventoryShipmentChargeId
 			,[intInventoryShipmentItemId]	= ShipmentItem.intInventoryShipmentItemId
 			,[intChargeId]					= Charge.intChargeId
@@ -160,11 +160,19 @@ BEGIN
 												(ISNULL(Charge.dblRate, 0) / 100)
 												*	ISNULL(ShipmentItem.dblQuantity, 0) 
 												*	CASE 
-														WHEN ISNULL(Shipment.intCurrencyId, @DefaultCurrencyId) <> @DefaultCurrencyId THEN 
-															ISNULL(ShipmentItem.dblForeignUnitPrice, 0)
+														WHEN ISNULL(Shipment.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ShipmentItem.dblForexRate, 0) <> 0 THEN 
+															-- Convert the foreign price to transaction currency. 
+															ISNULL(ShipmentItem.dblUnitPrice, 0) * ISNULL(ShipmentItem.dblForexRate, 0) 
 														ELSE 
 															ISNULL(ShipmentItem.dblUnitPrice, 0)
 													END
+												* 
+													-- and then convert the transaction price to the other charge currency. 
+													CASE WHEN ISNULL(Charge.intCurrencyId, Shipment.intCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(Charge.dblForexRate, 0) <> 0 THEN 
+															1 / Charge.dblForexRate
+														ELSE 
+															1
+												END 
 												, 2
 											)
 

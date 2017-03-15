@@ -110,6 +110,7 @@ BEGIN
 			,strTransactionId
 			,strSourceTransactionId
 			,intSourceTransactionTypeId
+			,dblWeightPerQty
 	)
 	SELECT	intLotId				= AdjItem.intLotId
 			,strLotNumber			= NULL 
@@ -120,8 +121,8 @@ BEGIN
 			,intStorageLocationId	= StorageLocation.intStorageLocationId
 			,dblQty					= CASE WHEN @ysnPost = 1 THEN AdjItem.dblAdjustByQuantity ELSE -AdjItem.dblAdjustByQuantity END 
 			,intItemUOMId			= AdjItem.intItemUOMId
-			,dblWeight				= 0
-			,intWeightUOMId			= NULL 
+			,dblWeight				= CASE WHEN @ysnPost = 1 THEN AdjItem.dblAdjustByQuantity ELSE -AdjItem.dblAdjustByQuantity END 
+			,intWeightUOMId			= AdjItem.intItemUOMId 
 			,dtmExpiryDate			= NULL 
 			,dtmManufacturedDate	= NULL 
 			,intOriginId			= NULL 
@@ -142,6 +143,7 @@ BEGIN
 			,strTransactionId			= Adj.strAdjustmentNo
 			,strSourceTransactionId		= Adj.strAdjustmentNo
 			,intSourceTransactionTypeId = @InventoryTransactionType_InventoryAdjustment
+			,dblWeightPerQty		= 1
 	FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjItem
 				ON Adj.intInventoryAdjustmentId = AdjItem.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItem Item

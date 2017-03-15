@@ -164,7 +164,7 @@ DECLARE @EIN NVARCHAR(50)
 						--5. Collection Allowance. Do not calculate this allowance if your return and payment are late. Collection allowance rate is 0.73%
 								IF(@ScheduleCodeParam <> '')
 									BEGIN
-										SET @QueryTransaction = 'SELECT strColumnValue * ' + CONVERT(NVARCHAR(50), @TemplateConfiguration) + ' FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+										SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
 										INSERT INTO @TFTransactionSummaryTotal
 										EXEC(@QueryTransaction)
 									END

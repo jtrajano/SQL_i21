@@ -1,48 +1,8 @@
 ﻿GO
 	PRINT 'Start generating default account categories'
 GO
-
---DO NOT CHANGE THE ID NAME COMBINATION AS OTHER MODULES ARE USING ID AS REFERENCE
---TOTAL COUNT IS 56 AS OF 10-22-2015
---TOTAL COUNT IS 59 AS OF 01-26-2015
---TOTAL COUNT IS 60 AS OF 01-27-2015
-BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
-	BEGIN TRANSACTION
-	DECLARE @tblSegment TABLE(intAccountSegmentId INT, strAccountCategory VARCHAR(100))
-	DECLARE @tblCategoryGroup TABLE(intAccountCategoryGroupId INT, strAccountCategory VARCHAR(100))
-	DECLARE @tblCTCostType TABLE(intCostTypeId INT, strAccountCategory VARCHAR(100))
-	DECLARE @tblAccountGroup TABLE(intAccountGroupId INT, strAccountCategory VARCHAR(100))
-	DECLARE @tblCOATemplateDetail TABLE (intAccontTemplateDetailId INT, strAccountCategory VARCHAR(100))
-	DECLARE @tblICCategory TABLE (intCategoryAccountId INT, strAccountCategory VARCHAR(100))
-	DECLARE @tblICItemAccount TABLE (intItemAccountId INT, strAccountCategory VARCHAR(100))
-
-	DECLARE @categoryCount INT, @categoryTopId INT,@needFix BIT  =  0
 	
-	SELECT @categoryCount= COUNT(1) FROM tblGLAccountCategory
-	SELECT TOP 1 @categoryTopId = intAccountCategoryId FROM tblGLAccountCategory ORDER BY intAccountCategoryId DESC
-	IF @categoryCount <> @categoryTopId and @categoryCount > 0 SET @needFix = 1
-
-	IF @needFix =1
-	BEGIN
-		INSERT INTO @tblSegment(intAccountSegmentId,strAccountCategory)SELECT B.intAccountSegmentId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountSegment B, tblGLAccountStructure C
-		WHERE A.intAccountCategoryId = B.intAccountCategoryId 
-		AND B.intAccountStructureId = C.intAccountStructureId AND C.strType = 'Primary'
-		INSERT INTO @tblCategoryGroup(intAccountCategoryGroupId,strAccountCategory)SELECT B.intAccountCategoryGroupId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountCategoryGroup B
-		WHERE A.intAccountCategoryId = B.intAccountCategoryId
-		INSERT INTO @tblCTCostType(intCostTypeId,strAccountCategory)SELECT B.intCostTypeId, strAccountCategory FROM tblGLAccountCategory A, tblCTCostType B
-		WHERE A.intAccountCategoryId = B.intAccountCategoryId
-		INSERT INTO @tblAccountGroup(intAccountGroupId,strAccountCategory)SELECT B.intAccountGroupId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountGroup B
-		WHERE A.intAccountCategoryId = B.intAccountCategoryId
-		INSERT INTO @tblCOATemplateDetail(intAccontTemplateDetailId,strAccountCategory)SELECT B.intAccountTemplateDetailId, strAccountCategory FROM tblGLAccountCategory A, tblGLCOATemplateDetail B
-		WHERE A.intAccountCategoryId = B.intAccountCategoryId
-		INSERT INTO @tblICCategory(intCategoryAccountId,strAccountCategory)SELECT B.intCategoryAccountId, strAccountCategory FROM tblGLAccountCategory A, tblICCategoryAccount B
-		WHERE A.intAccountCategoryId = B.intAccountCategoryId
-		INSERT INTO @tblICItemAccount(intItemAccountId,strAccountCategory)SELECT B.intItemAccountId, strAccountCategory FROM tblGLAccountCategory A, tblICItemAccount B
-		WHERE A.intAccountCategoryId = B.intAccountCategoryId
-	END
-	
-	
-	SET  IDENTITY_INSERT tblGLAccountCategory ON
+SET  IDENTITY_INSERT tblGLAccountCategory ON
 	MERGE 
 	INTO	dbo.tblGLAccountCategory
 	WITH	(HOLDLOCK) 
@@ -106,10 +66,21 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 56,name = 'Other Charge Income' UNION ALL 
 			SELECT id = 57,name = 'Maintenance Sales' UNION ALL
 			SELECT id = 58,name = 'Deferred Revenue' UNION ALL
-			SELECT id = 59,name = 'Realized Gain or Loss Foreign Currency' UNION ALL
-			SELECT id = 60,name = 'Unrealized Gain or Loss Foreign Currency'UNION ALL
-			SELECT id = 61,name = 'Deferred Payable'UNION ALL
-			SELECT id = 62,name = 'Gain or loss commodity' --GL-1667
+			SELECT id = 59,name = 'Deferred Payable'UNION ALL
+			SELECT id = 60,name = 'Unrealized Gain or Loss Accounts Receivable' UNION ALL --GL-3286
+			SELECT id = 61,name = 'Unrealized Gain or Loss Accounts Payable' UNION ALL --GL-3286
+			SELECT id = 62,name = 'Unrealized Gain or Loss Cash Management' UNION ALL --GL-3286
+			SELECT id = 63,name = 'Unrealized Gain or Loss Inventory' UNION ALL --GL-3286
+			SELECT id = 64,name = 'Unrealized Gain or Loss Contract Purchase' UNION ALL --GL-3286
+			SELECT id = 65,name = 'Unrealized Gain or Loss Contract Sales'  UNION ALL --GL-3286
+			SELECT id = 66,name = 'Unrealized Gain or Loss Offset AR' UNION ALL --GL-3286
+			SELECT id = 67,name = 'Unrealized Gain or Loss Offset AP' UNION ALL --GL-3286
+			SELECT id = 68,name = 'Unrealized Gain or Loss Offset CM' UNION ALL --GL-3286
+			SELECT id = 69,name = 'Unrealized Gain or Loss Offset Inventory' UNION ALL --GL-3286
+			SELECT id = 70,name = 'Unrealized Gain or Loss Offset Contract Purchase' UNION ALL --GL-3286
+			SELECT id = 71,name = 'Unrealized Gain or Loss Offset Contract Sales' UNION ALL--GL-3286
+			SELECT id = 72,name = 'Realized Gain or Loss Payables' UNION ALL--GL-3286
+			SELECT id = 73,name = 'Realized Gain or Loss Receivables' --GL-3286
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
@@ -131,89 +102,8 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			,1
 		);
 	SET  IDENTITY_INSERT tblGLAccountCategory OFF
-	
-
-	--UPDATE RELATED TABLES
-	IF @needFix = 1
-	BEGIN
-		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-		FROM tblGLAccountSegment A 
-		JOIN @tblSegment t ON  A.intAccountSegmentId = t.intAccountSegmentId 
-		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
-
-		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-		FROM tblGLAccountCategoryGroup A 
-		JOIN @tblCategoryGroup t ON  A.intAccountCategoryGroupId = t.intAccountCategoryGroupId 
-		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
-
-		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-		FROM tblGLAccountGroup A 
-		JOIN @tblAccountGroup t ON  A.intAccountGroupId = t.intAccountGroupId 
-		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
-	
-		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-		FROM tblGLCOATemplateDetail A 
-		JOIN @tblCOATemplateDetail t ON  A.intAccountTemplateDetailId = t.intAccontTemplateDetailId
-		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
-
-		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-		FROM tblCTCostType A 
-		JOIN @tblCTCostType t ON  A.intCostTypeId = t.intCostTypeId 
-		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
-
-		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-		FROM tblICCategoryAccount A 
-		JOIN @tblICCategory t ON  A.intCategoryAccountId = t.intCategoryAccountId 
-		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
-
-		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-		FROM tblICItemAccount A 
-		JOIN @tblICItemAccount t ON  A.intItemAccountId = t.intItemAccountId 
-		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
-
-		--REMOVE EXCESS
-		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 60
-	END
-	COMMIT TRANSACTION
-END TRY
-BEGIN CATCH
-	PRINT 'Error in Generating Account Categories: ' +  ERROR_MESSAGE()
-	ROLLBACK TRANSACTION
-END CATCH
-
 GO
 
-	IF EXISTS (SELECT TOP 1 1 FROM tblGLAccountCategory WHERE strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Cash in Bank','Petty Cash','Pending AP'))
-	BEGIN -- Reverting GL-1499 
-		DECLARE @GenealCategoryId  INT,@CashCategoryId INT, @APClearing INT
-		SELECT  TOP 1 @GenealCategoryId =  intAccountCategoryId  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'General'
-		SELECT  TOP 1 @CashCategoryId =  intAccountCategoryId  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Cash Account'
-		SELECT  TOP 1 @APClearing =  intAccountCategoryId  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'AP Clearing'
-
-		UPDATE tblGLAccountSegment SET intAccountCategoryId = @GenealCategoryId
-			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Petty Cash'))
-		UPDATE tblGLAccountGroup SET intAccountCategoryId = @GenealCategoryId
-			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Petty Cash'))
-		UPDATE tblGLCOATemplateDetail SET intAccountCategoryId = @GenealCategoryId
-			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Petty Cash'))
-
-		UPDATE tblGLAccountGroup SET intAccountCategoryId = @CashCategoryId
-			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Cash in Bank')
-		UPDATE tblGLCOATemplateDetail SET intAccountCategoryId = @CashCategoryId
-			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Cash in Bank')
-		UPDATE tblGLAccountSegment SET intAccountCategoryId = @CashCategoryId
-			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Cash in Bank')
-
-		UPDATE tblGLAccountGroup SET intAccountCategoryId = @APClearing
-			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Pending AP')
-		UPDATE tblGLCOATemplateDetail SET intAccountCategoryId = @APClearing
-			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Pending AP')
-		UPDATE tblGLAccountSegment SET intAccountCategoryId = @APClearing
-			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Pending AP')
-
-		DELETE FROM tblGLAccountCategory WHERE strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Cash in Bank','Petty Cash','Pending AP')
-	END
-GO
 
 BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		

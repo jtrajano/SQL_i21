@@ -71,6 +71,9 @@ SELECT
 	 , strShipToState			= RTRIM(strShipToState)
 	 , strShipToCountry			= RTRIM(strShipToCountry)
 	 , strShipToZipCode			= RTRIM(strShipToZipCode)
+	 , intCurrencyId			= SAR.intCurrencyId
+	 , strCurrency				= SAR.strCurrency
+	 , strCurrencyDescription	= SAR.strCurrencyDescription
 FROM
 (
 --NON SOftware
@@ -109,11 +112,20 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strShipToState				= ARI.strShipToState
 	  , strShipToCountry			= ARI.strShipToCountry
 	  , strShipToZipCode			= ARI.strShipToZipCode
+	  , intCurrencyId				= ARI.intCurrencyId
+	  , strCurrency					= SMC.strCurrency
+	  , strCurrencyDescription		= SMC.strDescription
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
 			tblARInvoice ARI 
 				ON ARID.intInvoiceId = ARI.intInvoiceId
+		LEFT OUTER JOIN 
+			(SELECT intCurrencyID, 
+					strCurrency, 
+					strDescription 
+			FROM 
+				tblSMCurrency) SMC ON ARI.intCurrencyId = SMC.intCurrencyID	
 		LEFT JOIN
 			tblICItem ICI
 				ON ARID.intItemId = ICI.intItemId
@@ -229,8 +241,17 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strShipToState				= SO.strShipToState
 	 , strShipToCountry				= SO.strShipToCountry
 	 , strShipToZipCode				= SO.strShipToZipCode
+	 , intCurrencyId				= SO.intCurrencyId
+	 , strCurrency					= SMC.strCurrency
+	 , strCurrencyDescription		= SMC.strDescription
 FROM
 		tblSOSalesOrder SO 
+	LEFT OUTER JOIN 
+		(SELECT intCurrencyID, 
+				strCurrency, 
+				strDescription 
+		FROM 
+			tblSMCurrency) SMC ON SO.intCurrencyId = SMC.intCurrencyID	
 	INNER JOIN 
 		tblSOSalesOrderDetail SOD 
 			ON SO.intSalesOrderId = SOD.intSalesOrderId
@@ -368,11 +389,20 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strShipToState				= ARI.strShipToState
 	  , strShipToCountry			= ARI.strShipToCountry
 	  , strShipToZipCode			= ARI.strShipToZipCode
+	  , intCurrencyId				= ARI.intCurrencyId
+	  , strCurrency					= SMC.strCurrency
+	  , strCurrencyDescription		= SMC.strDescription
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
 			tblARInvoice ARI 
 				ON ARID.intInvoiceId = ARI.intInvoiceId
+		LEFT OUTER JOIN 
+			(SELECT intCurrencyID, 
+					strCurrency, 
+					strDescription 
+			FROM 
+				tblSMCurrency) SMC ON ARI.intCurrencyId = SMC.intCurrencyID	
 		LEFT JOIN
 			tblICItem ICI
 				ON ARID.intItemId = ICI.intItemId
@@ -489,8 +519,17 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strShipToState				= SO.strShipToState
 	 , strShipToCountry				= SO.strShipToCountry
 	 , strShipToZipCode				= SO.strShipToZipCode
+	 , intCurrencyId				= SO.intCurrencyId
+	 , strCurrency					= SMC.strCurrency
+	 , strCurrencyDescription		= SMC.strDescription
 FROM
 		tblSOSalesOrder SO 
+	LEFT OUTER JOIN 
+		(SELECT intCurrencyID, 
+				strCurrency, 
+				strDescription 
+		FROM 
+			tblSMCurrency) SMC ON SO.intCurrencyId = SMC.intCurrencyID	
 	INNER JOIN 
 		tblSOSalesOrderDetail SOD 
 			ON SO.intSalesOrderId = SOD.intSalesOrderId
@@ -628,11 +667,20 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strShipToState				= ARI.strShipToState
 	  , strShipToCountry			= ARI.strShipToCountry
 	  , strShipToZipCode			= ARI.strShipToZipCode
+	 , intCurrencyId				= ARI.intCurrencyId
+	 , strCurrency					= SMC.strCurrency
+	 , strCurrencyDescription		= SMC.strDescription
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
 			tblARInvoice ARI 
 				ON ARID.intInvoiceId = ARI.intInvoiceId
+		LEFT OUTER JOIN 
+			(SELECT intCurrencyID, 
+					strCurrency, 
+					strDescription 
+			FROM 
+				tblSMCurrency) SMC ON ARI.intCurrencyId = SMC.intCurrencyID	
 		LEFT JOIN
 			tblICItem ICI
 				ON ARID.intItemId = ICI.intItemId
@@ -749,8 +797,17 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strShipToState				= SO.strShipToState
 	 , strShipToCountry			= SO.strShipToCountry
 	 , strShipToZipCode			= SO.strShipToZipCode
+	 , intCurrencyId				= SO.intCurrencyId
+	 , strCurrency					= SMC.strCurrency
+	 , strCurrencyDescription		= SMC.strDescription
 FROM
 		tblSOSalesOrder SO 
+	LEFT OUTER JOIN 
+		(SELECT intCurrencyID, 
+				strCurrency, 
+				strDescription 
+		FROM 
+			tblSMCurrency) SMC ON SO.intCurrencyId = SMC.intCurrencyID	
 	INNER JOIN 
 		tblSOSalesOrderDetail SOD 
 			ON SO.intSalesOrderId = SOD.intSalesOrderId
@@ -888,11 +945,20 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strShipToState				= ARI.strShipToState
 	  , strShipToCountry			= ARI.strShipToCountry
 	  , strShipToZipCode			= ARI.strShipToZipCode
+	 , intCurrencyId				= ARI.intCurrencyId
+	 , strCurrency					= SMC.strCurrency
+	 , strCurrencyDescription		= SMC.strDescription
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
 			tblARInvoice ARI 
 				ON ARID.intInvoiceId = ARI.intInvoiceId
+		LEFT OUTER JOIN 
+			(SELECT intCurrencyID, 
+					strCurrency, 
+					strDescription 
+			FROM 
+				tblSMCurrency) SMC ON ARI.intCurrencyId = SMC.intCurrencyID	
 		LEFT JOIN
 			tblICItem ICI
 				ON ARID.intItemId = ICI.intItemId

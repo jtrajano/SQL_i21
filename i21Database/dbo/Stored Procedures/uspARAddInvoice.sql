@@ -139,14 +139,14 @@ SELECT TE.InvoiceNumber														-- invoice number
 	 , IE.strSourceId														--[strInvoiceOriginId]
 	 , IE.[intEntityCustomerId]												--[intEntityCustomerId]
 	 , CAST(IE.dtmDate AS DATE)												--[dtmDate]
-	 , dbo.fnGetDueDateBasedOnTerm(CAST(IE.dtmDate AS DATE), ISNULL(EL.[intTermsId],0))	--[dtmDueDate]
+	 , dbo.fnGetDueDateBasedOnTerm(CAST(IE.dtmDate AS DATE), ISNULL(AC.[intTermsId],0))	--[dtmDueDate]
 	 , ISNULL(MIN(AC.intCurrencyId), IE.intCurrencyId)						--[intCurrencyId]
 	 , ISNULL(IE.intLocationId, (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))	--[intCompanyLocationId]
 	 , ISNULL(IE.[intSalesPersonId], MIN(AC.[intSalespersonId]))			--[intEntitySalespersonId]
 	 , CAST(IE.dtmDate AS DATE)												--[dtmShipDate]
 	 , ISNULL(IE.intShipViaId, ISNULL(MIN(EL.[intShipViaId]), 0))			--[intShipViaId]
 	 , IE.strPurchaseOrder    												--[strPONumber]
-	 , EL.[intTermsId]														--[intTermId]
+	 , AC.[intTermsId]														--[intTermId]
 	 , 0          															--[dblInvoiceSubtotal] need to check
 	 , @ZeroDecimal															--[dblShipping]
 	 , @ZeroDecimal															--[dblTax]
@@ -210,7 +210,7 @@ LEFT OUTER JOIN [tblEMEntityLocation] SL
 LEFT OUTER JOIN [tblEMEntityLocation] BL
 		ON AC.[intBillToId] = BL.intEntityLocationId	
 WHERE IE.intInvoiceId IS NULL OR IE.intInvoiceId = 0
-GROUP BY TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId,IE.strBOLNumber,IE.strSourceScreenName;				
+GROUP BY TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,AC.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId,IE.strBOLNumber,IE.strSourceScreenName;				
 
 ENABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
 
@@ -219,14 +219,14 @@ SET
 	 [strInvoiceOriginId]			= IE.strSourceId
 	,[intEntityCustomerId]			= IE.[intEntityCustomerId]
 	,[dtmDate]						= CAST(IE.dtmDate AS DATE)
-	,[dtmDueDate]					= dbo.fnGetDueDateBasedOnTerm(CAST(IE.dtmDate AS DATE), ISNULL(EL.[intTermsId],0))
+	,[dtmDueDate]					= dbo.fnGetDueDateBasedOnTerm(CAST(IE.dtmDate AS DATE), ISNULL(AC.[intTermsId],0))
 	,[intCurrencyId]				= ISNULL(IE.intCurrencyId,AC.[intCurrencyId])
 	,[intCompanyLocationId]			= ISNULL(IE.intLocationId, (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))
 	,[intEntitySalespersonId]		= ISNULL(IE.[intSalesPersonId],AC.[intSalespersonId])
 	,[dtmShipDate]					= CAST(IE.dtmDate AS DATE)
 	,[intShipViaId]					= ISNULL(IE.intShipViaId,ISNULL(EL.[intShipViaId], 0))
 	,[strPONumber]					= IE.strPurchaseOrder
-	,[intTermId]					= EL.[intTermsId]
+	,[intTermId]					= AC.[intTermsId]
 	,[dblInvoiceSubtotal]			= @ZeroDecimal
 	,[dblShipping]					= @ZeroDecimal
 	,[dblTax]						= @ZeroDecimal

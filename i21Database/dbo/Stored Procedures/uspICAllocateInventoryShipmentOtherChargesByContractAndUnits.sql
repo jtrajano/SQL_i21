@@ -36,6 +36,12 @@ DECLARE	-- Shipment Types
 		,@SOURCE_TYPE_Inbound_Shipment AS INT = 2
 		,@SOURCE_TYPE_Transport AS INT = 3
 
+-- Get the functional currency
+BEGIN 
+	DECLARE @intFunctionalCurrencyId AS INT
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+END
+
 -- Allocate price by 'Unit' and by Contract where cost methods are using 'Per Unit' and 'Percentage' 
 BEGIN 
 	-- Upsert (update or insert) a record into the Shipment Item Allocated Charge table. 
@@ -55,25 +61,31 @@ BEGIN
 					AND ShipmentItem.intOrderId IS NOT NULL 
 					AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 				INNER JOIN (					
-					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount) 								
-							,ysnAccrue
-							,intContractId
-							,intContractDetailId 
-							,intEntityVendorId
-							,intInventoryShipmentId
-							,intInventoryShipmentChargeId
-							,ysnPrice
-					FROM	dbo.tblICInventoryShipmentChargePerItem CalculatedCharge				
+					SELECT	dblTotalOtherCharge = 
+								-- Convert the other charge amount to functional currency. 
+								SUM(
+									dblCalculatedAmount
+									--* CASE WHEN ISNULL(Charge.dblForexRate, 0) = 0 AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE Charge.dblForexRate END 
+								)												
+							,CalculatedCharge.ysnAccrue
+							,CalculatedCharge.intContractId
+							,CalculatedCharge.intContractDetailId 
+							,CalculatedCharge.intEntityVendorId
+							,CalculatedCharge.intInventoryShipmentId
+							,CalculatedCharge.intInventoryShipmentChargeId
+							,CalculatedCharge.ysnPrice
+					FROM	dbo.tblICInventoryShipmentChargePerItem CalculatedCharge INNER JOIN tblICInventoryShipmentCharge Charge
+								ON CalculatedCharge.intInventoryShipmentChargeId = Charge.intInventoryShipmentChargeId				
 					WHERE	CalculatedCharge.intInventoryShipmentId = @intInventoryShipmentId
 							AND CalculatedCharge.strAllocatePriceBy = @ALLOCATE_PRICE_BY_Unit
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY ysnAccrue
-							, intContractId
-							, intContractDetailId
-							, intEntityVendorId
-							, intInventoryShipmentId
-							, intInventoryShipmentChargeId
-							, ysnPrice
+					GROUP BY CalculatedCharge.ysnAccrue
+							, CalculatedCharge.intContractId
+							, CalculatedCharge.intContractDetailId
+							, CalculatedCharge.intEntityVendorId
+							, CalculatedCharge.intInventoryShipmentId
+							, CalculatedCharge.intInventoryShipmentChargeId
+							, CalculatedCharge.ysnPrice
 				) CalculatedCharges 
 					ON CalculatedCharges.intContractId = ShipmentItem.intOrderId 
 					--AND CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo //removing this because Shipment could have many contract details/sequences per contract

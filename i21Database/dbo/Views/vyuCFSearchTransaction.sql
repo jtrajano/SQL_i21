@@ -51,3 +51,13 @@ FROM         dbo.tblCFTransaction AS cfTransaction LEFT OUTER JOIN
                                 GROUP BY intTransactionId) AS tblCFTransactionTax_1 ON cfTransaction.intTransactionId = tblCFTransactionTax_1.intTransactionId LEFT OUTER JOIN
                          dbo.tblCTContractHeader AS ctContracts ON cfTransaction.intContractId = ctContracts.intContractHeaderId
 GO
+
+
+
+GO
+
+
+
+GO
+
+

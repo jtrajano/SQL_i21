@@ -232,6 +232,7 @@ BEGIN
 		,ysnAccrue
 		,ysnPrice
 		,dblForexRate
+		,strRateType
 	)
 	AS 
 	(
@@ -245,13 +246,14 @@ BEGIN
 				,dblCost = AllocatedOtherCharges.dblAmount
 				,intTransactionTypeId  = @intTransactionTypeId
 				,intCurrencyId = ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId) 
-				,dblExchangeRate = 1
+				,dblExchangeRate = ISNULL(ShipmentCharges.dblForexRate, 1) 
 				,ShipmentItem.intInventoryShipmentItemId
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
 				,AllocatedOtherCharges.ysnAccrue
 				,AllocatedOtherCharges.ysnPrice
-				,ShipmentCharges.dblForexRate
+				,dblForexRate = ISNULL(ShipmentCharges.dblForexRate, 1) 
+				,strRateType = currencyRateType.strCurrencyExchangeRateType
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem 
 					ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 				INNER JOIN dbo.tblICInventoryShipmentItemAllocatedCharge AllocatedOtherCharges
@@ -267,6 +269,8 @@ BEGIN
 					AND ChargeItemLocation.intLocationId = Shipment.intShipFromLocationId
 				LEFT JOIN dbo.tblICInventoryTransactionType TransType
 					ON TransType.intTransactionTypeId = @intTransactionTypeId
+				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+					ON currencyRateType.intCurrencyExchangeRateTypeId = ShipmentCharges.intForexRateTypeId
 		WHERE	Shipment.intInventoryShipmentId = @intInventoryShipmentId
 				
 	)
@@ -310,7 +314,8 @@ BEGIN
 			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
-			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,dblForeignRate				= ForGLEntries_CTE.dblForexRate
+			,strRateType				= ForGLEntries_CTE.strRateType 
 	FROM	ForGLEntries_CTE  
 			INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
@@ -368,6 +373,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId

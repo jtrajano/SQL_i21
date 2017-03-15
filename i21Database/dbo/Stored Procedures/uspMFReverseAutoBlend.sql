@@ -138,6 +138,7 @@ INSERT INTO @GLEntries (
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 		)
 		EXEC dbo.uspICUnpostCosting
 		 @intBatchId

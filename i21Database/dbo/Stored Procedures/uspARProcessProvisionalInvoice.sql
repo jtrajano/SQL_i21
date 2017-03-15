@@ -176,6 +176,9 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+		,[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]
 		,[intSubCurrencyId] 
 		,[dblSubCurrencyRate]
 	)
@@ -266,6 +269,9 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]			= ARID.[ysnVirtualMeterReading]
 		,[intDestinationGradeId]			= ARSID.[intDestinationGradeId]
 		,[intDestinationWeightId]			= ARSID.[intDestinationWeightId]
+		,[intCurrencyExchangeRateTypeId]	= ARSID.[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]		= ARSID.[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]			= ARSID.[dblCurrencyExchangeRate]
 		,[intSubCurrencyId]					= ARSID.[intSubCurrencyId]
 		,[dblSubCurrencyRate]				= ARSID.[dblSubCurrencyRate]
 	FROM
@@ -374,6 +380,9 @@ SELECT
 		,[ysnVirtualMeterReading]			= ARID.[ysnVirtualMeterReading]
 		,[intDestinationGradeId]			= ISI.[intDestinationGradeId]
 		,[intDestinationWeightId]			= ISI.[intDestinationWeightId]
+		,[intCurrencyExchangeRateTypeId]	= ISI.[intForexRateTypeId]
+		,[intCurrencyExchangeRateId]		= NULL
+		,[dblCurrencyExchangeRate]			= ISI.[dblForexRate]
 		,[intSubCurrencyId]					= ARID.[intSubCurrencyId]
 		,[dblSubCurrencyRate]				= ARID.[dblSubCurrencyRate]
 	FROM

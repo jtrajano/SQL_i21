@@ -6,7 +6,6 @@
     [ysnTicketAllowed] BIT NOT NULL, 
     [intNextTicketNumber] INT NOT NULL, 
     [intDiscountSchedule] INT NULL, 
-    [intDiscountLocationId] INT  NULL, 
     [intDistributionMethod] INT NOT NULL, 
     [ysnSelectByPO] BIT NOT NULL, 
     [intSplitInvoiceOption] INT NOT NULL, 
@@ -18,7 +17,6 @@
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSCTicketType_intTicketTypeId] PRIMARY KEY ([intTicketTypeId]), 
     CONSTRAINT [FK_tblSCTicketType_tblSCTicketPool_intTicketPoolId] FOREIGN KEY (intTicketPoolId) REFERENCES tblSCTicketPool(intTicketPoolId),
-    CONSTRAINT [FK_tblSCTicketType_tblSMCompanyLocation_intDiscountLocationId] FOREIGN KEY ([intDiscountLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblSCTicketType_tblSCListTicketType_intListTicketTypeId] FOREIGN KEY ([intListTicketTypeId]) REFERENCES [tblSCListTicketTypes]([intTicketTypeId])
 )
 
@@ -160,11 +158,3 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Discount Location',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicketType',
-    @level2type = N'COLUMN',
-    @level2name = N'intDiscountLocationId'

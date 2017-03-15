@@ -14,6 +14,9 @@ DECLARE @Type NVARCHAR(100)
 DECLARE @DiscountDay INT, @DayMonthDue INT, @DueNextMonth INT
 DECLARE @DiscountEP NUMERIC(18,6)
 DECLARE @DiscountDate datetime
+DECLARE @CurrentDate datetime
+
+SET @CurrentDate = DATEADD(DAY, 0, DATEDIFF(DAY, 0, GETDATE()))
 
 SELECT 
 	 @Type = strType 
@@ -28,7 +31,7 @@ WHERE
 
 IF (@Type = 'Standard')
 	BEGIN
-		IF (DATEADD(DAY,@DiscountDay,@TransactionDate) >= @PaymentDate)
+		IF ((DATEADD(DAY,@DiscountDay,@TransactionDate) >= @PaymentDate) AND (DATEADD(DAY,@DiscountDay,@TransactionDate) >= @CurrentDate))
 			BEGIN
 				RETURN @InvoiceTotal * (@DiscountEP / 100)
 			END
@@ -44,8 +47,8 @@ ELSE IF (@Type = 'Date Driven')
 		
 		DECLARE @TempDiscountDate datetime
 		Set @TempDiscountDate = CONVERT(datetime, (CAST(@TransactionMonth AS nvarchar(10)) + '/' + CAST(@DiscountDay AS nvarchar(10)) + '/' + CAST(@TransactionYear AS nvarchar(10))), 101)
-			
-		IF (@TempDiscountDate >= @PaymentDate)
+				
+		IF ((@TempDiscountDate >= @PaymentDate) AND (DATEADD(DAY,@DiscountDay,@TransactionDate) >= @CurrentDate))
 			BEGIN
 				RETURN @InvoiceTotal * (@DiscountEP / 100)
 			END
@@ -57,7 +60,7 @@ ELSE IF (@Type = 'Date Driven')
 	END	
 ELSE
 	BEGIN
-		IF (@DiscountDate >= @PaymentDate)
+		IF ((@DiscountDate >= @PaymentDate) AND (DATEADD(DAY,@DiscountDay,@TransactionDate) >= @CurrentDate)) 
 			BEGIN
 				RETURN @InvoiceTotal * (@DiscountEP / 100)
 			END

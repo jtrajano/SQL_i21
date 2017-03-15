@@ -71,10 +71,16 @@ BEGIN
 	INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'Pac Pride', N'Delimiter', N'Comma', NULL, N'', 1, 1)
 	SET @pacpridePK = SCOPE_IDENTITY();
 
+	
 	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) 
-	VALUES (@pacpridePK, N'Transaction Date', 0, 10, NULL, 0, 4, NULL)
+	VALUES (@pacpridePK, N'Transaction Date', 0, 10, NULL, 1, 5, NULL)
 	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
-	VALUES (@pacpridePK, SCOPE_IDENTITY(), 29, 0, NULL, N'tblCFTransaction', N'dtmTransactionDate', NULL, 0, N'', 1, 4)
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 29, 1, NULL, N'tblCFTransaction', N'dtmTransactionDate', NULL, 0, N'', 1, 4)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) 
+	VALUES (@pacpridePK, N'Transaction Time', 0, 11, NULL, 1, 1, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 63, 2, NULL, NULL, NULL, NULL, NULL, NULL, 1, 2)
 
 	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat]) 
 	VALUES (@pacpridePK, N'Site Number', 0, 2, NULL, 0, 3, NULL)

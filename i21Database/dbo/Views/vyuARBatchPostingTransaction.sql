@@ -4,10 +4,13 @@ SELECT
 	 GL.strBatchId
 	,GL.dtmDate
 	,GL.strTransactionType
-	,COUNT(AR.intTransactionId) dblEntriesCount
-	,SUM(AR.dblTotal) dblTotalAmount
+	,dblEntriesCount			= COUNT(AR.intTransactionId)  
+	,dblTotalAmount				= SUM(AR.dblTotal) 
 	,AR.strUserName
 	,AR.strLocationName	
+	,intCurrencyId				= AR.intCurrencyID
+	,AR.strCurrency
+	,AR.strCurrencyDescription
 FROM
 	(SELECT 
 		strBatchId
@@ -24,13 +27,16 @@ FROM
 INNER JOIN
 	(
 		SELECT
-			 strPostingType		= 'Invoice' 
-			,dblTotal			= INV.dblInvoiceTotal
-			,intTransactionId	= INV.intInvoiceId
-			,strTransactionId	= INV.strInvoiceNumber
-			,intAccountId		= INV.intAccountId
-			,strUserName		= E.strName 
-			,strLocationName	= LOC.strLocationName
+			 strPostingType			= 'Invoice' 
+			,dblTotal				= INV.dblInvoiceTotal
+			,intTransactionId		= INV.intInvoiceId
+			,strTransactionId		= INV.strInvoiceNumber
+			,intAccountId			= INV.intAccountId
+			,strUserName			= E.strName 
+			,strLocationName		= LOC.strLocationName
+			,intCurrencyID			= SMC.intCurrencyID
+			,strCurrency			= SMC.strCurrency
+			,strCurrencyDescription	= SMC.strDescription
 		FROM
 			(SELECT 
 				intInvoiceId
@@ -38,7 +44,8 @@ INNER JOIN
 				, intEntityId
 				, intAccountId
 				, intCompanyLocationId
-				, dblInvoiceTotal
+				, dblInvoiceTotal	
+				, intCurrencyId			
 			 FROM 
 				tblARInvoice
 			 WHERE
@@ -55,6 +62,12 @@ INNER JOIN
 					, strLocationName
 				  FROM 
 					dbo.tblSMCompanyLocation) LOC ON INV.intCompanyLocationId  = LOC.intCompanyLocationId 
+			LEFT OUTER JOIN 
+				(SELECT intCurrencyID, 
+						strCurrency, 
+						strDescription 
+				FROM 
+					tblSMCurrency) SMC ON INV.intCurrencyId = SMC.intCurrencyID	
 			
 		UNION
 		
@@ -66,6 +79,9 @@ INNER JOIN
 			,intAccountId		= AR.intAccountId
 			,strUserName		= E.strName 
 			,strLocationName	= LOC.strLocationName
+			,intCurrencyID			= SMC.intCurrencyID
+			,strCurrency			= SMC.strCurrency
+			,strCurrencyDescription	= SMC.strDescription
 		FROM
 			(SELECT 
 				intPaymentId
@@ -74,6 +90,7 @@ INNER JOIN
 				, intEntityId
 				, dblAmountPaid
 				, intLocationId
+				, intCurrencyId
 			 FROM 
 				tblARPayment
 			 WHERE 
@@ -90,6 +107,12 @@ INNER JOIN
 					, strLocationName
 				 FROM 
 					dbo.tblSMCompanyLocation) LOC ON AR.intLocationId  = LOC.intCompanyLocationId 			
+			LEFT OUTER JOIN 
+				(SELECT intCurrencyID, 
+						strCurrency, 
+						strDescription 
+				FROM 
+					tblSMCurrency) SMC ON AR.intCurrencyId = SMC.intCurrencyID	
 	) AR
 ON GL.intTransactionId = AR.intTransactionId
 AND GL.strTransactionType IN ('Invoice','Receive Payments', 'Credit Memo')
@@ -102,3 +125,6 @@ GROUP BY
 	,GL.strTransactionType 
 	,AR.strUserName
 	,AR.strLocationName
+	,AR.intCurrencyID
+	,AR.strCurrency
+	,AR.strCurrencyDescription

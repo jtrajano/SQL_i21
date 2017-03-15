@@ -29,8 +29,10 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strOrderUOM = ShipmentItemSource.strOrderUOM
 	, strUnitMeasure = UOM.strUnitMeasure
 	, dblItemUOMConv = ItemUOM.dblUnitQty
+	, intDecimalPlaces = UOM.intDecimalPlaces
+	, intUnitMeasureId = UOM.intUnitMeasureId
 	, strUnitType = UOM.strUnitType
-	, ShipmentItem.intCurrencyId
+	, intCurrencyId = Currency.intCurrencyID
 	, Currency.strCurrency
 	, strWeightUOM = WeightUOM.strUnitMeasure
 	, dblWeightItemUOMConv = ItemWeightUOM.dblUnitQty
@@ -65,7 +67,7 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId    
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ShipmentItem.intGradeId
 	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ShipmentItem.intDiscountSchedule
-	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ShipmentItem.intCurrencyId
+	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = Shipment.intCurrencyId
 	LEFT JOIN tblGRStorageType StorageType ON StorageType.intStorageScheduleTypeId = ShipmentItem.intStorageScheduleTypeId
 	LEFT JOIN tblCTWeightGrade DestWeights ON DestWeights.intWeightGradeId = ShipmentItem.intDestinationWeightId
 	LEFT JOIN tblCTWeightGrade DestGrades ON DestGrades.intWeightGradeId = ShipmentItem.intDestinationGradeId

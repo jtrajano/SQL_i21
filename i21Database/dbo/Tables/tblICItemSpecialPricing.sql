@@ -27,12 +27,14 @@ Type the overview for the table here.
 		[dblDiscountThruAmount] NUMERIC(18,6) NULL DEFAULT ((0)),
 		[dblAccumulatedQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblAccumulatedAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[intCurrencyId] [int] NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemSpecialPricing] PRIMARY KEY ([intItemSpecialPricingId]), 
 		CONSTRAINT [FK_tblICItemSpecialPricing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemSpecialPricing_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
-		CONSTRAINT [FK_tblICItemSpecialPricing_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+		CONSTRAINT [FK_tblICItemSpecialPricing_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+		CONSTRAINT [FK_tblICItemSpecialPricing_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 	)
 
 	GO

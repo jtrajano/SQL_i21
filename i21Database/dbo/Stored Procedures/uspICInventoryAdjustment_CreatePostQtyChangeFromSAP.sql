@@ -205,12 +205,12 @@ BEGIN
 													ELSE ISNULL(StocksPerUOM.dblOnHand, 0)
 											END 
 											+ @dblAdjustByQuantity
-			,intWeightUOMId				= Lot.intWeightUOMId
+			,intWeightUOMId				= ISNULL(Lot.intWeightUOMId, @intItemUOMId)
 			,dblWeight					=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN ABS(dbo.fnMultiply(@dblAdjustByQuantity, Lot.dblWeightPerQty)) 
-													WHEN Lot.intWeightUOMId = @intItemUOMId THEN ABS(@dblAdjustByQuantity) 
+													WHEN Lot.intWeightUOMId = @intItemUOMId OR Lot.intWeightUOMId IS NULL THEN ABS(@dblAdjustByQuantity)
 													ELSE 0 
 											END 
-			,dblWeightPerQty			= Lot.dblWeightPerQty
+			,dblWeightPerQty			= ISNULL(Lot.dblWeightPerQty, 1)
 			,dblCost					= dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, @intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
 			,dblNewCost					= @dblNewUnitCost
 			,intSort					= 1

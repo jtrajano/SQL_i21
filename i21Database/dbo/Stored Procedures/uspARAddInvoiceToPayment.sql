@@ -112,7 +112,7 @@ SET @PaymentTotal = ROUND(ISNULL((SELECT SUM(ISNULL(dblPayment, @ZeroDecimal)) F
 DECLARE @ErrorMsg NVARCHAR(100)
 SET @ErrorMsg = CONVERT(NVARCHAR(100),CAST(ISNULL(@Payment,@ZeroDecimal) AS MONEY),2) 
 
-IF (@PaymentTotal + @Payment) > (@AmountPaid + @Payment)
+IF (@PaymentTotal + @Payment) > (@AmountPaid + @Payment) AND @TransactionType <> 'Customer Prepayment'
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120059, 16, 1, @ErrorMsg);

@@ -75,6 +75,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@ItemId						INT				= NULL
 			,@ItemDescription				NVARCHAR(500)	= NULL
 			,@TaxGroupId					INT				= NULL
+			,@TaxClassId					INT				= NULL
 			,@AmountDue						NUMERIC(18,6)	= @ZeroDecimal
 			,@TaxAmount						NUMERIC(18,6)	= @ZeroDecimal
 			,@Total							NUMERIC(18,6)	= @ZeroDecimal
@@ -87,6 +88,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@BillingBy						NVARCHAR(50)	= NULL
 			,@COGSAmount					NUMERIC(18,6)   = @ZeroDecimal
 			,@CustomerNumber				NVARCHAR(100)	= NULL
+			,@ItemCategory					NVARCHAR(100)	= NULL
 			,@intItemLocationId				INT				= NULL
 			,@ysnAllowNegativeStock			BIT				= 0
 			,@intStockUnit					INT				= NULL
@@ -186,8 +188,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @CompanyLocationId			= CL.intCompanyLocationId
 					, @EntityId						= ISNULL(@UserEntityId, IL.intEntityId)
 					, @EntitySalespersonId			= SP.intEntitySalespersonId
-					, @TermId						= EL.intTermsId
-					, @DueDate						= dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, EL.intTermsId)
+					, @TermId						= C.intTermsId
+					, @DueDate						= dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, C.intTermsId)
 					, @TransactionType				= ILD.strTransactionType
 					, @Type							= @Type
 					, @Comment						= @IMPORTFORMAT_CARQUEST + ' ' + ILD.strTransactionType + ' ' + ILD.strTransactionNumber
@@ -201,7 +203,9 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @ItemId						= ICI.intItemId
 					, @ItemPrice					= ABS(ISNULL(ILD.dblSubtotal, @ZeroDecimal))
 					, @ItemDescription				= ICI.strDescription
-					, @TaxGroupId					= EL.intTaxGroupId
+					, @TaxGroupId					= TGC.intTaxGroupId
+					, @TaxClassId					= CATEGORYTAX.intTaxClassId
+					, @ItemCategory                 = ISNULL(ICC.strCategoryCode, '') + ' - ' + ISNULL(ICC.strDescription, '')
 					, @Total						= ABS(ILD.dblTotal)
 					, @COGSAmount					= ABS(ILD.dblCOGSAmount)
 					, @FreightTermId				= ISNULL(EL.intFreightTermId, 0)
@@ -218,20 +222,36 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 						ON ILD.intImportLogId = IL.intImportLogId
 				LEFT JOIN
 					(tblARCustomer C
+						INNER JOIN tblEMEntity EC
+							ON C.intEntityCustomerId = EC.intEntityId
 						INNER JOIN tblEMEntityLocation EL
 							ON C.intEntityCustomerId = EL.intEntityId
 							AND EL.ysnDefaultLocation = 1)
-						ON ILD.strCustomerNumber = C.strCustomerNumber
+						ON ILD.strCustomerNumber = EC.strEntityNo
 				LEFT JOIN
 					tblSMCompanyLocation CL
 						ON CL.intCompanyLocationId = @ImportLocationId
 				LEFT JOIN
-					tblARSalesperson SP
-						ON ILD.strSalespersonNumber = SP.strSalespersonId
+					(tblARSalesperson SP 
+						INNER JOIN tblEMEntity ESP
+							ON SP.intEntitySalespersonId = ESP.intEntityId)
+						ON ILD.strSalespersonNumber = ESP.strEntityNo
 				LEFT JOIN
 					tblICItem ICI
 						ON ICI.intItemId = @ImportItemId
 						AND ICI.strType = 'Inventory'
+				LEFT JOIN
+					tblICCategory ICC
+						ON ICI.intCategoryId = ICC.intCategoryId
+				CROSS APPLY
+					(SELECT TOP 1 intCategoryId, intTaxClassId
+					FROM tblICCategoryTax 
+					WHERE intCategoryId = ICI.intCategoryId
+					) CATEGORYTAX
+				LEFT JOIN
+					tblSMTaxCode TC ON CATEGORYTAX.intTaxClassId = TC.intTaxClassId
+				LEFT JOIN
+					tblSMTaxGroupCode TGC ON TC.intTaxCodeId = TGC.intTaxCodeId
 				LEFT JOIN
 					tblICItemLocation ICIL 
 						ON ICIL.intItemId = ICI.intItemId 
@@ -306,7 +326,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Term Code provided does not exists. '
 		ELSE IF @TermId = 0 AND @IsTank = 0
 			BEGIN
-				SELECT TOP 1 @TermId = intTermsId FROM [tblEMEntityLocation] WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
+				SELECT TOP 1 @TermId = intTermsId FROM [tblARCustomer] WHERE intEntityCustomerId = @EntityCustomerId  
 				IF ISNULL(@TermId, 0) = 0
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The customer provided doesn''t have default terms. '				
 			END
@@ -329,7 +349,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		IF @TaxGroupId IS NULL
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 
 								CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST
-									THEN 'Customer ' + @CustomerNumber + ' doesn''t have default tax group set up.'
+									THEN 'Category ' + @ItemCategory + ' doesn''t have default tax class set up.'
 									ELSE 'The Tax Group provided does not exists. '
 								END									
 		ELSE IF @TaxGroupId = 0
@@ -343,6 +363,9 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 				IF ISNULL(@TaxGroupId, 0) > 0 AND NOT EXISTS (SELECT NULL FROM tblSMTaxGroupCode WHERE intTaxGroupId = @TaxGroupId)
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Tax Group must have atleast (1) one Tax Code setup.'
 				
+				IF ISNULL(@TaxClassId, 0) = 0
+					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item Category doesn''t have default tax class set up.'
+
 				IF ISNULL(@intItemLocationId, 0) = 0
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item Location for the selected item is required.'
 
@@ -442,6 +465,11 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCOGSAmount]
 							,[intTempDetailIdForTaxes]
 							,[intConversionAccountId]
+							,[intCurrencyExchangeRateTypeId]
+							,[intCurrencyExchangeRateId]
+							,[dblCurrencyExchangeRate]
+							,[intSubCurrencyId]
+							,[dblSubCurrencyRate]
 						)
 						SELECT 
 							 [strSourceTransaction]		= 'Import'
@@ -528,6 +556,11 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCOGSAmount]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST THEN @COGSAmount ELSE NULL END
 							,[intTempDetailIdForTaxes]  = @ImportLogDetailId
 							,[intConversionAccountId]	= @ConversionAccountId
+							,[intCurrencyExchangeRateTypeId]	= NULL
+							,[intCurrencyExchangeRateId]		= NULL
+							,[dblCurrencyExchangeRate]	= 1.000000
+							,[intSubCurrencyId]			= NULL
+							,[dblSubCurrencyRate]		= 1.000000
 				
 						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 							BEGIN
@@ -571,6 +604,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 									INNER JOIN tblSMTaxCodeRate TCR
 										ON TC.intTaxCodeId = TCR.intTaxCodeId
 								WHERE TGC.intTaxGroupId = @TaxGroupId 
+								  AND TC.intTaxClassId = @TaxClassId
 							END
 						
 						EXEC [dbo].[uspARProcessInvoices]

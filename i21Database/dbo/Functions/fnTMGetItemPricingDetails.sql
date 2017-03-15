@@ -26,7 +26,7 @@
 	,@AllowQtyToExceed			BIT
 	,@InvoiceType				NVARCHAR(200)
 	,@TermId					INT
-	,@GetAllAvailablePricing	BIT
+	,@GetAllAvailablePricing	BIT	
 )
 RETURNS @returntable TABLE
 (
@@ -70,5 +70,6 @@ BEGIN
 		,@InvoiceType			
 		,@TermId				
 		,@GetAllAvailablePricing)
+
 	RETURN
 END

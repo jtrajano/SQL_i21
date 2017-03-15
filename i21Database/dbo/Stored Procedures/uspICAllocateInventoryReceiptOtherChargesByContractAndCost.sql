@@ -36,6 +36,13 @@ DECLARE	-- Receipt Types
 		,@SOURCE_TYPE_InboundShipment AS INT = 2
 		,@SOURCE_TYPE_Transport AS INT = 3
 
+
+-- Get the functional currency
+BEGIN 
+	DECLARE @intFunctionalCurrencyId AS INT
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+END 
+
 -- Allocate cost by 'Cost' and by Contract and cost methods are used are 'Per Unit' and 'Percentage' 
 BEGIN
 	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
@@ -56,20 +63,35 @@ BEGIN
 					AND ReceiptItem.intOrderId IS NOT NULL 
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 				INNER JOIN (
-					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
-							,ysnAccrue
-							,intContractId
-							,intContractDetailId
-							,intEntityVendorId
-							,ysnInventoryCost
-							,intInventoryReceiptId
-							,intInventoryReceiptChargeId
-							,ysnPrice
-					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge 					
+					SELECT	
+							dblTotalOtherCharge = 
+								-- Convert the other charge amount to functional currency. 
+								SUM(
+									dblCalculatedAmount
+									--* CASE WHEN ISNULL(Charge.dblForexRate, 0) = 0 AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE Charge.dblForexRate END 
+								)
+							,CalculatedCharge.ysnAccrue
+							,CalculatedCharge.intContractId
+							,CalculatedCharge.intContractDetailId
+							,CalculatedCharge.intEntityVendorId
+							,CalculatedCharge.ysnInventoryCost
+							,CalculatedCharge.intInventoryReceiptId
+							,CalculatedCharge.intInventoryReceiptChargeId
+							,CalculatedCharge.ysnPrice
+					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge INNER JOIN tblICInventoryReceiptCharge Charge
+								ON CalculatedCharge.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId										
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Cost
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY ysnAccrue, intContractId, intContractDetailId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId, ysnPrice
+					GROUP BY 
+						CalculatedCharge.ysnAccrue
+						, CalculatedCharge.intContractId
+						, CalculatedCharge.intContractDetailId
+						, CalculatedCharge.intEntityVendorId
+						, CalculatedCharge.ysnInventoryCost
+						, CalculatedCharge.intInventoryReceiptId
+						, CalculatedCharge.intInventoryReceiptChargeId
+						, CalculatedCharge.ysnPrice
 				) CalculatedCharges 
 					ON CalculatedCharges.intContractId = ReceiptItem.intOrderId
 					AND CalculatedCharges.intContractDetailId = ReceiptItem.intLineNo 
@@ -81,7 +103,10 @@ BEGIN
 												ELSE 
 													ISNULL(ReceiptItem.dblOpenReceive, 0) 
 										END
-										, ISNULL(ReceiptItem.dblUnitCost, 0)
+										, (
+											ISNULL(ReceiptItem.dblUnitCost, 0)
+											--* CASE WHEN ISNULL(ReceiptItem.dblForexRate, 0) = 0 AND ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE ReceiptItem.dblForexRate END 
+										)										
 									)
 								)
 							,ReceiptItem.intOrderId 

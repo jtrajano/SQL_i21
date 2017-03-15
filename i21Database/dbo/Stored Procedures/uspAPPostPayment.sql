@@ -430,6 +430,9 @@ ELSE
 			,[strTransactionType]
 			,[strAccountId]
 			,[strAccountGroup]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
+			,[strRateType]
 		)
 		SELECT
 			[strTransactionId]
@@ -456,6 +459,9 @@ ELSE
 			,A.[strTransactionType]
 			,B.strAccountId
 			,C.strAccountGroup
+			,A.dblDebitForeign
+			,A.dblCreditForeign
+			,''
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId

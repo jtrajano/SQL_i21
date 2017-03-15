@@ -51,6 +51,8 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItemLot.dblGrossWeight
 	, ShipmentItemLot.dblTareWeight
 	, dblNetWeight = ISNULL(ShipmentItemLot.dblGrossWeight, 0) - ISNULL(ShipmentItemLot.dblTareWeight, 0)
+	, ShipmentItem.intCurrencyId
+	, ShipmentItem.strCurrency
 FROM tblICInventoryShipmentItemLot ShipmentItemLot
 	LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentItemId = ShipmentItemLot.intInventoryShipmentItemId
 	LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId

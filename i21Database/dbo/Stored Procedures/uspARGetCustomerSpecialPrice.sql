@@ -1,22 +1,22 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetCustomerSpecialPrice]
-	@ItemId				INT
-	,@CustomerId		INT	
-	,@LocationId		INT				= NULL
-	,@ItemUOMId			INT				= NULL
-	,@TransactionDate	DATETIME		= NULL
-	,@Quantity			NUMERIC(18,6)
-	,@Price				NUMERIC(18,6)	= NULL OUTPUT
-	,@Pricing			NVARCHAR(250)	= NULL OUTPUT	
-	,@Deviation			NUMERIC(18,6)	= NULL OUTPUT
-	,@TermDiscount		NUMERIC(18,6)	= NULL OUTPUT
-	,@VendorId			INT				= NULL
-	,@SupplyPointId		INT				= NULL
-	,@LastCost			NUMERIC(18,6)	= NULL
-	,@ShipToLocationId  INT				= NULL
-	,@VendorLocationId  INT				= NULL
-	,@InvoiceType		NVARCHAR(200)	= NULL
-	,@TermId			INT				= NULL
-	,@CurrencyId		INT				= NULL
+	@ItemId						INT
+	,@CustomerId				INT	
+	,@LocationId				INT				= NULL
+	,@ItemUOMId					INT				= NULL
+	,@TransactionDate			DATETIME		= NULL
+	,@Quantity					NUMERIC(18,6)
+	,@Price						NUMERIC(18,6)	= NULL OUTPUT
+	,@Pricing					NVARCHAR(250)	= NULL OUTPUT	
+	,@Deviation					NUMERIC(18,6)	= NULL OUTPUT
+	,@TermDiscount				NUMERIC(18,6)	= NULL OUTPUT
+	,@VendorId					INT				= NULL
+	,@SupplyPointId				INT				= NULL
+	,@LastCost					NUMERIC(18,6)	= NULL
+	,@ShipToLocationId			INT				= NULL
+	,@VendorLocationId			INT				= NULL
+	,@InvoiceType				NVARCHAR(200)	= NULL
+	,@TermId					INT				= NULL
+	,@CurrencyId				INT				= NULL	
 AS		
 	
 	SELECT

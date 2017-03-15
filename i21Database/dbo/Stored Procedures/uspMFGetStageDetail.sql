@@ -10,7 +10,7 @@ BEGIN
 		,IU.intItemUOMId
 		,U.intUnitMeasureId
 		,U.strUnitMeasure
-		,W.dtmCreated
+		,W.dtmProductionDate AS dtmCreated
 		,W.intCreatedUserId
 		,US.strUserName
 		,W.intWorkOrderId

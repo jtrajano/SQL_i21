@@ -105,8 +105,8 @@ BEGIN
 	FROM	@ItemsFromInventoryReceipt ReceiptItems INNER JOIN tblPOPurchase PO 
 				ON ReceiptItems.intOrderId = PO.intPurchaseId
 			LEFT JOIN tblICItemLocation il
-				ON ReceiptItems.intItemId = il.intItemId
-				AND ReceiptItems.intLocationId = PO.intShipToId
+				ON il.intItemId = ReceiptItems.intItemId
+				AND il.intLocationId = PO.intShipToId
 	WHERE	ReceiptItems.intOrderId IS NOT NULL 
 
 	-- Call the stored procedure that updates the on order qty. 

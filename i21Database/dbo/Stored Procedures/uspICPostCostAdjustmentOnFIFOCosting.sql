@@ -170,6 +170,14 @@ DECLARE @dblRemainingQty AS NUMERIC(38,20)
 		,@intInventoryTrnasactionId_EscalateValue AS INT 
 		,@intLotId AS INT 	
 
+DECLARE		
+		@strDescription AS NVARCHAR(255)
+		,@strCurrentValuation AS NVARCHAR(50) 
+		,@strRunningQty AS NVARCHAR(50) 
+		,@strNewCost AS NVARCHAR(50) 
+		,@strNewValuation AS NVARCHAR(50) 
+
+
 -- Get the number of Lots to process. 
 DECLARE @CbWithOldCost AS INT = 0 
 SELECT	@CbWithOldCost = COUNT(intInventoryFIFOId) 
@@ -184,6 +192,7 @@ WHERE	tblICInventoryFIFO.intItemId = @intItemId
 
 -- Initialize the remaining qty
 SET @dblRemainingQty = @dblQty
+
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start loop for the FIFO Cost. 
@@ -350,6 +359,11 @@ BEGIN
 							@intTransactionTypeId
 				END
 
+		SET @strNewCost = CONVERT(NVARCHAR, CAST(@CostAdjustmentValue AS MONEY), 1)
+		SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @CostBucketStrTransactionId + '.'
+		FROM	tblICItem i 
+		WHERE	i.intItemId = @intItemId
+
 		-- Create the 'Cost Adjustment'
 		EXEC [dbo].[uspICPostInventoryTransaction]
 			@intItemId								= @intItemId
@@ -380,6 +394,9 @@ BEGIN
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+			,@intForexRateTypeId					= NULL
+			,@dblForexRate							= 1
+			,@strDescription						= @strDescription
 
 		-- Log original cost to tblICInventoryFIFOCostAdjustmentLog
 		IF NOT EXISTS (
@@ -558,6 +575,11 @@ BEGIN
 								- dbo.fnMultiply(@FifoOutQty, @CostBucketCost) -- minus by the original cost. 
 							)
 
+				SET @strNewCost = CONVERT(NVARCHAR, CAST(@CostAdjustmentValue AS MONEY), 1)
+				SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @CostBucketStrTransactionId + '.'
+				FROM	tblICItem i 
+				WHERE	i.intItemId = @intItemId	
+
 				---------------------------------------------------------------------------
 				-- 7. If stock was shipped or reduced from adj, then do the "Revalue Sold". 
 				---------------------------------------------------------------------------
@@ -602,6 +624,10 @@ BEGIN
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+						,@intForexRateTypeId					= NULL
+						,@dblForexRate							= 1
+						,@strDescription						= @strDescription
+
 				END 	
 
 				---------------------------------------------------------------------------
@@ -674,6 +700,10 @@ BEGIN
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+						,@intForexRateTypeId					= NULL
+						,@dblForexRate							= 1
+						,@strDescription						= @strDescription
+
 					
 					-----------------------------------------------------------------------------------------------------------
 					-- 9. Get the 'produced/transferred/in-transit item'. Insert it in a temporary table for later processing. 

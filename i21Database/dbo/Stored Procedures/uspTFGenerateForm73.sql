@@ -224,6 +224,7 @@ SELECT TOP 1 @EIN = strEin,
 					BEGIN
 						SET @ColumnA = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '5' AND strType = 'Gasoline / Gasohol / Ethanol' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 						SET @ColumnB = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '5' AND strType = 'Undyed Diesel / Biodiesel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+						SET @ColumnD = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '5' AND strType = 'Undyed or Dyed Kerosene' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 						SET @ColumnG = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '5' AND strType = 'Aviation Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 						SET @ColumnH = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransaction WHERE strScheduleCode = '5' AND strType = 'Aviation Jet Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 					END

@@ -26,11 +26,11 @@ BEGIN
 		END			
 	
 	DECLARE @EntityId int
-	SET @EntityId = ISNULL((SELECT  intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @UserId),@UserId)
+	SET @EntityId = ISNULL((SELECT TOP 1 intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @UserId),@UserId)
 	
 	DECLARE @ARAccount VARCHAR(250)
 	--AR Account
-	SET @ARAccount = (SELECT [intARAccountId] FROM tblARCompanyPreference)
+	SET @ARAccount = (SELECT TOP 1 [intARAccountId] FROM tblARCompanyPreference)
 
 	DECLARE @ysnAG BIT = 0
     DECLARE @ysnPT BIT = 0

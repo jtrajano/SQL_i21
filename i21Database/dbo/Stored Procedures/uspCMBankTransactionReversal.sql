@@ -177,8 +177,8 @@ ELSE
 					BEGIN
 						/* If Void Check entry for AP Payment, do not post the reversal*/
 						UPDATE tblCMBankTransaction 
-							SET ysnPosted = 1, ysnCheckVoid = 1, ysnClr = 1, 
-								dtmDateReconciled = dtmDate, dtmCheckPrinted = dtmDate, @isPostingSuccessful = 1 
+							SET ysnPosted = CASE WHEN intBankTransactionTypeId = 123 THEN 1 ELSE 0 END, ysnCheckVoid = CASE WHEN intBankTransactionTypeId = 123 THEN 0 ELSE 1 END, ysnClr = CASE WHEN intBankTransactionTypeId = 123 THEN 0 ELSE 1 END, 
+								dtmDateReconciled = CASE WHEN intBankTransactionTypeId = 123 THEN NULL ELSE dtmDate END, dtmCheckPrinted = CASE WHEN intBankTransactionTypeId = 123 THEN NULL ELSE dtmDate END, intBankFileAuditId = CASE WHEN intBankTransactionTypeId = 123 THEN NULL ELSE intBankFileAuditId END, @isPostingSuccessful = 1 
 						WHERE strTransactionId = @strVoidTransactionId --AND intBankTransactionTypeId = @VOID_CHECK
 					END
 				ELSE

@@ -31,6 +31,12 @@ DECLARE	-- Shipment Types
 		,@SOURCE_TYPE_Inbound_Shipment AS INT = 2
 		,@SOURCE_TYPE_Transport AS INT = 3
 
+-- Get the functional currency
+BEGIN 
+	DECLARE @intFunctionalCurrencyId AS INT
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+END
+
 -- Allocate price by 'Unit' regardless if there are contracts and cost methods used are 'Per Unit' and 'Percentage' 
 BEGIN 
 	-- Upsert (update or insert) a record into the Shipment Item Allocated Charge table. 
@@ -54,17 +60,28 @@ BEGIN
 				INNER JOIN dbo.tblICItemUOM ItemUOM	
 					ON ItemUOM.intItemUOMId = ISNULL(ShipmentItem.intWeightUOMId, ShipmentItem.intItemUOMId) 
 				INNER JOIN (
-					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
-							,ysnAccrue
-							,intEntityVendorId
-							,intInventoryShipmentId
-							,intInventoryShipmentChargeId
-							,ysnPrice
-					FROM	dbo.tblICInventoryShipmentChargePerItem CalculatedCharge 					
+					SELECT	dblTotalOtherCharge = 
+								-- Convert the other charge amount to functional currency. 
+								SUM(
+									dblCalculatedAmount
+									--* CASE WHEN ISNULL(Charge.dblForexRate, 0) = 0 AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE Charge.dblForexRate END 
+								)								
+							,CalculatedCharge.ysnAccrue
+							,CalculatedCharge.intEntityVendorId
+							,CalculatedCharge.intInventoryShipmentId
+							,CalculatedCharge.intInventoryShipmentChargeId
+							,CalculatedCharge.ysnPrice
+					FROM	dbo.tblICInventoryShipmentChargePerItem CalculatedCharge INNER JOIN tblICInventoryShipmentCharge Charge
+								ON CalculatedCharge.intInventoryShipmentChargeId = Charge.intInventoryShipmentChargeId	 					
 					WHERE	CalculatedCharge.intInventoryShipmentId = @intInventoryShipmentId
 							AND CalculatedCharge.strAllocatePriceBy = @ALLOCATE_PRICE_BY_Unit
 							AND CalculatedCharge.intContractId IS NULL 
-					GROUP BY ysnAccrue, intEntityVendorId, intInventoryShipmentId, intInventoryShipmentChargeId, ysnPrice
+					GROUP BY 
+						CalculatedCharge.ysnAccrue
+						, CalculatedCharge.intEntityVendorId
+						, CalculatedCharge.intInventoryShipmentId
+						, CalculatedCharge.intInventoryShipmentChargeId
+						, CalculatedCharge.ysnPrice
 				) CalculatedCharges 
 					ON ShipmentItem.intInventoryShipmentId = CalculatedCharges.intInventoryShipmentId
 				LEFT JOIN (

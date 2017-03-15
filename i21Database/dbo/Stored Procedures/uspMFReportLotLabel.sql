@@ -43,7 +43,14 @@ BEGIN TRY
 	SELECT @strLotNo = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strLotNo'
-	
+
+	IF @strLotNo IS NULL OR @strLotNo=''
+	BEGIN
+		SELECT @strLotNo = [from]
+		FROM @temp_xml_table
+		WHERE [fieldname] = 'strLotNumber'
+	END
+
 	SELECT @strLotId = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intLotId'

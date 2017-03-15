@@ -59,7 +59,7 @@ BEGIN
 			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblDefaultHours END					
 			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END
 			,dblRateAmount
-			,dblTotal = CASE WHEN (strCalculationType IN ('Rate Factor', 'Overtime') AND intEmployeeEarningLinkId IS NOT NULL) THEN 
+			,dblTotal = ROUND(CASE WHEN (strCalculationType IN ('Rate Factor', 'Overtime') AND intEmployeeEarningLinkId IS NOT NULL) THEN 
 							CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
 								CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END * dblRateAmount
 							ELSE
@@ -69,7 +69,7 @@ BEGIN
 							CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END * dblRateAmount
 						ELSE
 							dblRateAmount
-						END
+						END, 2)
 			,NULL
 			,NULL
 			,intSort

@@ -105,7 +105,7 @@ BEGIN
 								,A.intEntityCustomerId	--@CustomerId	
 								,A.intLocationId	--@LocationId		
 								,NULL	--@ItemUOMId
-								,NULL	--@CurrencyId		 
+								,(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 								,DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)	 --@TransactionDate	
 								,A.dblRequiredQuantity	--@Quantity			
 								,NULL --@ContractHeaderId		
@@ -122,7 +122,7 @@ BEGIN
 								,NULL --@ShipToLocationId  
 								,NULL --@VendorLocationId
 								,NULL --@InvoiceType
-								,0	  --@GetAllAvailablePricing
+								,0	  --@GetAllAvailablePricing								
 								)
 						ELSE
 							B.dblPrice

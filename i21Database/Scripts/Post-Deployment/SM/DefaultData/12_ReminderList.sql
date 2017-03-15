@@ -560,6 +560,18 @@ GO
 			WHERE [strReminder] = N'Unlock' AND [strType] = N'Transaction'
 		END
 GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Error' AND [strType] = N'Scale Service')
+BEGIN
+	DECLARE @intMaxSortOrder INT
+	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+	SELECT [strReminder]        =        N'Error',
+			[strType]        	=        N'Scale Service',
+			[strMessage]		=        N'Scale service is not currently working. <br> Please check scale configuration.',
+			[strQuery]  		=        N'SELECT intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile where DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(intEntityId,0) != {0}',
+			[strNamespace]      =        N'',
+			[intSort]           =        @intMaxSortOrder + 1
+END
 
 --	IF EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
 --	DELETE FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal'

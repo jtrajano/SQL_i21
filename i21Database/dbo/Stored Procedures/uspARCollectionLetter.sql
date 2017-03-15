@@ -913,15 +913,24 @@ BEGIN
 				, BillToLoc.strBillToLocationName
 				, BillToLoc.strBillToState
 				, BillToLoc.strBillToZipCode
-				, EMEL.intTermsId
-				, EMEL.strTerm
+				, ARC.intTermsId
+				, ARC.strTerm
 			FROM 
 				(SELECT 
 					intEntityCustomerId, 
 					strCustomerNumber, 
-					intBillToId					
+					intBillToId,
+					intTermsId,
+					strTerm	
+								
 				FROM 
-					tblARCustomer) ARC
+					tblARCustomer ARC
+				INNER JOIN (
+							SELECT 
+								intTermID,
+								strTerm 
+							FROM 
+								tblSMTerm) SMT ON ARC.intTermsId = SMT.intTermID ) ARC
 				INNER JOIN (
 							SELECT 
 								intEntityId, 

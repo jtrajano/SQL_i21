@@ -300,7 +300,7 @@ BEGIN TRY
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	DECLARE @intProductionSummaryId INT
-		,@dblYieldQuantity INT
+		,@dblYieldQuantity NUMERIC(38, 20)
 		,@intStorageLocationId INT
 		,@strLotNumber NVARCHAR(MAX)
 		,@intLotId INT

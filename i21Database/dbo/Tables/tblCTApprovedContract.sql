@@ -35,6 +35,8 @@
 	[intPurchasingGroupId] INT,
 	[strVendorLotID] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 
+	[strApprovalType]	NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
+
 	[intApprovedById]	INT,
 	[dtmApproved]	DATETIME,
 

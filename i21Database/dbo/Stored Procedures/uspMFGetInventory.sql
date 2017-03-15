@@ -9,23 +9,23 @@ JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId
 WHERE strName = @strCustomerName
 	AND strEntityNo <> ''
 
-SELECT I.strItemNo
-	,I.strDescription
-	,PL.strParentLotNumber AS strLotId
-	,strVendorLotNo
-	,L.dblQty
-	,UM.strUnitMeasure
-	,SL.strName AS strStorageLocation
-	,L.strLotNumber AS strPalletId
-	,LS.strSecondaryStatus
+SELECT I.strItemNo AS [Item]
+	,I.strDescription AS [Item Desc]
+	,PL.strParentLotNumber AS [Lot No]
+	,strVendorLotNo AS [Vendor Lot No]
+	,L.dblQty AS [Quantity]
+	,UM.strUnitMeasure AS [UOM]
+	,SL.strName AS [Storage Location]
+	,L.strLotNumber AS [Pallet No]
+	,LS.strSecondaryStatus AS [Lot Status]
 FROM dbo.tblICLot L
 JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-JOIN dbo.tblICItem I ON I.intItemId = I.intItemId
+JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-Left JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = LI.intItemOwnerId
+LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = LI.intItemOwnerId
 WHERE dblQty > 0
 	--AND IO1.intOwnerId = @intOwnerId

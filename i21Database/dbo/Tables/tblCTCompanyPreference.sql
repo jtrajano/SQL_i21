@@ -29,7 +29,7 @@
 	ysnBasisComponent BIT,
     [strAmendmentFields] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	ysnOutGoingContractFeed BIT,
-	ysnRoundLotsForMultiPrice BIT,
+	ysnAlwaysMultiPrice BIT,
 	ysnMultiPriceOnBasis BIT,
 	intDefContainerTypeId INT,
 	ysnFeedOnApproval BIT,
