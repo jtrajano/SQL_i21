@@ -11,6 +11,7 @@ SELECT	i21.intBankAccountId
 		,i21.intCurrencyId
 		,i21.intBankAccountType
 		,i21.strContact
+		,i21.strBankAccountHolder
 		,ISNULL(dbo.fnAESDecryptASym(i21.strBankAccountNo),strBankAccountNo) COLLATE Latin1_General_CI_AS AS strBankAccountNo
 		,ISNULL(dbo.fnAESDecryptASym(i21.strRTN),strRTN) COLLATE Latin1_General_CI_AS AS strRTN
 		,i21.strAddress
@@ -22,6 +23,8 @@ SELECT	i21.intBankAccountId
 		,i21.strFax
 		,i21.strWebsite
 		,i21.strEmail
+		,i21.strIBAN
+		,i21.strSWIFT
 		,i21.intCheckStartingNo
 		,i21.intCheckEndingNo
 		,i21.intCheckNextNo
@@ -100,6 +103,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intCurrencyId
 						,intBankAccountType
 						,strContact
+						,strBankAccountHolder
 						,strBankAccountNo
 						,strRTN
 						,strAddress
@@ -111,6 +115,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strFax
 						,strWebsite
 						,strEmail
+						,strIBAN
+						,strSWIFT
 						,intCheckStartingNo
 						,intCheckEndingNo
 						,intCheckNextNo
@@ -155,6 +161,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intCurrencyId						= i.intCurrencyId
 						,intBankAccountType					= i.intBankAccountType
 						,strContact							= i.strContact
+						,strBankAccountHolder				= i.strBankAccountHolder
 						,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
 						,strRTN								= [dbo].fnAESEncryptASym(i.strRTN)
 						,strAddress							= i.strAddress
@@ -166,6 +173,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strFax								= i.strFax
 						,strWebsite							= i.strWebsite
 						,strEmail							= i.strEmail
+						,strIBAN							= i.strIBAN
+						,strSWIFT							= i.strSWIFT
 						,intCheckStartingNo					= i.intCheckStartingNo
 						,intCheckEndingNo					= i.intCheckEndingNo
 						,intCheckNextNo						= i.intCheckNextNo
@@ -233,6 +242,7 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intCurrencyId						= i.intCurrencyId
 					,intBankAccountType					= i.intBankAccountType
 					,strContact							= i.strContact
+					,strBankAccountHolder				= i.strBankAccountHolder
 					,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
 					,strRTN								= [dbo].fnAESEncryptASym(i.strRTN)
 					,strAddress							= i.strAddress
@@ -244,6 +254,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,strFax								= i.strFax
 					,strWebsite							= i.strWebsite
 					,strEmail							= i.strEmail
+					,strIBAN							= i.strIBAN
+					,strSWIFT							= i.strSWIFT
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo

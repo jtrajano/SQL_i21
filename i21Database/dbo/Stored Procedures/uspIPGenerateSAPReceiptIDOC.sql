@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPGenerateSAPReceiptIDOC]
-	@ysnUpdateFeedStatusOnRead bit=0
 AS
 
 Declare @intMinHeader				INT,
@@ -34,8 +33,7 @@ Declare @intMinHeader				INT,
 		@intLoadContainerId			INT,
 		@intNoOfContainer			INT,
 		@strReceiptNo				NVARCHAR(50),
-		@ysnWMMBXY					bit=1,
-		@str10Zeros					NVARCHAR(50)='0000000000'
+		@ysnWMMBXY					bit=1
 
 Declare @tblReceiptHeader AS Table
 (
@@ -201,7 +199,7 @@ Begin
 		If UPPER(@strCommodityCode)='COFFEE' AND @ysnWMMBXY=1
 		Begin
 			Set @strItemXml += '<E1MBXYI SEGMENT="1">'
-			Set @strItemXml += '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
+			Set @strItemXml += '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
 			Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
 			Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 			Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
@@ -218,7 +216,7 @@ Begin
 		Begin			
 			Set @strItemXml += '<E1EDL24 SEGMENT="1">'
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strDeliveryItemNo,'') + '</POSNR>' 
-			Set @strItemXml += '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
+			Set @strItemXml += '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
 			If ISNULL(@ysnBatchSplit,0)=0
 				Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
 			Else
@@ -293,11 +291,8 @@ Begin
 	Select @strReceiptDetailIds=COALESCE(CONVERT(VARCHAR,@strReceiptDetailIds) + ',', '') + CONVERT(VARCHAR,intInventoryReceiptItemId) 
 	From vyuICGetInventoryReceiptItem Where intInventoryReceiptId=@intMinHeader
 
-	If @ysnUpdateFeedStatusOnRead=1
-		Update tblICInventoryReceiptItem Set ysnExported=0 Where intInventoryReceiptId=@intMinHeader
-
 	INSERT INTO @tblOutput(strReceiptDetailIds,strRowState,strXml,strReceiptNo,strMessageType)
-	VALUES(@strReceiptDetailIds,'CREATE',@strXml,ISNULL(@strReceiptNo,''),CASE WHEN @ysnWMMBXY=1 THEN 'WMMBXY' ELSE 'WHSCON' END)
+	VALUES(@strReceiptDetailIds,'CREATE',@strXml,@strReceiptNo,CASE WHEN @ysnWMMBXY=1 THEN 'WMMBXY' ELSE 'WHSCON' END)
 
 	Select @intMinHeader=Min(intInventoryReceiptId) From @tblReceiptHeader Where intInventoryReceiptId>@intMinHeader
 End

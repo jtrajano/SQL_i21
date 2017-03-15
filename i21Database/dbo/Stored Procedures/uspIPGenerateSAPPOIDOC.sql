@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPGenerateSAPPOIDOC]
-	@ysnUpdateFeedStatusOnRead bit=0
 AS
 
 Declare @intMinSeq					INT,
@@ -57,8 +56,7 @@ Declare @intMinSeq					INT,
 		@strTextXml					NVARCHAR(MAX),
 		@strSeq						NVARCHAR(MAX),
 		@strProductType				NVARCHAR(100),
-		@strVendorBatch				NVARCHAR(100),
-		@str10Zeros					NVARCHAR(50)='0000000000'
+		@strVendorBatch				NVARCHAR(100)
 
 Declare @tblOutput AS Table
 (
@@ -206,8 +204,7 @@ Begin
 			@strPriceUOM				= (Select TOP 1 ISNULL(strSymbol,strUnitMeasure) From tblICUnitMeasure Where strUnitMeasure = strPriceUOM) , --COND_UNIT 
 			@strRowState				= strRowState ,
 			@strFeedStatus				= strFeedStatus,
-			@strContractItemNo			= strContractItemNo,
-			@strOrigin					= strOrigin	
+			@strContractItemNo			= strContractItemNo
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
 
 		--Convert price USC to USD
@@ -236,19 +233,6 @@ Begin
 			Set @strDocType='ZB2B'
 		
 		If ISNULL(@strDocType,'')='' Set @strDocType='ZHUB'
-
-		If UPPER(@strHeaderState)='MODIFIED'	
-		Begin
-			--update first entry in feed table if empty
-			Update tblCTContractFeed Set strDocType=@strDocType Where intContractFeedId=
-			(Select TOP 1 intContractFeedId From tblCTContractFeed Where intContractDetailId=@intContractDetailId)
-			AND ISNULL(strDocType,'')=''
-
-			Select TOP 1 @strDocType=strDocType From tblCTContractFeed Where intContractDetailId=@intContractDetailId
-		End
-
-		--update in feed table
-		Update tblCTContractFeed Set strDocType=@strDocType Where intContractFeedId=@intContractFeedId
 
 		--Header Start Xml
 		If ISNULL(@strXmlHeaderStart,'')=''
@@ -350,9 +334,9 @@ Begin
 				If UPPER(@strRowState)='DELETE'
 					Set @strItemXml += '<DELETE_IND>'	+ 'X'	+ '</DELETE_IND>'
 				If UPPER(@strCommodityCode)='TEA'
-					Set @strItemXml += '<MATERIAL>'		+ dbo.fnEscapeXML(ISNULL(ISNULL(@str10Zeros + @strContractItemNo,@str10Zeros + @strItemNo),''))				+ '</MATERIAL>'
+					Set @strItemXml += '<MATERIAL>'		+ dbo.fnEscapeXML(ISNULL(ISNULL(@strContractItemNo,@strItemNo),''))				+ '</MATERIAL>'
 				ELSE
-					Set @strItemXml += '<MATERIAL>'		+ dbo.fnEscapeXML(ISNULL(@str10Zeros + @strItemNo,''))				+ '</MATERIAL>'
+					Set @strItemXml += '<MATERIAL>'		+ dbo.fnEscapeXML(ISNULL(@strItemNo,''))				+ '</MATERIAL>'
 				Set @strItemXml += '<PLANT>'		+ ISNULL(@strSubLocation,'')		+ '</PLANT>'
 				Set @strItemXml += '<STGE_LOC>'		+ ISNULL(@strStorageLocation,'')	+ '</STGE_LOC>'
 				Set @strItemXml += '<TRACKINGNO>'	+ ISNULL(CONVERT(VARCHAR,@intContractDetailId),'')	+ '</TRACKINGNO>'
@@ -362,8 +346,6 @@ Begin
 				Set @strItemXml += '<NET_PRICE>'	+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblCashPrice)),'0.00')	+ '</NET_PRICE>'
 				If UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Washed Arabica','Unwashed Arabica')
 					Set @strItemXml += '<PRICE_UNIT>'	+ '100'	+ '</PRICE_UNIT>'
-				Else if UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Robusta')
-					Set @strItemXml += '<PRICE_UNIT>'	+ '1000'	+ '</PRICE_UNIT>'
 				Else
 					Set @strItemXml += '<PRICE_UNIT>'	+ '1'	+ '</PRICE_UNIT>'
 				If ISNULL(@dblCashPrice,0)=0
@@ -461,8 +443,6 @@ Begin
 				Set @strCondXml += '<COND_UNIT>'		+ ISNULL(@strPriceUOM,'')		+ '</COND_UNIT>'
 				If UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Washed Arabica','Unwashed Arabica')
 					Set @strCondXml += '<COND_P_UNT>'		+ '100'	+ '</COND_P_UNT>'
-				Else if UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Robusta')
-					Set @strCondXml += '<COND_P_UNT>'		+ '1000'	+ '</COND_P_UNT>'
 				Else
 					Set @strCondXml += '<COND_P_UNT>'		+ '1'	+ '</COND_P_UNT>'
 				Set @strCondXml += '<CHANGE_ID>'		+ 'U' + '</CHANGE_ID>'
@@ -489,11 +469,11 @@ Begin
 				If UPPER(@strCommodityCode)='COFFEE'
 				Begin
 					--Origin (L16)
-					If ISNULL(@strContractItemNo,'')<>''
+					If ISNULL(@strOrigin,'')<>''
 					Begin
 						Set @strTextXml += '<E1BPMEPOTEXTHEADER>'
 						Set @strTextXml += '<TEXT_ID>' + 'L16' + '</TEXT_ID>' 
-						Set @strTextXml += '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(@strContractItemNo,'')) + '</TEXT_LINE>' 
+						Set @strTextXml += '<TEXT_LINE>'  +  dbo.fnEscapeXML(ISNULL(@strOrigin,'')) + '</TEXT_LINE>' 
 						Set @strTextXml += '</E1BPMEPOTEXTHEADER>'
 					End
 
@@ -558,16 +538,9 @@ Begin
 	--Final Xml
 	Set @strXml = @strXmlHeaderStart + @strItemXml + @strItemXXml + @strScheduleXml + @strScheduleXXml + @strCondXml + @strCondXXml + @strTextXml + @strXmlHeaderEnd
 
-	If @ysnUpdateFeedStatusOnRead=1
-	Begin
-		Declare @strSql nvarchar(max)='Update tblCTContractFeed Set strFeedStatus=''Awt Ack'' Where intContractFeedId IN (' + @strContractFeedIds + ')'
-	
-		Exec sp_executesql @strSql
-	End
-
 	INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml,strContractNo,strPONo)
-	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,ISNULL(@strContractNumber,'') + ' / ' + ISNULL(@strSeq,''),ISNULL(@strERPPONumber,''))
-	
+	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,ISNULL(@strContractNumber,''),ISNULL(@strERPPONumber,''))
+
 	NEXT_PO:
 	Select @intMinRowNo=Min(intRowNo) From @tblHeader Where intRowNo>@intMinRowNo
 End --End Header Loop

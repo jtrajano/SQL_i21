@@ -1,8 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspICPostInventoryShipment]
+CREATE PROCEDURE [dbo].[uspICPostInventoryShipment]
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
 	,@intEntityUserSecurityId AS INT = NULL 
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -34,8 +35,7 @@ DECLARE	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods
 DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 -- Get the Inventory Shipment batch number
-DECLARE @strBatchId AS NVARCHAR(40) 
-		,@strItemNo AS NVARCHAR(50)
+DECLARE @strItemNo AS NVARCHAR(50)
 		,@ysnAllowBlankGLEntries AS BIT = 1
 		,@intItemId AS INT
 
@@ -273,9 +273,13 @@ BEGIN
 		END 
 	END
 END
+
 -- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
-IF @@ERROR <> 0 GOTO Post_Exit    
+BEGIN 
+	SET @strBatchId = NULL 
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
+	IF @@ERROR <> 0 GOTO Post_Exit    
+END 
 
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
@@ -335,6 +339,7 @@ BEGIN
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]
+			,[strRateType]
 		)	
 		EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
 			@intTransactionId
@@ -366,6 +371,8 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
@@ -414,7 +421,9 @@ BEGIN
 				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
 				,intLotId                   = Lot.intLotId
 				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
-				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
+				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId)
+				,intForexRateTypeId			= DetailItem.intForexRateTypeId
+				,dblForexRate				= 1		 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -475,6 +484,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[strRateType]
 			)
 			EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 				@strBatchId
@@ -506,6 +516,8 @@ BEGIN
 					,[intSourceTransactionDetailId]
 					,[intFobPointId]
 					,[intInTransitSourceLocationId]
+					,[intForexRateTypeId]
+					,[dblForexRate]
 			)
 			SELECT
 					[intItemId] 
@@ -529,6 +541,8 @@ BEGIN
 					,[intTransactionDetailId] 
 					,[intFobPointId] = @intFobPointId
 					,[intInTransitSourceLocationId] = t.intItemLocationId
+					,[intForexRateTypeId] = t.intForexRateTypeId
+					,[dblForexRate] = t.dblForexRate
 			FROM	tblICInventoryTransaction t 
 			WHERE	t.strTransactionId = @strTransactionId
 					AND t.ysnIsUnposted = 0 
@@ -603,6 +617,8 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
@@ -641,6 +657,8 @@ BEGIN
 				,intLotId                   = Lot.intLotId
 				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
 				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
+				,intForexRateTypeId			= DetailItem.intForexRateTypeId
+				,dblForexRate				= 1		 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -707,6 +725,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
@@ -761,6 +780,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 			)	
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryShipmentOtherCharges 
 				@intTransactionId
@@ -835,6 +855,13 @@ BEGIN
 	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
 END 
 
+-- Clean up the recap data. 
+BEGIN 
+	UPDATE @GLEntries
+	SET dblDebitForeign = ISNULL(dblDebitForeign, 0)
+		,dblCreditForeign = ISNULL(dblCreditForeign, 0) 
+END 
+
 --------------------------------------------------------------------------------------------  
 -- If RECAP is TRUE, 
 -- 1.	Store all the GL entries in a holding table. It will be used later as data  
@@ -845,7 +872,9 @@ END
 IF @ysnRecap = 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspCMPostRecap @GLEntries
+	EXEC dbo.uspGLPostRecap 
+			@GLEntries
+			,@intEntityUserSecurityId
 	COMMIT TRAN @TransactionName
 END 
 

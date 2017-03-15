@@ -212,6 +212,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\23_AddDefaultCollectionLetters.sql
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
 :r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
+:r .\AR\DefaultData\27_RenamePricingForContracts.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -375,6 +376,12 @@ print 'BEGIN POST DEPLOYMENT'
 --:r .\TF\DefaultData\_TaxReportTemplate.sql
 --:r .\TF\DefaultData\_TerminalControlNumber.sql
 --:r .\TF\DefaultData\_IntegrationSystem.sql
+--:r .\TF\DefaultData\_TaxCriteria.sql
+--:r .\TF\DefaultData\_CompanyPreference.sql
+:r .\TF\DefaultData\00_Cleanup.sql
+:r .\TF\DefaultData\01_TaxAuthority.sql
+:r .\TF\DefaultData\IN_Indiana.sql
+:r .\TF\DefaultData\NE_Nebraska.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql

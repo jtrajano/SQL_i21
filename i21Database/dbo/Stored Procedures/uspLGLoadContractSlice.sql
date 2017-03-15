@@ -111,8 +111,8 @@ BEGIN TRY
 		BEGIN
 			UPDATE tblLGLoadDetail 
 			SET dblQuantity = @dblOrgContractDetailQty
-			   ,dblNet = dbo.fnCTConvertQtyToTargetItemUOM(intItemId,intWeightItemUOMId,@dblOrgContractDetailQty)
-			   ,dblGross = dbo.fnCTConvertQtyToTargetItemUOM(intItemId,intWeightItemUOMId,@dblOrgContractDetailQty)
+			   ,dblNet = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intWeightItemUOMId,@dblOrgContractDetailQty)
+			   ,dblGross = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intWeightItemUOMId,@dblOrgContractDetailQty)
 			WHERE intLoadDetailId = @intOrgLoadIDetaild
 
 			SET @dblOrgLoadDetailQty = (@dblOrgLoadDetailQty - @dblOrgContractDetailQty)

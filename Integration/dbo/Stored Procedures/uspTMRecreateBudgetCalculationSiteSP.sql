@@ -294,6 +294,7 @@ BEGIN
 											,NULL --@VendorLocationId
 											,NULL --@InvoiceType
 											,0	  --@GetAllAvailablePricing
+											,(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference )
 											)
 									ELSE
 										B.dblPrice

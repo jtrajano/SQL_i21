@@ -9,7 +9,7 @@ strLocationName = SMCompanyLocation.strLocationName,
 RetailPriceAdjustmentDetail.strRegion,
 RetailPriceAdjustmentDetail.strDistrict,
 RetailPriceAdjustmentDetail.strState,
-RetailPriceAdjustmentDetail.intVendorId,
+RetailPriceAdjustmentDetail.intEntityId,
 strVendorName =  EMEntity.strName,
 RetailPriceAdjustmentDetail.intCategoryId,
 strCategoryCode  = ICCategory.strCategoryCode,
@@ -41,4 +41,4 @@ LEFT JOIN tblICCategory ICCategory ON RetailPriceAdjustmentDetail.intCategoryId 
 LEFT JOIN tblSTSubcategory STSubcategoryFamily ON RetailPriceAdjustmentDetail.intFamilyId = STSubcategoryFamily.intSubcategoryId
 LEFT JOIN tblSTSubcategory STSubcategoryClass ON RetailPriceAdjustmentDetail.intClassId = STSubcategoryClass.intSubcategoryId
 LEFT JOIN tblSMCompanyLocation SMCompanyLocation ON RetailPriceAdjustmentDetail.intCompanyLocationId = SMCompanyLocation.intCompanyLocationId
-LEFT JOIN tblEMEntity EMEntity ON RetailPriceAdjustmentDetail.intVendorId = EMEntity.intEntityId
+LEFT JOIN tblEMEntity EMEntity ON RetailPriceAdjustmentDetail.intEntityId = EMEntity.intEntityId

@@ -17,7 +17,7 @@ BEGIN
 		SET @ARAccountId = (SELECT TOP 1 [intUndepositedFundsId] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId)
 		
 	IF @TransactionType = 'Customer Prepayment'
-		SET @ARAccountId = (SELECT TOP 1 [intPurchaseAdvAccount] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId)
+		SET @ARAccountId = (SELECT TOP 1 [intSalesAdvAcct] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId)
 
 	RETURN @ARAccountId
 END

@@ -66,7 +66,6 @@ SELECT
 	 AS ysnQuantityFinal
 	,CH.strInternalComment
 	,LG.dblQuantity AS dblShippingInsQty
-
 FROM vyuCTContractSequence CSeq
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = CSeq.intContractDetailId
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CSeq.intContractHeaderId

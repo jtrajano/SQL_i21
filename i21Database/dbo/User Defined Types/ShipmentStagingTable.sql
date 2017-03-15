@@ -31,6 +31,7 @@
 	dtmFreeTime DATETIME NULL,
 	strReceivedBy NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	strComment NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	intCurrencyId INT NULL,
 
 	-- Details
 	-- Required Field for Details
@@ -39,6 +40,8 @@
 	dblQuantity NUMERIC(38, 20) NOT NULL CHECK(dblQuantity > 0),
 	intItemUOMId INT NOT NULL,
 	intStorageScheduleTypeId INT NULL,
+	intForexRateTypeId INT NULL,
+	dblForexRate NUMERIC(38, 20) NULL, 
 
 	-- This is used to group lots for lotted items
 	intItemLotGroup INT NULL,
@@ -48,7 +51,7 @@
 	intLineNo INT NULL,
 	intSubLocationId INT NULL,
 	intStorageLocationId INT NULL,
-	intCurrencyId INT NULL,
+	intItemCurrencyId INT NULL,
 	intWeightUOMId INT NULL,
 	dblUnitPrice NUMERIC(38, 20) NULL,
 	intDockDoorId INT NULL,

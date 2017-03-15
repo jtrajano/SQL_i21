@@ -46,7 +46,7 @@ DECLARE @intId AS INT
 		,@dblCost AS NUMERIC(38, 20)
 		,@dblSalesPrice AS NUMERIC(18, 6)
 		,@intCurrencyId AS INT 
-		,@dblExchangeRate AS DECIMAL (38, 20) 
+		--,@dblExchangeRate AS DECIMAL (38, 20) 
 		,@intTransactionId AS INT
 		,@intTransactionDetailId AS INT 
 		,@strTransactionId AS NVARCHAR(40) 
@@ -57,6 +57,8 @@ DECLARE @intId AS INT
 		,@strSourceTransactionId AS NVARCHAR(40)
 		,@intFobPointId AS TINYINT 
 		,@intInTransitSourceLocationId AS INT
+		,@intForexRateTypeId AS INT
+		,@dblForexRate NUMERIC(38, 20)
 		
 		,@intInventoryTransactionId INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -104,7 +106,7 @@ SELECT  intId
 		,dblCost
 		,dblSalesPrice
 		,intCurrencyId
-		,dblExchangeRate
+		--,dblExchangeRate
 		,intTransactionId
 		,intTransactionDetailId
 		,strTransactionId
@@ -115,6 +117,8 @@ SELECT  intId
 		,strSourceTransactionId
 		,intFobPointId
 		,intInTransitSourceLocationId
+		,intForexRateTypeId
+		,dblForexRate
 FROM	@ItemsToPost
 
 OPEN loopItems;
@@ -131,7 +135,7 @@ FETCH NEXT FROM loopItems INTO
 	,@dblCost
 	,@dblSalesPrice 
 	,@intCurrencyId
-	,@dblExchangeRate
+	--,@dblExchangeRate
 	,@intTransactionId
 	,@intTransactionDetailId
 	,@strTransactionId
@@ -142,6 +146,8 @@ FETCH NEXT FROM loopItems INTO
 	,@strSourceTransactionId
 	,@intFobPointId
 	,@intInTransitSourceLocationId
+	,@intForexRateTypeId
+	,@dblForexRate
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -176,7 +182,7 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			,@dblExchangeRate
+			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -186,6 +192,8 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intFobPointId
 			,@intInTransitSourceLocationId
+			,@intForexRateTypeId
+			,@dblForexRate
 			;
 	END
 
@@ -203,7 +211,7 @@ BEGIN
 			,@dblCost 
 			,@dblSalesPrice 
 			,@intCurrencyId 
-			,@dblExchangeRate 
+			--,@dblExchangeRate 
 			,@intTransactionId 
 			,@intTransactionDetailId 
 			,@strTransactionId 
@@ -213,6 +221,8 @@ BEGIN
 			,@intEntityUserSecurityId 
 			,@intFobPointId
 			,@intInTransitSourceLocationId
+			,@intForexRateTypeId
+			,@dblForexRate
 			;
 	END 
 
@@ -228,7 +238,7 @@ BEGIN
 		,@dblCost
 		,@dblSalesPrice 
 		,@intCurrencyId
-		,@dblExchangeRate
+		--,@dblExchangeRate
 		,@intTransactionId
 		,@intTransactionDetailId
 		,@strTransactionId
@@ -239,6 +249,9 @@ BEGIN
 		,@strSourceTransactionId
 		,@intFobPointId
 		,@intInTransitSourceLocationId
+		,@intForexRateTypeId
+		,@dblForexRate
+
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
@@ -272,7 +285,7 @@ BEGIN
 			@intInventoryTransactionId	= intInventoryTransactionId
 			,@intCurrencyId				= intCurrencyId
 			,@dtmDate					= dtmDate
-			,@dblExchangeRate			= dblExchangeRate
+			--,@dblExchangeRate			= dblExchangeRate
 			,@intTransactionId			= intTransactionId
 			,@strTransactionId			= strTransactionId
 			,@strTransactionForm		= strTransactionForm
@@ -313,6 +326,8 @@ BEGIN
 					,[strDescription]
 					,[intFobPointId]
 					,[intInTransitSourceLocationId]
+					,[intForexRateTypeId]
+					,[dblForexRate]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -327,7 +342,7 @@ BEGIN
 				,[dblValue]								= -currentValuation.floatingValue
 				,[dblSalesPrice]						= 0
 				,[intCurrencyId]						= @intCurrencyId
-				,[dblExchangeRate]						= @dblExchangeRate
+				,[dblExchangeRate]						= 1 -- @dblExchangeRate
 				,[intTransactionId]						= @intTransactionId
 				,[strTransactionId]						= @strTransactionId
 				,[strBatchId]							= @strBatchId
@@ -350,6 +365,8 @@ BEGIN
 														)
 				,[intFobPointId]						= @FOB_DESTINATION 
 				,[intInTransitSourceLocationId]			= @intInTransitSourceLocationId
+				,[intForexRateTypeId]					= @intForexRateTypeId
+				,[dblForexRate]							= @dblForexRate
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
 					ON iWithZeroStock.intItemId = iStock.intItemId
 					AND iWithZeroStock.intItemLocationId = iStock.intItemLocationId

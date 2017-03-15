@@ -364,7 +364,7 @@ BEGIN
 			,@dblValue								= @CostAdjustmentValue
 			,@dblSalesPrice							= 0
 			,@intCurrencyId							= @intCurrencyId 
-			,@dblExchangeRate						= @dblExchangeRate
+			--,@dblExchangeRate						= @dblExchangeRate
 			,@intTransactionId						= @intTransactionId
 			,@intTransactionDetailId				= @intTransactionDetailId
 			,@strTransactionId						= @strTransactionId
@@ -586,7 +586,7 @@ BEGIN
 						,@dblValue								= @InvTranValue
 						,@dblSalesPrice							= 0
 						,@intCurrencyId							= @InvTranCurrencyId
-						,@dblExchangeRate						= @InvTranExchangeRate
+						--,@dblExchangeRate						= @InvTranExchangeRate
 						,@intTransactionId						= @intTransactionId
 						,@intTransactionDetailId				= @intTransactionDetailId
 						,@strTransactionId						= @strTransactionId
@@ -658,7 +658,7 @@ BEGIN
 						,@dblValue								= @InvTranValue
 						,@dblSalesPrice							= 0
 						,@intCurrencyId							= @InvTranCurrencyId
-						,@dblExchangeRate						= @InvTranExchangeRate
+						--,@dblExchangeRate						= @InvTranExchangeRate
 						,@intTransactionId						= @intTransactionId
 						,@intTransactionDetailId				= @intTransactionDetailId
 						,@strTransactionId						= @strTransactionId

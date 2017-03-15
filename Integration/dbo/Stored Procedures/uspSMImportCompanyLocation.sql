@@ -479,7 +479,7 @@ BEGIN
 					   ,[intConcurrencyId])
 			SELECT  CL.[intCompanyLocationId], 
 					AL.agloc_prc2_desc,
-					1,
+					2,
 					1
 			FROM  
 				tblSMCompanyLocation CL 
@@ -496,7 +496,7 @@ BEGIN
 					   ,[intConcurrencyId])
 			SELECT  CL.[intCompanyLocationId], 
 					AL.agloc_prc3_desc,
-					1,
+					3,
 					1
 			FROM  
 				tblSMCompanyLocation CL 
@@ -513,7 +513,7 @@ BEGIN
 					   ,[intConcurrencyId])
 			SELECT  CL.[intCompanyLocationId], 
 					AL.agloc_prc4_desc,
-					1,
+					4,
 					1
 			FROM  
 				tblSMCompanyLocation CL 
@@ -530,7 +530,7 @@ BEGIN
 					   ,[intConcurrencyId])
 			SELECT  CL.[intCompanyLocationId], 
 					AL.agloc_prc5_desc,
-					1,
+					5,
 					1
 			FROM  
 				tblSMCompanyLocation CL 
@@ -547,7 +547,7 @@ BEGIN
 					   ,[intConcurrencyId])
 			SELECT  CL.[intCompanyLocationId], 
 					AL.agloc_prc6_desc,
-					1,
+					6,
 					1
 			FROM  
 				tblSMCompanyLocation CL 
@@ -564,7 +564,7 @@ BEGIN
 					   ,[intConcurrencyId])
 			SELECT  CL.[intCompanyLocationId], 
 					AL.agloc_prc7_desc,
-					1,
+					7,
 					1
 			FROM  
 				tblSMCompanyLocation CL 
@@ -581,7 +581,7 @@ BEGIN
 					   ,[intConcurrencyId])
 			SELECT  CL.[intCompanyLocationId], 
 					AL.agloc_prc8_desc,
-					1,
+					8,
 					1
 			FROM  
 				tblSMCompanyLocation CL 
@@ -598,7 +598,7 @@ BEGIN
 					   ,[intConcurrencyId])
 			SELECT  CL.[intCompanyLocationId], 
 					AL.agloc_prc9_desc,
-					1,
+					9,
 					1
 			FROM  
 				tblSMCompanyLocation CL 
@@ -938,8 +938,8 @@ BEGIN
            ,[intSort]
            ,[intConcurrencyId])
 	SELECT  CL.[intCompanyLocationId], 
-	        PT.pt3cf_prc1,
-			1,
+	        PT.pt3cf_prc2,
+			2,
 			1
 	FROM  tblSMCompanyLocation CL 
 	INNER JOIN ptlocmst PL 
@@ -947,7 +947,7 @@ BEGIN
 	LEFT OUTER JOIN ptctlmst PT 
 		ON  PT.ptctl_key = 3
 	where [intCompanyLocationId] not in (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
-										 where [strPricingLevelName] COLLATE Latin1_General_CI_AS = PT.pt3cf_prc1 COLLATE Latin1_General_CI_AS) 
+										 where [strPricingLevelName] COLLATE Latin1_General_CI_AS = PT.pt3cf_prc2 COLLATE Latin1_General_CI_AS) 
 
 	--PRICE LEVEL 3
 	INSERT INTO [dbo].[tblSMCompanyLocationPricingLevel]
@@ -956,8 +956,8 @@ BEGIN
            ,[intSort]
            ,[intConcurrencyId])
 	SELECT  CL.[intCompanyLocationId], 
-	        PT.pt3cf_prc1,
-			1,
+	        PT.pt3cf_prc3,
+			3,
 			1
 	FROM  tblSMCompanyLocation CL 
 	INNER JOIN ptlocmst PL 
@@ -965,7 +965,7 @@ BEGIN
 	LEFT OUTER JOIN ptctlmst PT 
 		ON  PT.ptctl_key = 3
 	where [intCompanyLocationId] not in (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
-										 where [strPricingLevelName] COLLATE Latin1_General_CI_AS = PT.pt3cf_prc1 COLLATE Latin1_General_CI_AS)   
+										 where [strPricingLevelName] COLLATE Latin1_General_CI_AS = PT.pt3cf_prc3 COLLATE Latin1_General_CI_AS)   
   END'
   )
 END

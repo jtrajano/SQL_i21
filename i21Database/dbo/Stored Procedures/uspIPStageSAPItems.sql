@@ -110,11 +110,6 @@ BEGIN TRY
 
 	Begin Tran
 
-	Update @tblItem set strItemNo=RIGHT(strItemNo,8)
-	Update @tblItemUOM set strItemNo=RIGHT(strItemNo,8)
-	Update @tblItemSubLocation set strItemNo=RIGHT(strItemNo,8)
-	Update @tblItem set strSKUItemNo=RIGHT(strSKUItemNo,8)
-
 	--ZCOM
 	--Add to Staging tables
 	Insert into tblIPItemStage(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription)
@@ -142,8 +137,6 @@ BEGIN TRY
 	Where i.strItemType='ZMPN'
 
 	Commit Tran
-
-	Select TOP 1 strItemNo AS strInfo1,strItemType AS strInfo2 From @tblItem
 
 END TRY
 

@@ -13,6 +13,7 @@ SELECT
 	B.intBillDetailId,
 	A.intEntityVendorId,
 	C.strItemNo,
+	CUR.strCurrency,
 	B.dblCost,
 	CASE WHEN (A.intTransactionType NOT IN (1,9,10)) THEN B.dblQtyOrdered * -1 ELSE B.dblQtyOrdered END AS dblQtyOrdered,
 	CASE WHEN (A.intTransactionType NOT IN (1,9,10)) THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END AS dblQtyReceived,
@@ -37,12 +38,25 @@ SELECT
 	SC.strTicketNumber
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.intEntityVendorId = G2.intEntityId) ON G.intEntityVendorId = A.intEntityVendorId
-INNER JOIN dbo.tblAPBillDetail B ON A.intBillId = B.intBillId
-LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON B.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
-LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRE.intInventoryReceiptId
-LEFT JOIN dbo.tblGLAccount H ON B.intAccountId = H.intAccountId
-LEFT JOIN dbo.tblICItem C ON B.intItemId = C.intItemId
-LEFT JOIN dbo.tblAP1099Category D ON D.int1099CategoryId = B.int1099Category
-LEFT JOIN dbo.tblSMTaxGroup E ON B.intTaxGroupId = E.intTaxGroupId
-LEFT JOIN dbo.tblSMTaxGroup F ON B.intTaxGroupId = F.intTaxGroupId
-LEFT JOIN dbo.tblSCTicket SC ON SC.intInventoryReceiptId = IR.intInventoryReceiptId
+INNER JOIN dbo.tblAPBillDetail B 
+	ON A.intBillId = B.intBillId
+LEFT JOIN dbo.tblAPBillDetailTax BD 
+	ON BD.intBillDetailId = B.intBillDetailId
+LEFT JOIN dbo.tblICInventoryReceiptItem IRE 
+	ON B.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
+LEFT JOIN dbo.tblICInventoryReceipt IR 
+	ON IR.intInventoryReceiptId = IRE.intInventoryReceiptId
+LEFT JOIN dbo.tblGLAccount H 
+	ON B.intAccountId = H.intAccountId
+LEFT JOIN dbo.tblICItem C 
+	ON B.intItemId = C.intItemId
+LEFT JOIN dbo.tblAP1099Category D 
+	ON D.int1099CategoryId = B.int1099Category
+LEFT JOIN dbo.tblSMTaxGroup E 
+	ON BD.intTaxGroupId = E.intTaxGroupId
+LEFT JOIN dbo.tblSMTaxGroup F 
+	ON BD.intTaxGroupId = F.intTaxGroupId
+LEFT JOIN dbo.tblSCTicket SC 
+	ON SC.intInventoryReceiptId = IR.intInventoryReceiptId
+INNER JOIN dbo.tblSMCurrency CUR 
+	ON CUR.intCurrencyID = A.intCurrencyId

@@ -34,8 +34,8 @@ FROM (
 		WHERE CD.intContractDetailId NOT IN (
 				SELECT CASE 
 						WHEN L.intPurchaseSale = 1
-							THEN LD.intPContractDetailId
-						ELSE LD.intSContractDetailId
+							THEN ISNULL(LD.intPContractDetailId,0)
+						ELSE ISNULL(LD.intSContractDetailId,0)
 						END
 				FROM tblLGLoadDetail LD
 				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -62,8 +62,8 @@ FROM (
 			,CD.dtmStartDate
 			,CD.dtmEndDate
 			,E.strName strVendor
-			,LCI.strCity AS strLoading
-			,DCI.strCity AS strDestination
+			,ISNULL(LCI.strCity,L.strOriginPort) AS strLoading
+			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETSPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
 			,'Contracts w/o shipping advice' AS strType
@@ -104,8 +104,8 @@ FROM (
 			,CD.dtmStartDate
 			,CD.dtmEndDate
 			,E.strName strVendor
-			,LCI.strCity AS strLoading
-			,DCI.strCity AS strDestination
+			,ISNULL(LCI.strCity,L.strOriginPort) AS strLoading
+			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), GETDATE(), 101), CONVERT(NVARCHAR(100), L.dtmETAPOD, 101))
 			,L.dtmETAPOD AS dtmETAPOD
 			,'Contracts w/o document' AS strType
@@ -121,7 +121,7 @@ FROM (
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE L.intLoadId NOT IN (
 				SELECT intLoadId
-				FROM tblLGLoadDocuments
+				FROM tblLGLoadDocuments WHERE ISNULL(ysnReceived,0) = 1
 				)
 			AND CH.intContractTypeId = 1
 		) t
@@ -144,8 +144,8 @@ FROM (
 			,CD.dtmStartDate
 			,CD.dtmEndDate
 			,E.strName strVendor
-			,LCI.strCity AS strLoading
-			,DCI.strCity AS strDestination
+			,ISNULL(LCI.strCity,L.strOriginPort) AS strLoading
+			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETAPOD, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
 			,'Contracts w/o weight claim' AS strType
@@ -167,12 +167,12 @@ FROM (
 			AND CH.intContractTypeId = 1
 		) t
 		,tblCTEvent EV
-	WHERE t.intDayToShipment <= EV.intDaysToRemind
+	WHERE t.intDayToShipment >= EV.intDaysToRemind
 		AND EV.strEventName = 'Contract Without Weight Claim'
 	
 	UNION ALL
 	
-	SELECT t.*
+	SELECT DISTINCT t.*
 		,EV.intEventId
 	FROM (
 		SELECT 5 intDataSeq
@@ -185,8 +185,8 @@ FROM (
 			,CD.dtmStartDate
 			,CD.dtmEndDate
 			,E.strName strVendor
-			,LCI.strCity AS strLoading
-			,DCI.strCity AS strDestination
+			,ISNULL(LCI.strCity,L.strOriginPort) AS strLoading
+			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), WC.dtmActualWeighingDate, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
 			,'Weight claims w/o debit note' AS strType
@@ -206,6 +206,78 @@ FROM (
 			AND CH.intContractTypeId = 1
 		) t
 		,tblCTEvent EV
-	WHERE t.intDayToShipment < EV.intDaysToRemind
+	WHERE t.intDayToShipment > EV.intDaysToRemind
 		AND EV.strEventName = 'Weight Claims w/o Debit Note'
-	) tbl
+
+	UNION ALL
+
+	SELECT t.*
+		,EV.intEventId
+	FROM (
+		SELECT 6 intDataSeq
+			,CH.intContractHeaderId
+			,CH.strContractNumber
+			,CD.intContractSeq
+			,I.strItemNo
+			,CO.strCommodityCode
+			,CH.dtmCreated
+			,CD.dtmStartDate
+			,CD.dtmEndDate
+			,E.strName strVendor
+			,ISNULL(LCI.strCity,L.strOriginPort) AS strLoading
+			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
+			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETSPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
+			,L.dtmETAPOD AS dtmETAPOD
+			,'Contracts w/o 4C' AS strType
+		FROM tblCTContractHeader CH
+		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			AND L.intShipmentType = 1
+		JOIN tblICItem I ON I.intItemId = CD.intItemId
+		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
+		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
+		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
+		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments WHERE ysnReceived = 1)
+			AND CH.intContractTypeId = 1 AND ISNULL(L.ysn4cRegistration,0) =0 
+		) t
+		,tblCTEvent EV
+	WHERE EV.strEventName = 'Contracts w/o 4C'
+
+	UNION ALL
+
+	SELECT t.*
+		,EV.intEventId
+	FROM (
+		SELECT 7 intDataSeq
+			,CH.intContractHeaderId
+			,CH.strContractNumber
+			,CD.intContractSeq
+			,I.strItemNo
+			,CO.strCommodityCode
+			,CH.dtmCreated
+			,CD.dtmStartDate
+			,CD.dtmEndDate
+			,E.strName strVendor
+			,ISNULL(LCI.strCity,L.strOriginPort) AS strLoading
+			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
+			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETSPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
+			,L.dtmETAPOD AS dtmETAPOD
+			,'Contracts w/o TC' AS strType
+		FROM tblCTContractHeader CH
+		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			AND L.intShipmentType = 1
+		JOIN tblICItem I ON I.intItemId = CD.intItemId
+		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
+		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
+		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
+		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments WHERE ysnReceived = 0)
+			AND CH.intContractTypeId = 1 AND L.dtmBLDate IS NOT NULL
+		) t
+		,tblCTEvent EV
+	WHERE EV.strEventName = 'Contracts w/o TC'
+) tbl

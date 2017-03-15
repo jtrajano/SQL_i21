@@ -34,16 +34,12 @@ BEGIN
 			CASE	WHEN ISNULL(ItemUOMFrom.dblUnitQty, 0) = 0 OR ISNULL(ItemUOMTo.dblUnitQty, 0) = 0 THEN 
 						NULL 			
 					WHEN ItemUOMFrom.dblUnitQty = ItemUOMTo.dblUnitQty THEN 
-						@dblQty 
+						@dblQty 					
 					ELSE 
-						CASE	WHEN ItemUOMTo.dblUnitQty <> 0 THEN 
-									dbo.fnDivide(
-										dbo.fnMultiply(@dblQty, ItemUOMFrom.dblUnitQty)
-										,ItemUOMTo.dblUnitQty 
-									)
-								ELSE 
-									NULL 
-						END
+						dbo.fnDivide(
+							dbo.fnMultiply(@dblQty, ItemUOMFrom.dblUnitQty)
+							,ItemUOMTo.dblUnitQty 
+						)					
 			END 
 	FROM	(
 				SELECT	ItemUOM.dblUnitQty 

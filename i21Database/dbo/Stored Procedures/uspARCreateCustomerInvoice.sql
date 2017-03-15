@@ -19,7 +19,7 @@
 	,@FreightTermId					INT				= NULL
 	,@ShipViaId						INT				= NULL
 	,@PaymentMethodId				INT				= NULL
-	,@InvoiceOriginId				NVARCHAR(16)	= NULL
+	,@InvoiceOriginId				NVARCHAR(25)	= NULL
 	,@PONumber						NVARCHAR(50)	= ''
 	,@BOLNumber						NVARCHAR(50)	= ''
 	,@DeliverPickUp					NVARCHAR(100)	= NULL
@@ -109,8 +109,11 @@
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@ItemConversionAccountId		INT				= NULL
 	,@ItemSalesAccountId			INT				= NULL
+	,@ItemCurrencyExchangeRateTypeId	INT				= NULL
+	,@ItemCurrencyExchangeRateId	INT				= NULL
+	,@ItemCurrencyExchangeRate		NUMERIC(18,8)	= 1.000000
 	,@ItemSubCurrencyId				INT				= NULL
-	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= 1.000000
 	,@DocumentMaintenanceId			INT				= NULL
 	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemDestinationGradeId		INT				= NULL
@@ -388,11 +391,11 @@ BEGIN TRY
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId
 		,[intCurrencyId]				= @DefaultCurrency
-		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
+		,[intTermId]					= ISNULL(@TermId, C.[intTermsId])
 		,[intSourceId]					= @SourceId
 		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
 		,[dtmDate]						= ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)
-		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
+		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(@TermId, C.[intTermsId]),0)) AS DATE)))
 		,[dtmShipDate]					= ISNULL(@ShipDate, DATEADD(month, 1, ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)))
 		,[dtmPostDate]					= ISNULL(CAST(@PostDate AS DATE),ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly))
 		,[dblInvoiceSubtotal]			= @ZeroDecimal

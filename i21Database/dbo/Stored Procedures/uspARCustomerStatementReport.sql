@@ -86,6 +86,7 @@ DECLARE @temp_statement_table TABLE(
 	,[dblAmountDue]					NUMERIC(18,6)
 	,[dblPastDue]					NUMERIC(18,6)
 	,[dblMonthlyBudget]				NUMERIC(18,6)
+	,[dblRunningBalance]			NUMERIC(18,6)
 	,[strCustomerNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,[strName]						NVARCHAR(100)
 	,[strBOLNumber]					NVARCHAR(100)
@@ -211,11 +212,12 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 						ELSE 0
 					END
 	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](C.intEntityCustomerId, I.dtmDate), 0)
+	 , dblRunningBalance = SUM(CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)) OVER (PARTITION BY I.intEntityCustomerId ORDER BY I.dtmPostDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 	 , C.strCustomerNumber
 	 , C.strName
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
-	 , ACS.strAccountStatusCode
+	 , strAccountStatusCode = NULL
 	 , CL.strLocationName
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
@@ -228,7 +230,7 @@ FROM vyuARCustomer C
 		AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
 		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +' 
 		AND (I.ysnPaid = 0
-			 OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) > '+ @strDateTo +'))))
+			 OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) > '+ @strDateTo +' UNION ALL SELECT intPrepaymentId FROM tblARPrepaidAndCredit WHERE ysnApplied = 1))))
 		AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))	
 	LEFT JOIN tblARPayment PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId AND PCREDITS.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), PCREDITS.dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 	LEFT JOIN (
@@ -237,8 +239,13 @@ FROM vyuARCustomer C
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND P.ysnInvoicePrepayment = 0 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= '+ @strDateTo +'
 			GROUP BY intInvoiceId)
 		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
-	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID
-	LEFT JOIN (tblARCustomerAccountStatus CAS INNER JOIN tblARAccountStatus ACS ON CAS.intAccountStatusId = ACS.intAccountStatusId) ON CAS.intEntityCustomerId = C.intEntityCustomerId
+	LEFT JOIN (
+		(SELECT intPrepaymentId
+		     , SUM(dblAppliedInvoiceAmount) AS dblAppliedInvoiceAmount
+			FROM tblARPrepaidAndCredit WHERE ysnApplied = 1
+			GROUP BY intPrepaymentId)
+		) PC ON I.intInvoiceId = PC.intPrepaymentId
+	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 ) MainQuery'
 
@@ -313,7 +320,19 @@ INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
 VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 --- Without CF Report
-SELECT STATEMENTREPORT.strReferenceNumber
+SELECT MAINREPORT.* 
+	  ,dblCreditAvailable							= MAINREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+	  ,dbl0Days										= ISNULL(AGINGREPORT.dbl0Days, 0)
+	  ,dbl10Days									= ISNULL(AGINGREPORT.dbl10Days, 0)
+	  ,dbl30Days									= ISNULL(AGINGREPORT.dbl30Days, 0)
+	  ,dbl60Days									= ISNULL(AGINGREPORT.dbl60Days, 0)
+	  ,dbl90Days									= ISNULL(AGINGREPORT.dbl90Days, 0)
+	  ,dbl91Days									= ISNULL(AGINGREPORT.dbl91Days, 0)
+	  ,dblCredits									= ISNULL(AGINGREPORT.dblCredits, 0)
+	  ,dblPrepayments								= ISNULL(AGINGREPORT.dblPrepayments, 0)
+FROM
+(SELECT STATEMENTREPORT.strReferenceNumber
+      ,STATEMENTREPORT.intEntityCustomerId
       ,STATEMENTREPORT.strTransactionType
 	  ,STATEMENTREPORT.dtmDueDate
 	  ,STATEMENTREPORT.dtmDate
@@ -323,19 +342,11 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,STATEMENTREPORT.dblAmountDue
 	  ,STATEMENTREPORT.dblPastDue
 	  ,STATEMENTREPORT.dblMonthlyBudget
+	  ,STATEMENTREPORT.dblRunningBalance
 	  ,STATEMENTREPORT.strCustomerNumber
 	  ,STATEMENTREPORT.strName
 	  ,STATEMENTREPORT.strBOLNumber
-	  ,STATEMENTREPORT.dblCreditLimit
-	  ,dblCreditAvailable							= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-	  ,dbl0Days										= ISNULL(AGINGREPORT.dbl0Days, 0)
-	  ,dbl10Days									= ISNULL(AGINGREPORT.dbl10Days, 0)
-	  ,dbl30Days									= ISNULL(AGINGREPORT.dbl30Days, 0)
-	  ,dbl60Days									= ISNULL(AGINGREPORT.dbl60Days, 0)
-	  ,dbl90Days									= ISNULL(AGINGREPORT.dbl90Days, 0)
-	  ,dbl91Days									= ISNULL(AGINGREPORT.dbl91Days, 0)
-	  ,dblCredits									= ISNULL(AGINGREPORT.dblCredits, 0)
-	  ,dblPrepayments								= ISNULL(AGINGREPORT.dblPrepayments, 0)
+	  ,STATEMENTREPORT.dblCreditLimit	  
 	  ,STATEMENTREPORT.strFullAddress
 	  ,STATEMENTREPORT.strStatementFooterComment	  
 	  ,STATEMENTREPORT.strCompanyName
@@ -347,14 +358,13 @@ INNER JOIN @temp_aging_table AS AGINGREPORT
 	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN tblARCustomer CUSTOMER 
 	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-WHERE AGINGREPORT.dblTotalAR <> 0
-AND (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)
-AND strReferenceNumber NOT IN (SELECT strInvoiceNumber FROM @temp_cf_table)
+WHERE strReferenceNumber NOT IN (SELECT strInvoiceNumber FROM @temp_cf_table)
 
 UNION ALL
 
 --- With CF Report
 SELECT strReferenceNumber							= CFReportTable.strInvoiceReportNumber
+      ,STATEMENTREPORT.intEntityCustomerId
       ,STATEMENTREPORT.strTransactionType
 	  ,dtmDueDate									= CFReportTable.dtmInvoiceDate
 	  ,dtmDate										= CFReportTable.dtmInvoiceDate
@@ -364,19 +374,11 @@ SELECT strReferenceNumber							= CFReportTable.strInvoiceReportNumber
 	  ,dblAmountDue									= SUM(STATEMENTREPORT.dblAmountDue)
 	  ,dblPastDue									= SUM(STATEMENTREPORT.dblPastDue)
 	  ,dblMonthlyBudget								= SUM(STATEMENTREPORT.dblMonthlyBudget)
+	  ,dblRunningBalance							= SUM(STATEMENTREPORT.dblRunningBalance)
 	  ,STATEMENTREPORT.strCustomerNumber
 	  ,STATEMENTREPORT.strName
 	  ,STATEMENTREPORT.strBOLNumber
-	  ,STATEMENTREPORT.dblCreditLimit
-	  ,dblCreditAvailable							= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-	  ,dbl0Days										= SUM(ISNULL(AGINGREPORT.dbl0Days, 0))
-	  ,dbl10Days									= SUM(ISNULL(AGINGREPORT.dbl10Days, 0))
-	  ,dbl30Days									= SUM(ISNULL(AGINGREPORT.dbl30Days, 0))
-	  ,dbl60Days									= SUM(ISNULL(AGINGREPORT.dbl60Days, 0))
-	  ,dbl90Days									= SUM(ISNULL(AGINGREPORT.dbl90Days, 0))
-	  ,dbl91Days									= SUM(ISNULL(AGINGREPORT.dbl91Days, 0))
-	  ,dblCredits									= SUM(ISNULL(AGINGREPORT.dblCredits, 0))
-	  ,dblPrepayments								= SUM(ISNULL(AGINGREPORT.dblPrepayments, 0))
+	  ,STATEMENTREPORT.dblCreditLimit	  
 	  ,STATEMENTREPORT.strFullAddress
 	  ,STATEMENTREPORT.strStatementFooterComment	  
 	  ,STATEMENTREPORT.strCompanyName
@@ -384,10 +386,6 @@ SELECT strReferenceNumber							= CFReportTable.strInvoiceReportNumber
 	  ,dtmAsOfDate									= @dtmDateTo
 	  ,blbLogo										= dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
-INNER JOIN @temp_aging_table AS AGINGREPORT
-	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-INNER JOIN tblARCustomer CUSTOMER 
-	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 INNER JOIN (SELECT 
 				intInvoiceId
 				, strInvoiceNumber
@@ -395,18 +393,23 @@ INNER JOIN (SELECT
 				, dtmInvoiceDate 
 			FROM 
 				@temp_cf_table) CFReportTable ON STATEMENTREPORT.strReferenceNumber = CFReportTable.strInvoiceNumber
-WHERE AGINGREPORT.dblTotalAR <> 0
-AND (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)
-AND strReferenceNumber IN (SELECT strInvoiceNumber FROM @temp_cf_table)
+WHERE strReferenceNumber IN (SELECT strInvoiceNumber FROM @temp_cf_table)
 GROUP BY CFReportTable.strInvoiceReportNumber
-      ,STATEMENTREPORT.strTransactionType
-	  ,CFReportTable.dtmInvoiceDate
-	  ,STATEMENTREPORT.strCustomerNumber
-	  ,STATEMENTREPORT.strName
-	  ,STATEMENTREPORT.strBOLNumber
-	  ,STATEMENTREPORT.dblCreditLimit
-	  ,AGINGREPORT.dblTotalAR
-	  ,STATEMENTREPORT.strFullAddress
-	  ,STATEMENTREPORT.strStatementFooterComment	  
-	  ,STATEMENTREPORT.strCompanyName
-	  ,STATEMENTREPORT.strCompanyAddress
+       , CFReportTable.dtmInvoiceDate
+	   , STATEMENTREPORT.strTransactionType	  
+	   , STATEMENTREPORT.strCustomerNumber
+	   , STATEMENTREPORT.strName
+	   , STATEMENTREPORT.strBOLNumber
+	   , STATEMENTREPORT.dblCreditLimit	  
+	   , STATEMENTREPORT.strFullAddress
+	   , STATEMENTREPORT.strStatementFooterComment	  
+	   , STATEMENTREPORT.strCompanyName
+	   , STATEMENTREPORT.strCompanyAddress
+	   , STATEMENTREPORT.intEntityCustomerId)
+AS MAINREPORT
+INNER JOIN @temp_aging_table AS AGINGREPORT
+	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+INNER JOIN tblARCustomer CUSTOMER 
+	ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+WHERE AGINGREPORT.dblTotalAR <> 0
+ AND (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)

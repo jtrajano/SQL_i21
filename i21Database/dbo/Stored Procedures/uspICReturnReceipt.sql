@@ -10,22 +10,17 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- TODO: Validate
--- TODO: Validate if receipt is already posted. 
--- TODO: Validate if there are enough stocks to return. 
--- TODO: Add audit-trail on the original receipt that it was returned. 
--- TODO: Add audit-trail on the inventory return that it was created. 
-
 DECLARE @strReceiptNumber AS NVARCHAR(50)
 		,@ysnPosted AS BIT 
 		,@strReceiptType AS NVARCHAR(50)
+		,@intReturnValue AS INT
 
 -- Validate if the Inventory Receipt exists   
 IF @intReceiptId IS NULL  
 BEGIN   
 	-- Cannot find the transaction.  
 	RAISERROR(50004, 11, 1)  
-	GOTO ReturnReceipt_Exit  
+	GOTO _Exit  
 END   
 
 SELECT TOP 1 
@@ -40,21 +35,21 @@ IF @strReceiptNumber IS NULL
 BEGIN 
 	-- Cannot find the transaction.  
 	RAISERROR(50004, 11, 1)  
-	GOTO ReturnReceipt_Exit  
+	GOTO _Exit  
 END 
 
 IF ISNULL(@ysnPosted, 0) = 0 
 BEGIN 
 	-- Cannot return the inventory receipt. {Receipt Id} must be posted before it can be returned.
 	RAISERROR(80100, 11, 1, @strReceiptNumber)  
-	GOTO ReturnReceipt_Exit  
+	GOTO _Exit  
 END 
 
 IF @strReceiptType = 'Transfer Order'
 BEGIN 
 	-- 'Cannot return {Receipt Id} because it is a Transfer Order.'
 	RAISERROR(80103, 11, 1, @strReceiptNumber)  
-	GOTO ReturnReceipt_Exit  
+	GOTO _Exit  
 END 
 
 -- Get the starting number 
@@ -198,6 +193,8 @@ BEGIN
 		,strComments
 		,intTaxGroupId
 		,intSourceInventoryReceiptItemId
+		,intForexRateTypeId
+		,dblForexRate
 	)
 	SELECT	intInventoryReceiptId = @intInventoryReturnId
 			,ri.intLineNo
@@ -245,12 +242,15 @@ BEGIN
 			,ri.strComments
 			,ri.intTaxGroupId
 			,intSourceInventoryReceiptItemId = ri.intInventoryReceiptItemId 
+			,ri.intForexRateTypeId
+			,ri.dblForexRate
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			LEFT JOIN tblICItemLocation il
 				ON il.intItemId = ri.intItemId
 				AND il.intLocationId = r.intLocationId
 	WHERE	r.intInventoryReceiptId = @intReceiptId
+			AND ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) > 0
 END 
 
 -- Create the lots for the return transaction 
@@ -358,6 +358,8 @@ BEGIN
 		,dblTax
 		,intConcurrencyId
 		,intTaxGroupId	
+		,intForexRateTypeId
+		,dblForexRate
 	)
 	SELECT	
 			intInventoryReceiptId = @intReceiptId
@@ -384,6 +386,8 @@ BEGIN
 			,c.dblTax
 			,c.intConcurrencyId
 			,c.intTaxGroupId
+			,c.intForexRateTypeId
+			,c.dblForexRate
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge c
 				ON r.intInventoryReceiptId = c.intInventoryReceiptId
 	WHERE	r.intInventoryReceiptId = @intReceiptId
@@ -433,6 +437,30 @@ BEGIN
 	WHERE	r.intInventoryReceiptId = @intInventoryReturnId
 END 
 
+-- Update the returned qty
+BEGIN 
+	UPDATE	ri	
+	SET		ri.dblQtyReturned = ISNULL(ri.dblQtyReturned, 0) + rtnItem.dblOpenReceive
+			,ri.dblNetReturned = ISNULL(ri.dblNetReturned, 0) + rtnItem.dblNet
+	FROM	tblICInventoryReceipt rtn INNER JOIN tblICInventoryReceiptItem rtnItem
+				ON rtn.intInventoryReceiptId = rtnItem.intInventoryReceiptId
+			INNER JOIN (
+				tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+					ON r.intInventoryReceiptId = ri.intInventoryReceiptId					
+			)
+				ON ri.intInventoryReceiptItemId = rtnItem.intSourceInventoryReceiptItemId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = ri.intItemId 
+	WHERE	rtn.intInventoryReceiptId = @intInventoryReturnId
+
+	-- Validate for over-return 
+	EXEC @intReturnValue = uspICValidateReceiptForReturn
+		@intReceiptId = NULL
+		,@intReturnId = @intInventoryReturnId
+
+	IF @intReturnValue < 0 GOTO _Exit 
+END 
+
 -- Add the audit-trail 
 BEGIN 
 	DECLARE @strDescription AS NVARCHAR(100) 
@@ -461,4 +489,4 @@ BEGIN
 			,@toValue = @strInventoryReturnId						-- New Value
 END
 
-ReturnReceipt_Exit:
+_Exit:

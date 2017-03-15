@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFUpgradeReportingComponentConfigurations]
+	@TaxAuthorityCode NVARCHAR(10),
 	@ReportingComponentConfigurations TFReportingComponentConfigurations READONLY
 
 AS
@@ -15,30 +16,41 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
+	DECLARE @TaxAuthorityId INT
+	SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
+	IF (ISNULL(@TaxAuthorityId, 0) = 0)
+	BEGIN
+		RAISERROR('Tax Authority code does not exist.', 16, 1)
+	END
+
+	SELECT RCC.*, RC.intReportingComponentId
+	INTO #tmpRCC
+	FROM @ReportingComponentConfigurations RCC
+	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCC.strFormCode COLLATE Latin1_General_CI_AS
+		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCC.strScheduleCode COLLATE Latin1_General_CI_AS
+		AND RC.strType COLLATE Latin1_General_CI_AS = RCC.strType COLLATE Latin1_General_CI_AS
+
 	MERGE	
-	INTO	tblTFTaxReportTemplate
+	INTO	tblTFReportingComponentConfiguration
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
-		SELECT RCC.*, RC.intReportingComponentId FROM @ReportingComponentConfigurations RCC
-		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCC.strFormCode COLLATE Latin1_General_CI_AS
-			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCC.strScheduleCode COLLATE Latin1_General_CI_AS
-			AND RC.strType COLLATE Latin1_General_CI_AS = RCC.strType COLLATE Latin1_General_CI_AS
+		SELECT * FROM #tmpRCC
 	) AS SOURCE
-		ON TARGET.strTemplateItemId = SOURCE.strTemplateItemId
+		ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
+			AND TARGET.strTemplateItemId = SOURCE.strTemplateItemId
+		
 
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
 			intReportingComponentId		= SOURCE.intReportingComponentId
 			, strTemplateItemId			= SOURCE.strTemplateItemId
-			, strFormCode				= SOURCE.strFormCode
 			, strReportSection			= SOURCE.strReportSection
 			, intReportItemSequence		= SOURCE.intReportItemSequence
 			, intTemplateItemNumber		= SOURCE.intTemplateItemNumber
 			, strDescription			= SOURCE.strDescription
 			, strScheduleCode			= SOURCE.strScheduleList
-			, strConfiguration			= SOURCE.strConfiguration
 			, ysnConfiguration			= SOURCE.ysnConfiguration
 			, ysnDynamicConfiguration	= SOURCE.ysnDynamicConfiguration
 			, strLastIndexOf			= SOURCE.strLastIndexOf
@@ -48,7 +60,6 @@ BEGIN TRY
 		INSERT (
 			intReportingComponentId
 			, strTemplateItemId
-			, strFormCode
 			, strReportSection
 			, intReportItemSequence
 			, intTemplateItemNumber
@@ -64,7 +75,6 @@ BEGIN TRY
 		VALUES (
 			SOURCE.intReportingComponentId
 			, SOURCE.strTemplateItemId
-			, SOURCE.strFormCode
 			, SOURCE.strReportSection
 			, SOURCE.intReportItemSequence
 			, SOURCE.intTemplateItemNumber
@@ -77,6 +87,20 @@ BEGIN TRY
 			, SOURCE.strSegment
 			, SOURCE.intSort
 		);
+
+	
+	-- Delete existing Reporting Component Configuration that is not within Source
+	DELETE FROM tblTFReportingComponentConfiguration
+	WHERE intReportingComponentConfigurationId IN (
+		SELECT DISTINCT RCC.intReportingComponentConfigurationId FROM tblTFReportingComponentConfiguration RCC
+		LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCC.intReportingComponentId
+		LEFT JOIN #tmpRCC tmp ON tmp.intReportingComponentId = RCC.intReportingComponentId
+			AND tmp.strTemplateItemId = RCC.strTemplateItemId
+		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
+			AND ISNULL(tmp.strTemplateItemId, '') = ''
+	)
+
+	DROP TABLE #tmpRCC
 
 END TRY
 BEGIN CATCH

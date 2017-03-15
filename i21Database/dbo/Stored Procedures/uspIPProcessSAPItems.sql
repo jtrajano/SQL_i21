@@ -48,8 +48,6 @@ Set @ysnDeleted=0
 Select @intStageItemId=intStageItemId,@strItemNo=strItemNo,@strItemType=strItemType,@strSKUItemNo=strSKUItemNo,
 @strStockUOM=strStockUOM,@ysnDeleted=ISNULL(ysnDeleted,0),@strDescription=strDescription From tblIPItemStage Where intStageItemId=@intMinItem
 
-Select @strItemNo AS strInfo1,@strItemType AS strInfo2
-
 Select @intCategoryId=intCategoryId From tblICCategory Where strCategoryCode=@strItemType
 
 If @strItemType='ZMPN' --Contract Item
@@ -140,18 +138,18 @@ Begin
 	Select @intItemId,cl.intCompanyLocationId,1,3
 	From tblSMCompanyLocation cl
 
-	--Insert Into tblICItemSubLocation(intItemLocationId,intSubLocationId)
-	--Select il.intItemLocationId,sl.intCompanyLocationSubLocationId
-	--From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName 
-	--Join tblICItemLocation il on sl.intCompanyLocationId=il.intLocationId
-	--where s.intStageItemId=@intStageItemId AND il.intItemId=@intItemId
+	Insert Into tblICItemSubLocation(intItemLocationId,intSubLocationId)
+	Select il.intItemLocationId,sl.intCompanyLocationSubLocationId
+	From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName 
+	Join tblICItemLocation il on sl.intCompanyLocationId=il.intLocationId
+	where s.intStageItemId=@intStageItemId AND il.intItemId=@intItemId
 
 	--Add Audit Trail Record
 	Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intItemId) + '","keyValue":' + CONVERT(VARCHAR,@intItemId) + ',"iconCls":"small-new-plus","leaf":true}'
 	
-	Select @dtmDate=DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmCreated) From tblIPItemStage Where intStageItemId=@intStageItemId
+	Select @dtmDate=dtmCreated From tblIPItemStage Where intStageItemId=@intStageItemId
 	If @dtmDate is null
-		Set @dtmDate =  GETUTCDATE()
+		Set @dtmDate =  GETDATE()
 
 	Select @strUserName=strCreatedUserName From tblIPItemStage Where intStageItemId=@intStageItemId
 	Select @intUserId=e.intEntityId From tblEMEntity e Join tblEMEntityType et on e.intEntityId=et.intEntityId  Where e.strExternalERPId=@strUserName AND et.strType='User'
@@ -181,20 +179,20 @@ Begin --Update
 	Where intItemId=@intItemId AND st.intStageItemId=@intStageItemId
 
 	--add new sublocations
-	--Insert Into tblICItemSubLocation(intItemLocationId,intSubLocationId)
-	--Select il.intItemLocationId,sl.intCompanyLocationSubLocationId
-	--From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName 
-	--Join tblICItemLocation il on sl.intCompanyLocationId=il.intLocationId AND il.intItemId=@intItemId
-	--where s.intStageItemId=@intStageItemId AND 
-	--sl.intCompanyLocationSubLocationId NOT IN (Select isl.intSubLocationId From tblICItemSubLocation isl 
-	--Join tblICItemLocation il on isl.intItemLocationId=il.intItemLocationId Where il.intItemId=@intItemId)
+	Insert Into tblICItemSubLocation(intItemLocationId,intSubLocationId)
+	Select il.intItemLocationId,sl.intCompanyLocationSubLocationId
+	From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName 
+	Join tblICItemLocation il on sl.intCompanyLocationId=il.intLocationId AND il.intItemId=@intItemId
+	where s.intStageItemId=@intStageItemId AND 
+	sl.intCompanyLocationSubLocationId NOT IN (Select isl.intSubLocationId From tblICItemSubLocation isl 
+	Join tblICItemLocation il on isl.intItemLocationId=il.intItemLocationId Where il.intItemId=@intItemId)
 
 	--Delete the SubLocation if it is marked for deletion
-	--Delete From tblICItemSubLocation
-	--Where intItemLocationId in (Select intItemLocationId From tblICItemLocation Where intItemId=@intItemId) AND 
-	--intSubLocationId IN (Select sl.intCompanyLocationSubLocationId 
-	--From tblSMCompanyLocationSubLocation sl Join tblIPItemSubLocationStage s on sl.strSubLocationName=s.strSubLocation 
-	--Where s.intStageItemId=@intStageItemId AND ISNULL(s.ysnDeleted,0)=1)
+	Delete From tblICItemSubLocation
+	Where intItemLocationId in (Select intItemLocationId From tblICItemLocation Where intItemId=@intItemId) AND 
+	intSubLocationId IN (Select sl.intCompanyLocationSubLocationId 
+	From tblSMCompanyLocationSubLocation sl Join tblIPItemSubLocationStage s on sl.strSubLocationName=s.strSubLocation 
+	Where s.intStageItemId=@intStageItemId AND ISNULL(s.ysnDeleted,0)=1)
 End
 End
 

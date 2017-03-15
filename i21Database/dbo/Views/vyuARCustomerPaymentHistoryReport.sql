@@ -18,7 +18,7 @@ SELECT I.strInvoiceNumber
 	 , dblAmountPaid		= ISNULL(PAYMENTS.dblAmountPaid, 0)
 	 , dblAmountApplied		= ISNULL(PAYMENTS.dblPayment, 0)
 	 , dblInvoiceTotal		= ISNULL(PAYMENTS.dblInvoiceTotal, 0)
-	 , dblAmountDue			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(PAYMENTS.dblAmountDue, 0) * -1 ELSE ISNULL(PAYMENTS.dblAmountDue, 0) END	 
+	 , dblAmountDue			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(PAYMENTS.dblAmountDue, 0) * -1 ELSE ISNULL(PAYMENTS.dblAmountDue, 0) END	 
 	 , intPaymentId			= PAYMENTS.intPaymentId	 
 	 , intPaymentMethodId	= PAYMENTS.intPaymentMethodId	 
 	 , strReferenceNumber	= PAYMENTS.strPaymentInfo	 
@@ -77,7 +77,7 @@ SELECT I.strInvoiceNumber
 	 , dblAmountPaid		= ISNULL(PREPAYMENT.dblAmountPaid, 0)
 	 , dblAmountApplied		= 0
 	 , dblInvoiceTotal		= 0
-	 , dblAmountDue			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END	 
+	 , dblAmountDue			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END	 
 	 , intPaymentId			= PREPAYMENT.intPaymentId	 
 	 , intPaymentMethodId	= PREPAYMENT.intPaymentMethodId	 
 	 , strReferenceNumber	= PREPAYMENT.strPaymentInfo	 

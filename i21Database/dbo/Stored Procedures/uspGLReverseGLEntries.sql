@@ -33,7 +33,7 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN			
-		DECLARE @GLEntries RecapTableType
+		
 		EXEC uspGLInsertReverseGLEntry @strTransactionId,@intEntityId,@dtmDateReverse
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -41,24 +41,19 @@ ELSE
 	BEGIN
 		-- DELETE Results 1 DAYS OLDER	
 		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intEntityId;
+		DECLARE @GLEntries RecapTableType
 		
-		WITH Accounts 
-		AS 
-		(
-			SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup],A.[strDescription]
-			FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupId = B.intAccountGroupId
-		)
-		INSERT INTO tblGLPostRecap (
+		INSERT INTO @GLEntries (
 			 [strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]
-			,[strAccountId]
-			,[strAccountGroup]
 			,[strDescription]
 			,[strReference]	
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[dtmDate]
@@ -78,13 +73,13 @@ ELSE
 			 [strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]			
-			,[strAccountId]			= (SELECT [strAccountId] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
-			,[strAccountGroup]		= (SELECT [strAccountGroup] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
-			,[strDescription]		=  A.[strDescription]
+			,[strDescription]		=  A.strJournalLineDescription
 			,[strReference]			
 			,[dtmTransactionDate]	
 			,[dblDebit]				= [dblCredit]
 			,[dblCredit]			= [dblDebit]	
+			,[dblDebitForeign]		= [dblCreditForeign]
+			,[dblCreditForeign]		= [dblDebitForeign]	
 			,[dblDebitUnit]			= [dblCreditUnit]
 			,[dblCreditUnit]		= [dblDebitUnit]
 			,[dtmDate]				
@@ -102,6 +97,8 @@ ELSE
 		FROM	tblGLDetail A
 		WHERE	strTransactionId = @strTransactionId and ysnIsUnposted = 0
 		ORDER BY intGLDetailId
+
+		EXEC uspGLPostRecap @GLEntries, @intEntityId
 				
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 

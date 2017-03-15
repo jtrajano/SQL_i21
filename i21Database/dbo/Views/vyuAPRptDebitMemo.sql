@@ -30,6 +30,22 @@ SELECT
 	,ISNULL(N2.strCountry,V.strDescription) AS strCountryOrigin
 	,P.strSubLocationName strLPlant
 	,strDateLocation = Q.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 107)
+	,U.strBankName
+	,S.strBankAccountHolder
+	,S.strIBAN
+	,S.strSWIFT
+	,T.strTerm
+	,A.strRemarks
+	,U.strCountry + ', ' + U.strCity + ' ' + U.strState AS strBankAddress
+ 	,(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
+	(	
+	  SELECT TOP 1
+	  intAttachmentId
+	  FROM tblSMAttachment
+	  WHERE strScreen = 'SystemManager.CompanyPreference'
+	  AND strComment = 'Footer'
+	  ORDER BY intAttachmentId DESC
+	)) AS strFooter
 FROM tblAPBill A
 INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityVendorId = B2.intEntityId) ON A.intEntityVendorId = B.intEntityVendorId
 INNER JOIN tblAPBillDetail C2 ON A.intBillId = C2.intBillId
@@ -50,4 +66,7 @@ LEFT JOIN tblSMCurrency I ON I.intMainCurrencyId = A.intCurrencyId AND I.ysnSubC
 LEFT JOIN tblEMEntity L ON A.intEntityId = L.intEntityId
 LEFT JOIN tblSMCompanyLocationSubLocation P ON D2.intSubLocationId = P.intCompanyLocationSubLocationId
 LEFT JOIN tblSMCompanyLocation Q ON A.intStoreLocationId = Q.intCompanyLocationId
+LEFT JOIN tblCMBankAccount S ON S.intBankAccountId = A.intBankInfoId
+LEFT JOIN tblCMBank U ON U.intBankId = S.intBankId
+LEFT JOIN tblSMTerm T ON A.intTermsId = T.intTermID
 WHERE A.intTransactionType = 3

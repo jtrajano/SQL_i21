@@ -35,6 +35,10 @@ SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecur
 
 
 SELECT DISTINCT RecordKey = intTransactionId INTO #tmpTransactionId FROM vyuCFBatchPostTransactions
+--ORDER BY intTransactionId
+--OFFSET     0 ROWS       
+--FETCH NEXT 500 ROWS ONLY
+
 
 IF @TransactionId != 'ALL'
 BEGIN
@@ -75,6 +79,7 @@ END
 					,[intShipViaId]
 					,[intPaymentMethodId]
 					,[strInvoiceOriginId]
+					,[ysnUseOriginIdAsInvoiceNumber]
 					,[strPONumber]
 					,[strBOLNumber]
 					,[strDeliverPickup]
@@ -152,7 +157,8 @@ END
 					,[intFreightTermId]						= NULL 
 					,[intShipViaId]							= NULL 
 					,[intPaymentMethodId]					= NULL
-					,[strInvoiceOriginId]					= ''
+					,[strInvoiceOriginId]					= cfTrans.strTransactionId
+					,[ysnUseOriginIdAsInvoiceNumber]		= 1
 					,[strPONumber]							= ''
 					,[strBOLNumber]							= ''
 					,[strDeliverPickup]						= cfTrans.strDeliveryPickupInd
@@ -191,11 +197,12 @@ END
 					,[dblMaintenanceAmount]					= NULL
 					,[dblLicenseAmount]						= NULL
 					,[intTaxGroupId]						= cfSiteItem.intTaxGroupId
-					,[ysnRecomputeTax]						= (CASE 
-																	WHEN @ysnRemoteTransaction = 1 OR cfSiteItem.intTaxGroupId IS NULL
-																	THEN 0
-																	ELSE 1
-															   END)
+					,[ysnRecomputeTax]						= 0 
+					--(CASE 
+					--												WHEN @ysnRemoteTransaction = 1 OR cfSiteItem.intTaxGroupId IS NULL
+					--												THEN 0
+					--												ELSE 1
+					--										   END)
 					,[intSCInvoiceId]						= NULL
 					,[strSCInvoiceNumber]					= ''
 					,[intInventoryShipmentItemId]			= NULL
@@ -262,8 +269,8 @@ END
 				WHERE cfTrans.intTransactionId = @strRecord
 
 
-				IF (@ysnRemoteTransaction = 1)
-				BEGIN
+				--IF (@ysnRemoteTransaction = 1)
+				--BEGIN
 					INSERT INTO @TaxDetails
 						(
 						[intDetailId] 
@@ -288,12 +295,12 @@ END
 					,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
 					,[intTaxClassId]			= cfTaxCode.intTaxClassId
 					,[strTaxableByOtherTaxes]	= cfTaxCode.strTaxableByOtherTaxes
-					,[strCalculationMethod]		= cfTaxCodeRate.strCalculationMethod
+					,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
 					,[dblRate]					= cfTransactionTax.dblTaxRate
 					,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
-					,[dblTax]					= 0
-					,[dblAdjustedTax]			= (cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
-					,[ysnTaxAdjusted]			= 1
+					,[dblTax]					= cfTransactionTax.dblTaxCalculatedAmount
+					,[dblAdjustedTax]			= cfTransactionTax.dblTaxCalculatedAmount--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
+					,[ysnTaxAdjusted]			= 0
 					,[ysnSeparateOnInvoice]		= 0 
 					,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
 					,[ysnTaxExempt]				= 0
@@ -305,11 +312,11 @@ END
 					ON cfTransaction.intTransactionId = cfTransactionTax.intTransactionId
 					INNER JOIN tblSMTaxCode  cfTaxCode
 					ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
-					INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
-					ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
-					WHERE cfTransactionTax.intTransactionId = @strRecord
+					--INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
+					--ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
+					WHERE cfTransaction.intTransactionId = @strRecord
 
-				END
+			--	END
 
 				DELETE FROM #tmpTransactionId WHERE RecordKey = @intRecordKey
 			
@@ -322,11 +329,13 @@ END
 	
 	BEGIN TRANSACTION
 
+	--select * from @TaxDetails
+
 	EXEC [dbo].[uspARProcessInvoices]
-		@InvoiceEntries	= @EntriesForInvoice
+	@InvoiceEntries	= @EntriesForInvoice
 	,@LineItemTaxEntries = @TaxDetails
 	,@UserId					= @UserId
-	,@GroupingOption			= 0
+	,@GroupingOption			= 11
 	,@RaiseError				= 1
 	,@ErrorMessage				= @ErrorMessage OUTPUT
 	,@CreatedIvoices			= @CreatedIvoices OUTPUT
@@ -463,5 +472,6 @@ END
 		END
 	ELSE
 		BEGIN
+			--COMMIT TRANSACTION
 			ROLLBACK TRANSACTION
 		END

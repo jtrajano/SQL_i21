@@ -54,7 +54,7 @@ RETURN (
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) + ISNULL(StockUOM.dblUnitReserved, 0) < 0
+					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) + ISNULL(StockUOM.dblUnitReserved, 0), 6) < 0
 							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 													
 				)
 
@@ -98,7 +98,7 @@ RETURN (
 								ON Lot.intItemLocationId = Location.intItemLocationId 
 								AND Lot.intItemUOMId = @intItemUOMId
 								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)	
-					WHERE	ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
+					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0), 6) < 0
 							AND Location.intAllowNegativeInventory = 3													
 				)
 

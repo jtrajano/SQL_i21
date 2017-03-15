@@ -38,8 +38,6 @@ BEGIN TRY
 			) x
 			Where x.QUALF='007'
 
-	Select TOP 1 strDeliveryNo AS strInfo1,ISNULL(CONVERT(VARCHAR(10),dtmETA,121),'') AS strInfo2 From tblIPShipmentETAStage
-
 END TRY
 
 BEGIN CATCH

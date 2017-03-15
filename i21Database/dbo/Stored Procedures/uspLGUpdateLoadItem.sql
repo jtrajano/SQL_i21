@@ -27,27 +27,10 @@ BEGIN TRY
 	SELECT @intContractTypeId = CT.intContractTypeId, @intItemId=CT.intItemId, @intItemUOMId=CT.intItemUOMId FROM vyuCTContractDetailView CT WHERE CT.intContractDetailId=@intContractDetailId
 	SELECT @strItemType = Item.strType FROM tblICItem Item WHERE Item.intItemId = @intItemId
 	SELECT @ysnUpdateVesselInfo = ysnUpdateVesselInfo FROM tblLGCompanyPreference
-
-	IF (@strItemType = 'Bundle')
-	BEGIN
-		SELECT @intCount = COUNT(LD.intLoadDetailId)
-		FROM tblLGLoadDetail LD
+	SELECT @intCount = COUNT(LD.intLoadDetailId) FROM tblLGLoadDetail LD  
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		WHERE LD.intPContractDetailId = @intContractDetailId
-			AND LD.intItemId NOT IN (
-				SELECT intBundleItemId
-				FROM tblICItemBundle
-				WHERE intItemId = @intItemId
-				)
-	END
-	ELSE
-	BEGIN
-		SELECT @intCount = COUNT(LD.intLoadDetailId)
-		FROM tblLGLoadDetail LD
-		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-		WHERE LD.intPContractDetailId = @intContractDetailId
-			AND LD.intItemId <> @intItemId
-	END
+		AND LD.intItemId <> @intItemId
 
 	IF @ysnUpdateVesselInfo = 1
 	BEGIN

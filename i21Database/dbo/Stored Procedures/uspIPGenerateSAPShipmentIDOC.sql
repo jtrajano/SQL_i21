@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPGenerateSAPShipmentIDOC]
-	@ysnUpdateFeedStatusOnRead bit=0
 AS
 
 Declare @intMinHeader				INT,
@@ -50,9 +49,7 @@ Declare @intMinHeader				INT,
 		@strWeightUOM				NVARCHAR(50),
 		@dtmETAPOD					DATETIME,
 		@intNoOfContainer			INT,
-		@intExternalContainerNo		INT,
-		@strAdviceNumber			NVARCHAR(100),
-		@str10Zeros					NVARCHAR(50)='0000000000'
+		@intExternalContainerNo		INT
 
 Declare @tblDetail AS Table
 (
@@ -84,12 +81,7 @@ Declare @tblContainer AS Table
 	intRowNo INT IDENTITY(1,1),
 	intLoadContainerId	INT,
 	strContainerNo NVARCHAR(100),
-	strContainerSizeCode NVARCHAR(100),
-	strExternalContainerId NVARCHAR(100),
-	dblNetWt NUMERIC(38,20),
-	strWeightUOM NVARCHAR(50),
-	strRowState NVARCHAR(50),
-	intConcurrencyId INT
+	strContainerSizeCode NVARCHAR(100)
 )
 
 Declare @tblOutput AS Table
@@ -125,8 +117,7 @@ Begin
 		@dtmScheduledDate			=   dtmScheduledDate,
 		@strFeedStatus				=	strFeedStatus,
 		@dtmETAPOD					=	dtmETAPOD,
-		@strHeaderRowState			=	strRowState,
-		@strAdviceNumber			=	strLoadNumber
+		@strHeaderRowState			=	strRowState
 	From tblLGLoadStg Where intLoadStgId=@intMinHeader
 
 	Select TOP 1 @strVendorAccountNo=v.strVendorAccountNum 
@@ -134,8 +125,6 @@ Begin
 
 	If (Select intLoadShippingInstructionId From tblLGLoad Where intLoadId=@intLoadId AND intShipmentType=1) is not null
 		Set @strHeaderRowState='MODIFIED'
-	Else
-		Set @strAdviceNumber=''
 
 	If UPPER(@strHeaderRowState)='MODIFIED' AND ISNULL(@strExternalDeliveryNumber,'')=''
 		Begin
@@ -152,8 +141,6 @@ Begin
 		AND intLoadStgId < @intLoadStgId Order By intLoadStgId Desc)<>'Ack Rcvd'
 		GOTO NEXT_SHIPMENT
 
-	Update tblLGLoadStg Set strMessageState=@strHeaderRowState  Where intLoadStgId=@intLoadStgId
-
 	Set @strXml =  '<DELVRY07>'
 	Set @strXml += '<IDOC BEGIN="1">'
 	
@@ -169,7 +156,6 @@ Begin
 	Begin
 		Set @strXml += '<E1EDL20 SEGMENT="1">'
 		Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
-		Set @strXml += '<LIFEX>'	+ ISNULL(@strLoadNumber,'')				+ '</LIFEX>'
 
 		Set @strXml += '<E1EDL18 SEGMENT="1">'
 		Set @strXml += '<QUALF>' + 'DEL' + '</QUALF>'
@@ -284,7 +270,7 @@ Begin
 
 			Set @strItemXml += '<E1EDL24 SEGMENT="1">'
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strDeliveryItemNo,'') + '</POSNR>' 
-			Set @strItemXml += '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
+			Set @strItemXml += '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
 			If ISNULL(@ysnBatchSplit,0)=0
 				Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
 			Else
@@ -294,7 +280,7 @@ Begin
 				Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
 			Else
 				Set @strItemXml += '<CHARG>'  +  '' + '</CHARG>' 
-			Set @strItemXml += '<KDMAT>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</KDMAT>' 
+			Set @strItemXml += '<KDMAT>'  +  ISNULL(@strItemNo,'') + '</KDMAT>' 
 			If ISNULL(@ysnBatchSplit,0)=0
 				Set @strItemXml += '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblNetWeight)),'') + '</LFIMG>'
 			Else
@@ -309,6 +295,13 @@ Begin
 			Begin
 				Set @strItemXml += '<E1EDL19 SEGMENT="1">'
 				Set @strItemXml += '<QUALF>'  +  'QUA' + '</QUALF>' 
+				Set @strItemXml += '</E1EDL19>'
+			End
+
+			If UPPER(@strRowState)='DELETE'
+			Begin
+				Set @strItemXml += '<E1EDL19 SEGMENT="1">'
+				Set @strItemXml += '<QUALF>'  +  'DEL' + '</QUALF>' 
 				Set @strItemXml += '</E1EDL19>'
 			End
 
@@ -333,26 +326,15 @@ Begin
 					Update tblLGLoadContainerStg Set strExternalContainerId=@intExternalContainerNo,@intExternalContainerNo=@intExternalContainerNo+1
 					Where intLoadStgId=@intLoadStgId AND ISNULL(strExternalContainerId,'')=''
 
-					Delete From @tblContainer
-
-					Insert Into @tblContainer(strExternalContainerId,strContainerNo,dblNetWt,strWeightUOM,strRowState,intConcurrencyId)
-					Select lc.strExternalContainerId,lc.strContainerNo,lc.dblNetWt,lc.strWeightUOM,lc.strRowState,c.intConcurrencyId
-					From tblLGLoadContainerStg lc
-					Left Join tblLGLoadContainer c on lc.intLoadContainerId=c.intLoadContainerId
-					Left Join tblLGLoadDetailContainerLink cl on lc.intLoadContainerId=cl.intLoadContainerId
-					Left Join tblLGLoadDetail ld on ld.intLoadDetailId=cl.intLoadDetailId
-					Where lc.intLoadStgId=@intLoadStgId AND ld.intLoadDetailId=@intLoadDetailId
-					Order By lc.strExternalContainerId
-
 					Set @strContainerXml=''
 					Select @strContainerXml=@strContainerXml
 							+ '<E1EDL24 SEGMENT="1">'
 							+ '<POSNR>' + ISNULL(CONVERT(VARCHAR,lc.strExternalContainerId),'') + '</POSNR>' 
-							+ '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
+							+ '<MATNR>'  +  ISNULL(@strItemNo,'') + '</MATNR>' 
 							+ '<WERKS>'  +  '' + '</WERKS>' 
 							+ '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 							+ '<CHARG>'  +  ISNULL(lc.strContainerNo,'') + '</CHARG>' 
-							+ '<KDMAT>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</KDMAT>' 
+							+ '<KDMAT>'  +  ISNULL(@strItemNo,'') + '</KDMAT>' 
 							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),CASE WHEN UPPER(lc.strRowState)='DELETE' Then 0 ELSE lc.dblNetWt END)),'') + '</LFIMG>' 
 							+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(lc.strWeightUOM,'')) + '</VRKME>' 
 							+ '<HIPOS>' + ISNULL(@strDeliveryItemNo,'') + '</HIPOS>' 
@@ -362,7 +344,7 @@ Begin
 							+ '</E1EDL19>'
 
 							+
-							Case When lc.intConcurrencyId=1 THEN --New Container
+							Case When c.intConcurrencyId=1 THEN --New Container
 							'<E1EDL19 SEGMENT="1">'
 							+ '<QUALF>'  +  'BAS' + '</QUALF>' 
 							+ '</E1EDL19>'
@@ -376,7 +358,11 @@ Begin
 							+ '</E1EDL41>'
 
 							+ '</E1EDL24>'
-					From @tblContainer lc
+					From tblLGLoadContainerStg lc
+					Left Join tblLGLoadContainer c on lc.intLoadContainerId=c.intLoadContainerId
+					Left Join tblLGLoadDetailContainerLink cl on lc.intLoadContainerId=cl.intLoadContainerId
+					Left Join tblLGLoadDetail ld on ld.intLoadDetailId=cl.intLoadDetailId
+					Where lc.intLoadStgId=@intLoadStgId AND ld.intLoadDetailId=@intLoadDetailId
 
 					--Update the POSNR in container link table
 					Update lc Set lc.strExternalContainerId=cs.strExternalContainerId
@@ -391,7 +377,7 @@ Begin
 	End --Loop Detail End
 
 	--For Tea
-	If UPPER(@strCommodityCode)='TEA' AND Exists (Select intConcurrencyId From tblLGLoadContainer Where intLoadId=@intLoadId AND intConcurrencyId<=1) 
+	If UPPER(@strCommodityCode)='TEA'
 	Begin
 			Set @strContainerXml=''
 			Set @intNoOfContainer=1
@@ -460,11 +446,8 @@ Begin
 	Set @strXml += '</IDOC>'
 	Set @strXml +=  '</DELVRY07>'
 
-	If @ysnUpdateFeedStatusOnRead=1
-		Update tblLGLoadStg Set strFeedStatus='Awt Ack' Where intLoadStgId = @intMinHeader
-
 	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml,strShipmentNo,strDeliveryNo)
-	VALUES(@intMinHeader,CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN 'CREATE' WHEN UPPER(@strHeaderRowState)='DELETE' THEN 'DELETE' ELSE 'UPDATE' END,@strXml,CASE WHEN ISNULL(@strAdviceNumber,'')='' THEN ISNULL(@strLoadNumber,'') ELSE ISNULL(@strLoadNumber,'') + ' / ' + ISNULL(@strAdviceNumber,'') END,ISNULL(@strExternalDeliveryNumber,''))
+	VALUES(@intMinHeader,CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,ISNULL(@strLoadNumber,''),ISNULL(@strExternalDeliveryNumber,''))
 
 	NEXT_SHIPMENT:
 	Select @intMinHeader=Min(intLoadStgId) From tblLGLoadStg Where intLoadStgId>@intMinHeader AND ISNULL(strFeedStatus,'')=''

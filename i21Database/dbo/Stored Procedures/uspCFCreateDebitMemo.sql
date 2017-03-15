@@ -108,6 +108,7 @@ BEGIN
 			,[intShipViaId]
 			,[intPaymentMethodId]
 			,[strInvoiceOriginId]
+			,[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]
 			,[strBOLNumber]
 			,[strDeliverPickup]
@@ -184,13 +185,14 @@ BEGIN
 			,[intCurrencyId]						= NULL
 			,[intTermId]							= intTermID
 			,[dtmDate]								= dtmInvoiceDate								
-			,[dtmDueDate]							= dtmInvoiceDate
+			,[dtmDueDate]							= NULL
 			,[dtmShipDate]							= dtmInvoiceDate							-- TEMPORARY
 			,[intEntitySalespersonId]				= intSalesPersonId										-- TEMPORARY
 			,[intFreightTermId]						= NULL 
 			,[intShipViaId]							= NULL 
 			,[intPaymentMethodId]					= NULL
-			,[strInvoiceOriginId]					= ''
+			,[strInvoiceOriginId]					= strInvoiceReportNumber
+			,[ysnUseOriginIdAsInvoiceNumber]		= 1
 			,[strPONumber]							= NULL
 			,[strBOLNumber]							= ''
 			,[strDeliverPickup]						= NULL

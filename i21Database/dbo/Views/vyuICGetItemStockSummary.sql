@@ -41,86 +41,103 @@ FROM (
 			, dblStockOut = SUM(dblStockOut)
 			, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
 	FROM (
+		SELECT f.intItemId
+			, f.intItemLocationId
+			, intSubLocationId = r.intSubLocationId
+			, intStorageLocationId = r.intStorageLocationId
+			, f.intItemUOMId
+			, dblStockIn = SUM(f.dblStockIn)
+			, dblStockOut = SUM(f.dblStockOut)
+			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+		FROM tblICInventoryFIFO f
+			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+				AND r.intInventoryReceiptId = f.intTransactionId
+		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+
+		UNION ALL
+
+		SELECT f.intItemId
+			, f.intItemLocationId
+			, intSubLocationId = r.intSubLocationId
+			, intStorageLocationId = r.intStorageLocationId
+			, f.intItemUOMId
+			, dblStockIn = SUM(f.dblStockIn)
+			, dblStockOut = SUM(f.dblStockOut)
+			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+		FROM tblICInventoryLIFO f
+			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+				AND r.intInventoryReceiptId = f.intTransactionId
+		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+
+		UNION ALL
+
+		SELECT f.intItemId
+			, f.intItemLocationId
+			, intSubLocationId = r.intSubLocationId
+			, intStorageLocationId = r.intStorageLocationId
+			, f.intItemUOMId
+			, dblStockIn = SUM(f.dblStockIn)
+			, dblStockOut = SUM(f.dblStockOut)
+			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+		FROM tblICInventoryLot f
+			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+				AND r.intInventoryReceiptId = f.intTransactionId
+		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+
+		UNION ALL
+
+		SELECT f.intItemId
+			, f.intItemLocationId
+			, intSubLocationId = r.intSubLocationId
+			, intStorageLocationId = r.intStorageLocationId
+			, f.intItemUOMId
+			, dblStockIn = SUM(f.dblStockIn)
+			, dblStockOut = SUM(f.dblStockOut)
+			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+		FROM tblICInventoryActualCost f
+			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+				AND r.intInventoryReceiptId = f.intTransactionId
+		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+
+		UNION ALL
+
+		SELECT f.intItemId
+			, f.intItemLocationId
+			, intSubLocationId = r.intSubLocationId
+			, intStorageLocationId = r.intStorageLocationId
+			, f.intItemUOMId
+			, dblStockIn = SUM(f.dblStockIn)
+			, dblStockOut = SUM(f.dblStockOut)
+			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+		FROM tblICInventoryFIFOStorage f
+			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+				AND r.intInventoryReceiptId = f.intTransactionId
+		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+
+		UNION ALL
+
+		SELECT f.intItemId
+			, f.intItemLocationId
+			, intSubLocationId = r.intSubLocationId
+			, intStorageLocationId = r.intStorageLocationId
+			, f.intItemUOMId
+			, dblStockIn = SUM(f.dblStockIn)
+			, dblStockOut = SUM(f.dblStockOut)
+			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+		FROM tblICInventoryLIFOStorage f
+			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+				AND r.intInventoryReceiptId = f.intTransactionId
+		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+
+		UNION ALL
 		SELECT intItemId
 			, intItemLocationId
-			, intSubLocationId = NULL
-			, intStorageLocationId = NULL
+			, intSubLocationId
+			, intStorageLocationId
 			, intItemUOMId
 			, dblStockIn = SUM(dblStockIn)
 			, dblStockOut = SUM(dblStockOut)
 			, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryFIFO
-		GROUP BY intItemId, intItemLocationId, intItemUOMId
-
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId = NULL
-			, intStorageLocationId = NULL
-			, intItemUOMId
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryLIFO
-		GROUP BY intItemId, intItemLocationId, intItemUOMId
-
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId
-			, intStorageLocationId
-			, intItemUOMId
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryLot
-		GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId
-
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId = NULL
-			, intStorageLocationId = NULL
-			, intItemUOMId
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryActualCost
-		GROUP BY intItemId, intItemLocationId, intItemUOMId
-
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId = NULL
-			, intStorageLocationId = NULL
-			, intItemUOMId
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryFIFOStorage
-		GROUP BY intItemId, intItemLocationId, intItemUOMId
-
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId = NULL
-			, intStorageLocationId = NULL
-			, intItemUOMId
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
-			FROM tblICInventoryLIFOStorage
-		GROUP BY intItemId, intItemLocationId, intItemUOMId
-
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId
-			, intStorageLocationId
-			, intItemUOMId
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
 		FROM tblICInventoryLotStorage
 		GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId
 		) tblCostingBuckets

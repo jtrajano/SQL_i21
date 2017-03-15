@@ -42,6 +42,8 @@ AS
 			,ISNULL(A.intCurrencyId,H1.intMainCurrencyId) AS intCurrencyId
 			,(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)AS strCostCurrency
 			,ISNULL(B.ysnSubCurrency,0) AS ysnSubCurrency
+			,Term.intTermID
+			,Term.strTerm
 		FROM tblAPBill A
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		INNER JOIN (tblICItemUOM B2 INNER JOIN tblICUnitMeasure B3 ON B2.intUnitMeasureId = B3.intUnitMeasureId) ON (CASE WHEN B.dblNetWeight > 0 THEN B.intWeightUOMId WHEN B.intCostUOMId > 0 THEN B.intCostUOMId ELSE B.intUnitOfMeasureId END) =		B2.intItemUOMId
@@ -61,6 +63,7 @@ AS
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = E.intCurrencyId
 		INNER JOIN tblAPBill K ON J.intTransactionId = K.intBillId
+		LEFT JOIN tblSMTerm Term ON H.intTermId = Term.intTermID
 		INNER JOIN tblAPBillDetail L ON K.intBillId = L.intBillId 
 					AND B.intItemId = L.intItemId 
 					AND E.intContractDetailId = L.intContractDetailId
@@ -133,4 +136,5 @@ AS
 				 ,H1.strCurrency
 			     ,H1.ysnSubCurrency
 				 ,B.ysnSubCurrency
-GO
+				 ,Term.intTermID
+				 ,Term.strTerm

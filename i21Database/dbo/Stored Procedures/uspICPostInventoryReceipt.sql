@@ -3,6 +3,7 @@
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
 	,@intEntityUserSecurityId AS INT = NULL 
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -35,10 +36,10 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 		,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
 
 -- Posting variables
-DECLARE @strBatchId AS NVARCHAR(40) 
-		,@strItemNo AS NVARCHAR(50)
+DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT
 		,@ysnAllowBlankGLEntries AS BIT = 1
+		,@intFunctionalCurrencyId AS INT 
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
@@ -262,9 +263,15 @@ END
 
 -- Get the next batch number
 BEGIN 
+	SET @strBatchId = NULL 
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
 	IF @@ERROR <> 0 GOTO Post_Exit;
 END
+
+-- Get the functional currency
+BEGIN 
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+END 
 
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
@@ -336,6 +343,7 @@ BEGIN
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]
+			,[strRateType]
 		)	
 		EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 			@intTransactionId
@@ -369,6 +377,8 @@ BEGIN
 				,intStorageLocationId
 				,strActualCostId
 				,intInTransitSourceLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -450,29 +460,71 @@ BEGIN
 								-- 2.1. If it is not a Lot, convert the cost from Cost UOM to Receive UOM. 
 								-- 2.2. If it is a Lot, convert the cost from Cost UOM to Lot UOM. 
 							-- 3. If sub-currency exists, then convert it to sub-currency. 
-							CASE	
-									WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 
-										-- Convert the Cost UOM to Gross/Net UOM. 
-										dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
-										+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+							-- (A + B) / C 
+							(
+								-- (A) Item Cost
+								CASE	
+										WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 
+											-- Convert the Cost UOM to Gross/Net UOM. 
 
-									-- If Gross/Net UOM is missing, 
-									ELSE 
-											CASE	
-													-- If non-lot, convert the cost Cost UOM to Receive UOM
+											CASE	-- When item is NOT a Lot, use the cost line item. 
 													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
-														-- Convert the Cost UOM to Item UOM. 
-														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItem.dblUnitCost) 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+
+														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
 													
-													-- If lot, convert the cost Cost UOM to Lot UOM
-													ELSE 														
-														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItemLot.intItemUnitMeasureId, DetailItem.dblUnitCost) 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+													--------------------------------------------------------------------------------------------------------
+													-- Cleaned weight scenario. 
+													--------------------------------------------------------------------------------------------------------
+													-- When item is a LOT, recalculate the cost. 
+													-- Below is an example: 
+													-- 1. Receive a stock at $1/LB. Net weight received is 100lb. So this means line total is $100. $1 x $100 = $100. 
+													-- 2. Lot can be cleaned. So after a lot is cleaned, net weight on lot level is reduced to 80 lb. 
+													-- 3. Value of the line total will still remain at $100. 
+													-- 4. So this means, cost needs to be changed from $1/LB to $1.25/LB.
+													-- 5. Receiving 80lbs @ $1.25/lb is $100. This will match the value of the line item with the lot item. 
+													ELSE 
+														dbo.fnDivide(
+															dbo.fnMultiply(
+																dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+																, ISNULL(DetailItem.dblNet, 0)
+															)
+															,
+															CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
+																		dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
+																	-- Calculate the Net Qty
+																	ELSE 
+																		ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+															END 
+														)
 											END 
 
-							END
-							-- and then convert the cost to the sub-currency value. 
+										-- If Gross/Net UOM is missing, 
+										ELSE 
+												CASE	
+														-- If non-lot, convert the cost Cost UOM to Receive UOM
+														WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
+															-- Convert the Cost UOM to Item UOM. 
+															dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItem.dblUnitCost) 
+													
+														-- If lot, convert the cost Cost UOM to Lot UOM
+														ELSE 														
+															dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItemLot.intItemUnitMeasureId, DetailItem.dblUnitCost) 
+												END 
+
+								END
+								-- (B) Other Charge
+								+ 
+								CASE 
+									WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
+										-- Convert the other charge to the currency used by the detail item. 
+										dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId) / DetailItem.dblForexRate
+									ELSE 
+										-- No conversion. Detail item is already in functional currency. 
+										dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+								END 									
+
+							)
+							-- (C) then convert the cost to the sub-currency value. 
 							/ 
 							CASE	WHEN DetailItem.ysnSubCurrency = 1 THEN 
 										CASE WHEN ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Header.intSubCurrencyCents, 1) ELSE 1 END 
@@ -482,7 +534,7 @@ BEGIN
 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
-				,dblExchangeRate = 1  
+				,dblExchangeRate = ISNULL(DetailItem.dblForexRate, 1)   
 				,intTransactionId = Header.intInventoryReceiptId  
 				,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
 				,strTransactionId = Header.strReceiptNumber  
@@ -492,6 +544,8 @@ BEGIN
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,strActualCostId = Header.strActualCostId
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
+				,intForexRateTypeId = DetailItem.intForexRateTypeId
+				,dblForexRate = DetailItem.dblForexRate
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -513,7 +567,24 @@ BEGIN
 
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
-  
+
+		-- Update currency fields to functional currency. 
+		BEGIN 
+			UPDATE	itemCost
+			SET		dblExchangeRate = 1
+					,dblForexRate = 1
+					,intCurrencyId = @intFunctionalCurrencyId
+			FROM	@ItemsForPost itemCost
+			WHERE	ISNULL(itemCost.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId 
+
+			UPDATE	itemCost
+			SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
+					,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
+					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+			FROM	@ItemsForPost itemCost
+			WHERE	itemCost.intCurrencyId <> @intFunctionalCurrencyId 
+		END
+		  
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
 		BEGIN 
@@ -538,6 +609,8 @@ BEGIN
 					,intStorageLocationId
 					,strActualCostId
 					,intInTransitSourceLocationId
+					,intForexRateTypeId
+					,dblForexRate
 			)
 			SELECT 
 					intItemId  
@@ -559,53 +632,10 @@ BEGIN
 					,intStorageLocationId
 					,strActualCostId
 					,intInTransitSourceLocationId
+					,intForexRateTypeId
+					,dblForexRate
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
-
-			---- Gather the item returns
-			--INSERT INTO @ReturnItemsForPost (
-			--		intItemId  
-			--		,intItemLocationId 
-			--		,intItemUOMId  
-			--		,dtmDate  
-			--		,dblQty  
-			--		,dblUOMQty  
-			--		,dblCost  
-			--		,dblSalesPrice  
-			--		,intCurrencyId  
-			--		,dblExchangeRate  
-			--		,intTransactionId  
-			--		,intTransactionDetailId   
-			--		,strTransactionId  
-			--		,intTransactionTypeId  
-			--		,intLotId 
-			--		,intSubLocationId
-			--		,intStorageLocationId
-			--		,strActualCostId
-			--		,intInTransitSourceLocationId	
-			--)
-			--SELECT 
-			--		intItemId  
-			--		,intItemLocationId 
-			--		,intItemUOMId  
-			--		,dtmDate  
-			--		,dblQty  
-			--		,dblUOMQty  
-			--		,dblCost  
-			--		,dblSalesPrice  
-			--		,intCurrencyId  
-			--		,dblExchangeRate  
-			--		,intTransactionId  
-			--		,intTransactionDetailId   
-			--		,strTransactionId  
-			--		,intTransactionTypeId  
-			--		,intLotId 
-			--		,intSubLocationId
-			--		,intStorageLocationId
-			--		,strActualCostId
-			--		,intInTransitSourceLocationId
-			--FROM	@ItemsForPost
-			--WHERE	dblQty < 0 
 			
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
@@ -647,6 +677,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[strRateType]
 				)
 				EXEC	@intReturnValue = dbo.uspICPostCosting  
 						@CompanyOwnedItemsForPost  
@@ -656,51 +687,6 @@ BEGIN
 
 				IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			END
-		
-			---- Call the post routine for posting the return items 
-			--IF EXISTS (SELECT TOP 1 1 FROM @ReturnItemsForPost)
-			--BEGIN 			
-			--	INSERT INTO @GLEntries (
-			--			[dtmDate] 
-			--			,[strBatchId]
-			--			,[intAccountId]
-			--			,[dblDebit]
-			--			,[dblCredit]
-			--			,[dblDebitUnit]
-			--			,[dblCreditUnit]
-			--			,[strDescription]
-			--			,[strCode]
-			--			,[strReference]
-			--			,[intCurrencyId]
-			--			,[dblExchangeRate]
-			--			,[dtmDateEntered]
-			--			,[dtmTransactionDate]
-			--			,[strJournalLineDescription]
-			--			,[intJournalLineNo]
-			--			,[ysnIsUnposted]
-			--			,[intUserId]
-			--			,[intEntityId]
-			--			,[strTransactionId]
-			--			,[intTransactionId]
-			--			,[strTransactionType]
-			--			,[strTransactionForm]
-			--			,[strModuleName]
-			--			,[intConcurrencyId]
-			--			,[dblDebitForeign]	
-			--			,[dblDebitReport]	
-			--			,[dblCreditForeign]	
-			--			,[dblCreditReport]	
-			--			,[dblReportingRate]	
-			--			,[dblForeignRate]
-			--	)
-			--	EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
-			--			@ReturnItemsForPost  
-			--			,@strBatchId  
-			--			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-			--			,@intEntityUserSecurityId
-
-			--	IF @intReturnValue < 0 GOTO With_Rollback_Exit
-			--END
 		END
 	END 
 
@@ -725,6 +711,8 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 				,intInTransitSourceLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -805,29 +793,71 @@ BEGIN
 								-- 2.1. If it is not a Lot, convert the cost from Cost UOM to Receive UOM. 
 								-- 2.2. If it is a Lot, convert the cost from Cost UOM to Lot UOM. 
 							-- 3. If sub-currency exists, then convert it to sub-currency. 
-							CASE	
-									WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 
-										-- Convert the Cost UOM to Gross/Net UOM. 
-										dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
-										+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+							-- (A + B) / C 
+							(
+								-- (A) Item Cost
+								CASE	
+										WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 
+											-- Convert the Cost UOM to Gross/Net UOM. 
 
-									-- If Gross/Net UOM is missing, 
-									ELSE 
-											CASE	
-													-- If non-lot, convert the cost Cost UOM to Receive UOM
+											CASE	-- When item is NOT a Lot, use the cost line item. 
 													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
-														-- Convert the Cost UOM to Item UOM. 
-														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItem.dblUnitCost) 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+
+														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
 													
-													-- If lot, convert the cost Cost UOM to Lot UOM
-													ELSE 														
-														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItemLot.intItemUnitMeasureId, DetailItem.dblUnitCost) 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+													--------------------------------------------------------------------------------------------------------
+													-- Cleaned weight scenario. 
+													--------------------------------------------------------------------------------------------------------
+													-- When item is a LOT, recalculate the cost. 
+													-- Below is an example: 
+													-- 1. Receive a stock at $1/LB. Net weight received is 100lb. So this means line total is $100. $1 x $100 = $100. 
+													-- 2. Lot can be cleaned. So after a lot is cleaned, net weight on lot level is reduced to 80 lb. 
+													-- 3. Value of the line total will still remain at $100. 
+													-- 4. So this means, cost needs to be changed from $1/LB to $1.25/LB.
+													-- 5. Receiving 80lbs @ $1.25/lb is $100. This will match the value of the line item with the lot item. 
+													ELSE 
+														dbo.fnDivide(
+															dbo.fnMultiply(
+																dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+																, ISNULL(DetailItem.dblNet, 0)
+															)
+															,
+															CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
+																		dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
+																	-- Calculate the Net Qty
+																	ELSE 
+																		ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+															END 
+														)
 											END 
 
-							END
-							-- and then convert the cost to the sub-currency value. 
+										-- If Gross/Net UOM is missing, 
+										ELSE 
+												CASE	
+														-- If non-lot, convert the cost Cost UOM to Receive UOM
+														WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
+															-- Convert the Cost UOM to Item UOM. 
+															dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItem.dblUnitCost) 
+													
+														-- If lot, convert the cost Cost UOM to Lot UOM
+														ELSE 														
+															dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItemLot.intItemUnitMeasureId, DetailItem.dblUnitCost) 
+												END 
+
+								END
+								-- (B) Other Charge
+								+ 
+								CASE 
+									WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
+										-- Convert the other charge to the currency used by the detail item. 
+										dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId) / DetailItem.dblForexRate
+									ELSE 
+										-- No conversion. Detail item is already in functional currency. 
+										dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+								END 									
+
+							)
+							-- (C) then convert the cost to the sub-currency value. 
 							/ 
 							CASE	WHEN DetailItem.ysnSubCurrency = 1 THEN 
 										CASE WHEN ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Header.intSubCurrencyCents, 1) ELSE 1 END 
@@ -846,6 +876,8 @@ BEGIN
 				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
+				,intForexRateTypeId = DetailItem.intForexRateTypeId
+				,dblForexRate = DetailItem.dblForexRate
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 					
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -864,11 +896,28 @@ BEGIN
 					AND InTransitSourceLocation.intLocationId = Header.intTransferorId
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
+
+		-- Update currency fields to functional currency. 
+		BEGIN 
+			UPDATE	storageCost
+			SET		dblExchangeRate = 1
+					,dblForexRate = 1
+					,intCurrencyId = @intFunctionalCurrencyId
+			FROM	@StorageItemsForPost storageCost
+			WHERE	ISNULL(storageCost.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId 
+
+			UPDATE	storageCost
+			SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
+					,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
+					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+			FROM	@StorageItemsForPost storageCost
+			WHERE	storageCost.intCurrencyId <> @intFunctionalCurrencyId 
+		END
   
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 		BEGIN 
-			EXEC	@intReturnValue = dbo.uspICPostStorage
+			EXEC @intReturnValue = dbo.uspICPostStorage
 					@StorageItemsForPost  
 					,@strBatchId  
 					,@intEntityUserSecurityId
@@ -911,6 +960,7 @@ BEGIN
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]
+			,[strRateType]
 		)	
 		EXEC dbo.uspICPostInventoryReceiptTaxes 
 			@intTransactionId
@@ -963,6 +1013,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
@@ -1017,6 +1068,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 			)	
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptOtherCharges 
 				@intTransactionId
@@ -1061,6 +1113,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 			)	
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptTaxes 
 				@intTransactionId
@@ -1085,10 +1138,18 @@ BEGIN
 	END 	
 END   
 
--- Update the In-Transit Outbound for Transfer Order
+-- Clean up the recap data. 
+BEGIN 
+	UPDATE @GLEntries
+	SET dblDebitForeign = ISNULL(dblDebitForeign, 0)
+		,dblCreditForeign = ISNULL(dblCreditForeign, 0) 
+END 
+
+-- Update the In-Transit Outbound and Inbound for Transfer Order
 IF @ysnRecap = 0
 BEGIN 
-	DECLARE		@InTransit_Outbound AS InTransitTableType
+	DECLARE	@InTransit_Outbound AS InTransitTableType
+	DECLARE	@InTransit_Inbound AS InTransitTableType
 
 	INSERT INTO @InTransit_Outbound (
 		[intItemId]
@@ -1173,10 +1234,97 @@ BEGIN
 	WHERE	r.intInventoryReceiptId = @intTransactionId	
 			AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
 
+	INSERT INTO @InTransit_Inbound (
+			[intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[intLotId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dblQty]
+			,[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionTypeId]	
+	)
+	SELECT	[intItemId]				= ri.intItemId
+			,[intItemLocationId]	= il.intItemLocationId
+			,[intItemUOMId]			= 
+						-- New Hierarchy:
+						-- 1. Use the Gross/Net UOM (intWeightUOMId) 
+						-- 2. If there is no Gross/Net UOM, then check the lot. 
+							-- 2.1. If it is a Lot, use the Lot UOM. 
+							-- 2.2. If it is not a Lot, use the Item UOM. 
+						ISNULL( 
+							ri.intWeightUOMId, 
+							CASE	WHEN ISNULL(ril.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(ri.intItemId) <> 0 THEN 
+										ril.intItemUnitMeasureId
+									ELSE 
+										ri.intUnitMeasureId
+							END 
+						)
+			,[intLotId]				= ril.intLotId
+			,[intSubLocationId]		= ri.intSubLocationId
+			,[intStorageLocationId]	= ri.intStorageLocationId
+			,[dblQty]				= 
+						-- New Hierarchy:
+						-- 1. If there is a Gross/Net UOM, use the Net Qty. 
+							-- 2.1. If it is not a Lot, use the item's Net Qty. 
+							-- 2.2. If it is a Lot, use the Lot's Net Qty. 
+						-- 2. If there is no Gross/Net UOM, use the item or lot qty. 
+							-- 2.1. If it is not a Lot, use the item Qty. 
+							-- 2.2. If it is a Lot, use the lot qty. 
+						CASE		-- Use the Gross/Net Qty if there is a Gross/Net UOM. 
+									WHEN ri.intWeightUOMId IS NOT NULL THEN 									
+										CASE	-- When item is NOT a Lot, receive it by the item's net qty. 
+												WHEN ISNULL(ril.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ri.intItemId) = 0 THEN 
+													ISNULL(ri.dblNet, 0)
+													
+												-- When item is a LOT, get the net qty from the Lot record. 
+												-- 1. If Net Qty is not provided, convert the Lot Qty into Gross/Net UOM. 
+												-- 2. Else, get the Net Qty by using this formula: Gross Weight - Tare Weight. 
+												ELSE 
+															-- When Net Qty is missing, then convert the Lot Qty to Gross/Net UOM. 
+													CASE	WHEN  ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0) = 0 THEN 
+																dbo.fnCalculateQtyBetweenUOM(ril.intItemUnitMeasureId, ri.intWeightUOMId, ril.dblQuantity)
+															-- Calculate the Net Qty
+															ELSE 
+																ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0)
+													END 
+										END 
+
+								-- If Gross/Net UOM is missing, then get the item/lot qty. 
+								ELSE 
+									CASE	-- When item is NOT a Lot, receive it by the item qty.
+											WHEN ISNULL(ril.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ri.intItemId) = 0 THEN 
+												ri.dblOpenReceive
+												
+											-- When item is a LOT, receive it by the Lot Qty. 
+											ELSE 
+												ISNULL(ril.dblQuantity, 0)
+									END 								
+
+						END 
+			,[intTransactionId]		= r.intInventoryReceiptId
+			,[strTransactionId]		= r.strReceiptNumber
+			,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE
+	FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			INNER JOIN dbo.tblICItemLocation il 
+				ON il.intItemId = ri.intItemId
+				AND il.intLocationId = r.intLocationId
+			LEFT JOIN dbo.tblICInventoryReceiptItemLot ril
+				ON ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId				
+	WHERE	r.intInventoryReceiptId = @intTransactionId	
+			AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+
 	UPDATE @InTransit_Outbound
 	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END
 	
+	UPDATE @InTransit_Inbound
+	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END
+
 	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
+	EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound
 
 	IF @ysnPost = 1 
 		EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 3 -- Set status of the transfer order to 'Closed'
@@ -1194,7 +1342,9 @@ END
 IF @ysnRecap = 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspCMPostRecap @GLEntries
+	EXEC dbo.uspGLPostRecap 
+			@GLEntries
+			,@intEntityUserSecurityId
 	COMMIT TRAN @TransactionName
 END 
 

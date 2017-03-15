@@ -108,6 +108,7 @@
 :r .\11_IC\Rename_tblICItemOwner_Fields.sql
 :r .\11_IC\Clean_Valuation_Indexes.sql
 :r .\11_IC\Relink_Line_Of_Business.sql
+:r .\11_IC\Remove_Unused_Shipment_Item_Fields.sql 
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql
@@ -137,6 +138,7 @@
 
 :r .\12_EM\16_CleanCustomerProductVersion.sql
 :r .\12_EM\20_CleanCustomerSpecialPrice.sql
+:r .\12_EM\21_CleanAPBillMissingContact.sql
 --RK
 :r .\13_RK\01_DropTableScript.sql
 
@@ -174,3 +176,7 @@
 --EM
 
 :r .\12_EM\16_Drop_tblEntity_related_constraints.sql -- THIS IS ON THE OUTSKIRT OF SCRIPT DUE TO ITS SENSITIVITY
+
+--MFT
+:r .\23_MFT\1_CleanUp_Data.sql
+:r .\23_MFT\0_Remove_Unused_Tables_FK.sql

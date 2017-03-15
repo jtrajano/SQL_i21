@@ -27,44 +27,37 @@ AS
 BEGIN 
 	DECLARE	@result AS NUMERIC(38,20) 
 
-	DECLARE @dblUnitQtyFrom AS NUMERIC(38,20)
-			,@dblUnitQtyTo AS NUMERIC(38,20)
+	IF ISNULL(@dblCost, 0) = 0 
+		RETURN @dblCost; 
 
-	-- Optimize the function. If From and To are equal, return the same cost. 
-	IF @intItemUOMIdFrom = @intItemUOMIdTo
-		RETURN @dblCost 
+	SELECT	@result = 
+			CASE	WHEN ISNULL(ItemUOMFrom.dblUnitQty, 0) = 0 OR ISNULL(ItemUOMTo.dblUnitQty, 0) = 0 THEN 
+						NULL 			
+					WHEN ItemUOMFrom.dblUnitQty = ItemUOMTo.dblUnitQty THEN 
+						@dblCost 					
 
-	SELECT	@dblUnitQtyFrom = ItemUOM.dblUnitQty
-	FROM	dbo.tblICItemUOM ItemUOM 
-	WHERE	ItemUOM.intItemUOMId = @intItemUOMIdFrom
+					WHEN ItemUOMFrom.dblUnitQty = 1 THEN 
+						dbo.fnMultiply(@dblCost, ItemUOMTo.dblUnitQty)
 
-	SELECT	@dblUnitQtyTo = ItemUOM.dblUnitQty
-	FROM	dbo.tblICItemUOM ItemUOM 
-	WHERE	ItemUOM.intItemUOMId = @intItemUOMIdTo
+					WHEN ItemUOMTo.dblUnitQty = 1 THEN 
+						dbo.fnDivide(@dblCost, ItemUOMFrom.dblUnitQty)
 
-	-- Validate if unit qty's are non-zero
-	SET @dblUnitQtyFrom = ISNULL(@dblUnitQtyFrom, 0)
-	SET @dblUnitQtyTo = ISNULL(@dblUnitQtyTo, 0)
-
-	IF @dblUnitQtyFrom = 0 OR @dblUnitQtyTo = 0 
-	BEGIN 
-		-- Return null if the unit qty's are invalid. 
-		-- Do not continue with the calculation
-		RETURN NULL; 
-	END 
-
-	-- Calculate the Unit Cost
-	SET @result = 
-		CASE	WHEN @dblUnitQtyFrom = @dblUnitQtyTo THEN 
-					@dblCost
-				ELSE 
-					CASE	WHEN @dblUnitQtyFrom <> 0 THEN 
-								dbo.fnDivide(dbo.fnMultiply(@dblCost, @dblUnitQtyTo), @dblUnitQtyFrom)
-							ELSE 
-								NULL 
-					END
-		END 
+					ELSE 
+						dbo.fnDivide(
+							dbo.fnMultiply(@dblCost, ItemUOMFrom.dblUnitQty)
+							,ItemUOMTo.dblUnitQty 
+						)					
+			END 
+	FROM	(
+				SELECT	ItemUOM.dblUnitQty 
+				FROM	dbo.tblICItemUOM ItemUOM 
+				WHERE	ItemUOM.intItemUOMId = @intItemUOMIdFrom
+			) ItemUOMFrom
+			, (
+				SELECT	ItemUOM.dblUnitQty 
+				FROM	dbo.tblICItemUOM ItemUOM 
+				WHERE	ItemUOM.intItemUOMId = @intItemUOMIdTo
+			) ItemUOMTo
 
 	RETURN @result;	
 END
-GO

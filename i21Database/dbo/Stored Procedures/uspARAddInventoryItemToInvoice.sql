@@ -68,8 +68,11 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
+	,@ItemCurrencyExchangeRateTypeId	INT			= NULL
+	,@ItemCurrencyExchangeRateId	INT				= NULL
+	,@ItemCurrencyExchangeRate		NUMERIC(18, 8)	= 1.000000
 	,@ItemSubCurrencyId				INT				= NULL
-	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= 1.000000
 	,@ItemIsBlended					BIT				= 0
 	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemDestinationGradeId		INT				= NULL
@@ -224,6 +227,9 @@ BEGIN TRY
 				,[strVFDDocumentNumber]
 				,[dblTotalTax]
 				,[dblTotal]
+				,[intCurrencyExchangeRateTypeId]
+				,[intCurrencyExchangeRateId]
+				,[dblCurrencyExchangeRate]
 				,[intSubCurrencyId]
 				,[dblSubCurrencyRate]
 				,[ysnBlended]
@@ -303,6 +309,9 @@ BEGIN TRY
 				,[strVFDDocumentNumber]				= @ItemVFDDocumentNumber
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal
+				,[intCurrencyExchangeRateTypeId]	= @ItemCurrencyExchangeRateTypeId
+				,[intCurrencyExchangeRateId]		= @ItemCurrencyExchangeRateId
+				,[dblCurrencyExchangeRate]			= CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1 ELSE ISNULL(@ItemCurrencyExchangeRate, 1) END
 				,[intSubCurrencyId]					= ISNULL(@ItemSubCurrencyId, @CurrencyId)
 				,[dblSubCurrencyRate]				= CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
 				,[ysnBlended]						= @ItemIsBlended

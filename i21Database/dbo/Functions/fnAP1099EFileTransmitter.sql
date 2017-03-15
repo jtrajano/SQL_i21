@@ -17,7 +17,7 @@ BEGIN
 		+ ISNULL(NULLIF(LEFT(A.strFederalTaxID,9),''),SPACE(9)) --Position 7-15 TIN
 		+ '33A19' --Position 16-20 TCC
 		+ SPACE(7) -- 21-27Position 
-		+ CASE WHEN 0 = 1 THEN 'T' ELSE ' ' END --Position 28
+		+ CASE WHEN @test = 1 THEN 'T' ELSE ' ' END --Position 28
 		+ ' ' COLLATE Latin1_General_CI_AS --Position 29 Foreign Indicator
 		+ LEFT(dbo.fnTrim(A.strCompanyName), 40) + SPACE(40 - LEN(dbo.fnTrim(A.strCompanyName))) --Position 30-69 First 40 (Transmitter name)
 		+ SUBSTRING(dbo.fnTrim(A.strCompanyName), 41, LEN(dbo.fnTrim(A.strCompanyName))) + SPACE(40 - LEN(SUBSTRING(dbo.fnTrim(A.strCompanyName), 41,LEN(dbo.fnTrim(A.strCompanyName))))) --Position 70-109 Remaining 40 and spaces

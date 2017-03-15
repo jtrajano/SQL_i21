@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantMCM]
-@intCheckoutId Int
+@intCheckoutId Int,
+@strXML nvarchar(MAX)
 AS
 BEGIN
 

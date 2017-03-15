@@ -22,7 +22,8 @@ BEGIN TRY
 			
 
 	
-	SELECT	PF.intPriceFixationId,
+	SELECT	DISTINCT 
+			PF.intPriceFixationId,
 			PD.dtmFixationDate,
 			CONVERT(NVARCHAR(50),PD.dtmFixationDate,106) AS dtmFixationDateDesc,
 			MA.strFutMarketName,
@@ -35,7 +36,7 @@ BEGIN TRY
 				
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
-	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	PF.intContractDetailId	LEFT
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractHeaderId			=	PF.intContractHeaderId	LEFT
 	JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=	PD.intFutureMarketId	LEFT
 	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	PD.intFutureMonthId		LEFT	
 	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=	CD.intCurrencyId		LEFT

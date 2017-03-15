@@ -65,21 +65,6 @@ SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompany
 --END
 
 --Make sure all items were not yet billed.
-IF NOT EXISTS (
-	SELECT	TOP 1 1 
-	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri 
-				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			INNER JOIN #tmpReceiptIds tmp
-				ON ri.intInventoryReceiptId = tmp.intInventoryReceiptId
-	WHERE	ri.dblOpenReceive <> ri.dblBillQty
-			AND r.strReceiptType = 'inventory Return'			
-)
-BEGIN 
-	-- Debit Memo is no longer needed. All items have Debit Memo.
-	RAISERROR(80110, 11, 1)  
-END
-
---Make sure all items were not yet billed.
 IF NOT EXISTS(
 	SELECT	TOP 1 1 
 	FROM	tblICInventoryReceiptItem r INNER JOIN #tmpReceiptIds tmp
@@ -87,8 +72,38 @@ IF NOT EXISTS(
 	WHERE	r.dblOpenReceive <> r.dblBillQty
 )
 BEGIN
-	-- Voucher is no longer needed. All items have Voucher.
-	RAISERROR(80111, 11, 1)  
+	IF EXISTS (
+		SELECT	TOP 1 1 
+		FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri 
+					ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+				INNER JOIN #tmpReceiptIds tmp
+					ON ri.intInventoryReceiptId = tmp.intInventoryReceiptId
+		WHERE	r.strReceiptType = 'Inventory Return'	
+	)
+	BEGIN 
+		-- Debit Memo is no longer needed. All items have Debit Memo.
+		RAISERROR(80110, 11, 1)  
+	END 
+	ELSE 
+	BEGIN 
+		-- Voucher is no longer needed. All items have Voucher.
+		RAISERROR(80111, 11, 1)  
+	END 
+END
+ELSE 
+BEGIN
+	
+	DECLARE @availableQty INT
+	SET @availableQty =	(SELECT  CASE WHEN A.dblOpenReceive =  SUM(B.dblQtyReceived) THEN 1 ELSE 0 END
+					FROM tblICInventoryReceiptItem A
+						INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
+					where A.intInventoryReceiptItemId IN  (SELECT intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds))  AND B.intInventoryReceiptChargeId IS NULL
+					GROUP BY A.dblOpenReceive)
+		IF(@availableQty = 1)
+		BEGIN 
+			-- Voucher is no longer needed. All items have Voucher.
+			RAISERROR(80111, 11, 1)  
+		END 
 END
 
 --removed first the constraint
@@ -216,8 +231,8 @@ BEGIN
 			,[intAccountId] 		=	@APAccount
 			,[strBillId]			=	@generatedBillRecordId
 			,[strReference] 		=	A.strBillOfLading
-			,[dblTotal] 			=	A.dblInvoiceAmount
-			,[dblAmountDue]			=	A.dblInvoiceAmount
+			,[dblTotal] 			=	@totalReceiptAmount
+			,[dblAmountDue]			=	@totalReceiptAmount
 			,[intEntityId]			=	@userId
 			,[ysnPosted]			=	0
 			,[ysnPaid]				=	0
@@ -324,6 +339,7 @@ BEGIN
 		[dblQtyReceived],
 		[dblTax],
 		[dblRate],
+		[intCurrencyExchangeRateTypeId],
 		[ysnSubCurrency],
 		[intTaxGroupId],
 		[intAccountId],
@@ -359,7 +375,8 @@ BEGIN
 		[dblQtyOrdered]				=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END,
 		[dblQtyReceived]			=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END,
 		[dblTax]					=	ISNULL(B.dblTax,0),
-		[dblRate]					=	ISNULL(G.dblRate,0),
+		[dblForexRate]				=	ISNULL(B.dblForexRate,0),
+		[intForexRateTypeId]		=	B.intForexRateTypeId,
 		[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
@@ -368,7 +385,8 @@ BEGIN
 													THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) 
 																   THEN E1.dblCashPrice 
 																   ELSE B.dblUnitCost 
-															  END / ISNULL(A.intSubCurrencyCents,1)  * ((B.dblOpenReceive - B.dblBillQty) * (CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6))/ CAST(ISNULL(ItemWeightUOM.dblUnitQty ,1) AS DECIMAL(18,6))))  * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+															  END / ISNULL(A.intSubCurrencyCents,1)  * ((CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END) 
+															     * (CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6))/ CAST(ISNULL(ItemWeightUOM.dblUnitQty ,1) AS DECIMAL(18,6))))  * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 													WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
 													THEN CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END) 
 																* 
@@ -384,7 +402,8 @@ BEGIN
 													THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) 
 																   THEN E1.dblCashPrice 
 																   ELSE B.dblUnitCost 
-															  END * ((B.dblOpenReceive - B.dblBillQty) * (CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6))/ CAST(ISNULL(ItemWeightUOM.dblUnitQty ,1) AS DECIMAL(18,6))))  * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+															  END * ((CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END) 
+															      * (CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6))/ CAST(ISNULL(ItemWeightUOM.dblUnitQty ,1) AS DECIMAL(18,6))))  * ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 													WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
 													THEN CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END) 
 																* CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  
@@ -405,7 +424,8 @@ BEGIN
 										 (CASE WHEN B.dblNet > 0 THEN B.dblUnitCost * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1)AS DECIMAL(18,6))) 
 											   WHEN B.intCostUOMId > 0 THEN B.dblUnitCost * ( CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1)AS DECIMAL(18,6))) ELSE B.dblUnitCost END) / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,1) ELSE 1 END
 										) ELSE 0.00 END,0),
-		[dblNetWeight]				=	CASE WHEN B.intWeightUOMId > 0 THEN (B.dblOpenReceive - B.dblBillQty) * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)) ELSE 0 END,
+		[dblNetWeight]				=	CASE WHEN B.intWeightUOMId > 0 THEN (CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END)
+										* (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)) ELSE 0 END,
 		[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0),
 		[dblWeightLoss]				=	ISNULL(B.dblGross - B.dblNet,0),
 		[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END,
@@ -463,7 +483,7 @@ BEGIN
 		SELECT 
 			K.dblNetWt AS dblNet
 		FROM tblLGLoadContainer K
-		WHERE 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2
+		WHERE 1 = (CASE WHEN (A.strReceiptType = 'Purchase Contract' OR A.strReceiptType = 'Inventory Return') AND A.intSourceType = 2
 							AND K.intLoadContainerId = B.intContainerId 
 						THEN 1
 						ELSE 0 END)
@@ -494,7 +514,8 @@ BEGIN
 		[dblQtyOrdered]				=	A.dblOrderQty,
 		[dblQtyReceived]			=	A.dblQuantityToBill,
 		[dblTax]					=	ISNULL(A.dblTax,0),
-		[dblRate]					=	ISNULL(G.dblRate,0),
+		[dblForexRate]				=	ISNULL(A.dblForexRate,0),
+		[intForexRateTypeId]		=   A.intForexRateTypeId,
 		[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	A.intAccountId,

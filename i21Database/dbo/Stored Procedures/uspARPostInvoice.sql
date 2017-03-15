@@ -46,10 +46,6 @@ DECLARE @PostInvoiceData TABLE  (
 	,UNIQUE (intInvoiceId)
 );
 
-
- 
-
-
 DECLARE @InvalidInvoiceData TABLE  (
 	strError NVARCHAR(max),
 	strTransactionType NVARCHAR(50),
@@ -70,7 +66,6 @@ DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
-
 
 DECLARE @UserEntityID				INT
 		,@DiscountAccountId			INT
@@ -189,13 +184,11 @@ BEGIN TRY
 				IF (ISNULL(@invoicesToAdd, '') <> '')
 					BEGIN
 						INSERT INTO @PostInvoiceData 
-
-						
+												
 						SELECT ARI.[intInvoiceId], ARI.intCompanyLocationId, ARI.[strInvoiceNumber], ARI.strTransactionType, ARI.[intEntityId], ARI.[intPeriodsToAccrue]
 						FROM dbo.tblARInvoice ARI
 						WHERE ARI.[ysnPosted] = 0 
 							AND intInvoiceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd))
-
 
 						EXEC dbo.uspARReComputeInvoiceAmounts @intSplitInvoiceId
 
@@ -625,6 +618,7 @@ END CATCH
 					ARI.strType = 'Tank Delivery'
 					AND ARID.intSiteId IS NULL
 					AND ICI.ysnTankRequired = 1
+					AND ICI.strType <> 'Comment'
 				 							
 				--zero amount
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -746,7 +740,8 @@ END CATCH
 						ON ISNULL(IST.intDiscountAccountId, @DiscountAccountId) = GLA.intAccountId
 				WHERE 
 					((ISNULL(IST.intDiscountAccountId,0) = 0  AND  ISNULL(@DiscountAccountId,0) = 0) OR GLA.intAccountId IS NULL)
-					AND Detail.dblDiscount <> 0					
+					AND Detail.dblDiscount <> 0		
+					AND IT.strType <> 'Comment'			
 
 				--Currency is required
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -989,7 +984,7 @@ END CATCH
 						ON D.intItemId = I.intItemId	 				
 				WHERE
 					ISNULL(A.intPeriodsToAccrue,0) > 1
-					AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+					AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 								
 				--General Account				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1023,6 +1018,7 @@ END CATCH
 				WHERE
 					(ISNULL(Acct.intGeneralAccountId,0) = 0 OR GLA.intAccountId IS NULL)
 					AND I.strType IN ('Non-Inventory','Service')
+					AND I.strType <> 'Comment'
 					
 				--Software - Maintenance Sales				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1159,9 +1155,9 @@ END CATCH
 				WHERE
 					D.dblTotal <> @ZeroDecimal 
 					AND (D.intItemId IS NOT NULL OR D.intItemId <> 0)
-					AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+					AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 					AND (ISNULL(Acct.intSalesAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND A.strTransactionType <> 'Debit Memo'
+					AND (A.strTransactionType <> 'Debit Memo' OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
 					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 				--Sales Account				
@@ -1272,7 +1268,7 @@ END CATCH
 					AND (ISNULL(D.intInventoryShipmentItemId,0) <> 0 OR ISNULL(D.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND (ISNULL(IST.intCOGSAccountId,0) = 0 OR GLA.intAccountId IS NULL)
 					AND ISNULL(D.intItemId, 0) <> 0
-					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
+					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 					AND A.strTransactionType <> 'Debit Memo'
 
 
@@ -1325,7 +1321,7 @@ END CATCH
 					D.dblTotal <> @ZeroDecimal
 					AND (ISNULL(D.intInventoryShipmentItemId,0) <> 0 OR ISNULL(D.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(D.intItemId, 0) <> 0
-					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
+					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 					AND A.strTransactionType <> 'Debit Memo'	
 					AND (ISNULL(IST.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					
@@ -1363,7 +1359,7 @@ END CATCH
 					AND (ISNULL(Detail.intInventoryShipmentItemId,0) <> 0 OR ISNULL(Detail.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(Detail.intItemId, 0) <> 0
 					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
+					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 					AND Header.strTransactionType <> 'Debit Memo'
 					
 					
@@ -1406,7 +1402,7 @@ END CATCH
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ARI.[strTransactionType] <> 'Debit Memo'		
-					AND ARIC.strType <> 'Finished Good'
+					AND ARIC.strType NOT IN ('Finished Good','Comment')
 
 				--Inventory In-Transit Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1441,7 +1437,7 @@ END CATCH
 					AND (ISNULL(Detail.intInventoryShipmentItemId,0) <> 0 OR ISNULL(Detail.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(Detail.intItemId, 0) <> 0
 					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
+					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 					AND Header.strTransactionType <> 'Debit Memo'
 					
 					
@@ -1484,7 +1480,7 @@ END CATCH
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ARI.[strTransactionType] <> 'Debit Memo'																		
-					AND ARIC.strType <> 'Finished Good'
+					AND ARIC.strType NOT IN ('Finished Good','Comment')
 				
 				--Zero Contract Item Price	
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -2057,28 +2053,8 @@ IF @post = 1
 				@PostInvoiceData IP 
 			WHERE ISNULL(IP.intPeriodsToAccrue,0) > 1
 
-			INSERT INTO @GLEntries 
-			EXEC	dbo.uspARGenerateEntriesForAccrual  
-						 @Invoices					= @Accruals
-						,@DeferredRevenueAccountId	= @DeferredRevenueAccountId
-						,@BatchId					= @batchId
-						,@Code						= @CODE
-						,@UserId					= @userId
-						,@UserEntityId				= @UserEntityID
-						,@ScreenName				= @SCREEN_NAME
-						,@ModuleName				= @MODULE_NAME
-						,@AccrueLicense				= @accrueLicense
-
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH		
-		
-		BEGIN TRY
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-				[dtmDate] 
+			INSERT INTO @GLEntries(
+				 [dtmDate]
 				,[strBatchId]
 				,[intAccountId]
 				,[dblDebit]
@@ -2103,14 +2079,74 @@ IF @post = 1
 				,[strTransactionForm]
 				,[strModuleName]
 				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[strRateType]
+			)
+			EXEC	dbo.uspARGenerateEntriesForAccrual  
+						 @Invoices					= @Accruals
+						,@DeferredRevenueAccountId	= @DeferredRevenueAccountId
+						,@BatchId					= @batchId
+						,@Code						= @CODE
+						,@UserId					= @userId
+						,@UserEntityId				= @UserEntityID
+						,@ScreenName				= @SCREEN_NAME
+						,@ModuleName				= @MODULE_NAME
+						,@AccrueLicense				= @accrueLicense
+
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH		
+		
+		BEGIN TRY
+			-- Call the post routine 
+			INSERT INTO @GLEntries (
+				 [dtmDate]
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[strRateType]
 			)
 			--DEBIT Total
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= A.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblBaseInvoiceTotal - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblBaseInvoiceTotal - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
 																								(
 																								SELECT
@@ -2164,12 +2200,12 @@ IF @post = 1
 																									ARI.intInvoiceId = A.intInvoiceId
 																									AND ARID.dblTotal <> @ZeroDecimal  
 																								)
-																							END				
+																							END																						
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= 0
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
@@ -2182,7 +2218,14 @@ IF @post = 1
 				,strTransactionType			= A.strTransactionType
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1				 
+				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
+				,[dblReportingRate]			= 0
+				,[dblForeignRate]			= 0
+				,[strRateType]				= ''
 			FROM
 				tblARInvoice A
 			LEFT JOIN 
@@ -2195,8 +2238,9 @@ IF @post = 1
 				(
 				--Credit Memo Prepaids
 				SELECT
-					 [dblAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
-					,[intInvoiceId]			= A.[intInvoiceId] 
+					 [dblAppliedCMAmount]		= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
+					,[dblBaseAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblBaseAppliedInvoiceDetailAmount],@ZeroDecimal))
+					,[intInvoiceId]				= A.[intInvoiceId] 
 				FROM
 					tblARPrepaidAndCredit ARPAC
 				INNER JOIN
@@ -2211,7 +2255,7 @@ IF @post = 1
 				GROUP BY
 					A.[intInvoiceId]
 				) CM
-					ON A.[intInvoiceId] = CM.[intInvoiceId] 		
+					ON A.[intInvoiceId] = CM.[intInvoiceId]
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 
@@ -2222,8 +2266,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= ARI1.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
 				,dblDebitUnit				= @ZeroDecimal 
 				,dblCreditUnit				= @ZeroDecimal
 				,strDescription				= A.strComments
@@ -2243,7 +2287,14 @@ IF @post = 1
 				,strTransactionType			= A.strTransactionType
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1				 
+				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,[dblReportingRate]			= 0
+				,[dblForeignRate]			= 0
+				,[strRateType]				= ''	 
 			FROM
 				tblARPrepaidAndCredit ARPAC
 			INNER JOIN
@@ -2272,15 +2323,15 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= SMCL.intUndepositedFundsId 
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblBasePayment - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblBasePayment - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) END
 				,dblDebitUnit				= @ZeroDecimal
-				,dblCreditUnit				= @ZeroDecimal		
+				,dblCreditUnit				= @ZeroDecimal					
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= 0
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
@@ -2293,7 +2344,14 @@ IF @post = 1
 				,strTransactionType			= A.strTransactionType
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1				 
+				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
+				,[dblReportingRate]			= 0
+				,[dblForeignRate]			= 0
+				,[strRateType]				= ''	 
 			FROM
 				tblARInvoice A
 			LEFT JOIN 
@@ -2309,8 +2367,9 @@ IF @post = 1
 				(
 				--Credit Memo Prepaids
 				SELECT
-					 [dblAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
-					,[intInvoiceId]			= A.[intInvoiceId] 
+					 [dblAppliedCMAmount]		= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
+					,[dblBaseAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblBaseAppliedInvoiceDetailAmount],@ZeroDecimal))
+					,[intInvoiceId]				= A.[intInvoiceId] 
 				FROM
 					tblARPrepaidAndCredit ARPAC
 				INNER JOIN
@@ -2336,10 +2395,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= ARI1.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
 				,dblDebitUnit				= @ZeroDecimal 
-				,dblCreditUnit				= @ZeroDecimal
+				,dblCreditForeign			= @ZeroDecimal
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2357,7 +2416,14 @@ IF @post = 1
 				,strTransactionType			= A.strTransactionType
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1				 
+				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,[dblReportingRate]			= 0
+				,[dblForeignRate]			= 0
+				,[strRateType]				= ''
 			FROM
 				tblARPrepaidAndCredit ARPAC
 			INNER JOIN
@@ -2384,10 +2450,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= B.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())  END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())  END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2405,7 +2471,14 @@ IF @post = 1
 				,strTransactionType			= A.strTransactionType
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1	
+				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())  END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())  END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
+				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
+				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -2420,12 +2493,22 @@ IF @post = 1
 			LEFT OUTER JOIN 
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 				
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
+			
 			WHERE
 				B.dblTotal <> @ZeroDecimal 
 				AND ((B.intItemId IS NULL OR B.intItemId = 0)
 					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
-				AND A.strTransactionType <> 'Debit Memo'
+				AND (A.strTransactionType <> 'Debit Memo' OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 
@@ -2438,23 +2521,23 @@ IF @post = 1
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
-																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																															[dbo].fnRoundBanker((ISNULL(B.dblBaseLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
 																										 END)
 											  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
 																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
@@ -2462,7 +2545,7 @@ IF @post = 1
 																										 END)
 											  ELSE 0  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END							
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2480,7 +2563,62 @@ IF @post = 1
 				,strTransactionType			= A.strTransactionType
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1	
+				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
+																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
+																												THEN
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																										 END)
+											  END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
+																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
+																												THEN
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																										 END)
+											  END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
+																												THEN
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																													
+																										 END)
+											  ELSE 0  END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
+																												THEN
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																													
+																										 END)
+											  ELSE 0  END
+				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
+				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -2498,7 +2636,16 @@ IF @post = 1
 			LEFT OUTER JOIN 
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 						
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId					
 			WHERE
 				B.dblLicenseAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
@@ -2514,31 +2661,31 @@ IF @post = 1
 				,intAccountId				= @DeferredRevenueAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
-																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																															[dbo].fnRoundBanker((ISNULL(B.dblBaseLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
 																										 END)
 											  ELSE 0  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
-																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
 																														ELSE
-																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																															[dbo].fnRoundBanker((ISNULL(B.dblBaseLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
 																										 END)
 											  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2556,7 +2703,60 @@ IF @post = 1
 				,strTransactionType			= A.strTransactionType
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1	
+				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
+																												THEN
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																										 END)
+											  ELSE 0  END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
+																												THEN
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																										 END)
+											  ELSE 0  END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
+																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
+																												THEN
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																										 END)
+											  END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
+																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
+																												THEN
+																													ISNULL(B.dblTotal, @ZeroDecimal) + (CASE WHEN (ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0) THEN 0 ELSE [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END)
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + + (CASE WHEN ISNULL(A.intPeriodsToAccrue,0) > 1 AND @accrueLicense = 0  THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(100.000000 - [dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) END) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblLicenseAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																										 END)
+											  END
+				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
+				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -2579,6 +2779,15 @@ IF @post = 1
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
 					AND A.intCompanyLocationId = ICIS.intLocationId 						
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId		
 			WHERE
 				B.dblLicenseAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
@@ -2595,29 +2804,29 @@ IF @post = 1
 				,strBatchID					= @batchId
 				,intAccountId				= B.intMaintenanceAccountId 
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (CASE WHEN B.strMaintenanceType IN ('Maintenance Only', 'SaaS')  THEN 
-																													ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
 																														ELSE
-																															[dbo].fnRoundBanker((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																															[dbo].fnRoundBanker((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
 																												END)
 												END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType IN ('Maintenance Only', 'SaaS')  THEN 
-																													ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
 																												ELSE
 																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
 																														THEN
-																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
+																															[dbo].fnRoundBanker(B.dblBaseTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblBaseTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
 																														ELSE
-																															[dbo].fnRoundBanker((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																															[dbo].fnRoundBanker((ISNULL(B.dblBaseMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
 																													END)
 																												END) 
 											  ELSE 0  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END							
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2635,7 +2844,54 @@ IF @post = 1
 				,strTransactionType			= A.strTransactionType
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1	
+				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (CASE WHEN B.strMaintenanceType IN ('Maintenance Only', 'SaaS')  THEN 
+																													ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																												END)
+												END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (CASE WHEN B.strMaintenanceType IN ('Maintenance Only', 'SaaS')  THEN 
+																													ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																												END)
+												END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType IN ('Maintenance Only', 'SaaS')  THEN 
+																													ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																												END) 
+											  ELSE 0  END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType IN ('Maintenance Only', 'SaaS')  THEN 
+																													ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
+																												ELSE
+																													(CASE WHEN ISNULL(B.dblDiscount, @ZeroDecimal) > @ZeroDecimal 
+																														THEN
+																															[dbo].fnRoundBanker(B.dblTotal * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) + [dbo].fnRoundBanker(([dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())) * ([dbo].fnRoundBanker(((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped) / B.dblTotal) * 100.00000, dbo.fnARGetDefaultDecimal())/ 100.000000), dbo.fnARGetDefaultDecimal()) 
+																														ELSE
+																															[dbo].fnRoundBanker((ISNULL(B.dblMaintenanceAmount, @ZeroDecimal) * B.dblQtyShipped), dbo.fnARGetDefaultDecimal())		
+																													END)
+																												END) 
+											  ELSE 0  END
+				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
+				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -2653,7 +2909,16 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 						
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId							
 			WHERE
 				B.dblMaintenanceAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
@@ -2667,10 +2932,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= B.intSalesAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END							
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2688,7 +2953,14 @@ IF @post = 1
 				,strTransactionType			= A.strTransactionType
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1	
+				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
+				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
+				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -2706,10 +2978,19 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId 
 			WHERE			 
 				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
-				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 				--AND B.dblTotal <> @ZeroDecimal 
@@ -2720,10 +3001,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= B.intSalesAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END							
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2741,7 +3022,14 @@ IF @post = 1
 				,strTransactionType			= A.strTransactionType
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1	
+				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
+				,[dblReportingRate]			= B.dblCurrencyExchangeRate 
+				,[dblForeignRate]			= B.dblCurrencyExchangeRate 
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType
 			FROM
 				tblARInvoiceDetail B
 			INNER JOIN
@@ -2759,11 +3047,21 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId 
 			WHERE
 				B.dblTotal <> @ZeroDecimal  
 				AND A.strTransactionType = 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+				AND I.strType <> 'Comment'
 
 			--CREDIT Shipping
 			UNION ALL 
@@ -2771,10 +3069,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= L.intFreightIncome
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblShipping END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblShipping ELSE 0  END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblBaseShipping END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblBaseShipping ELSE 0  END
 				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblCreditUnit				= 0							
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2793,6 +3091,13 @@ IF @post = 1
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblShipping END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblShipping END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblShipping ELSE 0  END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblShipping ELSE 0  END
+				,[dblReportingRate]			= 0
+				,[dblForeignRate]			= 0
+				,[strRateType]				= ''
 			FROM
 				tblARInvoice A 
 			LEFT JOIN 
@@ -2814,17 +3119,17 @@ IF @post = 1
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 
-													CASE WHEN DT.dblAdjustedTax < 0 THEN ABS(DT.dblAdjustedTax) ELSE 0 END 
+													CASE WHEN DT.dblBaseAdjustedTax < 0 THEN ABS(DT.dblBaseAdjustedTax) ELSE 0 END 
 											  ELSE 
-													CASE WHEN DT.dblAdjustedTax < 0 THEN 0 ELSE DT.dblAdjustedTax END
+													CASE WHEN DT.dblBaseAdjustedTax < 0 THEN 0 ELSE DT.dblBaseAdjustedTax END
 											  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 
-													CASE WHEN DT.dblAdjustedTax < 0 THEN 0 ELSE DT.dblAdjustedTax END 
+													CASE WHEN DT.dblBaseAdjustedTax < 0 THEN 0 ELSE DT.dblBaseAdjustedTax END 
 											  ELSE 
-													CASE WHEN DT.dblAdjustedTax < 0 THEN ABS(DT.dblAdjustedTax) ELSE 0 END 
+													CASE WHEN DT.dblBaseAdjustedTax < 0 THEN ABS(DT.dblBaseAdjustedTax) ELSE 0 END 
 											  END
 				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblCreditUnit				= 0								
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2843,6 +3148,29 @@ IF @post = 1
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 
+													CASE WHEN DT.dblAdjustedTax < 0 THEN ABS(DT.dblAdjustedTax) ELSE 0 END 
+											  ELSE 
+													CASE WHEN DT.dblAdjustedTax < 0 THEN 0 ELSE DT.dblAdjustedTax END
+											  END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 
+													CASE WHEN DT.dblAdjustedTax < 0 THEN ABS(DT.dblAdjustedTax) ELSE 0 END 
+											  ELSE 
+													CASE WHEN DT.dblAdjustedTax < 0 THEN 0 ELSE DT.dblAdjustedTax END
+											  END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 
+													CASE WHEN DT.dblAdjustedTax < 0 THEN 0 ELSE DT.dblAdjustedTax END 
+											  ELSE 
+													CASE WHEN DT.dblAdjustedTax < 0 THEN ABS(DT.dblAdjustedTax) ELSE 0 END 
+											  END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 
+													CASE WHEN DT.dblAdjustedTax < 0 THEN 0 ELSE DT.dblAdjustedTax END 
+											  ELSE 
+													CASE WHEN DT.dblAdjustedTax < 0 THEN ABS(DT.dblAdjustedTax) ELSE 0 END 
+											  END
+				,[dblReportingRate]			= 0
+				,[dblForeignRate]			= 0
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetailTax DT
 			INNER JOIN
@@ -2859,7 +3187,16 @@ IF @post = 1
 					ON A.intInvoiceId = P.intInvoiceId				
 			LEFT OUTER JOIN
 				tblSMTaxCode TC
-					ON DT.intTaxCodeId = TC.intTaxCodeId	
+					ON DT.intTaxCodeId = TC.intTaxCodeId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
 			WHERE
 				DT.dblAdjustedTax <> @ZeroDecimal
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
@@ -2870,10 +3207,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblCreditUnit				= 0								
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2892,6 +3229,13 @@ IF @post = 1
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0 END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0 END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblPrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
+				,[dblReportingRate]			= 0
+				,[dblForeignRate]			= 0
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail D
 			INNER JOIN			
@@ -2906,7 +3250,16 @@ IF @post = 1
 					ON A.intEntityCustomerId = C.intEntityCustomerId
 			INNER JOIN 
 				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId					
+					ON A.intInvoiceId = P.intInvoiceId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId				
 			WHERE
 				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
 
@@ -3099,15 +3452,15 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intCOGSAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblBasePrice * D.dblQtyShipped) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblBasePrice * D.dblQtyShipped) END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END				
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END								
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= D.dblCurrencyExchangeRate
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= D.strItemDescription
@@ -3121,6 +3474,13 @@ IF @post = 1
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblPrice * D.dblQtyShipped) ELSE 0 END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblPrice * D.dblQtyShipped) ELSE 0 END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblPrice * D.dblQtyShipped) END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblPrice * D.dblQtyShipped) END
+				,[dblReportingRate]			= D.dblCurrencyExchangeRate
+				,[dblForeignRate]			= D.dblCurrencyExchangeRate
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail D
 			INNER JOIN			
@@ -3152,7 +3512,16 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON D.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
 			WHERE
 				D.dblTotal <> @ZeroDecimal
 				AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0
@@ -3167,10 +3536,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intInventoryInTransitAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblPrice * D.dblQtyShipped) END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblPrice * D.dblQtyShipped) ELSE 0 END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END				
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END								
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -3189,6 +3558,13 @@ IF @post = 1
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblPrice * D.dblQtyShipped) END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblPrice * D.dblQtyShipped) END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblPrice * D.dblQtyShipped) ELSE 0 END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblPrice * D.dblQtyShipped) ELSE 0 END
+				,[dblReportingRate]			= D.dblCurrencyExchangeRate
+				,[dblForeignRate]			= D.dblCurrencyExchangeRate
+				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			FROM
 				tblARInvoiceDetail D
 			INNER JOIN			
@@ -3220,7 +3596,16 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON D.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				(
+					SELECT
+						intCurrencyExchangeRateTypeId 
+						,strCurrencyExchangeRateType 
+					FROM
+						tblSMCurrencyExchangeRateType
+				)	SMCERT
+					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 			WHERE
 				D.dblTotal <> @ZeroDecimal
 				AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0
@@ -3264,6 +3649,8 @@ IF @post = 1
 				,intSubLocationId
 				,intStorageLocationId
 				,strActualCostId
+				,intForexRateTypeId
+				,dblForexRate
 			) 
 			SELECT 
 				 intItemId					= Detail.intItemId  
@@ -3304,10 +3691,12 @@ IF @post = 1
 				,intTransactionDetailId		= Detail.intInvoiceDetailId
 				,strTransactionId			= Header.strInvoiceNumber 
 				,intTransactionTypeId		= @INVENTORY_INVOICE_TYPE
-				,intLotId					= NULL 
+				,intLotId					= LGL.intLotId  
 				,intSubLocationId			= Detail.intCompanyLocationSubLocationId 
 				,intStorageLocationId		= Detail.intStorageLocationId
 				,strActualCostId			= CASE WHEN (ISNULL(Header.intDistributionHeaderId,0) <> 0 OR ISNULL(Header.intLoadDistributionHeaderId,0) <> 0) THEN Header.strActualCostId ELSE NULL END
+				,intForexRateTypeId			= Detail.intCurrencyExchangeRateTypeId
+				,dblForexRate				= Detail.dblCurrencyExchangeRate
 			FROM 
 				tblARInvoiceDetail Detail
 			INNER JOIN
@@ -3330,13 +3719,16 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock IST
 					ON Detail.intItemId = IST.intItemId 
-					AND Header.intCompanyLocationId = IST.intLocationId 
+					AND Header.intCompanyLocationId = IST.intLocationId
+			OUTER APPLY
+				dbo.[fnGetLoadDetailLots](Detail.intLoadDetailId) LGL
+
 			WHERE				
 				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND Detail.dblTotal <> 0) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
-				AND (IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (IST.strType = 'Finished Good' AND Detail.ysnBlended = 1))
+				AND (IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (IST.strType = 'Finished Good' AND Detail.ysnBlended = 1))
 				AND Header.strTransactionType <> 'Debit Memo'							
 				AND (Detail.intStorageScheduleTypeId IS NULL OR ISNULL(Detail.intStorageScheduleTypeId,0) = 0)				
 
@@ -3369,6 +3761,8 @@ IF @post = 1
 				,intSubLocationId			= ARID.intCompanyLocationSubLocationId
 				,intStorageLocationId		= ARID.intStorageLocationId
 				,strActualCostId			= CASE WHEN (ISNULL(ARI.intDistributionHeaderId,0) <> 0 OR ISNULL(ARI.intLoadDistributionHeaderId,0) <> 0) THEN ARI.strActualCostId ELSE NULL END
+				,intForexRateTypeId			= ARID.intCurrencyExchangeRateTypeId
+				,dblForexRate				= ARID.dblCurrencyExchangeRate
 			FROM
 				vyuARGetItemComponents ARIC
 			INNER JOIN
@@ -3397,7 +3791,7 @@ IF @post = 1
 				AND ISNULL(ARID.[intItemId],0) <> 0
 				AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 				AND ARI.[strTransactionType] <> 'Debit Memo'
-				AND ARIC.strType <> 'Finished Good'
+				AND ARIC.strType NOT IN ('Finished Good','Comment')
 				AND (ARID.intStorageScheduleTypeId IS NULL OR ISNULL(ARID.intStorageScheduleTypeId,0) = 0)			
 			
 		END TRY
@@ -3412,7 +3806,7 @@ IF @post = 1
 			BEGIN TRY
 				-- Call the post routine 
 				INSERT INTO @GLEntries (
-					[dtmDate] 
+					 [dtmDate]
 					,[strBatchId]
 					,[intAccountId]
 					,[dblDebit]
@@ -3443,6 +3837,7 @@ IF @post = 1
 					,[dblCreditReport]
 					,[dblReportingRate]
 					,[dblForeignRate]
+					,[strRateType]
 				)
 				EXEC	dbo.uspICPostCosting  
 						@ItemsForPost  
@@ -3499,6 +3894,8 @@ IF @post = 1
 					,[intSourceTransactionDetailId] 
 					,[intFobPointId] 
 					,[intInTransitSourceLocationId]
+					,[intForexRateTypeId]
+					,[dblForexRate]
 			)
 			SELECT
 					[intItemId]					= t.intItemId
@@ -3522,6 +3919,8 @@ IF @post = 1
 					,[intSourceTransactionDetailId] = t.intTransactionDetailId
 					,[intFobPointId]				= t.intFobPointId
 					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
+					,intForexRateTypeId			= id.intCurrencyExchangeRateTypeId
+					,dblForexRate				= id.dblCurrencyExchangeRate
 			FROM	tblARInvoice i INNER JOIN tblARInvoiceDetail id
 						ON i.intInvoiceId = id.intInvoiceId
 					INNER JOIN tblICInventoryShipmentItem si
@@ -3789,6 +4188,8 @@ IF @post = 0
 				,dblCredit
 				,dblDebitUnit
 				,dblCreditUnit
+				,dblDebitForeign
+				,dblCreditForeign				
 				,strDescription
 				,strCode
 				,strReference
@@ -3816,6 +4217,8 @@ IF @post = 0
 				,dblCredit						= GLD.dblDebit
 				,dblDebitUnit					= GLD.dblCreditUnit
 				,dblCreditUnit					= GLD.dblDebitUnit
+				,dblDebitForeign				= GLD.dblDebitForeign
+				,dblCreditForeign				= GLD.dblCreditForeign				
 				,GLD.strDescription
 				,GLD.strCode
 				,GLD.strReference
@@ -4113,15 +4516,7 @@ IF @post = 0
 IF @recap = 1		
 	BEGIN
 		IF @raiseError = 0
-			ROLLBACK TRAN @TransactionName
-
-		DELETE GLDR  
-		FROM 
-			@PostInvoiceData PID  
-		INNER JOIN 
-			dbo.tblGLDetailRecap GLDR 
-				ON (PID.strTransactionId = GLDR.strTransactionId OR PID.intInvoiceId = GLDR.intTransactionId)  
-				AND GLDR.strCode = @CODE  
+			ROLLBACK TRAN @TransactionName		
 
 		DELETE GLDR  
 		FROM 
@@ -4132,68 +4527,7 @@ IF @recap = 1
 				AND GLDR.strCode = @CODE  		   
 		   
 		BEGIN TRY		
-			INSERT INTO dbo.tblGLDetailRecap (  
-			  [dtmDate]  
-			  ,[strBatchId]  
-			  ,[intAccountId]  
-			  ,[dblDebit]  
-			  ,[dblCredit]  
-			  ,[dblDebitUnit]  
-			  ,[dblCreditUnit]  
-			  ,[strDescription]  
-			  ,[strCode]  
-			  ,[strReference]  
-			  ,[intCurrencyId]  
-			  ,[dblExchangeRate]  
-			  ,[dtmDateEntered]  
-			  ,[dtmTransactionDate]  
-			  ,[strJournalLineDescription]  
-			  ,[intJournalLineNo]  
-			  ,[ysnIsUnposted]  
-			  ,[intUserId]  
-			  ,[intEntityId]  
-			  ,[strTransactionId]  
-			  ,[intTransactionId]  
-			  ,[strTransactionType]  
-			  ,[strTransactionForm]  
-			  ,[strModuleName]  
-			  ,[intConcurrencyId]  
-			)  
-			-- RETRIEVE THE DATA FROM THE TABLE VARIABLE.   
-			SELECT [dtmDate]  
-			  ,@batchId  
-			  ,[intAccountId]  
-			  ,[dblDebit]		= Debit.Value
-			  ,[dblCredit]		= Credit.Value 
-			  ,[dblDebit]		= DebitUnit.Value
-			  ,[dblCredit]		= CreditUnit.Value  
-			  ,[strDescription]  
-			  ,[strCode]  
-			  ,[strReference]  
-			  ,[intCurrencyId]  
-			  ,[dblExchangeRate]  
-			  ,[dtmDateEntered]  
-			  ,[dtmTransactionDate]  
-			  ,[strJournalLineDescription]  
-			  ,[intJournalLineNo]  
-			  ,[ysnIsUnposted]  
-			  ,[intUserId]  
-			  ,[intEntityId]  
-			  ,[strTransactionId]  
-			  ,[intTransactionId]  
-			  ,[strTransactionType]  
-			  ,[strTransactionForm]  
-			  ,[strModuleName]  
-			  ,[intConcurrencyId]  
-			FROM 
-				@GLEntries GLEntries
-			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
-			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Credit
-			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
-			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) CreditUnit
-
-
-
+		 
 			INSERT INTO tblGLPostRecap(
 			 [strTransactionId]
 			,[intTransactionId]
@@ -4206,6 +4540,9 @@ IF @recap = 1
 			,[dblCredit]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]			
+			,[intCurrencyId]
 			,[dtmDate]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
@@ -4219,6 +4556,7 @@ IF @recap = 1
 			,[strTransactionType]
 			,[strAccountId]
 			,[strAccountGroup]
+			,[strRateType]
 		)
 		SELECT
 			[strTransactionId]
@@ -4232,6 +4570,9 @@ IF @recap = 1
 			,Credit.Value
 			,A.[dblDebitUnit]
 			,A.[dblCreditUnit]
+			,A.[dblDebitForeign]
+			,A.[dblCreditForeign]			
+			,A.[intCurrencyId]
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
@@ -4245,6 +4586,7 @@ IF @recap = 1
 			,A.[strTransactionType]
 			,B.strAccountId
 			,C.strAccountGroup
+			,A.strRateType
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId
@@ -4347,6 +4689,11 @@ IF @recap = 0
 					INNER JOIN
 						dbo.tblHDTicketHoursWorked HDTHW
 							ON PID.intInvoiceId = HDTHW.intInvoiceId
+														
+					DELETE PD
+					FROM tblARPaymentDetail PD
+						INNER JOIN tblARPayment P ON P.intPaymentId = PD.intPaymentId AND P.ysnPosted = 0
+					WHERE PD.intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @PostInvoiceData)
 						
 					BEGIN TRY
 						DECLARE @TankDeliveryForUnSync TABLE (
@@ -4540,6 +4887,72 @@ SET @invalidCount = @totalInvalid
 IF @raiseError = 0
 	COMMIT TRANSACTION
 RETURN 1;
+
+IF @post = 0
+	BEGIN
+		UPDATE ARI
+		SET
+			ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) 
+									THEN @ZeroDecimal 
+									ELSE 
+										ARI.dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
+								END)
+		FROM
+			@PostInvoiceData PID
+		INNER JOIN
+			dbo.tblARInvoice ARI
+				ON PID.intInvoiceId = ARI.intInvoiceId 
+
+		UPDATE ARI
+		SET
+			ARI.ysnPosted				= 0
+			,ARI.ysnPaid				= 0
+			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
+			,ARI.dblDiscount			= @ZeroDecimal
+			,ARI.dblDiscountAvailable	= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
+			,ARI.dblInterest			= @ZeroDecimal
+			,ARI.dblPayment				= ISNULL(dblPayment, @ZeroDecimal)
+			,ARI.dtmPostDate			= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+			,ARI.intConcurrencyId		= ISNULL(ARI.intConcurrencyId,0) + 1
+		FROM
+			@PostInvoiceData PID
+		INNER JOIN
+			dbo.tblARInvoice ARI
+				ON PID.intInvoiceId = ARI.intInvoiceId 		
+	END
+ELSE
+	BEGIN
+		UPDATE ARI
+		SET
+			ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) 
+									THEN @ZeroDecimal 
+									ELSE 
+										ARI.dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
+								END)
+		FROM
+			@PostInvoiceData PID
+		INNER JOIN
+			dbo.tblARInvoice ARI
+				ON PID.intInvoiceId = ARI.intInvoiceId 
+
+		UPDATE ARI						
+		SET
+			ARI.ysnPosted				= 1
+			,ARI.ysnPaid				= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 1 ELSE 0 END)
+			,ARI.dblInvoiceTotal		= ARI.dblInvoiceTotal
+			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
+			,ARI.dblDiscount			= @ZeroDecimal
+			,ARI.dblDiscountAvailable	= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
+			,ARI.dblInterest			= @ZeroDecimal			
+			,ARI.dtmPostDate			= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+			,ARI.intConcurrencyId		= ISNULL(ARI.intConcurrencyId,0) + 1	
+		FROM
+			@PostInvoiceData PID
+		INNER JOIN
+			dbo.tblARInvoice ARI
+				ON PID.intInvoiceId = ARI.intInvoiceId
+	END
+
 
 Do_Rollback:
 	IF @raiseError = 0

@@ -5,6 +5,7 @@ SELECT
 	A.intBillId,
 	A.strBillId,
 	A.intSubCurrencyCents,
+	CUR.strCurrency,
 	CASE WHEN (A.intTransactionType IN (3,8)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
 	CASE WHEN (A.intTransactionType IN (3,8)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
 	A.ysnPosted,
@@ -22,7 +23,7 @@ SELECT
 	B1.strName,
 	C.strAccountId,
 	Payment.strPaymentInfo,
-	Payment.strBankAccountNo,
+	dbo.fnAESDecryptASym(Payment.strBankAccountNo) AS strBankAccountNo,
 	Payment.ysnCleared,
 	Payment.dtmDateReconciled,
 	F.strUserName AS strUserId,
@@ -57,6 +58,8 @@ FROM
 		ON A.intAccountId = C.intAccountId
 	INNER JOIN dbo.tblEMEntityLocation EL
 		ON EL.intEntityLocationId = A.intShipFromId
+	INNER JOIN dbo.tblSMCurrency CUR 
+		ON CUR.intCurrencyID = A.intCurrencyId
 	OUTER APPLY
 	(
 		SELECT TOP 1

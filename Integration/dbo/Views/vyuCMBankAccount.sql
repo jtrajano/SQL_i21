@@ -17,6 +17,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.intCurrencyId
 				,i21.intBankAccountType
 				,i21.strContact
+				,i21.strBankAccountHolder
 				,ISNULL(dbo.fnAESDecryptASym(i21.strBankAccountNo),strBankAccountNo) COLLATE Latin1_General_CI_AS AS strBankAccountNo
 				,ISNULL(dbo.fnAESDecryptASym(i21.strRTN),strRTN) COLLATE Latin1_General_CI_AS AS strRTN
 				,i21.strAddress
@@ -28,6 +29,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.strFax
 				,i21.strWebsite
 				,i21.strEmail
+				,i21.strIBAN
+				,i21.strSWIFT
 				,i21.intCheckStartingNo
 				,i21.intCheckEndingNo
 				,i21.intCheckNextNo
@@ -190,6 +193,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intCurrencyId
 					,intBankAccountType
 					,strContact
+					,strBankAccountHolder
 					,strBankAccountNo
 					,strRTN
 					,strAddress
@@ -201,6 +205,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strFax
 					,strWebsite
 					,strEmail
+					,strIBAN
+					,strSWIFT
 					,intCheckStartingNo
 					,intCheckEndingNo
 					,intCheckNextNo
@@ -245,6 +251,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intCurrencyId						= i.intCurrencyId
 					,intBankAccountType					= i.intBankAccountType
 					,strContact							= i.strContact
+					,strBankAccountHolder				= i.strBankAccountHolder
 					,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
 					,strRTN								= [dbo].fnAESEncryptASym(i.strRTN)
 					,strAddress							= i.strAddress
@@ -256,6 +263,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strFax								= i.strFax
 					,strWebsite							= i.strWebsite
 					,strEmail							= i.strEmail
+					,strIBAN							= i.strIBAN
+					,strSWIFT							= i.strSWIFT
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo
@@ -418,6 +427,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intCurrencyId						= i.intCurrencyId
 					,intBankAccountType					= i.intBankAccountType
 					,strContact							= i.strContact
+					,strBankAccountHolder				= i.strBankAccountHolder
 					,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
 					,strRTN								= [dbo].fnAESEncryptASym(i.strRTN)
 					,strAddress							= i.strAddress
@@ -429,6 +439,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strFax								= i.strFax
 					,strWebsite							= i.strWebsite
 					,strEmail							= i.strEmail
+					,strIBAN							= i.strIBAN
+					,strSWIFT							= i.strSWIFT
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo

@@ -16,10 +16,7 @@ Declare @intMinRowNo int,
 		@strPartnerNo NVARCHAR(100),
 		@intLoadStgId INT,
 		@intNewLoadStgId INT,
-		@dtmOldETA DATETIME,
-		@strJson NVARCHAR(MAX),
-		@intEntityId INT,
-		@strGMT NVARCHAR(50)
+		@dtmOldETA DATETIME
 
 Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage
 
@@ -32,13 +29,8 @@ Begin
 		Select @strDeliveryNo=strDeliveryNo,@dtmETA=dtmETA,@strPartnerNo=strPartnerNo
 		From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
 
-		Select @strDeliveryNo AS strInfo1,ISNULL(CONVERT(VARCHAR(10),@dtmETA,121),'') AS strInfo2
-
 		If NOT EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 			RaisError('Invalid LSP Partner',16,1)
-
-		Select TOP 1 @intEntityId=intEntityVendorId From tblAPVendor 
-		Where strVendorAccountNum=(Select strWarehouseVendorAccNo From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 
 		If @dtmETA IS NULL
 			RaisError('Invalid ETA',16,1)
@@ -56,15 +48,6 @@ Begin
 
 		Insert Into tblLGETATracking(intLoadId,strTrackingType,dtmETAPOD,dtmModifiedOn)
 		Values(@intLoadId,'ETA POD',@dtmETA,GETDATE()) 
-
-		Set @strGMT = 'GMT' + CASE WHEN DATEDIFF(hh, GETUTCDATE(), GETDATE())>0 THEN '+' ELSE '-' END + CONVERT(varchar,ABS(DATEDIFF(hh, GETUTCDATE(), GETDATE())))
-
-		--Add Audit Trail Record
-		Set @strJson='{"action":"Updated","change":"Updated - Record: ' + CONVERT(VARCHAR,@intLoadId) + '","keyValue":' + CONVERT(VARCHAR,@intLoadId) + 
-		',"iconCls":"small-tree-modified","children":[{"change":"dtmETAPOD","from":"' + case When @dtmOldETA IS NULL THEN '' ELSE  CONVERT(VARCHAR(10),@dtmOldETA,121) END  + ' ' + @strGMT + '","to":"' + CONVERT(VARCHAR(10),@dtmETA,121) + ' ' + @strGMT + '","leaf":true,"iconCls":"small-gear"}]}'
-
-		Insert Into tblSMAuditLog(strActionType,strTransactionType,strRecordNo,strDescription,strRoute,strJsonData,dtmDate,intEntityId,intConcurrencyId)
-		Values('Updated','Logistics.view.ShipmentSchedule',@intLoadId,'','',@strJson,GETUTCDATE(),@intEntityId,1)
 
 		Select TOP 1 @intLoadStgId=intLoadStgId From tblLGLoadStg Where intLoadId=@intLoadId Order By intLoadStgId Desc
 

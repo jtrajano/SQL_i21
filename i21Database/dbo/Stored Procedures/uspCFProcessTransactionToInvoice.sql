@@ -74,6 +74,7 @@ INSERT INTO @EntriesForInvoice(
 	,[intShipViaId]
 	,[intPaymentMethodId]
 	,[strInvoiceOriginId]
+	,[ysnUseOriginIdAsInvoiceNumber]
 	,[strPONumber]
 	,[strBOLNumber]
 	,[strDeliverPickup]
@@ -156,7 +157,8 @@ SELECT
 	,[intFreightTermId]						= NULL 
 	,[intShipViaId]							= NULL 
 	,[intPaymentMethodId]					= NULL
-	,[strInvoiceOriginId]					= ''
+	,[strInvoiceOriginId]					= cfTrans.strTransactionId
+	,[ysnUseOriginIdAsInvoiceNumber]		= 1
 	,[strPONumber]							= cfTrans.strPONumber
 	,[strBOLNumber]							= ''
 	,[strDeliverPickup]						= cfTrans.strDeliveryPickupInd
@@ -195,11 +197,12 @@ SELECT
     ,[dblMaintenanceAmount]					= NULL
     ,[dblLicenseAmount]						= NULL
 	,[intTaxGroupId]						= cfSiteItem.intTaxGroupId
-	,[ysnRecomputeTax]						= (CASE 
-													WHEN @ysnRemoteTransaction = 1 OR @UpdateAvailableDiscount = 1 OR cfSiteItem.intTaxGroupId IS NULL
-													THEN 0
-													ELSE 1
-											   END)
+	,[ysnRecomputeTax]						= 0 
+											  -- (CASE 
+													--WHEN @ysnRemoteTransaction = 1 OR @UpdateAvailableDiscount = 1 OR cfSiteItem.intTaxGroupId IS NULL
+													--THEN 0
+													--ELSE 1
+											  -- END)
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= ''
 	,[intInventoryShipmentItemId]			= NULL
@@ -220,7 +223,7 @@ SELECT
 	,[intPerformerId]						= NULL
 	,[ysnLeaseBilling]						= NULL
 	,[ysnVirtualMeterReading]				= NULL
-	,[ysnClearDetailTaxes]					= 1
+	,[ysnClearDetailTaxes]					= 0
 	,[intTempDetailIdForTaxes]				= @TransactionId
 	,[strType]								= 'CF Tran'
 	,[ysnUpdateAvailableDiscount]			= @UpdateAvailableDiscount
@@ -274,8 +277,8 @@ WHERE cfTrans.intTransactionId = @TransactionId
 
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 
-IF (@ysnRemoteTransaction = 1)
-BEGIN
+--IF (@ysnRemoteTransaction = 1)
+--BEGIN
 	INSERT INTO @TaxDetails
 		(
 		[intDetailId] 
@@ -300,12 +303,12 @@ BEGIN
 	,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
 	,[intTaxClassId]			= cfTaxCode.intTaxClassId
 	,[strTaxableByOtherTaxes]	= cfTaxCode.strTaxableByOtherTaxes
-	,[strCalculationMethod]		= cfTaxCodeRate.strCalculationMethod
+	,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
 	,[dblRate]					= cfTransactionTax.dblTaxRate
 	,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
-	,[dblTax]					= 0
-	,[dblAdjustedTax]			= (cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
-	,[ysnTaxAdjusted]			= 1
+	,[dblTax]					= cfTransactionTax.dblTaxCalculatedAmount
+	,[dblAdjustedTax]			= cfTransactionTax.dblTaxCalculatedAmount--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
+	,[ysnTaxAdjusted]			= 0
 	,[ysnSeparateOnInvoice]		= 0 
 	,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
 	,[ysnTaxExempt]				= 0
@@ -317,11 +320,14 @@ BEGIN
 	ON cfTransaction.intTransactionId = cfTransactionTax.intTransactionId
 	INNER JOIN tblSMTaxCode  cfTaxCode
 	ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
-	INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
-	ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
-	WHERE cfTransactionTax.intTransactionId = @TransactionId
+	--INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
+	--ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
+	WHERE cfTransaction.intTransactionId = @TransactionId
 
-END
+--END
+
+--SELECT * FROM @EntriesForInvoice
+--SELECT * FROM @TaxDetails
 
 --SELECT * FROM @EntriesForInvoice
 EXEC [dbo].[uspARProcessInvoices]

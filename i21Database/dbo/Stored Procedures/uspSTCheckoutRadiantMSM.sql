@@ -1,10 +1,63 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantMSM]
-@intCheckoutId Int
+@intCheckoutId Int,
+@strXML NVARCHAR(MAX)
 AS
 BEGIN
 
     DECLARE @intStoreId int
     SELECT @intStoreId = intStoreId FROM dbo.tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId
+
+--START Convert XML to temporary table
+If(OBJECT_ID('tempdb..#Temp') Is Not Null)
+Begin
+    Drop Table #Temp
+End
+create table #Temp
+(
+    MiscellaneousSummaryCode int, 
+    MiscellaneousSummarySubCode int, 
+    MiscellaneousSummarySubCodeModifier nvarchar(MAX), 
+    TenderCode int, 
+    TenderSubCode int,
+    CurrencyCode nvarchar(MAX),
+    CurrencySubCode nvarchar(MAX), 
+    TenderTransactionsCount int, 
+    ManualEntryFlag nvarchar(5),
+	MiscellaneousSummaryAmount decimal(18,6),
+	MiscellaneousSummaryCount bigint
+)
+--start to convert XML string to XML
+Declare @xml XML = @strXML
+;WITH XMLNAMESPACES ('http://www.naxml.org/POSBO/Vocabulary/2003-10-16' as b)
+INSERT INTO #Temp
+SELECT
+	MiscellaneousSummaryCode, 
+    MiscellaneousSummarySubCode, 
+    MiscellaneousSummarySubCodeModifier, 
+    TenderCode, 
+    TenderSubCode,
+    CurrencyCode,
+    CurrencySubCode, 
+    TenderTransactionsCount, 
+    ManualEntryFlag,
+	MiscellaneousSummaryAmount,
+	MiscellaneousSummaryCount
+FROM
+(SELECT  
+        ISNULL(x.u.value('(../b:MiscellaneousSummaryCodes/b:MiscellaneousSummaryCode)[1]', 'int'), 0) as MiscellaneousSummaryCode,
+		ISNULL(x.u.value('(../b:MiscellaneousSummaryCodes/b:MiscellaneousSummarySubCode)[1]', 'int'), 0) as MiscellaneousSummarySubCode,
+		CAST(ISNULL(x.u.value('(../b:MiscellaneousSummaryCodes/b:MiscellaneousSummarySubCodeModifier)[1]', 'nvarchar(MAX)'), 0) as bigint) as MiscellaneousSummarySubCodeModifier,
+
+		ISNULL(x.u.value('(b:Tender/b:TenderCode)[1]', 'int'), 0) as TenderCode,
+		ISNULL(x.u.value('(b:Tender/b:TenderSubCode)[1]', 'int'), 0) as TenderSubCode,
+		ISNULL(x.u.value('(b:Currency/b:CurrencyCode)[1]', 'nvarchar(MAX)'), '') as CurrencyCode,
+		ISNULL(x.u.value('(b:Currency/b:CurrencySubCode)[1]', 'nvarchar(MAX)'), '') as CurrencySubCode,
+		ISNULL(x.u.value('(b:TenderTransactionsCount)[1]', 'int'), 0) as TenderTransactionsCount,
+		ISNULL(x.u.value('(b:ManualEntryFlag/@value)[1]', 'nvarchar(5)'), 0) as ManualEntryFlag,
+        CAST(ISNULL(x.u.value('(b:MiscellaneousSummaryAmount)[1]', 'money'), 0) as decimal(18,6)) as MiscellaneousSummaryAmount,
+        CAST(ISNULL(x.u.value('(b:MiscellaneousSummaryCount)[1]', 'money'), 0) as bigint) as MiscellaneousSummaryCount
+FROM    @xml.nodes('//b:MiscellaneousSummaryMovement/b:MSMDetail/b:MSMSalesTotals') x(u)) as S
+--END
 
     Update dbo.tblSTCheckoutPaymentOptions
     SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
@@ -79,10 +132,26 @@ BEGIN
                                             END
     WHERE intCheckoutId = @intCheckoutId AND intTaxNo IN (1, 2, 3, 4)
 
-    UPDATE dbo.tblSTCheckoutHeader 
-    SET dblCustomerCount = (SELECT SUM(CAST(TenderTransactionsCount as int)) FROM #tempCheckoutInsert) 
-    WHERE intCheckoutId = @intCheckoutId
+    --UPDATE dbo.tblSTCheckoutHeader 
+    --SET dblCustomerCount = (SELECT SUM(CAST(TenderTransactionsCount as int)) FROM #tempCheckoutInsert) 
+    --WHERE intCheckoutId = @intCheckoutId
+
+
+	--Update TenderTransactionsCount
+	Update dbo.tblSTCheckoutHeader
+	SET dblCustomerCount = (S.TenderTransactionsCount)
+	FROM
+	(SELECT 
+		SUM(TenderTransactionsCount) as TenderTransactionsCount
+    FROM #Temp ST
+    JOIN dbo.tblSTPaymentOption PO ON PO.intRegisterMop = ST.TenderSubCode
+    JOIN dbo.tblSTStore Store ON Store.intStoreId = PO.intStoreId
+	JOIN dbo.tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
+    WHERE ST.TenderSubCode <> ''
+	AND Store.intStoreId = @intStoreId  
+	AND intCheckoutId = @intCheckoutId) as S
        
+
     UPDATE dbo.tblSTCheckoutHeader 
     SET intTotalNoSalesCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =4) 
     WHERE intCheckoutId = @intCheckoutId

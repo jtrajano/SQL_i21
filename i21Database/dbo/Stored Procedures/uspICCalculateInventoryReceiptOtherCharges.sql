@@ -30,7 +30,6 @@ BEGIN
 			,@strOtherCharge AS NVARCHAR(50)
 END 
 
-
 -- Do the validation
 BEGIN 
 	-- Check if there are receipt charges to process
@@ -40,6 +39,12 @@ BEGIN
 		GOTO _Exit
 	END
 END
+
+-- Get the functional currency
+BEGIN 
+	DECLARE @intFunctionalCurrencyId AS INT
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+END 
 
 -- Clear any existing records in the tblICInventoryReceiptChargePerItem table
 BEGIN 
@@ -157,7 +162,23 @@ BEGIN
 			,[intEntityVendorId]			= Charge.intEntityVendorId
 			,[dblCalculatedAmount]			= ROUND (
 												(ISNULL(Charge.dblRate, 0) / 100)
-												* ISNULL(ReceiptItem.dblLineTotal, ReceiptItem.dblOpenReceive * ReceiptItem.dblUnitCost) 
+												*  
+												CASE 
+													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+														-- Convert the line total to transaction currency. 
+														ISNULL(ReceiptItem.dblLineTotal, 0) * ReceiptItem.dblForexRate
+													ELSE 
+														ISNULL(ReceiptItem.dblLineTotal, 0)
+												END 
+												* 
+												-- and then convert the transaction currency to the other charge currency. 
+												CASE WHEN ISNULL(Charge.intCurrencyId, Receipt.intCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(Charge.dblForexRate, 0) <> 0 THEN 
+														1 / Charge.dblForexRate
+													ELSE 
+														1
+												END 
+											
+												--ISNULL(ReceiptItem.dblLineTotal, ReceiptItem.dblOpenReceive * ReceiptItem.dblUnitCost) 
 												, 2
 											)
 			,[intContractId]				= Charge.intContractId
@@ -169,7 +190,9 @@ BEGIN
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 
-				ON Item.intItemId = Charge.intChargeId				
+				ON Item.intItemId = Charge.intChargeId
+			INNER JOIN tblICInventoryReceipt Receipt
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 			AND Charge.strCostMethod = @COST_METHOD_PERCENTAGE
 			AND (
@@ -222,7 +245,7 @@ BEGIN
 END 
 
 -- Update the Other Charge amounts
--- Also, the sub-currency amounts must be converted back to the currency amounts.
+-- If it is in sub-currency, convert it back to the currency amount.
 BEGIN 
 	UPDATE	Charge
 	SET		dblAmount = ROUND(	

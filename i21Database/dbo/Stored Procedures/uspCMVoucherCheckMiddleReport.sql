@@ -110,16 +110,23 @@ WHERE [fieldname] = 'strBatchId'
 SET @strTransactionId = CASE WHEN LTRIM(RTRIM(ISNULL(@strTransactionId, ''))) = '' THEN NULL ELSE @strTransactionId END  
 SET @strBatchId = CASE WHEN LTRIM(RTRIM(ISNULL(@strBatchId, ''))) = '' THEN NULL ELSE @strBatchId END  
 
---For Encryption and Decryption
-OPEN SYMMETRIC KEY i21EncryptionSymKey
-	DECRYPTION BY CERTIFICATE i21EncryptionCert
-	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
   
 -- Report Query:  
 SELECT	CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
-		,CHK.strPayee
+		,strPayee = CASE
+					WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.intEntityVendorId) > 0 THEN
+						CHK.strPayee + ' ' + (STUFF( (SELECT ' and ' + strName 
+                             FROM tblAPVendorLien LIEN
+							 INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
+							 WHERE LIEN.ysnActive = 1 AND GETDATE() BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+                             ORDER BY intEntityVendorLienId
+                             FOR XML PATH('')), 
+                            1, 1, ''))
+					ELSE
+						CHK.strPayee
+					END
 		,strAmountInWords = LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', 30)
 		,CHK.strMemo
 		,CHK.strTransactionId
@@ -195,4 +202,3 @@ WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)
 ORDER BY CHK.strReferenceNo ASC
 
-CLOSE SYMMETRIC KEY i21EncryptionSymKey

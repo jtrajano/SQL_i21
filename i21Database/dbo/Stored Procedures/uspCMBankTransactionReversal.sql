@@ -177,8 +177,8 @@ ELSE
 					BEGIN
 						/* If Void Check entry for AP Payment, do not post the reversal*/
 						UPDATE tblCMBankTransaction 
-							SET ysnPosted = 1, ysnCheckVoid = 1, ysnClr = 1, 
-								dtmDateReconciled = dtmDate, dtmCheckPrinted = dtmDate, @isPostingSuccessful = 1 
+							SET ysnPosted = CASE WHEN intBankTransactionTypeId = 123 THEN 1 ELSE 0 END, ysnCheckVoid = CASE WHEN intBankTransactionTypeId = 123 THEN 0 ELSE 1 END, ysnClr = CASE WHEN intBankTransactionTypeId = 123 THEN 0 ELSE 1 END, 
+								dtmDateReconciled = CASE WHEN intBankTransactionTypeId = 123 THEN NULL ELSE dtmDate END, dtmCheckPrinted = CASE WHEN intBankTransactionTypeId = 123 THEN NULL ELSE dtmDate END, intBankFileAuditId = CASE WHEN intBankTransactionTypeId = 123 THEN NULL ELSE intBankFileAuditId END, @isPostingSuccessful = 1 
 						WHERE strTransactionId = @strVoidTransactionId --AND intBankTransactionTypeId = @VOID_CHECK
 					END
 				ELSE
@@ -215,7 +215,7 @@ ELSE
 				,intLastModifiedUserId = @intUserId
 		FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 					ON F.strTransactionId = TMP.strTransactionId
-		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK)		
+		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK, @DIRECT_DEPOSIT)		
 				-- Condition #1:
 				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		

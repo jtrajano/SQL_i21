@@ -97,7 +97,7 @@ BEGIN TRY
             BEGIN
 				SELECT @strRowState= 'Added'
             END
-            DELETE FROM tblCTApprovedContract WHERE intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId      < @intPrevApprovedContractId
+            --DELETE FROM tblCTApprovedContract WHERE intContractDetailId = ISNULL(@intContractDetailId,0) AND intApprovedContractId      < @intPrevApprovedContractId
             GOTO INSERTBLOCK
 
 				/*

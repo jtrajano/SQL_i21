@@ -1,7 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnPATCreateIssueStockGLEntries]
 (
 	@transactionIds NVARCHAR(MAX),
-	@votingStock BIT,
 	@intUserId INT,
 	@batchId NVARCHAR(40)
 )
@@ -37,6 +36,7 @@ RETURNS @returnTable TABLE
     [dblCreditReport]           NUMERIC (18, 6) NULL,
     [dblReportingRate]          NUMERIC (18, 6) NULL,
     [dblForeignRate]            NUMERIC (18, 6) NULL,
+	[strRateType]				NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
 )
 AS
@@ -53,160 +53,83 @@ BEGIN
 
 	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 
-	IF (@votingStock = 1) --POST VOTING STOCKS
-	BEGIN
-		INSERT INTO @returnTable
-		--VOTING STOCK ISSUED
-		SELECT	
-			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	@batchId,
-			[intAccountId]					=	ComPref.intVotingStockId,
-			[dblDebit]						=	0,
-			[dblCredit]						=	ROUND(A.dblFaceValue,2),
-			[dblDebitUnit]					=	0,
-			[dblCreditUnit]					=	0,
-			[strDescription]				=	'Posted Voting Stock Issue',
-			[strCode]						=	@MODULE_CODE,
-			[strReference]					=	A.strCertificateNo,
-			[intCurrencyId]					=	0,
-			[dblExchangeRate]				=	1,
-			[dtmDateEntered]				=	GETDATE(),
-			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	'Posted Voting Stock Issue',
-			[intJournalLineNo]				=	1,
-			[ysnIsUnposted]					=	0,
-			[intUserId]						=	@intUserId,
-			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	A.intCustomerStockId, 
-			[intTransactionId]				=	A.intCustomerStockId, 
-			[strTransactionType]			=	'Voting Stock',
-			[strTransactionForm]			=	@SCREEN_NAME,
-			[strModuleName]					=	@MODULE_NAME,
-			[dblDebitForeign]				=	0,      
-			[dblDebitReport]				=	0,
-			[dblCreditForeign]				=	0,
-			[dblCreditReport]				=	0,
-			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0,
-			[intConcurrencyId]				=	1
-		FROM	[dbo].[tblPATCustomerStock] A
-				CROSS JOIN tblPATCompanyPreference ComPref
-		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
-		UNION ALL
-		--AR Account
-		SELECT	
-			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	@batchId,
-			[intAccountId]					=	ComPref.intARAccountId, 
-			[dblDebit]						=	ROUND(A.dblFaceValue,2),
-			[dblCredit]						=	0,
-			[dblDebitUnit]					=	0,
-			[dblCreditUnit]					=	0,
-			[strDescription]				=	'Posted AR Account from Voting Stock',
-			[strCode]						=	@MODULE_CODE,
-			[strReference]					=	A.strCertificateNo,
-			[intCurrencyId]					=	0,
-			[dblExchangeRate]				=	1,
-			[dtmDateEntered]				=	GETDATE(),
-			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	'Posted AR Account from Voting Stock',
-			[intJournalLineNo]				=	1,
-			[ysnIsUnposted]					=	0,
-			[intUserId]						=	@intUserId,
-			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	A.intCustomerStockId, 
-			[intTransactionId]				=	A.intCustomerStockId, 
-			[strTransactionType]			=	'Voting Stock',
-			[strTransactionForm]			=	@SCREEN_NAME,
-			[strModuleName]					=	@MODULE_NAME,
-			[dblDebitForeign]				=	0,      
-			[dblDebitReport]				=	0,
-			[dblCreditForeign]				=	0,
-			[dblCreditReport]				=	0,
-			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0,
-			[intConcurrencyId]				=	1
-		FROM	[dbo].[tblPATCustomerStock] A
-		CROSS APPLY tblARCompanyPreference ComPref
-		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
-	END
-	ELSE --POST NON-VOTING/OTHER STOCKS
-	BEGIN
-		INSERT INTO @returnTable
-		--NON-VOTING/OTHER STOCK ISSUED
-		SELECT	
-			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	@batchId,
-			[intAccountId]					=	ComPref.intNonVotingStockId,
-			[dblDebit]						=	0,
-			[dblCredit]						=	ROUND(A.dblFaceValue,2),
-			[dblDebitUnit]					=	0,
-			[dblCreditUnit]					=	0,
-			[strDescription]				=	'Posted Non-Voting Stock Issue',
-			[strCode]						=	@MODULE_CODE,
-			[strReference]					=	A.strCertificateNo,
-			[intCurrencyId]					=	0,
-			[dblExchangeRate]				=	1,
-			[dtmDateEntered]				=	GETDATE(),
-			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	'Posted Non-Voting Stock Issue',
-			[intJournalLineNo]				=	1,
-			[ysnIsUnposted]					=	0,
-			[intUserId]						=	@intUserId,
-			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	A.intCustomerStockId, 
-			[intTransactionId]				=	A.intCustomerStockId, 
-			[strTransactionType]			=	'Non-Voting/Other Stock',
-			[strTransactionForm]			=	@SCREEN_NAME,
-			[strModuleName]					=	@MODULE_NAME,
-			[dblDebitForeign]				=	0,      
-			[dblDebitReport]				=	0,
-			[dblCreditForeign]				=	0,
-			[dblCreditReport]				=	0,
-			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0,
-			[intConcurrencyId]				=	1
-		FROM	[dbo].[tblPATCustomerStock] A
-				CROSS JOIN tblPATCompanyPreference ComPref
-		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
-		UNION ALL
-		--AR Account
-		SELECT	
-			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	@batchId,
-			[intAccountId]					=	ComPref.intARAccountId, 
-			[dblDebit]						=	ROUND(A.dblFaceValue,2),
-			[dblCredit]						=	0,
-			[dblDebitUnit]					=	0,
-			[dblCreditUnit]					=	0,
-			[strDescription]				=	'Posted AR Account from Non-Voting Stock',
-			[strCode]						=	@MODULE_CODE,
-			[strReference]					=	A.strCertificateNo,
-			[intCurrencyId]					=	0,
-			[dblExchangeRate]				=	1,
-			[dtmDateEntered]				=	GETDATE(),
-			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	'Posted AR Account from Non-Voting Stock',
-			[intJournalLineNo]				=	1,
-			[ysnIsUnposted]					=	0,
-			[intUserId]						=	@intUserId,
-			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	A.intCustomerStockId, 
-			[intTransactionId]				=	A.intCustomerStockId, 
-			[strTransactionType]			=	'Non-Voting/Other Stock',
-			[strTransactionForm]			=	@SCREEN_NAME,
-			[strModuleName]					=	@MODULE_NAME,
-			[dblDebitForeign]				=	0,      
-			[dblDebitReport]				=	0,
-			[dblCreditForeign]				=	0,
-			[dblCreditReport]				=	0,
-			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0,
-			[intConcurrencyId]				=	1
-		FROM	[dbo].[tblPATCustomerStock] A
-		CROSS APPLY tblARCompanyPreference ComPref
-		WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
-	END
+
+	INSERT INTO @returnTable
+	--VOTING STOCK/NON-VOTING STOCK/OTHER ISSUED
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	CASE WHEN A.strStockStatus = 'Voting' THEN ComPref.intVotingStockId ELSE ComPref.intNonVotingStockId END,
+		[dblDebit]						=	0,
+		[dblCredit]						=	ROUND(A.dblFaceValue,2),
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Posted Voting Stock Issue' ELSE 'Posted Non-Voting/Other Stock Issue' END,
+		[strCode]						=	@MODULE_CODE,
+		[strReference]					=	A.strCertificateNo,
+		[intCurrencyId]					=	0,
+		[dblExchangeRate]				=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	NULL,
+		[strJournalLineDescription]		=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Posted Voting Stock Issue' ELSE 'Posted Non-Voting/Other Stock Issue' END,
+		[intJournalLineNo]				=	1,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.intCustomerStockId, 
+		[intTransactionId]				=	A.intCustomerStockId, 
+		[strTransactionType]			=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Voting Stock' ELSE 'Non-Voting/Other' END,
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	0,
+		[strRateType]					=	NULL,
+		[intConcurrencyId]				=	1
+	FROM	[dbo].[tblPATCustomerStock] A
+			CROSS JOIN tblPATCompanyPreference ComPref
+	WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
+	UNION ALL
+	--AR Account
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	ComPref.intARAccountId, 
+		[dblDebit]						=	ROUND(A.dblFaceValue,2),
+		[dblCredit]						=	0,
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	'Posted AR Account from Voting Stock',
+		[strCode]						=	@MODULE_CODE,
+		[strReference]					=	A.strCertificateNo,
+		[intCurrencyId]					=	0,
+		[dblExchangeRate]				=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	NULL,
+		[strJournalLineDescription]		=	'Posted AR Account from Voting Stock',
+		[intJournalLineNo]				=	1,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.intCustomerStockId, 
+		[intTransactionId]				=	A.intCustomerStockId, 
+		[strTransactionType]			=	'Voting Stock',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	0,
+		[strRateType]					=	NULL,
+		[intConcurrencyId]				=	1
+	FROM	[dbo].[tblPATCustomerStock] A
+	CROSS APPLY tblARCompanyPreference ComPref
+	WHERE	A.intCustomerStockId IN (SELECT intTransactionId FROM @tmpTransacions)
 	RETURN
 END
 

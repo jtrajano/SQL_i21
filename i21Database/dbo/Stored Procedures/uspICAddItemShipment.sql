@@ -71,6 +71,7 @@ INSERT INTO @ShipmentEntries(
 		, dtmFreeTime
 		, strReceivedBy
 		, strComment
+		, intCurrencyId
 		, intItemId
 		, intOwnershipType
 		, dblQuantity
@@ -81,7 +82,7 @@ INSERT INTO @ShipmentEntries(
 		, intLineNo
 		, intSubLocationId
 		, intStorageLocationId
-		, intCurrencyId
+		, intItemCurrencyId
 		, intWeightUOMId
 		, dblUnitPrice
 		, intDockDoorId
@@ -91,6 +92,8 @@ INSERT INTO @ShipmentEntries(
 		, intStorageScheduleTypeId
 		, intDestinationGradeId
 		, intDestinationWeightId
+		, intForexRateTypeId
+		, dblForexRate
 )
 SELECT 
 		intOrderType
@@ -118,6 +121,7 @@ SELECT
 		, dtmFreeTime
 		, strReceivedBy
 		, strComment
+		, intCurrencyId
 		, intItemId
 		, intOwnershipType
 		, dblQuantity
@@ -128,7 +132,7 @@ SELECT
 		, intLineNo
 		, intSubLocationId
 		, intStorageLocationId
-		, intCurrencyId
+		, intItemCurrencyId
 		, intWeightUOMId
 		, dblUnitPrice
 		, intDockDoorId
@@ -138,6 +142,8 @@ SELECT
 		, intStorageScheduleTypeId
 		, intDestinationGradeId
 		, intDestinationWeightId
+		, intForexRateTypeId
+		, dblForexRate
 FROM @Entries
 
 -- 2. Charges
@@ -236,7 +242,8 @@ DECLARE @Header TABLE (
 	intShipToLocationId INT NULL,
 	intFreightTermId INT NOT NULL,
 	intBaseId INT NOT NULL,
-	strSourceScreenName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+	strSourceScreenName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
+	intCurrencyId INT NULL
 )
 
 -- Get Headers
@@ -247,9 +254,9 @@ AS
 	FROM @ShipmentEntries
 	GROUP BY intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId, intFreightTermId
 )
-INSERT INTO @Header(intBaseId, intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId, intFreightTermId, strSourceScreenName)
+INSERT INTO @Header(intBaseId, intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId, intFreightTermId, strSourceScreenName, intCurrencyId)
 SELECT h.intId, se.intOrderType, se.intSourceType, se.intEntityCustomerId,
-	se.dtmShipDate, se.intShipFromLocationId, se.intShipToLocationId, se.intFreightTermId, se.strSourceScreenName
+	se.dtmShipDate, se.intShipFromLocationId, se.intShipToLocationId, se.intFreightTermId, se.strSourceScreenName, se.intCurrencyId
 FROM @ShipmentEntries se
 	INNER JOIN headers h ON h.intId = se.intId
 	
@@ -287,16 +294,17 @@ WHEN NOT MATCHED BY SOURCE THEN DELETE;
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 	FOR 
 		SELECT intId, intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, 
-			intShipFromLocationId, intShipToLocationId, intFreightTermId, intBaseId, strSourceScreenName
+			intShipFromLocationId, intShipToLocationId, intFreightTermId, intBaseId, strSourceScreenName, intCurrencyId
 		FROM @Header
 
 DECLARE @intId INT, @intOrderType INT, @intSourceType INT, @intEntityCustomerId INT, @dtmShipDate DATETIME, 
-@intShipFromLocationId INT, @intShipToLocationId INT, @intFreightTermId INT, @intBaseId INT, @strSourceScreenName NVARCHAR(100)
+@intShipFromLocationId INT, @intShipToLocationId INT, @intFreightTermId INT, @intBaseId INT, @strSourceScreenName NVARCHAR(100),
+@intCurrencyId INT
 
 OPEN cur
 
 FETCH NEXT FROM cur INTO @intId, @intOrderType, @intSourceType, @intEntityCustomerId, @dtmShipDate, 
-			@intShipFromLocationId, @intShipToLocationId, @intFreightTermId, @intBaseId, @strSourceScreenName
+			@intShipFromLocationId, @intShipToLocationId, @intFreightTermId, @intBaseId, @strSourceScreenName, @intCurrencyId
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
@@ -305,9 +313,9 @@ BEGIN
 	
 	-- Insert New Shipment
 	INSERT INTO tblICInventoryShipment(strShipmentNumber, dtmShipDate, intOrderType, intSourceType,
-		intShipFromLocationId, intEntityCustomerId, intShipToLocationId, intFreightTermId, strBOLNumber)
+		intShipFromLocationId, intEntityCustomerId, intShipToLocationId, intFreightTermId, strBOLNumber, intCurrencyId)
 	VALUES(@ShipmentNumber, @dtmShipDate, @intOrderType, @intSourceType, @intShipFromLocationId,
-		@intEntityCustomerId, @intShipToLocationId, @intFreightTermId, '')
+		@intEntityCustomerId, @intShipToLocationId, @intFreightTermId, '', @intCurrencyId)
 
 	-- Get Inserted Shipment ID
 	SET @CurrentShipmentId = SCOPE_IDENTITY()
@@ -342,7 +350,7 @@ BEGIN
 
 	-- Get Next Header
 	FETCH NEXT FROM cur INTO @intId, @intOrderType, @intSourceType, @intEntityCustomerId, @dtmShipDate, 
-			@intShipFromLocationId, @intShipToLocationId, @intFreightTermId, @intBaseId, @strSourceScreenName
+			@intShipFromLocationId, @intShipToLocationId, @intFreightTermId, @intBaseId, @strSourceScreenName, @intCurrencyId
 END
 
 CLOSE cur
@@ -372,6 +380,8 @@ INSERT INTO tblICInventoryShipmentItem(
 	, intStorageScheduleTypeId
 	, intDestinationGradeId
 	, intDestinationWeightId
+	, intForexRateTypeId
+	, dblForexRate
 )
 SELECT 
 	se.intShipmentId
@@ -384,7 +394,7 @@ SELECT
 	, se.intLineNo
 	, se.intSubLocationId
 	, se.intStorageLocationId
-	, se.intCurrencyId
+	, se.intItemCurrencyId
 	, se.intWeightUOMId
 	, se.dblUnitPrice
 	, se.intDockDoorId
@@ -395,6 +405,8 @@ SELECT
 	, se.intStorageScheduleTypeId
 	, se.intDestinationGradeId
 	, se.intDestinationWeightId
+	, se.intForexRateTypeId
+	, se.dblForexRate
 FROM @ShipmentEntries se
 
 -- Insert shipment charges

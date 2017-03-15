@@ -142,11 +142,11 @@ BEGIN
 				,dtmLastInvoiceRevisedDate = CASE WHEN ISDATE(A.agcus_last_ivc_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.agcus_last_ivc_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
 				,dtmLastPaymentRevisedDate = CASE WHEN ISDATE(A.agcus_last_pay_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.agcus_last_pay_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END 
 				,dtmLastStatementRevDate = CASE WHEN ISDATE(A.agcus_last_stmt_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.agcus_last_stmt_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END 
-				,strCompleteAddress = dbo.[fnConvertToFullAddress]((ISNULL(A.agcus_addr,'''') + CHAR(13) + CHAR(10) + ISNULL(A.agcus_addr2,''''))
+				,strCompleteAddress = dbo.[fnConvertToFullAddress]((CASE WHEN RTRIM(ISNULL(A.agcus_addr2,'''')) <> '''' THEN (CASE WHEN RTRIM(ISNULL(A.agcus_addr,'''')) <> '''' THEN (RTRIM(ISNULL(A.agcus_addr,'''')) + CHAR(13) + CHAR(10) + RTRIM(A.agcus_addr2)) ELSE RTRIM(A.agcus_addr2) END) ELSE ISNULL(A.agcus_addr,'''') END)
 																	,ISNULL(A.agcus_city,'''')
 																	,ISNULL(A.agcus_state,'''')
 																	,ISNULL(A.agcus_zip,'''')) COLLATE Latin1_General_CI_AS
-				,strFormattedAddress = (CASE WHEN RTRIM(ISNULL(A.agcus_addr2,'''')) = '''' THEN (ISNULL(A.agcus_addr,'''') + CHAR(13) + CHAR(10) + A.agcus_addr2) ELSE ISNULL(A.agcus_addr,'''') END) COLLATE Latin1_General_CI_AS
+				,strFormattedAddress = (CASE WHEN RTRIM(ISNULL(A.agcus_addr2,'''')) <> '''' THEN (CASE WHEN RTRIM(ISNULL(A.agcus_addr,'''')) <> '''' THEN (RTRIM(ISNULL(A.agcus_addr,'''')) + CHAR(13) + CHAR(10) + RTRIM(A.agcus_addr2)) ELSE RTRIM(A.agcus_addr2) END) ELSE ISNULL(A.agcus_addr,'''') END) COLLATE Latin1_General_CI_AS
 				,strFullName = (CASE WHEN A.agcus_co_per_ind_cp = ''C'' 
 									THEN RTRIM(A.agcus_last_name) + RTRIM(A.agcus_first_name) 
 								WHEN A.agcus_first_name IS NULL OR RTRIM(A.agcus_first_name) = ''''  
@@ -158,11 +158,15 @@ BEGIN
 				FROM agcusmst A
 				LEFT JOIN aglocmst B
 					ON A.agcus_bus_loc_no = B.agloc_loc_no
-				OUTER APPLY (
-					SELECT TOP 1 agtrm_desc 
-					FROM agtrmmst 
-					WHERE agtrm_key_n = A.agcus_terms_cd  
+				LEFT JOIN (
+					SELECT 
+						agtrm_desc
+						,agtrm_key_n
+						,intRecCountId = ROW_NUMBER() OVER(PARTITION BY agtrm_key_n ORDER BY A4GLIdentity)
+					FROM agtrmmst
 				) C 
+				ON  C.agtrm_key_n = A.agcus_terms_cd  
+					AND C.intRecCountId = 1
 				')
 		END
 		-- PT VIEW
@@ -288,11 +292,11 @@ BEGIN
 				,dtmLastInvoiceRevisedDate = CASE WHEN ISDATE(A.ptcus_last_ivc_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.ptcus_last_ivc_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
 				,dtmLastPaymentRevisedDate = CASE WHEN ISDATE(A.ptcus_last_pay_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.ptcus_last_pay_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
 				,dtmLastStatementRevDate =  CASE WHEN ISDATE(A.ptcus_last_stmnt_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.ptcus_last_stmnt_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
-				,strCompleteAddress = dbo.[fnConvertToFullAddress]((ISNULL(A.ptcus_addr,'''') + CHAR(13) + CHAR(10) + ISNULL(A.ptcus_addr2,''''))
+				,strCompleteAddress = dbo.[fnConvertToFullAddress](LTRIM((CASE WHEN RTRIM(ISNULL(A.ptcus_addr2,'''')) <> '''' THEN (CASE WHEN RTRIM(ISNULL(A.ptcus_addr,'''')) <> '''' THEN (RTRIM(ISNULL(A.ptcus_addr,'''')) + CHAR(13) + CHAR(10) + RTRIM(A.ptcus_addr2)) ELSE RTRIM(A.ptcus_addr2) END) ELSE RTRIM(ISNULL(A.ptcus_addr,'''')) END))
 																	,ISNULL(A.ptcus_city,'''')
 																	,ISNULL(A.ptcus_state,'''')
 																	,ISNULL(A.ptcus_zip,'''')) COLLATE Latin1_General_CI_AS
-				,strFormattedAddress = (CASE WHEN RTRIM(ISNULL(A.ptcus_addr2,'''')) = '''' THEN (ISNULL(A.ptcus_addr,'''') + CHAR(13) + CHAR(10) + A.ptcus_addr2) ELSE ISNULL(A.ptcus_addr,'''') END) COLLATE Latin1_General_CI_AS
+				,strFormattedAddress = LTRIM((CASE WHEN RTRIM(ISNULL(A.ptcus_addr2,'''')) <> '''' THEN (CASE WHEN RTRIM(ISNULL(A.ptcus_addr,'''')) <> '''' THEN (RTRIM(ISNULL(A.ptcus_addr,'''')) + CHAR(13) + CHAR(10) + RTRIM(A.ptcus_addr2)) ELSE RTRIM(A.ptcus_addr2) END) ELSE RTRIM(ISNULL(A.ptcus_addr,'''')) END)) COLLATE Latin1_General_CI_AS
 				,strFullName = (CASE WHEN A.ptcus_co_per_ind_cp = ''C'' 
 									THEN RTRIM(A.ptcus_last_name) + RTRIM(A.ptcus_first_name) + RTRIM(A.ptcus_mid_init) + RTRIM(A.ptcus_name_suffx)   
 								WHEN A.ptcus_first_name IS NULL OR RTRIM(A.ptcus_first_name) = ''''  
@@ -304,11 +308,15 @@ BEGIN
 				FROM ptcusmst A
 				LEFT JOIN ptlocmst B
 					ON A.ptcus_bus_loc_no = B.ptloc_loc_no
-				OUTER APPLY (
-					SELECT TOP 1 pttrm_desc 
+				LEFT JOIN (
+					SELECT 
+						pttrm_desc
+						,pttrm_code
+						,intRecCountId = ROW_NUMBER() OVER(PARTITION BY pttrm_code ORDER BY A4GLIdentity)
 					FROM pttrmmst
-					WHERE pttrm_code = A.ptcus_terms_code  
 				) C 
+				ON  C.pttrm_code = A.ptcus_terms_code  
+					AND C.intRecCountId = 1
 				')
 		END
 	END

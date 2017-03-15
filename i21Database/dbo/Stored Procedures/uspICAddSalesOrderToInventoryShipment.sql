@@ -54,6 +54,7 @@ BEGIN
 				,dtmFreeTime
 				,strReceivedBy
 				,strComment
+				,intCurrencyId
 				,ysnPosted
 				,intEntityId
 				,intConcurrencyId
@@ -81,6 +82,7 @@ BEGIN
 				,dtmFreeTime				= NULL 
 				,strReceivedBy				= NULL 
 				,strComment					= SO.strComments
+				,intCurrencyId				= SO.intCurrencyId
 				,ysnPosted					= 0 
 				,intEntityId				= @intEntityUserSecurityId
 				,intConcurrencyId			= 1

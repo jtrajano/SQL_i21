@@ -1,8 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPStageSAPStock]
 	@strXml nvarchar(max),
-	@strSessionId nvarchar(50) = '' out,
-	@strInfo1 NVARCHAR(MAX)='' OUT,
-	@strInfo2 NVARCHAR(MAX)='' OUT
+	@strSessionId nvarchar(50) = '' out
 AS
 
 BEGIN TRY
@@ -27,7 +25,6 @@ BEGIN TRY
 	[strStockType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[dblInspectionQuantity] NUMERIC(38,20),
 	[dblBlockedQuantity] NUMERIC(38,20),
-	[dblUnrestrictedQuantity] NUMERIC(38,20),
 	[dblQuantity] NUMERIC(38,20)
 	)
 
@@ -37,7 +34,6 @@ BEGIN TRY
 		,strStockType
 		,dblInspectionQuantity
 		,dblBlockedQuantity
-		,dblUnrestrictedQuantity
 		,dblQuantity
 		)
 	SELECT MATNR
@@ -45,7 +41,6 @@ BEGIN TRY
 		,DELKZ
 		,INSME
 		,SPEME
-		,LABST
 		,MNG01
 	FROM OPENXML(@idoc, 'LOISTD01/IDOC/E1MDSTL/E1PLSEL/E1MDPSL', 2) WITH (
 			 MATNR NVARCHAR(100) '../../MATNR'
@@ -53,7 +48,6 @@ BEGIN TRY
 			,DELKZ NVARCHAR(50) 
 			,INSME NUMERIC(38,20) '../../INSME'
 			,SPEME NUMERIC(38,20) '../../SPEME'
-			,LABST NUMERIC(38,20) '../../LABST'
 			,MNG01 NUMERIC(38,20) 
 			)
 
@@ -61,12 +55,10 @@ BEGIN TRY
 		RaisError('Unable to process. Xml tag (LOISTD01/IDOC/E1MDSTL) not found.',16,1)
 
 	--Add to Staging tables
-	Insert into tblIPStockStage(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblQuantity,strSessionId)
-	Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblQuantity,@strSessionId
+	Insert into tblIPStockStage(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,strSessionId)
+	Select '0000000000' + strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblQuantity,@strSessionId
 	From @tblStock Where (UPPER(strStockType) like 'WB%' OR UPPER(strStockType) like 'KB%' OR UPPER(strStockType) like 'LK%')
 	AND (RIGHT(strItemNo,8) like '496%' OR RIGHT(strItemNo,8) like '491%')
-
-	Select TOP 1 @strInfo1=strItemNo,@strInfo2=strSubLocation From @tblStock
 
 END TRY
 

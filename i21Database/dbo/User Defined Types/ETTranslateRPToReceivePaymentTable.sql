@@ -3,8 +3,7 @@
 */
 CREATE TYPE [dbo].[ETTranslateRPToReceivePaymentTable] AS TABLE
 (
-	[intImportRPToReceivePaymentId] INT NOT NULL IDENTITY PRIMARY KEY CLUSTERED, 
-    [strInvoiceNumber] NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL, 
+	[strInvoiceNumber] NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL, 
     [strCustomerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL , 
     [dtmPaymentDate] DATETIME NULL, 
 	[dblPaymentAmount] NUMERIC(18, 6) NULL, 

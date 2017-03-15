@@ -266,8 +266,8 @@ dtmTransactionDate
   WHERE (strSourceRecordConcatKey = CONVERT(NVARCHAR(30), px.pxrpt_trans_rev_dt) + '_' + REPLACE(px.pxrpt_ord_no COLLATE Latin1_General_CI_AS, '   ', '') + '_' + px.pxrpt_trans_type + '_' + CONVERT(NVARCHAR(50), px.pxrpt_seq_no)))
   SELECT @ImportedCount = @@ROWCOUNT
 
-	TRUNCATE TABLE tblTFTransactions
-	INSERT INTO tblTFTransactions (uniqTransactionGuid,
+	TRUNCATE TABLE tblTFTransaction
+	INSERT INTO tblTFTransaction (uniqTransactionGuid,
 	intTaxAuthorityId,
 	strTaxAuthority,
 	strFormCode,

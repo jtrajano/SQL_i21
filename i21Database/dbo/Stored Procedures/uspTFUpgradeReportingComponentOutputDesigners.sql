@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFUpgradeReportingComponentOutputDesigners]
+	@TaxAuthorityCode NVARCHAR(10),
 	@ReportingComponentOutputDesigners TFReportingComponentOutputDesigners READONLY
 
 AS
@@ -14,48 +15,65 @@ DECLARE @ErrorSeverity INT
 DECLARE @ErrorState INT
 
 BEGIN TRY
+	
+	DECLARE @TaxAuthorityId INT
+	SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
+	IF (ISNULL(@TaxAuthorityId, 0) = 0)
+	BEGIN
+		RAISERROR('Tax Authority code does not exist.', 16, 1)
+	END
 
-	MERGE	
-	INTO	tblTFScheduleFields
-	WITH	(HOLDLOCK) 
-	AS		TARGET
-	USING (
-		SELECT RCOD.*, RC.intReportingComponentId FROM @ReportingComponentOutputDesigners RCOD
-		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCOD.strFormCode COLLATE Latin1_General_CI_AS
-			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCOD.strScheduleCode COLLATE Latin1_General_CI_AS
-			AND RC.strType COLLATE Latin1_General_CI_AS = RCOD.strType COLLATE Latin1_General_CI_AS
-	) AS SOURCE
-		ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
-			AND TARGET.strColumn = SOURCE.strColumn
+	SELECT RCOD.*, RC.intReportingComponentId
+	INTO #tmpRCOD
+	FROM @ReportingComponentOutputDesigners RCOD
+	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = RCOD.strFormCode COLLATE Latin1_General_CI_AS
+		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCOD.strScheduleCode COLLATE Latin1_General_CI_AS
+		AND RC.strType COLLATE Latin1_General_CI_AS = RCOD.strType COLLATE Latin1_General_CI_AS
+	ORDER BY RCOD.intScheduleColumnId
 
-	WHEN MATCHED THEN 
-		UPDATE
-		SET 
-			intReportingComponentId	= SOURCE.intReportingComponentId
-			, strColumn				= SOURCE.strColumn
-			, strCaption			= SOURCE.strCaption
-			, strFormat				= SOURCE.strFormat
-			, strFooter				= SOURCE.strFooter
-			, intWidth				= SOURCE.intWidth
-	WHEN NOT MATCHED BY TARGET THEN 
-		INSERT (
-			intReportingComponentId
-			, strColumn
-			, strCaption
-			, strFormat
-			, strFooter
-			, intWidth
-		)
-		VALUES (
-			SOURCE.intReportingComponentId
-			, SOURCE.strColumn
-			, SOURCE.strCaption
-			, SOURCE.strFormat
-			, SOURCE.strFooter
-			, SOURCE.intWidth
-		)
-	WHEN NOT MATCHED BY SOURCE THEN 
-		DELETE;
+	UPDATE tblTFReportingComponentField
+	SET intReportingComponentId	= SOURCE.intReportingComponentId
+		, strColumn				= SOURCE.strColumn
+		, strCaption			= SOURCE.strCaption
+		, strFormat				= SOURCE.strFormat
+		, strFooter				= SOURCE.strFooter
+		, intWidth				= SOURCE.intWidth
+	FROM #tmpRCOD SOURCE
+	WHERE tblTFReportingComponentField.intReportingComponentId = SOURCE.intReportingComponentId
+		AND tblTFReportingComponentField.strColumn = SOURCE.strColumn
+
+	INSERT INTO tblTFReportingComponentField(
+		intReportingComponentId
+		, strColumn
+		, strCaption
+		, strFormat
+		, strFooter
+		, intWidth
+	)
+	SELECT SOURCE.intReportingComponentId
+		, SOURCE.strColumn
+		, SOURCE.strCaption
+		, SOURCE.strFormat
+		, SOURCE.strFooter
+		, SOURCE.intWidth
+	FROM #tmpRCOD SOURCE
+	LEFT JOIN tblTFReportingComponentField TARGET ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
+		AND TARGET.strColumn = SOURCE.strColumn
+	WHERE ISNULL(TARGET.intReportingComponentFieldId, '') = ''
+	ORDER BY SOURCE.intScheduleColumnId
+
+	-- Delete existing Reporting Component Output Designers that is not within Source
+	DELETE FROM tblTFReportingComponentField
+	WHERE intReportingComponentFieldId IN (
+		SELECT DISTINCT RCF.intReportingComponentFieldId FROM tblTFReportingComponentField RCF
+		LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCF.intReportingComponentId
+		LEFT JOIN #tmpRCOD tmp ON tmp.intReportingComponentId = RCF.intReportingComponentId
+			AND tmp.strColumn = RCF.strColumn
+		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
+			AND ISNULL(tmp.strColumn, '') = ''
+	)
+
+	DROP TABLE #tmpRCOD
 
 END TRY
 BEGIN CATCH

@@ -11,5 +11,5 @@ BEGIN
 	SELECT @strPrefix = strPrefix ,@intNumber = intNumber FROM tblSMStartingNumber WHERE intStartingNumberId = @i
 		
 	UPDATE tblSMStartingNumber SET intNumber = intNumber+1 WHERE intStartingNumberId = @i
-	SELECT @strID = @strPrefix + CONVERT(VARCHAR(10),@intNumber)
+	SELECT @strID = @strPrefix + '-' + CONVERT(VARCHAR(10),@intNumber)
 END

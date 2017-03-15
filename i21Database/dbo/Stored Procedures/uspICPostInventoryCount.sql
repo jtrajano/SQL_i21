@@ -115,6 +115,21 @@ BEGIN
 	END  
 END   
 
+-- Validate Lot Number for Lot-tracked items
+DECLARE @ItemNo NVARCHAR(50)
+
+SELECT TOP 1 @ItemNo = Item.strItemNo
+FROM tblICInventoryCount IC 
+	LEFT JOIN tblICInventoryCountDetail ICDetail ON ICDetail.intInventoryCountId = IC.intInventoryCountId
+	LEFT JOIN tblICItem Item ON Item.intItemId = ICDetail.intItemId
+WHERE IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICDetail.intLotId IS NULL OR ICDetail.intLotId NOT IN (SELECT intLotId FROM tblICInventoryLot WHERE intItemId = ICDetail.intItemId))
+
+IF @ItemNo IS NOT NULL
+	BEGIN
+		-- Lot Number is invalid or missing for item {Item No.}
+		RAISERROR(80130, 11, 1, @ItemNo)  
+		GOTO Post_Exit  
+	END
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
 IF @@ERROR <> 0 GOTO Post_Exit    
@@ -242,7 +257,8 @@ BEGIN
 				,[dblCreditForeign]	
 				,[dblCreditReport]	
 				,[dblReportingRate]	
-				,[dblForeignRate]				
+				,[dblForeignRate]		
+				,[strRateType]		
 		)
 		EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 			@strBatchId
@@ -292,6 +308,7 @@ BEGIN
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]
+			,[strRateType]
 	)
 	EXEC	@intReturnValue = dbo.uspICUnpostCosting
 			@intTransactionId
@@ -327,7 +344,7 @@ BEGIN
 	 ELSE
 		BEGIN
 			ROLLBACK TRAN @TransactionName
-			EXEC dbo.uspGLPostRecap 
+			EXEC dbo.uspGLPostRecapOld 
 					@GLEntries
 					,@intTransactionId
 					,@strTransactionId

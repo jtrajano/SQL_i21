@@ -261,9 +261,9 @@ BEGIN TRY
 		,intSCompanyLocationId
 		,@dblNewLoadDetailQuantity
 		,intItemUOMId
-		,dbo.fnCTConvertQtyToTargetItemUOM(intItemId,intWeightItemUOMId,@dblNewLoadDetailQuantity)
+		,dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intWeightItemUOMId,@dblNewLoadDetailQuantity)
 		,0
-		,dbo.fnCTConvertQtyToTargetItemUOM(intItemId,intWeightItemUOMId,@dblNewLoadDetailQuantity)
+		,dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intWeightItemUOMId,@dblNewLoadDetailQuantity)
 		,intWeightItemUOMId
 		,dblDeliveredQuantity
 		,dblDeliveredGross

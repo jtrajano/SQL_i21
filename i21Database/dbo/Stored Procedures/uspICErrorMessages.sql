@@ -480,7 +480,7 @@ SET @strmessage = 'Cannot return the inventory receipt. %s must be posted before
 EXEC sp_addmessage 80100,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80101) EXEC sp_dropmessage 80101, 'us_english'	
-SET @strmessage = 'Unable to unpost. It has a Debit Memo, %s.'
+SET @strmessage = 'Unable to unpost because it has a debit memo. Unpost and delete %s first before you can unpost the Inventory Return.'
 EXEC sp_addmessage 80101,11,@strmessage,'us_english','False'
 
 -- was 51174 
@@ -513,7 +513,7 @@ SET @strmessage = 'Check the return date on the transaction. Return date is %s, 
 EXEC sp_addmessage 80108,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80109) EXEC sp_dropmessage 80109, 'us_english'	
-SET @strmessage = 'Return is stopped. All the stocks %s from %s are already returned or over-return is going to happen.'
+SET @strmessage = 'Return is stopped. All of the stocks in %s that is received in %s are either sold, consumed, returned, or over-return is going to happen.'
 EXEC sp_addmessage 80109,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80110) EXEC sp_dropmessage 80110, 'us_english'	
@@ -525,7 +525,7 @@ SET @strmessage = 'Voucher is no longer needed. All items have Voucher.'
 EXEC sp_addmessage 80111,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80112) EXEC sp_dropmessage 80112, 'us_english'	
-SET @strmessage = 'Unable to unpost the Inventory Receipt. It has an Inventory Return in %s.'
+SET @strmessage = 'Unable to unpost the Inventory Receipt because it was returned. Please check %s.'
 EXEC sp_addmessage 80112,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80113) EXEC sp_dropmessage 80113, 'us_english'	
@@ -561,7 +561,7 @@ SET @strmessage = 'Item UOM Id is invalid or missing for item %s.'
 EXEC sp_addmessage 80120,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80121) EXEC sp_dropmessage 80121, 'us_english'	
-SET @strmessage = 'Gross/Net UOM is invalid or missing for item %s.'
+SET @strmessage = 'Gross/Net UOM is invalid for item %s.'
 EXEC sp_addmessage 80121,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80122) EXEC sp_dropmessage 80122, 'us_english'	
@@ -707,3 +707,24 @@ EXEC sp_addmessage 80156,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80157) EXEC sp_dropmessage 80157, 'us_english'	
 SET @strmessage = 'Lot ID %s is invalid for lot %s.'
 EXEC sp_addmessage 80157,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80158) EXEC sp_dropmessage 80158, 'us_english'	
+SET @strmessage = 'The Qty to Return for %s is %s. Total Lot Quantity is %s. The difference is %s.'
+EXEC sp_addmessage 80158,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80159) EXEC sp_dropmessage 80159, 'us_english'	
+SET @strmessage = 'Item: %s, Qty: %s, Cost: %s'
+EXEC sp_addmessage 80159,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80160) EXEC sp_dropmessage 80160, 'us_english'	
+SET @strmessage = 'Transaction not saved. Stocks for %s will have an over-return.'
+EXEC sp_addmessage 80160,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80161) EXEC sp_dropmessage 80161, 'us_english'	
+SET @strmessage = 'Return no longer allowed. All of the stocks are returned.'
+EXEC sp_addmessage 80161,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80162) EXEC sp_dropmessage 80162, 'us_english'	
+SET @strmessage = '%s is using a foreign currency. Please check if %s has a forex rate.'
+EXEC sp_addmessage 80162,11,@strmessage,'us_english','False'
+

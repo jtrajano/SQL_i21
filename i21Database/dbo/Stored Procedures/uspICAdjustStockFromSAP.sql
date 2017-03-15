@@ -24,7 +24,7 @@ SET ANSI_WARNINGS OFF
 DECLARE
 	@intLotId AS INT
 	,@strItemNo AS NVARCHAR(50)
-	,@dblAdjustQtyBy AS NUMERIC(38, 20)
+	,@dblAdjustQtyBy AS NUMERIC(38, 20) = 0
 	,@intItemLocationId AS INT
 	,@tempEachLotQty AS NUMERIC(38,20)
 	,@tempAdjustQtyBy AS NUMERIC(38,20)
@@ -207,6 +207,9 @@ BEGIN
 				AND StockUOM.intItemLocationId = @intItemLocationId 
 				AND StockUOM.intSubLocationId = @intSubLocationId 
 
+		IF @dblAdjustQtyBy IS NULL 
+			SET @dblAdjustQtyBy = @dblNewQty
+
 		IF @dblAdjustQtyBy = 0 
 			GOTO _Exit
 
@@ -231,10 +234,14 @@ BEGIN
 		IF @strLotNumber IS NOT NULL AND UPPER(@strLotNumber) NOT IN ('[FIFO]','FIFO')
 		BEGIN
 			-- Get the value to Adjust
-			SELECT	@dblAdjustQtyBy = -(SUM(ISNULL(Lot.dblQty, 0)) - @dblNewQty)
-			FROM	dbo.tblICLot Lot
-			WHERE	Lot.intItemId = @intItemId 
-					AND Lot.strLotNumber = @strLotNumber
+			SELECT @dblAdjustQtyBy = -(ISNULL(SUM(ISNULL(ICLot.dblStockIn, 0) - ISNULL(ICLot.dblStockOut, 0)) - @dblNewQty,0))
+			FROM dbo.tblICInventoryLot ICLot INNER JOIN dbo.tblICLot Lot ON Lot.intLotId = ICLot.intLotId
+			WHERE Lot.intItemId = @intItemId AND Lot.strLotNumber = @strLotNumber AND ICLot.intItemUOMId = @intItemUOMId
+
+			-- Get value for @intInventoryLotId --
+			SELECT @intInventoryLotId = ICLot.intInventoryLotId
+			FROM dbo.tblICInventoryLot ICLot INNER JOIN dbo.tblICLot Lot ON Lot.intLotId = ICLot.intLotId
+			WHERE Lot.intItemId = @intItemId AND Lot.strLotNumber = @strLotNumber AND ICLot.intItemUOMId = @intItemUOMId
 
 			IF @intStorageLocationId IS NULL
 				BEGIN
@@ -244,6 +251,17 @@ BEGIN
 						WHERE ICLot.intItemId = @intItemId AND ICLot.intSubLocationId = @intSubLocationId AND ICLot.intItemLocationId = @intItemLocationId AND ICLot.intItemUOMId = @intItemUOMId AND Lot.strLotNumber = @strLotNumber 
 					)
 				END
+
+			IF @dblCost IS NULL
+				BEGIN
+					SELECT	@dblCost = dblLastCost 
+					FROM	dbo.tblICInventoryLot cb INNER JOIN dbo.tblICLot Lot 
+								ON Lot.intLotId = cb.intLotId
+					WHERE	cb.intInventoryLotId = @intInventoryLotId
+				END
+
+			IF @dblAdjustQtyBy IS NULL 
+				SET @dblAdjustQtyBy = @dblNewQty
 
 			IF @dblAdjustQtyBy = 0 
 				GOTO _Exit
@@ -261,6 +279,9 @@ BEGIN
 					AND StockUOM.intItemUOMId = @intItemUOMId
 					AND StockUOM.intItemLocationId = @intItemLocationId 
 					AND StockUOM.intSubLocationId = @intSubLocationId 
+
+			IF @dblAdjustQtyBy IS NULL 
+				SET @dblAdjustQtyBy = @dblNewQty;
 
 			IF @dblAdjustQtyBy = 0 
 				GOTO _Exit
@@ -305,14 +326,14 @@ BEGIN
 					SELECT TOP 1 
 							@strLotNumber = Lot.strLotNumber 
 							,@intInventoryLotId = ICLot.intInventoryLotId
-							,@tempEachLotQty = Lot.dblQty
+							,@tempEachLotQty = ISNULL(ICLot.dblStockIn, 0) - ISNULL(ICLot.dblStockOut, 0)
 					FROM	dbo.tblICInventoryLot ICLot INNER JOIN dbo.tblICLot Lot 
 								ON Lot.intLotId = ICLot.intLotId
 					WHERE	ICLot.intItemId = @intItemId 
 							AND ICLot.intItemUOMId = @intItemUOMId 
 							AND ICLot.intSubLocationId = @intSubLocationId 
 							AND ICLot.intItemLocationId = @intItemLocationId 							
-							AND Lot.dblQty > 0
+							AND (ISNULL(ICLot.dblStockIn, 0) - ISNULL(ICLot.dblStockOut, 0)) > 0
 					ORDER BY ICLot.dtmCreated ASC
 
 					IF @intStorageLocationId IS NULL
@@ -352,6 +373,8 @@ BEGIN
 						,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
 						SET @temp_RemainingQty = @temp_RemainingQty - @tempEachLotQty
+						SET @intStorageLocationId = NULL
+						SET @dblCost = NULL
 					END
 
 					ELSE

@@ -197,8 +197,7 @@ BEGIN
 	END 
 END 
 
--- Update the Surcharge amounts
--- Also, the sub-currency amounts must be converted back the currency amounts.
+-- Update the Surcharge amounts. If it is a sub-currency, convert it back to the currency value. 
 BEGIN 
 	UPDATE	Charge
 	SET		dblAmount = ROUND(	

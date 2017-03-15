@@ -2,7 +2,6 @@
 AS
        SELECT 
 			 A.intBillId
-			,A.intTransactionType
 			,Bill.dblCost
 			,Bill.dblBillCost
 			,ISNULL(SUM(Container.dblGrossShippedWeight), SUM(B.dblWeight)) AS dblGrossShippedWeight
@@ -25,13 +24,11 @@ AS
 			,Item.strItemNo
 			,Item.intItemId
 			,Item.strDescription
-			,Item.intOriginId
 			,B.intContractDetailId
 			,B.intContractHeaderId
 			,E.intContractSeq
 			,E.dblTotalCost AS dblAmountPaid
 			,E.dblQuantity AS dblContractItemQty
-			,E.intItemContractId
 			,H.strContractNumber
 			,I.dblFranchise
 			,A.intEntityVendorId
@@ -40,7 +37,6 @@ AS
 			,M.strVendorId
 			,M.intGLAccountExpenseId AS intAccountId
 			,M3.strAccountId
-			,ISNULL(Item.strDescription, B.strMiscDescription) strMiscDescription
 			,M3.strDescription AS strAccountDesc
 			,M2.strName
 			,M2.str1099Form
@@ -51,17 +47,17 @@ AS
 			,ISNULL(B.ysnSubCurrency,0) AS ysnSubCurrency
 			,ContainerDetails.strContainerNumber
 			,D.strBillOfLading
-			,A.strBillId
-			,A.strVendorOrderNumber
-			,A.dtmDate
-			,A.dtmDueDate
-			,A.strComment
+			,Claim.strBillId
+			,Claim.strVendorOrderNumber
+			,Claim.dtmDate
+			,Claim.dtmDueDate
+			,Claim.strComment
 			,I.strWeightGradeDesc
 			,N.strCurrency
 		FROM tblAPBill A
 		INNER JOIN tblAPBillDetail B 
 			ON A.intBillId = B.intBillId
-		LEFT JOIN (tblICItemUOM B2 INNER JOIN tblICUnitMeasure B3 
+		INNER JOIN (tblICItemUOM B2 INNER JOIN tblICUnitMeasure B3 
 			ON B2.intUnitMeasureId = B3.intUnitMeasureId) ON (CASE WHEN B.dblNetWeight > 0 THEN B.intWeightUOMId WHEN B.intCostUOMId > 0 THEN B.intCostUOMId ELSE B.intUnitOfMeasureId END) =		B2.intItemUOMId
 		INNER JOIN (tblAPVendor M INNER JOIN tblEMEntity M2 
 			ON M.intEntityVendorId = M2.intEntityId LEFT JOIN tblGLAccount M3 ON M.intGLAccountExpenseId = M3.intAccountId) ON A.intEntityVendorId = M.intEntityVendorId
@@ -141,22 +137,19 @@ AS
 			FROM tblLGLoadContainer LGC
 			INNER JOIN tblICInventoryReceiptItem C2 ON C2.intContainerId = LGC.intLoadContainerId
 		) ContainerDetails
-		WHERE 
-		--1 = CASE WHEN A.ysnPosted = 0 AND (A.intTransactionType = 11 OR A.intTransactionType = 3) THEN 1 
-		--			ELSE (CASE WHEN A.ysnPosted = 1 THEN 1 ELSE 0 END)
-		--		END
-		--AND 
-		1 = CASE WHEN A.intTransactionType = 11 AND J.intBillDetailApplied IS NOT NULL AND D.intSourceType != 2 THEN 0 ELSE 1 END
-		  --Inbound Shipment, this will make sure that the receipt is from inbound shipment which is for original process of weight claim
-		AND 1 = CASE WHEN A.intTransactionType = 11 AND J.intBillDetailApplied IS NOT NULL AND E.intContractStatusId != 5 THEN 0 ELSE 1 END
-				--this will make sure that the contract has fully received for original process of weight claim
-		AND A.intTransactionType IN (3, 11)
+		WHERE 1 = CASE WHEN A.ysnPosted = 0 AND A.intTransactionType = 11 THEN 1 ELSE 
+					CASE WHEN A.ysnPosted = 1 THEN 1 ELSE 0 END
+				END
+		AND 1 = CASE WHEN (D.intSourceType IS NULL) THEN 1 ELSE 
+			CASE WHEN D.intSourceType = 2 THEN 1 ELSE 0 END
+		 END --Inbound Shipment
+		AND 1 = CASE WHEN E.intContractStatusId IS NULL THEN 1 ELSE 
+					CASE WHEN E.intContractStatusId = 5 THEN 1 ELSE 0 END
+				END
 		GROUP BY A.intBillId
-				 ,A.intTransactionType
 				 ,Bill.dblCost
 				 ,Bill.dblBillCost
 				 ,B.intUnitOfMeasureId
-				 ,B.strMiscDescription
 				 ,UOM.strUnitMeasure
 				 ,B.intCostUOMId
 				 ,CostUOM.strUnitMeasure
@@ -167,20 +160,15 @@ AS
 				 ,B.dblUnitQty
 				 ,Item.strItemNo
 				 ,Item.intItemId
-				 ,Item.strDescription
-				 ,Item.intOriginId
 				 ,B.intContractDetailId
 				 ,B.intContractHeaderId
 				 ,E.intContractSeq
 				 ,E.dblTotalCost
 				 ,E.dblQuantity
-				 ,E.intItemContractId
 				 ,H.strContractNumber
 				 ,I.dblFranchise
 				 ,A.intEntityVendorId
 				 ,A.intShipToId
-				 ,A.intEntityId
-				 ,A.intStoreLocationId
 				 ,L.dblTotal 
 				 ,L.dblTax
 				 ,M.strVendorId
@@ -198,11 +186,11 @@ AS
 				 ,H1.strCurrency
 			     ,H1.ysnSubCurrency
 				 ,D.strBillOfLading
-				 ,A.strBillId
-				 ,A.strVendorOrderNumber
-				 ,A.dtmDate
-				 ,A.dtmDueDate
-				 ,A.strComment
+				 ,Claim.strBillId
+				 ,Claim.strVendorOrderNumber
+				 ,Claim.dtmDate
+				 ,Claim.dtmDueDate
+				 ,Claim.strComment
 				 ,I.strWeightGradeDesc
 				 ,N.strCurrency
 				 ,ContainerDetails.strContainerNumber

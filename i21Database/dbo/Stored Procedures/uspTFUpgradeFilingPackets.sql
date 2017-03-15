@@ -32,6 +32,7 @@ BEGIN TRY
 		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = FP.strFormCode COLLATE Latin1_General_CI_AS
 			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = FP.strScheduleCode COLLATE Latin1_General_CI_AS
 			AND RC.strType COLLATE Latin1_General_CI_AS = FP.strType COLLATE Latin1_General_CI_AS
+			AND RC.intTaxAuthorityId = @TaxAuthorityId
 	) AS SOURCE
 		ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
 			AND TARGET.intTaxAuthorityId = @TaxAuthorityId

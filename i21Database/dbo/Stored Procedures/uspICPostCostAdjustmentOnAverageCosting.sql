@@ -142,6 +142,13 @@ DECLARE	@RunningQty AS NUMERIC(38, 20)
 		,@BreakOnNextLoop AS BIT = 0
 
 		,@CBOut_Id AS INT 
+
+DECLARE		
+		@strDescription AS NVARCHAR(255)
+		,@strCurrentValuation AS NVARCHAR(50) 
+		,@strRunningQty AS NVARCHAR(50) 
+		,@strNewCost AS NVARCHAR(50) 
+		,@strNewValuation AS NVARCHAR(50) 
 						
 -- Exit immediately if item is a lot type. 
 IF dbo.fnGetItemLotType(@intItemId) <> 0 
@@ -305,6 +312,11 @@ BEGIN
 								@intTransactionTypeId
 					END
 
+			SET @strNewCost = CONVERT(NVARCHAR, CAST(@AdjustmentValue AS MONEY), 1)
+			SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @t_strTransactionId + '.'
+			FROM	tblICItem i 
+			WHERE	i.intItemId = @intItemId
+
 			-- Create the 'Cost Adjustment'
 			EXEC [uspICPostInventoryTransaction]
 				@intItemId								= @intItemId
@@ -319,7 +331,7 @@ BEGIN
 				,@dblValue								= @AdjustmentValue
 				,@dblSalesPrice							= 0
 				,@intCurrencyId							= @intCurrencyId 
-				,@dblExchangeRate						= @dblExchangeRate
+				--,@dblExchangeRate						= @dblExchangeRate
 				,@intTransactionId						= @intTransactionId
 				,@intTransactionDetailId				= @intTransactionDetailId
 				,@strTransactionId						= @strTransactionId
@@ -335,6 +347,9 @@ BEGIN
 				,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 				,@intFobPointId							= @intFobPointId 
 				,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+				,@intForexRateTypeId					= NULL
+				,@dblForexRate							= 1
+				,@strDescription						= @strDescription
 
 			-- Log original cost to tblICInventoryFIFOCostAdjustmentLog
 			IF NOT EXISTS (
@@ -432,6 +447,14 @@ BEGIN
 					)
 					- @RunningValue
 
+				-- 'Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s.'
+				SET @strCurrentValuation = CONVERT(NVARCHAR, CAST(@RunningValue AS MONEY), 1)
+				SET @strRunningQty = CONVERT(NVARCHAR, CAST(dbo.fnCalculateQtyBetweenUOM(@StockItemUOMId, @t_intItemUOMId, @RunningQty) AS MONEY), 1)
+				SET @strNewCost = CONVERT(NVARCHAR, CAST(@t_dblCost AS MONEY), 1)
+				SET @strNewValuation = CONVERT(NVARCHAR, CAST(@AdjustmentValue AS MONEY), 1)
+	
+				SELECT	@strDescription = FORMATMESSAGE(80078, @strCurrentValuation, @strRunningQty, @strNewCost, @strNewValuation)
+
 				-- Create the 'Auto Variance'
 				EXEC [uspICPostInventoryTransaction]
 					@intItemId								= @intItemId
@@ -446,7 +469,7 @@ BEGIN
 					,@dblValue								= @AdjustmentValue
 					,@dblSalesPrice							= 0
 					,@intCurrencyId							= @intCurrencyId 
-					,@dblExchangeRate						= @dblExchangeRate
+					--,@dblExchangeRate						= @dblExchangeRate
 					,@intTransactionId						= @intTransactionId
 					,@intTransactionDetailId				= @intTransactionDetailId
 					,@strTransactionId						= @strTransactionId
@@ -462,6 +485,10 @@ BEGIN
 					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 					,@intFobPointId							= @intFobPointId 
 					,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+					,@intForexRateTypeId					= NULL
+					,@dblForexRate							= 1
+					,@strDescription						= @strDescription
+
 			END 
 		END 
 
@@ -562,6 +589,14 @@ BEGIN
 
 	SET @AdjustmentValue = dbo.fnMultiply(@NewCost, @RunningQty) - @RunningValue
 
+	-- 'Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s.'
+	SET @strCurrentValuation = CONVERT(NVARCHAR, CAST(@RunningValue AS MONEY), 1)
+	SET @strRunningQty = CONVERT(NVARCHAR, CAST(@RunningQty AS MONEY), 1)
+	SET @strNewCost = CONVERT(NVARCHAR, CAST(@NewCost AS MONEY), 1)
+	SET @strNewValuation = CONVERT(NVARCHAR, CAST(@AdjustmentValue AS MONEY), 1)
+	
+	SELECT	@strDescription = FORMATMESSAGE(80078, @strCurrentValuation, @strRunningQty, @strNewCost, @strNewValuation)
+
 	-- Create the 'Auto Variance'
 	EXEC [uspICPostInventoryTransaction]
 		@intItemId								= @intItemId
@@ -576,7 +611,7 @@ BEGIN
 		,@dblValue								= @AdjustmentValue
 		,@dblSalesPrice							= 0
 		,@intCurrencyId							= @intCurrencyId 
-		,@dblExchangeRate						= @dblExchangeRate
+		--,@dblExchangeRate						= @dblExchangeRate
 		,@intTransactionId						= @intTransactionId
 		,@intTransactionDetailId				= @intTransactionDetailId
 		,@strTransactionId						= @strTransactionId
@@ -592,6 +627,10 @@ BEGIN
 		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 		,@intFobPointId							= @intFobPointId 
 		,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+		,@intForexRateTypeId					= NULL
+		,@dblForexRate							= 1
+		,@strDescription						= @strDescription
+
 END 
 
 -- Recalculate the average cost. 

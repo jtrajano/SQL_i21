@@ -72,8 +72,6 @@ Delete From @tblEntityContactIdOutput
 Select @intStageEntityId=intStageEntityId,@strVendorName=strName,@strTerm=strTerm,@strCurrency=strCurrency,@strAccountNo=strAccountNo,@ysnDeleted=ISNULL(ysnDeleted,0)
 From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId=@intMinVendor
 
-Select @strAccountNo AS strInfo1,@strVendorName AS strInfo2
-
 Select @intEntityId=intEntityVendorId From tblAPVendor Where strVendorAccountNum=@strAccountNo
 Select @intTermId=intTermID From tblSMTerm Where strTermCode=@strTerm
 Select @intCurrencyId=intCurrencyID From tblSMCurrency Where strCurrency=@strCurrency
@@ -179,9 +177,9 @@ Begin
 	--Add Audit Trail Record
 	Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intEntityId) + '","keyValue":' + CONVERT(VARCHAR,@intEntityId) + ',"iconCls":"small-new-plus","leaf":true}'
 	
-	Select @dtmDate=DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmCreated) From tblIPEntityStage Where intStageEntityId=@intStageEntityId
+	Select @dtmDate=dtmCreated From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 	If @dtmDate is null
-		Set @dtmDate =  GETUTCDATE()
+		Set @dtmDate =  GETDATE()
 
 	Select @strUserName=strCreatedUserName From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 	Select @intUserId=e.intEntityId From tblEMEntity e Join tblEMEntityType et on e.intEntityId=et.intEntityId  Where e.strExternalERPId=@strUserName AND et.strType='User'

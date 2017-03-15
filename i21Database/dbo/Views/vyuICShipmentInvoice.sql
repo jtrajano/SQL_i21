@@ -21,6 +21,8 @@ SELECT
 	, dblCOGSAmount = ISNULL(-(t.dblQty) * t.dblCost + t.dblValue, 0.0)
 	, dblQtyToInvoice = CASE iv.ysnPosted WHEN 0 THEN ivd.dblQtyShipped ELSE 0.0 END
 	, dblQtyInvoiced = CASE iv.ysnPosted WHEN 1 THEN ivd.dblQtyShipped ELSE 0.0 END
+	, intCurrencyId = currency.intCurrencyID
+	, strCurrency = currency.strCurrency
 FROM tblICInventoryShipment s
 	LEFT JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
 	LEFT JOIN tblICItem i ON i.intItemId = si.intItemId
@@ -50,4 +52,6 @@ FROM tblICInventoryShipment s
 		UNION
 		SELECT 4 intOrderTypeId, 'Direct' strOrderType
 	) AS ot ON ot.intOrderTypeId = s.intOrderType
+	LEFT JOIN tblSMCurrency currency
+		ON currency.intCurrencyID = s.intCurrencyId
 WHERE s.ysnPosted = 1

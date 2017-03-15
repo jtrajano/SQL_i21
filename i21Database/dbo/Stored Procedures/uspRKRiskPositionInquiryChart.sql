@@ -8,6 +8,10 @@
  @intForecastWeeklyConsumption INTEGER = null,
  @intForecastWeeklyConsumptionUOMId INTEGER = null   
 AS
+
+DECLARE @strRiskView nvarchar(50) 
+SELECT @strRiskView = strRiskView FROM tblRKCompanyPreference 
+
 DECLARE @tblFinalDetail TABLE (
  intRowNumber INT
  ,Selection NVARCHAR(500) COLLATE Latin1_General_CI_AS
@@ -53,7 +57,7 @@ SELECT strFutureMonth
  ,convert(DECIMAL(24, 10), sum(isnull(dblNoOfContract, 0))) dblNoOfContract
  ,NULL
 FROM @tblFinalDetail
-WHERE Selection = 'Net market risk'
+WHERE Selection =  CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END
  AND strFutureMonth = 'Previous'
 GROUP BY strFutureMonth
  ,Selection
@@ -67,7 +71,7 @@ SELECT strFutureMonth
  ,NULL
  ,convert(DECIMAL(24, 10), sum(isnull(dblNoOfContract, 0))) dblNoOfContract
 FROM @tblFinalDetail
-WHERE Selection = 'Physical position / Basis risk'
+WHERE Selection = CASE WHEN @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end
  AND strFutureMonth = 'Previous'
 GROUP BY strFutureMonth
  ,Selection
@@ -82,7 +86,7 @@ SELECT strFutureMonth
  ,convert(DECIMAL(24, 10), sum(isnull(dblNoOfContract, 0))) dblNoOfContract
  ,NULL
 FROM @tblFinalDetail
-WHERE Selection = 'Net market risk'
+WHERE Selection =  CASE WHEN @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end
  AND strFutureMonth <> 'Previous'
 GROUP BY strFutureMonth
  ,Selection

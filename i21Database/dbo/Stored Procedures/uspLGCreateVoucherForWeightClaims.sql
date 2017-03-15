@@ -15,6 +15,13 @@ BEGIN TRY
 	DECLARE @strWeightClaimNo NVARCHAR(100)
 	DECLARE @intWeightClaimDetailId INT
 	DECLARE @intCount INT
+	DECLARE @intLoadId INT
+	DECLARE @intCurrencyId INT
+	DECLARE @ysnSubCurrency BIT
+	DECLARE @dblClaimAmount NUMERIC(18,6)
+	DECLARE @dblNetWeight NUMERIC(18,6)
+	DECLARE @dblTotalForBill NUMERIC(18,6)
+	DECLARE @dblAmountDueForBill NUMERIC(18,6)
 
 	DECLARE @voucherDetailData TABLE 
 		(intWeightClaimRecordId INT Identity(1, 1)
@@ -24,11 +31,13 @@ BEGIN TRY
 		,intPartyEntityId INT
 		,dblNetShippedWeight DECIMAL(18, 6)
 		,dblWeightLoss DECIMAL(18, 6)
+		,dblNetWeight DECIMAL(18, 6) 
 		,dblFranchiseWeight DECIMAL(18, 6)
 		,dblQtyReceived DECIMAL(18, 6)
 		,dblCost DECIMAL(18, 6)
 		,dblCostUnitQty DECIMAL(18, 6)
 		,dblWeightUnitQty DECIMAL(18, 6)
+		,dblClaimAmount DECIMAL(18, 6)
 		,dblUnitQty DECIMAL(18, 6)
 		,intWeightUOMId INT
 		,intUOMId INT
@@ -46,7 +55,18 @@ BEGIN TRY
 		(intItemRecordId INT Identity(1, 1)
 		,intItemId INT)
 
-	SELECT @strWeightClaimNo = strReferenceNumber FROM tblLGWeightClaim WHERE intWeightClaimId = @intWeightClaimId
+	SELECT @strWeightClaimNo = strReferenceNumber
+		,@intLoadId = intLoadId
+	FROM tblLGWeightClaim
+	WHERE intWeightClaimId = @intWeightClaimId
+
+	SELECT @intCurrencyId = intCurrencyId
+	FROM tblLGWeightClaimDetail
+	WHERE intWeightClaimId = @intWeightClaimId
+
+	SELECT @ysnSubCurrency = ISNULL(ysnSubCurrency, 0)
+	FROM tblSMCurrency
+	WHERE intCurrencyID = @intCurrencyId
 
 	IF EXISTS (SELECT TOP 1 1
 			   FROM tblAPBill AB
@@ -83,11 +103,13 @@ BEGIN TRY
 		  ,intPartyEntityId
 		  ,dblNetShippedWeight
 		  ,dblWeightLoss
+		  ,dblNetWeight
 		  ,dblFranchiseWeight
 		  ,dblQtyReceived
 		  ,dblCost
 		  ,dblCostUnitQty
 		  ,dblWeightUnitQty
+		  ,dblClaimAmount
 		  ,dblUnitQty
 		  ,intWeightUOMId
 		  ,intUOMId
@@ -102,25 +124,28 @@ BEGIN TRY
 		,WCD.intPartyEntityId
 		,WCD.dblFromNet AS dblNetShippedWeight
 		,WCD.dblWeightLoss AS dblWeightLoss
+		,WCD.dblWeightLoss AS dblNetWeight
 		,WCD.dblFranchiseWt AS dblFranchiseWeight
 		,(WCD.dblWeightLoss - WCD.dblFranchiseWt) AS dblQtyReceived
-		,CASE 
-			WHEN AD.ysnSeqSubCurrency = 1
-				THEN dbo.fnCTConvertQtyToTargetItemUOM((
-							SELECT TOP (1) IU.intItemUOMId
-							FROM tblICItemUOM IU
-							WHERE IU.intItemId = CD.intItemId
-								AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-							), AD.intSeqPriceUOMId, AD.dblSeqPrice) / 100
-			ELSE dbo.fnCTConvertQtyToTargetItemUOM((
-						SELECT TOP (1) IU.intItemUOMId
-						FROM tblICItemUOM IU
-						WHERE IU.intItemId = CD.intItemId
-							AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-						), AD.intSeqPriceUOMId, AD.dblSeqPrice)
-			END AS dblCost
+		--,CASE 
+		--	WHEN AD.ysnSeqSubCurrency = 1
+		--		THEN dbo.fnCTConvertQtyToTargetItemUOM((
+		--					SELECT TOP (1) IU.intItemUOMId
+		--					FROM tblICItemUOM IU
+		--					WHERE IU.intItemId = CD.intItemId
+		--						AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+		--					), AD.intSeqPriceUOMId, AD.dblSeqPrice) / 100
+		--	ELSE dbo.fnCTConvertQtyToTargetItemUOM((
+		--				SELECT TOP (1) IU.intItemUOMId
+		--				FROM tblICItemUOM IU
+		--				WHERE IU.intItemId = CD.intItemId
+		--					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+		--				), AD.intSeqPriceUOMId, AD.dblSeqPrice)
+		--	END AS dblCost
+		,AD.dblSeqPrice
 		,1 AS dblCostUnitQty
 		,1 AS dblWeightUnitQty
+		,dblClaimAmount 
 		,1 AS dblUnitQty
 		,(SELECT TOP (1) IU.intItemUOMId
 			FROM tblICItemUOM IU
@@ -147,6 +172,8 @@ BEGIN TRY
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = WCD.intPriceItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	WHERE WC.intWeightClaimId = @intWeightClaimId
+		AND ISNULL(WCD.ysnNoClaim, 0) = 0
+		AND ISNULL(WCD.dblClaimAmount,0) > 0
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intPartyEntityId
@@ -181,6 +208,7 @@ BEGIN TRY
 	BEGIN
 		SET @intVendorEntityId = NULL
 		SET @intWeightClaimDetailId = NULL
+		SET @dblClaimAmount = NULL
 
 		SELECT @intVendorEntityId = intVendorEntityId
 		FROM @distinctVendor
@@ -188,7 +216,11 @@ BEGIN TRY
 
 		SELECT @intCount = COUNT(*) FROM @voucherDetailData WHERE intPartyEntityId = @intVendorEntityId
 
-		SELECT @intWeightClaimDetailId = intWeightClaimDetailId FROM @voucherDetailData WHERE intPartyEntityId = @intVendorEntityId
+		SELECT @intWeightClaimDetailId = intWeightClaimDetailId,
+			   @dblClaimAmount = dblClaimAmount,
+			   @dblNetWeight = dblNetWeight
+		FROM @voucherDetailData 
+		WHERE intPartyEntityId = @intVendorEntityId
 
 		INSERT INTO @VoucherDetailClaim (
 			 dblNetShippedWeight
@@ -236,12 +268,32 @@ BEGIN TRY
 			UPDATE tblLGWeightClaimDetail
 			SET intBillId = @intBillId
 			WHERE intWeightClaimId = @intWeightClaimId
+
+			UPDATE tblAPBillDetail
+			SET intLoadId = @intLoadId,
+				intCurrencyId = @intCurrencyId,
+				ysnSubCurrency = @ysnSubCurrency,
+				dblClaimAmount = @dblClaimAmount,
+				dblTotal = @dblClaimAmount,
+				dbl1099 = @dblClaimAmount,
+				dblNetWeight = @dblNetWeight
+			WHERE intBillId = @intBillId
 		END
 		ELSE 
 		BEGIN
 			UPDATE tblLGWeightClaimDetail
 			SET intBillId = @intBillId
 			WHERE intWeightClaimDetailId = @intWeightClaimDetailId
+			
+			UPDATE tblAPBillDetail
+			SET intLoadId = @intLoadId,
+				intCurrencyId = @intCurrencyId,
+				ysnSubCurrency = @ysnSubCurrency,
+				dblClaimAmount = @dblClaimAmount,
+				dblTotal = @dblClaimAmount,
+				dbl1099 = @dblClaimAmount,
+				dblNetWeight = @dblNetWeight
+			WHERE intBillId = @intBillId
 		END
 
 		DELETE
@@ -251,6 +303,35 @@ BEGIN TRY
 		FROM @distinctVendor
 		WHERE intRecordId > @intMinRecord
 	END
+
+	SELECT @dblTotalForBill = SUM(dblTotal)
+		  ,@dblAmountDueForBill = SUM(dblClaimAmount)
+	FROM tblAPBillDetail
+	WHERE intBillId = @intBillId
+
+	UPDATE tblAPBill
+	SET dblTotal = @dblTotalForBill
+	   ,dblAmountDue = @dblAmountDueForBill
+	WHERE intBillId = @intBillId
+
+	UPDATE BD
+	SET intCurrencyId = WCD.intCurrencyId
+		,ysnSubCurrency = 1
+		,dblClaimAmount = WCD.dblClaimAmount
+		,dblTotal = WCD.dblClaimAmount
+		,dbl1099 = WCD.dblClaimAmount
+		,dblNetWeight = WCD.dblToNet
+		,intLoadId = WC.intLoadId
+		,intAccountId = IA.intAccountId
+	FROM tblAPBill B
+	JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
+	JOIN tblLGLoad LD ON LD.intLoadId = BD.intLoadId
+	JOIN tblLGWeightClaim WC ON WC.intLoadId = BD.intLoadId
+	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
+	LEFT JOIN tblICItemAccount IA ON IA.intItemId = WCD.intItemId AND IA.intAccountCategoryId = 27
+	WHERE WCD.intContractDetailId = BD.intContractDetailId
+		AND WC.intWeightClaimId = @intWeightClaimId 
+
 END TRY
 
 BEGIN CATCH

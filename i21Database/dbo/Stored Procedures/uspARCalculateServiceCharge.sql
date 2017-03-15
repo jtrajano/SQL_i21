@@ -43,6 +43,7 @@ AS
 		,[dtmAsOfDate]				DATETIME
 		,[strSalespersonName]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,[intCompanyLocationId]		INT
+		,[strSourceTransaction]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	)
 	DECLARE @zeroDecimal		NUMERIC(18, 6) = 0
 	      , @dblMinimumSC		NUMERIC(18, 6) = 0
@@ -223,9 +224,9 @@ AS
 								 						THEN
 								 							CASE WHEN dblServiceChargeAPR > 0
 								 								THEN
-								 									CASE WHEN dblMinimumCharge > ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId), @asOfDate) * CB.dblBudgetAmount
+								 									CASE WHEN dblMinimumCharge > ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermsId), @asOfDate) * CB.dblBudgetAmount
 								 											THEN dblMinimumCharge
-								 											ELSE (((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId), @asOfDate) * CB.dblBudgetAmount)
+								 											ELSE (((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermsId), @asOfDate) * CB.dblBudgetAmount)
 								 									END
 								 								ELSE 0
 								 							END
@@ -237,7 +238,7 @@ AS
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
 								INNER JOIN [tblEMEntityLocation] EL ON CB.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1	
 							WHERE CB.intEntityCustomerId = @entityId
-								AND DATEADD(DAY, SC.intGracePeriod, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 AND ISNULL(CB.ysnCalculated, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId)) < @asOfDate
+								AND DATEADD(DAY, SC.intGracePeriod, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 AND ISNULL(CB.ysnCalculated, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermsId)) < @asOfDate
 								AND CB.dblBudgetAmount > @zeroDecimal
 								AND (CB.ysnCalculated = 0 OR CB.ysnForgiven = 1)
 						END

@@ -7,8 +7,8 @@ CREATE TABLE [dbo].[tblGLPostRecap](
     [strAccountGroup]           NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [dblDebit]                  NUMERIC (18, 6)  NULL,
     [dblCredit]                 NUMERIC (18, 6)  NULL,
-	[dblDebitForeign]           NUMERIC (18, 6)  NULL,
-    [dblCreditForeign]          NUMERIC (18, 6)  NULL,
+	[dblDebitForeign]                  NUMERIC (18, 6)  NULL,
+    [dblCreditForeign]                 NUMERIC (18, 6)  NULL,
     [dblDebitUnit]              NUMERIC (18, 6)  NULL,
     [dblCreditUnit]             NUMERIC (18, 6)  NULL,
     [strDescription]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
@@ -28,6 +28,7 @@ CREATE TABLE [dbo].[tblGLPostRecap](
     [strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
+	[strRateType]				NVARCHAR (50)	 COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]          INT              DEFAULT 1 NOT NULL
 		
  CONSTRAINT [PK_tblGLPostRecap] PRIMARY KEY CLUSTERED 

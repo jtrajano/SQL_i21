@@ -135,12 +135,13 @@ BEGIN
 			,strTransactionForm			= GLEntries.strTransactionForm
 			,strModuleName				= GLEntries.strModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= GLEntries.dblDebitForeign 
+			,dblDebitForeign			= GLEntries.dblCreditForeign
 			,dblDebitReport				= GLEntries.dblDebitReport
-			,dblCreditForeign			= GLEntries.dblCreditForeign
+			,dblCreditForeign			= GLEntries.dblDebitForeign 
 			,dblCreditReport			= GLEntries.dblCreditReport
 			,dblReportingRate			= GLEntries.dblReportingRate
 			,dblForeignRate				= GLEntries.dblForeignRate
+			,strRateType				= currencyRateType.strCurrencyExchangeRateType
 	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
 				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
 				--AND GLEntries.strTransactionId = Reversal.strTransactionId
@@ -154,6 +155,8 @@ BEGIN
 						--	AND GLEntries.strTransactionId = Reversal.strRelatedTransactionId					
 						--)					
 				)
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = Reversal.intForexRateTypeId
 	WHERE	Reversal.strBatchId = @strBatchId
 			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
 			AND Reversal.intTransactionTypeId <> @InventoryTransactionTypeId_AutoVariance
@@ -194,6 +197,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NULL 
+			,strRateType				= NULL 
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
@@ -204,6 +208,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
+			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
 
 	UNION ALL 
 	SELECT	
@@ -238,6 +243,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NULL 
+			,strRateType				= NULL 
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
@@ -248,6 +254,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
+			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
 END
 ;
 

@@ -15,7 +15,7 @@ CREATE PROCEDURE [dbo].[uspICPostReturnActualCost]
 	,@dblCost AS NUMERIC(38, 20)
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
-	,@dblExchangeRate AS NUMERIC(38,20)
+	--,@dblExchangeRate AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -23,6 +23,9 @@ CREATE PROCEDURE [dbo].[uspICPostReturnActualCost]
 	,@intTransactionTypeId AS INT
 	,@strTransactionForm AS NVARCHAR(255)
 	,@intEntityUserSecurityId AS INT
+	,@intForexRateTypeId AS INT
+	,@dblForexRate NUMERIC(38, 20)
+
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -111,7 +114,7 @@ BEGIN
 						,@dblValue = NULL
 						,@dblSalesPrice = @dblSalesPrice
 						,@intCurrencyId = @intCurrencyId
-						,@dblExchangeRate = @dblExchangeRate
+						--,@dblExchangeRate = @dblExchangeRate
 						,@intTransactionId = @intTransactionId
 						,@intTransactionDetailId = @intTransactionDetailId
 						,@strTransactionId = @strTransactionId
@@ -123,8 +126,10 @@ BEGIN
 						,@strRelatedTransactionId = NULL 
 						,@strTransactionForm = @strTransactionForm
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
-						,@intCostingMethod = @AVERAGECOST
+						,@intCostingMethod = @ACTUALCOST
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+						,@intForexRateTypeId = @intForexRateTypeId
+						,@dblForexRate = @dblForexRate
 
 				IF @intReturnValue < 0 GOTO _Exit_With_Error
 

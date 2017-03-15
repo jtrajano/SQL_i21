@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMGetBankAccountRegister] 
 @intBankAccountId  INT,
+@skip INT,
+@take INT,
 @totalCount AS INT = 0 OUTPUT 
 
 AS
@@ -28,9 +30,8 @@ DECLARE @openingBalance AS NUMERIC(18,6),
 		@strReferenceNo AS NVARCHAR(50),
 		@strMemo AS NVARCHAR(250),
 		@strPayee AS NVARCHAR(100),
-		@skip INT = NULL,
-		@take INT = NULL,
-		@ysnMaskEmployeeName AS BIT
+		@ysnMaskEmployeeName AS BIT,
+		@RowNum BIGINT = 0
 
 
 -- Get the opening balance from the first bank reconciliation record. 
@@ -90,20 +91,25 @@ intTransactionId
 	WHEN intBankTransactionTypeId = 5 AND dblAmount < 0 THEN dblAmount
 	ELSE 0 
 	END AS dblPayment
-,CASE WHEN intBankTransactionTypeId IN (1,10,11,18,19)  THEN dblAmount 
+,CASE WHEN intBankTransactionTypeId IN (1,10,11,18,19,103,116,121,123)  THEN dblAmount 
 	WHEN intBankTransactionTypeId = 5 AND dblAmount > 0 THEN dblAmount
 	ELSE 0 
 	END AS dblDeposit
 ,ysnCheckVoid
 ,ysnClr
+,ROW_NUMBER() OVER (ORDER BY dtmDate,intTransactionId) AS RowNum
 INTO #tempTransaction
 FROM tblCMBankTransaction A
 WHERE intBankAccountId = @intBankAccountId
 AND (ysnPosted = 1 OR ysnCheckVoid = 1)
 ORDER BY dtmDate, intTransactionId
 
+CREATE NONCLUSTERED  INDEX cx_tempTransaction ON #tempTransaction (intTransactionId,dtmDate);
+
 WHILE EXISTS (SELECT TOP 1 1 FROM #tempTransaction)
 BEGIN
+
+	SET @RowNum = @RowNum + 1
 
 	SELECT TOP 1 
 		@intTransactionId = intTransactionId
@@ -122,7 +128,7 @@ BEGIN
 		,@ysnCheckVoid = ysnCheckVoid
 		,@ysnClr = ysnClr
 	FROM #tempTransaction 
-	ORDER BY dtmDate, intTransactionId
+	WHERE RowNum = @RowNum
 
 	IF @ysnCheckVoid = 0 AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(GETDATE(),@dtmDate) AS FLOAT)) AS DATETIME)	
 	BEGIN
@@ -207,3 +213,4 @@ END
 				SELECT * FROM @BankAccountRegister 
 			END
     
+	drop table #tempTransaction

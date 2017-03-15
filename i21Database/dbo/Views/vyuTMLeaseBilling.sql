@@ -18,14 +18,18 @@ SELECT
 	,strItemNumber = ISNULL(M.strItemNo,'')
 	,dblBillAmount = (CASE WHEN C.strBillingType = 'Gallons' AND ISNULL((Q.ysnEnableLeaseBillingAboveMinUse),0) = 1 
 							THEN 
-								( CASE WHEN Q.strLeaseBillingIncentiveCalculation = '2 Years Ago' THEN
-									(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(JJ.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
+								( CASE WHEN Q.strLeaseBillingIncentiveCalculation = 'Last 12 Months' THEN
+									(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL((SELECT SUM(dblQuantityDelivered) 
+																																						FROM tblTMDeliveryHistory 
+																																						WHERE intSiteID = D.intSiteID
+																																							AND DATEADD(dd, DATEDIFF(dd, 0, dtmInvoiceDate), 0) >= DATEADD(dd, DATEDIFF(dd, 0, DATEADD(MONTH, -12, GETDATE())), 0)
+																																							),0) > Z.dblMinimumUsage) > 0
 										THEN
 											0.0
 										ELSE
 											ISNULL(G.dblAmount,0.0)
 										END)
-									WHEN Q.strLeaseBillingIncentiveCalculation = 'Prior Year' THEN
+									WHEN Q.strLeaseBillingIncentiveCalculation = 'Prior Season' THEN
 										(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(II.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
 										THEN
 											0.0
@@ -106,34 +110,26 @@ INNER JOIN tblARCustomer O
 	ON O.intEntityCustomerId = F.intEntityId
 LEFT JOIN tblSMTaxGroup P
 	ON C.intLeaseTaxGroupId = P.intTaxGroupId
-CROSS APPLY (
-	SELECT TOP 1 
+LEFT JOIN vyuTMSiteDeliveryHistoryTotal HH
+	ON A.intSiteID = HH.intSiteId AND HH.intCurrentSeasonYear = HH.intSeasonYear
+LEFT JOIN vyuTMSiteDeliveryHistoryTotal II
+	ON A.intSiteID = II.intSiteId AND (II.intCurrentSeasonYear - 1) = II.intSeasonYear
+,(	SELECT TOP 1 
 		ysnEnableLeaseBillingAboveMinUse 
 		,strLeaseBillingIncentiveCalculation
 	FROM tblTMPreferenceCompany
 )Q
-OUTER APPLY (
-	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-	WHERE intSiteId = A.intSiteID
-		AND intCurrentSeasonYear = intSeasonYear
-)HH
-OUTER APPLY (
-	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-	WHERE intSiteId = A.intSiteID
-		AND intCurrentSeasonYear = intSeasonYear
-)II
-OUTER APPLY (
-	SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-	WHERE intSiteId = A.intSiteID
-		AND intCurrentSeasonYear = intSeasonYear
-)JJ
 WHERE O.ysnActive = 1
 	AND C.strLeaseStatus <> 'Inactive'
 	AND B.strOwnership <> 'Customer Owned'
 	AND (CASE WHEN C.strBillingType = 'Gallons' AND ISNULL((Q.ysnEnableLeaseBillingAboveMinUse),0) = 1 
 		THEN 
 			( CASE WHEN Q.strLeaseBillingIncentiveCalculation = '2 Years Ago' THEN
-				(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL(JJ.dblTotalGallons,0.0) > Z.dblMinimumUsage) > 0
+				(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND ISNULL((SELECT SUM(dblQuantityDelivered) 
+																																						FROM tblTMDeliveryHistory 
+																																						WHERE intSiteID = D.intSiteID
+																																							AND DATEADD(dd, DATEDIFF(dd, 0, dtmInvoiceDate), 0) >= DATEADD(dd, DATEDIFF(dd, 0, DATEADD(MONTH, -12, GETDATE())), 0)
+																																							),0) > Z.dblMinimumUsage) > 0
 					THEN
 						0.0
 					ELSE

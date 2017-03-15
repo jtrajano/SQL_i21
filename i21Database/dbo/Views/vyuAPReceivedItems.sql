@@ -32,6 +32,8 @@ FROM
 		,[dblUnitCost]				=	tblReceived.dblUnitCost
 		,[dblTax]					=	tblReceived.dblTax
 		,[dblRate]					=	tblReceived.dblRate
+		,[strRateType]				=	tblReceived.strCurrencyExchangeRateType
+		,[intCurrencyExchangeRateTypeId] =	tblReceived.intForexRateTypeId
 		,[ysnSubCurrency]			=	tblReceived.ysnSubCurrency
 		,[intSubCurrencyCents]		=   tblReceived.intSubCurrencyCents
 		,[intAccountId]				=	tblReceived.intAccountId
@@ -97,7 +99,9 @@ FROM
 				,strAccountDesc = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
 				,dblQuantityBilled = SUM(ISNULL(B1.dblBillQty, 0))
 				,ISNULL(B1.dblTax,0) AS dblTax
-				,ISNULL(G.dblRate,0) AS dblRate
+				,ISNULL(B1.dblForexRate,0) AS dblRate
+				,B1.intForexRateTypeId
+				,RT.strCurrencyExchangeRateType
 				,CASE WHEN B1.ysnSubCurrency > 0 THEN 1 ELSE 0 END AS ysnSubCurrency
 				,ISNULL(A1.intSubCurrencyCents, 0) AS intSubCurrencyCents
 				,B1.intUnitMeasureId
@@ -141,6 +145,7 @@ FROM
 				LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A1.intShipFromId
 				LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A1.intCurrencyId AND SubCurrency.ysnSubCurrency = 1
 				LEFT JOIN dbo.tblICStorageLocation ISL ON ISL.intStorageLocationId = B1.intStorageLocationId
+				LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B1.intForexRateTypeId
 			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty 
 			AND B1.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 			AND B.intPurchaseDetailId = B1.intLineNo
@@ -177,6 +182,9 @@ FROM
 				,B1.intStorageLocationId
 				,ISL.strName
 				,A1.intLocationId
+				,B1.intForexRateTypeId
+				,B1.dblForexRate
+				,RT.strCurrencyExchangeRateType
 		) as tblReceived
 		--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -215,7 +223,9 @@ FROM
 	,[intContractChargeId]		=	NULL  
 	,[dblUnitCost]				=	B.dblCost
 	,[dblTax]					=	ISNULL(B.dblTax,0)
-	,[dblRate]					=	0
+	,[dblRate]					=	ISNULL(B.dblForexRate,0)
+	,[strRateType]				=	RT.strCurrencyExchangeRateType
+	,[intCurrencyExchangeRateTypeId] =	B.intForexRateTypeId
 	,[ysnSubCurrency]			=	0
 	,[intSubCurrencyCents]		=	0
 	,[intAccountId]				=	CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory') END
@@ -274,6 +284,7 @@ FROM
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitOfMeasureId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId
+		LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B.intForexRateTypeId
 		OUTER APPLY
 		(
 			SELECT SUM(ISNULL(G.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
@@ -313,7 +324,9 @@ FROM
 												 ELSE B.dblUnitCost
 											END  	
 	,[dblTax]					=	ISNULL(B.dblTax,0)
-	,[dblRate]					=	ISNULL(G1.dblRate,0)
+	,[dblRate]					=	ISNULL(B.dblForexRate,0)
+	,[strRateType]				=	RT.strCurrencyExchangeRateType
+	,[intCurrencyExchangeRateTypeId] =	B.intForexRateTypeId
 	,[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END
 	,[intSubCurrencyCents]		=	ISNULL(A.intSubCurrencyCents, 0)
 	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')
@@ -394,6 +407,7 @@ FROM
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	LEFT JOIN dbo.tblICStorageLocation ISL ON ISL.intStorageLocationId = B.intStorageLocationId 
 	LEFT JOIN dbo.tblCTWeightGrade J ON CH.intWeightId = J.intWeightGradeId
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B.intForexRateTypeId
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
@@ -443,7 +457,9 @@ FROM
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblUnitCost
 		,[dblTax]									=	ISNULL(A.dblTax,0)
-		,[dblRate]									=	ISNULL(G1.dblRate,0)
+		,[dblRate]									=	ISNULL(A.dblForexRate,0)
+		,[strRateType]								=	RT.strCurrencyExchangeRateType
+		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
 		,[intAccountId]								=	A.intAccountId
@@ -502,6 +518,7 @@ FROM
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = A.intForexRateTypeId
 	OUTER APPLY 
 	(
 		SELECT intEntityVendorId FROM tblAPBillDetail BD
@@ -543,6 +560,8 @@ FROM
 		,[dblUnitCost]								=	A.dblCashPrice
 		,[dblTax]									=	0
 		,[dblRate]									=	0
+		,[strRateType]								=	NULL
+		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	0
 		,[intSubCurrencyCents]						=	0
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
@@ -628,6 +647,8 @@ FROM
 														END
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,0) ELSE ISNULL(G1.dblRate,0) END
+		,[strRateType]								=	NULL
+		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	ISNULL(RC.intCent,0)
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
@@ -720,6 +741,8 @@ FROM
 		,[dblUnitCost]								=	A.dblCashPrice
 		,[dblTax]									=	0
 		,[dblRate]									=	0
+		,[strRateType]								=	NULL
+		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	0
 		,[intSubCurrencyCents]						=	0
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
@@ -801,7 +824,9 @@ FROM
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblUnitCost
 		,[dblTax]									=	ISNULL(Taxes.dblTax,0)
-		,[dblRate]									=	ISNULL(G1.dblRate,0)
+		,[dblRate]									=	ISNULL(A.dblForexRate,0)
+		,[strRateType]								=	RT.strCurrencyExchangeRateType
+		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
 		,[intAccountId]								=	A.intAccountId
@@ -867,6 +892,7 @@ FROM
 	LEFT JOIN tblICCategoryTax B ON I.intCategoryId = B.intCategoryId
 	LEFT JOIN tblSMTaxClass C ON B.intTaxClassId = C.intTaxClassId 
 	LEFT JOIN tblSMTaxCode D ON D.intTaxClassId = C.intTaxClassId 
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = A.intForexRateTypeId
 	OUTER APPLY fnGetItemTaxComputationForVendor(A.intItemId, A.intEntityVendorId, A.dtmDate, A.dblUnitCost, 1, (CASE WHEN VST.intTaxGroupId > 0 THEN VST.intTaxGroupId
 																													  WHEN CL.intTaxGroupId  > 0 THEN CL.intTaxGroupId 
 																													  WHEN EL.intTaxGroupId > 0  THEN EL.intTaxGroupId ELSE 0 END), CL.intCompanyLocationId, D1.intShipFromId , 0, NULL, 0) Taxes

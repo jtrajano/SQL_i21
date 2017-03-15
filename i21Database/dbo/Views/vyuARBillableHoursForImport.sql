@@ -14,7 +14,7 @@ SELECT
 	,HW.[intInvoiceId] 
 	,JC.[intJobCodeId]
 	,JC.[strJobCode]
-	,ISNULL(JC.[intCompanyLocationId], (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))
+	,ISNULL(EML.[intWarehouseId], ISNULL(JC.[intCompanyLocationId], (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1)))
 									AS "intCompanyLocationId"
 	,JC.[intItemId]
 	,JC.[intItemUOMId] 
@@ -42,6 +42,10 @@ INNER JOIN
 INNER JOIN
 	tblEMEntity E
 		ON C.[intEntityCustomerId] = E.[intEntityId]	
+LEFT JOIN
+	tblEMEntityLocation EML
+		ON E.[intEntityId] = EML.[intEntityId]
+		AND EML.[ysnDefaultLocation] = 1
 INNER JOIN
 	tblEMEntity U
 		ON HW.[intAgentEntityId] = U.[intEntityId]

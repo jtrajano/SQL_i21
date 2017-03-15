@@ -82,6 +82,8 @@ SELECT INV.intInvoiceId
 	 , intOneLinePrintId		= ISNULL(MFR.intOneLinePrintId, 1)
 	 , strInvoiceComments		= I.strInvoiceComments
 	 , dblTotalWeight			= ISNULL(INV.dblTotalWeight, 0)
+	 , ID.strVFDDocumentNumber
+	 , ysnHasVFDDrugItem        = CASE WHEN (SELECT COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = ID.intInvoiceId AND ISNULL(strVFDDocumentNumber, '') != '') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM tblARInvoice INV
 LEFT JOIN (tblARInvoiceDetail ID 
 	LEFT JOIN tblICItem I ON ID.intItemId = I.intItemId 

@@ -2,7 +2,6 @@
 	,@intProductValueId INT
 	,@intItemId INT
 	,@intControlPointId INT
-	,@intSampleTypeId INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -20,10 +19,6 @@ BEGIN
 			SELECT DATEPART(dy, GETDATE())
 			)
 
-	SELECT @intControlPointId = intControlPointId
-	FROM tblQMSampleType
-	WHERE intSampleTypeId = @intSampleTypeId
-
 	IF @intProductTypeId = 3
 		OR @intProductTypeId = 4
 		OR @intProductTypeId = 5
@@ -34,7 +29,7 @@ BEGIN
 				JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 				WHERE P.intProductTypeId = @intProductTypeId
 					AND P.intProductValueId IS NULL
-					AND PC.intSampleTypeId = @intSampleTypeId
+					AND PC.intControlPointId = @intControlPointId
 					AND P.ysnActive = 1
 				)
 	END
@@ -46,7 +41,7 @@ BEGIN
 				JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 				WHERE P.intProductTypeId = 2 -- Item
 					AND P.intProductValueId = @intItemId
-					AND PC.intSampleTypeId = @intSampleTypeId
+					AND PC.intControlPointId = @intControlPointId
 					AND P.ysnActive = 1
 				)
 
@@ -63,7 +58,7 @@ BEGIN
 					JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 					WHERE P.intProductTypeId = 1 -- Item Category
 						AND P.intProductValueId = @intCategoryId
-						AND PC.intSampleTypeId = @intSampleTypeId
+						AND PC.intControlPointId = @intControlPointId
 						AND P.ysnActive = 1
 					)
 		END
@@ -461,7 +456,7 @@ BEGIN
 		LEFT JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = PPV.intUnitMeasureId
 		LEFT JOIN dbo.tblQMList AS L ON L.intListId = PRT.intListId
 		WHERE PRD.intProductId = @intProductId
-			AND PC.intSampleTypeId = @intSampleTypeId
+			AND PC.intControlPointId = @intControlPointId
 			AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
 				AND DATEPART(dy, PPV.dtmValidTo)
 		ORDER BY PP.intSequenceNo
@@ -524,7 +519,7 @@ BEGIN
 		LEFT JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = PPV.intUnitMeasureId
 		LEFT JOIN dbo.tblQMList AS L ON L.intListId = PRT.intListId
 		WHERE PRD.intProductId = @intProductId
-			AND PC.intSampleTypeId = @intSampleTypeId
+			AND PC.intControlPointId = @intControlPointId
 			AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
 				AND DATEPART(dy, PPV.dtmValidTo)
 		ORDER BY PP.intSequenceNo

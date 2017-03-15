@@ -16,19 +16,28 @@
     [dtmPostDate]					DATETIME										NULL,
 	[dtmCalculated]					DATETIME										NULL,               
     [dblInvoiceSubtotal]			NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblBaseInvoiceSubtotal]		NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblShipping]					NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblBaseShipping]				NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblTax]						NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblBaseTax]					NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblInvoiceTotal]				NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblBaseInvoiceTotal]			NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblDiscount]					NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblBaseDiscount]				NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblDiscountAvailable]			NUMERIC(18, 6)									NULL DEFAULT 0,	
+	[dblBaseDiscountAvailable]		NUMERIC(18, 6)									NULL DEFAULT 0,	
 	[dblInterest]					NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblBaseInterest]				NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblAmountDue]					NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblBaseAmountDue]				NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblPayment]					NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblBasePayment]				NUMERIC(18, 6)									NULL DEFAULT 0,
     [intEntitySalespersonId]		INT												NULL,    
     [intFreightTermId]				INT												NULL,
     [intShipViaId]					INT												NULL,
     [intPaymentMethodId]			INT												NULL, 	        
-    [strInvoiceOriginId]			NVARCHAR(8)		COLLATE Latin1_General_CI_AS	NULL,
+    [strInvoiceOriginId]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
     [strPONumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
 	[strBOLNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,     
 	[strDeliverPickup]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
@@ -125,9 +134,10 @@ ON dbo.tblARInvoice
 AFTER INSERT
 AS
 
-DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25), strType NVARCHAR(100))
+DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25), strType NVARCHAR(100), intCompanyLocationId INT)
 DECLARE @count INT = 0
 DECLARE @intInvoiceId INT
+DECLARE @intCompanyLocationId INT
 DECLARE @InvoiceNumber NVARCHAR(50)
 DECLARE @strTransactionType NVARCHAR(25)
 DECLARE @strType NVARCHAR(100)
@@ -135,13 +145,13 @@ DECLARE @intMaxCount INT = 0
 DECLARE @intStartingNumberId INT = 0
 
 INSERT INTO @inserted
-SELECT intInvoiceId, strTransactionType, strType FROM INSERTED WHERE strInvoiceNumber IS NULL ORDER BY intInvoiceId
+SELECT intInvoiceId, strTransactionType, strType, intCompanyLocationId FROM INSERTED WHERE strInvoiceNumber IS NULL ORDER BY intInvoiceId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 	SET @intStartingNumberId = 19
 	
-	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType, @strType = strType FROM @inserted
+	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType, @strType = strType, @intCompanyLocationId = intCompanyLocationId FROM @inserted
 
 	SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
 	FROM tblSMStartingNumber 
@@ -151,7 +161,7 @@ BEGIN
 									WHEN @strTransactionType = 'Invoice' AND @strType = 'Service Charge' THEN 'Service Charge'
 									ELSE 'Invoice' END
 		
-	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT	
+	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId
 	
 	IF(@InvoiceNumber IS NOT NULL)
 	BEGIN
@@ -165,7 +175,7 @@ BEGIN
 				SELECT @intMaxCount = MAX(CONVERT(INT, SUBSTRING(strInvoiceNumber, @intStartIndex, 10))) FROM tblARInvoice WHERE strTransactionType = @strTransactionType
 
 				UPDATE tblSMStartingNumber SET intNumber = @intMaxCount + 1 WHERE intStartingNumberId = @intStartingNumberId
-				EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT				
+				EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId			
 			END
 
 		UPDATE tblARInvoice

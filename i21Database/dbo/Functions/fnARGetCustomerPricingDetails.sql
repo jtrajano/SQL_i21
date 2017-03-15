@@ -1,18 +1,19 @@
 ﻿CREATE FUNCTION [dbo].[fnARGetCustomerPricingDetails]
 (
-	 @ItemId					INT
-	,@CustomerId				INT	
-	,@LocationId				INT
-	,@ItemUOMId					INT
-	,@TransactionDate			DATETIME
-	,@Quantity					NUMERIC(18,6)
-	,@VendorId					INT
-	,@SupplyPointId				INT
-	,@LastCost					NUMERIC(18,6)
-	,@ShipToLocationId			INT
-	,@VendorLocationId			INT
-	,@InvoiceType				NVARCHAR(200)
-	,@GetAllAvailablePricing	BIT
+	 @ItemId						INT
+	,@CustomerId					INT	
+	,@LocationId					INT
+	,@ItemUOMId						INT
+	,@TransactionDate				DATETIME
+	,@Quantity						NUMERIC(18,6)
+	,@VendorId						INT
+	,@SupplyPointId					INT
+	,@LastCost						NUMERIC(18,6)
+	,@ShipToLocationId				INT
+	,@VendorLocationId				INT
+	,@InvoiceType					NVARCHAR(200)
+	,@GetAllAvailablePricing		BIT
+	,@SpecialPricingCurrencyId		INT
 )
 RETURNS @returntable TABLE
 (
@@ -27,9 +28,15 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	DECLARE @SpecialPriceId	INT
-			,@intSort		INT
+	DECLARE @SpecialPriceId		INT
+			,@intSort				INT
+			,@FunctionalCurrencyId	INT
 
+
+	SELECT TOP 1 @FunctionalCurrencyId = intDefaultCurrencyId  FROM tblSMCompanyPreference
+	IF @SpecialPricingCurrencyId IS NULL
+		SET @SpecialPricingCurrencyId = @FunctionalCurrencyId
+	
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	SET @intSort = 0	
 	
@@ -135,7 +142,8 @@ BEGIN
 		C.intEntityCustomerId = @CustomerId
 		AND ((CAST(@TransactionDate AS DATE) BETWEEN CAST(SP.dtmBeginDate AS DATE) AND CAST(ISNULL(SP.dtmEndDate, GETDATE()) AS DATE)) OR (CAST(@TransactionDate AS DATE) >= CAST(SP.dtmBeginDate AS DATE) AND SP.dtmEndDate IS NULL))
 		AND ((@LocationId IS NOT NULL) OR (@LocationId IS NULL AND SP.strPriceBasis IN ('F', 'R', 'L', 'O')))
-		AND (SP.intItemId = @ItemId OR SP.intCategoryId = @ItemCategoryId)
+		AND ISNULL(SP.intCurrencyId, @FunctionalCurrencyId) = @SpecialPricingCurrencyId 
+
 
 	--Customer Special Pricing
 	IF(EXISTS(SELECT TOP 1 NULL FROM @CustomerSpecialPricing))
@@ -943,7 +951,7 @@ BEGIN
 			END
 			
 		--l. Customer - Customer Location - Item (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)		
-		SET @SpecialPriceId = (SELECT TOP 1 intSpecialPriceId FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND (ISNULL(strInvoiceType,'') = ISNULL(@InvoiceType,'') OR ISNULL(strInvoiceType,'') = '' OR ISNULL(@InvoiceType,'') = '') AND (ISNULL(intVendorLocationId,0) = 0 OR ISNULL(intVendorLocationId,0) = @VendorShipFromLocationId) AND (ISNULL(intVendorId,0) = 0 OR ISNULL(intVendorId,0) = @ItemVendorId) AND intItemId = @ItemId AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 intSpecialPriceId FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND (ISNULL(strInvoiceType,'') = ISNULL(@InvoiceType,'') OR ISNULL(strInvoiceType,'') = '' OR ISNULL(@InvoiceType,'') = '') AND intItemId = @ItemId AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				SET @intSort = @intSort + 1

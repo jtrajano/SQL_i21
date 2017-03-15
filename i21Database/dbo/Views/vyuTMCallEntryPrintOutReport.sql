@@ -58,11 +58,9 @@ SELECT
 							THEN CONVERT (VARCHAR,C.dtmNextDeliveryDate, 101) 
 							ELSE CAST(C.intNextDeliveryDegreeDay AS NVARCHAR(20)) 
 						END)
-    ,dblDailyUse = (CASE WHEN H.strCurrentSeason = 'Summer' 
-							THEN C.dblSummerDailyUse 
-						WHEN H.strCurrentSeason = 'Winter' 
-							THEN C.dblWinterDailyUse 
-						ELSE COALESCE(C.dblWinterDailyUse, 0)
+    ,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= H.intBeginSummerMonth AND  MONTH(GETDATE()) < H.intBeginWinterMonth
+						THEN ISNULL(C.dblSummerDailyUse,0.0) 
+						ELSE ISNULL(C.dblWinterDailyUse,0.0)
 					END)
     ,F.dblPercentLeft
 	,F.dblMinimumQuantity

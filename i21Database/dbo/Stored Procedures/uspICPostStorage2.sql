@@ -38,7 +38,7 @@ DECLARE @intId AS INT
 		,@dblCost AS NUMERIC(38, 20)
 		,@dblSalesPrice AS NUMERIC(18, 6)
 		,@intCurrencyId AS INT 
-		,@dblExchangeRate AS DECIMAL (38, 20) 
+		--,@dblExchangeRate AS DECIMAL (38, 20) 
 		,@intTransactionId AS INT
 		,@intTransactionDetailId AS INT 
 		,@strTransactionId AS NVARCHAR(40) 
@@ -47,6 +47,8 @@ DECLARE @intId AS INT
 		,@intSubLocationId AS INT
 		,@intStorageLocationId AS INT 
 		,@strActualCostId AS NVARCHAR(50)
+		,@intForexRateTypeId AS INT
+		,@dblForexRate NUMERIC(38, 20)
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -93,7 +95,7 @@ SELECT  intId
 		,dblCost
 		,dblSalesPrice
 		,intCurrencyId
-		,dblExchangeRate
+		--,dblExchangeRate
 		,intTransactionId
 		,intTransactionDetailId
 		,strTransactionId
@@ -102,6 +104,8 @@ SELECT  intId
 		,intSubLocationId
 		,intStorageLocationId
 		,strActualCostId
+		,intForexRateTypeId
+		,dblForexRate
 FROM	@ItemsToStorage
 
 OPEN loopItems;
@@ -118,7 +122,7 @@ FETCH NEXT FROM loopItems INTO
 	,@dblCost
 	,@dblSalesPrice
 	,@intCurrencyId
-	,@dblExchangeRate
+	--,@dblExchangeRate
 	,@intTransactionId
 	,@intTransactionDetailId
 	,@strTransactionId
@@ -126,7 +130,10 @@ FETCH NEXT FROM loopItems INTO
 	,@intLotId
 	,@intSubLocationId
 	,@intStorageLocationId
-	,@strActualCostId;
+	,@strActualCostId
+	,@intForexRateTypeId
+	,@dblForexRate
+	;
 	
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -171,7 +178,7 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			,@dblExchangeRate
+			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -179,6 +186,9 @@ BEGIN
 			,@intTransactionTypeId
 			,@strTransactionForm
 			,@intEntityUserSecurityId
+			,@intForexRateTypeId
+			,@dblForexRate
+
 	END
 
 	-- LIFO 
@@ -196,14 +206,16 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			,@dblExchangeRate
+			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intEntityUserSecurityId;
+			,@intEntityUserSecurityId
+			,@intForexRateTypeId
+			,@dblForexRate
 	END
 
 	-- LOT 
@@ -222,28 +234,17 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			,@dblExchangeRate
+			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intEntityUserSecurityId;
+			,@intEntityUserSecurityId
+			,@intForexRateTypeId
+			,@dblForexRate
 	END
-
-	----------------------------------------
-	---- Update the Lot's Qty and Weights. 
-	----------------------------------------
-	--BEGIN 
-	--	UPDATE	Lot 
-	--	SET		Lot.dblQty = dbo.fnCalculateLotQty(Lot.intItemUOMId, @intItemUOMId, Lot.dblQty, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-	--			,Lot.dblWeight = dbo.fnCalculateLotWeight(Lot.intItemUOMId, Lot.intWeightUOMId, @intItemUOMId, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-	--			,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
-	--	FROM	dbo.tblICLot Lot
-	--	WHERE	Lot.intItemLocationId = @intItemLocationId
-	--			AND Lot.intLotId = @intLotId
-	--END 
 
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItems INTO 
@@ -257,7 +258,7 @@ BEGIN
 		,@dblCost
 		,@dblSalesPrice
 		,@intCurrencyId
-		,@dblExchangeRate
+		--,@dblExchangeRate
 		,@intTransactionId
 		,@intTransactionDetailId
 		,@strTransactionId
@@ -266,6 +267,8 @@ BEGIN
 		,@intSubLocationId
 		,@intStorageLocationId
 		,@strActualCostId 
+		,@intForexRateTypeId
+		,@dblForexRate
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop

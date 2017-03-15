@@ -107,6 +107,7 @@ SELECT TOP 1 L.intLoadId
 	,CETC.strName AS strCustomerContact
 	,L.strOriginPort
 	,L.strDestinationPort
+	,(SELECT TOP 1 strVAT FROM tblSMCity WHERE strCity = L.strDestinationPort) AS strDestinationPortVatNo
 	,SLEntity.strName AS strShippingLine
 	,L.strServiceContractNumber
 	,L.strPackingDescription
@@ -464,7 +465,7 @@ SELECT TOP 1 L.intLoadId
 	,@strCountry AS strCompanyCountry 
 	,@strPhone AS strCompanyPhone 
 	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
-	,@strFullName AS strUserFullName
+	,@strUserName AS strUserFullName
 	,@strLogisticsCompanyName AS strLogisticsCompanyName
 	,@strLogisticsPrintSignOff AS strLogisticsPrintSignOff
 	,@strPrintableRemarks AS strPrintableRemarks

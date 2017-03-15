@@ -3,8 +3,8 @@ CREATE TABLE [dbo].[tblCTContractText](
 	[intConcurrencyId] [int] NOT NULL,
 	[intContractType] [int] NOT NULL,
 	[intContractPriceType] [int] NOT NULL,
-	[strTextCode] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strTextDescription] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strTextCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strTextDescription] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strText] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnActive] [bit] NOT NULL CONSTRAINT [DF_tblCTContractText_ysnActive]  DEFAULT ((1)),
  CONSTRAINT [PK_tblCTContractText_intContractTextId] PRIMARY KEY CLUSTERED 

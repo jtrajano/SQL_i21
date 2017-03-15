@@ -125,7 +125,7 @@ SELECT
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
-		,intGrossNetUOMId			= 0
+		,intGrossNetUOMId			= NULL
 		--,intGrossNetUOMId			= ( SELECT TOP 1 ItemUOM.intItemUOMId
 		--									FROM dbo.tblICItemUOM ItemUOM INNER JOIN tblSCScaleSetup SCSetup 
 		--										ON ItemUOM.intUnitMeasureId = SCSetup.intUnitMeasureId
@@ -343,7 +343,9 @@ IF @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) = 0
 		SET @ysnAccrue = 0
 		SET @ysnPrice = 0
 	END
-ELSE
+IF ISNULL(@intFreightItemId,0) = 0
+	SET @intFreightItemId = 0
+
 	BEGIN
 		IF	ISNULL(@intLoadId,0) != 0 
 			BEGIN
@@ -1034,7 +1036,7 @@ ELSE
 									,[ysnInventoryCost]					= 0
 									,[strCostMethod]					= 'Per Unit'
 									,[dblRate]							= RE.dblFreightRate
-									,[intCostUOMId]						= RE.intItemUOMId
+									,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, RE.intItemUOMId)
 									,[intOtherChargeEntityVendorId]		= CASE
 																			WHEN @intHaulerId = 0 THEN NULL
 																			WHEN @intHaulerId != 0 THEN @intHaulerId

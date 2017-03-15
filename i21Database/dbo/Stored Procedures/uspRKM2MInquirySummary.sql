@@ -77,6 +77,7 @@ DECLARE @tblFinalDetail TABLE (
 							,intCommodityUnitMeasureId INT
 							,intPriceUOMId INT
 							,intCent int
+							,dtmPlannedAvailabilityDate datetime
 						)
 
 INSERT INTO @#tempSummary 

@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE [dbo].[uspETTranslateSDToInvoice]
+CREATE PROCEDURE [uspETTranslateSDToInvoice]
 	@StagingTable ETTranslateSDToInvoiceTable READONLY
 	,@EntityUserId			INT
 	,@strAllErrorMessage	NVARCHAR(MAX) = '' OUTPUT	
@@ -93,6 +93,8 @@ BEGIN
 		,strStatus					NVARCHAR(MAX)
 		,ysnSuccessful				BIT
 		,intInvoiceId				INT
+		,strRecordId                NVARCHAR(5)
+		,strTransactionType 		NVARCHAR(25)
 	)
 
 	SET @strAllErrorMessage = ''
@@ -320,7 +322,9 @@ BEGIN
 							,strFileName				
 							,strStatus
 							,ysnSuccessful
-							,intInvoiceId				
+							,intInvoiceId			
+							,strRecordId       
+							,strTransactionType	
 					)
 					SELECT
 							strCustomerNumber = @strCustomerNumber		
@@ -332,6 +336,8 @@ BEGIN
 							,strStatus = @strErrorMessage
 							,ysnSuccessful = 0
 							,intInvoiceId = @intNewInvoiceId
+							,strRecordId  = @intNewInvoiceId     
+							,strTransactionType = 'Invoice'
 					
 					GOTO CONTINUELOOP
 
@@ -385,7 +391,10 @@ BEGIN
 						,@ItemDescription		   = @strItemDescription
 						,@ItemUOMId				   = @intItemUOMId
 						,@ItemContractDetailId     = @intContractDetailId
+						,@ItemCurrencyExchangeRateTypeId = NULL            
+                        ,@ItemCurrencyExchangeRateId = NULL            
 						,@RecomputeTax			   = 0
+
 				LOGDETAILENTRY:
 				IF 	LTRIM(@strErrorMessage) != ''
 				BEGIN		
@@ -403,6 +412,9 @@ BEGIN
 							,strStatus
 							,ysnSuccessful
 							,intInvoiceId 
+							,strRecordId 
+							,strTransactionType
+
 					)
 					SELECT
 							strCustomerNumber = @strCustomerNumber		
@@ -414,6 +426,8 @@ BEGIN
 							,strStatus = @strErrorMessage
 							,ysnSuccessful = 0
 							,intInvoiceId = @intNewInvoiceId
+							,strRecordId  = @intNewInvoiceId     
+							,strTransactionType = 'Invoice'
 					GOTO CONTINUELOOP
 				END
 				/*
@@ -558,6 +572,8 @@ BEGIN
 						,strStatus
 						,ysnSuccessful
 						,intInvoiceId 
+						,strRecordId  
+							,strTransactionType 
 				)
 				SELECT
 						strCustomerNumber = @strCustomerNumber		
@@ -569,6 +585,8 @@ BEGIN
 						,strStatus = 'Successfully created ' + @strNewInvoiceNumber
 						,ysnSuccessful = 1
 						,intInvoiceId = @intNewInvoiceId
+						,strRecordId  = @intNewInvoiceId     
+							,strTransactionType = 'Invoice'
 			END
 
 			--Delete the processed detail list

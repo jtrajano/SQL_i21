@@ -19,10 +19,7 @@ Declare @intMinRowNo int,
 		@strFinalErrMsg NVARCHAR(MAX)='',
 		@intUserId INT,
 		@strPartnerNo NVARCHAR(100),
-		@intLoadId INT,
-		@dtmDate DateTime,
-		@strJson NVARCHAR(MAX),
-		@intEntityId INT
+		@intLoadId INT
 
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
 
@@ -35,8 +32,6 @@ Begin
 
 		Select @strDeliveryNo=strDeliveryNo,@dtmReceiptDate=dtmReceiptDate,@strPartnerNo=strPartnerNo
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
-
-		Select @strDeliveryNo AS strInfo1,'' AS strInfo2
 
 		If NOT EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 			RaisError('Invalid LSP Partner',16,1)
@@ -103,19 +98,6 @@ Begin
 			Join tblICItem i on ri.intItemId=i.intItemId
 			JOin tblICCommodity cd on cd.intCommodityId=i.intCommodityId
 			Where ri.intInventoryReceiptId=@intReceiptId
-
-			--Add Audit Trail Record
-			Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intReceiptId) + '","keyValue":' + CONVERT(VARCHAR,@intReceiptId) + ',"iconCls":"small-new-plus","leaf":true}'
-	
-			Select @dtmDate=DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), @dtmReceiptDate)
-			If @dtmDate is null
-				Set @dtmDate =  GETUTCDATE()
-
-			Select TOP 1 @intEntityId=intEntityVendorId From tblAPVendor 
-			Where strVendorAccountNum=(Select strWarehouseVendorAccNo From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
-
-			Insert Into tblSMAuditLog(strActionType,strTransactionType,strRecordNo,strDescription,strRoute,strJsonData,dtmDate,intEntityId,intConcurrencyId)
-			Values('Created','Inventory.view.InventoryReceipt',@intReceiptId,'','',@strJson,@dtmDate,@intEntityId,1)
 
 			--Post Receipt
 			Exec dbo.uspICPostInventoryReceipt 1,0,@strReceiptNo,@intUserId

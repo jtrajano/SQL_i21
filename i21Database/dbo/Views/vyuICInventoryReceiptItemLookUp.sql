@@ -7,6 +7,8 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, strItemDescription = Item.strDescription
 		, Item.strLotTracking
 		, strUnitMeasure = ItemUnitMeasure.strUnitMeasure
+		, intItemUOMId = ItemUnitMeasure.intUnitMeasureId
+		, intItemUOMDecimalPlaces = ItemUnitMeasure.intDecimalPlaces
 		, strUnitType = ItemUnitMeasure.strUnitType
 		, SubLocation.strSubLocationName
 		, strStorageLocationName = StorageLocation.strName
@@ -35,6 +37,18 @@ SELECT	ReceiptItem.intInventoryReceiptId
 					THEN TransferView.strTransferNo
 				WHEN Receipt.strReceiptType = 'Direct'
 					THEN NULL
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					CASE	WHEN rtn.strReceiptType = 'Purchase Contract' 
+								THEN ContractView.strContractNumber							
+							WHEN rtn.strReceiptType = 'Purchase Order'
+								THEN POView.strPurchaseOrderNumber
+							WHEN rtn.strReceiptType = 'Transfer Order'
+								THEN TransferView.strTransferNo
+							WHEN rtn.strReceiptType = 'Direct'
+								THEN NULL
+							ELSE 
+								NULL 
+					END 
 				ELSE NULL
 				END
 			)
@@ -48,7 +62,10 @@ SELECT	ReceiptItem.intInventoryReceiptId
 
 				WHEN Receipt.intSourceType = 3 -- Transport
 					THEN LoadReceipt.strTransaction 
-					
+
+				WHEN Receipt.intSourceType = 4 -- Settle Storage
+					THEN ISNULL(vyuGRStorageSearchView.strStorageTicketNumber, '') 					
+
 				ELSE CAST(NULL AS NVARCHAR(50)) 
 				END
 			)
@@ -212,29 +229,63 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON TransactionCurrency.intCurrencyID = Receipt.intCurrencyId
 		LEFT JOIN tblSMTaxGroup SMTaxGroup
 			ON SMTaxGroup.intTaxGroupId = ReceiptItem.intTaxGroupId
+		OUTER APPLY (
+			SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
+					,r.strReceiptType
+			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+						ON r.intInventoryReceiptId = ri.intInventoryReceiptId				
+			WHERE	r.intInventoryReceiptId = Receipt.intSourceInventoryReceiptId
+					AND ri.intInventoryReceiptItemId = ReceiptItem.intSourceInventoryReceiptItemId
+					AND Receipt.strReceiptType = 'Inventory Return'
+		) rtn
+
 		-- Integrations with the other modules: 
 		-- 1. Purchase Order
 		LEFT JOIN vyuPODetails POView
 			ON POView.intPurchaseId = ReceiptItem.intOrderId 
 			AND intPurchaseDetailId = ReceiptItem.intLineNo
-			AND Receipt.strReceiptType = 'Purchase Order'
+			AND (
+				Receipt.strReceiptType = 'Purchase Order'
+				OR (
+					Receipt.strReceiptType = 'Inventory Return'
+					AND rtn.strReceiptType = 'Purchase Order'
+				)
+			)
 
 		-- 2. Contracts
 		LEFT JOIN vyuCTContractDetailView ContractView
 			ON ContractView.intContractDetailId = ReceiptItem.intLineNo
-			AND Receipt.strReceiptType = 'Purchase Contract'
+			AND (
+				Receipt.strReceiptType = 'Purchase Contract'
+				OR (
+					Receipt.strReceiptType = 'Inventory Return'
+					AND rtn.strReceiptType = 'Purchase Contract'
+				)
+			)
 
 		-- 3. Inventory Transfer
 		LEFT JOIN vyuICGetInventoryTransferDetail TransferView
 			ON TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
-			AND Receipt.strReceiptType = 'Transfer Order'
+			AND (
+				Receipt.strReceiptType = 'Transfer Order'
+				OR (
+					Receipt.strReceiptType = 'Inventory Return'
+					AND rtn.strReceiptType = 'Transfer Order'
+				)
+			)
 
 		-- 4. Logistics
 		LEFT JOIN vyuICLoadContainerReceiptContracts LogisticsView
 			ON LogisticsView.intLoadDetailId = ReceiptItem.intSourceId
 			AND intLoadContainerId = ReceiptItem.intContainerId
-			AND Receipt.strReceiptType = 'Purchase Contract'
 			AND Receipt.intSourceType = 2
+			AND (
+				Receipt.strReceiptType = 'Purchase Contract'
+				OR (
+					Receipt.strReceiptType = 'Inventory Return'
+					AND rtn.strReceiptType = 'Purchase Contract'
+				)
+			)
 
 		-- 5. Scale Tickets
 		LEFT JOIN tblSCTicket SCTicket
@@ -246,12 +297,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON LoadReceipt.intLoadReceiptId = ReceiptItem.intSourceId
 			AND Receipt.intSourceType = 3
 
-		-- 7. Inventory Return
-		OUTER APPLY (
-			SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
-			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-						ON r.intInventoryReceiptId = ri.intInventoryReceiptId				
-			WHERE	r.intInventoryReceiptId = Receipt.intSourceInventoryReceiptId
-					AND ri.intInventoryReceiptItemId = ReceiptItem.intSourceInventoryReceiptItemId
-					AND Receipt.strReceiptType = 'Inventory Return'
-		) rtn
+		-- 7. Grain > Settle Storage 
+		LEFT JOIN vyuGRStorageSearchView
+			ON vyuGRStorageSearchView.intCustomerStorageId = ReceiptItem.intSourceId
+				AND Receipt.intSourceType = 4

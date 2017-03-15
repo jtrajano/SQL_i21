@@ -36,7 +36,8 @@ RETURNS @returntable TABLE
     [dblCreditForeign]          NUMERIC (18, 6) NULL,
     [dblCreditReport]           NUMERIC (18, 6) NULL,
     [dblReportingRate]          NUMERIC (18, 6) NULL,
-    [dblForeignRate]            NUMERIC (18, 6) NULL
+    [dblForeignRate]            NUMERIC (18, 6) NULL,
+	[strRateType]				NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
 )
 AS
 BEGIN
@@ -116,7 +117,8 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	0
+		[dblForeignRate]				=	0,
+		[strRateType]				=	NULL
 	FROM	[dbo].tblAPPayment A 
 	INNER JOIN tblAPVendor C
 		ON A.intEntityVendorId = C.intEntityVendorId
@@ -157,7 +159,8 @@ BEGIN
 			[dblCreditForeign]				=	0,
 			[dblCreditReport]				=	0,
 			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
 			FROM [dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
 					ON A.intAccountId = GLAccnt.intAccountId
 				INNER JOIN tblAPVendor B
@@ -200,7 +203,8 @@ BEGIN
 			[dblCreditForeign]				=	0,
 			[dblCreditReport]				=	0,
 			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
 		FROM [dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -250,7 +254,8 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	0
+		[dblForeignRate]				=	0,
+		[strRateType]					=	NULL
 	FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
@@ -303,7 +308,8 @@ BEGIN
 			[dblCreditForeign]				=	0,
 			[dblCreditReport]				=	0,
 			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
@@ -357,7 +363,8 @@ BEGIN
 			[dblCreditForeign]				=	0,
 			[dblCreditReport]				=	0,
 			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
 		FROM [dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -409,7 +416,8 @@ BEGIN
 			[dblCreditForeign]				=	0,
 			[dblCreditReport]				=	0,
 			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
 		FROM [dbo].tblAPPayment A 
 				INNER JOIN tblAPVendor B
 					ON A.intEntityVendorId = B.intEntityVendorId

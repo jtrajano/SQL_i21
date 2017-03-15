@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspETTranslateRPToRecievePayment]
-	@StagingTable ETTranslateSDToInvoiceTable READONLY
+﻿CREATE PROCEDURE [uspETTranslateRPToRecievePayment]
+	@StagingTable ETTranslateRPToReceivePaymentTable READONLY
 	,@EntityUserId			INT
 	,@strAllErrorMessage	NVARCHAR(MAX) = '' OUTPUT	
 	
@@ -13,7 +13,7 @@ BEGIN
 	DECLARE @strCheckNumOrDesc						NVARCHAR(25)
 	DECLARE @strRecordType							NVARCHAR(2)
 	DECLARE	@strLocation							NVARCHAR(50)
-	DECLARE @strPaymentType							NVARCHAR(25)
+	DECLARE @strPaymentMethod						NVARCHAR(25)
 	
 	DECLARE @intCntIdUniqueInvoiceCustomerDate		INT
 	DECLARE @strErrorMessage						NVARCHAR(MAX) 
@@ -23,6 +23,7 @@ BEGIN
 	DECLARE @intLocationId							INT
 	DECLARE @intNewPaymentId						INT
 	DECLARE @strNewPaymentNumber					NVARCHAR(25)
+	DECLARE @intPaymentMethodId						INT
 
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
@@ -34,30 +35,35 @@ BEGIN
 		,strStatus					NVARCHAR(MAX)
 		,ysnSuccessful				BIT
 		,intInvoiceId				INT
+		,strRecordId                NVARCHAR(5)
 	)
 
 	SET @strAllErrorMessage = ''
 
 	IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpSDToInvoice')) 
-	BEGIN
-		DROP TABLE #tmpSDToInvoice
-	END
+		BEGIN
+			DROP TABLE #tmpSDToInvoice
+		END
+	
 	SELECT * INTO #tmpSDToInvoice 
 	FROM @StagingTable
+	WHERE strRecordType = 'C'
+
+	--SELECT * 	FROM #tmpSDToInvoice tmp--debug
 
 	IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpUniqueInvoiceList')) 
-	BEGIN
-		DROP TABLE #tmpUniqueInvoiceList
-	END
+		BEGIN
+			DROP TABLE #tmpUniqueInvoiceList
+		END
+	
 	--Get the unique list of Customer, Invoice Number and date
 	SELECT DISTINCT 
 		strCustomerNumber
 		,strInvoiceNumber
-		,dtmDate
+		,dtmPaymentDate
 		,intCntId = ROW_NUMBER() OVER (ORDER BY strCustomerNumber)
 	INTO #tmpUniqueInvoiceList
 	FROM #tmpSDToInvoice
-
 
 	---Loop through the unique customer invoice date
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUniqueInvoiceList) 
@@ -65,101 +71,72 @@ BEGIN
 		SELECT TOP 1
 			@strCustomerNumber = strCustomerNumber
 			,@strPaymentNumber = strInvoiceNumber
-			,@dtmPaymentDate = dtmDate
-			,@intCntIdUniqueInvoiceCustomerDate = intCntId
-		FROM #tmpUniqueInvoiceList
+			,@dtmPaymentDate = dtmPaymentDate
+			,@strPaymentMethod = (CASE LTRIM(RTRIM(strPaymentType)) WHEN  '1' THEN 'Cash' WHEN '2' THEN 'Check' WHEN '3'  THEN 'Credit Card'  ELSE '' END)
+			,@dblPaymentAmount = dblPaymentAmount
+			,@strLocation = strLocation
+		FROM @StagingTable
+			WHERE strCustomerNumber = (SELECT TOP 1 strCustomerNumber FROM #tmpUniqueInvoiceList)
+			AND strInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM #tmpUniqueInvoiceList)
+			AND dtmPaymentDate =  (SELECT TOP 1 dtmPaymentDate FROM #tmpUniqueInvoiceList)
+			AND strRecordType = 'C'
+	
+		----Get check number if exists
+		SELECT TOP 1 @strCheckNumOrDesc = strDescriptionCheckNum
+		FROM  @StagingTable 
+				WHERE strCustomerNumber = (SELECT TOP 1 strCustomerNumber FROM #tmpUniqueInvoiceList)
+			AND strInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM #tmpUniqueInvoiceList)
+			AND dtmPaymentDate =  (SELECT TOP 1 dtmPaymentDate FROM #tmpUniqueInvoiceList)
 		
-				
-		IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCustomerInvoiceDetail')) 
-		BEGIN
-			DROP TABLE #tmpCustomerInvoiceDetail
-		END
-
-		--Get the Details 
-		SELECT *
-		INTO #tmpCustomerInvoiceDetail
-		FROM  #tmpSDToInvoice
-		WHERE strCustomerNumber = @strCustomerNumber
-			AND strInvoiceNumber = @dtmPaymentDate
-			AND dtmDate = @dtmPaymentDate
-			AND strDetailType = 'D'
-
-		IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCustomerInvoiceTaxDetail')) 
-		BEGIN
-			DROP TABLE #tmpCustomerInvoiceTaxDetail
-		END
-
-		SELECT *
-		INTO #tmpCustomerInvoiceTaxDetail
-		FROM  #tmpSDToInvoice
-		WHERE strCustomerNumber = @strCustomerNumber
-			AND strInvoiceNumber = @dtmPaymentDate
-			AND dtmDate = @dtmPaymentDate
-			
-		BEGIN TRANSACTION
-		--Loop through the details 
-		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomerInvoiceDetail)
-		BEGIN
+			AND strRecordType = 'Z'
+	
 			SET @strErrorMessage = ''
-			--SET @ysnProcessNextAsHeader = 0
-			--Get the first Record and create Invoice
-			SELECT TOP 1 
-				@strCustomerNumber	 = strCustomerNumber
-				,@strPaymentNumber		  = strPaymentNumber
-				,@dtmPaymentDate		  = dtmDate
-				--@dblPaymentAmount	= strLocation
-				--@strCheckNumOrDesc	
-				--@strRecordType		
-				--@strLocation		
-				--@strPaymentType		
-			FROM #tmpCustomerInvoiceDetail
-			ORDER BY intLineItem ASC
 
-			--Get Customer Entity Id
-			SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)
-			--Get Location Id
-			SET @intLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @strLocation)
-		
-			---Insert/Create Payment Header 
-			IF(@ysnHeader = 1)
-			BEGIN
-				
-				EXEC [uspARCreateCustomerPayment]
-					--@EntityCustomerId          = @intCustomerEntityId
-					--,@InvoiceDate              = @dtmInvoiceDate
-					--,@CompanyLocationId        = @intLocationId
-					--,@EntityId                 = @EntityUserId
-					--,@NewInvoiceId             = @intNewInvoiceId OUTPUT
-					--,@ErrorMessage             = @strErrorMessage OUTPUT
-					--,@ItemId                   = @intItemId
-					--,@ItemQtyShipped           = @dblQuantity
-					--,@ItemPrice                = @dblPrice
-					--,@ItemSiteId               = @intSiteId
-					--,@TransactionType	       = @strTransactionType
-					--,@Type					   = 'Tank Delivery'
-					--,@TermId				   = @intTermCode
-					--,@ShipDate				   = @dtmInvoiceDate
-					--,@EntitySalespersonId	   = @intDriverEntityId		
-					--,@Comment				   = @strComment	
-					--,@ItemPercentFull		   = @dblPercentFullAfterDelivery
-					--,@ItemTaxGroupId		   = @intTaxGroupId	
-					--,@ItemDescription		   = @strItemDescription
-					--,@ItemUOMId				   = @intItemUOMId
-					--,@BOLNumber				   = @strInvoiceNumber
-					--,@ItemContractDetailId     = @intContractDetailId
-					--,@RaiseError			   = 0
-					--,@UseOriginIdAsInvoiceNumber = 1
-					--,@InvoiceOriginId         = @strInvoiceNumber
-
-				--GEt the created invoice number
-				SET @strNewPaymentNumber = (SELECT TOP 1 strRecordNumber FROM tblARPayment WHERE intPaymentId  = @intNewPaymentId) 
-				--SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARPaymentDetail WHERE intPaymentId = @intNewPaymentId)
+				------Get equivalent Ids---------
+				--Get Customer Entity Id
+				SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)
+				--Get Location Id
+				SET @intLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @strLocation)
+				--Get Payment Method Id
+				SET @intPaymentMethodId = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = @strPaymentMethod)
+					
+			BEGIN TRANSACTION
+			EXEC uspARCreateCustomerPayment
+					@EntityCustomerId	= @intCustomerEntityId	--INT
+					,@CompanyLocationId	= @intLocationId		--INT
+					,@DatePaid			= @dtmPaymentDate--DATETIME
+					,@AmountPaid		= @dblPaymentAmount--NUMERIC(18,6)	= 0.000000
+					,@PaymentMethodId	= @intPaymentMethodId--INT
+					,@PaymentInfo		= @strCheckNumOrDesc --NVARCHAR(50)	= NULL
+					,@EntityId			= @EntityUserId				--INT
+					,@ErrorMessage		= @strErrorMessage OUTPUT	--NVARCHAR(250)	= NULL			OUTPUT
+					,@NewPaymentId	= @intNewPaymentId OUTPUT		--INT				= NULL			OUTPUT 		
+					,@RaiseError = 0									--BIT				= 0
+					--,@Payment									--NUMERIC(18,6)	= 0.000000
+					--,@CurrencyId		--INT				= NULL
+					--,@AccountId			--INT				= NULL
+					--,@BankAccountId		--INT				= NULL
+					--,@InvoiceId									--INT				= NULL
+					--,@ApplytoBudget		--BIT				= 0
+					--,@ApplyOnAccount	--BIT				= 0
+					--,@Notes				--NVARCHAR(250)	= ''
+					--,@ApplyTermDiscount	--BIT				= 1
+					--,@Discount			--NUMERIC(18,6)	= 0.000000	
+					--,@Interest			--NUMERIC(18,6)	= 0.000000			
+					--,@InvoicePrepayment	--BIT				= 0
+					--,@WriteOffAccountId	--INT				= NULL
+					,@AllowPrepayment								= 1--BIT				= 0
+					--,@AllowOverpayment								--BIT				= 0
+			
+			--GEt the created invoice number
+			SET @strNewPaymentNumber = (SELECT TOP 1 strRecordNumber FROM tblARPayment WHERE intPaymentId  = @intNewPaymentId) 
+			--SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARPaymentDetail WHERE intPaymentId = @intNewPaymentId)
 			
 				
-				--Check if any error in creating invoice 
-				--Log Entry
-				LOGHEADERENTRY:
-				IF 	LTRIM(@strErrorMessage) != ''
+			--Check if any error in creating invoice 
+			--Log Entry
+			LOGHEADERENTRY:
+			IF 	LTRIM(@strErrorMessage) != ''
 				BEGIN		
 					ROLLBACK TRANSACTION
 					
@@ -174,6 +151,7 @@ BEGIN
 							,strStatus
 							,ysnSuccessful
 							,intInvoiceId				
+							,strRecordId
 					)
 					SELECT
 							strCustomerNumber = @strCustomerNumber		
@@ -182,18 +160,15 @@ BEGIN
 							,dtmDate = @dtmPaymentDate					
 							,intLineItem = 0--@intLineItem		
 							,strFileName = ''				
-							,strStatus = @strErrorMessage
+							,strStatus = 'Importing Failed'
 							,ysnSuccessful = 0
 							,intInvoiceId = @intNewPaymentId--@intNewInvoiceId
+							,strRecordId = @intNewPaymentId
 				END
-			END
-			
-			
-			
-			-- Check if there are more details left
-			IF((SELECT COUNT(1) FROM #tmpCustomerInvoiceDetail) = 1)
-			BEGIN
-				-- Insert the succes log to table 	
+
+			ELSE
+				BEGIN
+					-- Insert the succes log to table 	
 				INSERT INTO @ResultTableLog (
 						strCustomerNumber			
 						,strInvoiceNumber			
@@ -204,7 +179,9 @@ BEGIN
 						,strStatus
 						,ysnSuccessful
 						,intInvoiceId 
+						,strRecordId
 				)
+
 				SELECT
 						strCustomerNumber = @strCustomerNumber		
 						,strInvoiceNumber =	@strNewPaymentNumber		
@@ -212,30 +189,26 @@ BEGIN
 						,dtmDate = @dtmPaymentDate
 						,intLineItem = 0						
 						,strFileName = ''				
-						,strStatus = 'Successfully created ' + @strNewPaymentNumber
+						,strStatus = 'Successfully created '-- + @strNewPaymentNumber
 						,ysnSuccessful = 1
 						,intInvoiceId = @intNewPaymentId
-			END
+						,strRecordId = @intNewPaymentId
 
-			--Delete the processed detail list
-			--DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceId
+						--select * from @ResultTableLog--debug
+				END
 			
-			
-			--IF(@ysnProcessNextAsHeader = 0)
-			--BEGIN
-				SET @ysnHeader = 0
-			--END
+			COMMIT TRANSACTION
+
+			CONTINUELOOP:
+			--Delete processed record
+					DELETE FROM #tmpUniqueInvoiceList 
+			WHERE strCustomerNumber = @strCustomerNumber 
+			AND strInvoiceNumber = @strPaymentNumber
+			AND dtmPaymentDate = @dtmPaymentDate 
+
 		END
-		
-		COMMIT TRANSACTION
-		CONTINUELOOP:
-		--Delete processed record
-		DELETE FROM #tmpUniqueInvoiceList 
-		WHERE strCustomerNumber = @strCustomerNumber 
-			AND strInvoiceNumber = @strNewPaymentNumber
-			AND dtmDate = @dtmPaymentDate 
-	END
-
+			
 	SELECT * FROM @ResultTableLog
+
 END
 GO

@@ -11,6 +11,7 @@ SELECT
 		CASE WHEN Receipt.intSourceType = 1 THEN 'Scale'
 			WHEN Receipt.intSourceType = 2 THEN 'Inbound Shipment'
 			WHEN Receipt.intSourceType = 3 THEN 'Transport'
+			WHEN Receipt.intSourceType = 4 THEN 'Settle Storage'
 			WHEN Receipt.intSourceType = 0 THEN 'None'
 		END),
 	strOrderNumber = 
@@ -47,6 +48,8 @@ SELECT
 				THEN ISNULL(LogisticsView.strLoadNumber, '')
 			WHEN Receipt.intSourceType = 3 -- Transport
 				THEN LoadReceipt.strTransaction 
+			WHEN Receipt.intSourceType = 4 -- Settle Storage
+				THEN ISNULL(vyuGRStorageSearchView.strStorageTicketNumber, '') 
 			ELSE NULL
 			END
 		),
@@ -222,6 +225,9 @@ LEFT JOIN vyuPODetails POView
 LEFT JOIN vyuICGetInventoryTransferDetail TransferView
 	ON TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
 	AND Receipt.strReceiptType = 'Transfer Order'
+LEFT JOIN vyuGRStorageSearchView
+	ON vyuGRStorageSearchView.intCustomerStorageId = ReceiptItem.intSourceId
+	AND Receipt.intSourceType = 4
 OUTER APPLY (
 	SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
@@ -230,3 +236,5 @@ OUTER APPLY (
 			AND ri.intInventoryReceiptItemId = ReceiptItem.intSourceInventoryReceiptItemId
 			AND Receipt.strReceiptType = 'Inventory Return'
 ) rtn
+
+

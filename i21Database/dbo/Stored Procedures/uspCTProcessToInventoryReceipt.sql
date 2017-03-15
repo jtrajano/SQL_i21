@@ -158,6 +158,7 @@ AS
 		JOIN	tblSMCurrency			CY  ON	CY.intCurrencyID		=	CC.intCurrencyId
 
 		WHERE	CC.intContractDetailId	=	@intContractDetailId
+		AND		ISNULL(CC.ysnBasis,0) <> 1
 
 		IF NOT EXISTS(SELECT * FROM  @ReceiptStagingTable)
 		BEGIN

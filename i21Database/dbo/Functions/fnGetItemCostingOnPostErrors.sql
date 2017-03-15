@@ -129,7 +129,7 @@ RETURN (
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) + ISNULL(StockUOM.dblUnitReserved, 0) < 0
+					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) + ISNULL(StockUOM.dblUnitReserved, 0), 4) < 0
 							AND (							
 								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
 								OR Item.strStatus = 'Phased Out'
@@ -179,7 +179,7 @@ RETURN (
 								AND Lot.intItemUOMId = @intItemUOMId
 					WHERE	Item.intItemId = @intItemId
 							AND Lot.intLotId IS NOT NULL
-							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
+							AND ROUND(ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0), 4) < 0
 							AND (							
 								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
 								OR Item.strStatus = 'Phased Out'
@@ -229,7 +229,7 @@ RETURN (
 								AND Lot.intWeightUOMId = @intItemUOMId
 					WHERE	Item.intItemId = @intItemId
 							AND Lot.intLotId IS NOT NULL
-							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblWeight, 0) < 0
+							AND ROUND(ISNULL(@dblQty, 0) + ISNULL(Lot.dblWeight, 0), 4) < 0
 							AND (							
 								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
 								OR Item.strStatus = 'Phased Out'

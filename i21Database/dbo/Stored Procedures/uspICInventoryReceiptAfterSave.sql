@@ -10,7 +10,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
-
 	
 DECLARE @ReceiptType AS INT
 DECLARE @SourceType AS INT
@@ -28,6 +27,7 @@ DECLARE @SourceType_Transport AS INT = 3
 DECLARE @SourceType_SettleStorage AS INT = 4
 
 DECLARE @ErrMsg NVARCHAR(MAX)
+		,@intReturnValue AS INT 
 
 -- Initialize the variables
 BEGIN
@@ -54,56 +54,8 @@ BEGIN
 	END
 END
 
-IF @ForDelete = 1
+-- Create current snapshot of the Receipt Items 
 BEGIN 
-	-- Call the grain sp when deleting the receipt. 
-	EXEC uspGRReverseOnReceiptDelete @ReceiptId
-
-	IF @SourceType = @SourceType_SettleStorage
-	BEGIN
-		DECLARE @ItemId INT
-		DECLARE @SourceNumberId INT
-		DECLARE @Quantity DECIMAL(24, 10)
-
-		DECLARE curReceipt CURSOR LOCAL FAST_FORWARD
-		FOR
-		SELECT t.intItemId, t.intSourceNumberId, SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, dbo.fnGetItemStockUOM(t.intItemId), t.dblQuantity))
-		FROM tblICTransactionDetailLog t
-		WHERE t.intTransactionId = @ReceiptId
-			AND t.strTransactionType = 'Inventory Receipt'
-		GROUP BY t.intItemId, t.intSourceNumberId
-
-		OPEN curReceipt
-
-		FETCH NEXT FROM curReceipt INTO @ItemId, @SourceNumberId, @Quantity
-		WHILE @@FETCH_STATUS = 0
-		BEGIN
-			EXEC uspGRReverseSettleStorage @ItemId, @SourceNumberId, @Quantity, @UserId
-			FETCH NEXT FROM curReceipt INTO @ItemId, @SourceNumberId, @Quantity
-		END
-
-		CLOSE curReceipt
-		DEALLOCATE curReceipt
-
-	END
-	-- Call the quality sp when deleting the receipt.
-	EXEC uspQMInspectionDeleteResult @ReceiptId
-END 
-
--- Validate. 
-BEGIN		
-	-- Do not proceed if receipt type is NOT a 'Purchase Contract' 
-	IF	@ReceiptType <> @ReceiptType_PurchaseContract
-		GOTO _Exit;
-
-	-- Do not proceed if the source type is 'Inbound Shipment' or 'Scale'. 
-	-- Logistics (Inbound Shipment) and Scale (Scale Ticket) will be calling uspCTUpdateScheduleQuantity on their own. 
-	IF ISNULL(@SourceType, @SourceType_None) = @SourceType_InboundShipment OR ISNULL(@SourceType, @SourceType_None) = @SourceType_Scale
-		GOTO _Exit;
-END
-
--- Get the deleted, new, or modified data. 
-BEGIN
 	-- Create current snapshot of Receipt Items after Save
 	SELECT
 		ReceiptItem.intInventoryReceiptId,
@@ -122,160 +74,221 @@ BEGIN
 		intItemUOMId = ReceiptItem.intUnitMeasureId,
 		ReceiptItem.dblOpenReceive,
 		ReceiptItemSource.ysnLoad,
-		ReceiptItem.intLoadReceive
-	INTO #tmpReceiptItems
-	FROM tblICInventoryReceiptItem ReceiptItem
-		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-		LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+		ReceiptItem.intLoadReceive,
+		ReceiptItem.dblNet,
+		intSourceInventoryDetailId = ReceiptItem.intSourceInventoryReceiptItemId
+	INTO #tmpAfterSaveReceiptItems
+	FROM 
+		tblICInventoryReceiptItem ReceiptItem
+		LEFT JOIN tblICInventoryReceipt Receipt 
+			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource 
+			ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 	WHERE ReceiptItem.intInventoryReceiptId = @ReceiptId
+
 	-- Create snapshot of Receipt Items before Save
 	SELECT 
-		intInventoryReceiptId = intTransactionId,
-		intInventoryReceiptItemId = intTransactionDetailId,
-		intOrderType,
-		intOrderId = intOrderNumberId,
-		intSourceType,
-		intSourceId = intSourceNumberId,
-		intLineNo,
-		intItemId,
-		intItemUOMId,
-		dblOpenReceive = dblQuantity,
-		ysnLoad,
-		intLoadReceive
-	INTO #tmpLogReceiptItems
+		intInventoryReceiptId = intTransactionId
+		,intInventoryReceiptItemId = intTransactionDetailId
+		,intOrderType
+		,intOrderId = intOrderNumberId
+		,intSourceType
+		,intSourceId = intSourceNumberId
+		,intLineNo
+		,intItemId
+		,intItemUOMId
+		,dblOpenReceive = dblQuantity
+		,ysnLoad
+		,intLoadReceive
+		,dblNet
+		,intSourceInventoryDetailId
+	INTO #tmpBeforeSaveReceiptItems
 	FROM tblICTransactionDetailLog
-	WHERE intTransactionId = @ReceiptId
+	WHERE 
+		intTransactionId = @ReceiptId
 		AND strTransactionType = 'Inventory Receipt'
+END 
 
-	-- Create temporary table for processing records
-	DECLARE @tblToProcess TABLE
-	(
-		intKeyId					INT IDENTITY,
-		intInventoryReceiptItemId	INT,
-		intContractDetailId			INT,
-		intItemUOMId				INT,
-		dblQty						NUMERIC(12,4)	
+IF @ForDelete = 1
+BEGIN 
+	-- Call the grain sp when deleting the receipt. 
+	EXEC uspGRReverseOnReceiptDelete @ReceiptId
+	IF @@ERROR <> 0 GOTO _Exit 
+
+	IF @SourceType = @SourceType_SettleStorage
+	BEGIN
+		DECLARE @ItemId INT
+		DECLARE @SourceNumberId INT
+		DECLARE @Quantity DECIMAL(24, 10)
+
+		DECLARE curReceipt CURSOR LOCAL FAST_FORWARD
+		FOR
+		SELECT	t.intItemId
+				, t.intSourceNumberId
+				, SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, dbo.fnGetItemStockUOM(t.intItemId), t.dblQuantity))
+		FROM	tblICTransactionDetailLog t
+		WHERE	t.intTransactionId = @ReceiptId
+				AND t.strTransactionType = 'Inventory Receipt'
+		GROUP BY t.intItemId, t.intSourceNumberId
+
+		OPEN curReceipt
+
+		FETCH NEXT FROM curReceipt INTO @ItemId, @SourceNumberId, @Quantity
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			EXEC uspGRReverseSettleStorage @ItemId, @SourceNumberId, @Quantity, @UserId
+			IF @@ERROR <> 0 GOTO _Exit 
+			FETCH NEXT FROM curReceipt INTO @ItemId, @SourceNumberId, @Quantity
+		END
+
+		CLOSE curReceipt
+		DEALLOCATE curReceipt
+	END
+
+	-- Call the quality sp when deleting the receipt.
+	EXEC uspQMInspectionDeleteResult @ReceiptId
+	IF @@ERROR <> 0 GOTO _Exit 
+END 
+
+-- Call the integration with contracts. 
+-- Conditions: 
+-- 1. Do not proceed if receipt type is NOT a 'Purchase Contract' 
+-- 2. Do not proceed if the source type is 'Inbound Shipment' or 'Scale'. Logistics (Inbound Shipment) and Scale (Scale Ticket) will be calling uspCTUpdateScheduleQuantity on their own. 
+IF	@ReceiptType = @ReceiptType_PurchaseContract
+	AND (
+		ISNULL(@SourceType, @SourceType_None) NOT IN (@SourceType_InboundShipment, @SourceType_Scale)
 	)
+BEGIN 
+	-- Get the deleted, new, or modified data. 
+	BEGIN
+		-- Create temporary table for processing records
+		DECLARE @tblToProcess TABLE
+		(
+			intKeyId					INT IDENTITY,
+			intInventoryReceiptItemId	INT,
+			intContractDetailId			INT,
+			intItemUOMId				INT,
+			dblQty						NUMERIC(12,4)	
+		)
 
-	INSERT INTO @tblToProcess(
-		intInventoryReceiptItemId,
-		intContractDetailId,
-		intItemUOMId,
-		dblQty)
-
-	-- Changed Quantity/UOM
-	SELECT 
-		currentSnapshot.intInventoryReceiptItemId,
-		currentSnapshot.intLineNo,
-		currentSnapshot.intItemUOMId,
-		CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END))
-			ELSE currentSnapshot.intLoadReceive END 
-	FROM #tmpReceiptItems currentSnapshot
-	INNER JOIN #tmpLogReceiptItems previousSnapshot
-		ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
-		AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
-	INNER JOIN tblCTContractDetail ContractDetail
-		ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
-	WHERE
-		currentSnapshot.intLineNo IS NOT NULL
-		AND currentSnapshot.intLineNo = previousSnapshot.intLineNo
-		AND currentSnapshot.intItemId = previousSnapshot.intItemId		
-		AND (currentSnapshot.intItemUOMId <> previousSnapshot.intItemUOMId OR currentSnapshot.dblOpenReceive <> previousSnapshot.dblOpenReceive)
-
-	UNION ALL 
+		INSERT INTO @tblToProcess(
+			intInventoryReceiptItemId,
+			intContractDetailId,
+			intItemUOMId,
+			dblQty
+		)
+		-- Changed Quantity/UOM
+		SELECT 
+			currentSnapshot.intInventoryReceiptItemId,
+			currentSnapshot.intLineNo,
+			currentSnapshot.intItemUOMId,
+			CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END))
+				ELSE currentSnapshot.intLoadReceive END 
+		FROM 
+			#tmpAfterSaveReceiptItems currentSnapshot
+			INNER JOIN #tmpBeforeSaveReceiptItems previousSnapshot
+				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
+				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
+			INNER JOIN tblCTContractDetail ContractDetail
+				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
+		WHERE
+			currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intLineNo = previousSnapshot.intLineNo
+			AND currentSnapshot.intItemId = previousSnapshot.intItemId		
+			AND (currentSnapshot.intItemUOMId <> previousSnapshot.intItemUOMId OR currentSnapshot.dblOpenReceive <> previousSnapshot.dblOpenReceive)		
 		
-	--New Contract Selected
-	SELECT
-		currentSnapshot.intInventoryReceiptItemId
-		,currentSnapshot.intLineNo
-		,currentSnapshot.intItemUOMId
-		,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblOpenReceive)
-			ELSE currentSnapshot.intLoadReceive END
-	FROM #tmpReceiptItems currentSnapshot
-	INNER JOIN #tmpLogReceiptItems previousSnapshot
-		ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
-		AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
-	INNER JOIN tblCTContractDetail ContractDetail
-		ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
-	WHERE
-		currentSnapshot.intLineNo IS NOT NULL
-		AND currentSnapshot.intLineNo <> previousSnapshot.intLineNo		
-		AND currentSnapshot.intItemId = previousSnapshot.intItemId		
-		
-	UNION ALL
+		--New Contract Selected
+		UNION ALL 
+		SELECT
+			currentSnapshot.intInventoryReceiptItemId
+			,currentSnapshot.intLineNo
+			,currentSnapshot.intItemUOMId
+			,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblOpenReceive)
+				ELSE currentSnapshot.intLoadReceive END
+		FROM 
+			#tmpAfterSaveReceiptItems currentSnapshot
+			INNER JOIN #tmpBeforeSaveReceiptItems previousSnapshot
+				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
+				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
+			INNER JOIN tblCTContractDetail ContractDetail
+				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
+		WHERE
+			currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intLineNo <> previousSnapshot.intLineNo		
+			AND currentSnapshot.intItemId = previousSnapshot.intItemId		
 
-	--Replaced Contract
-	SELECT
-		currentSnapshot.intInventoryReceiptItemId
-		,previousSnapshot.intLineNo
-		,previousSnapshot.intItemUOMId
-		,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
-			ELSE previousSnapshot.intLoadReceive END
-	FROM #tmpReceiptItems currentSnapshot
-	INNER JOIN #tmpLogReceiptItems previousSnapshot
-		ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
-		AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
-	INNER JOIN tblCTContractDetail ContractDetail
-		ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
-	WHERE
-		currentSnapshot.intLineNo IS NOT NULL
-		AND currentSnapshot.intLineNo <> previousSnapshot.intLineNo
-		AND currentSnapshot.intItemId = previousSnapshot.intItemId
+		--Replaced Contract
+		UNION ALL
+		SELECT
+			currentSnapshot.intInventoryReceiptItemId
+			,previousSnapshot.intLineNo
+			,previousSnapshot.intItemUOMId
+			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+				ELSE previousSnapshot.intLoadReceive END
+		FROM 
+			#tmpAfterSaveReceiptItems currentSnapshot
+			INNER JOIN #tmpBeforeSaveReceiptItems previousSnapshot
+				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
+				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
+			INNER JOIN tblCTContractDetail ContractDetail
+				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
+		WHERE
+			currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intLineNo <> previousSnapshot.intLineNo
+			AND currentSnapshot.intItemId = previousSnapshot.intItemId
+		
+		--Removed Contract
+		UNION ALL
+		SELECT
+			currentSnapshot.intInventoryReceiptItemId
+			,previousSnapshot.intLineNo
+			,previousSnapshot.intItemUOMId
+			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+				ELSE previousSnapshot.intLoadReceive END
+		FROM 
+			#tmpAfterSaveReceiptItems currentSnapshot
+			INNER JOIN #tmpBeforeSaveReceiptItems previousSnapshot
+				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
+				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
+			INNER JOIN tblCTContractDetail ContractDetail
+				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
+		WHERE
+			currentSnapshot.intLineNo IS NULL
+			AND previousSnapshot.intLineNo IS NOT NULL
+		
+		--Deleted Item
+		UNION ALL	
+		SELECT
+			previousSnapshot.intInventoryReceiptItemId
+			,previousSnapshot.intLineNo
+			,previousSnapshot.intItemUOMId
+			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+				ELSE previousSnapshot.intLoadReceive END
+		FROM 
+			#tmpBeforeSaveReceiptItems previousSnapshot
+			INNER JOIN tblCTContractDetail ContractDetail
+				ON ContractDetail.intContractDetailId = previousSnapshot.intLineNo
+		WHERE
+			previousSnapshot.intLineNo IS NOT NULL
+			AND previousSnapshot.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM #tmpAfterSaveReceiptItems)
 
-	UNION ALL
-		
-	--Removed Contract
-	SELECT
-		currentSnapshot.intInventoryReceiptItemId
-		,previousSnapshot.intLineNo
-		,previousSnapshot.intItemUOMId
-		,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
-			ELSE previousSnapshot.intLoadReceive END
-	FROM #tmpReceiptItems currentSnapshot
-	INNER JOIN #tmpLogReceiptItems previousSnapshot
-		ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
-		AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
-	INNER JOIN tblCTContractDetail ContractDetail
-		ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
-	WHERE
-		currentSnapshot.intLineNo IS NULL
-		AND previousSnapshot.intLineNo IS NOT NULL
-		
-	UNION ALL	
+		--Added Item
+		UNION ALL
+		SELECT
+			currentSnapshot.intInventoryReceiptItemId
+			,currentSnapshot.intLineNo
+			,currentSnapshot.intItemUOMId
+			,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, currentSnapshot.dblOpenReceive)
+				ELSE currentSnapshot.intLoadReceive END
+		FROM 
+			#tmpAfterSaveReceiptItems currentSnapshot
+			INNER JOIN tblCTContractDetail ContractDetail
+				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
+		WHERE
+			currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM #tmpBeforeSaveReceiptItems)
+	END
 
-	--Deleted Item
-	SELECT
-		previousSnapshot.intInventoryReceiptItemId
-		,previousSnapshot.intLineNo
-		,previousSnapshot.intItemUOMId
-		,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
-			ELSE previousSnapshot.intLoadReceive END
-	FROM #tmpLogReceiptItems previousSnapshot
-	INNER JOIN tblCTContractDetail ContractDetail
-		ON ContractDetail.intContractDetailId = previousSnapshot.intLineNo
-	WHERE
-		previousSnapshot.intLineNo IS NOT NULL
-		AND previousSnapshot.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM #tmpReceiptItems)
-		
-	UNION ALL
-		
-	--Added Item
-	SELECT
-		currentSnapshot.intInventoryReceiptItemId
-		,currentSnapshot.intLineNo
-		,currentSnapshot.intItemUOMId
-		,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, currentSnapshot.dblOpenReceive)
-			ELSE currentSnapshot.intLoadReceive END
-	FROM #tmpReceiptItems currentSnapshot
-	INNER JOIN tblCTContractDetail ContractDetail
-		ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
-	WHERE
-		currentSnapshot.intLineNo IS NOT NULL
-		AND currentSnapshot.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM #tmpLogReceiptItems)
-END
-
-BEGIN TRY
-	-- Call the integration with contracts. 
 	BEGIN 
 		-- Iterate and process records
 		DECLARE @Id INT = NULL,
@@ -312,6 +325,8 @@ BEGIN TRY
 					@intExternalId			=	@intInventoryReceiptItemId,
 					@strScreenName			=	'Inventory Receipt'
 
+			IF @@ERROR <> 0 GOTO _Exit
+
 			-- Attempt to fetch the next row from cursor. 
 			FETCH NEXT FROM loopItemsForContractScheduleQuantity INTO 
 				@intContractDetailId
@@ -324,19 +339,43 @@ BEGIN TRY
 
 		CLOSE loopItemsForContractScheduleQuantity;
 		DEALLOCATE loopItemsForContractScheduleQuantity;
-
-		DROP TABLE #tmpLogReceiptItems
-		DROP TABLE #tmpReceiptItems
 	END
-END TRY
-BEGIN CATCH
-	SET @ErrMsg = ERROR_MESSAGE()  
-	RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')  
-END CATCH
+END 
 
-_Exit: 
+-- If it is an inventory return, update the returned qty & net of the IR transaction.
+IF @ReceiptType = @ReceiptType_InventoryReturn
+BEGIN 
+	UPDATE	ri
+	SET		dblQtyReturned = ISNULL(ri.dblQtyReturned, 0) - beforeSave.dblOpenReceive
+			,dblNetReturned = ISNULL(ri.dblNetReturned, 0) - beforeSave.dblNet
+	FROM	tblICInventoryReceiptItem ri 
+			INNER JOIN #tmpBeforeSaveReceiptItems beforeSave
+				ON ri.intInventoryReceiptItemId = beforeSave.intSourceInventoryDetailId
+
+	UPDATE	ri
+	SET		dblQtyReturned = ISNULL(ri.dblQtyReturned, 0) + afterSave.dblOpenReceive
+			,dblNetReturned = ISNULL(ri.dblNetReturned, 0) + afterSave.dblNet
+	FROM	tblICInventoryReceiptItem ri 
+			INNER JOIN #tmpAfterSaveReceiptItems afterSave
+				ON ri.intInventoryReceiptItemId = afterSave.intSourceInventoryDetailId
+
+	-- Validate for Over-Return.
+	BEGIN 
+		-- Validate for over-return 
+		EXEC @intReturnValue = uspICValidateReceiptForReturn
+			@intReceiptId = NULL
+			,@intReturnId = @ReceiptId
+
+		IF @intReturnValue < 0 GOTO _Exit 
+	END 
+END 
 
 -- Delete the data snapshot. 
 DELETE	FROM tblICTransactionDetailLog 
 WHERE	strTransactionType = 'Inventory Receipt' 
 		AND intTransactionId = @ReceiptId
+
+_Exit: 
+
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBeforeSaveReceiptItems')) DROP TABLE #tmpBeforeSaveReceiptItems
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAfterSaveReceiptItems')) DROP TABLE #tmpAfterSaveReceiptItems

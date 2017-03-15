@@ -64,9 +64,6 @@ AS
 			ON F.intCustomerID = K.intCustomerID 
 		LEFT JOIN tblEMEntity L
 			ON K.intCustomerNumber = L.intEntityId
-		OUTER APPLY (
-			SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-			WHERE intSiteId = F.intSiteID
-				AND intCurrentSeasonYear = intSeasonYear
-		)HH
+		LEFT JOIN vyuTMSiteDeliveryHistoryTotal HH
+			ON F.intSiteID = HH.intSiteId AND HH.intCurrentSeasonYear = HH.intSeasonYear
 GO

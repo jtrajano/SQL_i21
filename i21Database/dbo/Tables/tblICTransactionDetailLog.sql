@@ -14,6 +14,8 @@
     [dblQuantity] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
 	[ysnLoad] BIT NULL DEFAULT((0)),
 	[intLoadReceive] INT NULL DEFAULT ((0)),
+	[dblNet] NUMERIC(38, 20) NULL DEFAULT ((0)), 
+	[intSourceInventoryDetailId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICTransactionDetailLog] PRIMARY KEY ([intTransactionDetailLogId]) 
 )

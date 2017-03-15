@@ -50,7 +50,9 @@ FROM (
 		intCent,
 		intCurrencyId,
 		strCostCurrency,
-		ysnSubCurrency
+		ysnSubCurrency,
+		strTerm,
+		intTermID
 	FROM (
 		SELECT 
 			 A.intBillId
@@ -94,6 +96,8 @@ FROM (
 			,A.intCurrencyId
 			,A.strCostCurrency
 			,A.ysnSubCurrency
+			,A.strTerm
+			,A.intTermID
 		FROM vyuAPClaimsDetails A
 	) tmpClaim
 	GROUP BY dblCost,
@@ -130,7 +134,9 @@ FROM (
 		strDescription,
 		ysnSubCurrency,
 		intCent,
-		strCostCurrency
+		strCostCurrency,
+		strTerm,
+		intTermID
 ) Claim
 WHERE dblQtyBillCreated = dblContractItemQty --make sure we fully billed the contract item
 AND dblWeightLoss > dblFranchiseWeight -- Make sure the weight loss is greater then the tolerance

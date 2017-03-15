@@ -12,7 +12,9 @@ BEGIN TRY
 		    @BrokerName nvarchar(100),
 			@BrokerAccount nvarchar(100)
 
-	SELECT @intCurrencyId = intCurrencyId,@BrokerAccount=strAccountNumber,@BrokerName=strName FROM tblRKMatchFuturesPSHeader h
+	SELECT TOP 1 @strUserName=strExternalERPId from tblEMEntity where strName=@strUserName
+
+	SELECT @intCurrencyId = intCurrencyId,@BrokerAccount=strClearingAccountNumber,@BrokerName=strName FROM tblRKMatchFuturesPSHeader h
 	JOIN tblRKFutureMarket fm on h.intFutureMarketId=fm.intFutureMarketId 
 	JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=h.intBrokerageAccountId
 	join tblEMEntity e on h.intEntityId=e.intEntityId

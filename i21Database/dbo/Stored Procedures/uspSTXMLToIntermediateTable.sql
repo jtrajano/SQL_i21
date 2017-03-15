@@ -6,9 +6,12 @@
 AS
 BEGIN
 
-
-
 	DECLARE @XML XML --,  @strXML nvarchar(max)
+
+	--START For passing xml string to uspSTCheckout stored proc
+	Declare @getStrXML nvarchar(MAX)
+	SET @getStrXML = @strXML
+	--END
 
 	--SET @XML = CAST(@XML1 as xml)
 
@@ -293,7 +296,7 @@ BEGIN
 	SET @SQL = @SQL + '
 	 EXEC sp_xml_removedocument @DocumentID  
 			SELECT * FROM #tempCheckoutInsert
-		EXEC ' + @strSPName + ' ' + CAST(@intCheckoutId as nvarchar(20))  + '
+		EXEC ' + @strSPName + ' ' + CAST(@intCheckoutId as nvarchar(20))  + ', ' + '''' + @getStrXML + '''' + '
 		DROP TABLE #tempCheckoutInsert
 	'
 

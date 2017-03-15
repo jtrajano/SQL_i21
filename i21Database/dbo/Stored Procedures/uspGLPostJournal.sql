@@ -229,23 +229,18 @@ ELSE
 		DELETE FROM tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intEntityId;
 		
 		
-		WITH Accounts 
-		AS 
-		(
-			SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup]
-			FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupId = B.intAccountGroupId
-		)
-		INSERT INTO tblGLPostRecap (
+	
+		INSERT INTO @GLEntries (
 			 [strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]
-			,[strAccountId]
-			,[strAccountGroup]
 			,[strDescription]
 			,[strReference]	
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[dtmDate]
@@ -265,17 +260,13 @@ ELSE
 			 [strTransactionId]		= B.[strJournalId]
 			,[intTransactionId]		= B.[intJournalId]
 			,[intAccountId]			= A.[intAccountId]
-			,[strAccountId]			= (SELECT [strAccountId] FROM Accounts WHERE [intAccountId] = A.[intAccountId])--AccountGroup.strAccountId --  
-			,[strAccountGroup]		= (SELECT [strAccountGroup] FROM Accounts WHERE [intAccountId] = A.[intAccountId])--AccountGroup.strAccountGroup --
 			,[strDescription]		= A.[strDescription]
 			,[strReference]			= A.[strReference]
 			,[dtmTransactionDate]	= A.[dtmDate]
-			,[dblDebit]				= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
-											WHEN [dblDebit] < 0 THEN 0
-											ELSE [dblDebit] END 
-			,[dblCredit]			= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
-											WHEN [dblCredit] < 0 THEN 0
-											ELSE [dblCredit] END	
+			,[dblDebit]				
+			,[dblCredit]			
+			,[dblDebitForeign]		
+			,[dblCreditForeign]		
 			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)
 			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0)
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
@@ -296,54 +287,11 @@ ELSE
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 
-	IF((SELECT COUNT(*) FROM @tmpValidJournals) > 1)
-		BEGIN
-		
-			--SUMMARY GROUP
-			INSERT INTO tblGLPostRecap (
-				 [strTransactionId]
-				,[intTransactionId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[dtmDate]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]				
-				,[strBatchId]
-				,[strCode]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]				
-			)
-			SELECT 
-				 [strTransactionId]
-				,[intTransactionId]		
-				,SUM([dblDebit])
-				,SUM([dblCredit])
-				,SUM([dblDebitUnit])
-				,SUM([dblCreditUnit])
-				,[dtmDate]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[ysnIsUnposted]
-				,[intUserId]	
-				,[intEntityId]					
-				,[strBatchId]	
-				,[strCode]		
-				,[strTransactionType]
-				,[strTransactionForm]		
-				,[strModuleName]				
-			FROM [dbo].tblGLPostRecap A
-			WHERE A.[strBatchId] = @strBatchId and A.[intEntityId] = @intEntityId
-			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[intEntityId],[strBatchId],[strCode],[strTransactionForm],[strTransactionType],[strModuleName]
+		EXEC dbo.uspGLPostRecap 
+			@GLEntries
+			,@intEntityId
 
-			IF @@ERROR <> 0	GOTO Post_Rollback;
-					
-		END
+	
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 

@@ -36,6 +36,7 @@ BEGIN
 				WHERE intSiteID = @intSiteId 
 					AND dtmLastDeliveryDate IS NOT NULL 
 					AND intGlobalJulianCalendarId IS NOT NULL
+					AND intFillMethodId = (SELECT TOP 1 intFillMethodId FROM tblTMFillMethod WHERE strFillMethod = 'Julian Calendar')
 					AND ysnActive = 1)
 	BEGIN
 		SELECT TOP 1

@@ -31,6 +31,7 @@ BEGIN TRY
 			, '' AS 'strCompanyAddress'
 			, '' AS 'strParentLotNumber'
 			, '' AS 'strCustomerName'
+			, '' AS 'strShipFromLocation'
 		RETURN
 	END
 
@@ -83,7 +84,7 @@ BEGIN TRY
 		FROM (
 			SELECT Shipment.intInventoryShipmentId
 				,Shipment.strShipmentNumber
-				,strShipFromAddress = Shipment.strShipFromLocation + ' ' + Shipment.strShipFromAddress 
+				,strShipFromAddress = Shipment.strShipFromAddress 
 				,strShipToAddress = Shipment.strShipToLocation + ' ' + Shipment.strShipToAddress
 				,Shipment.strBOLNumber
 				,ShipmentItem.strOrderNumber
@@ -105,6 +106,7 @@ BEGIN TRY
 				,Shipment.strCompanyAddress
 				,ParentLot.strParentLotNumber
 				,Shipment.strCustomerName
+				,strShipFromLocation = Shipment.strShipFromLocation
 			FROM vyuICGetInventoryShipment Shipment
 			LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId

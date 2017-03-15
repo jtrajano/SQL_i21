@@ -53,7 +53,7 @@ SELECT
 	,@Type						= 'Standard'
 	,@EntityCustomerId			= ICIS.[intEntityCustomerId]
 	,@CompanyLocationId			= ICIS.[intShipFromLocationId]	
-	,@CurrencyId				= ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))	
+	,@CurrencyId				= ISNULL( ICIS.intCurrencyId, ISNULL((SELECT TOP 1 intCurrencyId FROM vyuARShippedItems WHERE intInventoryShipmentId = @ShipmentId AND intInventoryShipmentChargeId IS NOT NULL AND intCurrencyId IS nOT NULL),ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))))
 	,@SourceId					= @ShipmentId
 	,@PeriodsToAccrue			= 1
 	,@Date						= @DateOnly
@@ -197,6 +197,9 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]
 	,[intSubCurrencyId] 
 	,[dblSubCurrencyRate] 
 	)
@@ -306,6 +309,9 @@ SELECT
 	,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
 	,[intDestinationGradeId]				= ARSI.[intDestinationGradeId]
 	,[intDestinationWeightId]				= ARSI.[intDestinationWeightId]
+	,[intCurrencyExchangeRateTypeId]		= ARSI.[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
 FROM
@@ -422,6 +428,9 @@ SELECT
 	,[intStorageScheduleTypeId]				= SOD.intStorageScheduleTypeId
 	,[intDestinationGradeId]				= NULL
 	,[intDestinationWeightId]				= NULL
+	,[intCurrencyExchangeRateTypeId]		= SOD.[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]			= SOD.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]				= SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
 FROM 

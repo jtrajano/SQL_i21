@@ -87,21 +87,12 @@ BEGIN
 		ON A.intLocationId = D.intCompanyLocationId
 	LEFT JOIN tblTMClock E
 		ON A.intClockID = E.intClockID
-	OUTER APPLY (
-		SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-		WHERE intSiteId = A.intSiteID
-			AND intCurrentSeasonYear = intSeasonYear
-	)H
-	OUTER APPLY (
-		SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-		WHERE intSiteId = A.intSiteID
-			AND (intCurrentSeasonYear - 1) = intSeasonYear
-	)I
-	OUTER APPLY (
-		SELECT TOP 1 dblTotalGallons = SUM(dblTotalGallons) FROM vyuTMSiteDeliveryHistoryTotal 
-		WHERE intSiteId = A.intSiteID
-			AND (intCurrentSeasonYear - 2) = intSeasonYear
-	)J
+	LEFT JOIN vyuTMSiteDeliveryHistoryTotal H
+		ON A.intSiteID = H.intSiteId AND H.intCurrentSeasonYear = H.intSeasonYear
+	LEFT JOIN vyuTMSiteDeliveryHistoryTotal I
+		ON A.intSiteID = I.intSiteId AND (I.intCurrentSeasonYear - 1) = I.intSeasonYear
+	LEFT JOIN vyuTMSiteDeliveryHistoryTotal J
+		ON A.intSiteID = J.intSiteId AND (J.intCurrentSeasonYear - 2) = J.intSeasonYear
 
 	IF OBJECT_ID('tempdb..#tmpStage2') IS NOT NULL 
 	BEGIN DROP TABLE #tmpStage2 END
@@ -114,7 +105,7 @@ BEGIN
 								,A.intEntityCustomerId	--@CustomerId	
 								,A.intLocationId	--@LocationId		
 								,NULL	--@ItemUOMId
-								,NULL	--@CurrencyId		 
+								,(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 								,DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)	 --@TransactionDate	
 								,A.dblRequiredQuantity	--@Quantity			
 								,NULL --@ContractHeaderId		
@@ -131,7 +122,7 @@ BEGIN
 								,NULL --@ShipToLocationId  
 								,NULL --@VendorLocationId
 								,NULL --@InvoiceType
-								,0	  --@GetAllAvailablePricing
+								,0	  --@GetAllAvailablePricing								
 								)
 						ELSE
 							B.dblPrice

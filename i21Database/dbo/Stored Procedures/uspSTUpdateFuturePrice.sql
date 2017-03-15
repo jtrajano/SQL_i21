@@ -66,7 +66,7 @@ BEGIN
 		)
 		select adj1.intItemUOMId, adj1.dblFactor, adj1.dblPrice,adj1.dblLastCost,
 		adj1.dtmSalesStartDate,adj1.dtmSalesEndDate,
-		adj1.intCompanyLocationId,adj1.intVendorId,adj1.intCategoryId,adj1.intFamilyId,
+		adj1.intCompanyLocationId,adj1.intEntityId,adj1.intCategoryId,adj1.intFamilyId,
 		adj1.intClassId,adj1.strRegion,adj1.strDistrict,adj1.strPriceType, 
 		adj1.strPriceMethod, adj1.intRetailPriceAdjustmentDetailId
 		from tblSTRetailPriceAdjustmentDetail adj1 inner join tblSTRetailPriceAdjustment adj2

@@ -31,6 +31,7 @@
     [dblMarketFuturesResult] NUMERIC(24, 6) NULL,
     [dblResultCash] NUMERIC(24, 6) NULL,    
 	[intContractHeaderId] int null, 
+    [dtmPlannedAvailabilityDate] DATETIME NULL, 
     CONSTRAINT [PK_tblRKM2MInquiryTransaction_intM2MInquiryTransactionId] PRIMARY KEY (intM2MInquiryTransactionId),
 	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblRKM2MInquiry_intM2MInquiryId] FOREIGN KEY([intM2MInquiryId])REFERENCES [dbo].[tblRKM2MInquiry] (intM2MInquiryId) ON DELETE CASCADE,  
 	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY(intFutureMarketId)REFERENCES [dbo].[tblRKFutureMarket] (intFutureMarketId),

@@ -70,7 +70,7 @@ AS
 				,0 as intConcurrencyId,
 				i.strMarketValuation
 			FROM tblICItemStock iis		
-			JOIN tblICItem i on i.intItemId=iis.intItemId and strLotTracking = 'No'
+			JOIN tblICItem i on i.intItemId=iis.intItemId 
 			LEFT join tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId
 			LEFT JOIN vyuCTContractDetailView cd on iis.intItemId=cd.intItemId  and cd.intContractStatusId <> 3
 			LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
@@ -79,4 +79,5 @@ AS
 			LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 			LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 			WHERE LEFT(strPricingType,2) <> 'DP' and (iis.dblUnitOnHand > 0 or iis.dblUnitStorage>0) and strContractType <> 'Sale'
+			   and i.strLotTracking = case when (select top 1 strRiskView from tblRKCompanyPreference) = 'Processor' then i.strLotTracking else 'No' end
 

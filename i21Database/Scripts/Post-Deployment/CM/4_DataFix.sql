@@ -225,4 +225,15 @@ BEGIN
 	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Encrypt tblCMBankAccount.strMICRRoutingNo','1')
 END	
 
+
+--This will fix previous ACH transaction to set intBankFileAuditId = 0 in preparation to the new approach. This is related to this jira key CM-1457
+IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Previous ACH transactions set intBankFileAuditId = 0')
+BEGIN
+
+	UPDATE tblCMBankTransaction SET intBankFileAuditId = 0 WHERE intBankTransactionTypeId IN (22,23) AND dtmCheckPrinted IS NOT NULL
+
+	--Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Previous ACH transactions set intBankFileAuditId = 0','1')
+END	
+
 print('/*******************  END Cash Management Data Fixess *******************/')

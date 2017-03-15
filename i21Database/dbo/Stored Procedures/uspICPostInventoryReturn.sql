@@ -3,6 +3,7 @@
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
 	,@intEntityUserSecurityId AS INT = NULL 
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -36,8 +37,7 @@ DECLARE @INVENTORY_RETURN_TYPE AS INT = 42
 		,@RECEIPT_TYPE_INVENTORY_RETURN AS NVARCHAR(50) = 'Inventory Return'
 
 -- Posting variables
-DECLARE @strBatchId AS NVARCHAR(40) 
-		,@strItemNo AS NVARCHAR(50)
+DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT
 		,@ysnAllowBlankGLEntries AS BIT = 1
 
@@ -241,8 +241,164 @@ BEGIN
 	END 
 END
 
--- Get the next batch number
+-- Validations related to lot numbers
 BEGIN 
+	DECLARE @strUnitMeasure AS NVARCHAR(50)
+	DECLARE @OpenReceiveQty AS NUMERIC(38,20)
+	DECLARE @LotQty AS NUMERIC(38,20)
+	DECLARE @OpenReceiveQtyInItemUOM AS NUMERIC(38,20)
+	DECLARE @LotQtyInItemUOM AS NUMERIC(38,20)
+	DECLARE @ReceiptItemNet  AS NUMERIC(38,20)
+
+	DECLARE @CleanWgtCount AS INT = 0
+	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
+	DECLARE @FormattedLotQty AS NVARCHAR(50)
+	DECLARE @FormattedDifference AS NVARCHAR(50)
+	DECLARE @FormattedReceiptItemNet AS NVARCHAR(50)
+
+	-- Check if the unit quantities on the UOM table are valid. 
+	BEGIN 
+		SELECT	TOP 1 
+				@strItemNo = Item.strItemNo
+				,@intItemId = Item.intItemId
+				,@strUnitMeasure = UOM.strUnitMeasure
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				INNER JOIN dbo.tblICItem Item
+					ON ReceiptItem.intItemId = Item.intItemId
+				INNER JOIN dbo.tblICItemUOM ItemUOM
+					ON ItemUOM.intItemId = ReceiptItem.intItemId
+				INNER JOIN dbo.tblICUnitMeasure UOM
+					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+		WHERE	ISNULL(ItemUOM.dblUnitQty, 0) <= 0
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			IF ISNULL(@strItemNo, '') = '' 
+				SET @strItemNo = 'an item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
+
+			-- 'Please correct the unit qty in UOM {UOM} on {Item}.'
+			RAISERROR(80017, 11, 1, @strUnitMeasure, @strItemNo) 
+			RETURN -1; 			 
+		END 
+	END 
+		
+	-- Check if the Qty to Return matches with the total Lot Qty. 
+	SET @strItemNo = NULL 
+	SET @intItemId = NULL 
+
+	SELECT	TOP 1 
+			@strItemNo					= Item.strItemNo
+			,@intItemId					= Item.intItemId
+			,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
+			,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
+			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
+			,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblOpenReceive
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem Item
+				ON Item.intItemId = ReceiptItem.intItemId
+			LEFT JOIN (
+				SELECT  AggregrateLot.intInventoryReceiptItemId
+						,TotalLotQtyInItemUOM = SUM(
+							dbo.fnCalculateQtyBetweenUOM(
+								ISNULL(AggregrateLot.intItemUnitMeasureId, tblICInventoryReceiptItem.intUnitMeasureId)
+								,tblICInventoryReceiptItem.intUnitMeasureId
+								,AggregrateLot.dblQuantity
+							)
+						)
+						,TotalLotQty = SUM(ISNULL(AggregrateLot.dblQuantity, 0))
+				FROM	dbo.tblICInventoryReceipt INNER JOIN dbo.tblICInventoryReceiptItem 
+							ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
+						INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
+							ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
+				WHERE	tblICInventoryReceipt.strReceiptNumber = @strTransactionId				
+				GROUP BY AggregrateLot.intInventoryReceiptItemId
+			) ItemLot
+				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
+	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
+			AND Receipt.strReceiptNumber = @strTransactionId
+			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 6) <> ROUND(ReceiptItem.dblOpenReceive,6)
+			
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		IF ISNULL(@strItemNo, '') = '' 
+			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
+
+		SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@OpenReceiveQty AS NUMERIC(18,6)), 1)
+		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS NUMERIC(18,6)), 1)
+		SET @FormattedDifference =  CAST(ABS(@OpenReceiveQty - @LotQtyInItemUOM) AS NVARCHAR(50))
+
+		-- 'The Qty to Return for {Item} is {Open Receive Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
+		RAISERROR(80158, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+		RETURN -1; 
+	END 
+
+	-------------------------------------------------------------------------------------
+	-- Note: Need to change this validation as a settable configuration in IC. 
+	-- Dallmayr seems to use Item Net weight as the "received weight". 
+	-- They clean the coffee per lot. Net wgt at Lot is the actual wgt. 
+	-- See IC-2176 and IC-2341 for more info. 
+	-------------------------------------------------------------------------------------		
+	---- Check if the Item Receipt Net qty matches with the total Net qty from the lots. 
+	--SET @strItemNo = NULL 
+	--SET @intItemId = NULL 
+
+	SELECT	TOP 1 
+			@strItemNo					= Item.strItemNo
+			,@intItemId					= Item.intItemId
+			,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
+			,@ReceiptItemNet			= ReceiptItem.dblNet
+			,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
+			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
+			,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblNet
+			,@CleanWgtCount				= ISNULL(clean.CleanCount, 0)
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem Item
+				ON Item.intItemId = ReceiptItem.intItemId
+			LEFT JOIN (
+				SELECT  AggregrateLot.intInventoryReceiptItemId
+						,TotalLotQtyInItemUOM = SUM(ISNULL(AggregrateLot.dblGrossWeight, 0) - ISNULL(AggregrateLot.dblTareWeight, 0))
+						,TotalLotQty = SUM(ISNULL(AggregrateLot.dblGrossWeight, 0) - ISNULL(AggregrateLot.dblTareWeight, 0))
+				FROM	dbo.tblICInventoryReceipt INNER JOIN dbo.tblICInventoryReceiptItem 
+							ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
+						INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
+							ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
+				WHERE	tblICInventoryReceipt.strReceiptNumber = @strTransactionId				
+				GROUP BY AggregrateLot.intInventoryReceiptItemId
+			) ItemLot
+				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+			LEFT OUTER JOIN (
+					SELECT COUNT(intInventoryReceiptItemLotId) CleanCount, intInventoryReceiptItemId
+					FROM dbo.tblICInventoryReceiptItemLot
+					WHERE strCondition = 'Clean Wgt'
+					GROUP BY intInventoryReceiptItemId
+			) clean ON clean.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId										
+	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
+			AND Receipt.strReceiptNumber = @strTransactionId
+			AND ROUND(ItemLot.TotalLotQtyInItemUOM,6) <> ROUND(ReceiptItem.dblNet,6)
+			AND ReceiptItem.intWeightUOMId IS NOT NULL -- There is a Gross/Net UOM. 
+			
+	IF @intItemId IS NOT NULL AND @CleanWgtCount = 0
+	BEGIN 
+		
+		IF ISNULL(@strItemNo, '') = '' 
+			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
+
+		SET @FormattedReceiptItemNet =  CONVERT(NVARCHAR, CAST(@ReceiptItemNet AS MONEY), 1)
+		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
+		SET @FormattedDifference =  CAST(ABS(@ReceiptItemNet - @LotQtyInItemUOM) AS NVARCHAR(50))
+
+		-- 'Net quantity mismatch. It is {@FormattedReceiptItemNet} on item {@strItemNo} but the total net from the lot(s) is {@FormattedLotQty}.'
+		RAISERROR(80081, 11, 1, @FormattedReceiptItemNet, @strItemNo, @FormattedLotQty)  
+		RETURN -1; 
+	END 
+END
+
+-- Get the next batch number
+BEGIN	
+	SET @strBatchId = NULL 
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
 	IF @@ERROR <> 0 GOTO Post_Exit;
 END
@@ -253,25 +409,7 @@ END
 BEGIN TRAN @TransactionName
 SAVE TRAN @TransactionName
 
----- Create and validate the lot numbers
---IF @ysnPost = 1
---BEGIN 	
---	DECLARE @intCreateUpdateLotError AS INT 
-
---	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryReceipt 
---			@strTransactionId
---			,@intEntityUserSecurityId
---			,@ysnPost
-
---	IF @intCreateUpdateLotError <> 0
---	BEGIN 
---		ROLLBACK TRAN @TransactionName
---		COMMIT TRAN @TransactionName
---		GOTO Post_Exit;
---	END
---END
-
---------------------------------------------------------------------------------------------  
+-------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1  
@@ -317,6 +455,7 @@ BEGIN
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]
+			,[strRateType]
 		)	
 		EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 			@intTransactionId
@@ -356,6 +495,8 @@ BEGIN
 				,intStorageLocationId
 				,strActualCostId
 				,intInTransitSourceLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -469,7 +610,7 @@ BEGIN
 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
-				,dblExchangeRate = 1  
+				,dblExchangeRate = ISNULL(DetailItem.dblForexRate, 1) 
 				,intTransactionId = Header.intInventoryReceiptId  
 				,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
 				,strTransactionId = Header.strReceiptNumber  
@@ -479,6 +620,8 @@ BEGIN
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,strActualCostId = Header.strActualCostId
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
+				,intForexRateTypeId = DetailItem.intForexRateTypeId
+				,dblForexRate = DetailItem.dblForexRate
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -593,6 +736,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[strRateType]
 				)
 				EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
 						@CompanyOwnedItemsForPost  
@@ -626,6 +770,8 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 				,intInTransitSourceLocationId
+				,intForexRateTypeId
+				,dblForexRate
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -738,7 +884,7 @@ BEGIN
 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
-				,dblExchangeRate = 1  
+				,dblExchangeRate = ISNULL(DetailItem.dblForexRate, 1)   
 				,intTransactionId = Header.intInventoryReceiptId  
 				,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
 				,strTransactionId = Header.strReceiptNumber  
@@ -747,6 +893,8 @@ BEGIN
 				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
+				,intForexRateTypeId = DetailItem.intForexRateTypeId
+				,dblForexRate = DetailItem.dblForexRate
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 					
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -816,6 +964,7 @@ BEGIN
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]
+			,[strRateType]
 		)	
 		EXEC dbo.uspICPostInventoryReceiptTaxes 
 			@intTransactionId
@@ -878,6 +1027,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostReturnCosting
 				@intTransactionId
@@ -932,6 +1082,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 			)	
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptOtherCharges 
 				@intTransactionId
@@ -976,6 +1127,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 			)	
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptTaxes 
 				@intTransactionId
@@ -1000,6 +1152,13 @@ BEGIN
 	END
 END   
 
+-- Clean up the recap data. 
+BEGIN 
+	UPDATE @GLEntries
+	SET dblDebitForeign = ISNULL(dblDebitForeign, 0)
+		,dblCreditForeign = ISNULL(dblCreditForeign, 0) 
+END 
+
 --------------------------------------------------------------------------------------------  
 -- If RECAP is TRUE, 
 -- 1.	Store all the GL entries in a holding table. It will be used later as data  
@@ -1010,7 +1169,9 @@ END
 IF @ysnRecap = 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspCMPostRecap @GLEntries
+	EXEC dbo.uspGLPostRecap 
+			@GLEntries
+			,@intEntityUserSecurityId
 	COMMIT TRAN @TransactionName
 END 
 

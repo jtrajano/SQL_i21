@@ -25,7 +25,7 @@ INSERT INTO @transmitter
 SELECT dbo.[fnAP1099EFileTransmitter](@year,@test)
 
 INSERT INTO @payer
-SELECT dbo.[fnAP1099EFilePayer](@year, @test, @vendorFrom, @vendorTo)
+SELECT dbo.[fnAP1099EFilePayer](@year, 2, @vendorFrom, @vendorTo)
 
 INSERT INTO @payee
 SELECT * FROM dbo.fnAP1099EFileINTPayee(@year, @reprint, @corrected, @vendorFrom, @vendorTo)

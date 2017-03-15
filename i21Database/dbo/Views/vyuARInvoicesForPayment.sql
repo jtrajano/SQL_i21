@@ -11,17 +11,25 @@ SELECT
 	,[strTransactionType]		= ARIFP.[strTransactionType]
 	,[strType]					= ARIFP.[strType]
 	,[intEntityCustomerId]		= ARIFP.[intEntityCustomerId]	
+	,[strCustomerName]			= ARIFP.[strCustomerName]
+	,[strCustomerNumber]		= ARIFP.[strCustomerNumber]
 	,[intAccountId]				= ARIFP.[intAccountId]
 	,[intCurrencyId]			= ARIFP.[intCurrencyId]	
 	,[dtmDate]					= ARIFP.[dtmDate]
 	,[dtmDueDate]				= ARIFP.[dtmDueDate]
 	,[dtmPostDate]				= ARIFP.[dtmPostDate]
 	,[dblInvoiceTotal]			= ARIFP.[dblInvoiceTotal]
+	,[dblBaseInvoiceTotal]		= ARIFP.[dblBaseInvoiceTotal]
 	,[dblDiscount]				= ARIFP.[dblDiscount]
+	,[dblBaseDiscount]			= ARIFP.[dblBaseDiscount]
 	,[dblDiscountAvailable]		= ARIFP.[dblDiscountAvailable]
+	,[dblBaseDiscountAvailable]	= ARIFP.[dblBaseDiscountAvailable]
 	,[dblInterest]				= ARIFP.[dblInterest]
+	,[dblBaseInterest]			= ARIFP.[dblBaseInterest]
 	,[dblAmountDue]				= ARIFP.[dblAmountDue]
+	,[dblBaseAmountDue]			= ARIFP.[dblBaseAmountDue]
 	,[dblPayment]				= ARIFP.[dblPayment]
+	,[dblBasePayment]			= ARIFP.[dblBasePayment]
 	,[ysnPosted]				= ARIFP.[ysnPosted]
 	,[ysnPaid]					= ARIFP.[ysnPaid]
 	,[intPaymentId]				= ARIFP.[intPaymentId]
@@ -41,6 +49,12 @@ SELECT
 	,[dtmTermDueDate]			= SMT.[dtmDueDate]
 	,[dblTermAPR]				= SMT.[dblAPR]
 	,[ysnExcludeForPayment]		= ARIFP.[ysnExcludeForPayment]
+	,[intPaymentMethodId]		= ARIFP.[intPaymentMethodId]	
+	,[strPaymentMethod]			= ARIFP.[strPaymentMethod]
+	,[intCurrencyExchangeRateTypeId]	= DFR.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= DFR.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= DFR.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= DFR.[dblCurrencyExchangeRate]
 FROM
 	(
 		SELECT 
@@ -53,6 +67,8 @@ FROM
 			,[strTransactionType]		= ARI.[strTransactionType]
 			,[strType]					= ARI.[strType]
 			,[intEntityCustomerId]		= ARI.[intEntityCustomerId]
+			,[strCustomerName]			= CE.strName
+			,[strCustomerNumber]		= ARC.[strCustomerNumber]
 			,[intCompanyLocationId]		= ARI.[intCompanyLocationId]
 			,[intAccountId]				= ARI.[intAccountId]
 			,[intCurrencyId]			= ARI.[intCurrencyId]	
@@ -60,11 +76,17 @@ FROM
 			,[dtmDueDate]				= ARI.[dtmDueDate]
 			,[dtmPostDate]				= ARI.[dtmPostDate]
 			,[dblInvoiceTotal]			= ARI.[dblInvoiceTotal]
+			,[dblBaseInvoiceTotal]		= ARI.[dblBaseInvoiceTotal]
 			,[dblDiscount]				= ARI.[dblDiscount]
+			,[dblBaseDiscount]			= ARI.[dblBaseDiscount]
 			,[dblDiscountAvailable]		= ARI.[dblDiscountAvailable]
+			,[dblBaseDiscountAvailable]	= ARI.[dblBaseDiscountAvailable]
 			,[dblInterest]				= ARI.[dblInterest]
+			,[dblBaseInterest]			= ARI.[dblBaseInterest]
 			,[dblAmountDue]				= ARI.[dblAmountDue]
+			,[dblBaseAmountDue]			= ARI.[dblBaseAmountDue]
 			,[dblPayment]				= ARI.[dblPayment]
+			,[dblBasePayment]			= ARI.[dblBasePayment]
 			,[ysnPosted]				= ARI.[ysnPosted]
 			,[ysnPaid]					= ARI.[ysnPaid]
 			,[intPaymentId]				= ARI.[intPaymentId]
@@ -79,8 +101,29 @@ FROM
 												THEN CONVERT(BIT, 1)
 											ELSE CONVERT(BIT, 0) 
 										 END)
+			,intPaymentMethodId				= ARC.intPaymentMethodId	
+			,strPaymentMethod				= SMP.strPaymentMethod
 		FROM
 			[tblARInvoice] ARI
+		INNER JOIN
+			(SELECT 
+				strCustomerNumber,
+				intEntityCustomerId,
+				intPaymentMethodId
+			 FROM 
+				dbo.tblARCustomer) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
+		INNER JOIN
+			(SELECT	
+				intEntityId,
+				strName
+			 FROM
+				dbo.tblEMEntity) AS CE ON ARC.[intEntityCustomerId] = CE.intEntityId 
+		LEFT OUTER JOIN
+			(SELECT 
+				intPaymentMethodID,
+				strPaymentMethod
+			 FROM
+				dbo.tblSMPaymentMethod) AS SMP ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
 		LEFT OUTER JOIN 
 			(
 			SELECT
@@ -107,6 +150,8 @@ FROM
 			,[strTransactionType]		= (CASE WHEN APB.[intTransactionType] = 11 THEN 'Weight Claim' WHEN APB.[intTransactionType] = 3 THEN 'Debit Memo' ELSE '' END)
 			,[strType]					= 'Voucher'
 			,[intEntityCustomerId]		= APB.[intEntityVendorId]
+			,[strCustomerName]			= CE.[strName]
+			,[strCustomerNumber]		= APV.[strVendorId]
 			,[intCompanyLocationId]		= APB.intShipToId
 			,[intAccountId]				= APB.[intAccountId]
 			,[intCurrencyId]			= APB.[intCurrencyId]
@@ -114,11 +159,17 @@ FROM
 			,[dtmDueDate]				= APB.[dtmDueDate]
 			,[dtmPostDate]				= APB.[dtmBillDate]
 			,[dblInvoiceTotal]			= APB.[dblTotal]
+			,[dblBaseInvoiceTotal]		= APB.[dblTotal]
 			,[dblDiscount]				= APB.[dblDiscount]
+			,[dblBaseDiscount]			= APB.[dblDiscount]
 			,[dblDiscountAvailable]		= CAST(0 AS DECIMAL(18,6))
+			,[dblBaseDiscountAvailable]	= CAST(0 AS DECIMAL(18,6))
 			,[dblInterest]				= APB.[dblInterest]
+			,[dblBaseInterest]			= APB.[dblInterest]
 			,[dblAmountDue]				= APB.[dblAmountDue]
+			,[dblBaseAmountDue]			= APB.[dblAmountDue]
 			,[dblPayment]				= APB.[dblPayment]
+			,[dblBasePayment]			= APB.[dblPayment]
 			,[ysnPosted]				= APB.[ysnPosted]
 			,[ysnPaid]					= APB.[ysnPaid]
 			,[intPaymentId]				= NULL
@@ -128,12 +179,33 @@ FROM
 			,[strCustomerReferences]	= ''
 			,[intTermId]				= APB.[intTermsId]
 			,[ysnExcludeForPayment]		= CONVERT(BIT, 0)
+			,intPaymentMethodId			= APV.intPaymentMethodId	
+			,strPaymentMethod			= SMP.strPaymentMethod
 		FROM
 			tblAPBill APB
 		INNER JOIN
 			tblEMEntityType EMET
 				ON APB.[intEntityVendorId] = EMET.[intEntityId]
-				AND EMET.[strType] = 'Customer'		
+				AND EMET.[strType] = 'Customer'	
+		INNER JOIN
+			(SELECT 				
+				intEntityVendorId,
+				intPaymentMethodId,
+				strVendorId
+			 FROM 
+				dbo.tblAPVendor) AS APV ON APV.[intEntityVendorId] = APB.[intEntityVendorId] 
+		INNER JOIN
+			(SELECT	
+				intEntityId,
+				strName
+			 FROM
+				dbo.tblEMEntity) AS CE ON APV.[intEntityVendorId] = CE.intEntityId 	
+		LEFT OUTER JOIN
+			(SELECT 
+				intPaymentMethodID,
+				strPaymentMethod
+			 FROM
+				dbo.tblSMPaymentMethod) AS SMP ON APV.intPaymentMethodId = SMP.intPaymentMethodID								
 		WHERE
 			[intTransactionType] IN (11,3)
 			AND [ysnPosted] = 1
@@ -163,3 +235,5 @@ LEFT OUTER JOIN
 		tblSMCompanyLocation
 	) SMCL
 		ON ARIFP.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
+CROSS APPLY
+		[dbo].[fnARGetDefaultForexRate](ARIFP.[dtmDate], ARIFP.[intCurrencyId], NULL) DFR
