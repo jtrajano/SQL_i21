@@ -1083,7 +1083,7 @@ BEGIN TRY
 			AND D.intPContractDetailId = LSID.intPContractDetailId
 		WHERE LD.intLoadId = @intLoadId
 
-	INSERT INTO tblLGLoadContainerLSPStg
+		INSERT INTO tblLGLoadContainerLSPStg
 	SELECT @intLoadStgId
 		,@intLoadId
 		,LC.intLoadContainerId
@@ -1113,6 +1113,7 @@ BEGIN TRY
 	LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 	WHERE LC.intLoadId = @intLoadId
 	ORDER BY LC.intLoadContainerId
+	END
 END TRY
 
 BEGIN CATCH
