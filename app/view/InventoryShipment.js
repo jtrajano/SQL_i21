@@ -210,6 +210,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                             type: 'vbox',
                                             align: 'stretch'
                                         },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'tabDetails'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'container',
@@ -1173,10 +1177,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         xtype: 'griduomcolumn',
                                                                         decimalPrecisionField: 'intDecimalPlaces',
                                                                         displayField: 'strUnitMeasure',
-                                                                        dataIndex: 'dblQuantity',
                                                                         itemId: 'colGumQuantity',
                                                                         width: 200,
                                                                         align: 'right',
+                                                                        dataIndex: 'dblQuantity',
                                                                         text: 'Quantity',
                                                                         editor: {
                                                                             xtype: 'griduomfield',
@@ -1820,6 +1824,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                             type: 'hbox',
                                             align: 'stretch'
                                         },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'tabCharges'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
@@ -2217,6 +2225,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         xtype: 'glrecaptab',
                                         itemId: 'pgePostPreview',
                                         title: 'Post Preview',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'tabPostPreview'
+                                        },
                                         listeners: {
                                             show: 'onPnlRecapBeforeShow'
                                         }

@@ -1211,7 +1211,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter123",
                                                     "designerId": "8725b495-60b5-4fac-b7b6-11f36b61fc8d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1708,7 +1708,7 @@
                                                 "flex": null,
                                                 "format": "0,000.00####",
                                                 "itemId": "colLastCost",
-                                                "text": "Last Cost",
+                                                "text": "Cost",
                                                 "width": 71
                                             },
                                             "name": "MyNumberColumn5",

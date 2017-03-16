@@ -3130,60 +3130,27 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     },   
 
     onPnlRecapBeforeShow: function(component, eOpts){
-        var me = this;
-        var win = component.up('window');
-        var context = win.context;
+        // var me = this;
+        // var win = component.up('window');
 
-        var doRecap = function (currentRecord){
-            ic.utils.ajax({
-                url: '../Inventory/api/InventoryShipment/Ship',
-                params:{
-                    strTransactionId: currentRecord.get('strShipmentNumber'),
-                    isPost: currentRecord.get('ysnPosted') ? false : true,
-                    isRecap: true
-                },
-                method: 'post'
-            })
-            .subscribe(
-                function(successResponse) {
-                    var postResult = Ext.decode(successResponse.responseText);
-                    var batchId = postResult.data.strBatchId;
-                    if (batchId) {
-                        me.bindRecapGrid(batchId);
-                    }                    
-                }
-                ,function(failureResponse) {
-                    // Show Post Preview failed.
-                    var jsonData = Ext.decode(failureResponse.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
-                }
-            )
-        };    
-
-        // If there is no data change, calculate the charge and do the recap. 
-        if (!context.data.hasChanges()) {
-            doRecap(win.viewModel.data.current);
-        }
-
-        // Save has data changes first before anything else. 
-        context.data.saveRecord({
-            successFn: function () {
-                doRecap(win.viewModel.data.current);             
-            }
-        });
+        // me.doPostPreview(win);
     }, 
 
     onPostClick: function(button, e, eOpts) {
         var me = this;
         var win = button.up('window');
         var context = win.context;
+        var currentRecord = win.viewModel.data.current;
+        var tabInventoryShipment = win.down('#tabInventoryShipment');
+        var activeTab = tabInventoryShipment.getActiveTab();
 
-        var doPost = function (currentRecord){
+        var doPost = function (){
+            var current = currentRecord; 
             ic.utils.ajax({
                 url: '../Inventory/api/InventoryShipment/Ship',
                 params:{
-                    strTransactionId: currentRecord.get('strShipmentNumber'),
-                    isPost: currentRecord.get('ysnPosted') ? false : true,
+                    strTransactionId: current.get('strShipmentNumber'),
+                    isPost: current.get('ysnPosted') ? false : true,
                     isRecap: false
                 },
                 method: 'post'
@@ -3191,6 +3158,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             .subscribe(
                 function(successResponse) {
                     me.onAfterShip(true);
+
+                    // Check what is the active tab. If it is the Post Preview tab, load the recap data. 
+                    if (activeTab.itemId == 'pgePostPreview'){
+                        var cfg = {
+                            isAfterPostCall: true,
+                            ysnPosted: current.get('ysnPosted') ? true : false
+                        };
+                        me.doPostPreview(win, cfg);
+                    }                     
                 }
                 ,function(failureResponse) {
                     var jsonData = Ext.decode(failureResponse.responseText);
@@ -3201,13 +3177,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         // If there is no data change, calculate the charge and do the recap. 
         if (!context.data.hasChanges()) {
-            doPost(win.viewModel.data.current);
+            doPost();
         }
 
         // Save has data changes first before anything else. 
         context.data.saveRecord({
             successFn: function () {
-                doPost(win.viewModel.data.current);             
+                doPost();             
             }
         });
     },    
@@ -3383,6 +3359,66 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         current.set('intItemUOMId', intItemUOMId);
     },
 
+    doPostPreview: function(win, cfg){
+        var me = this;
+
+        if (!win) {return;}
+        cfg = cfg ? cfg : {};
+
+        var isAfterPostCall = cfg.isAfterPostCall;
+        var ysnPosted = cfg.ysnPosted;
+        var context = win.context;
+
+        var doRecap = function (currentRecord){
+            ic.utils.ajax({
+                url: '../Inventory/api/InventoryShipment/Ship',
+                params:{
+                    strTransactionId: currentRecord.get('strShipmentNumber'),
+                    isPost: isAfterPostCall ? ysnPosted : currentRecord.get('ysnPosted') ? false : true,
+                    isRecap: true
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    var postResult = Ext.decode(successResponse.responseText);
+                    var batchId = postResult.data.strBatchId;
+                    if (batchId) {
+                        me.bindRecapGrid(batchId);
+                    }                    
+                }
+                ,function(failureResponse) {
+                    // Show Post Preview failed.
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            )
+        };    
+
+        // If there is no data change, calculate the charge and do the recap. 
+        if (!context.data.hasChanges()) {
+            doRecap(win.viewModel.data.current);
+        }
+
+        // Save has data changes first before anything else. 
+        context.data.saveRecord({
+            successFn: function () {
+                doRecap(win.viewModel.data.current);             
+            }
+        });        
+    },    
+
+    onShipmentTabChange: function(tabPanel, newCard, oldCard, eOpts){
+        var me = this;
+        var win = tabPanel.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;        
+        switch (newCard.itemId) {
+            case 'pgePostPreview': 
+                me.doPostPreview(win);
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -3502,7 +3538,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#gumQuantity": {
                 onUOMSelect: this.onGumUOMSelect
-            }
+            },
+            "#tabInventoryShipment": {
+                tabChange: this.onShipmentTabChange
+            }            
         })
     }
 

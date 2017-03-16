@@ -582,6 +582,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             },
                                                             {
                                                                 xtype: 'numbercolumn',
+                                                                format: '0,000.000000##',
                                                                 itemId: 'colUOMUnitQty',
                                                                 align: 'right',
                                                                 dataIndex: 'strFieldName',
@@ -721,7 +722,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 itemId: 'colDefaultPackingUOM',
                                                                 width: 123,
                                                                 dataIndex: 'string',
-                                                                text: 'Default Packing UOM',
+                                                                text: 'Default UOM',
                                                                 editor: {
                                                                     xtype: 'gridcombobox',
                                                                     columns: [
