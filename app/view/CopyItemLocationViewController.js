@@ -23,8 +23,11 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
 
     onCopy: function(e) {
         var me = this;
+        
         var grid = this.getView().down('#grdItems');
         var selected = grid.getSelectionModel().selected;
+        var win = grid.up('window');
+
         if(selected && selected.count() > 0) {
             var msgAction = function (button) {
                 if (button === 'yes') {
@@ -40,6 +43,9 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
     },
 
     copyLocation: function(selectedItems, sourceItem) {
+        var me = this;
+        var win = me.getView();
+
         var destinationItems = _.map(selectedItems, function(o) { return o.data; });
         var destinationItemIds = _.map(destinationItems, function(r) { return r.intItemId; });
         //destinationItemIds = _.filter(destinationItemIds, function(e) { return e !== sourceItem.get('intItemId'); });
@@ -60,6 +66,9 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
                 var json = JSON.parse(successResponse.responseText);
                 if(json.success) {
                     i21.functions.showCustomDialog('info', 'ok', 'Location(s) copied successfully.');   
+
+                    // Auto-Close                     
+                    win.close();
                 } else {
                     i21.functions.showCustomDialog('error', 'ok', json.message.statusText);   
                 }

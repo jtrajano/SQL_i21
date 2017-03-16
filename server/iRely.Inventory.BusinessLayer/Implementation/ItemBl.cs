@@ -1019,7 +1019,7 @@ namespace iRely.Inventory.BusinessLayer
                     throw new System.ArgumentException("Cannot copy the location without a target item. Please specify the target items.");
                 }
 
-                db.CopyItemLocation(intSourceItemId, strDestinationItemIds);
+                db.CopyItemLocation(intSourceItemId, strDestinationItemIds, iRely.Common.Security.GetEntityId());
                 result = _db.Save(false);
                 result.HasError = false;
             }
