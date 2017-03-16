@@ -545,20 +545,20 @@ FROM(
                      ,'Market Risk' as strAccountNumber,sum(dblNoOfContract) dblNoOfContract,
                      strTradeNo, TransactionDate,TranType,CustVendor,sum(dblNoOfLot) dblNoOfLot, sum(dblQuantity)  dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId  
        FROM @List WHERE Selection='Physical position / Basis risk' 
-                                    and PriceStatus = 'b. Priced / Outright - (Outright position)' 
+                                    and PriceStatus = 'b. Priced / Outright - (Outright position)' and  dblQuantity <> 0
        GROUP BY strFutureMonth,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
        UNION
        SELECT 'Net market risk'  AS Selection,'Net market risk'  as PriceStatus,strFutureMonth
                      ,'Market Risk' as strAccountNumber,sum(dblNoOfContract) dblNoOfContract,
-                     strTradeNo, TransactionDate,TranType,CustVendor,sum(dblNoOfLot) dblNoOfLot, sum(dblQuantity)  dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId  
-       FROM @List WHERE PriceStatus ='F&O' and Selection LIKE ('Total F&O%')
+                     strTradeNo, TransactionDate,TranType,CustVendor,sum(dblNoOfLot) dblNoOfLot, sum(dblNoOfContract)  dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId  
+       FROM @List WHERE PriceStatus ='F&O' and Selection LIKE ('Total F&O%')  and  dblQuantity <> 0
        GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
        
        UNION 
         SELECT 'Net market risk'  AS Selection, 'Net market risk' as PriceStatus,strFutureMonth
                      ,'Market Risk' as strAccountNumber,sum(dblNoOfContract) dblNoOfContract,
                      strTradeNo, TransactionDate,TranType,CustVendor,sum(dblNoOfLot) dblNoOfLot, sum(dblQuantity)  dblQuantity,intContractHeaderId,intFutOptTransactionHeaderId  
-       FROM @List WHERE PriceStatus ='a. Delta %' and Selection = ('Total speciality delta fixed')
+       FROM @List WHERE PriceStatus ='a. Delta %' and Selection = ('Total speciality delta fixed')  and  dblQuantity <> 0
        GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  
        )t 
 GROUP BY Selection,PriceStatus,strAccountNumber,strFutureMonth,strTradeNo, TransactionDate,TranType,CustVendor,intContractHeaderId,intFutOptTransactionHeaderId  

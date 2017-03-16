@@ -23,6 +23,11 @@ FROM (
 			,DCI.strCity AS strDestination
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), GETDATE(), 101), CONVERT(NVARCHAR(100), CD.dtmStartDate, 101))
 			,NULL AS dtmETAPOD
+			,CD.dblQuantity - ISNULL((
+					SELECT SUM(dblQuantity)
+					FROM tblLGLoadDetail LOADDetail
+					WHERE LOADDetail.intPContractDetailId = CD.intContractDetailId
+					), 0) AS dblRemainingQty
 			,'Contracts w/o shipping instruction' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -31,16 +36,13 @@ FROM (
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
-		WHERE CD.intContractDetailId NOT IN (
-				SELECT CASE 
-						WHEN L.intPurchaseSale = 1
-							THEN ISNULL(LD.intPContractDetailId,0)
-						ELSE ISNULL(LD.intSContractDetailId,0)
-						END
-				FROM tblLGLoadDetail LD
-				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-				WHERE L.intShipmentType = 2
-				)
+		WHERE CD.dblQuantity - (
+				ISNULL((
+						SELECT SUM(dblQuantity)
+						FROM tblLGLoadDetail LOADDetail
+						WHERE LOADDetail.intPContractDetailId = CD.intContractDetailId
+						), 0)
+				) > 0
 			AND CH.intContractTypeId = 1
 		) t
 		,tblCTEvent EV
@@ -66,6 +68,7 @@ FROM (
 			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETSPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
+			,dblRemainingQty = NULL
 			,'Contracts w/o shipping advice' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -108,6 +111,7 @@ FROM (
 			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), GETDATE(), 101), CONVERT(NVARCHAR(100), L.dtmETAPOD, 101))
 			,L.dtmETAPOD AS dtmETAPOD
+			,dblRemainingQty = NULL
 			,'Contracts w/o document' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -148,6 +152,7 @@ FROM (
 			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETAPOD, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
+			,dblRemainingQty = NULL
 			,'Contracts w/o weight claim' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -189,6 +194,7 @@ FROM (
 			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), WC.dtmActualWeighingDate, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
+			,dblRemainingQty = NULL
 			,'Weight claims w/o debit note' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -228,6 +234,7 @@ FROM (
 			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETSPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
+			,dblRemainingQty = NULL
 			,'Contracts w/o 4C' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -264,6 +271,7 @@ FROM (
 			,ISNULL(DCI.strCity,L.strDestinationPort) AS strDestination
 			,intDayToShipment = DATEDIFF(DAY, CONVERT(NVARCHAR(100), L.dtmETSPOL, 101), CONVERT(NVARCHAR(100), GETDATE(), 101))
 			,L.dtmETAPOD AS dtmETAPOD
+			,dblRemainingQty = NULL
 			,'Contracts w/o TC' AS strType
 		FROM tblCTContractHeader CH
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId

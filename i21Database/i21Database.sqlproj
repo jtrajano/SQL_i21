@@ -2216,7 +2216,6 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\TankInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryReceiptUnitCost.sql" />
-    <None Include="Scripts\Post-Deployment\GL\InventoryCategoryFix.sql" />
     <Build Include="dbo\Tables\tblSTRadiantItemTypeCode.sql" />
     <Build Include="dbo\Views\vyuARDepositAccount.sql" />
     <Build Include="dbo\Tables\tblICCommodityProductLine.sql" />

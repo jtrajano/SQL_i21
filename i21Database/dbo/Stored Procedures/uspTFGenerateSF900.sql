@@ -51,7 +51,6 @@ DECLARE @DateEnd DATETIME
 
 DECLARE @LicenseNumber NVARCHAR(50)
 DECLARE @EIN NVARCHAR(50)
-	, @FaxNumber NVARCHAR(50)
 
 -- ======================== SUMMARY ==============================
 	SELECT TOP 1 
@@ -78,7 +77,7 @@ DECLARE @EIN NVARCHAR(50)
 		WHERE rc.strFormCode = @FormCodeParam 
 		AND config.strTemplateItemId = 'SF-900-LicenseNumber'
 	
-	SELECT TOP 1 @EIN = strEin, @FaxNumber = strFax FROM tblSMCompanySetup	
+	SELECT TOP 1 @EIN = strEin FROM tblSMCompanySetup	
 
 	INSERT INTO tblTFTransactionSummary (
 		strSummaryGuid
@@ -118,7 +117,7 @@ DECLARE @EIN NVARCHAR(50)
 		, strContactPhone
 		, strContactName
 		, @LicenseNumber
-		, @FaxNumber
+		, strContactName
 	FROM tblTFCompanyPreference
 
 		INSERT INTO @tblTempSummaryItem (TaxReportSummaryItemId)  -- GET SUMMARY ITEMS TABLE HELPER BY FORM AND TA THEN INSERT INTO TBLTEMPSUMMARY
