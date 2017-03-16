@@ -5121,6 +5121,7 @@
     <Build Include="dbo\Tables\tblLGReasonCode.sql" />
     <Build Include="dbo\Views\vyuHDTicketJiraDetails.sql" />
     <Build Include="dbo\Views\vyuEMEntityCusVenCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessToInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
