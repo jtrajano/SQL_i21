@@ -20,6 +20,7 @@
 	strCreatedUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strErrorMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strImportStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,  
+	[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	dtmTransactionDate DATETIME NULL  DEFAULT((getdate())),
 	CONSTRAINT [PK_tblIPEntityStage_intStageEntityId] PRIMARY KEY ([intStageEntityId])
 )

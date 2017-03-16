@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPStageSAPVendors]
-	@strXml nvarchar(max)
+	@strXml nvarchar(max),
+	@strSessionId NVARCHAR(50)=''
 AS
 
 BEGIN TRY
@@ -11,6 +12,7 @@ BEGIN TRY
 		
 	DECLARE @idoc INT
 	DECLARE @ErrMsg nvarchar(max)
+	If ISNULL(@strSessionId,'')='' Set  @strSessionId=NEWID()
 
 	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -116,8 +118,8 @@ BEGIN TRY
 	Begin Tran
 
 	--Add to Staging tables
-	Insert into tblIPEntityStage(strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,strEntityType,strCurrency,strTerm,ysnDeleted)
-	Select strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,'Vendor',strCurrency,strTerm,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END
+	Insert into tblIPEntityStage(strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,strEntityType,strCurrency,strTerm,ysnDeleted,strSessionId)
+	Select strName,strAddress,strAddress1,strCity,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,dtmCreated,strCreatedUserName,'Vendor',strCurrency,strTerm,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END,@strSessionId
 	From @tblVendor
 
 	Insert Into tblIPEntityContactStage(intStageEntityId,strEntityName,strFirstName,strLastName,strPhone)
@@ -127,7 +129,7 @@ BEGIN TRY
 
 	Commit Tran
 
-	Select TOP 1 strAccountNo AS strInfo1,strName AS strInfo2 From @tblVendor
+	Select TOP 1 strAccountNo AS strInfo1,strName AS strInfo2,@strSessionId AS strSessionId From @tblVendor
 
 END TRY
 

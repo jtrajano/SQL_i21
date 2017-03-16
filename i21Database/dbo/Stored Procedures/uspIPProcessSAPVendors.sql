@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPVendors]
+@strSessionId NVARCHAR(50)=''
 AS
 BEGIN TRY
 
@@ -40,7 +41,10 @@ Declare @strFinalErrMsg NVARCHAR(MAX)=''
 
 DECLARE @tblEntityContactIdOutput table (intEntityId int)
 
-Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor'
+If ISNULL(@strSessionId,'')=''
+	Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor'
+Else
+	Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND strSessionId=@strSessionId
 
 While(@intMinVendor is not null)
 Begin
@@ -293,8 +297,8 @@ End
 	MOVE_TO_ARCHIVE:
 
 	--Move to Archive
-	Insert into tblIPEntityArchive(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName)
-	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName
+	Insert into tblIPEntityArchive(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,strSessionId)
+	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,@strSessionId
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	Select @intNewStageEntityId=SCOPE_IDENTITY()
@@ -318,8 +322,8 @@ BEGIN CATCH
 	SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 	--Move to Error
-	Insert into tblIPEntityError(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,strErrorMessage,strImportStatus)
-	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,@ErrMsg,'Failed'
+	Insert into tblIPEntityError(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,strErrorMessage,strImportStatus,strSessionId)
+	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,@ErrMsg,'Failed',@strSessionId
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	Select @intNewStageEntityId=SCOPE_IDENTITY()
@@ -331,7 +335,10 @@ BEGIN CATCH
 	Delete From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 END CATCH
 
-	Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor
+	If ISNULL(@strSessionId,'')=''
+		Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor
+	Else
+		Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor AND strSessionId=@strSessionId
 End
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
