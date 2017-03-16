@@ -5076,6 +5076,7 @@
     <Build Include="dbo\Functions\fnARGetDefaultForexRate.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
     <Build Include="dbo\Views\vyuEMEntityCusVenCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessToInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
