@@ -851,7 +851,7 @@ BEGIN
 			) Credit
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
-	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1
+	WHERE	ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 1
 
 	UNION ALL 
 	SELECT	
