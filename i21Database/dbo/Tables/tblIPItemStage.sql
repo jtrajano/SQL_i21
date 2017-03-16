@@ -80,7 +80,7 @@
 		,ysnDeleted BIT DEFAULT 0
 		,strErrorMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,[strImportStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL  
-		,[strSessionId] NVARCHAR(32) COLLATE Latin1_General_CI_AS NULL
+		,[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,strLoggedOnUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblIPItemStage_strLoggedOnUserName] DEFAULT((HOST_NAME()))
 		,dtmTransactionDate DATETIME NULL CONSTRAINT [DF_tblMFItemStage_dtmTransactionDate] DEFAULT((getdate()))
 		,CONSTRAINT [PK_tblIPItemStage_intStageItemId] PRIMARY KEY ([intStageItemId]) 

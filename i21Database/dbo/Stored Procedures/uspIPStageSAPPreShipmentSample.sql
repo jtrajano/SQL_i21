@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPStageSAPPreShipmentSample]
-	@strXml nvarchar(max)
+	@strXml nvarchar(max),
+	@strSessionId NVARCHAR(50)=''
 AS
 
 BEGIN TRY
@@ -11,7 +12,7 @@ BEGIN TRY
 		
 	DECLARE @idoc INT
 	DECLARE @ErrMsg nvarchar(max)
-	DECLARE @strSessionId nvarchar(50)=NEWID()
+	If ISNULL(@strSessionId,'')='' Set  @strSessionId=NEWID()
 
 	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -52,7 +53,7 @@ BEGIN TRY
 			)
 	) Where strSessionId=@strSessionId
 
-	Select TOP 1 strPONo AS strInfo1, strItemNo + ' / ' +  ISNULL(strSampleNo,'') AS strInfo2 From tblIPPreShipmentSampleStage Where strSessionId=@strSessionId
+	Select TOP 1 strPONo AS strInfo1, strItemNo + ' / ' +  ISNULL(strSampleNo,'') AS strInfo2,@strSessionId AS strSessionId From tblIPPreShipmentSampleStage Where strSessionId=@strSessionId
 
 END TRY
 
