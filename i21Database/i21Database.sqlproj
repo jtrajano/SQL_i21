@@ -5119,6 +5119,7 @@
     <Build Include="dbo\Views\vyuLGContractsWithoutDocuments.sql" />
     <Build Include="dbo\Tables\tblLGShippingMode.sql" />
     <Build Include="dbo\Tables\tblLGReasonCode.sql" />
+    <Build Include="dbo\Views\vyuHDTicketJiraDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
