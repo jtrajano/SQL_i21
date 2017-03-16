@@ -20,4 +20,7 @@ IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFRep
 			UPDATE tblTFReportingComponentConfiguration
 			SET ysnConfiguration = 0
 			WHERE ysnConfiguration IS NULL
+
+			DELETE FROM tblTFReportingComponentConfiguration
+			WHERE intReportingComponentId = 0 OR intReportingComponentId IS NULL
 		END
