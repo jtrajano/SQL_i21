@@ -17,10 +17,23 @@ IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFRep
 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFReportingComponentConfiguration')
 		BEGIN
-			UPDATE tblTFReportingComponentConfiguration
-			SET ysnConfiguration = 0
-			WHERE ysnConfiguration IS NULL
-
-			DELETE FROM tblTFReportingComponentConfiguration
-			WHERE intReportingComponentId = 0 OR intReportingComponentId IS NULL
+		  IF EXISTS(SELECT *
+          FROM   INFORMATION_SCHEMA.COLUMNS
+          WHERE  TABLE_NAME = 'tblTFReportingComponentConfiguration'
+                 AND COLUMN_NAME = 'ysnConfiguration') 
+				 BEGIN
+					UPDATE tblTFReportingComponentConfiguration
+					SET ysnConfiguration = 0
+					WHERE ysnConfiguration IS NULL
+				 END
+				
+		  IF EXISTS(SELECT *
+          FROM   INFORMATION_SCHEMA.COLUMNS
+          WHERE  TABLE_NAME = 'tblTFReportingComponentConfiguration'
+                 AND COLUMN_NAME = 'intReportingComponentId') 
+				 BEGIN
+					DELETE FROM tblTFReportingComponentConfiguration
+					WHERE intReportingComponentId = 0 
+					OR intReportingComponentId IS NULL
+				 END
 		END
