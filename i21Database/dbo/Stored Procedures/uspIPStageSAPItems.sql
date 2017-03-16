@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPStageSAPItems]
-	@strXml nvarchar(max)
+	@strXml nvarchar(max),
+	@strSessionId NVARCHAR(50) =''
 AS
 
 BEGIN TRY
@@ -11,6 +12,7 @@ BEGIN TRY
 		
 	DECLARE @idoc INT
 	DECLARE @ErrMsg nvarchar(max)
+	If ISNULL(@strSessionId,'')='' Set  @strSessionId=NEWID()
 
 	Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -110,10 +112,15 @@ BEGIN TRY
 
 	Begin Tran
 
+	Update @tblItem set strItemNo=RIGHT(strItemNo,8)
+	Update @tblItemUOM set strItemNo=RIGHT(strItemNo,8)
+	Update @tblItemSubLocation set strItemNo=RIGHT(strItemNo,8)
+	Update @tblItem set strSKUItemNo=RIGHT(strSKUItemNo,8)
+
 	--ZCOM
 	--Add to Staging tables
-	Insert into tblIPItemStage(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription)
-	Select strItemNo,dtmCreatedDate,strCreatedBy,dtmModifiedDate,strModifiedBy,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END,strItemType,strStockUOM,strSKUItemNo,strShortName
+	Insert into tblIPItemStage(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strSessionId)
+	Select strItemNo,dtmCreatedDate,strCreatedBy,dtmModifiedDate,strModifiedBy,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END,strItemType,strStockUOM,strSKUItemNo,strShortName,@strSessionId
 	From @tblItem Where (RIGHT(strItemNo,8) like '496%' OR RIGHT(strItemNo,8) like '491%') AND strItemType='ZCOM'
 
 	Insert Into tblIPItemUOMStage(intStageItemId,strItemNo,strUOM,dblNumerator,dblDenominator)
@@ -127,8 +134,8 @@ BEGIN TRY
 	Where (RIGHT(iu.strItemNo,8) like '496%' OR RIGHT(iu.strItemNo,8) like '491%') AND strItemType='ZCOM'
 
 	--ZMPN
-	Insert into tblIPItemStage(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription)
-	Select strItemNo,dtmCreatedDate,strCreatedBy,dtmModifiedDate,strModifiedBy,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END,strItemType,strStockUOM,strSKUItemNo,strShortName
+	Insert into tblIPItemStage(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strSessionId)
+	Select strItemNo,dtmCreatedDate,strCreatedBy,dtmModifiedDate,strModifiedBy,CASE WHEN ISNULL(strMarkForDeletion,'')='X' THEN 1 ELSE 0 END,strItemType,strStockUOM,strSKUItemNo,strShortName,@strSessionId
 	From @tblItem Where strItemType='ZMPN'
 
 	Insert Into tblIPItemUOMStage(intStageItemId,strItemNo,strUOM,dblNumerator,dblDenominator)
@@ -137,6 +144,8 @@ BEGIN TRY
 	Where i.strItemType='ZMPN'
 
 	Commit Tran
+
+	Select TOP 1 strItemNo AS strInfo1,strItemType AS strInfo2,@strSessionId AS strSessionId From @tblItem
 
 END TRY
 

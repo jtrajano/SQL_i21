@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPItems]
+@strSessionId NVARCHAR(50)=''
 AS
 BEGIN TRY
 
@@ -28,7 +29,10 @@ Declare @intUserId Int
 Declare @strUserName NVARCHAR(100)
 Declare @strFinalErrMsg NVARCHAR(MAX)=''
 
-Select @intMinItem=MIN(intStageItemId) From tblIPItemStage
+If ISNULL(@strSessionId,'')=''
+	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage
+Else
+	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where strSessionId=@strSessionId
 
 While(@intMinItem is not null)
 Begin
@@ -47,6 +51,8 @@ Set @ysnDeleted=0
 
 Select @intStageItemId=intStageItemId,@strItemNo=strItemNo,@strItemType=strItemType,@strSKUItemNo=strSKUItemNo,
 @strStockUOM=strStockUOM,@ysnDeleted=ISNULL(ysnDeleted,0),@strDescription=strDescription From tblIPItemStage Where intStageItemId=@intMinItem
+
+Select @strItemNo AS strInfo1,@strItemType AS strInfo2
 
 Select @intCategoryId=intCategoryId From tblICCategory Where strCategoryCode=@strItemType
 
@@ -90,10 +96,10 @@ Begin
 		End
 
 	If @ysnDeleted=1
-		Delete From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo
+		Delete From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo AND strContractItemName=@strDescription
 	Else
 	Begin
-		If Not Exists (Select 1 From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo) --Add
+		If Not Exists (Select 1 From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo AND strContractItemName=@strDescription) --Add
 		Begin
 			Insert Into tblICItemContract(intItemId,strContractItemNo,strContractItemName,intItemLocationId)
 			Select @intItemId,@strItemNo,@strDescription,intItemLocationId 
@@ -101,7 +107,7 @@ Begin
 		End
 		Else
 		Begin --Update
-			Update tblICItemContract Set strContractItemName=@strDescription Where intItemId=@intItemId AND strContractItemNo=@strItemNo
+			Update tblICItemContract Set strContractItemName=@strDescription Where intItemId=@intItemId AND strContractItemNo=@strItemNo AND strContractItemName=@strDescription
 		End
 	End
 	GOTO MOVE_TO_ARCHIVE
@@ -147,9 +153,9 @@ Begin
 	--Add Audit Trail Record
 	Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intItemId) + '","keyValue":' + CONVERT(VARCHAR,@intItemId) + ',"iconCls":"small-new-plus","leaf":true}'
 	
-	Select @dtmDate=dtmCreated From tblIPItemStage Where intStageItemId=@intStageItemId
+	Select @dtmDate=DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmCreated) From tblIPItemStage Where intStageItemId=@intStageItemId
 	If @dtmDate is null
-		Set @dtmDate =  GETDATE()
+		Set @dtmDate =  GETUTCDATE()
 
 	Select @strUserName=strCreatedUserName From tblIPItemStage Where intStageItemId=@intStageItemId
 	Select @intUserId=e.intEntityId From tblEMEntity e Join tblEMEntityType et on e.intEntityId=et.intEntityId  Where e.strExternalERPId=@strUserName AND et.strType='User'
@@ -199,8 +205,8 @@ End
 	MOVE_TO_ARCHIVE:
 
 	--Move to Archive
-	Insert into tblIPItemArchive(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription)
-	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription
+	Insert into tblIPItemArchive(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strSessionId)
+	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strSessionId
 	From tblIPItemStage Where intStageItemId=@intStageItemId
 
 	Select @intNewStageItemId=SCOPE_IDENTITY()
@@ -228,8 +234,8 @@ BEGIN CATCH
 	SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 	--Move to Error
-	Insert into tblIPItemError(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strErrorMessage,strImportStatus)
-	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,@ErrMsg,'Failed'
+	Insert into tblIPItemError(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strErrorMessage,strImportStatus,strSessionId)
+	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,@ErrMsg,'Failed',strSessionId
 	From tblIPItemStage Where intStageItemId=@intStageItemId
 
 	Select @intNewStageItemId=SCOPE_IDENTITY()
@@ -245,7 +251,10 @@ BEGIN CATCH
 	Delete From tblIPItemStage Where intStageItemId=@intStageItemId
 END CATCH
 
-	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem
+	If ISNULL(@strSessionId,'')=''
+		Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem
+	Else
+		Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem AND strSessionId=@strSessionId
 End
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
