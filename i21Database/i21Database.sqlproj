@@ -5118,6 +5118,7 @@
     <Build Include="dbo\Tables\tblLGShippingMode.sql" />
     <Build Include="dbo\Tables\tblLGReasonCode.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateCSV.sql" />
+    <Build Include="dbo\Views\vyuEMEntityCusVenCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
