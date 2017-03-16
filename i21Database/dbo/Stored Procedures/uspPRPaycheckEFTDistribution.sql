@@ -6,7 +6,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+--SET ANSI_WARNINGS OFF
 
 	DECLARE @dblAmount NUMERIC(18, 6)
 	DECLARE @intEntityEmployeeId AS INT
@@ -31,7 +31,7 @@ SET ANSI_WARNINGS OFF
 		,intEntityEFTInfoId
 		,intBankId
 		,strBankName
-		,strAccountNumber
+		,strAccountNumber = [dbo].fnAESDecryptASym(strAccountNumber)
 		,strDistributionType
 		,dblAmount
 	INTO #tmpEFTInfo

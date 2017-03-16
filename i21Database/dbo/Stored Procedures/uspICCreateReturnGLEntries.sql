@@ -228,6 +228,7 @@ WITH ForGLEntries_CTE (
 	,strTransactionForm
 	,strDescription
 	,dblForexRate
+	,strRateType 
 )
 AS 
 (
@@ -249,8 +250,11 @@ AS
 			,strTransactionForm = @strTransactionForm
 			,t.strDescription
 			,t.dblForexRate
+			,strRateType = currencyRateType.strCurrencyExchangeRateType
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 	-- inventory return 
@@ -272,6 +276,7 @@ AS
 			,ty.strTransactionForm 
 			,strDescription = NULL  
 			,t.dblForexRate
+			,strRateType = currencyRateType.strCurrencyExchangeRateType
 	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryReturned rtn
 				ON rtn.intInventoryTransactionId = t.intInventoryTransactionId
 			INNER JOIN tblICInventoryReceipt r
@@ -285,6 +290,10 @@ AS
 				FROM	dbo.tblICInventoryTransactionType ty
 				WHERE	ty.strName = 'Inventory Return'
 			) ty
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+
+
 	WHERE	rtn.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 			AND rtn.intTransactionTypeId = @InventoryTransactionTypeId_InventoryAdjustmentQtyChange
@@ -324,6 +333,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE  
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -396,6 +406,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -421,6 +432,7 @@ FROM	ForGLEntries_CTE
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
 		) CreditForeign
+
 WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				@InventoryTransactionTypeId_WriteOffSold
 				, @InventoryTransactionTypeId_RevalueSold
@@ -464,6 +476,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -524,6 +537,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -588,6 +602,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -648,6 +663,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId

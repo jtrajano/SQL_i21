@@ -34,7 +34,7 @@
 	,@SubCurrency				NVARCHAR(250)	= NULL OUTPUT
 	,@SubCurrencyRate			NUMERIC(18,6)	= NULL OUTPUT
 	,@PricingType				NVARCHAR(50)	= NULL OUTPUT
-	,@GetAllAvailablePricing	BIT				= 0
+	,@GetAllAvailablePricing	BIT				= 0	
 AS	
 
 	SELECT

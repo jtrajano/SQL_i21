@@ -308,5 +308,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\21_PR\4_1710_to_1720.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\Remove_Unused_Shipment_Item_Fields.sql" />
+    <None Include="Scripts\Pre-Deployment\12_EM\21_CleanAPBillMissingContact.sql" />
+
   </ItemGroup>
 </Project>

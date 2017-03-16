@@ -142,7 +142,7 @@ Begin
 
 	--Insert Into tblICItemSubLocation(intItemLocationId,intSubLocationId)
 	--Select il.intItemLocationId,sl.intCompanyLocationSubLocationId
-	--From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName 
+	--From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName
 	--Join tblICItemLocation il on sl.intCompanyLocationId=il.intLocationId
 	--where s.intStageItemId=@intStageItemId AND il.intItemId=@intItemId
 
@@ -183,17 +183,17 @@ Begin --Update
 	--add new sublocations
 	--Insert Into tblICItemSubLocation(intItemLocationId,intSubLocationId)
 	--Select il.intItemLocationId,sl.intCompanyLocationSubLocationId
-	--From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName 
+	--From tblIPItemSubLocationStage s join tblSMCompanyLocationSubLocation sl on s.strSubLocation=sl.strSubLocationName
 	--Join tblICItemLocation il on sl.intCompanyLocationId=il.intLocationId AND il.intItemId=@intItemId
-	--where s.intStageItemId=@intStageItemId AND 
-	--sl.intCompanyLocationSubLocationId NOT IN (Select isl.intSubLocationId From tblICItemSubLocation isl 
+	--where s.intStageItemId=@intStageItemId AND
+	--sl.intCompanyLocationSubLocationId NOT IN (Select isl.intSubLocationId From tblICItemSubLocation isl
 	--Join tblICItemLocation il on isl.intItemLocationId=il.intItemLocationId Where il.intItemId=@intItemId)
 
 	--Delete the SubLocation if it is marked for deletion
 	--Delete From tblICItemSubLocation
-	--Where intItemLocationId in (Select intItemLocationId From tblICItemLocation Where intItemId=@intItemId) AND 
-	--intSubLocationId IN (Select sl.intCompanyLocationSubLocationId 
-	--From tblSMCompanyLocationSubLocation sl Join tblIPItemSubLocationStage s on sl.strSubLocationName=s.strSubLocation 
+	--Where intItemLocationId in (Select intItemLocationId From tblICItemLocation Where intItemId=@intItemId) AND
+	--intSubLocationId IN (Select sl.intCompanyLocationSubLocationId
+	--From tblSMCompanyLocationSubLocation sl Join tblIPItemSubLocationStage s on sl.strSubLocationName=s.strSubLocation
 	--Where s.intStageItemId=@intStageItemId AND ISNULL(s.ysnDeleted,0)=1)
 End
 End

@@ -6,7 +6,6 @@ AS SELECT
     ,SCType.ysnTicketAllowed
     ,SCType.intNextTicketNumber
     ,SCType.intDiscountSchedule
-    ,SCType.intDiscountLocationId
     ,SCType.intDistributionMethod
     ,SCType.ysnSelectByPO
     ,SCType.intSplitInvoiceOption
@@ -21,7 +20,5 @@ AS SELECT
 		ELSE SCList.strTicketType
 	END as strTicketType
 	,SCList.strInOutIndicator
-	,SM.strLocationName
 FROM tblSCTicketType SCType
 LEFT JOIN tblSCListTicketTypes SCList ON SCType.intListTicketTypeId = SCList.intTicketTypeId
-LEFT JOIN tblSMCompanyLocation SM ON SCType.intDiscountLocationId = SM.intCompanyLocationId

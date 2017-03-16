@@ -92,6 +92,8 @@ INSERT INTO @ShipmentEntries(
 		, intStorageScheduleTypeId
 		, intDestinationGradeId
 		, intDestinationWeightId
+		, intForexRateTypeId
+		, dblForexRate
 )
 SELECT 
 		intOrderType
@@ -140,6 +142,8 @@ SELECT
 		, intStorageScheduleTypeId
 		, intDestinationGradeId
 		, intDestinationWeightId
+		, intForexRateTypeId
+		, dblForexRate
 FROM @Entries
 
 -- 2. Charges
@@ -376,6 +380,8 @@ INSERT INTO tblICInventoryShipmentItem(
 	, intStorageScheduleTypeId
 	, intDestinationGradeId
 	, intDestinationWeightId
+	, intForexRateTypeId
+	, dblForexRate
 )
 SELECT 
 	se.intShipmentId
@@ -399,6 +405,8 @@ SELECT
 	, se.intStorageScheduleTypeId
 	, se.intDestinationGradeId
 	, se.intDestinationWeightId
+	, se.intForexRateTypeId
+	, se.dblForexRate
 FROM @ShipmentEntries se
 
 -- Insert shipment charges

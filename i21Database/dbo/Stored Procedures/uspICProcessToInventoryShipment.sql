@@ -34,7 +34,9 @@ BEGIN TRY
 		, strVessel, strProNumber, strDriverId, strSealNumber, strDeliveryInstruction, dtmAppointmentTime, dtmDepartureTime
 		, dtmArrivalTime, dtmDeliveredDate, dtmFreeTime, strReceivedBy, strComment, intItemId, intOwnershipType, dblQuantity
 		, intItemUOMId, intItemLotGroup, intOrderId, intSourceId, intLineNo, intSubLocationId, intStorageLocationId, intCurrencyId
-		, intWeightUOMId, dblUnitPrice, intDockDoorId, strNotes, intGradeId, intDiscountSchedule, intStorageScheduleTypeId)
+		, intWeightUOMId, dblUnitPrice, intDockDoorId, strNotes, intGradeId, intDiscountSchedule, intStorageScheduleTypeId
+		, intForexRateTypeId, dblForexRate	
+	)
 	SELECT
 		intOrderType					= @SALES_ORDER_TYPE
 		, intSourceType					= 0
@@ -79,6 +81,8 @@ BEGIN TRY
 		, intGradeId					= NULL
 		, intDiscountSchedule			= NULL
 		, intStorageScheduleTypeId		= SODetail.intStorageScheduleTypeId
+		, intForexRateTypeId			= SODetail.intCurrencyExchangeRateTypeId
+		, dblForexRate					= SODetail.dblCurrencyExchangeRate
 		FROM dbo.tblSOSalesOrder SO
 			INNER JOIN dbo.tblSOSalesOrderDetail SODetail ON SO.intSalesOrderId = SODetail.intSalesOrderId
 			INNER JOIN dbo.tblICItemUOM ItemUOM ON SODetail.intItemId = ItemUOM.intItemId

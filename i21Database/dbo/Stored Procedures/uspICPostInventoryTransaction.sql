@@ -29,6 +29,7 @@
 	,@intInTransitSourceLocationId INT = NULL 
 	,@intForexRateTypeId INT = NULL
 	,@dblForexRate NUMERIC(38, 20) = 1
+	,@strDescription NVARCHAR(255) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -78,6 +79,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[intInTransitSourceLocationId]
 		,[intForexRateTypeId]
 		,[dblForexRate]
+		,[strDescription]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -111,6 +113,7 @@ SELECT	[intItemId]							= @intItemId
 		,[intInTransitSourceLocationId]		= @intInTransitSourceLocationId
 		,[intForexRateTypeId]				= @intForexRateTypeId
 		,[dblForexRate]						= @dblForexRate
+		,[strDescription]					= @strDescription
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 

@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKSettlementPriceImport
+﻿CREATE PROC [dbo].[uspRKSettlementPriceImport]
 AS
 BEGIN TRY
 
@@ -6,6 +6,12 @@ DECLARE @ErrMsg nvarchar(Max)
 
 DECLARE @strDateTimeFormat nvarchar(50)
 DECLARE @ConvertYear int
+DECLARE @dtmPriceDate1 nvarchar(50)
+
+	DECLARE @strMarket nvarchar(50) = null
+	DECLARE @strSettlementDate nvarchar(50) = null
+	DECLARE @intFutureMarketId int = null
+	DECLARE @intFutureSettlementPriceId int = null
 
 SELECT @strDateTimeFormat = strDateTimeFormat FROM tblRKCompanyPreference
 
@@ -15,68 +21,67 @@ ELSE IF (@strDateTimeFormat = 'DD MM YYYY HH:MI' OR @strDateTimeFormat ='YYYY DD
 SELECT @ConvertYear=103
 
 
-DECLARE @strMarketValidation1 nvarchar(50)
-DECLARE @dtmPriceDate1 nvarchar(50)
+BEGIN TRAN
 
-IF (SELECT COUNT(*) FROM (SELECT DISTINCT (LTRIM(RTRIM(strFutureMarket))) strFutureMarket 
-							FROM tblRKSettlementPriceImport)t) > 1
+IF NOT EXISTS(SELECT intImportSettlementPriceId FROM tblRKSettlementPriceImport_ErrLog)
 BEGIN
- RAISERROR('Upload file should contain data for only one market.',16,1)
-END
-ELSE
-BEGIN
+DECLARE @mRowNumber INT
+SELECT ROW_NUMBER()  OVER (ORDER BY strFutureMarket) intRowNum,strFutureMarket INTO #temp from(
+SELECT DISTINCT strFutureMarket  FROM tblRKSettlementPriceImport)t
 
-	SELECT TOP 1 @strMarketValidation1=ltrim(rtrim(strFutureMarket)) FROM tblRKSettlementPriceImport
-	
-	if Not Exists(select * from tblRKFutureMarket where strFutMarketName=@strMarketValidation1) 
+
+SELECT @mRowNumber = MIN(intRowNum) FROM #temp
+WHILE @mRowNumber > 0
 	BEGIN
-		RAISERROR('Invalid market.',16,1)
+
+	set @strMarket  = ''
+	set @strSettlementDate  = ''
+	set @intFutureMarketId = null
+	set @intFutureSettlementPriceId = null
+
+	SELECT @strMarket=strFutureMarket from #temp where intRowNum=@mRowNumber
+
+		IF (SELECT COUNT(*) FROM (SELECT DISTINCT (LTRIM(RTRIM(dtmPriceDate))) dtmPriceDate 
+							FROM tblRKSettlementPriceImport where strFutureMarket=@strMarket)t) > 1							
+	BEGIN
+	 RAISERROR('Upload file should contain data for only one date/time combination.',16,1)
 	END
-END
+	
+	SELECT  @dtmPriceDate1=(LTRIM(RTRIM(dtmPriceDate)))  FROM tblRKSettlementPriceImport where strFutureMarket=@strMarket
 
-IF (SELECT COUNT(*) FROM (SELECT DISTINCT (LTRIM(RTRIM(dtmPriceDate))) dtmPriceDate 
-							FROM tblRKSettlementPriceImport)t) > 1							
-BEGIN
- RAISERROR('Upload file should contain data for only one date/time combination.',16,1)
-END
-
-SELECT TOP 1  @dtmPriceDate1=(LTRIM(RTRIM(dtmPriceDate)))  FROM tblRKSettlementPriceImport
-
-If 	EXISTS(SELECT * FROM tblRKFuturesSettlementPrice sp
+	If 	EXISTS(SELECT * FROM tblRKFuturesSettlementPrice sp
 			JOIN tblRKFutureMarket fm on sp.intFutureMarketId=fm.intFutureMarketId 
-			WHERE fm.strFutMarketName= @strMarketValidation1 
+			WHERE fm.strFutMarketName= @strMarket
 			AND convert(datetime,dtmPriceDate,@ConvertYear)=convert(datetime,@dtmPriceDate1,@ConvertYear))
 			BEGIN
 			RAISERROR('A record already exists for this market and date/time.',16,1)
 			END
 
-BEGIN TRAN
+	
+	SELECT @strMarket=ltrim(rtrim(strFutureMarket)),@strSettlementDate=CONVERT(DATETIME,dtmPriceDate,@ConvertYear) FROM tblRKSettlementPriceImport where strFutureMarket=@strMarket
+	SELECT @intFutureMarketId=intFutureMarketId from tblRKFutureMarket where strFutMarketName=@strMarket
 
-IF NOT EXISTS(SELECT intImportSettlementPriceId FROM tblRKSettlementPriceImport_ErrLog)
-BEGIN
-	DECLARE @strMarketValidation nvarchar(50)
-	DECLARE @strSettlementDate nvarchar(50)
-	DECLARE @intFutureMarketId int
-	DECLARE @intFutureSettlementPriceId int = null
-
-	SELECT TOP 1 @strMarketValidation=ltrim(rtrim(strFutureMarket)),@strSettlementDate=convert(datetime,dtmPriceDate,@ConvertYear) FROM tblRKSettlementPriceImport
-	SELECT @intFutureMarketId=intFutureMarketId from tblRKFutureMarket where strFutMarketName=@strMarketValidation
 
 	INSERT INTO tblRKFuturesSettlementPrice VALUES(@intFutureMarketId,@strSettlementDate,1)
 	SELECT @intFutureSettlementPriceId = scope_Identity()
--- Insert Futures Month settlement Price	
+
+--Insert Futures Month settlement Price	
 	INSERT INTO tblRKFutSettlementPriceMarketMap (intConcurrencyId,intFutureSettlementPriceId,intFutureMonthId,dblLastSettle,dblLow,dblHigh,strComments)
 	SELECT 1,@intFutureSettlementPriceId,intFutureMonthId,dblLastSettle,dblLow,dblHigh,strFutComments FROM tblRKSettlementPriceImport i
-	JOIN tblRKFuturesMonth fm on fm.strFutureMonth=replace(i.strFutureMonth ,'-',' ')
-	WHERE strInstrumentType='Futures' and intFutureMarketId=@intFutureMarketId
+	JOIN tblRKFuturesMonth fm on fm.strFutureMonth=replace(i.strFutureMonth ,'-',' ') and intFutureMarketId=@intFutureMarketId
+	WHERE strInstrumentType='Futures' and strFutureMarket=@strMarket
 
-	-- Insert Options Month settlement Price	
+-- Insert Options Month settlement Price	
 	INSERT INTO tblRKOptSettlementPriceMarketMap (intConcurrencyId,intFutureSettlementPriceId,intOptionMonthId,dblStrike,intTypeId,dblSettle,dblDelta,strComments)
 	SELECT 1,@intFutureSettlementPriceId,intOptionMonthId,dblStrike,CASE WHEN strType = 'Put' THEN 1 
 																		WHEN strType = 'Call' THEN 2 ELSE 0 END,
 			  dblSettle,dblDelta,strFutComments FROM tblRKSettlementPriceImport i
-	JOIN tblRKOptionsMonth fm on fm.strOptionMonth=replace(i.strFutureMonth ,'-',' ') 
-	WHERE strInstrumentType like 'Opt%' and intFutureMarketId=@intFutureMarketId
+	JOIN tblRKOptionsMonth fm on fm.strOptionMonth=replace(i.strFutureMonth ,'-',' ')  and intFutureMarketId=@intFutureMarketId
+	WHERE strInstrumentType like 'Opt%' and strFutureMarket=@strMarket
+
+select * from tblRKFutSettlementPriceMarketMap
+SELECT @mRowNumber = MIN(intRowNum)	FROM #temp	WHERE intRowNum > @mRowNumber
+END
 
 END
 
@@ -92,4 +97,5 @@ BEGIN CATCH
  IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION    
  SET @ErrMsg = ERROR_MESSAGE()  
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
-End Catch	
+End Catch
+

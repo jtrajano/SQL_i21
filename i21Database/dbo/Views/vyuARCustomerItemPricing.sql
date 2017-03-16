@@ -138,7 +138,7 @@ CROSS APPLY
 		,ARI.[intEntityCustomerId]	--@CustomerId
 		,ARI.[intCompanyLocationId]	--@LocationId
 		,ARID.[intItemUOMId]		--@ItemUOMId
-		,ARI.[intCurrencyId]		--@CurrencyId
+		,ISNULL(ARI.intCurrencyId, (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference))		--@CurrencyId
 		,ARI.[dtmDate]				--@TransactionDate
 		,ARID.[dblQtyShipped]		--@Quantity
 		,NULL						--@ContractHeaderId

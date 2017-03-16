@@ -20,7 +20,7 @@ FROM (
 		, strSourceNumber = NULL
 		, POView.intItemId
 		, strItemNo
-		, strItemDescription = strDescription
+		, strItemDescription = POView.strDescription
 		, dblQtyToReceive = dblQtyOrdered - dblQtyReceived
 		, intLoadToReceive = NULL
 		, dblUnitCost = dblCost
@@ -62,6 +62,9 @@ FROM (
 		, strSubCurrency = CAST(NULL AS NVARCHAR(50)) 
 		, dblGross = CAST(0 AS NUMERIC(38, 20)) -- There is no gross from PO
 		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from PO
+		, intForexRateTypeId = POView.intForexRateTypeId
+		, strForexRateType = currencyType.strCurrencyExchangeRateType
+		, dblForexRate = POView.dblForexRate
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -75,6 +78,8 @@ FROM (
                 ON GrossNetUOM.intItemUOMId = DefaultGrossNetUOM.intGrossNetUOMId
             LEFT JOIN dbo.tblICUnitMeasure GrossNetName 
                 ON GrossNetName.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyType 
+				ON currencyType.intCurrencyExchangeRateTypeId = POView.intForexRateTypeId
 	WHERE ysnCompleted = 0
 		
 ) tblAddOrders

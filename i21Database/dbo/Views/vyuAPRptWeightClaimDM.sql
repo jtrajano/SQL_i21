@@ -88,6 +88,7 @@ FROM
 		,dblFranchiseWeight		=	WC2Details.dblFranchiseWeight
 		,dblClaimAmount			=	WC2Details.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
+		,strContainerNumber		=	ISNULL(LCointainer.strContainerNumber, (SELECT TOP 1 LoadContainer.strContainerNumber FROM tblLGLoadContainer LoadContainer WHERE LoadContainer.intLoadId = WC2Details.intLoadId))
 	FROM tblAPBill WC2
 	INNER JOIN tblAPBillDetail WC2Details ON WC2.intBillId = WC2Details.intBillId
 	INNER JOIN tblICItem Item ON Item.intItemId = WC2Details.intItemId
@@ -136,6 +137,7 @@ FROM
 		,dblFranchiseWeight		=	0 --DMDetails.dblFranchiseWeight
 		,dblClaimAmount			=	0 --DMDetails.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
+		,strContractNumber		=	LCointainer.strContainerNumber
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
@@ -153,6 +155,7 @@ FROM
 			ON ContractDetail.intItemContractId = ItemContract.intItemContractId
 	LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = Item.intOriginId
 	LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
+	LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
 	WHERE DM.intTransactionType = 3
 	UNION ALL -- Voucher
 	--SELECT

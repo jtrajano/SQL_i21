@@ -19,11 +19,17 @@ SELECT
 	,[dtmDueDate]				= ARIFP.[dtmDueDate]
 	,[dtmPostDate]				= ARIFP.[dtmPostDate]
 	,[dblInvoiceTotal]			= ARIFP.[dblInvoiceTotal]
+	,[dblBaseInvoiceTotal]		= ARIFP.[dblBaseInvoiceTotal]
 	,[dblDiscount]				= ARIFP.[dblDiscount]
+	,[dblBaseDiscount]			= ARIFP.[dblBaseDiscount]
 	,[dblDiscountAvailable]		= ARIFP.[dblDiscountAvailable]
+	,[dblBaseDiscountAvailable]	= ARIFP.[dblBaseDiscountAvailable]
 	,[dblInterest]				= ARIFP.[dblInterest]
+	,[dblBaseInterest]			= ARIFP.[dblBaseInterest]
 	,[dblAmountDue]				= ARIFP.[dblAmountDue]
+	,[dblBaseAmountDue]			= ARIFP.[dblBaseAmountDue]
 	,[dblPayment]				= ARIFP.[dblPayment]
+	,[dblBasePayment]			= ARIFP.[dblBasePayment]
 	,[ysnPosted]				= ARIFP.[ysnPosted]
 	,[ysnPaid]					= ARIFP.[ysnPaid]
 	,[intPaymentId]				= ARIFP.[intPaymentId]
@@ -45,6 +51,10 @@ SELECT
 	,[ysnExcludeForPayment]		= ARIFP.[ysnExcludeForPayment]
 	,[intPaymentMethodId]		= ARIFP.[intPaymentMethodId]	
 	,[strPaymentMethod]			= ARIFP.[strPaymentMethod]
+	,[intCurrencyExchangeRateTypeId]	= DFR.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]		= DFR.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]		= DFR.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= DFR.[dblCurrencyExchangeRate]
 FROM
 	(
 		SELECT 
@@ -66,11 +76,17 @@ FROM
 			,[dtmDueDate]				= ARI.[dtmDueDate]
 			,[dtmPostDate]				= ARI.[dtmPostDate]
 			,[dblInvoiceTotal]			= ARI.[dblInvoiceTotal]
+			,[dblBaseInvoiceTotal]		= ARI.[dblBaseInvoiceTotal]
 			,[dblDiscount]				= ARI.[dblDiscount]
+			,[dblBaseDiscount]			= ARI.[dblBaseDiscount]
 			,[dblDiscountAvailable]		= ARI.[dblDiscountAvailable]
+			,[dblBaseDiscountAvailable]	= ARI.[dblBaseDiscountAvailable]
 			,[dblInterest]				= ARI.[dblInterest]
+			,[dblBaseInterest]			= ARI.[dblBaseInterest]
 			,[dblAmountDue]				= ARI.[dblAmountDue]
+			,[dblBaseAmountDue]			= ARI.[dblBaseAmountDue]
 			,[dblPayment]				= ARI.[dblPayment]
+			,[dblBasePayment]			= ARI.[dblBasePayment]
 			,[ysnPosted]				= ARI.[ysnPosted]
 			,[ysnPaid]					= ARI.[ysnPaid]
 			,[intPaymentId]				= ARI.[intPaymentId]
@@ -143,11 +159,17 @@ FROM
 			,[dtmDueDate]				= APB.[dtmDueDate]
 			,[dtmPostDate]				= APB.[dtmBillDate]
 			,[dblInvoiceTotal]			= APB.[dblTotal]
+			,[dblBaseInvoiceTotal]		= APB.[dblTotal]
 			,[dblDiscount]				= APB.[dblDiscount]
+			,[dblBaseDiscount]			= APB.[dblDiscount]
 			,[dblDiscountAvailable]		= CAST(0 AS DECIMAL(18,6))
+			,[dblBaseDiscountAvailable]	= CAST(0 AS DECIMAL(18,6))
 			,[dblInterest]				= APB.[dblInterest]
+			,[dblBaseInterest]			= APB.[dblInterest]
 			,[dblAmountDue]				= APB.[dblAmountDue]
+			,[dblBaseAmountDue]			= APB.[dblAmountDue]
 			,[dblPayment]				= APB.[dblPayment]
+			,[dblBasePayment]			= APB.[dblPayment]
 			,[ysnPosted]				= APB.[ysnPosted]
 			,[ysnPaid]					= APB.[ysnPaid]
 			,[intPaymentId]				= NULL
@@ -213,3 +235,5 @@ LEFT OUTER JOIN
 		tblSMCompanyLocation
 	) SMCL
 		ON ARIFP.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
+CROSS APPLY
+		[dbo].[fnARGetDefaultForexRate](ARIFP.[dtmDate], ARIFP.[intCurrencyId], NULL) DFR

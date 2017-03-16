@@ -3,24 +3,22 @@
 AS 
 
 
-	SELECT	PF.intPriceContractId,
+	SELECT	PF.*,
+
 			PD.intPriceFixationDetailId,
 			PD.intConcurrencyId,
-			PD.intPriceFixationId,
 			PD.strTradeNo,
 			PD.strOrder,
 			PD.dtmFixationDate,
-			PD.dblQuantity,
+			PD.dblQuantity			AS dblDtlQty,
 			PD.intQtyItemUOMId,
-			PD.[dblNoOfLots],
-			PD.intFutureMarketId,
-			PD.intFutureMonthId,
+			PD.[dblNoOfLots]		AS dblDtlNoOfLots,
 			PD.dblFixationPrice,
-			PD.dblFutures,
-			PD.dblBasis,
+			PD.dblFutures			AS dblDtlFutures,
+			PD.dblBasis				AS dblDtlBasis,
 			PD.dblPolRefPrice,
 			PD.dblPolPremium,
-			PD.dblCashPrice,
+			PD.dblCashPrice			AS dblDtlCashPrice,
 			PD.intPricingUOMId,
 			PD.ysnHedge,
 			PD.dblHedgePrice,
@@ -28,20 +26,19 @@ AS
 			PD.intBrokerId,
 			PD.intBrokerageAccountId,
 			PD.intFutOptTransactionId,
-			PD.dblFinalPrice,
+			PD.dblFinalPrice		AS dblDtlFinalPrice,
 			PD.strNotes,
 
-			EY.strName	AS strBroker,
-			CM.strUnitMeasure AS strPricingUOM,
-			UM.strUnitMeasure AS strQuantityUOM,
+			EY.strName				AS strBroker,
+			CM.strUnitMeasure		AS strPricingUOM,
+			UM.strUnitMeasure		AS strQuantityUOM,
 			BA.strAccountNumber,
 			MA.strOptMarketName,
 			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') AS strPricingMonth,
-			REPLACE(HO.strFutureMonth,' ','('+HO.strSymbol+') ') AS strHedgeMonth,
-			CU.intCommodityId
+			REPLACE(HO.strFutureMonth,' ','('+HO.strSymbol+') ') AS strHedgeMonth
 
-	FROM	tblCTPriceFixationDetail PD
-	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId		LEFT
+	FROM	tblCTPriceFixationDetail	PD
+	JOIN	vyuCTSearchPriceContract	PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId		LEFT
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId					=	PD.intBrokerId				LEFT
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PD.intPricingUOMId			LEFT
 	JOIN	tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId			LEFT

@@ -258,6 +258,7 @@ BEGIN
 		,ysnPrice
 		,ysnInventoryCost
 		,dblForexRate
+		,strRateType
 	)
 	AS 
 	(
@@ -277,14 +278,15 @@ BEGIN
 					END 
 				,intTransactionTypeId  = @intTransactionTypeId
 				,intCurrencyId = ISNULL(ReceiptCharges.intCurrencyId, Receipt.intCurrencyId)  
-				,dblExchangeRate = ReceiptCharges.dblForexRate
+				,dblExchangeRate = ISNULL(ReceiptCharges.dblForexRate, 1) 
 				,ReceiptItem.intInventoryReceiptItemId
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
 				,AllocatedOtherCharges.ysnAccrue
 				,AllocatedOtherCharges.ysnPrice
 				,AllocatedOtherCharges.ysnInventoryCost
-				,ReceiptCharges.dblForexRate
+				,dblForexRate = ISNULL(ReceiptCharges.dblForexRate, 1) 
+				,strRateType = currencyRateType.strCurrencyExchangeRateType
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
@@ -300,6 +302,8 @@ BEGIN
 					AND ChargeItemLocation.intLocationId = Receipt.intLocationId
 				LEFT JOIN dbo.tblICInventoryTransactionType TransType
 					ON TransType.intTransactionTypeId = @intTransactionTypeId
+				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharges.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 				
 	)
@@ -343,6 +347,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType
 	FROM	ForGLEntries_CTE  
 			INNER JOIN @ItemGLAccounts ItemGLAccounts
 				ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
@@ -399,6 +404,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -461,6 +467,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -517,6 +524,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId

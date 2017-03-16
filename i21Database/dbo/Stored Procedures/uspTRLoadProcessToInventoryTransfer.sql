@@ -91,8 +91,8 @@ END
 		,[strTransferType]          = 'Location to Location'
 		,[intSourceType]            = 3
 		,[strDescription]           = MIN(IC.strDescription)
-		,[intFromLocationId]        = MIN(TR.intCompanyLocationId)
-		,[intToLocationId]          = MIN(DH.intCompanyLocationId)
+		,[intFromLocationId]        = TR.intCompanyLocationId
+		,[intToLocationId]          = DH.intCompanyLocationId
 		,[ysnShipmentRequired]      = 0
 		,[intStatusId]              = 1
 		,[intShipViaId]             = MIN(TL.intShipViaId)
@@ -137,7 +137,7 @@ END
 			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
 			OR (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
 			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 OR TR.dblFreightRate != 0 OR TR.dblPurSurcharge != 0)))
-	GROUP BY TR.intLoadReceiptId
+	GROUP BY TR.intLoadReceiptId, TR.intCompanyLocationId, DH.intCompanyLocationId
 
 	--if No Records to Process exit
     SELECT @total = COUNT(*) FROM @TransferEntries;

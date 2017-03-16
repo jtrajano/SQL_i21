@@ -10,6 +10,7 @@ BEGIN
 	-- Variables used in the validations. 
 	DECLARE @strItemNo AS NVARCHAR(50)
 			,@intItemId AS INT 
+			,@strTransactionId AS NVARCHAR(50)
 END 
 
 -- Validate 
@@ -101,6 +102,34 @@ BEGIN
 		-- Vendor for {Other Charge Item} is required to accrue.
 		RAISERROR(80088, 11, 1, @strItemNo)
 		GOTO _Exit
+	END 
+END 
+
+-- Validate
+BEGIN 
+	-- Check if the transaction is using a foreign currency and it has a missing forex rate. 
+	SELECT @strItemNo = NULL
+			, @intItemId = NULL 
+			, @strTransactionId = NULL 
+
+	SELECT TOP 1 
+			@strTransactionId = Shipment.strShipmentNumber 
+			,@strItemNo = Item.strItemNo
+			,@intItemId = Item.intItemId
+	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge OtherCharge
+				ON Shipment.intInventoryShipmentId = OtherCharge.intInventoryShipmentId	
+			INNER JOIN tblICItem Item
+				ON Item.intItemId = OtherCharge.intChargeId
+	WHERE	ISNULL(OtherCharge.dblForexRate, 0) = 0 
+			AND OtherCharge.intCurrencyId IS NOT NULL 
+			AND OtherCharge.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+			AND Shipment.intInventoryShipmentId = @intInventoryShipmentId
+
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- '{Transaction Id} is using a foreign currency. Please check if {Charge No} has a forex rate.'
+		RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo)
+		RETURN -1
 	END 
 END 
 
@@ -315,6 +344,7 @@ BEGIN
 		,ysnAccrue
 		,ysnPrice
 		,dblForexRate
+		,strRateType
 	)
 	AS 
 	(
@@ -328,13 +358,14 @@ BEGIN
 				,dblCost = AllocatedOtherCharges.dblAmount
 				,intTransactionTypeId  = @intTransactionTypeId
 				,intCurrencyId = ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId) 
-				,dblExchangeRate = 1
+				,dblExchangeRate = ISNULL(ShipmentCharges.dblForexRate, 1) 
 				,ShipmentItem.intInventoryShipmentItemId
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
 				,AllocatedOtherCharges.ysnAccrue
 				,AllocatedOtherCharges.ysnPrice
-				,ShipmentCharges.dblForexRate
+				,dblForexRate = ISNULL(ShipmentCharges.dblForexRate, 1) 
+				,strRateType = currencyRateType.strCurrencyExchangeRateType
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem 
 					ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 				INNER JOIN dbo.tblICInventoryShipmentItemAllocatedCharge AllocatedOtherCharges
@@ -350,6 +381,9 @@ BEGIN
 					AND ChargeItemLocation.intLocationId = Shipment.intShipFromLocationId
 				LEFT JOIN dbo.tblICInventoryTransactionType TransType
 					ON TransType.intTransactionTypeId = @intTransactionTypeId
+				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+					ON currencyRateType.intCurrencyExchangeRateTypeId = ShipmentCharges.intForexRateTypeId
+
 		WHERE	Shipment.intInventoryShipmentId = @intInventoryShipmentId
 				
 	)
@@ -394,6 +428,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType
 	FROM	ForGLEntries_CTE  
 			INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
@@ -451,6 +486,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+			,strRateType				= ForGLEntries_CTE.strRateType
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId

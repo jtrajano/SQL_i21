@@ -69,14 +69,18 @@ EXEC [uspRKM2MInquiryTransaction]   @intM2MBasisId  = @intM2MBasisId,
                   @intLocationId = @intLocationId,
                   @intMarketZoneId = @intMarketZoneId
 
-SELECT cd.*,e.strName as strProducer,ch.intProducerId into #temp FROM @tblFinalDetail cd
-JOIN tblCTContractHeader ch on ch.intContractHeaderId=cd.intContractHeaderId
+SELECT cd.*,case when isnull(ysnRiskToProducer,0)=1 then e.strName else null end as strProducer,
+			case when isnull(ysnRiskToProducer,0)=1 then ch.intProducerId  else null end intProducerId into #temp FROM @tblFinalDetail cd
+JOIN tblCTContractDetail ch on ch.intContractHeaderId=cd.intContractHeaderId
 LEFT JOIN tblEMEntity e on e.intEntityId=ch.intProducerId
 
 IF (ISNULL(@ysnVendorProducer,0)=0)
 BEGIN
 	select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
-              dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue, dblTotalSpend
+              CONVERT(NUMERIC(16,2),dblFixedPurchaseVolume) dblFixedPurchaseVolume, CONVERT(NUMERIC(16,2),dblUnfixedPurchaseVolume) dblUnfixedPurchaseVolume
+			  , CONVERT(NUMERIC(16,2),dblTotalCommittedVolume) dblTotalCommittedVolume, CONVERT(NUMERIC(16,2),dblFixedPurchaseValue) dblFixedPurchaseValue,
+			   CONVERT(NUMERIC(16,2),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue, CONVERT(NUMERIC(16,2),dblTotalCommittedValue) dblTotalCommittedValue,
+			    CONVERT(NUMERIC(16,2),dblTotalSpend) dblTotalSpend
 			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,
 			  case when (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) < 0 then 0 else (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) end  dblPotentialAdditionalVolume, 0 as intConcurrencyId
 			  from (
@@ -98,8 +102,8 @@ BEGIN
        FROM(
        SELECT strEntityName strVendorName,strRiskIndicator strRating,
                      dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue
-                     ,(isnull(dblTotalCommittedValue,0)/ SUM(CASE WHEN ISNULL(dblTotalCommittedValue,0)=0 then 1 else dblTotalCommittedValue end) OVER ())*100 as dblTotalSpend
-                     , (isnull(dblTotalCommittedVolume,0)/ CASE WHEN ISNULL(dblRiskTotalBusinessVolume,0) =0 then 1 else dblRiskTotalBusinessVolume end)*100 as dblShareWithSupplier
+                       ,(isnull(dblTotalCommittedValue,0)/ SUM(CASE WHEN ISNULL(dblTotalCommittedValue,0)=0 then 1 else dblTotalCommittedValue end) OVER ())*100 as dblTotalSpend
+                      , (CASE WHEN ISNULL(dblRiskTotalBusinessVolume,0) =0 then 0 else isnull(dblTotalCommittedVolume,0)/dblRiskTotalBusinessVolume end)*100 as dblShareWithSupplier
                      ,dblResult as dblMToM,dblCompanyExposurePercentage,dblSupplierSalesPercentage
        FROM (
        SELECT strEntityName,dblFixedPurchaseVolume as dblFixedPurchaseVolume,
@@ -130,7 +134,7 @@ BEGIN
                                   case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyPrice
        
                                   ,dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
-                           fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
+                                  fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
                                   fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))/
                                   case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyUnFixedPrice                       
 
@@ -165,7 +169,10 @@ ELSE
 BEGIN
 
 	select convert(int,row_number() OVER(ORDER BY strVendorName)) intRowNum, strVendorName,strRating,
-              dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue, dblTotalSpend
+                   CONVERT(NUMERIC(16,2),dblFixedPurchaseVolume) dblFixedPurchaseVolume, CONVERT(NUMERIC(16,2),dblUnfixedPurchaseVolume) dblUnfixedPurchaseVolume
+			  , CONVERT(NUMERIC(16,2),dblTotalCommittedVolume) dblTotalCommittedVolume, CONVERT(NUMERIC(16,2),dblFixedPurchaseValue) dblFixedPurchaseValue,
+			   CONVERT(NUMERIC(16,2),dblUnfixedPurchaseValue) dblUnfixedPurchaseValue, CONVERT(NUMERIC(16,2),dblTotalCommittedValue) dblTotalCommittedValue,
+			    CONVERT(NUMERIC(16,2),dblTotalSpend) dblTotalSpend
 			  ,dblShareWithSupplier ,dblMToM,dblCompanyExposurePercentage,
 			  case when (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) < 0 then 0 else (isnull(dblPotentialAdditionalVolume,0)-isnull(dblTotalCommittedVolume,0)) end  dblPotentialAdditionalVolume, 0 as intConcurrencyId
 			  from (
@@ -190,8 +197,10 @@ BEGIN
        SELECT strEntityName strVendorName,strRiskIndicator strRating,
                      dblFixedPurchaseVolume,dblUnfixedPurchaseVolume,dblTotalCommittedVolume,dblFixedPurchaseValue,dblUnfixedPurchaseValue,dblTotalCommittedValue
                      ,(isnull(dblTotalCommittedValue,0)/ SUM(CASE WHEN ISNULL(dblTotalCommittedValue,0)=0 then 1 else dblTotalCommittedValue end) OVER ())*100 as dblTotalSpend
-                     , (isnull(dblTotalCommittedVolume,0)/ CASE WHEN ISNULL(dblRiskTotalBusinessVolume,0) =0 then 1 else dblRiskTotalBusinessVolume end)*100 as dblShareWithSupplier
-                     ,dblResult as dblMToM,dblCompanyExposurePercentage,dblSupplierSalesPercentage
+
+                     , (CASE WHEN ISNULL(dblRiskTotalBusinessVolume,0) =0 then 0 else isnull(dblTotalCommittedVolume,0)/dblRiskTotalBusinessVolume end)*100 as dblShareWithSupplier
+                     
+					 ,dblResult as dblMToM,dblCompanyExposurePercentage,dblSupplierSalesPercentage
        FROM (
        SELECT strEntityName,CONVERT(NUMERIC(16,2),dblFixedPurchaseVolume) as dblFixedPurchaseVolume,
                                          CONVERT(NUMERIC(16,2),dblUnfixedPurchaseVolume) as dblUnfixedPurchaseVolume,
@@ -214,6 +223,7 @@ BEGIN
                                   sum(dblResult) dblResult,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage 
                                   FROM(
                                   SELECT isnull(strProducer,strEntityName) strEntityName,dblOpenQty as dblOpenQty,
+
                                   dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                                                        fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
                                   fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))/

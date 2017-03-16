@@ -343,6 +343,7 @@ BEGIN
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]
+			,[strRateType]
 		)	
 		EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 			@intTransactionId
@@ -676,6 +677,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[strRateType]
 				)
 				EXEC	@intReturnValue = dbo.uspICPostCosting  
 						@CompanyOwnedItemsForPost  
@@ -958,6 +960,7 @@ BEGIN
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]
+			,[strRateType]
 		)	
 		EXEC dbo.uspICPostInventoryReceiptTaxes 
 			@intTransactionId
@@ -1010,6 +1013,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
@@ -1064,6 +1068,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 			)	
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptOtherCharges 
 				@intTransactionId
@@ -1108,6 +1113,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 			)	
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptTaxes 
 				@intTransactionId

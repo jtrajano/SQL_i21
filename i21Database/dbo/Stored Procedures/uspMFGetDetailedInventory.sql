@@ -1,4 +1,4 @@
-﻿Create Procedure uspMFGetDetailedInventory(@strCustomerName NVARCHAR(50))
+﻿CREATE PROCEDURE uspMFGetDetailedInventory (@strCustomerName NVARCHAR(50))
 AS
 DECLARE @intOwnerId INT
 
@@ -9,33 +9,32 @@ JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId
 WHERE strName = @strCustomerName
 	AND strEntityNo <> ''
 
-
-SELECT E.strName AS strOwner
-	,I.strItemNo
-	,I.strDescription
-	,PL.strParentLotNumber AS strLotId
-	,L.dtmDateCreated
-	,strVendorLotNo
-	,L.dtmManufacturedDate
-	,L.dtmExpiryDate
-	,L.strLotNumber AS strPalletId
+SELECT E.strName AS [Owner]
+	,I.strItemNo AS [Item No]
+	,I.strDescription AS [Item Desc]
+	,PL.strParentLotNumber AS [Lot No]
+	,L.dtmDateCreated AS [Created Date]
+	,strVendorLotNo AS [Vendor Lot No]
+	,L.dtmManufacturedDate AS [Manufactured Date]
+	,L.dtmExpiryDate AS [Expiry Date]
+	,L.strLotNumber AS [Pallet No]
 	,CASE 
 		WHEN L.intLotStatusId = 1
 			THEN L.dblQty
 		ELSE 0
-		END AS dblActiveQty
+		END AS [Active Qty]
 	,CASE 
 		WHEN L.intLotStatusId <> 1
 			THEN L.dblQty
 		ELSE 0
-		END AS dblInactiveQty
-	,UM.strUnitMeasure
-	,SL.strName AS strStorageLocation
-	,LS.strSecondaryStatus
-	,L.dblWeight
+		END AS [Inactive Qty]
+	,UM.strUnitMeasure AS UOM
+	,SL.strName AS [Storage Location]
+	,LS.strSecondaryStatus [Lot Status]
+	,L.dblWeight AS Weight
 FROM dbo.tblICLot L
 JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-JOIN dbo.tblICItem I ON I.intItemId = I.intItemId
+JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId

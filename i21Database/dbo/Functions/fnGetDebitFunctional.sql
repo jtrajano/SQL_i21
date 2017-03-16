@@ -20,8 +20,10 @@ AS
 RETURN 
 SELECT Value = 
 		CASE 
-			WHEN ISNULL(@intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(@forexRate, 1) <> 0 THEN 
-				ROUND(CASE WHEN @value > 0 THEN @value * @forexRate ELSE 0 END, 2) 			
+			WHEN ISNULL(@intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(@forexRate, 0) <> 0 THEN 
+				ROUND(CASE WHEN @value > 0 THEN @value * @forexRate ELSE 0 END, 2) 
+			WHEN ISNULL(@intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 
+				ROUND(CASE WHEN @value > 0 THEN @value ELSE 0 END, 2) 
 			ELSE
 				0 -- ROUND(CASE WHEN @value > 0 THEN @value ELSE 0 END, 2) 
 		END 

@@ -118,7 +118,9 @@ BEGIN
 	DECLARE @ysnSiteAcceptCreditCard	BIT = 0
 	--LOGS--
 
+	DECLARE @ysnVehicleRequire			BIT = 0
 	DECLARE @intOverFilledTransactionId INT = NULL
+	DECLARE @intAccountId				INT = 0
 	DECLARE @intCardId					INT = 0
 	DECLARE @intVehicleId				INT	= 0
 	DECLARE @intProductId				INT	= 0
@@ -215,6 +217,13 @@ BEGIN
 
 	IF(@strNetworkType = 'PacPride')
 	BEGIN
+		-----------ORIGINAL GROSS PRICE-------
+		IF(@dblOriginalGrossPrice IS NULL OR @dblOriginalGrossPrice = 0)
+		BEGIN
+		SET @dblOriginalGrossPrice = @dblTransferCost
+		END
+		
+		-----------TRANSACTION TYPE-----------
 		IF(@intSellingHost = @intParticipantNo AND @intBuyingHost = @intParticipantNo)
 		BEGIN
 			SET @strTransactionType = 'Local/Network'
@@ -489,6 +498,16 @@ BEGIN
 	BEGIN
 		SET @intCardId = NULL
 	END
+	ELSE
+	BEGIN
+		SELECT TOP 1
+			 @intAccountId = a.intAccountId
+			,@ysnVehicleRequire = a.ysnVehicleRequire
+		FROM tblCFCard as c
+		INNER JOIN tblCFAccount as a
+		ON c.intAccountId = a.intAccountId
+		WHERE intCardId = @intCardId
+	END
 
 	IF(@intProductId = 0)
 	BEGIN
@@ -516,10 +535,18 @@ BEGIN
 	SET @intARItemLocationId = (SELECT TOP 1 intARLocationId
 								FROM tblCFSite 
 								WHERE intSiteId = @intSiteId)
-
-	SET @intVehicleId =(SELECT TOP 1 intVehicleId
+	
+	IF(@intAccountId IS NOT NULL AND @intAccountId != 0 AND @strVehicleId != 0)
+	BEGIN
+		SET @intVehicleId =
+						(SELECT TOP 1 intVehicleId
 						FROM tblCFVehicle
-						WHERE strVehicleNumber	= @strVehicleId)
+						WHERE strVehicleNumber	= @strVehicleId AND intAccountId = @intAccountId)
+	END
+	ELSE
+	BEGIN
+		SET @intVehicleId = NULL
+	END
 	------------------------------------------------------------
 
 
@@ -612,6 +639,13 @@ BEGIN
 		BEGIN
 			SET @ysnInvalid = 1
 		END
+		IF(@intVehicleId = 0 OR @intVehicleId IS NULL)
+		BEGIN
+			SET @intVehicleId = NULL
+			SET @ysnInvalid = 1
+		END
+
+		
 
 		---- DUPLICATE CHECK -- 
 		--SELECT @intDupTransCount = COUNT(*)
@@ -805,6 +839,17 @@ BEGIN
 
 			RETURN;
 		END
+		IF((@intVehicleId = 0 OR @intVehicleId IS NULL) AND @strTransactionType != 'Foreign Sale')
+		BEGIN
+			IF(@ysnVehicleRequire = 1)
+			BEGIN
+				INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+				VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
+
+				INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')
+			END
+		END
+
 		
 		
 
@@ -997,7 +1042,7 @@ BEGIN
 				WHERE intTransactionId = @Pk
 					
 		END
-		ELSE IF (@strPriceMethod = 'Contracts - Customer Pricing' OR @strPriceMethod = 'Contract Pricing')
+		ELSE IF (@strPriceMethod = 'Contracts' OR @strPriceMethod = 'Contract Pricing')
 		BEGIN
 
 				IF(@intPrcAvailableQuantity < @dblQuantity)

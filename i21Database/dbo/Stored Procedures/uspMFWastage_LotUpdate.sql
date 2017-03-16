@@ -110,7 +110,8 @@ BEGIN TRY
 			,[dblCreditReport]
 			,[dblReportingRate]
 			,[dblForeignRate]
-			)
+			,[strRateType]
+		)
 		EXEC uspICUnpostCosting @intBatchId
 			,@strShiftActivityNo
 			,@strBatchId

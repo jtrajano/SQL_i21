@@ -72,8 +72,11 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
+	,@ItemCurrencyExchangeRateTypeId	INT				= NULL
+	,@ItemCurrencyExchangeRateId	INT				= NULL
+	,@ItemCurrencyExchangeRate		NUMERIC(18,8)	= 1.000000
 	,@ItemSubCurrencyId				INT				= NULL
-	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= 1.000000
 	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
@@ -183,6 +186,9 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@EntitySalespersonId			= @EntitySalespersonId
+			,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+			,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
+			,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId
 			,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 			,@ItemIsBlended					= @ItemIsBlended
@@ -247,6 +253,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[strMaintenanceType]
 				,[strFrequency]
 				,[dtmMaintenanceDate]
+				,[intCurrencyExchangeRateTypeId]
+				,[intCurrencyExchangeRateId]
+				,[dblCurrencyExchangeRate]		
 				,[intSubCurrencyId]
 				,[dblSubCurrencyRate]
 				,[ysnBlended]
@@ -295,6 +304,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemMaintenanceType
 				,@ItemFrequency
 				,@ItemMaintenanceDate
+				,[intCurrencyExchangeRateTypeId]	= @ItemCurrencyExchangeRateTypeId
+				,[intCurrencyExchangeRateId]		= @ItemCurrencyExchangeRateId
+				,[dblCurrencyExchangeRate]			= CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1 ELSE ISNULL(@ItemCurrencyExchangeRate, 1) END
 				,ISNULL(@ItemSubCurrencyId, @CurrencyId)
 				,CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
 				,@ItemIsBlended
@@ -360,6 +372,9 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemTaxGroupId				= @ItemTaxGroupId
 			,@EntitySalespersonId			= @EntitySalespersonId
+			,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+			,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
+			,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId
 			,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 			,@ItemRecipeItemId				= @ItemRecipeItemId

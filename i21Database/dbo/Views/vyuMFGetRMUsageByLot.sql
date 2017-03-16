@@ -43,7 +43,6 @@ GROUP BY WI.dtmProductionDate
 	,W.strWorkOrderNo
 	,I1.strItemNo
 	,I1.strDescription
-	,IL.strLotNumber
 	,IPL.strParentLotNumber
 	,UM1.strUnitMeasure
 	,UM.strUnitMeasure

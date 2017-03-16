@@ -81,15 +81,24 @@ SELECT TC.intTaxCodeId
 								THEN ISNULL(I.dblTax, 0) * -1 
 								ELSE ISNULL(I.dblTax, 0)
 						  END
+	 ,intCurrencyId				= I.intCurrencyId
+	 ,strCurrency				= SMC.strCurrency
+	 ,strCurrencyDescription	= SMC.strDescription
 FROM tblSMTaxCode TC
-	LEFT OUTER JOIN tblSMTaxClass CL ON TC.intTaxClassId = CL.intTaxClassId
-	LEFT OUTER JOIN tblGLAccount SA ON TC.intSalesTaxAccountId = SA.intAccountId 
-	LEFT OUTER JOIN tblGLAccount PA ON TC.intPurchaseTaxAccountId = PA.intAccountId
-	LEFT OUTER JOIN tblARInvoiceDetailTax IDT ON TC.intTaxCodeId = IDT.intTaxCodeId 
-	INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
-	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnPosted = 1
-	INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
+	LEFT OUTER JOIN (SELECT intTaxClassId, strTaxClass FROM tblSMTaxClass) CL ON TC.intTaxClassId = CL.intTaxClassId
+	LEFT OUTER JOIN (SELECT intAccountId, strAccountId FROM tblGLAccount) SA ON TC.intSalesTaxAccountId = SA.intAccountId 
+	LEFT OUTER JOIN (SELECT intAccountId, strAccountId FROM tblGLAccount) PA ON TC.intPurchaseTaxAccountId = PA.intAccountId
+	LEFT OUTER JOIN (SELECT intInvoiceDetailId, intTaxCodeId, strCalculationMethod, dblRate, dblAdjustedTax, dblTax FROM tblARInvoiceDetailTax) IDT ON TC.intTaxCodeId = IDT.intTaxCodeId 
+	INNER JOIN (SELECT intInvoiceId, intInvoiceDetailId FROM tblARInvoiceDetail) ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
+	INNER JOIN (SELECT intInvoiceId, strInvoiceNumber, dtmDate, intEntityCustomerId, ysnPosted, intCurrencyId, dblTax, strTransactionType, dblInvoiceTotal, ysnPaid FROM tblARInvoice) I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnPosted = 1
+	INNER JOIN (SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer) C ON I.intEntityCustomerId = C.intEntityCustomerId
 	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
+	LEFT OUTER JOIN 
+		(SELECT intCurrencyID, 
+				strCurrency, 
+				strDescription 
+		FROM 
+			tblSMCurrency) SMC ON I.intCurrencyId = SMC.intCurrencyID	
 GROUP BY
 	 TC.intTaxCodeId
 	,TC.strTaxAgency
@@ -116,3 +125,6 @@ GROUP BY
 	,I.strTransactionType
 	,IDT.strCalculationMethod
 	,IDT.dblRate
+	,I.intCurrencyId
+	,SMC.strCurrency
+	,SMC.strDescription  

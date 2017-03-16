@@ -35,10 +35,13 @@ BEGIN
 						NULL 			
 					WHEN ItemUOMFrom.dblUnitQty = ItemUOMTo.dblUnitQty THEN 
 						@dblCost 					
+
 					WHEN ItemUOMFrom.dblUnitQty = 1 THEN 
 						dbo.fnMultiply(@dblCost, ItemUOMTo.dblUnitQty)
+
 					WHEN ItemUOMTo.dblUnitQty = 1 THEN 
 						dbo.fnDivide(@dblCost, ItemUOMFrom.dblUnitQty)
+
 					ELSE 
 						dbo.fnDivide(
 							dbo.fnMultiply(@dblCost, ItemUOMFrom.dblUnitQty)

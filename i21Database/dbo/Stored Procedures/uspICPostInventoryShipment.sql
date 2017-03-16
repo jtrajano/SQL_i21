@@ -339,6 +339,7 @@ BEGIN
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]
+			,[strRateType]
 		)	
 		EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
 			@intTransactionId
@@ -483,6 +484,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[strRateType]
 			)
 			EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 				@strBatchId
@@ -723,6 +725,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
@@ -777,6 +780,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
+				,[strRateType]
 			)	
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryShipmentOtherCharges 
 				@intTransactionId

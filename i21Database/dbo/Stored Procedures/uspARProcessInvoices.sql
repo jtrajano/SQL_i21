@@ -246,6 +246,9 @@ DECLARE  @Id									INT
 		,@ItemVirtualMeterReading				BIT
 		,@ClearDetailTaxes						BIT
 		,@TempDetailIdForTaxes					INT
+		,@ItemCurrencyExchangeRateTypeId		INT
+		,@ItemCurrencyExchangeRateId			INT
+		,@ItemCurrencyExchangeRate				NUMERIC(18, 8)
 		,@ItemSubCurrencyId						INT
 		,@ItemSubCurrencyRate					NUMERIC(18, 8)
 		,@ItemIsBlended							BIT
@@ -399,6 +402,9 @@ BEGIN
 		,@ItemPerformerId				= (CASE WHEN @GroupingOption = 0 THEN [intPerformerId] ELSE NULL END)
 		,@ItemLeaseBilling				= (CASE WHEN @GroupingOption = 0 THEN [ysnLeaseBilling] ELSE NULL END)
 		,@ItemVirtualMeterReading		= (CASE WHEN @GroupingOption = 0 THEN [ysnVirtualMeterReading] ELSE NULL END)
+		,@ItemCurrencyExchangeRateTypeId	= (CASE WHEN @GroupingOption = 0 THEN [intCurrencyExchangeRateTypeId] ELSE NULL END)
+		,@ItemCurrencyExchangeRateId	= (CASE WHEN @GroupingOption = 0 THEN [intCurrencyExchangeRateId] ELSE NULL END)
+		,@ItemCurrencyExchangeRate		= (CASE WHEN @GroupingOption = 0 THEN [dblCurrencyExchangeRate] ELSE 1 END)
 		,@ItemSubCurrencyId				= (CASE WHEN @GroupingOption = 0 THEN [intSubCurrencyId] ELSE NULL END)
 		,@ItemSubCurrencyRate			= (CASE WHEN @GroupingOption = 0 THEN [dblSubCurrencyRate] ELSE 1 END)
 		,@ItemIsBlended					= (CASE WHEN @GroupingOption = 0 THEN [ysnBlended] ELSE 0 END)
@@ -614,6 +620,9 @@ BEGIN
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@ItemConversionAccountId		= @ItemConversionAccountId
 			,@ItemSalesAccountId			= @ItemSalesAccountId
+			,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+			,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
+			,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId
 			,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
@@ -754,6 +763,9 @@ BEGIN
 					,@ClearDetailTaxes				= [ysnClearDetailTaxes]
 					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 					,@ItemConversionAccountId		= [intConversionAccountId]
+					,@ItemCurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
+					,@ItemCurrencyExchangeRateId	= [intCurrencyExchangeRateId]
+					,@ItemCurrencyExchangeRate		= [dblCurrencyExchangeRate]
 					,@ItemSubCurrencyId				= [intSubCurrencyId]
 					,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
 					,@ItemIsBlended					= [ysnBlended]
@@ -835,6 +847,9 @@ BEGIN
 						,@ItemPerformerId				= @ItemPerformerId
 						,@ItemLeaseBilling				= @ItemLeaseBilling
 						,@ItemConversionAccountId		= @ItemConversionAccountId
+						,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+						,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
+						,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 						,@ItemSubCurrencyId				= @ItemSubCurrencyId
 						,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 						,@ItemIsBlended					= @ItemIsBlended
@@ -1193,11 +1208,11 @@ BEGIN TRY
 			,[intCompanyLocationId]		= @CompanyLocationId
 			--,[intAccountId]				= @AccountId 
 			,[intCurrencyId]			= @CurrencyId
-			,[intTermId]				= ISNULL(@TermId, EL.[intTermsId])
+			,[intTermId]				= ISNULL(@TermId, C.[intTermsId])
 			,[intSourceId] 				= @NewSourceId
 			,[intPeriodsToAccrue] 		= ISNULL(@PeriodsToAccrue,1)
 			,[dtmDate]					= @Date
-			,[dtmDueDate]				= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@Date, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
+			,[dtmDueDate]				= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@Date, ISNULL(ISNULL(@TermId, C.[intTermsId]),0)) AS DATE)))
 			,[dtmShipDate]				= @ShipDate
 			,[dtmPostDate]				= @PostDate
 			,[dblInvoiceSubtotal]		= @ZeroDecimal
@@ -1373,6 +1388,9 @@ BEGIN TRY
 						,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 						,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 						,@ItemConversionAccountId		= [intConversionAccountId]
+						,@ItemCurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
+						,@ItemCurrencyExchangeRateId	= [intCurrencyExchangeRateId]
+						,@ItemCurrencyExchangeRate		= [dblCurrencyExchangeRate]
 						,@ItemSubCurrencyId				= [intSubCurrencyId]
 						,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
 						,@ItemStorageScheduleTypeId		= [intStorageScheduleTypeId]
@@ -1446,6 +1464,9 @@ BEGIN TRY
 							,@ItemPerformerId				= @ItemPerformerId
 							,@ItemLeaseBilling				= @ItemLeaseBilling
 							,@ItemConversionAccountId		= @ItemConversionAccountId
+							,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+							,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
+							,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 							,@ItemSubCurrencyId				= @ItemSubCurrencyId
 							,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 							,@ItemWeightUOMId				= @ItemWeightUOMId
@@ -1630,6 +1651,9 @@ BEGIN TRY
 					,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 					,@ItemConversionAccountId		= [intConversionAccountId]
+					,@ItemCurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
+					,@ItemCurrencyExchangeRateId	= [intCurrencyExchangeRateId]
+					,@ItemCurrencyExchangeRate		= [dblCurrencyExchangeRate]
 					,@ItemSubCurrencyId				= [intSubCurrencyId]
 					,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
 					,@ItemStorageScheduleTypeId		= [intStorageScheduleTypeId]
@@ -1744,6 +1768,9 @@ BEGIN TRY
 						,[ysnLeaseBilling]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLeaseBilling ELSE [ysnLeaseBilling] END
 						,[ysnVirtualMeterReading]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemVirtualMeterReading ELSE [ysnVirtualMeterReading] END
 						,[intConversionAccountId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemConversionAccountId ELSE [intConversionAccountId] END
+						,@ItemCurrencyExchangeRateTypeId		= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRateTypeId ELSE [intCurrencyExchangeRateTypeId] END
+						,@ItemCurrencyExchangeRateId			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRateId ELSE [intCurrencyExchangeRateId] END
+						,@ItemCurrencyExchangeRate				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCurrencyExchangeRate ELSE [dblCurrencyExchangeRate] END
 						,@ItemSubCurrencyId						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSubCurrencyId ELSE [intSubCurrencyId] END
 						,@ItemSubCurrencyRate					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSubCurrencyRate ELSE [dblSubCurrencyRate] END
 						,[intConcurrencyId]						= [intConcurrencyId] + 1

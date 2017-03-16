@@ -68,14 +68,16 @@ ORDER BY
 	
 WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 	BEGIN
-		DECLARE  @InvoiceDetailId	INT
-				,@ItemId			INT
-				,@ItemPrice			DECIMAL(18,6) 
-				,@QtyShipped		DECIMAL(18,6) 
-				,@TotalItemTax		DECIMAL(18,6) 
-				,@TaxGroupId		INT
-				,@ItemType			NVARCHAR(100)
-				,@SiteId			INT
+		DECLARE  @InvoiceDetailId		INT
+				,@ItemId				INT
+				,@ItemPrice				DECIMAL(18,6) 
+				,@QtyShipped			DECIMAL(18,6) 
+				,@TotalItemTax			DECIMAL(18,6)
+				,@TotalBaseItemTax		DECIMAL(18,6)
+				,@CurrencyExchangeRate	DECIMAL(18,6) 
+				,@TaxGroupId			INT
+				,@ItemType				NVARCHAR(100)
+				,@SiteId				INT
 
 		SELECT TOP 1
 			 @InvoiceDetailId		= [intInvoiceDetailId]
@@ -91,6 +93,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,@TaxGroupId			= tblARInvoiceDetail.[intTaxGroupId]
 			,@SiteId				= tblARInvoiceDetail.[intSiteId]
 			,@SubCurrencyRate		= ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
+			,@CurrencyExchangeRate	= ISNULL(tblARInvoiceDetail.[dblCurrencyExchangeRate], 1)
 		FROM
 			tblARInvoiceDetail
 		WHERE
@@ -123,6 +126,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
            ,[intSalesTaxAccountId]
            ,[dblTax]
            ,[dblAdjustedTax]
+		   ,[dblBaseAdjustedTax]
            ,[ysnTaxAdjusted]
            ,[ysnSeparateOnInvoice]
            ,[ysnCheckoffTax]
@@ -141,6 +145,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[intTaxAccountId]
 			,[dblTax]
 			,[dblAdjustedTax]
+			,[dblBaseAdjustedTax] = [dbo].fnRoundBanker([dblAdjustedTax] * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 			,[ysnTaxAdjusted]
 			,[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]
@@ -150,12 +155,20 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 		FROM
 			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0, 1)
 		
-		SELECT @TotalItemTax = SUM([dblAdjustedTax]), @TaxGroupId = MAX([intTaxGroupId]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
+		SELECT
+			 @TotalItemTax		= SUM([dblAdjustedTax])
+			,@TotalBaseItemTax	= SUM([dblBaseAdjustedTax])
+			,@TaxGroupId		= MAX([intTaxGroupId]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
 
 		IF @TaxGroupId = 0
 			SET @TaxGroupId = NULL
 								
-		UPDATE tblARInvoiceDetail SET dblTotalTax = @TotalItemTax, intTaxGroupId = @TaxGroupId WHERE [intInvoiceDetailId] = @InvoiceDetailId
+		UPDATE tblARInvoiceDetail 
+		SET
+			 dblTotalTax		= @TotalItemTax
+			,dblBaseTotalTax	= @TotalBaseItemTax
+			,intTaxGroupId		= @TaxGroupId
+		WHERE [intInvoiceDetailId] = @InvoiceDetailId
 					
 		DELETE FROM @InvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId	
 	END

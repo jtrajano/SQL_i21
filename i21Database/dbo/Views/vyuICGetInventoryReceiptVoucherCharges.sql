@@ -22,7 +22,9 @@ SELECT	intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEn
 		,dblOpenQty = receiptAndVoucheredCharges.dblOpenQty  
 		,dblItemsPayable = receiptAndVoucheredCharges.dblItemsPayable
 		,dblTaxesPayable = receiptAndVoucheredCharges.dblTaxesPayable
-		,dtmLastVoucherDate = topVoucher.dtmBillDate		
+		,dtmLastVoucherDate = topVoucher.dtmBillDate			
+		,receiptAndVoucheredCharges.intCurrencyId
+		,receiptAndVoucheredCharges.strCurrency
 		,strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) 
 		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) 
 FROM	tblICInventoryReceipt Receipt 
@@ -59,7 +61,9 @@ FROM	tblICInventoryReceipt Receipt
 						ISNULL(rc.dblTax, 0)
 						- ISNULL(voucher.TaxTotal, 0) 
 					,i.strItemNo
-					,strItemDescription = i.strDescription				
+					,strItemDescription = i.strDescription	
+					,intCurrencyId = ISNULL(rc.intCurrencyId, Receipt.intCurrencyId)
+					,currency.strCurrency
 			FROM	tblICInventoryReceiptCharge rc 
 					OUTER APPLY (
 						SELECT	QtyTotal = 
@@ -90,6 +94,9 @@ FROM	tblICInventoryReceipt Receipt
 
 					LEFT JOIN tblICItem i 
 						ON i.intItemId = rc.intChargeId
+
+					LEFT JOIN tblSMCurrency currency
+						ON currency.intCurrencyID = ISNULL(rc.intCurrencyId, Receipt.intCurrencyId) 
 
 			WHERE	rc.intInventoryReceiptId = Receipt.intInventoryReceiptId
 					AND rc.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
