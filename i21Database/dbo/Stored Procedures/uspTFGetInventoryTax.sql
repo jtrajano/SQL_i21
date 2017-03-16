@@ -23,20 +23,17 @@ BEGIN TRY
 	DECLARE @InventoryReceiptItemId NVARCHAR(50)
 	DECLARE @TaxCodeId NVARCHAR(50)
 	DECLARE @TaxCriteria NVARCHAR(10)
-	DECLARE @TaxCategory NVARCHAR(MAX)
 	DECLARE @QueryrReceiptItem NVARCHAR(MAX)
-	DECLARE @QueryRC NVARCHAR(MAX)
-	DECLARE @RCId NVARCHAR(50)
+	DECLARE @RCId INT
+		, @CompanyName NVARCHAR(250)
+		, @CompanyEIN NVARCHAR(100)
+		, @intReceiptTransactionId INT
+		, @intTaxCategoryId INT
 
 	-- USER DEFINED TABLES
-	DECLARE @TFReceiptTransaction TFReceiptTransaction
-	DECLARE @TFTaxCategory TFTaxCategory
 	DECLARE @TFReceiptItem TFReceiptItem
 	DECLARE @TFTransaction TFTransaction
 	--
-	DECLARE @tblTempReceiptItem2 TABLE (
-		intId INT IDENTITY(1,1),
-		intInventoryReceiptItemId INT)
 
 	IF @Refresh = 1
 	BEGIN
@@ -50,6 +47,8 @@ BEGIN TRY
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
 	INTO #tmpRC
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
+
+	SELECT TOP 1 @CompanyName = strCompanyName, @CompanyEIN = strEin FROM tblSMCompanySetup
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
 	BEGIN
@@ -291,11 +290,7 @@ BEGIN TRY
 					OR Vendor.intEntityId NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
 				)tblTransactions
 		END
-
-		DECLARE @intReceiptTransactionId INT
-			, @intTaxCategoryId INT
-			, @count INT
-
+		
 		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpReceiptTransaction) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
 		BEGIN
 			-- RETRIEVE TAX CATEGORY BASED ON RECEIPT ITEM ID/S
@@ -400,6 +395,8 @@ BEGIN TRY
 				, strTaxPayerFEIN
 				, strOriginState
 				, strDestinationState
+				, strCustomerName
+				, strCustomerFederalTaxId
 				, leaf)
 			SELECT DISTINCT @Guid
 				, intInventoryReceiptItemId
@@ -439,6 +436,8 @@ BEGIN TRY
 				, strHeaderFederalTaxID
 				, strOriginState
 				, strDestinationState
+				, @CompanyName
+				, @CompanyEIN
 				, 1
 			FROM @TFTransaction ORDER BY strProductCode
 		END
