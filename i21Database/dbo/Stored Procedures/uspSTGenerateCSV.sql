@@ -10,114 +10,112 @@ BEGIN
 	--Add date range filter
 
 	--START Insert data from tblSTTranslogRebates
-	IF(@strTableName = 'tblSTTransLogPMMorris')
+	IF(@strTableName = 'tblSTstgRebatesPMMorris')
 	BEGIN
 		INSERT INTO dbo.tblSTstgRebatesPMMorris
-		(
-			intManagementOrRetailNumber
-			, strWeekEndingDate
-			, strTransactionDate 
-			, strTransactionTime
-			, strTransactionIdCode 
-			, strStoreNumber
-			, strStoreName
-			, strStoreAddress
-			, strStoreCity
-			, strStoreState
-			, intStoreZipCode
-			, strCategory
-			, strManufacturerName
-			, strSKUCode
-			, strUpcCode
-			, strSkuUpcDescription
-			, strUnitOfMeasure
-			, intQuantitySold
-			, intConsumerUnits
-			, strMultiPackIndicator
-			, intMultiPackRequiredQuantity
-			, dblMultiPackDiscountAmount
-			, strRetailerFundedDIscountName
-			, dblRetailerFundedDiscountAmount
-			, strMFGDealNameONE
-			, dblMFGDealDiscountAmountONE
-			, strMFGDealNameTWO
-			, dblMFGDealDiscountAmountTWO
-			, strMFGDealNameTHREE
-			, dblMFGDealDiscountAmountTHREE
-			, dblFinalSalesPrice
-		)
-		SELECT
-			x.intTermMsgSN
-			--, x.RecordCount
-			, x.dtmWeekEndingDate 
-			, x.dtmTransactionDate
-			, x.strTransactionTime
-			, x.strTransactionIdCode 
-			, x.strStoreNumber
-			, x.strStoreName
-			, x.strStoreAddress
-			, x.strStoreCity
-			, x.strStoreState
-			, x.intStoreZipCode
-			, x.strCategory
-			, x.strManufacturerName
-			, x.strSKUCode
-			, x.strUpcCode
-			, x.strSkuUpcDescription
-			, x.strUnitOfMeasure
-			, x.intQuantitySold
-			, x.intConsumerUnits
-			, x.strMultiPackIndicator
-			, x.intMultiPackRequiredQuantity
-			, x.dblMultiPackDiscountAmount
-			, x.strRetailerFundedDiscountName
-			, x.dblRetailerFundedDiscountAmount
-			, x.strMFGDealNameONE
-			, x.dblMFGDealDiscountAmountONE
-			, x.strMFGDealNameTWO
-			, x.dblMFGDealDiscountAmountTWO
-			, x.strMFGDealNameTHREE
-			, x.dblMFGDealDiscountAmountTHREE
-			, x.dblFinalSalesPrice
-		FROM
-		(
+(
+	intManagementOrRetailNumber
+	, strWeekEndingDate
+	, strTransactionDate 
+	, strTransactionTime
+	, strTransactionIdCode 
+	, strStoreNumber
+	, strStoreName
+	, strStoreAddress
+	, strStoreCity
+	, strStoreState
+	, intStoreZipCode
+	, strCategory
+	, strManufacturerName
+	, strSKUCode
+	, strUpcCode
+	, strSkuUpcDescription
+	, strUnitOfMeasure
+	, intQuantitySold
+	, intConsumerUnits
+	, strMultiPackIndicator
+	, intMultiPackRequiredQuantity
+	, dblMultiPackDiscountAmount
+	, strRetailerFundedDIscountName
+	, dblRetailerFundedDiscountAmount
+	, strMFGDealNameONE
+	, dblMFGDealDiscountAmountONE
+	, strMFGDealNameTWO
+	, dblMFGDealDiscountAmountTWO
+	, strMFGDealNameTHREE
+	, dblMFGDealDiscountAmountTHREE
+	, dblFinalSalesPrice
+)
+SELECT
+    x.intTermMsgSN
+	--, x.RecordCount
+	, x.dtmWeekEndingDate 
+	, x.dtmTransactionDate
+	, x.strTransactionTime
+	, x.strTransactionIdCode 
+	, x.strStoreNumber
+	, x.strStoreName
+	, x.strStoreAddress
+	, x.strStoreCity
+	, x.strStoreState
+	, x.intStoreZipCode
+	, x.strCategory
+	, x.strManufacturerName
+	, x.strSKUCode
+	, x.strUpcCode
+	, x.strSkuUpcDescription
+	, x.strUnitOfMeasure
+	, x.intQuantitySold
+	, x.intConsumerUnits
+	, x.strMultiPackIndicator
+	, x.intMultiPackRequiredQuantity
+	, x.dblMultiPackDiscountAmount
+	, x.strRetailerFundedDiscountName
+	, x.dblRetailerFundedDiscountAmount
+	, x.strMFGDealNameONE
+	, x.dblMFGDealDiscountAmountONE
+	, x.strMFGDealNameTWO
+	, x.dblMFGDealDiscountAmountTWO
+	, x.strMFGDealNameTHREE
+	, x.dblMFGDealDiscountAmountTHREE
+	, x.dblFinalSalesPrice
+	FROM
+			(
 			SELECT
 				intTermMsgSN
-				, Count(intTermMsgSN) As RecordCount
-				, FORMAT(CAST(MIN(dtmClosedTime) AS DATE), 'yyyyMMdd') as dtmWeekEndingDate 
-				, FORMAT(CAST(MIN(dtmDate) AS DATE), 'yyyyMMdd') as dtmTransactionDate
-				, FORMAT(MIN(dtmDate), 'hh:mm:ss') as strTransactionTime
-				, MIN(intTermMsgSN) as strTransactionIdCode
-				, MIN(ST.intStoreNo) as strStoreNumber
-				, MIN(ST.strDescription) as strStoreName
-				, MIN(ST.strAddress) as strStoreAddress
-				, MIN(ST.strCity) as strStoreCity
-				, MIN(ST.strState) as strStoreState
-				, MIN(ST.strZipCode) as intStoreZipCode
-				, MIN(strTrlDept) as strCategory
+				, FORMAT(CAST(dtmClosedTime AS DATE), 'yyyyMMdd') as dtmWeekEndingDate 
+				, FORMAT(CAST(dtmDate AS DATE), 'yyyyMMdd') as dtmTransactionDate
+				, FORMAT(dtmDate, 'hh:mm:ss') as strTransactionTime
+				, intTermMsgSN as strTransactionIdCode
+				, ST.intStoreNo as strStoreNumber
+				, ST.strDescription as strStoreName
+				, ST.strAddress as strStoreAddress
+				, ST.strCity as strStoreCity
+				, ST.strState as strStoreState
+				, ST.strZipCode as intStoreZipCode
+				, strTrlDept as strCategory
 				, 'PM MORRIS' as strManufacturerName
 				, '' as strSKUCode
-				, MIN(strTrlUPC) as strUpcCode
-				, MIN(strTrlDesc) as strSkuUpcDescription
+				, strTrlUPC as strUpcCode
+				, strTrlDesc as strSkuUpcDescription
 				, 'PACK' as strUnitOfMeasure
-				, CAST(SUM(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END) as INT) as intQuantitySold
+				, CAST(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as INT) as intQuantitySold
 				, 1 as intConsumerUnits
-				, (CASE WHEN SUM(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END) >= 2 THEN 'Y' ELSE 'N' END) as strMultiPackIndicator
-				, CAST(SUM(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END) as INT) as intMultiPackRequiredQuantity
-				, (CASE WHEN SUM(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END) >= 2 THEN 0.50 ELSE 0 END) as dblMultiPackDiscountAmount
-				, (CASE WHEN SUM(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END) >= 2 THEN 'Sale' ELSE '' END) as strRetailerFundedDiscountName
-				, (CASE WHEN SUM(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END) >= 2 THEN 0.50 ELSE 0 END) as dblRetailerFundedDiscountAmount
-				, (CASE WHEN MIN(strTrpPaycode) = 'COUPONS' THEN 'Coupon' ELSE '' END) as strMFGDealNameONE
-				, (CASE WHEN MIN(strTrpPaycode) = 'COUPONS' THEN 0.50 ELSE 0 END) as dblMFGDealDiscountAmountONE
+				, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 'Y' ELSE 'N' END as strMultiPackIndicator
+				, CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as intMultiPackRequiredQuantity
+				, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 0.50 ELSE 0 END as dblMultiPackDiscountAmount
+				, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 'Sale' ELSE '' END as strRetailerFundedDiscountName
+				, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 0.50 ELSE 0 END as dblRetailerFundedDiscountAmount
+				, CASE WHEN strTrpPaycode = 'COUPONS' THEN 'Coupon' ELSE '' END as strMFGDealNameONE
+				, CASE WHEN strTrpPaycode = 'COUPONS' THEN 0.50 ELSE 0 END as dblMFGDealDiscountAmountONE
 				, '' as strMFGDealNameTWO
 				, 0 as dblMFGDealDiscountAmountTWO
 				, '' as strMFGDealNameTHREE
 				, 0 as dblMFGDealDiscountAmountTHREE
-				, SUM(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlLineTot ELSE 0 END) as dblFinalSalesPrice
+				, CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlLineTot ELSE 0 END as dblFinalSalesPrice
 			FROM dbo.tblSTTranslogRebates TR
 			JOIN dbo.tblSTStore ST ON ST.intStoreId = TR.intStoreId
-			GROUP BY intTermMsgSN
-		) x
+			) x
 	END
 
 	--ELSE IF(@strTableName = 'tblSTTransLogPMReynolds')
@@ -223,8 +221,8 @@ BEGIN
 		IF EXISTS (SELECT * FROM dbo.tblSTstgRebatesPMMorris WHERE intPMMId = @intMin)
 		BEGIN
 			SELECT @intManagementOrRetailNumber = intManagementOrRetailNumber
-				   , @strWeekEndingDate = strWeekEndingDate
-				   , @strTransactionDate = strTransactionDate
+				   , @strWeekEndingDate = CAST(strWeekEndingDate as NVARCHAR(20))
+				   , @strTransactionDate = CAST(strTransactionDate as NVARCHAR(20))
 				   , @strTransactionTime = strTransactionTime
 				   , @strTransactionIdCode = strTransactionIdCode
 				   , @strStoreNumber = strStoreNumber
@@ -282,7 +280,6 @@ BEGIN
 		SET @intMin = @intMin + 1
 	END
 
-	
 	DECLARE @SQL NVARCHAR(MAX)
 	SET @SQL = 'DELETE FROM ' + @strTableName
 	EXEC sp_executesql @SQL
