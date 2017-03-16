@@ -5120,6 +5120,7 @@
     <Build Include="dbo\Stored Procedures\uspSTGenerateCSV.sql" />
     <Build Include="dbo\Views\vyuEMEntityCusVenCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessToInventoryReceipt.sql" />
+    <Build Include="dbo\Functions\fnCTGetSampleDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
