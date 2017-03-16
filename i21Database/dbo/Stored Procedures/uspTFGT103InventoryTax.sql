@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspTFGT103InventoryTax]
+﻿CREATE PROCEDURE [dbo].[uspTFGT103InventoryTax]
 	@Guid NVARCHAR(50)
 	, @ReportingComponentId NVARCHAR(MAX)
 	, @DateFrom DATETIME
