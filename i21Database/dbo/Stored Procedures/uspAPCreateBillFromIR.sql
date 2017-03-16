@@ -135,7 +135,7 @@ BEGIN
 	FROM #tmpReceiptData 
 	WHERE intInventoryReceiptId = @receiptId
 
-	EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
+	--EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
 
 	--PRIORITIZE RECEIPT LOCATION
 	SET @receiptLocation = (SELECT intLocationId FROM #tmpReceiptData WHERE intInventoryReceiptId = @receiptId)
@@ -199,7 +199,7 @@ BEGIN
 					INNER JOIN tblCTContractHeader ct
 						on rtnItem.intOrderId = ct.intContractHeaderId
 					INNER JOIN tblCTContractDetail ctd
-						ON ct.intContractHeaderId = ctd.intContractHeaderId
+						ON ct.intContractHeaderId = ctd.intContractHeaderId AND rtnItem.intLineNo = ctd.intContractDetailId
 			WHERE	rtn.intInventoryReceiptId = @receiptId AND rtnItem.intInventoryReceiptItemId = @receiptDetailId
 					AND r.strReceiptType = 'Purchase Contract'
 					AND rtn.strReceiptType = 'Inventory Return'
@@ -212,10 +212,13 @@ BEGIN
 		-- Check if the inventory return needs to use the producer as the vendor for the debit memo. 
 		-- make sure we already have voucher created for that producer
 
-		SELECT TOP 1 @generatedBillId = intBillId FROM #tmpReceiptBillIds WHERE intEntityVendorId = @intProducerId
+		SET @generatedBillId = (SELECT TOP 1 intBillId FROM #tmpReceiptBillIds WHERE intEntityVendorId = @intProducerId)
 		
 		IF @generatedBillId IS NULL
 		BEGIN
+
+			EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
+
 			IF @intProducerId IS NOT NULL
 			BEGIN
 				INSERT INTO tblAPBill(
