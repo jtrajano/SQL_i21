@@ -6362,14 +6362,81 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         Inventory.view.InventoryReceiptViewController.orgValueLocation = current.get('intLocationId');
     },
+    
+    doPostPreview: function(win, cfg){
+        var me = this;
+
+        if (!win) {return;}
+        cfg = cfg ? cfg : {};
+
+        var isAfterPostCall = cfg.isAfterPostCall;
+        var ysnPosted = cfg.ysnPosted;
+
+        var context = win.context;
+        var current = win.viewModel.data.current;        
+        var pnlLotTracking = win.down('#pnlLotTracking');
+        var grdInventoryReceipt = win.down('#grdInventoryReceipt');        
+
+        //Hide Lot Tracking Grid
+        if (pnlLotTracking) {pnlLotTracking.setVisible(false);}
+
+        //Deselect all rows in Item Grid
+        if (grdInventoryReceipt) {grdInventoryReceipt.getSelectionModel().deselectAll();       }
+
+        var doRecap = function (currentRecord){
+            ic.utils.ajax({
+                url: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
+                params:{
+                    strTransactionId: currentRecord.get('strReceiptNumber'),
+                    isPost: isAfterPostCall ? ysnPosted : currentRecord.get('ysnPosted') ? false : true,
+                    isRecap: true
+                },
+                method: 'post'
+            })
+            .subscribe(
+                function(successResponse) {
+                    var postResult = Ext.decode(successResponse.responseText);
+                    var batchId = postResult.data.strBatchId;
+                    if (batchId) {
+                        me.bindRecapGrid(batchId);
+                    }                    
+                }
+                ,function(failureResponse) {
+                    // Show Post Preview failed.
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            )
+        };    
+
+        // If there is no data change, calculate the charge and do the recap. 
+        if (!context.data.hasChanges()) {
+            me.doOtherChargeCalculate(
+                win, 
+                doRecap(win.viewModel.data.current)
+            );
+            return;
+        }
+
+        // Save has data changes first before anything else. 
+        context.data.saveRecord({
+            successFn: function () {
+                me.doOtherChargeCalculate(
+                    win, 
+                    doRecap(win.viewModel.data.current)
+                );                
+            }
+        });
+    },
 
     onReceiptTabChange: function (tabPanel, newCard, oldCard, eOpts) {
+        var me = this;
+        var win = tabPanel.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;        
+
         switch (newCard.itemId) {
             case 'pgeIncomingInspection':
-                var win = tabPanel.up('window');
-                var context = win.context;
-                var current = win.viewModel.data.current;
-
                 var doPost = function () {
                     if (current) {
                         ic.utils.ajax({
@@ -6405,6 +6472,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
                 break;
+            case 'pgePostPreview': 
+                me.doPostPreview(win);
         }
     },
 
@@ -6638,63 +6707,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onPnlRecapBeforeShow: function(component, eOpts){
-        var me = this;
-        var win = component.up('window');
-        var context = win.context;
-        var pnlLotTracking = win.down('#pnlLotTracking');
-        var grdInventoryReceipt = win.down('#grdInventoryReceipt');
+        // var me = this;
+        // var win = component.up('window');
 
-        //Hide Lot Tracking Grid
-        pnlLotTracking.setVisible(false);
-
-        //Deselect all rows in Item Grid
-        grdInventoryReceipt.getSelectionModel().deselectAll();       
-
-        var doRecap = function (currentRecord){
-            ic.utils.ajax({
-                url: (currentRecord.get('strReceiptType') === 'Inventory Return') ? '../Inventory/api/InventoryReceipt/Return' : '../Inventory/api/InventoryReceipt/Receive',
-                params:{
-                    strTransactionId: currentRecord.get('strReceiptNumber'),
-                    isPost: currentRecord.get('ysnPosted') ? false : true,
-                    isRecap: true
-                },
-                method: 'post'
-            })
-            .subscribe(
-                function(successResponse) {
-                    var postResult = Ext.decode(successResponse.responseText);
-                    var batchId = postResult.data.strBatchId;
-                    if (batchId) {
-                        me.bindRecapGrid(batchId);
-                    }                    
-                }
-                ,function(failureResponse) {
-                    // Show Post Preview failed.
-                    var jsonData = Ext.decode(failureResponse.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
-                }
-            )
-        };    
-
-        // If there is no data change, calculate the charge and do the recap. 
-        if (!context.data.hasChanges()) {
-            me.doOtherChargeCalculate(
-                win, 
-                doRecap(win.viewModel.data.current)
-            );
-
-            return;
-        }
-
-        // Save has data changes first before anything else. 
-        context.data.saveRecord({
-            successFn: function () {
-                me.doOtherChargeCalculate(
-                    win, 
-                    doRecap(win.viewModel.data.current)
-                );                
-            }
-        });
+        // me.doPostPreview(win);
     },
 
     onReceiveClick: function (button, e, eOpts) {
@@ -6705,6 +6721,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var btnPost = win.down('#btnPost');
         var pnlLotTracking = win.down('#pnlLotTracking');
         var grdInventoryReceipt = win.down('#grdInventoryReceipt');
+        var tabInventoryReceipt = win.down('#tabInventoryReceipt');
+        var activeTab = tabInventoryReceipt.getActiveTab();
         
         //Hide Lot Grid
         pnlLotTracking.setVisible(false);
@@ -6725,6 +6743,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             .subscribe(
                 function(successResponse) {
                     me.onAfterReceive(true);
+
+                    // Check what is the active tab. If it is the Post Preview tab, load the recap data. 
+                    if (activeTab.itemId == 'pgePostPreview'){
+                        var cfg = {
+                            isAfterPostCall: true,
+                            ysnPosted: current.get('ysnPosted') ? true : false
+                        };
+                        me.doPostPreview(win, cfg);
+                    }                    
                 }
                 ,function(failureResponse) {                    
                     var jsonData = Ext.decode(failureResponse.responseText);
