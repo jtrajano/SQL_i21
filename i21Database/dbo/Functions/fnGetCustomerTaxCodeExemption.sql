@@ -119,6 +119,7 @@ BEGIN
 							ICI.intItemId = @ItemId
 							AND ICC.intCategoryId = @ItemCategoryId
 							AND ICCT.intTaxClassId = @TaxClassId
+							AND @DisregardExemptionSetup <> 1
 					)
 		AND ISNULL(@ItemId,0) <> 0
 	BEGIN
