@@ -44,7 +44,6 @@ BEGIN TRY
 	DECLARE @DateEnd DATETIME
 	DECLARE @TaxID NVARCHAR(50)
 	DECLARE @EIN NVARCHAR(50)
-		, @FaxNumber NVARCHAR(50)
 
 	SELECT TOP 1 @TA = intTaxAuthorityId
 		, @DatePeriod = dtmDate
@@ -55,7 +54,7 @@ BEGIN TRY
 		AND strFormCode = @FormCodeParam
 	
 	SELECT TOP 1 @TaxID = strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'GT-103-TID'
-	SELECT TOP 1 @EIN = strEin, @FaxNumber = strFax FROM tblSMCompanySetup
+	SELECT TOP 1 @EIN = strEin FROM tblSMCompanySetup
 
 	INSERT INTO tblTFTransactionSummary (strSummaryGuid
 		, intTaxAuthorityId
@@ -94,7 +93,7 @@ BEGIN TRY
 		, strZipCode
 		, strContactPhone
 		, strContactName
-		, @FaxNumber
+		, strContactPhone
 	FROM tblTFCompanyPreference
 	
 	-- ======================== SUMMARY ==============================
