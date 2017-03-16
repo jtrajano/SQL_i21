@@ -87,7 +87,7 @@ BEGIN
 		, transrecalled
 		, termMsgSNtype
 		, termMsgSNterm
-		, termMsgSN
+		, x.termMsgSN
 		, periodlevel
 		, periodseq
 		, periodname
@@ -140,6 +140,11 @@ BEGIN
 		, @intStoreId
 		, @intCheckoutId
 	FROM #tempCheckoutInsert chk
-	WHERE chk.transtype = 'sale' AND chk.trlDept = 'CIGARETTES'
-
+		JOIN
+	(
+		SELECT c.termMsgSN as termMsgSN
+		FROM #tempCheckoutInsert c
+		WHERE trlDept = 'CIGARETTES' AND transtype = 'sale'
+		GROUP BY c.termMsgSN
+	) x ON x.termMsgSN = chk.termMsgSN
 END
