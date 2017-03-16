@@ -61,7 +61,6 @@ BEGIN TRY
 		, @DateEnd DATETIME
 		, @LicenseNumber NVARCHAR(50)
 		, @EIN NVARCHAR(50)
-		, @FaxNumber NVARCHAR(50)
 
 	SELECT TOP 1 @TA = intTaxAuthorityId
 		, @TACode = strTaxAuthorityCode
@@ -78,7 +77,6 @@ BEGIN TRY
 		AND strTemplateItemId = 'MF-360-LicenseNumber'
 
 	SELECT TOP 1 @EIN = strEin
-		, @FaxNumber = strFax
 	FROM tblSMCompanySetup
 	
 	-- ======================== HEADER ==============================
@@ -119,7 +117,7 @@ BEGIN TRY
 		, strContactPhone
 		, strContactName
 		, @LicenseNumber
-		, @FaxNumber
+		, strContactName
 	FROM tblTFCompanyPreference
 
 	-- GET SUMMARY ITEMS TABLE HELPER BY FORM AND TA THEN INSERT INTO TBLTEMPSUMMARY
