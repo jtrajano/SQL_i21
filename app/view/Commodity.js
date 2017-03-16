@@ -187,6 +187,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
+                                                                        quantityField: true,
                                                                         flex: 1,
                                                                         quantityField: true,
                                                                         itemId: 'txtDecimalsOnDpr',
@@ -550,6 +551,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'griduomcolumn',
                                                                 itemId: 'colUnitQty',
+                                                                format: '0,000.000000##',
                                                                 align: 'right',
                                                                 dataIndex: 'dblUnitQty',
                                                                 text: 'Unit Qty',
@@ -689,7 +691,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 itemId: 'colDefaultPackingUOM',
                                                                 width: 123,
                                                                 dataIndex: 'string',
-                                                                text: 'Default Packing UOM',
+                                                                text: 'Default UOM',
                                                                 editor: {
                                                                     xtype: 'gridcombobox',
                                                                     columns: [
