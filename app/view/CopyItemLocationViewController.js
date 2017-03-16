@@ -25,7 +25,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
         var me = this;
         var grid = this.getView().down('#grdItems');
         var selected = grid.getSelectionModel().selected;
-        if(selected) {
+        if(selected && selected.count() > 0) {
             var msgAction = function (button) {
                 if (button === 'yes') {
                     var sourceItem = me.view.viewModel.get('hasSourceItem');
@@ -33,6 +33,9 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
                 }
             };
             iRely.Functions.showCustomDialog('question', 'yesno', 'Are you sure you want to copy the location(s) from this item?', msgAction);
+        }
+        else {
+            iRely.Functions.showCustomDialog('Warning', 'ok', 'Please select the target items from the grid.');
         }
     },
 

@@ -1013,6 +1013,12 @@ namespace iRely.Inventory.BusinessLayer
             try
             {
                 var db = (InventoryEntities)_db.ContextManager;
+
+                if (string.IsNullOrEmpty(strDestinationItemIds))
+                {
+                    throw new System.ArgumentException("Cannot copy the location without a target item. Please specify the target items.");
+                }
+
                 db.CopyItemLocation(intSourceItemId, strDestinationItemIds);
                 result = _db.Save(false);
                 result.HasError = false;
