@@ -5075,6 +5075,7 @@
     <Build Include="dbo\Views\vyuARCustomerContractHeader.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultForexRate.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
+    <Build Include="dbo\Views\vyuEMEntityCusVenCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
