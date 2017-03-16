@@ -210,6 +210,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colSubLocation: {
                     dataIndex: 'strSubLocation',
+                    text: '{setSubLocationLabel}',
                     editor: {
                         store: '{fromSubLocation}',
                         origValueField: 'intSubLocationId',
@@ -237,6 +238,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colStorageLocation: {
                     dataIndex: 'strStorageLocation',
+                    text: '{setStorageLocationLabel}',
                     editor: {
                         store: '{fromStorageLocation}',
                         origValueField: 'intStorageLocationId',
@@ -269,6 +271,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colLotNumber: {
                     dataIndex: 'strLotNumber',
+                    text: '{setLotNumberLabel}',
                     editor: {
                         store: '{lot}',
                         defaultFilters: [
@@ -301,7 +304,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colNewLotNumber: {
                     dataIndex: 'strNewLotNumber',
-                    hidden: '{formulaHideColumn_colNewLotNumber}'
+                    hidden: '{formulaHideColumn_colNewLotNumber}',
+                    text: '{setNewLotNumberLabel}'
                 },
 
                 colQuantity: {
@@ -311,17 +315,20 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colNewQuantity: {
                     dataIndex: 'dblNewQuantity',
-                    hidden: '{formulaHideColumn_colNewQuantity}'
+                    hidden: '{formulaHideColumn_colNewQuantity}',
+                    text: '{setNewQuantityLabel}'
                 },
 
                 colAdjustByQuantity: {
                     dataIndex: 'dblAdjustByQuantity',
-                    hidden: '{formulaHideColumn_colAdjustByQuantity}'
+                    hidden: '{formulaHideColumn_colAdjustByQuantity}',
+                    text: '{setAdjustByQuantityLabel}'
                 },
 
                 colNewSplitLotQuantity: {
                     dataIndex: 'dblNewSplitLotQuantity',
-                    hidden: '{formulaHideColumn_colNewSplitLotQuantity}'
+                    hidden: '{formulaHideColumn_colNewSplitLotQuantity}',
+                    text: '{setNewSplitLotQuantityLabel}'
                 },
 
                 colUOM: {
@@ -361,6 +368,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewUOM: {
                     dataIndex: 'strNewItemUOM',
                     hidden: '{formulaHideColumn_colNewUOM}',
+                    text: '{setNewUOMLabel}',
                     editor: {
                         store: '{newItemUOM}',
                         defaultFilters: [
@@ -474,6 +482,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewLotStatus: {
                     dataIndex: 'strNewLotStatus',
                     hidden: '{formulaHideColumn_colNewLotStatus}',
+                    text: '{setNewLotStatusLabel}',
                     editor: {
                         store: '{newLotStatus}'
                     }
@@ -487,6 +496,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewLocation: {
                     dataIndex: 'strNewLocation',
                     hidden: '{formulaHideColumn_colNewLocation}',
+                    text: '{setNewLocationLabel}',
                     editor: {
                         store: '{newLocation}',
                         defaultFilters: [
@@ -503,6 +513,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewSubLocation: {
                     dataIndex: 'strNewSubLocation',
                     hidden: '{formulaHideColumn_colNewSubLocation}',
+                    text: '{setNewSubLocationLabel}',
                     editor: {
                         store: '{newSubLocation}',
                         defaultFilters: [
@@ -524,6 +535,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewStorageLocation: {
                     dataIndex: 'strNewStorageLocation',
                     hidden: '{formulaHideColumn_colNewStorageLocation}',
+                    text: '{setNewStorageLocationLabel}',
                     editor: {
                         store: '{newStorageLocation}',
                         defaultFilters: [
