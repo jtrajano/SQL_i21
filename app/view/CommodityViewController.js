@@ -143,11 +143,11 @@ Ext.define('Inventory.view.CommodityViewController', {
                     dataIndex: 'strDefaultPackingUOM',
                     editor: {
                         store: '{packinguoms}',
-                        defaultFilters: [{
-                            column: 'strUnitType',
-                            value: 'Packed',
-                            conjunction: 'and'
-                        }],
+                        // defaultFilters: [{
+                        //     column: 'strUnitType',
+                        //     value: 'Packed',
+                        //     conjunction: 'and'
+                        // }],
                         origValueField: 'intUnitMeasureId',
                         origUpdateField: 'intDefaultPackingUOMId',
                     }
