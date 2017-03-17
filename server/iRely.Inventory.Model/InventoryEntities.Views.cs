@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsb2f06e139127e07038fe8851156e7b5ed4a73bdc7d4dba35a1a98898c00f3d65))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets8c588b3588dd3a16256c9b2ee9a9b2e412d718e7c96a7b83f6f53b543cf10319))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsb2f06e139127e07038fe8851156e7b5ed4a73bdc7d4dba35a1a98898c00f3d65 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets8c588b3588dd3a16256c9b2ee9a9b2e412d718e7c96a7b83f6f53b543cf10319 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "b2f06e139127e07038fe8851156e7b5ed4a73bdc7d4dba35a1a98898c00f3d65"; }
+            get { return "8c588b3588dd3a16256c9b2ee9a9b2e412d718e7c96a7b83f6f53b543cf10319"; }
         }
 
         /// <summary>
@@ -1757,224 +1757,244 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView341();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetStorageBinDetails")
+            if (extentName == "CodeFirstDatabase.vyuICGetSubLocationBins")
             {
                 return GetView342();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetStorageBinDetails")
+            if (extentName == "InventoryEntities.vyuICGetSubLocationBins")
             {
                 return GetView343();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetStorageBinMeasurementReading")
+            if (extentName == "CodeFirstDatabase.vyuICGetStorageBinDetails")
             {
                 return GetView344();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetStorageBinMeasurementReadings")
+            if (extentName == "InventoryEntities.vyuICGetStorageBinDetails")
             {
                 return GetView345();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetPostedLot")
+            if (extentName == "CodeFirstDatabase.vyuICGetSubLocationBinDetails")
             {
                 return GetView346();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetPostedLots")
+            if (extentName == "InventoryEntities.vyuICGetSubLocationBinDetails")
             {
                 return GetView347();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetReceiptAddOrder")
+            if (extentName == "CodeFirstDatabase.vyuICGetStorageBinMeasurementReading")
             {
                 return GetView348();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetReceiptAddOrders")
+            if (extentName == "InventoryEntities.vyuICGetStorageBinMeasurementReadings")
             {
                 return GetView349();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetReceiptAddPurchaseOrder")
+            if (extentName == "CodeFirstDatabase.vyuICGetPostedLot")
             {
                 return GetView350();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetReceiptAddPurchaseOrders")
+            if (extentName == "InventoryEntities.vyuICGetPostedLots")
             {
                 return GetView351();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetReceiptAddTransferOrder")
+            if (extentName == "CodeFirstDatabase.vyuICGetReceiptAddOrder")
             {
                 return GetView352();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetReceiptAddTransferOrders")
+            if (extentName == "InventoryEntities.vyuICGetReceiptAddOrders")
             {
                 return GetView353();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetReceiptAddPurchaseContract")
+            if (extentName == "CodeFirstDatabase.vyuICGetReceiptAddPurchaseOrder")
             {
                 return GetView354();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetReceiptAddPurchaseContracts")
+            if (extentName == "InventoryEntities.vyuICGetReceiptAddPurchaseOrders")
             {
                 return GetView355();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetReceiptAddLGInboundShipment")
+            if (extentName == "CodeFirstDatabase.vyuICGetReceiptAddTransferOrder")
             {
                 return GetView356();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetReceiptAddLGInboundShipments")
+            if (extentName == "InventoryEntities.vyuICGetReceiptAddTransferOrders")
             {
                 return GetView357();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetShipmentAddOrder")
+            if (extentName == "CodeFirstDatabase.vyuICGetReceiptAddPurchaseContract")
             {
                 return GetView358();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetShipmentAddOrders")
+            if (extentName == "InventoryEntities.vyuICGetReceiptAddPurchaseContracts")
             {
                 return GetView359();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetShipmentAddSalesOrder")
+            if (extentName == "CodeFirstDatabase.vyuICGetReceiptAddLGInboundShipment")
             {
                 return GetView360();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetShipmentAddSalesOrders")
+            if (extentName == "InventoryEntities.vyuICGetReceiptAddLGInboundShipments")
             {
                 return GetView361();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetShipmentAddSalesContract")
+            if (extentName == "CodeFirstDatabase.vyuICGetShipmentAddOrder")
             {
                 return GetView362();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetShipmentAddSalesContracts")
+            if (extentName == "InventoryEntities.vyuICGetShipmentAddOrders")
             {
                 return GetView363();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetShipmentAddSalesContractPickLot")
+            if (extentName == "CodeFirstDatabase.vyuICGetShipmentAddSalesOrder")
             {
                 return GetView364();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetShipmentAddSalesContractPickLots")
+            if (extentName == "InventoryEntities.vyuICGetShipmentAddSalesOrders")
             {
                 return GetView365();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetBundleItem")
+            if (extentName == "CodeFirstDatabase.vyuICGetShipmentAddSalesContract")
             {
                 return GetView366();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetBundleItems")
+            if (extentName == "InventoryEntities.vyuICGetShipmentAddSalesContracts")
             {
                 return GetView367();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICInventoryCount")
+            if (extentName == "CodeFirstDatabase.vyuICGetShipmentAddSalesContractPickLot")
             {
                 return GetView368();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICInventoryCountDetail")
+            if (extentName == "InventoryEntities.vyuICGetShipmentAddSalesContractPickLots")
             {
                 return GetView369();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetInventoryCountDetail")
+            if (extentName == "CodeFirstDatabase.vyuICGetBundleItem")
             {
                 return GetView370();
             }
 
-            if (extentName == "InventoryEntities.tblICInventoryCounts")
+            if (extentName == "InventoryEntities.vyuICGetBundleItems")
             {
                 return GetView371();
             }
 
-            if (extentName == "InventoryEntities.tblICInventoryCountDetails")
+            if (extentName == "CodeFirstDatabase.tblICInventoryCount")
             {
                 return GetView372();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetInventoryCountDetails")
+            if (extentName == "CodeFirstDatabase.tblICInventoryCountDetail")
             {
                 return GetView373();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetInventoryCount")
+            if (extentName == "CodeFirstDatabase.vyuICGetInventoryCountDetail")
             {
                 return GetView374();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetInventoryCounts")
+            if (extentName == "InventoryEntities.tblICInventoryCounts")
             {
                 return GetView375();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetCountSheet")
+            if (extentName == "InventoryEntities.tblICInventoryCountDetails")
             {
                 return GetView376();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetCountSheets")
+            if (extentName == "InventoryEntities.vyuICGetInventoryCountDetails")
             {
                 return GetView377();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetInventoryReceiptChargeTax")
+            if (extentName == "CodeFirstDatabase.vyuICGetInventoryCount")
             {
                 return GetView378();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetInventoryReceiptChargeTaxes")
+            if (extentName == "InventoryEntities.vyuICGetInventoryCounts")
             {
                 return GetView379();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetChargeTaxDetails")
+            if (extentName == "CodeFirstDatabase.vyuICGetCountSheet")
             {
                 return GetView380();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetChargeTaxDetails")
+            if (extentName == "InventoryEntities.vyuICGetCountSheets")
             {
                 return GetView381();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemOwner")
+            if (extentName == "CodeFirstDatabase.vyuICGetInventoryReceiptChargeTax")
             {
                 return GetView382();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemOwners")
+            if (extentName == "InventoryEntities.vyuICGetInventoryReceiptChargeTaxes")
             {
                 return GetView383();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemSubLocations")
+            if (extentName == "CodeFirstDatabase.vyuICGetChargeTaxDetails")
             {
                 return GetView384();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemSubLocations")
+            if (extentName == "InventoryEntities.vyuICGetChargeTaxDetails")
             {
                 return GetView385();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuICGetItemOwner")
+            {
+                return GetView386();
+            }
+
+            if (extentName == "InventoryEntities.vyuICGetItemOwners")
+            {
+                return GetView387();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuICGetItemSubLocations")
+            {
+                return GetView388();
+            }
+
+            if (extentName == "InventoryEntities.vyuICGetItemSubLocations")
+            {
+                return GetView389();
             }
 
             return null;
@@ -13530,14 +13550,66 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.vyuICGetStorageBinDetails.
+        /// Gets the view for CodeFirstDatabase.vyuICGetSubLocationBins.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView342()
         {
             return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetSubLocationBins
+        [CodeFirstDatabaseSchema.vyuICGetSubLocationBins](T1.vyuICGetSubLocationBins_intSubLocationId, T1.vyuICGetSubLocationBins_intCompanyLocationId, T1.vyuICGetSubLocationBins_strLocation, T1.vyuICGetSubLocationBins_strSubLocation, T1.vyuICGetSubLocationBins_dblEffectiveDepth, T1.vyuICGetSubLocationBins_dblPackFactor, T1.vyuICGetSubLocationBins_dblUnitPerFoot, T1.vyuICGetSubLocationBins_dblStock, T1.vyuICGetSubLocationBins_dblCapacity, T1.vyuICGetSubLocationBins_dblAvailable)
+    FROM (
+        SELECT 
+            T.intSubLocationId AS vyuICGetSubLocationBins_intSubLocationId, 
+            T.intCompanyLocationId AS vyuICGetSubLocationBins_intCompanyLocationId, 
+            T.strLocation AS vyuICGetSubLocationBins_strLocation, 
+            T.strSubLocation AS vyuICGetSubLocationBins_strSubLocation, 
+            T.dblEffectiveDepth AS vyuICGetSubLocationBins_dblEffectiveDepth, 
+            T.dblPackFactor AS vyuICGetSubLocationBins_dblPackFactor, 
+            T.dblUnitPerFoot AS vyuICGetSubLocationBins_dblUnitPerFoot, 
+            T.dblStock AS vyuICGetSubLocationBins_dblStock, 
+            T.dblCapacity AS vyuICGetSubLocationBins_dblCapacity, 
+            T.dblAvailable AS vyuICGetSubLocationBins_dblAvailable, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetSubLocationBins AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetSubLocationBins.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView343()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetSubLocationBins
+        [iRely.Inventory.Model.vyuICGetSubLocationBins](T1.vyuICGetSubLocationBins_intSubLocationId, T1.vyuICGetSubLocationBins_intCompanyLocationId, T1.vyuICGetSubLocationBins_strLocation, T1.vyuICGetSubLocationBins_strSubLocation, T1.vyuICGetSubLocationBins_dblEffectiveDepth, T1.vyuICGetSubLocationBins_dblPackFactor, T1.vyuICGetSubLocationBins_dblUnitPerFoot, T1.vyuICGetSubLocationBins_dblStock, T1.vyuICGetSubLocationBins_dblCapacity, T1.vyuICGetSubLocationBins_dblAvailable)
+    FROM (
+        SELECT 
+            T.intSubLocationId AS vyuICGetSubLocationBins_intSubLocationId, 
+            T.intCompanyLocationId AS vyuICGetSubLocationBins_intCompanyLocationId, 
+            T.strLocation AS vyuICGetSubLocationBins_strLocation, 
+            T.strSubLocation AS vyuICGetSubLocationBins_strSubLocation, 
+            T.dblEffectiveDepth AS vyuICGetSubLocationBins_dblEffectiveDepth, 
+            T.dblPackFactor AS vyuICGetSubLocationBins_dblPackFactor, 
+            T.dblUnitPerFoot AS vyuICGetSubLocationBins_dblUnitPerFoot, 
+            T.dblStock AS vyuICGetSubLocationBins_dblStock, 
+            T.dblCapacity AS vyuICGetSubLocationBins_dblCapacity, 
+            T.dblAvailable AS vyuICGetSubLocationBins_dblAvailable, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetSubLocationBins AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetStorageBinDetails.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView344()
+        {
+            return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageBinDetails
-        [CodeFirstDatabaseSchema.vyuICGetStorageBinDetails](T1.vyuICGetStorageBinDetails_intItemLocationId, T1.vyuICGetStorageBinDetails_intItemId, T1.vyuICGetStorageBinDetails_intStorageLocationId, T1.vyuICGetStorageBinDetails_intCompanyLocationId, T1.vyuICGetStorageBinDetails_strCommodityCode, T1.vyuICGetStorageBinDetails_strItemDescription, T1.vyuICGetStorageBinDetails_strItemNo, T1.vyuICGetStorageBinDetails_strUOM, T1.vyuICGetStorageBinDetails_strLocation, T1.vyuICGetStorageBinDetails_strStorageLocation, T1.vyuICGetStorageBinDetails_strDiscountCode, T1.vyuICGetStorageBinDetails_strDiscountDescription, T1.vyuICGetStorageBinDetails_dtmReadingDate, T1.vyuICGetStorageBinDetails_dblAirSpaceReading, T1.vyuICGetStorageBinDetails_dblPhysicalReading, T1.vyuICGetStorageBinDetails_dblStockVariance, T1.vyuICGetStorageBinDetails_dblCapacity, T1.vyuICGetStorageBinDetails_dblStock, T1.vyuICGetStorageBinDetails_dblAvailable, T1.vyuICGetStorageBinDetails_dblEffectiveDepth, T1.vyuICGetStorageBinDetails_dblPackFactor, T1.vyuICGetStorageBinDetails_dblUnitPerFoot)
+        [CodeFirstDatabaseSchema.vyuICGetStorageBinDetails](T1.vyuICGetStorageBinDetails_intItemLocationId, T1.vyuICGetStorageBinDetails_intItemId, T1.vyuICGetStorageBinDetails_intStorageLocationId, T1.vyuICGetStorageBinDetails_intCompanyLocationId, T1.vyuICGetStorageBinDetails_strCommodityCode, T1.vyuICGetStorageBinDetails_strItemDescription, T1.vyuICGetStorageBinDetails_strItemNo, T1.vyuICGetStorageBinDetails_strUOM, T1.vyuICGetStorageBinDetails_strLocation, T1.vyuICGetStorageBinDetails_strStorageLocation, T1.vyuICGetStorageBinDetails_strDiscountCode, T1.vyuICGetStorageBinDetails_strDiscountDescription, T1.vyuICGetStorageBinDetails_dtmReadingDate, T1.vyuICGetStorageBinDetails_dblAirSpaceReading, T1.vyuICGetStorageBinDetails_dblPhysicalReading, T1.vyuICGetStorageBinDetails_dblStockVariance, T1.vyuICGetStorageBinDetails_dblCapacity, T1.vyuICGetStorageBinDetails_dblStock, T1.vyuICGetStorageBinDetails_dblAvailable, T1.vyuICGetStorageBinDetails_dblEffectiveDepth, T1.vyuICGetStorageBinDetails_dblPackFactor, T1.vyuICGetStorageBinDetails_dblUnitPerFoot, T1.vyuICGetStorageBinDetails_strSubLocationName, T1.vyuICGetStorageBinDetails_intSubLocationId)
     FROM (
         SELECT 
             T.intItemLocationId AS vyuICGetStorageBinDetails_intItemLocationId, 
@@ -13562,6 +13634,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblEffectiveDepth AS vyuICGetStorageBinDetails_dblEffectiveDepth, 
             T.dblPackFactor AS vyuICGetStorageBinDetails_dblPackFactor, 
             T.dblUnitPerFoot AS vyuICGetStorageBinDetails_dblUnitPerFoot, 
+            T.strSubLocationName AS vyuICGetStorageBinDetails_strSubLocationName, 
+            T.intSubLocationId AS vyuICGetStorageBinDetails_intSubLocationId, 
             True AS _from0
         FROM InventoryEntities.vyuICGetStorageBinDetails AS T
     ) AS T1");
@@ -13571,11 +13645,11 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetStorageBinDetails.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView343()
+        private static DbMappingView GetView345()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageBinDetails
-        [iRely.Inventory.Model.vyuICGetStorageBinDetails](T1.vyuICGetStorageBinDetails_intItemLocationId, T1.vyuICGetStorageBinDetails_intItemId, T1.vyuICGetStorageBinDetails_intStorageLocationId, T1.vyuICGetStorageBinDetails_intCompanyLocationId, T1.vyuICGetStorageBinDetails_strCommodityCode, T1.vyuICGetStorageBinDetails_strItemDescription, T1.vyuICGetStorageBinDetails_strItemNo, T1.vyuICGetStorageBinDetails_strUOM, T1.vyuICGetStorageBinDetails_strLocation, T1.vyuICGetStorageBinDetails_strStorageLocation, T1.vyuICGetStorageBinDetails_strDiscountCode, T1.vyuICGetStorageBinDetails_strDiscountDescription, T1.vyuICGetStorageBinDetails_dtmReadingDate, T1.vyuICGetStorageBinDetails_dblAirSpaceReading, T1.vyuICGetStorageBinDetails_dblPhysicalReading, T1.vyuICGetStorageBinDetails_dblStockVariance, T1.vyuICGetStorageBinDetails_dblCapacity, T1.vyuICGetStorageBinDetails_dblStock, T1.vyuICGetStorageBinDetails_dblAvailable, T1.vyuICGetStorageBinDetails_dblEffectiveDepth, T1.vyuICGetStorageBinDetails_dblPackFactor, T1.vyuICGetStorageBinDetails_dblUnitPerFoot)
+        [iRely.Inventory.Model.vyuICGetStorageBinDetails](T1.vyuICGetStorageBinDetails_intItemLocationId, T1.vyuICGetStorageBinDetails_intItemId, T1.vyuICGetStorageBinDetails_intStorageLocationId, T1.vyuICGetStorageBinDetails_intCompanyLocationId, T1.vyuICGetStorageBinDetails_strCommodityCode, T1.vyuICGetStorageBinDetails_strItemDescription, T1.vyuICGetStorageBinDetails_strItemNo, T1.vyuICGetStorageBinDetails_strUOM, T1.vyuICGetStorageBinDetails_strLocation, T1.vyuICGetStorageBinDetails_strStorageLocation, T1.vyuICGetStorageBinDetails_strDiscountCode, T1.vyuICGetStorageBinDetails_strDiscountDescription, T1.vyuICGetStorageBinDetails_dtmReadingDate, T1.vyuICGetStorageBinDetails_dblAirSpaceReading, T1.vyuICGetStorageBinDetails_dblPhysicalReading, T1.vyuICGetStorageBinDetails_dblStockVariance, T1.vyuICGetStorageBinDetails_dblCapacity, T1.vyuICGetStorageBinDetails_dblStock, T1.vyuICGetStorageBinDetails_dblAvailable, T1.vyuICGetStorageBinDetails_dblEffectiveDepth, T1.vyuICGetStorageBinDetails_dblPackFactor, T1.vyuICGetStorageBinDetails_dblUnitPerFoot, T1.vyuICGetStorageBinDetails_strSubLocationName, T1.vyuICGetStorageBinDetails_intSubLocationId)
     FROM (
         SELECT 
             T.intItemLocationId AS vyuICGetStorageBinDetails_intItemLocationId, 
@@ -13600,8 +13674,90 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblEffectiveDepth AS vyuICGetStorageBinDetails_dblEffectiveDepth, 
             T.dblPackFactor AS vyuICGetStorageBinDetails_dblPackFactor, 
             T.dblUnitPerFoot AS vyuICGetStorageBinDetails_dblUnitPerFoot, 
+            T.strSubLocationName AS vyuICGetStorageBinDetails_strSubLocationName, 
+            T.intSubLocationId AS vyuICGetStorageBinDetails_intSubLocationId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetStorageBinDetails AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetSubLocationBinDetails.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView346()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetSubLocationBinDetails
+        [CodeFirstDatabaseSchema.vyuICGetSubLocationBinDetails](T1.vyuICGetSubLocationBinDetails_intItemLocationId, T1.vyuICGetSubLocationBinDetails_intItemId, T1.vyuICGetSubLocationBinDetails_intStorageLocationId, T1.vyuICGetSubLocationBinDetails_intCompanyLocationId, T1.vyuICGetSubLocationBinDetails_strCommodityCode, T1.vyuICGetSubLocationBinDetails_strItemDescription, T1.vyuICGetSubLocationBinDetails_strItemNo, T1.vyuICGetSubLocationBinDetails_strUOM, T1.vyuICGetSubLocationBinDetails_strLocation, T1.vyuICGetSubLocationBinDetails_strStorageLocation, T1.vyuICGetSubLocationBinDetails_strDiscountCode, T1.vyuICGetSubLocationBinDetails_strDiscountDescription, T1.vyuICGetSubLocationBinDetails_dtmReadingDate, T1.vyuICGetSubLocationBinDetails_dblAirSpaceReading, T1.vyuICGetSubLocationBinDetails_dblPhysicalReading, T1.vyuICGetSubLocationBinDetails_dblStockVariance, T1.vyuICGetSubLocationBinDetails_dblCapacity, T1.vyuICGetSubLocationBinDetails_dblStock, T1.vyuICGetSubLocationBinDetails_dblAvailable, T1.vyuICGetSubLocationBinDetails_dblEffectiveDepth, T1.vyuICGetSubLocationBinDetails_dblPackFactor, T1.vyuICGetSubLocationBinDetails_dblUnitPerFoot, T1.vyuICGetSubLocationBinDetails_strSubLocationName, T1.vyuICGetSubLocationBinDetails_intSubLocationId)
+    FROM (
+        SELECT 
+            T.intItemLocationId AS vyuICGetSubLocationBinDetails_intItemLocationId, 
+            T.intItemId AS vyuICGetSubLocationBinDetails_intItemId, 
+            T.intStorageLocationId AS vyuICGetSubLocationBinDetails_intStorageLocationId, 
+            T.intCompanyLocationId AS vyuICGetSubLocationBinDetails_intCompanyLocationId, 
+            T.strCommodityCode AS vyuICGetSubLocationBinDetails_strCommodityCode, 
+            T.strItemDescription AS vyuICGetSubLocationBinDetails_strItemDescription, 
+            T.strItemNo AS vyuICGetSubLocationBinDetails_strItemNo, 
+            T.strUOM AS vyuICGetSubLocationBinDetails_strUOM, 
+            T.strLocation AS vyuICGetSubLocationBinDetails_strLocation, 
+            T.strStorageLocation AS vyuICGetSubLocationBinDetails_strStorageLocation, 
+            T.strDiscountCode AS vyuICGetSubLocationBinDetails_strDiscountCode, 
+            T.strDiscountDescription AS vyuICGetSubLocationBinDetails_strDiscountDescription, 
+            T.dtmReadingDate AS vyuICGetSubLocationBinDetails_dtmReadingDate, 
+            T.dblAirSpaceReading AS vyuICGetSubLocationBinDetails_dblAirSpaceReading, 
+            T.dblPhysicalReading AS vyuICGetSubLocationBinDetails_dblPhysicalReading, 
+            T.dblStockVariance AS vyuICGetSubLocationBinDetails_dblStockVariance, 
+            T.dblCapacity AS vyuICGetSubLocationBinDetails_dblCapacity, 
+            T.dblStock AS vyuICGetSubLocationBinDetails_dblStock, 
+            T.dblAvailable AS vyuICGetSubLocationBinDetails_dblAvailable, 
+            T.dblEffectiveDepth AS vyuICGetSubLocationBinDetails_dblEffectiveDepth, 
+            T.dblPackFactor AS vyuICGetSubLocationBinDetails_dblPackFactor, 
+            T.dblUnitPerFoot AS vyuICGetSubLocationBinDetails_dblUnitPerFoot, 
+            T.strSubLocationName AS vyuICGetSubLocationBinDetails_strSubLocationName, 
+            T.intSubLocationId AS vyuICGetSubLocationBinDetails_intSubLocationId, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetSubLocationBinDetails AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetSubLocationBinDetails.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView347()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetSubLocationBinDetails
+        [iRely.Inventory.Model.vyuICGetSubLocationBinDetails](T1.vyuICGetSubLocationBinDetails_intItemLocationId, T1.vyuICGetSubLocationBinDetails_intItemId, T1.vyuICGetSubLocationBinDetails_intStorageLocationId, T1.vyuICGetSubLocationBinDetails_intCompanyLocationId, T1.vyuICGetSubLocationBinDetails_strCommodityCode, T1.vyuICGetSubLocationBinDetails_strItemDescription, T1.vyuICGetSubLocationBinDetails_strItemNo, T1.vyuICGetSubLocationBinDetails_strUOM, T1.vyuICGetSubLocationBinDetails_strLocation, T1.vyuICGetSubLocationBinDetails_strStorageLocation, T1.vyuICGetSubLocationBinDetails_strDiscountCode, T1.vyuICGetSubLocationBinDetails_strDiscountDescription, T1.vyuICGetSubLocationBinDetails_dtmReadingDate, T1.vyuICGetSubLocationBinDetails_dblAirSpaceReading, T1.vyuICGetSubLocationBinDetails_dblPhysicalReading, T1.vyuICGetSubLocationBinDetails_dblStockVariance, T1.vyuICGetSubLocationBinDetails_dblCapacity, T1.vyuICGetSubLocationBinDetails_dblStock, T1.vyuICGetSubLocationBinDetails_dblAvailable, T1.vyuICGetSubLocationBinDetails_dblEffectiveDepth, T1.vyuICGetSubLocationBinDetails_dblPackFactor, T1.vyuICGetSubLocationBinDetails_dblUnitPerFoot, T1.vyuICGetSubLocationBinDetails_strSubLocationName, T1.vyuICGetSubLocationBinDetails_intSubLocationId)
+    FROM (
+        SELECT 
+            T.intItemLocationId AS vyuICGetSubLocationBinDetails_intItemLocationId, 
+            T.intItemId AS vyuICGetSubLocationBinDetails_intItemId, 
+            T.intStorageLocationId AS vyuICGetSubLocationBinDetails_intStorageLocationId, 
+            T.intCompanyLocationId AS vyuICGetSubLocationBinDetails_intCompanyLocationId, 
+            T.strCommodityCode AS vyuICGetSubLocationBinDetails_strCommodityCode, 
+            T.strItemDescription AS vyuICGetSubLocationBinDetails_strItemDescription, 
+            T.strItemNo AS vyuICGetSubLocationBinDetails_strItemNo, 
+            T.strUOM AS vyuICGetSubLocationBinDetails_strUOM, 
+            T.strLocation AS vyuICGetSubLocationBinDetails_strLocation, 
+            T.strStorageLocation AS vyuICGetSubLocationBinDetails_strStorageLocation, 
+            T.strDiscountCode AS vyuICGetSubLocationBinDetails_strDiscountCode, 
+            T.strDiscountDescription AS vyuICGetSubLocationBinDetails_strDiscountDescription, 
+            T.dtmReadingDate AS vyuICGetSubLocationBinDetails_dtmReadingDate, 
+            T.dblAirSpaceReading AS vyuICGetSubLocationBinDetails_dblAirSpaceReading, 
+            T.dblPhysicalReading AS vyuICGetSubLocationBinDetails_dblPhysicalReading, 
+            T.dblStockVariance AS vyuICGetSubLocationBinDetails_dblStockVariance, 
+            T.dblCapacity AS vyuICGetSubLocationBinDetails_dblCapacity, 
+            T.dblStock AS vyuICGetSubLocationBinDetails_dblStock, 
+            T.dblAvailable AS vyuICGetSubLocationBinDetails_dblAvailable, 
+            T.dblEffectiveDepth AS vyuICGetSubLocationBinDetails_dblEffectiveDepth, 
+            T.dblPackFactor AS vyuICGetSubLocationBinDetails_dblPackFactor, 
+            T.dblUnitPerFoot AS vyuICGetSubLocationBinDetails_dblUnitPerFoot, 
+            T.strSubLocationName AS vyuICGetSubLocationBinDetails_strSubLocationName, 
+            T.intSubLocationId AS vyuICGetSubLocationBinDetails_intSubLocationId, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetSubLocationBinDetails AS T
     ) AS T1");
         }
 
@@ -13609,7 +13765,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetStorageBinMeasurementReading.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView344()
+        private static DbMappingView GetView348()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageBinMeasurementReading
@@ -13640,7 +13796,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetStorageBinMeasurementReadings.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView345()
+        private static DbMappingView GetView349()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageBinMeasurementReadings
@@ -13671,7 +13827,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetPostedLot.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView346()
+        private static DbMappingView GetView350()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetPostedLot
@@ -13715,7 +13871,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetPostedLots.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView347()
+        private static DbMappingView GetView351()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetPostedLots
@@ -13759,7 +13915,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetReceiptAddOrder.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView348()
+        private static DbMappingView GetView352()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptAddOrder
@@ -13830,7 +13986,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetReceiptAddOrders.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView349()
+        private static DbMappingView GetView353()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptAddOrders
@@ -13901,7 +14057,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetReceiptAddPurchaseOrder.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView350()
+        private static DbMappingView GetView354()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptAddPurchaseOrder
@@ -13975,7 +14131,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetReceiptAddPurchaseOrders.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView351()
+        private static DbMappingView GetView355()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptAddPurchaseOrders
@@ -14049,7 +14205,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetReceiptAddTransferOrder.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView352()
+        private static DbMappingView GetView356()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptAddTransferOrder
@@ -14120,7 +14276,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetReceiptAddTransferOrders.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView353()
+        private static DbMappingView GetView357()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptAddTransferOrders
@@ -14191,7 +14347,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetReceiptAddPurchaseContract.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView354()
+        private static DbMappingView GetView358()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptAddPurchaseContract
@@ -14265,7 +14421,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetReceiptAddPurchaseContracts.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView355()
+        private static DbMappingView GetView359()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptAddPurchaseContracts
@@ -14339,7 +14495,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetReceiptAddLGInboundShipment.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView356()
+        private static DbMappingView GetView360()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptAddLGInboundShipment
@@ -14413,7 +14569,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetReceiptAddLGInboundShipments.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView357()
+        private static DbMappingView GetView361()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptAddLGInboundShipments
@@ -14487,7 +14643,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetShipmentAddOrder.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView358()
+        private static DbMappingView GetView362()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetShipmentAddOrder
@@ -14549,7 +14705,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetShipmentAddOrders.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView359()
+        private static DbMappingView GetView363()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetShipmentAddOrders
@@ -14611,7 +14767,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetShipmentAddSalesOrder.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView360()
+        private static DbMappingView GetView364()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetShipmentAddSalesOrder
@@ -14679,7 +14835,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetShipmentAddSalesOrders.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView361()
+        private static DbMappingView GetView365()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetShipmentAddSalesOrders
@@ -14747,7 +14903,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetShipmentAddSalesContract.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView362()
+        private static DbMappingView GetView366()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetShipmentAddSalesContract
@@ -14813,7 +14969,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetShipmentAddSalesContracts.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView363()
+        private static DbMappingView GetView367()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetShipmentAddSalesContracts
@@ -14879,7 +15035,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetShipmentAddSalesContractPickLot.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView364()
+        private static DbMappingView GetView368()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetShipmentAddSalesContractPickLot
@@ -14945,7 +15101,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetShipmentAddSalesContractPickLots.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView365()
+        private static DbMappingView GetView369()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetShipmentAddSalesContractPickLots
@@ -15011,7 +15167,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetBundleItem.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView366()
+        private static DbMappingView GetView370()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetBundleItem
@@ -15041,7 +15197,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetBundleItems.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView367()
+        private static DbMappingView GetView371()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetBundleItems
@@ -15071,11 +15227,11 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICInventoryCount.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView368()
+        private static DbMappingView GetView372()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCount
-        [CodeFirstDatabaseSchema.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_ysnPosted, T1.tblICInventoryCount_dtmPosted, T1.tblICInventoryCount_intEntityId, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_ysnPosted, T1.tblICInventoryCount_dtmPosted, T1.tblICInventoryCount_intEntityId, T1.tblICInventoryCount_intImportFlagInternal, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryCountId AS tblICInventoryCount_intInventoryCountId, 
@@ -15101,6 +15257,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnPosted AS tblICInventoryCount_ysnPosted, 
             T.dtmPosted AS tblICInventoryCount_dtmPosted, 
             T.intEntityId AS tblICInventoryCount_intEntityId, 
+            T.intImportFlagInternal AS tblICInventoryCount_intImportFlagInternal, 
             T.intSort AS tblICInventoryCount_intSort, 
             T.intConcurrencyId AS tblICInventoryCount_intConcurrencyId, 
             True AS _from0
@@ -15112,7 +15269,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICInventoryCountDetail.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView369()
+        private static DbMappingView GetView373()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCountDetail
@@ -15146,7 +15303,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetInventoryCountDetail.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView370()
+        private static DbMappingView GetView374()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryCountDetail
@@ -15194,11 +15351,11 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICInventoryCounts.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView371()
+        private static DbMappingView GetView375()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCounts
-        [iRely.Inventory.Model.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_ysnPosted, T1.tblICInventoryCount_dtmPosted, T1.tblICInventoryCount_intEntityId, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_ysnPosted, T1.tblICInventoryCount_dtmPosted, T1.tblICInventoryCount_intEntityId, T1.tblICInventoryCount_intImportFlagInternal, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryCountId AS tblICInventoryCount_intInventoryCountId, 
@@ -15224,6 +15381,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnPosted AS tblICInventoryCount_ysnPosted, 
             T.dtmPosted AS tblICInventoryCount_dtmPosted, 
             T.intEntityId AS tblICInventoryCount_intEntityId, 
+            T.intImportFlagInternal AS tblICInventoryCount_intImportFlagInternal, 
             T.intSort AS tblICInventoryCount_intSort, 
             T.intConcurrencyId AS tblICInventoryCount_intConcurrencyId, 
             True AS _from0
@@ -15235,7 +15393,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICInventoryCountDetails.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView372()
+        private static DbMappingView GetView376()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCountDetails
@@ -15269,7 +15427,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetInventoryCountDetails.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView373()
+        private static DbMappingView GetView377()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryCountDetails
@@ -15317,7 +15475,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetInventoryCount.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView374()
+        private static DbMappingView GetView378()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryCount
@@ -15361,7 +15519,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetInventoryCounts.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView375()
+        private static DbMappingView GetView379()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryCounts
@@ -15405,7 +15563,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetCountSheet.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView376()
+        private static DbMappingView GetView380()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetCountSheet
@@ -15464,7 +15622,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetCountSheets.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView377()
+        private static DbMappingView GetView381()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetCountSheets
@@ -15523,7 +15681,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetInventoryReceiptChargeTax.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView378()
+        private static DbMappingView GetView382()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryReceiptChargeTax
@@ -15560,7 +15718,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetInventoryReceiptChargeTaxes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView379()
+        private static DbMappingView GetView383()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryReceiptChargeTaxes
@@ -15597,7 +15755,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetChargeTaxDetails.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView380()
+        private static DbMappingView GetView384()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetChargeTaxDetails
@@ -15623,7 +15781,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetChargeTaxDetails.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView381()
+        private static DbMappingView GetView385()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetChargeTaxDetails
@@ -15649,7 +15807,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemOwner.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView382()
+        private static DbMappingView GetView386()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemOwner
@@ -15671,7 +15829,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemOwners.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView383()
+        private static DbMappingView GetView387()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemOwners
@@ -15693,7 +15851,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemSubLocations.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView384()
+        private static DbMappingView GetView388()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemSubLocations
@@ -15717,7 +15875,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemSubLocations.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView385()
+        private static DbMappingView GetView389()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemSubLocations

@@ -313,11 +313,11 @@ namespace iRely.Inventory.BusinessLayer
         }
 
 
-        public SaveResult ProcessBill(int receiptId, out int? newBill)
+        public SaveResult ProcessBill(int receiptId, out int? newBill, out string newBills)
         {
             SaveResult saveResult = new SaveResult();
             int? newBillId = null;
-
+            string newBillIds = string.Empty;
             using (var transaction = _db.ContextManager.Database.BeginTransaction())
             {
                 var connection = _db.ContextManager.Database.Connection;
@@ -329,8 +329,24 @@ namespace iRely.Inventory.BusinessLayer
                     outParam.Direction = System.Data.ParameterDirection.Output;
                     outParam.DbType = System.Data.DbType.Int32;
                     outParam.SqlDbType = System.Data.SqlDbType.Int;
-                    _db.ContextManager.Database.ExecuteSqlCommand("uspICProcessToBill @intReceiptId, @intUserId, @intBillId OUTPUT", idParameter, userId, outParam);
+
+                    var outParam2 = new SqlParameter("@strBillIds", newBillIds);
+                    outParam2.Direction = ParameterDirection.Output;
+                    outParam2.DbType = DbType.String;
+                    outParam2.Size = -1;
+                    outParam2.SqlDbType = SqlDbType.NVarChar;
+
+                    var prefix = new SqlParameter("@strPrefix", "^|");
+                    var suffix = new SqlParameter("@strSuffix", "|");
+
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICProcessToBill @intReceiptId, @intUserId, @intBillId OUTPUT, @strBillIds OUTPUT, @strPrefix, @strSuffix", idParameter, userId, outParam, outParam2, prefix, suffix);
                     newBillId = (int)outParam.Value;
+                    var ids = outParam2.Value.ToString();
+                    if(ids.Length > 0)
+                    {
+                        ids = ids.Substring(1, ids.Length - 2);
+                    }
+                    newBillIds = ids;
                     saveResult = _db.Save(false);
                     transaction.Commit();
                 }
@@ -351,6 +367,7 @@ namespace iRely.Inventory.BusinessLayer
                 }
             }
             newBill = newBillId;
+            newBills = newBillIds;
             return saveResult;
         }
 
@@ -812,6 +829,78 @@ namespace iRely.Inventory.BusinessLayer
             }
             taxGroup = newTaxGroupId;
             taxGroupName = newTaxGroupName;
+            return saveResult;
+        }        
+
+        public SaveResult GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? entityVendorId, int? entityLocationId, out int? taxGroup, out string taxGroupName)
+        {
+            SaveResult saveResult = new SaveResult();
+            taxGroup = null;
+            taxGroupName = null;
+
+            try
+            {
+                var freightTermIdParam = new SqlParameter("@intFreightTermId", freightTermId);
+                freightTermIdParam.DbType = System.Data.DbType.Int32;
+                freightTermIdParam.SqlDbType = System.Data.SqlDbType.Int;
+                if (freightTermId == null)
+                    freightTermIdParam.Value = DBNull.Value; 
+                else
+                    freightTermIdParam.Value = freightTermId;
+
+                var locationIdParam = new SqlParameter("@intLocationId", locationId);
+                locationIdParam.DbType = System.Data.DbType.Int32;
+                locationIdParam.SqlDbType = System.Data.SqlDbType.Int;
+                if (locationId == null)
+                    locationIdParam.Value = DBNull.Value;
+                else
+                    locationIdParam.Value = locationId;
+
+                var entityVendorIdParam = new SqlParameter("@intEntityVendorId", entityVendorId);
+                entityVendorIdParam.DbType = System.Data.DbType.Int32;
+                entityVendorIdParam.SqlDbType = System.Data.SqlDbType.Int;
+                if (entityVendorId == null)
+                    entityVendorIdParam.Value = DBNull.Value;
+                else
+                    entityVendorIdParam.Value = entityVendorId;
+
+                var entityLocationIdParam = new SqlParameter("@intEntityLocationId", entityLocationId);
+                entityLocationIdParam.DbType = System.Data.DbType.Int32;
+                entityLocationIdParam.SqlDbType = System.Data.SqlDbType.Int;
+                if (entityLocationId == null)
+                    entityLocationIdParam.Value = DBNull.Value;
+                else
+                    entityLocationIdParam.Value = entityLocationId;
+
+                var intTaxGroupIdOutput = new SqlParameter("@intTaxGroupId", SqlDbType.Int);
+                intTaxGroupIdOutput.Direction = System.Data.ParameterDirection.Output;
+                intTaxGroupIdOutput.DbType = System.Data.DbType.Int32;
+
+                var strTaxGroupOutput = new SqlParameter("@strTaxGroup", SqlDbType.NVarChar);
+                strTaxGroupOutput.Direction = System.Data.ParameterDirection.Output;
+                strTaxGroupOutput.DbType = System.Data.DbType.String;
+                strTaxGroupOutput.Size = 50;
+
+                _db.ContextManager.Database.ExecuteSqlCommand(
+                    "uspICGetDefaultReceiptTaxGroupId @intFreightTermId, @intLocationId, @intEntityVendorId, @intEntityLocationId, @intTaxGroupId OUTPUT, @strTaxGroup OUTPUT"
+                    , freightTermIdParam
+                    , locationIdParam
+                    , entityVendorIdParam
+                    , entityLocationIdParam
+                    , intTaxGroupIdOutput
+                    , strTaxGroupOutput
+                );
+
+                taxGroup = (int)intTaxGroupIdOutput.Value;
+                taxGroupName = (string)strTaxGroupOutput.Value;
+                saveResult.HasError = false;
+            }
+            catch (Exception ex)
+            {
+                saveResult.BaseException = ex;
+                saveResult.Exception = new ServerException(ex);
+                saveResult.HasError = true;
+            }
             return saveResult;
         }
 

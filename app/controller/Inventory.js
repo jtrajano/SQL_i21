@@ -6,9 +6,6 @@ Ext.define('Inventory.controller.Inventory', {
     alias: 'controller.inventory',
     requires: [
         'Inventory.Utils',
-        'Inventory.ux.GridUnitMeasureColumn',
-        'Inventory.ux.GridUnitMeasureField',
-        'Inventory.ux.GridUOMCellEditor',
         'Inventory.ux.GridUOMColumn',
         'Inventory.ux.GridUOMField'
     ],

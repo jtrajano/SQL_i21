@@ -23,9 +23,12 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
 
     onCopy: function(e) {
         var me = this;
+        
         var grid = this.getView().down('#grdItems');
         var selected = grid.getSelectionModel().selected;
-        if(selected) {
+        var win = grid.up('window');
+
+        if(selected && selected.count() > 0) {
             var msgAction = function (button) {
                 if (button === 'yes') {
                     var sourceItem = me.view.viewModel.get('hasSourceItem');
@@ -34,9 +37,15 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
             };
             iRely.Functions.showCustomDialog('question', 'yesno', 'Are you sure you want to copy the location(s) from this item?', msgAction);
         }
+        else {
+            iRely.Functions.showCustomDialog('Warning', 'ok', 'Please select the target items from the grid.');
+        }
     },
 
     copyLocation: function(selectedItems, sourceItem) {
+        var me = this;
+        var win = me.getView();
+
         var destinationItems = _.map(selectedItems, function(o) { return o.data; });
         var destinationItemIds = _.map(destinationItems, function(r) { return r.intItemId; });
         //destinationItemIds = _.filter(destinationItemIds, function(e) { return e !== sourceItem.get('intItemId'); });
@@ -57,6 +66,9 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
                 var json = JSON.parse(successResponse.responseText);
                 if(json.success) {
                     i21.functions.showCustomDialog('info', 'ok', 'Location(s) copied successfully.');   
+
+                    // Auto-Close                     
+                    win.close();
                 } else {
                     i21.functions.showCustomDialog('error', 'ok', json.message.statusText);   
                 }

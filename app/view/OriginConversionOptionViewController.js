@@ -21,6 +21,65 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         "use strict";
         var me = con || this;
         var win = me.getView();
+        
+        ic.utils.ajax({
+            url: '../Inventory/api/CompanyPreference/Get',
+            method: 'get',
+            params: {
+                page: 1,
+                start: 0,
+                limit: 50
+            }
+        })
+        .map(function(res) {
+            var json = JSON.parse(res.responseText);
+            if(json.data && json.data.length > 0) {
+                return  { task: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
+            }
+            return null;
+        })
+        .subscribe(
+            function(pref) {
+                if(pref) {
+                    var lastLob = pref.lob;
+                    if (lastLob && lastLob !== '')
+                        me.getViewModel().set('lineOfBusiness', lastLob);
+                    else {
+                        if (me.getViewModel().get('lineOfBusiness') !== '')
+                            me.getViewModel().set('lineOfBusiness', '');
+                    }
+
+                    var lastTask = pref.task;
+                    if (lastTask && lastTask !== '')
+                        me.getViewModel().set('currentTask', lastTask);
+                    else {
+                        if (me.getViewModel().get('currentTask') !== '')
+                            me.getViewModel().set('currentTask', 'LOB');
+                    }
+
+                    var lob = me.getViewModel().get('lineOfBusiness');
+                    var currentTask = me.getViewModel().get('currentTask');
+
+                    if (lob)
+                        win.up('window').down('#cboLOB').setValue(me.getViewModel().get('lineOfBusiness'));
+                    else
+                        win.up('window').down('#cboLOB').setValue(null);
+
+                    var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
+                    var grains = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
+
+                    if (currentTask && currentTask !== 'LOB') {
+                        if (lob === 'Grain')
+                            originTypes = grains;
+                        var index = _.indexOf(originTypes, currentTask);
+                        if (index !== -1) {
+                            me.getViewModel().set('currentTask', originTypes[index + 1]);
+                        } else
+                            me.getViewModel().set('currentTask', "LOB");
+                    }
+                }
+            }
+        )
     },
 
     onImportButtonClick: function(button, e, eOpts) {
@@ -30,6 +89,10 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
         var type = null;
         var originType = null;
+        var grainType = null;
+        var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
+        var grain = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
+        
         switch (button.itemId) {
             case "btnImportFuelCategories":
                 type = "FuelCategories";
@@ -89,11 +152,8 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 type = "ItemContracts";
                 break;
             case "btnImportInventoryCount":
-                type = "InventoryCountDetails";
+                type = "InventoryCount";
                 break;
-            // case "btnImportInventoryCountDetails":
-            //     type = "InventoryCountDetails";
-            //     break;
             case "btnImportItemPricing":
                 type = "ItemPricing";
                 break;
@@ -103,16 +163,42 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             case "btnImportItemPricingLevels":
                 type = "ItemPricingLevels";
                 break;
-            case "btnImportItemsOrigins":
-                originType = "ItemsOrigins";
+            /* ORIGIN CONVERSIONS */
+            case "btnOriginUOM":
+                originType = 0;
+                grainType = 0;
                 break;
-            case "btnImportGLAccountsOrigins":
-                originType = "GLAccountsOrigins";
+            case "btnOriginLocations":
+                originType = 1;
+                grainType = 1;
+                break;
+            case "btnOriginCommodity":
+                grainType = 2;
+                originType = 1;
+                break;
+            case "btnOriginCategoryClass":
+                originType = 2;
+                break;
+            case "btnOriginCategoryGLAccts":
+                originType = 3;
+                break;
+            case "btnOriginAdditionalGLAccts":
+                originType = 4;
+                grainType = 3;
+                break;
+            case "btnOriginItems":
+                originType = 5;
+                break;
+            case "btnOriginItemGLAccts":
+                originType = 6;
+                break;
+            case "btnOriginBalance":
+                originType = 7;
                 break;
         }
 
         var allowOverwrite = this.view.viewModel.getData().allowOverwrite;
-
+        var lineOfBusiness = this.view.viewModel.getData().lineOfBusiness;
         if (type !== null) {
             iRely.Functions.openScreen('Inventory.view.ImportDataFromCsv', {
                 type: type,
@@ -121,22 +207,29 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 allowOverwrite: allowOverwrite
             });
         }
-        else if(originType != null)
-            this.importFromOrigins(originType, win);
+        else if(originType !== null) {
+            if(lineOfBusiness === 'Grain') {
+                originTypes = grain;
+                originType = grainType;
+            }
+
+            this.importFromOrigins(this.view.viewModel, originTypes, originType, lineOfBusiness, win);
+        }
     },
 
-    importFromOrigins: function(type, win) {
-        this.ajaxRequest(type, win);
+    importFromOrigins: function(viewModel, originTypes, type, lineOfBusiness, win) {
+        this.ajaxRequest(viewModel, originTypes, type, lineOfBusiness, win);
     },
 
-    ajaxRequest: function (type, win) {
+    ajaxRequest: function (viewModel, originTypes, type, lineOfBusiness, win) {
         jQuery.ajax({
             url: '../Inventory/api/ImportData/ImportOrigins',
             method: 'post',
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId),
-                'X-Import-Type': type
+                'X-Import-Type': originTypes[type],
+                'X-Import-LineOfBusiness': lineOfBusiness
             },
             beforeSend: function(jqXHR, settings) {
                 iRely.Msg.showWait('Importing in progress...');
@@ -144,22 +237,24 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
             success: function(data, status, jqXHR) {
                 iRely.Msg.close();
-                var type = 'info';
+                var msgtype = 'info';
                 var msg = "File imported successfully.";
                 var json = JSON.parse(jqXHR.responseText);
                 if (json.result.Info == "warning") {
-                    type = "warning";
+                    msgtype = "warning";
                     msg = "File imported successfully with warnings.";
                 }
                 if(json.result.Info == "error") {
-                    type = "warning";
+                    msgtype = "warning";
                     msg = "File imported successfully with errors.";
                 }
+                viewModel.set('lineOfBusiness', lineOfBusiness);
+                viewModel.set('currentTask', originTypes[type+1]);
 
-                i21.functions.showCustomDialog(type, 'ok', msg, function() {
+                i21.functions.showCustomDialog(msgtype, 'ok', msg, function() {
                     //win.close();
 
-                    if (data.messages !== null && data.messages.length > 0) {
+                    if (data.result.Messages !== null && data.result.Messages.length > 0) {
                         iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
                             data: data
                         });
@@ -173,7 +268,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                     function() {
                         //win.close();
 
-                        if (json.messages !== null && json.messages.length > 0) {
+                        if (json.messages && json.messages.length > 0) {
                             iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
                                 data: json
                             });
@@ -197,8 +292,20 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
             "#btnAllowOverwrite": {
                 toggle: this.onAllowOverwriteCheckChange
+            },
+
+            "#cboLOB": {
+                select: this.onLOBSelect
             }
         });
+    },
+
+    onLOBSelect: function(combo, record) {
+        var lob = record.get('strName');
+        if(lob) {
+            this.view.viewModel.set('lineOfBusiness', lob);
+            this.view.viewModel.set('currentTask', 'UOM');
+        }
     },
 
     onAllowOverwriteCheckChange: function(button, state) {
@@ -350,13 +457,10 @@ function getTemplateColumns(name) {
                 "Volume", "Volume UOM", "Max Qty"];
         case "Contract Items":
             return ["Item No","Location","Contract Name","Origin","Grade","Grade Type","Garden","Yield","Tolerance","Franchise"];
-        // case "Inventory Count":
-        //     return ["Location","Category","Commodity","Count Group","Count Date","Sub Location","Storage Location","Description",
-        //         "Include Zero on Hand","Include on Hand","Scanned Count Entry","Count by Lots","Count by Pallets","Recount Mismatch",
-        //         "External","Recount","Reference Count No"];
         case "Inventory Count":
-            return ["Location", "Count Group", "Description", "Date", "Item No", "Sub Location", "Storage Location", 
-                "Physical Count", "UOM", "Lot No", "Pallets", "Qty Per Pallet", "Count by Lots", "Count by Pallets", "Recount"];
+            return ["Location","Category","Commodity","Count Group","Count Date","Sub Location","Storage Location","Description",
+                "Include Zero on Hand","Include on Hand","Scanned Count Entry","Count by Lots","Count by Pallets","Recount Mismatch",
+                "External","Recount","Reference Count No"];
         case "Item Pricing":
             return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "Pricing Method",
                 "Amount/Percent", "Retail Price", "MSRP"];

@@ -29,8 +29,7 @@ Ext.define('Inventory.view.InventoryUOM', {
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
-        'Ext.toolbar.Paging',
-        'Inventory.ux.UnitMeasureField'
+        'Ext.toolbar.Paging'
     ],
 
     height: 550,

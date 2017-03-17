@@ -143,11 +143,11 @@ Ext.define('Inventory.view.CommodityViewController', {
                     dataIndex: 'strDefaultPackingUOM',
                     editor: {
                         store: '{packinguoms}',
-                        defaultFilters: [{
-                            column: 'strUnitType',
-                            value: 'Packed',
-                            conjunction: 'and'
-                        }],
+                        // defaultFilters: [{
+                        //     column: 'strUnitType',
+                        //     value: 'Packed',
+                        //     conjunction: 'and'
+                        // }],
                         origValueField: 'intUnitMeasureId',
                         origUpdateField: 'intDefaultPackingUOMId',
                     }
@@ -351,20 +351,9 @@ Ext.define('Inventory.view.CommodityViewController', {
         var plugin = grid.getPlugin('cepUOM');
         var current = plugin.getActiveRecord();
         var uomConversion = win.viewModel.storeInfo.uomConversion;
-        
+
         if (combo.column.itemId === 'colUOMCode')
         {
-            var colUOMUnitQty = _.findWhere(grid.getColumns(), { itemId: 'colUOMUnitQty' });
-            if(colUOMUnitQty) {
-                var editor = colUOMUnitQty.getEditor();
-                var decimals = records[0].get('intDecimalPlaces');                
-                var format = "";
-                for (var i = 0; i < decimals; i++)
-                    format += "0";
-                var formatted = numeral(current.get('dblUnitQty')).format('0,0.[' + format + ']');
-                editor.setValue(formatted);
-            }
-
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
             current.set('tblICUnitMeasure', records[0]);
 

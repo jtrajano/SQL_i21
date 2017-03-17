@@ -24,7 +24,16 @@ Ext.define('Inventory.ux.GridUOMField', {
 
     config: {
         DEFAULT_DECIMALS: 6,
-        customValue: null
+        customValue: null,
+        readOnly: false
+    },
+
+    getReadOnly: function() {
+        return this.readOnly;
+    },
+
+    setReadOnly: function(value) {
+        this.readOnly = value;
     },
 
     txtQuantity: undefined,
@@ -72,10 +81,8 @@ Ext.define('Inventory.ux.GridUOMField', {
         me.txtQuantity = panel.items.items[0];
         me.cboUom = panel.items.items[1];
 
-        if (me.readOnly) {
-            me.txtQuantity.setReadOnly(me.readOnly);
-            me.cboUom.setReadOnly(me.readOnly);
-        }
+        me.txtQuantity.setReadOnly(me.readOnly);
+        me.cboUom.setReadOnly(me.readOnly);
 
         me.setupBindings();
         me.setupComboboxFilters();
@@ -189,6 +196,11 @@ Ext.define('Inventory.ux.GridUOMField', {
     setupEvents: function() {
         var me = this,
             plugin = me.getEditingPlugin();
+
+        me.txtQuantity.on('focus', function() {
+            if(this.selectOnFocus)
+                this.inputEl.dom.select();
+        });
 
         me.txtQuantity.on('keypress', function(field, event) {
             if(event.keyCode === 13) {
@@ -348,7 +360,12 @@ Ext.define('Inventory.ux.GridUOMField', {
                 }
                 
                 me.value = newValue;
-                me.txtQuantity.setValue(newValue);     
+                me.txtQuantity.setValue(newValue);
+                if(me.txtQuantity.selectOnFocus && me.txtQuantity.hasFocus)
+                    me.txtQuantity.inputEl.dom.select();
+                
+                me.txtQuantity.setReadOnly(me.readOnly);
+                me.cboUom.setReadOnly(me.readOnly);
              }
          });
 
@@ -383,7 +400,8 @@ Ext.define('Inventory.ux.GridUOMField', {
         
         me.value = newValue;
         me.txtQuantity.setValue(newValue);
-
+        me.txtQuantity.setReadOnly(me.readOnly);
+        me.cboUom.setReadOnly(me.readOnly);
         return me;
     },
 
@@ -542,6 +560,7 @@ Ext.define('Inventory.ux.GridUOMField', {
                 {
                     xtype: 'numberfield',
                     flex: 1,
+                    selectOnFocus: true,
                     margin: '0 2 0 0',
                     decimalPrecision: 6,
                     decimalToDisplay: 6,

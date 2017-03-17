@@ -886,7 +886,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                             itemId: 'colLastCost',
                                             width: 71,
                                             dataIndex: 'string',
-                                            text: 'Last Cost',
+                                            text: 'Cost',
                                             format: '0,000.00####'
                                         },
                                         {

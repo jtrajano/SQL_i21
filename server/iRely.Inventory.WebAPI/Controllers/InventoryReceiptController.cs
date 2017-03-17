@@ -132,7 +132,8 @@ namespace iRely.Inventory.WebApi
         public HttpResponseMessage ProcessBill(int id)
         {
             int? newBill = null;
-            var result = _bl.ProcessBill(id, out newBill);
+            string newBillIds = string.Empty;
+            var result = _bl.ProcessBill(id, out newBill, out newBillIds);
 
             var httpStatusCode = HttpStatusCode.OK;
             if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
@@ -143,6 +144,7 @@ namespace iRely.Inventory.WebApi
                 message = new
                 {
                     BillId = newBill,
+                    BillIds = newBillIds,
                     statusText = result.Exception.Message,
                     status = result.Exception.Error,
                     button = result.Exception.Button.ToString()
@@ -199,6 +201,31 @@ namespace iRely.Inventory.WebApi
             int? taxGroup = null;
             string taxGroupName = null;
             var result = _bl.GetTaxGroupId(id, out taxGroup, out taxGroupName);
+
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    taxGroupId = taxGroup,
+                    taxGroupN = taxGroupName,
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
+        [HttpGet]
+        [ActionName("GetDefaultReceiptTaxGroupId")]
+        public HttpResponseMessage GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? entityVendorId, int? entityLocationId)
+        {
+            int? taxGroup = null;
+            string taxGroupName = null;
+            var result = _bl.GetDefaultReceiptTaxGroupId(freightTermId, locationId, entityVendorId, entityLocationId, out taxGroup, out taxGroupName);
 
             var httpStatusCode = HttpStatusCode.OK;
             if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;

@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
     {
         protected override string[] GetRequiredFields()
         {
-            return new string[] { "item no", "description", "type", "category" };
+            return new string[] { "item no", "type", "category" };
         }
 
         protected override tblICItem ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
@@ -78,7 +78,7 @@ namespace iRely.Inventory.BusinessLayer
                         break;
                     case "description":
                         if (string.IsNullOrEmpty(value))
-                            valid = false;
+                            fc.strDescription = fc.strItemNo;
                         else
                             fc.strDescription = value;
                         break;
@@ -172,7 +172,9 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         break;
                     case "lot tracking":
-                        if (value.Trim().ToLower().Contains("manual"))
+                        if (value.Trim().ToLower().Contains("manual/serial"))
+                            fc.strLotTracking = "Yes - Manual/Serial Number";
+                        else if (value.Trim().ToLower().Contains("manual"))
                             fc.strLotTracking = "Yes - Manual";
                         else if (value.Trim().ToLower().Contains("serial"))
                             fc.strLotTracking = "Yes - Serial Number";
@@ -181,20 +183,27 @@ namespace iRely.Inventory.BusinessLayer
                             switch (value.Trim().ToLower())
                             {
                                 case "no":
+                                    fc.strLotTracking = "No";
+                                    break;
                                 case "yes - manual":
+                                    fc.strLotTracking = "Yes - Manual";
+                                    break;
                                 case "yes - serial number":
-                                    fc.strLotTracking = value;
+                                    fc.strLotTracking = "Yes - Serial Number";
+                                    break;
+                                case "yes - manual/serial number":
+                                    fc.strLotTracking = "Yes - Manual/Serial Number";
                                     break;
                                 default:
                                     fc.strLotTracking = "No";
-                                    dr.Messages.Add(new ImportDataMessage()
-                                    {
-                                        Column = header,
-                                        Row = row,
-                                        Type = TYPE_INNER_WARN,
-                                        Message = "Invalid value for Lot Tracking: " + value + ". Lot Tracking set to default 'No'.",
-                                        Status = STAT_INNER_DEF
-                                    });
+                                    //dr.Messages.Add(new ImportDataMessage()
+                                    //{
+                                    //    Column = header,
+                                    //    Row = row,
+                                    //    Type = TYPE_INNER_WARN,
+                                    //    Message = "Invalid value for Lot Tracking: " + value + ". Lot Tracking set to default 'No'.",
+                                    //    Status = STAT_INNER_DEF
+                                    //});
                                     break;
                             }
                         }
@@ -266,14 +275,17 @@ namespace iRely.Inventory.BusinessLayer
                                 fc.strBarcodePrint = value;
                                 break;
                             default:
-                                dr.Messages.Add(new ImportDataMessage()
+                                if (!string.IsNullOrEmpty(value))
                                 {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Invalid value for Barcode Print: " + value + ".",
-                                    Status = STAT_INNER_COL_SKIP
-                                });
+                                    dr.Messages.Add(new ImportDataMessage()
+                                    {
+                                        Column = header,
+                                        Row = row,
+                                        Type = TYPE_INNER_WARN,
+                                        Message = "Invalid value for Barcode Print: " + value + ".",
+                                        Status = STAT_INNER_COL_SKIP
+                                    });
+                                }
                                 break;
                         }
                         break;

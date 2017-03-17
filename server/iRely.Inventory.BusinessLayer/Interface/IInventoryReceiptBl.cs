@@ -12,7 +12,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IInventoryReceiptBl : IBusinessLayer<tblICInventoryReceipt>
     {
-        SaveResult ProcessBill(int receiptId, out int? newBill);
+        SaveResult ProcessBill(int receiptId, out int? newBill, out string newBills);
         SaveResult CalculateCharges(int receiptId);
         //SaveResult PostReceive(Common.Posting_RequestModel receipt, bool isRecap);
         //SaveResult PostReturn(Common.Posting_RequestModel receipt, bool isRecap);
@@ -32,5 +32,6 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchReceiptCharges(GetParameter param);
         SaveResult UpdateReceiptVoucher();
         SaveResult CheckReceiptForValidReturn(int? receiptId);
+        SaveResult GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? entityVendorId, int? entityLocationId, out int? taxGroup, out string taxGroupName);
     }
 }
