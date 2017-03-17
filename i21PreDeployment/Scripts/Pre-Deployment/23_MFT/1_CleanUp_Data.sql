@@ -13,6 +13,16 @@ IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFRep
 			UPDATE tblTFReportingComponent
 			SET intConcurrencyId = 1
 			WHERE intConcurrencyId IS NULL
+
+			DECLARE @RCID INT
+			SET @RCID = (SELECT TOP 1 intReportingComponentId 
+			FROM tblTFReportingComponent 
+			WHERE strScheduleName = 'NE EDI file')
+
+			DELETE FROM tblTFFilingPacket 
+			WHERE intReportingComponentId = @RCID
+			DELETE FROM tblTFReportingComponent 
+			WHERE strScheduleName = 'NE EDI file'
 		END
 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFReportingComponentConfiguration')
