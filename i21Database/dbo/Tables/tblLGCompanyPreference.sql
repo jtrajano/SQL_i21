@@ -13,6 +13,7 @@
 [intDefaultLeastCostSourceType] INT NULL,
 [strALKMapKey] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
 [intTransUsedBy] INT NULL,
+[intShippingMode] INT NULL,
 [strCarrierShipmentStandardText] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [dblRouteHours] NUMERIC(18, 6) NULL,
 [intHaulerEntityId] INT NULL,
@@ -28,6 +29,7 @@
 [ysnAlertApprovedQty] [bit] NULL,
 [ysnUpdateVesselInfo] [bit] NULL,
 [ysnValidateExternalPONo] [bit] NULL,
+[ysnETAMandatory] [bit] NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
