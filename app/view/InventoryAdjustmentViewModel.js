@@ -793,7 +793,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
-            if (get('current.intAdjustmentType') == 1) {
+            if (get('current.intAdjustmentType') == 1 || get('current.intAdjustmentType') == 3 || get('current.intAdjustmentType') == 5) {
                 for (var i = 0; i < gridColumns.length; i++) {
                     if (gridColumns[i].itemId == 'colAdjustByQuantity') {
                         grdInventoryAdjustment.columnManager.columns[i].setText('Adjust Qty By <span style="color:red">*</span>');
@@ -898,7 +898,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
-            if (get('current.intAdjustmentType') == 4 || get('current.intAdjustmentType') == 5) {
+            if (get('current.intAdjustmentType') == 4 || get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 3) {
                 for (var i = 0; i < gridColumns.length; i++) {
                     if (gridColumns[i].itemId == 'colLotNumber') {
                         grdInventoryAdjustment.columnManager.columns[i].setText('Lot ID <span style="color:red">*</span>');

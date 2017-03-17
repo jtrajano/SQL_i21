@@ -452,7 +452,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colStorageLocation',
-                                                        width: 100,
+                                                        width: 110,
                                                         dataIndex: 'strStorageLocation',
                                                         text: 'Storage Location',
                                                         editor: {
@@ -803,7 +803,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewUOM',
-                                                        width: 110,
+                                                        width: 120,
                                                         dataIndex: 'strNewItemUOM',
                                                         tdCls: 'blue-text-column',
                                                         text: 'New Split Lot UOM',
@@ -1128,7 +1128,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewSubLocation',
-                                                        width: 100,
+                                                        width: 115,
                                                         dataIndex: 'strNewSubLocation',
                                                         tdCls: 'blue-text-column',
                                                         text: 'New Sub Location',
@@ -1174,7 +1174,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewStorageLocation',
-                                                        width: 120,
+                                                        width: 135,
                                                         dataIndex: 'strNewStorageLocation',
                                                         tdCls: 'blue-text-column',
                                                         text: 'New Storage Location',
