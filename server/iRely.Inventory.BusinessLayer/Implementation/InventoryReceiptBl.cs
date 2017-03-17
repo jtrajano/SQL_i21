@@ -313,11 +313,11 @@ namespace iRely.Inventory.BusinessLayer
         }
 
 
-        public SaveResult ProcessBill(int receiptId, out int? newBill)
+        public SaveResult ProcessBill(int receiptId, out int? newBill, out string newBills)
         {
             SaveResult saveResult = new SaveResult();
             int? newBillId = null;
-
+            string newBillIds = string.Empty;
             using (var transaction = _db.ContextManager.Database.BeginTransaction())
             {
                 var connection = _db.ContextManager.Database.Connection;
@@ -329,8 +329,24 @@ namespace iRely.Inventory.BusinessLayer
                     outParam.Direction = System.Data.ParameterDirection.Output;
                     outParam.DbType = System.Data.DbType.Int32;
                     outParam.SqlDbType = System.Data.SqlDbType.Int;
-                    _db.ContextManager.Database.ExecuteSqlCommand("uspICProcessToBill @intReceiptId, @intUserId, @intBillId OUTPUT", idParameter, userId, outParam);
+
+                    var outParam2 = new SqlParameter("@strBillIds", newBillIds);
+                    outParam2.Direction = ParameterDirection.Output;
+                    outParam2.DbType = DbType.String;
+                    outParam2.Size = -1;
+                    outParam2.SqlDbType = SqlDbType.NVarChar;
+
+                    var prefix = new SqlParameter("@strPrefix", "^|");
+                    var suffix = new SqlParameter("@strSuffix", "|");
+
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICProcessToBill @intReceiptId, @intUserId, @intBillId OUTPUT, @strBillIds OUTPUT, @strPrefix, @strSuffix", idParameter, userId, outParam, outParam2, prefix, suffix);
                     newBillId = (int)outParam.Value;
+                    var ids = outParam2.Value.ToString();
+                    if(ids.Length > 0)
+                    {
+                        ids = ids.Substring(1, ids.Length - 2);
+                    }
+                    newBillIds = ids;
                     saveResult = _db.Save(false);
                     transaction.Commit();
                 }
@@ -351,6 +367,7 @@ namespace iRely.Inventory.BusinessLayer
                 }
             }
             newBill = newBillId;
+            newBills = newBillIds;
             return saveResult;
         }
 
