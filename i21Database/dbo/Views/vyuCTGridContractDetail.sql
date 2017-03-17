@@ -34,6 +34,7 @@ AS
 			QA.strSampleTypeName,
 			QA.strSampleStatus,
 			QA.dtmTestingEndDate,
+			QA.dblApprovedQty,
 			MA.strFutMarketName AS strFutureMarket,
 			REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ')') strFutureMonth,
 			CASE WHEN (SELECT COUNT(SA.intSpreadArbitrageId) FROM tblCTSpreadArbitrage SA  WHERE SA.intPriceFixationId = PF.intPriceFixationId) > 0
@@ -114,23 +115,6 @@ LEFT JOIN	(
 			FROM	 tblCTPriceFixationDetail
 			GROUP BY intPriceFixationId
 			)							PD	ON	PD.intPriceFixationId			=		PF.intPriceFixationId
-LEFT JOIN	(
-				SELECT * FROM 
-				(
-					SELECT	ROW_NUMBER() OVER (PARTITION BY SA.intContractDetailId ORDER BY SA.intSampleId DESC) intRowNum,
-							SA.intContractDetailId,
-							SA.strSampleNumber,
-							SA.strContainerNumber,
-							ST.strSampleTypeName,
-							SS.strStatus AS strSampleStatus,
-							SA.dtmTestingEndDate
-					FROM	tblQMSample			SA
-					JOIN	tblQMSampleType		ST  ON ST.intSampleTypeId	= SA.intSampleTypeId
-					JOIN	tblQMSampleStatus	SS  ON SS.intSampleStatusId = SA.intSampleStatusId
-					WHERE	SA.intContractDetailId IS NOT NULL
-				) t
-				WHERE intRowNum = 1
-			)							QA	ON	QA.intContractDetailId			=	CD.intContractDetailId
 LEFT JOIN	tblLGContainerTypeCommodityQty	CQ	ON	CQ.intCommodityId			=	CH.intCommodityId 
 												AND CQ.intContainerTypeId		=	CD.intContainerTypeId 
 												AND CQ.intCommodityAttributeId	=	IM.intOriginId
@@ -151,4 +135,5 @@ LEFT JOIN	(
 													'ContractManagement.view.Amendments')
 					) t
 					WHERE intRowNum = 1
-			) AP ON AP.intRecordId = CD.intContractHeaderId					
+			) AP ON AP.intRecordId = CD.intContractHeaderId		
+OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA

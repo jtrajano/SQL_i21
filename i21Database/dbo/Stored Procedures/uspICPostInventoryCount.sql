@@ -164,7 +164,7 @@ BEGIN
 			,dblExchangeRate  
 			,intTransactionId  
 			,intTransactionDetailId  
-			,strTransactionId  
+			,strTransactionId   
 			,intTransactionTypeId  
 			,intLotId 
 			,intSubLocationId
@@ -331,26 +331,13 @@ END
 IF	@ysnRecap = 1	
 BEGIN 
 
-	IF @ysnGLEntriesRequired=0
-		BEGIN
-			ROLLBACK TRAN @TransactionName
-			COMMIT TRAN @TransactionName
-
-			-- 'Recap is not applicable for this type of transaction.'
-			RAISERROR(80025, 11, 1)  
-			GOTO Post_Exit  
-		END
-
-	 ELSE
-		BEGIN
-			ROLLBACK TRAN @TransactionName
-			EXEC dbo.uspGLPostRecapOld 
-					@GLEntries
-					,@intTransactionId
-					,@strTransactionId
-					,'IC'
-			COMMIT TRAN @TransactionName
-		END
+	ROLLBACK TRAN @TransactionName
+	EXEC dbo.uspGLPostRecapOld 
+			@GLEntries
+			,@intTransactionId
+			,@strTransactionId
+			,'IC'
+	COMMIT TRAN @TransactionName
 END 
 
 --------------------------------------------------------------------------------------------  

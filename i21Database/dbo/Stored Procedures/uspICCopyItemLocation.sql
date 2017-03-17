@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCopyItemLocation]
 	@intSourceItemId INT,
-	@strDestinationItemIds VARCHAR(8000)
+	@strDestinationItemIds VARCHAR(8000),
+	@intEntityUserSecurityId INT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -147,9 +148,12 @@ SET
       ,[ysnLockedInventory] = s.ysnLockedInventory
       ,[intSort] = s.intSort
 FROM tblICItemLocation d
-	INNER JOIN @Source s ON s.intLocationId = d.intLocationId
-	LEFT OUTER JOIN vyuICGetItemStock stock ON stock.intItemId = d.intItemId
+	INNER JOIN @Source s 
+		ON s.intLocationId = d.intLocationId
+	LEFT OUTER JOIN vyuICGetItemStock stock 
+		ON stock.intItemId = d.intItemId
 		AND stock.intItemLocationId = d.intItemLocationId
+		AND ISNULL(stock.dblUnitOnHand, 0) <> 0 
 WHERE d.intItemId IN (SELECT Value FROM dbo.fnICSplitStringToTable(@strDestinationItemIds, ','))
 
 DECLARE @intItemId INT
@@ -263,3 +267,67 @@ SELECT intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, 
 	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
 	, ysnLockedInventory, intSort
 FROM @New
+
+-- Add the audit logs
+BEGIN 
+	DECLARE @strDescription AS NVARCHAR(255)
+			,@actionType AS NVARCHAR(50) = 'Copy Location'
+			,@ysnIsCostingMethodReplaced AS BIT 
+
+	DECLARE cur CURSOR
+	FOR
+	SELECT	DISTINCT 
+			targetItem.intItemId
+			,strDescription = CAST('Copied ''' + sourceLocation.strLocationName + ''' from ' + sourceItem.strItemNo + '.' AS NVARCHAR(255)) 	
+			,ysnIsCostingMethodReplaced = CAST(CASE WHEN stock.intItemLocationId IS NOT NULL THEN 0 ELSE 1 END AS BIT) 
+	FROM	tblICItem targetItem INNER JOIN dbo.fnICSplitStringToTable(@strDestinationItemIds, ',') targetItems
+				ON targetItem.intItemId = targetItems.Value 
+			INNER JOIN tblICItemLocation targetItemLocation
+				ON targetItemLocation.intItemId = targetItem.intItemId 
+			INNER JOIN tblICItem sourceItem 
+				ON sourceItem.intItemId = @intSourceItemId
+			INNER JOIN tblICItemLocation sourceItemLocation 
+				ON sourceItemLocation.intItemId = sourceItem.intItemId 
+				AND sourceItemLocation.intLocationId = targetItemLocation.intLocationId
+			INNER JOIN tblSMCompanyLocation sourceLocation
+				ON sourceLocation.intCompanyLocationId = sourceItemLocation.intLocationId 
+			LEFT OUTER JOIN vyuICGetItemStock stock 
+				ON stock.intItemId = targetItem.intItemId
+				AND stock.intItemLocationId = targetItemLocation.intItemLocationId
+				AND ISNULL(stock.dblUnitOnHand, 0) <> 0 
+	;
+
+	OPEN cur
+
+	FETCH NEXT FROM cur INTO @intItemId, @strDescription, @ysnIsCostingMethodReplaced
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+		EXEC	dbo.uspSMAuditLog 
+				@keyValue = @intItemId						-- Item Id. 
+				,@screenName = 'Inventory.view.Item'        -- Screen Namespace
+				,@entityId = @intEntityUserSecurityId		-- Entity Id.
+				,@actionType = @actionType                  -- Action Type
+				,@changeDescription = @strDescription		-- 'Copied '{Location Name}' from {Item No}. 
+				,@fromValue = ''							-- Previous Value
+				,@toValue = ''								-- New Value
+
+		-- Add another audit log if Costing Method is not changed. 
+		IF @ysnIsCostingMethodReplaced = 0 
+		BEGIN 
+			SET @strDescription = 'Costing method is not replaced because the existing location has stock.'
+			EXEC	dbo.uspSMAuditLog 
+					@keyValue = @intItemId						-- Item Id. 
+					,@screenName = 'Inventory.view.Item'        -- Screen Namespace
+					,@entityId = @intEntityUserSecurityId		-- Entity Id.
+					,@actionType = @actionType                  -- Action Type
+					,@changeDescription = @strDescription		-- 'Copied '{Location Name}' from {Item No}. 
+					,@fromValue = ''							-- Previous Value
+					,@toValue = ''								-- New Value
+		END 
+
+		FETCH NEXT FROM cur INTO @intItemId, @strDescription, @ysnIsCostingMethodReplaced
+	END
+	CLOSE cur
+	DEALLOCATE cur
+END

@@ -541,7 +541,7 @@ BEGIN
 		  ,[agord_final_due_dt]			 =	 A.[agord_final_due_dt]
           ,[A4GLIdentity]				 =   A.[A4GLIdentity]			
 	FROM agordmst A
-	WHERE A.agord_type <> 'O'
+	WHERE A.agord_type <> ''O''
 END
 ELSE
 BEGIN
@@ -875,7 +875,7 @@ BEGIN
 		  ,[agord_final_due_dt]			 =	 A.[agord_final_due_dt]
           ,[A4GLIdentity]				 =   A.[A4GLIdentity]			
 	FROM agordmst A
-	WHERE A.agord_type <> 'O'
+	WHERE A.agord_type <> ''O''
 	AND 1 = (CASE WHEN CONVERT(DATE, CAST(A.agord_ord_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
 END
 

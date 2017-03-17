@@ -124,6 +124,7 @@ BEGIN
 			AND OtherCharge.intCurrencyId IS NOT NULL 
 			AND OtherCharge.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 			AND Shipment.intInventoryShipmentId = @intInventoryShipmentId
+			AND OtherCharge.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency WHERE ysnSubCurrency = 1 AND intMainCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 

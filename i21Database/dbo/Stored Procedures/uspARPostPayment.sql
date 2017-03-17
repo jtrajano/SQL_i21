@@ -103,15 +103,15 @@ SET @WriteOffAccount = NULL
 SET @IncomeInterestAccount = NULL
 SET @intWriteOff = NULL
 SET @intWriteOffAccount = NULL
-SET @intCFAccount = NULL
 SET @GainLossAccount = NULL
+SET @intCFAccount = NULL
 		
 SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 SET @DiscountAccount = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
 SET @WriteOffAccount = (SELECT TOP 1 intWriteOffAccountId FROM tblARCompanyPreference WHERE intWriteOffAccountId IS NOT NULL AND intWriteOffAccountId <> 0)
 SET @IncomeInterestAccount = (SELECT TOP 1 intInterestIncomeAccountId FROM tblARCompanyPreference WHERE intInterestIncomeAccountId IS NOT NULL AND intInterestIncomeAccountId <> 0)
-SET @intCFAccount = (SELECT TOP 1 intGLAccountId FROM tblCFCompanyPreference WHERE intGLAccountId IS NOT NULL AND intGLAccountId <> 0)
 SET @GainLossAccount = (SELECT TOP 1 intAccountsReceivableRealizedId FROM tblSMMultiCurrency WHERE intAccountsReceivableRealizedId IS NOT NULL AND intAccountsReceivableRealizedId <> 0)
+SET @intCFAccount = (SELECT TOP 1 intGLAccountId FROM tblCFCompanyPreference WHERE intGLAccountId IS NOT NULL AND intGLAccountId <> 0)
 
 DECLARE @UserEntityID			INT
 	,@AllowOtherUserToPost		BIT
@@ -1615,12 +1615,12 @@ IF @post = 1
 			B.dblDiscount <> 0
 			AND B.dblPayment <> 0
 			AND B.dblAmountDue = 0
---		GROUP BY
---			A.intPaymentId
---			,A.strRecordNumber
---			,C.strCustomerNumber
---			,A.dtmDatePaid
---			,A.intCurrencyId	
+		--GROUP BY
+		--	A.intPaymentId
+		--	,A.strRecordNumber
+		--	,C.strCustomerNumber
+		--	,A.dtmDatePaid
+		--	,A.intCurrencyId	
 			
 		UNION ALL
 		--DEBIT Interest
@@ -1681,12 +1681,12 @@ IF @post = 1
 			B.dblInterest <> 0
 			AND B.dblPayment <> 0
 			AND B.dblAmountDue = 0
---		GROUP BY
---			A.intPaymentId
---			,A.strRecordNumber
---			,C.strCustomerNumber
---			,A.dtmDatePaid
---			,A.intCurrencyId	
+		--GROUP BY
+		--	A.intPaymentId
+		--	,A.strRecordNumber
+		--	,C.strCustomerNumber
+		--	,A.dtmDatePaid
+		--	,A.intCurrencyId	
 			
 			
 		UNION ALL
@@ -1894,12 +1894,12 @@ IF @post = 1
 			B.dblDiscount <> 0
 			AND B.dblPayment <> 0
 			AND B.dblAmountDue = 0
---		GROUP BY
---			A.intPaymentId
---			,A.strRecordNumber
---			,C.strCustomerNumber
---			,A.dtmDatePaid
---			,A.intCurrencyId			
+		--GROUP BY
+		--	A.intPaymentId
+		--	,A.strRecordNumber
+		--	,C.strCustomerNumber
+		--	,A.dtmDatePaid
+		--	,A.intCurrencyId			
 			
 		UNION ALL
 		
@@ -1960,13 +1960,13 @@ IF @post = 1
 			B.dblInterest <> 0
 			AND B.dblPayment <> 0
 			AND B.dblAmountDue = 0
---		GROUP BY
---			A.intPaymentId
---			,A.strRecordNumber
---			,C.strCustomerNumber
---			,A.dtmDatePaid
---			,A.intCurrencyId
---			,P.intInterestAccountId
+		--GROUP BY
+		--	A.intPaymentId
+		--	,A.strRecordNumber
+		--	,C.strCustomerNumber
+		--	,A.dtmDatePaid
+		--	,A.intCurrencyId
+		--	,P.intInterestAccountId
 			
 	END TRY
 	BEGIN CATCH	
@@ -2180,6 +2180,7 @@ IF @recap = 1
 IF @recap = 0
 	BEGIN
 		BEGIN TRY 
+			--SELECT * FROM @GLEntries
 			EXEC dbo.uspGLBookEntries @GLEntries, @post
 		END TRY
 		BEGIN CATCH

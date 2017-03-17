@@ -24,8 +24,10 @@ BEGIN TRY
 	DECLARE @Count INT	
 	DECLARE @InventoryReceiptItemId INT
 	DECLARE @TaxCategory NVARCHAR(100) = 'IN Gasoline Use Tax (GUT)'
-	DECLARE @RCId NVARCHAR(50)
-	DECLARE @TaxAmount NUMERIC(18, 6)
+	DECLARE @RCId INT
+		, @TaxAmount NUMERIC(18, 6)
+		, @CompanyName NVARCHAR(250)
+		, @CompanyEIN NVARCHAR(100)
 
 	IF @Refresh = 'true'
 	BEGIN
@@ -37,10 +39,12 @@ BEGIN TRY
 	INTO #tmpRC
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
 
+	SELECT TOP 1 @CompanyName = strCompanyName, @CompanyEIN = strEin FROM tblSMCompanySetup
+
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
 	BEGIN
 		SELECT TOP 1 @RCId = intReportingComponentId FROM #tmpRC
-
+		DELETE FROM @TFTransaction
 		INSERT INTO @TFTransaction(intId
 			, intInventoryReceiptItemId
 			, intTaxAuthorityId
@@ -205,43 +209,45 @@ BEGIN TRY
 				, strTaxPayerFEIN
 				, strOriginState
 				, strDestinationState
+				, strCustomerName
+				, strCustomerFederalTaxId
 				, leaf)
 			SELECT DISTINCT @Guid
-				, MIN(intInventoryReceiptItemId)
-				, MIN(strBillOfLading)
-				, MIN(TRANS.intTaxAuthorityId)
-				, MIN(strTaxAuthorityCode)
-				, MIN(strFormCode)
-				, MIN(intReportingComponentId)
-				, MIN(strScheduleCode)
-				, MIN(strProductCode)
-				, SUM(dblGross)
-				, SUM(dblNet)
-				, SUM(dblBillQty)
-				, SUM(dblTax)
-				, MIN(dtmReceiptDate)
+				, intInventoryReceiptItemId
+				, strBillOfLading
+				, TRANS.intTaxAuthorityId
+				, strTaxAuthorityCode
+				, strFormCode
+				, intReportingComponentId
+				, strScheduleCode
+				, strProductCode
+				, dblGross
+				, dblNet
+				, dblBillQty
+				, dblTax
+				, dtmReceiptDate
 				, strVendorName
 				, strVendorFEIN
-				, MIN(strType)
-				, MIN(strTerminalControlNumber)
-				, MIN(@DateFrom)
-				, MIN(@DateTo)
+				, strType
+				, strTerminalControlNumber
+				, @DateFrom
+				, @DateTo
 				--HEADER
-				, MIN(strHeaderCompanyName)
-				, MIN(strHeaderAddress)
-				, MIN(strHeaderCity)
-				, MIN(strHeaderState)
-				, MIN(strHeaderZip)
-				, MIN(strHeaderPhone)
-				, MIN(strHeaderStateTaxID)
-				, MIN(strHeaderFederalTaxID)
+				, strHeaderCompanyName
+				, strHeaderAddress
+				, strHeaderCity
+				, strHeaderState
+				, strHeaderZip
+				, strHeaderPhone
+				, strHeaderStateTaxID
+				, strHeaderFederalTaxID
 				, strOriginState
-				, MIN(strDestinationState)
+				, strDestinationState
+				, @CompanyName
+				, @CompanyEIN
 				, 1
 			FROM @TFTransaction TRANS
 			LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = TRANS.intTaxAuthorityId
-			GROUP BY strVendorFEIN, strVendorName, strOriginState
-			ORDER BY MIN(strProductCode)
 		END
 		ELSE
 		BEGIN

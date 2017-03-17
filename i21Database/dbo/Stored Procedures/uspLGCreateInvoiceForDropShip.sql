@@ -179,7 +179,7 @@ BEGIN
 		,[intInvoiceDetailId]					= ID.intInvoiceDetailId
 		,[intItemId]							= LD.intItemId
 		,[ysnInventory]							= 1
-		,[strDocumentNumber]					= '' 
+		,[strDocumentNumber]					= L.strLoadNumber
 		,[strItemDescription]					= ITM.strDescription
 		,[intOrderUOMId]						= CD.[intOrderUOMId] 
 		,[dblQtyOrdered]						= CD.[dblOrderQuantity] 

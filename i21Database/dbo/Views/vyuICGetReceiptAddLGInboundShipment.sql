@@ -5,7 +5,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 , * 
 FROM (	
 	SELECT  
-		intLocationId				= intCompanyLocationId
+		intLocationId				= LogisticsView.intCompanyLocationId
 		, intEntityVendorId			= intEntityVendorId
 		, strVendorId				= strVendor
 		, strVendorName				= strVendor
@@ -30,10 +30,10 @@ FROM (
 		, intCommodityId			= intPCommodityId
 		, intContainerId			= LogisticsView.intLoadContainerId
 		, strContainer				= LogisticsView.strContainerNumber
-		, intSubLocationId			= LogisticsView.intSubLocationId
-		, strSubLocationName		= strSubLocationName
-		, intStorageLocationId		= CAST(NULL AS INT) 
-		, strStorageLocationName	= CAST(NULL AS NVARCHAR(50)) 
+		, intSubLocationId			= LogisticsView.intPSubLocationId
+		, strSubLocationName		= subLocation.strSubLocationName
+		, intStorageLocationId		= LogisticsView.intStorageLocationId
+		, strStorageLocationName	= LogisticsView.strStorageLocationName 
 		, intOrderUOMId				= ItemUOM.intItemUOMId
 		, strOrderUOM				= ItemUnitMeasure.strUnitMeasure
 		, dblOrderUOMConvFactor		= ItemUOM.dblUnitQty
@@ -86,6 +86,7 @@ FROM (
 				ON LC.intLoadContainerId = LogisticsView.intLoadContainerId
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyType 
 				ON currencyType.intCurrencyExchangeRateTypeId = NULL 
+			LEFT JOIN tblSMCompanyLocationSubLocation subLocation ON subLocation.intCompanyLocationSubLocationId = LogisticsView.intPSubLocationId
 	WHERE LogisticsView.dblBalanceToReceive > 0 
 		  AND LogisticsView.intSourceType = 2 
 		  AND LogisticsView.intTransUsedBy = 1 

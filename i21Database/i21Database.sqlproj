@@ -2216,7 +2216,6 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\TankInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryReceiptUnitCost.sql" />
-    <None Include="Scripts\Post-Deployment\GL\InventoryCategoryFix.sql" />
     <Build Include="dbo\Tables\tblSTRadiantItemTypeCode.sql" />
     <Build Include="dbo\Views\vyuARDepositAccount.sql" />
     <Build Include="dbo\Tables\tblICCommodityProductLine.sql" />
@@ -2671,6 +2670,7 @@
     <Build Include="dbo\Tables\tblPATTransfer.sql" />
     <Build Include="dbo\Tables\tblPATTransferDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
+    <Build Include="dbo\Functions\fnGLGetMTDActivity.sql" />
     <Build Include="dbo\Functions\fnGLValidateRevaluePeriod.sql" />
     <Build Include="dbo\Stored Procedures\uspPATProcessVoid.sql" />
     <Build Include="dbo\Functions\fnIsAllowUserSelfPost.sql" />
@@ -2682,7 +2682,6 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailNonInvContract.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuationSummary.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceNumbersFromPayment.sql" />
-    <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
     <Build Include="dbo\Views\vyuTRQuoteReport.sql" />
     <Build Include="dbo\Tables\tblAPCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessToBill.sql" />
@@ -5046,6 +5045,9 @@
     <Build Include="dbo\Views\vyuTFGetTransactionException.sql" />
     <Build Include="dbo\Views\vyuTFGetTransactionSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateForm73.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentAccountStatusCode.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentVendor.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCustomer.sql" />
     <Build Include="dbo\Tables\tblICItemSubLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaimDM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTBeforeSavePriceContract.sql" />
@@ -5123,6 +5125,35 @@
     <Build Include="dbo\Views\vyuEMEntityCusVenCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessToInventoryReceipt.sql" />
     <None Include="Scripts\Post-Deployment\ST\10_Checkout_Commander_Translog.sql" />
+    <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspFACreateAsset.sql" />
+    <Build Include="dbo\Stored Procedures\uspFADepreciateAsset.sql" />
+    <Build Include="dbo\Stored Procedures\uspFADisposeAsset.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAsset.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposureDetail.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAssetDepreciation.sql" />
+    <Build Include="dbo\Tables\tblFADepreciationMethod.sql" />
+    <Build Include="dbo\Tables\tblFADepreciationMethodDetail.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceFee.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
+    <Build Include="dbo\Tables\tblSTstgRebatesPMMorris.sql" />
+    <Build Include="dbo\Tables\tblSTstgRebatesRJReynolds.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFCreateFeeDebitMemo.sql" />
+    <Build Include="dbo\Tables\tblSTTranslogRebates.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderTranslog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateSystemCount.sql" />
+    <Build Include="dbo\Tables\tblRKM2MTransactionImport.sql" />
+    <Build Include="dbo\Tables\tblRKM2MBasisTransaction.sql" />
+    <Build Include="dbo\Tables\tblRKM2MTransaction_ErrLog.sql" />
+    <Build Include="dbo\Views\vyuRKBasisTransactionNotMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MBasisTransactionValidate.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MBasisTransactionImport.sql" />
+    <Build Include="dbo\Tables\tblSMApprovalAmendmentLog.sql" />
+    <Build Include="dbo\Views\vyuICGetSubLocationBins.sql" />
+    <Build Include="dbo\Views\vyuICGetSubLocationBinDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSearchStatementsCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGenerateCSV.sql" />
+    <Build Include="dbo\Functions\fnCTGetSampleDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

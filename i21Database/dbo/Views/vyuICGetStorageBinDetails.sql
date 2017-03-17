@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuICGetStorageBinDetails]
 AS 
 SELECT storageLocation.intStorageLocationId, stockUOM.intItemId, companyLocation.intCompanyLocationId, stockUOM.intItemLocationId
+	, subLocation.intCompanyLocationSubLocationId intSubLocationId, subLocation.strSubLocationName
 	, companyLocation.strLocationName strLocation, storageLocation.strName strStorageLocation, unitMeasure.strUnitMeasure strUOM
 	, item.strItemNo, item.strDescription strItemDescription
 	, storageLocation.dblEffectiveDepth, storageLocation.dblPackFactor, storageLocation.dblUnitPerFoot
@@ -31,7 +32,8 @@ FROM tblICItemStockUOM stockUOM
 		AND mrc.intItemId = item.intItemId
 	LEFT OUTER JOIN tblICStorageMeasurementReading smr ON smr.intLocationId = companyLocation.intCompanyLocationId
 	LEFT OUTER JOIN tblGRDiscountId grd ON grd.intDiscountId = mrc.intDiscountSchedule
-GROUP BY storageLocation.intStorageLocationId, stockUOM.intItemId,
+	LEFT OUTER JOIN tblSMCompanyLocationSubLocation subLocation ON subLocation.intCompanyLocationSubLocationId = stockUOM.intSubLocationId
+GROUP BY storageLocation.intStorageLocationId, stockUOM.intItemId, subLocation.intCompanyLocationSubLocationId, subLocation.strSubLocationName,
 	companyLocation.intCompanyLocationId, storageLocation.strName, companyLocation.strLocationName,
 	item.strItemNo, item.strDescription, storageLocation.dblEffectiveDepth, stockUOM.intItemLocationId,
 	storageLocation.dblPackFactor, storageLocation.dblUnitPerFoot, summary.dblStock, unitMeasure.strUnitMeasure,

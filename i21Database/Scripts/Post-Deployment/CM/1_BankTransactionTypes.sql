@@ -187,6 +187,12 @@ SELECT
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 121)
 UNION ALL 
 SELECT 
+	[intBankTransactionTypeId]		= 122
+	,[strBankTransactionTypeName]	= 'Void ACH'
+	,[intConcurrencyId]				= 1			
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 122)
+UNION ALL 
+SELECT 
 	[intBankTransactionTypeId]		= 123
 	,[strBankTransactionTypeName]	= 'Void Direct Deposit'
 	,[intConcurrencyId]				= 1			

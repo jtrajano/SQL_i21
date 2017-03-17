@@ -846,6 +846,15 @@ CREATE INDEX [IX_tblTMSite_strCity] ON [dbo].[tblTMSite] ([strCity])
 GO
 
 CREATE INDEX [IX_tblTMSite_strState] ON [dbo].[tblTMSite] ([strState])
+GO
 
-
-
+CREATE NONCLUSTERED INDEX [IX_tblTMSite_intCustomerID_intSiteID_intTaxStateID_intDriverID_intDeliveryTermID_intProduct] ON [dbo].[tblTMSite]
+(
+	[intCustomerID] ASC,
+	[intSiteID] ASC,
+	[intTaxStateID] ASC,
+	[intDriverID] ASC,
+	[intDeliveryTermID] ASC,
+	[intProduct] ASC
+)
+GO

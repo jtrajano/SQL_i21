@@ -735,6 +735,7 @@ BEGIN
 
 				IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
 				OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
+				OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
 				OR @strPriceMethod = 'Import File Price' 
 				OR @strPriceMethod = 'Credit Card' 
 				OR @strPriceMethod = 'Posted Trans from CSV'
@@ -1028,6 +1029,7 @@ BEGIN
 
 				IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
 				OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
+				OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
 				OR @strPriceMethod = 'Import File Price' 
 				OR @strPriceMethod = 'Credit Card' 
 				OR @strPriceMethod = 'Posted Trans from CSV'
@@ -1429,7 +1431,7 @@ BEGIN
 				AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
 
 
-				SELECT * FROM @tblCFRemoteTax
+				--SELECT * FROM @tblCFRemoteTax
 				
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
@@ -1484,6 +1486,7 @@ BEGIN
 
 	IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
 	OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
+	OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
 	OR @strPriceMethod = 'Import File Price' 
 	OR @strPriceMethod = 'Credit Card' 
 	OR @strPriceMethod = 'Posted Trans from CSV'

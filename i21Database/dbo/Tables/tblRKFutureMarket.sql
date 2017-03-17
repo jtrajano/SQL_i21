@@ -4,6 +4,8 @@ CREATE TABLE [dbo].[tblRKFutureMarket](
 	[strFutMarketName] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strFutSymbol] [nvarchar](10) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intFutMonthsToOpen] [int] NOT NULL,
+	[intForecastWeeklyConsumption] INT NULL, 
+	[intForecastWeeklyConsumptionUOMId] INT NULL, 
 	[ysnOptions] [bit] NULL,
 	[ysnActive] [bit] NULL,
 	[dblContractSize] [numeric](18, 6) NOT NULL,
@@ -46,7 +48,8 @@ CREATE TABLE [dbo].[tblRKFutureMarket](
 	[strOptionSymbolPrefix] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblRKFutureMarket_intFutureMarketId] PRIMARY KEY CLUSTERED ([intFutureMarketId] ASC),
 	CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
-	CONSTRAINT [FK_tblRKFutureMarket_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
+	CONSTRAINT [FK_tblRKFutureMarket_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
+	CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intForecastWeeklyConsumptionUOMId] FOREIGN KEY([intForecastWeeklyConsumptionUOMId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
 )
 GO
 

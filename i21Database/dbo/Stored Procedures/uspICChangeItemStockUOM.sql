@@ -141,9 +141,13 @@ BEGIN
 			,dblUnitStorage = dbo.fnCalculateQtyBetweenUOM(@OriginalStockItemUOMId, @NewStockItemUOMId, dblUnitStorage) 
 	FROM	dbo.tblICItemStock ItemStock
 	WHERE	intItemId = @intItemId
+END
+	-------------------------------------------------------------------------------------------------------
+	-- Removed the code for updating the tblICItemStockUOM since only tblICItemStock needs to be updated --
+	-------------------------------------------------------------------------------------------------------
 
 	-- Update qty of the new stock UOM. 
-	MERGE	
+	/* MERGE	
 	INTO	dbo.tblICItemStockUOM
 	WITH	(HOLDLOCK) 
 	AS		ItemStockUOM
@@ -225,9 +229,7 @@ BEGIN
 			,Source_Query.dblUnitStorage			
 			,1	
 		)
-	;
-
-END 
+	; */ 
 
 -- Update the dblUOMQty of all the inventory transactions 
 UPDATE	t

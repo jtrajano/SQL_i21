@@ -22,4 +22,3 @@ values ('lb', 'lb', 'Weight',1)
 --import units of mesaure from the commodity setup. USe distinct to get unit uoms
 insert into tblICUnitMeasure (strUnitMeasure, strSymbol, strUnitType, intConcurrencyId)
 select distinct gacom_un_desc, gacom_un_desc, case gacom_un_desc when 'BU' then 'Volume' End, 1 from gacommst
-

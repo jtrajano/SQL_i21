@@ -724,8 +724,7 @@ ELSE
 			,C.strAccountGroup
 			,DebitForeign.Value
 			,CreditForeign.Value
-			,(SELECT strCurrencyExchangeRateType FROM dbo.tblSMCurrencyExchangeRateType 
-				WHERE intCurrencyExchangeRateTypeId IN (SELECT TOP 1 intCurrencyExchangeRateTypeId FROM dbo.tblAPBillDetail WHERE intBillId = A.intTransactionId ))         
+			,A.[strRateType]           
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId

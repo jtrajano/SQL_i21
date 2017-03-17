@@ -95,17 +95,17 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 		and otr.intLocationId=cl.intCompanyLocationId ) FutSBalTransQty     
   
 	,(SELECT isnull(SUM(intNoOfContract),0) from tblRKFutOptTransaction otr  
-	WHERE otr.strBuySell='Buy' AND otr.intCommodityId=c.intCommodityId and intInstrumentTypeId=1 and otr.intLocationId=cl.intCompanyLocationId) as FutLBalTransQty,            
+	WHERE otr.strBuySell='Buy' AND otr.intCommodityId=c.intCommodityId and intInstrumentTypeId=1 and otr.intLocationId=cl.intCompanyLocationId) AS FutLBalTransQty,            
            
  (SELECT SUM(psd.dblMatchQty) from tblRKMatchFuturesPSHeader psh            
  JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId            
  and intCommodityId=c.intCommodityId and psh.intCompanyLocationId=cl.intCompanyLocationId   ) FutMatchedQty  
 
-		,(select sum(isnull(Qty,0)) Qty from(
+		,(SELECT SUM(ISNULL(Qty,0)) Qty FROM(
 		SELECT 
-		 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((a.dblUnitOnHand),0)) as Qty 
+		 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((a.dblUnitOnHand),0)) AS Qty 
  		 FROM tblICItemStock a  
-		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId   
+		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId AND ISNULL(a.dblUnitOnHand,0) > 0
 		  JOIN tblICItem i on a.intItemId=i.intItemId  
 		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
 		  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
@@ -113,11 +113,11 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 		 WHERE sl.intCompanyLocationId=cl.intCompanyLocationId and i.intCommodityId= c.intCommodityId	
 		 )t) as invQty  
 		 
-		,(select sum(isnull(Qty,0)) Qty from(
+		,(SELECT SUM(ISNULL(Qty,0)) Qty FROM(
 		SELECT 
-		 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((sr1.dblQty),0)) as Qty 
+		 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((sr1.dblQty),0)) AS Qty 
  		 FROM tblICItemStock a  
-		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId 
+		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId and isnull(a.dblUnitOnHand,0) > 0
 		  JOIN tblICStockReservation sr1 ON a.intItemId = sr1.intItemId   
 		  JOIN tblICItem i on a.intItemId=i.intItemId  
 		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
@@ -308,3 +308,4 @@ FROM #temp t
 	ORDER BY strCommodityCode
 
 END
+

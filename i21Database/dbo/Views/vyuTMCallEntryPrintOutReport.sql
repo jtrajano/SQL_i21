@@ -84,6 +84,10 @@ SELECT
 	,strTermId = CAST(I.intTermID AS NVARCHAR(8)) 
 	,Z.strCompanyName
 	,strPriceLevelName = Q.strPricingLevelName
+	,strBetweenDlvry = (CASE WHEN O.strFillMethod = 'Julian Calendar' THEN R.strDescription
+							ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
+						END)  
+	,dblNextDeliveryGallons = ISNULL(C.dblLastGalsInTank,0.0) - ISNULL(C.dblEstimatedGallonsLeft,0.0)
 FROM tblTMCustomer A 
 INNER JOIN vyuTMCustomerEntityView B 
 	ON A.intCustomerNumber = B.A4GLIdentity 
@@ -113,6 +117,8 @@ LEFT JOIN tblTMRoute P
 	ON C.intRouteId = P.intRouteId
 LEFT JOIN tblSMCompanyLocationPricingLevel Q
 	ON C.intCompanyLocationPricingLevelId = Q.intCompanyLocationPricingLevelId
+LEFT JOIN tblTMGlobalJulianCalendar R
+	ON C.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 ,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 WHERE H.strCurrentSeason IS NOT NULL 
 	AND vwcus_active_yn = 'Y' 

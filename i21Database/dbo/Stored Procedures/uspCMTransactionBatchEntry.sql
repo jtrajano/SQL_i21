@@ -9,7 +9,7 @@ CREATE PROCEDURE [dbo].[uspCMTransactionBatchEntry]
 	@strDescription NVARCHAR(250),
 	@intEntityUserId INT,
 	@BankTransactionBatchDetailEntries BankTransactionBatchDetailTable READONLY,
-	@newStrTransactionIds NVARCHAR(40) = NULL OUTPUT
+	@newStrTransactionIds NVARCHAR(MAX) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -80,7 +80,7 @@ FROM @BankTransactionBatchDetailEntries
 				--Assemble the transaction id
 				SELECT @newStrTransactionId = strPrefix + CAST(intNumber AS NVARCHAR) FROM tblSMStartingNumber WHERE strTransactionType = @transactionType
 
-				SET @newStrTransactionIds = @newStrTransactionIds + @newStrTransactionId + ','
+				SET @newStrTransactionIds = ISNULL(@newStrTransactionIds,'') + @newStrTransactionId + ','
 
 				INSERT INTO tblCMBankTransaction(
 					[strTransactionId]
