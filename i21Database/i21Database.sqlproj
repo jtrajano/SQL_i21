@@ -5121,6 +5121,7 @@
     <Build Include="dbo\Views\vyuEMEntityCusVenCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessToInventoryReceipt.sql" />
     <Build Include="dbo\Functions\fnCTGetSampleDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetDefaultReceiptTaxGroupId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
