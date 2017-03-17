@@ -447,6 +447,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewItemNumber: {
                     dataIndex: 'strNewItemNo',
                     hidden: '{formulaHideColumn_colNewItemNumber}',
+                    text: '{setNewItemNumberLabel}',
                     editor: {
                         store: '{newItem}',
                         defaultFilters: [
@@ -471,7 +472,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colNewExpiryDate: {
                     dataIndex: 'dtmNewExpiryDate',
-                    hidden: '{formulaHideColumn_colNewExpiryDate}'
+                    hidden: '{formulaHideColumn_colNewExpiryDate}',
+                    text: '{setNewExpiryDateLabel}'
                 },
 
                 colLotStatus: {

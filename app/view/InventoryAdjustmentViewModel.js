@@ -794,18 +794,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 1 || get('current.intAdjustmentType') == 3 || get('current.intAdjustmentType') == 5) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colAdjustByQuantity') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('Adjust Qty By <span style="color:red">*</span>');
-                    }
-                }
+                return 'Adjust Qty By <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colAdjustByQuantity') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('Adjust Qty By');
-                    }
-                }
+                return 'Adjust Qty By';
             }
         },
 
@@ -815,18 +807,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 1) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewQuantity') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Quantity <span style="color:red">*</span>');
-                    }
-                }
+                return 'New Quantity <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewQuantity') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Quantity');
-                    }
-                }
+                return 'New Quantity';
             }
         },
 
@@ -836,18 +820,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 3) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewItemNumber') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Item No. <span style="color:red">*</span>');
-                    }
-                }
+                return 'New Item No. <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewItemNumber') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Item No.');
-                    }
-                }
+                return 'New Item No.';
             }
         },
 
@@ -857,18 +833,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 4) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colSubLocation') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('Sub Location <span style="color:red">*</span>');
-                    }
-                }
+                return 'Sub Location <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colSubLocation') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('Sub Location');
-                    }
-                }
+                return 'Sub Location';
             }
         },
 
@@ -878,18 +846,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 4) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colStorageLocation') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('Storage Location <span style="color:red">*</span>');
-                    }
-                }
+                return 'Storage Location <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colStorageLocation') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('Storage Location');
-                    }
-                }
+                return 'Storage Location';
             }
         },
 
@@ -899,18 +859,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 4 || get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 3) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colLotNumber') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('Lot ID <span style="color:red">*</span>');
-                    }
-                }
+               return 'Lot ID <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colLotNumber') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('Lot ID');
-                    }
-                }
+                return 'Lot ID';
             }
         },
 
@@ -920,18 +872,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 4) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewLotStatus') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Lot Status <span style="color:red">*</span>');
-                    }
-                }
+                return 'New Lot Status <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewLotStatus') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Lot Status');
-                    }
-                }
+                return 'New Lot Status';
             }
         },
 
@@ -941,18 +885,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 5) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewLotNumber') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Lot ID <span style="color:red">*</span>');
-                    }
-                }
+                return 'New Lot ID <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewLotNumber') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Lot ID');
-                    }
-                }
+                return 'New Lot ID';
             }
         },
 
@@ -962,18 +898,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 5) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewUOM') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Split Lot UOM <span style="color:red">*</span>');
-                    }
-                }
+                return 'New Split Lot UOM <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewUOM') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Split Lot UOM');
-                    }
-                }
+                return 'New Split Lot UOM';
             }
         },
 
@@ -983,18 +911,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 5) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewSplitLotQuantity') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Split Lot Qty <span style="color:red">*</span>');
-                    }
-                }
+                return 'New Split Lot Qty <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewSplitLotQuantity') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Split Lot Qty');
-                    }
-                }
+                return 'New Split Lot Qty';
             }
         },
 
@@ -1004,18 +924,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 5) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewLocation') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Location <span style="color:red">*</span>');
-                    }
-                }
+                return 'New Location <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewLocation') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Location');
-                    }
-                }
+                return 'New Location';
             }
         },
 
@@ -1025,18 +937,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 5) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewSubLocation') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Sub Location <span style="color:red">*</span>');
-                    }
-                }
+                return 'New Sub Location <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewSubLocation') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Sub Location');
-                    }
-                }
+                return 'New Sub Location';
             }
         },
 
@@ -1046,20 +950,25 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 5) {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewStorageLocation') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Storage Location <span style="color:red">*</span>');
-                    }
-                }
+                return 'New Storage Location <span style="color:red">*</span>';
             }
             else {
-                for (var i = 0; i < gridColumns.length; i++) {
-                    if (gridColumns[i].itemId == 'colNewStorageLocation') {
-                        grdInventoryAdjustment.columnManager.columns[i].setText('New Storage Location');
-                    }
-                }
+                return 'New Storage Location';
             }
-        }              
+        },
+
+        setNewExpiryDateLabel: function(get) {
+            var win = this.getView();
+            var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
+            var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
+
+            if (get('current.intAdjustmentType') == 6) {
+                return 'New Expiry Date <span style="color:red">*</span>';
+            }
+            else {
+                return 'New Expiry Date';
+            }
+        }                          
     }
 
 });
