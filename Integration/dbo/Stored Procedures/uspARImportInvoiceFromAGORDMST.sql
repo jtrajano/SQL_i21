@@ -120,7 +120,8 @@ SELECT
 	[intAccountId] = @ARAccount, 
 	[ysnPosted] = 0,
 	[ysnPaid] = 0,
-	[ysnImportedFromOrigin] = 1,
+	[ysnImportedFromOrigin] = 0,
+	[ysnImportedAsPosted] = 0,
 	[intEntityId] = @UserId,
 	[intBackupId] =	A.intBackupId
 	FROM tmp_agordmstImport A
@@ -159,6 +160,7 @@ INSERT
 	,[ysnPosted]
 	,[ysnPaid]
 	,[ysnImportedFromOrigin]
+	,[ysnImportedAsPosted]
 	,[intEntityId]
 )
 VALUES
@@ -189,6 +191,7 @@ VALUES
 	,[ysnPosted]
 	,[ysnPaid]
 	,[ysnImportedFromOrigin]
+	,[ysnImportedAsPosted]
 	,[intEntityId]
 	)
 OUTPUT inserted.intInvoiceId, SourceData.intBackupId INTO #tmpInvoice;
