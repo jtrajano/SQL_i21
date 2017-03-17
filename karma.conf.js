@@ -39,6 +39,8 @@ var extJs = [
 
     // Load Base 64 js
     {pattern: '../resources/js/fn/Base64.js', watched: false},
+    {pattern: 'app/lib/numeral.js', watched: true },
+    {pattern: 'app/ux/**/*.js', watched: true },
 ];
 var inventoryFiles = [{
     "pattern": "app/model/ItemUPC.js"
@@ -847,7 +849,8 @@ var testFiles = [
 ];
 
 var libs = [
-    {pattern: 'app/lib/**/*.js', watched: true }
+    {pattern: 'app/lib/rx.all.js', watched: true },
+    {pattern: 'app/lib/underscore.js', watched: true }
 ];
 
 var files = libs.concat(extJs).concat(mockFiles).concat(inventoryFiles).concat(testFiles);
