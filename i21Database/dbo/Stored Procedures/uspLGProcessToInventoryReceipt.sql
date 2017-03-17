@@ -1,38 +1,65 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGProcessToInventoryReceipt] 
 	 @intLoadId INT
-	,@intUserId INT
+	,@intEntityUserSecurityId INT
+	,@intInventoryReceiptId INT OUTPUT
 AS
-DECLARE @ErrorMessage NVARCHAR(4000)
-DECLARE @ErrorSeverity INT
-DECLARE @ErrorState INT
-DECLARE @InventoryReceiptId INT
-DECLARE @ErrMsg NVARCHAR(MAX)
-DECLARE @intInventoryReceiptId INT
-DECLARE @ReceiptStagingTable ReceiptStagingTable
-	,@OtherCharges ReceiptOtherChargesTableType
-
---IF EXISTS (SELECT 1 FROM vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId AND dblAvailableQty <= 0) 
---BEGIN 
---	RAISERROR('No quantity is available to process.',16,1)
---END
-IF NOT EXISTS (
-		SELECT 1
-		FROM tempdb..sysobjects
-		WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')
-		)
-BEGIN
-	CREATE TABLE #tmpAddItemReceiptResult (
-		intSourceId INT
-		,intInventoryReceiptId INT
-		)
-END
-
 BEGIN TRY
+	DECLARE @ErrorMessage NVARCHAR(4000)
+	DECLARE @ErrorSeverity INT
+	DECLARE @ErrorState INT
+	DECLARE @InventoryReceiptId INT
+	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @intSourceId INT
+	DECLARE @intContractDetailId INT
+	DECLARE @intLoadDetailId INT
+	DECLARE @intMinRecordId INT
+	DECLARE @dblLoadDetailQty NUMERIC(18, 6)
+	DECLARE @intInventoryReceiptItemId INT
+	DECLARE @ReceiptStagingTable ReceiptStagingTable
+	DECLARE @OtherCharges ReceiptOtherChargesTableType
+	DECLARE @tblLoadDetail TABLE (
+		 intRecordId INT Identity(1, 1)
+		,intLoadDetailId INT
+		,intContractDetailId INT
+		,dblLoadDetailQty NUMERIC(18, 6)
+		)
+
+	INSERT INTO @tblLoadDetail
+	SELECT intLoadDetailId
+		,intPContractDetailId
+		,dblQuantity
+	FROM tblLGLoadDetail
+	WHERE intLoadId = @intLoadId
+
+	IF EXISTS (
+			SELECT 1
+			FROM tblLGLoad L
+			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+			JOIN tblICInventoryReceiptItem RI ON RI.intSourceId = LD.intLoadDetailId
+			WHERE L.intLoadId = @intLoadId
+			)
+	BEGIN
+		RAISERROR ('Receipt has already been created for the inbound shipment.',16,1)
+	END
+
+	IF NOT EXISTS (
+			SELECT 1
+			FROM tempdb..sysobjects
+			WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')
+			)
+	BEGIN
+		CREATE TABLE #tmpAddItemReceiptResult (
+			intSourceId INT
+			,intInventoryReceiptId INT
+			)
+	END
+
 	INSERT INTO @ReceiptStagingTable (
 		strReceiptType
 		,intEntityVendorId
 		,intShipFromId
 		,intLocationId
+		,strBillOfLadding
 		,intItemId
 		,intItemLocationId
 		,intItemUOMId
@@ -60,11 +87,13 @@ BEGIN TRY
 		,ysnSubCurrency
 		,intForexRateTypeId
 		,dblForexRate
+		,intContainerId
 		)
-	SELECT strReceiptType = 'Purchase Contract'
+	SELECT DISTINCT strReceiptType = 'Purchase Contract'
 		,intEntityVendorId = LD.intEntityVendorId
 		,intShipFromId = EL.intEntityLocationId
 		,intLocationId = CD.intCompanyLocationId
+		,LD.strBLNumber
 		,intItemId = LD.intItemId
 		,intItemLocationId = CD.intCompanyLocationId
 		,intItemUOMId = LD.intItemUOMId
@@ -82,8 +111,8 @@ BEGIN TRY
 		,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
 		,dblExchangeRate = 1
 		,intLotId = NULL
-		,intSubLocationId = LD.intPSubLocationId
-		,intStorageLocationId = LD.intStorageLocationId
+		,intSubLocationId = ISNULL(CD.intSubLocationId, LD.intSubLocationId)
+		,intStorageLocationId = ISNULL(CD.intStorageLocationId, LD.intStorageLocationId)
 		,ysnIsStorage = 0
 		,intSourceId = LD.intLoadDetailId
 		,intSourceType = 2
@@ -92,6 +121,7 @@ BEGIN TRY
 		,ysnSubCurrency = SubCurrency.ysnSubCurrency
 		,intForexRateTypeId = CD.intRateTypeId
 		,dblForexRate = CD.dblRate
+		,LD.intLoadContainerId
 	FROM vyuLGLoadContainerReceiptContracts LD
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -174,18 +204,17 @@ BEGIN TRY
 	WHERE L.intLoadId = @intLoadId
 		AND ysnAccrue = 1
 
-	IF NOT EXISTS (
-			SELECT *
-			FROM @ReceiptStagingTable
-			)
+	IF NOT EXISTS (SELECT 1 FROM @ReceiptStagingTable)
 	BEGIN
 		RETURN
 	END
 
 	EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable
 		,@OtherCharges
-		,@intUserId;
+		,@intEntityUserSecurityId;
 
+	SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
+	FROM #tmpAddItemReceiptResult
 END TRY
 
 BEGIN CATCH
