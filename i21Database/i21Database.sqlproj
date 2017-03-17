@@ -5154,6 +5154,7 @@
     <Build Include="dbo\Stored Procedures\uspARSearchStatementsCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateCSV.sql" />
     <Build Include="dbo\Functions\fnCTGetSampleDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetDefaultReceiptTaxGroupId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
