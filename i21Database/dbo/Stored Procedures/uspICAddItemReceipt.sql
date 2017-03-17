@@ -725,6 +725,7 @@ BEGIN
 				,intTaxGroupId
 				,intForexRateTypeId
 				,dblForexRate 
+				,intContainerId 
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -797,6 +798,7 @@ BEGIN
 				,intTaxGroupId			= RawData.intTaxGroupId
 				,intForexRateTypeId		= RawData.intForexRateTypeId
 				,dblForexRate			= RawData.dblForexRate
+				,intContainerId			= RawData.intContainerId 
 
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 

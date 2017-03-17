@@ -45,7 +45,8 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[ysnSubCurrency] BIT NULL 
 	,[intPaymentOn] INT NULL								-- Reserved for PaymentOn option
 	,[intForexRateTypeId] INT NULL							-- Currency Forex Rate Type Id
-	,[dblForexRate] NUMERIC(18, 6) NULL					-- Forex Rate (Exchange Rate)
+	,[dblForexRate] NUMERIC(18, 6) NULL						-- Forex Rate (Exchange Rate)
+	,[intContainerId] INT NULL								-- Container id. Used by LG Inbound Shipment. 
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	
