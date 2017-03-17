@@ -10,6 +10,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
+IF @ForDelete = 1
+	EXEC dbo.[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId
+
 DECLARE @Ids AS Id
 INSERT INTO @Ids(intId) SELECT @InvoiceId
 EXEC dbo.[uspARUpdateTransactionAccounts] @Ids = @Ids, @TransactionType	= 1
