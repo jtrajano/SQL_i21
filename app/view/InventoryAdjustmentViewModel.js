@@ -793,7 +793,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
-            if (get('current.intAdjustmentType') == 1 || get('current.intAdjustmentType') == 3 || get('current.intAdjustmentType') == 5) {
+            if (get('current.intAdjustmentType') == 1 || get('current.intAdjustmentType') == 3 || get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 7 || get('current.intAdjustmentType') == 8) {
                 return 'Adjust Qty By <span style="color:red">*</span>';
             }
             else {
@@ -806,7 +806,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
-            if (get('current.intAdjustmentType') == 1) {
+            if (get('current.intAdjustmentType') == 1 || get('current.intAdjustmentType') == 3 || get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 7 || get('current.intAdjustmentType') == 8) {
                 return 'New Quantity <span style="color:red">*</span>';
             }
             else {
@@ -832,7 +832,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
-            if (get('current.intAdjustmentType') == 4) {
+            if (get('current.intAdjustmentType') == 4 || get('current.intAdjustmentType') == 9) {
                 return 'Sub Location <span style="color:red">*</span>';
             }
             else {
@@ -845,7 +845,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
-            if (get('current.intAdjustmentType') == 4) {
+            if (get('current.intAdjustmentType') == 4 || get('current.intAdjustmentType') == 9) {
                 return 'Storage Location <span style="color:red">*</span>';
             }
             else {
@@ -858,7 +858,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
-            if (get('current.intAdjustmentType') == 4 || get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 3) {
+            if (get('current.intAdjustmentType') == 3 || get('current.intAdjustmentType') == 4 || get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 7 || get('current.intAdjustmentType') == 8 || get('current.intAdjustmentType') == 9) {
                return 'Lot ID <span style="color:red">*</span>';
             }
             else {
@@ -884,7 +884,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
-            if (get('current.intAdjustmentType') == 5) {
+            if (get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 8) {
                 return 'New Lot ID <span style="color:red">*</span>';
             }
             else {
@@ -923,7 +923,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
-            if (get('current.intAdjustmentType') == 5) {
+            if (get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 7 || get('current.intAdjustmentType') == 8) {
                 return 'New Location <span style="color:red">*</span>';
             }
             else {
@@ -936,7 +936,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
-            if (get('current.intAdjustmentType') == 5) {
+            if (get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 7 || get('current.intAdjustmentType') == 8) {
                 return 'New Sub Location <span style="color:red">*</span>';
             }
             else {
@@ -949,7 +949,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
-            if (get('current.intAdjustmentType') == 5) {
+            if (get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 7 || get('current.intAdjustmentType') == 8) {
                 return 'New Storage Location <span style="color:red">*</span>';
             }
             else {
@@ -968,7 +968,20 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             else {
                 return 'New Expiry Date';
             }
-        }                          
+        },
+
+        setNewOwnerNameLabel: function(get) {
+            var win = this.getView();
+            var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
+            var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
+
+            if (get('current.intAdjustmentType') == 9) {
+                return 'New Owner Name <span style="color:red">*</span>';
+            }
+            else {
+                return 'New Owner Name';
+            }
+        }                        
     }
 
 });

@@ -10,28 +10,29 @@ StartTest (function (t) {
             (t,next,
                 'Direct - NLTI - 01'
                 , 'Test Non Lotted Item Description'
-                , 4
-//                , 'Category-1'
-//                , 'Commodity-1'
-//                , 'LB'
-//                , 'LB'
+                , 'Category-1'
+                , 'Commodity-1'
+                ,4
+                , 'LB'
+                , 'LB'
                 , 10
                 , 10
                 , 40
             )
         })
 
+
         //Add Lotted Item - Manual
         .addFunction(function(next){
             commonIC.addInventoryItem
             (t,next,
                 'Direct - LTI - 01'
-                , 'Test Lotted Item Description'
+                , 'Test Non Lotted Item Description'
+                , 'Category-1'
+                , 'Commodity-1'
                 , 3
-//                , 'Category-1'
-//                , 'Commodity-1'
-//                , 'LB'
-//                , 'LB'
+                , 'LB'
+                , 'LB'
                 , 10
                 , 10
                 , 40
