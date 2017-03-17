@@ -3395,7 +3395,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         filters: [
                             {
                                 column: 'intBillId',
-                                value: data.message.BillId
+                                value: data.message.BillIds
                             }
                         ],
                         action: 'view',
