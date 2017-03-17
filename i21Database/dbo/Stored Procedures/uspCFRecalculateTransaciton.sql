@@ -1458,6 +1458,12 @@ BEGIN
 	END
 	
 
+	--SELECT * FROM @tblCFBackoutTax
+	--SELECT * FROM @tblCFCalculatedTax
+	--SELECT * FROM @tblCFOriginalTax
+	--SELECT * FROM @tblCFRemoteTax
+	--SELECT * FROM @tblCFTransactionTax
+
 	---------------------------------------------------
 	--				TAX COMPUTATION					 --
 	---------------------------------------------------
@@ -1502,17 +1508,17 @@ BEGIN
 			(
 				 'Gross Price'
 				,@dblOriginalPrice
-				,@dblPrice
+				,@dblPrice - (@totalOriginalTax / @dblQuantity) + (@totalCalculatedTax / @dblQuantity)
 			),
 			(
 				 'Net Price'
 				,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
-				,@dblPrice - (@totalCalculatedTax / @dblQuantity)
+				,@dblPrice - (@totalOriginalTax / @dblQuantity) -- @totalOriginalTax to handle tax exemption
 			),
 			(
 				 'Total Amount'
 				,ROUND(@dblOriginalPrice * @dblQuantity,2)
-				,ROUND(@dblPrice * @dblQuantity,2)
+				,ROUND((@dblPrice - (@totalOriginalTax / @dblQuantity) + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
 			)
 		END
 	ELSE
