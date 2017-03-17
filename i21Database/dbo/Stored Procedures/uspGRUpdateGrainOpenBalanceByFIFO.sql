@@ -357,8 +357,11 @@ BEGIN TRY
 			FROM @StorageTicketInfoByFIFO tblFIFO 
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=tblFIFO.intCustomerStorageId
 			WHERE strItemType = 'Inventory'
-
-		EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
+        
+		IF @strSourceType <> 'Invoice'--Invoice Calls uspICPostStorage to Update Inventory.
+		BEGIN
+			EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
+		END
 
 		UPDATE CS
 		SET CS.dblOpenBalance = CS.dblOpenBalance - tblFIFO.dblOpenBalance
