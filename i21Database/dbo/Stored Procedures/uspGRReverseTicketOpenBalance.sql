@@ -9,6 +9,12 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @strUserName NVARCHAR(40)
 	DECLARE @strType NVARCHAR(100)
+	DECLARE @intTransactionTypeId AS INT
+	DECLARE @ItemCostingTableType AS ItemCostingTableType
+
+	SELECT @intTransactionTypeId = intTransactionTypeId
+	FROM dbo.tblICInventoryTransactionType
+	WHERE strName = 'Inventory Adjustment - Quantity Change'
 
 	SELECT @strUserName=strUserName
 	FROM tblSMUserSecurity
@@ -53,6 +59,42 @@ BEGIN TRY
 			,[strUserName] = @strUserName
 		FROM tblGRStorageHistory WHERE intInventoryShipmentId=@IntSourceKey AND strType=@strType
 
+		INSERT INTO @ItemCostingTableType 
+		(
+			 [intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblQty]
+			,[dblCost]
+			,[dblValue]
+			,[dblSalesPrice]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[intSubLocationId]
+		)
+		SELECT 
+			 [intItemId] = CS.intItemId
+			,[intItemLocationId] = (SELECT TOP 1 intItemLocationId FROM tblICItemLocation WHERE intItemId = CS.intItemId AND intLocationId = CS.intCompanyLocationId)
+			,[intItemUOMId] = (SELECT  intItemUOMId FROM dbo.tblICItemUOM WHERE intItemId =  CS.intItemId AND ysnStockUnit = 1)
+			,[dtmDate] = GetDate()
+			,[dblQty] = SH.dblUnits
+			,[dblCost] = 0
+			,[dblValue] = 0
+			,[dblSalesPrice] = 0
+			,[intCurrencyId] = NULL
+			,[dblExchangeRate] = 1
+			,[intTransactionId] = CS.intCustomerStorageId
+			,[strTransactionId] = CS.[strStorageTicketNumber]
+			,[intTransactionTypeId] = @intTransactionTypeId
+			,[intSubLocationId] = CS.intCompanyLocationSubLocationId
+			FROM tblGRCustomerStorage CS
+			JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType
+			JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=0
+
 	END
 	ELSE IF  @strType='Reduced By Scale'
 	BEGIN
@@ -86,6 +128,42 @@ BEGIN TRY
 			,[strType] = 'Reverse By Scale'
 			,[strUserName] = @strUserName
 		FROM tblGRStorageHistory WHERE intTicketId=@IntSourceKey AND strType=@strType
+
+		INSERT INTO @ItemCostingTableType 
+		(
+			 [intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblQty]
+			,[dblCost]
+			,[dblValue]
+			,[dblSalesPrice]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[intSubLocationId]
+		)
+		SELECT 
+			 [intItemId] = CS.intItemId
+			,[intItemLocationId] = (SELECT TOP 1 intItemLocationId FROM tblICItemLocation WHERE intItemId = CS.intItemId AND intLocationId = CS.intCompanyLocationId)
+			,[intItemUOMId] = (SELECT  intItemUOMId FROM dbo.tblICItemUOM WHERE intItemId =  CS.intItemId AND ysnStockUnit = 1)
+			,[dtmDate] = GetDate()
+			,[dblQty] = SH.dblUnits
+			,[dblCost] = 0
+			,[dblValue] = 0
+			,[dblSalesPrice] = 0
+			,[intCurrencyId] = NULL
+			,[dblExchangeRate] = 1
+			,[intTransactionId] = CS.intCustomerStorageId
+			,[strTransactionId] = CS.[strStorageTicketNumber]
+			,[intTransactionTypeId] = @intTransactionTypeId
+			,[intSubLocationId] = CS.intCompanyLocationSubLocationId
+			FROM tblGRCustomerStorage CS
+			JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType
+			JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=0
 	END
 	ELSE IF  @strType='Reduced By Invoice'
 	BEGIN
@@ -119,7 +197,45 @@ BEGIN TRY
 			,[strType] = 'Reverse By Invoice'
 			,[strUserName] = @strUserName
 		FROM tblGRStorageHistory WHERE intInvoiceId=@IntSourceKey AND strType=@strType
+
+		INSERT INTO @ItemCostingTableType 
+		(
+			 [intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblQty]
+			,[dblCost]
+			,[dblValue]
+			,[dblSalesPrice]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[intSubLocationId]
+		)
+		SELECT 
+			 [intItemId] = CS.intItemId
+			,[intItemLocationId] = (SELECT TOP 1 intItemLocationId FROM tblICItemLocation WHERE intItemId = CS.intItemId AND intLocationId = CS.intCompanyLocationId)
+			,[intItemUOMId] = (SELECT  intItemUOMId FROM dbo.tblICItemUOM WHERE intItemId =  CS.intItemId AND ysnStockUnit = 1)
+			,[dtmDate] = GetDate()
+			,[dblQty] = SH.dblUnits
+			,[dblCost] = 0
+			,[dblValue] = 0
+			,[dblSalesPrice] = 0
+			,[intCurrencyId] = NULL
+			,[dblExchangeRate] = 1
+			,[intTransactionId] = CS.intCustomerStorageId
+			,[strTransactionId] = CS.[strStorageTicketNumber]
+			,[intTransactionTypeId] = @intTransactionTypeId
+			,[intSubLocationId] = CS.intCompanyLocationSubLocationId
+			FROM tblGRCustomerStorage CS
+			JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType
+			JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=0
 	END
+
+	EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
 	 
 END TRY
 BEGIN CATCH
