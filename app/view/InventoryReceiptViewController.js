@@ -1778,6 +1778,37 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         })
     },
 
+    getDefaultReceiptTaxGroupId: function(current, cfg){
+        cfg = cfg ? cfg : {};
+
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryReceipt/GetDefaultReceiptTaxGroupId',
+            params:{
+                freightTermId: cfg.freightTermId,
+                locationId: cfg.locationId,
+                entityVendorId: cfg.entityVendorId,
+                entityLocationId: cfg.entityLocationId
+            },
+            method: 'get'  
+        })
+        .subscribe(
+            function(successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+
+                if (current) {
+                    //Set intTaxGroupId and strTaxGroup
+                    current.set('intTaxGroupId', jsonData.message.taxGroupId);
+                    current.set('strTaxGroup', jsonData.message.taxGroupN);
+                }
+            }
+            , function(failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                //iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                iRely.Functions.showErrorDialog('Something went wrong while getting the default Tax Group for the item.');
+            }
+        );   
+    },
+
     getVendorCost: function(cfg, successFn, failureFn){
         // Sanitize parameters; 
         cfg = cfg ? cfg : {}; 
@@ -1835,6 +1866,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var vendorId = currentHeader.get('intEntityVendorId');            
             var vendorLocation = currentHeader.get('intShipFromId');            
             var dtmReceiptDate = currentHeader.get('dtmReceiptDate');
+            var intLocationId = currentHeader.get('intLocationId');
+            var intFreightTermId = currentHeader.get('intFreightTermId');
 
             // Get the important detail data:
             var itemId = records[0].get('intItemId');
@@ -1988,31 +2021,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var lifetimeType = current.get('strLifeTimeType');
             var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
 
-            /*  switch (records[0].get('strLotTracking')) {
-                  case 'Yes - Serial Number':
-                  case 'Yes - Manual':
-                      var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
-                          intInventoryReceiptItemId: current.get('intInventoryReceiptItemId') || current.get('strClientId'),
-                          strLotId: '',
-                          strContainerNo: '',
-                          intItemUnitMeasureId: intUOM,
-                          strUnitMeasure: strUOM,
-                          strWeightUOM: strWeightUOM,
-                          dblLotUOMConvFactor: dblLotUOMConvFactor,
-                          dblQuantity: '',
-                          intUnitPallet: '',
-                          dblGrossWeight: '',
-                          dblTareWeight: '',
-                          dblStatedGrossPerUnit: '',
-                          dblStatedTarePerUnit: '',
-                          intStorageLocationId: current.get('intStorageLocationId'),
-                          strStorageLocation: current.get('strStorageLocationName'),
-                          dtmExpiryDate: expiryDate
-                      });
-                      //current.tblICInventoryReceiptItemLots().store.load();
-                      current.tblICInventoryReceiptItemLots().add(newLot);
-                      break;
-              }*/
+            // Get the default tax group
+            var taxCfg = {
+                freightTermId: intFreightTermId,
+                locationId: intLocationId,
+                entityVendorId: vendorId,
+                entityLocationId: vendorLocation
+            };
+            me.getDefaultReceiptTaxGroupId(current, taxCfg);
         }
         else if (combo.itemId === 'cboItemUOM') {
             current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
@@ -2322,7 +2338,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 TaxGroupId: detailRecord.get('intTaxGroupId'),
                 EntityId: masterRecord.get('intEntityVendorId'),
                 BillShipToLocationId: masterRecord.get('intShipFromId'),
-                FreightTermId: masterRecord.get('intFreightTermId')
+                FreightTermId: masterRecord.get('intFreightTermId'),
+                CardId: null,
+                VehicleId: null,
+                IncludeExemptedCodes: false                
             };
 
             iRely.Functions.getItemTaxes(current, computeItemTax, me);
@@ -5083,6 +5102,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (records.length <= 0)
             return;
 
+        var me = this;
         var win = combo.up('window');
         var record = records[0];
         var grid = combo.up('grid');
@@ -5099,6 +5119,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             // Get the functional currency:
             var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
             var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
+
+            // Get the important header data:         
+            var intLocationId = masterRecord.get('intLocationId');
+            var intFreightTermId = masterRecord.get('intFreightTermId');            
 
             // Get the transaction currency
             var chargeCurrencyId = cboCurrency.getValue();
@@ -5185,7 +5209,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 );                      
             }
-			            
+
+            // Get the default tax group
+            var taxCfg = {
+                freightTermId: intFreightTermId,
+                locationId: intLocationId,
+                entityVendorId: current.get('intEntityVendorId'),
+                entityLocationId: null,           
+            };
+            me.getDefaultReceiptTaxGroupId(current, taxCfg);      
         }
 
         if (combo.itemId === 'cboChargeCurrency') {
@@ -6262,14 +6294,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                          //get EntityIdId and BillShipToLocationId
                          var valEntityId, valTaxGroupId;
-
-                         if(charge.get('ysnAccrue') === true && (charge.get('intEntityVendorId') !== current.get('intEntityVendorId'))) {
-                               valEntityId = charge.get('intEntityVendorId');
-                               valTaxGroupId = null;
-                        }
-                        else {
-                               valEntityId = current.get('intEntityVendorId');
-                               valTaxGroupId = charge.get('intTaxGroupId');
+                        
+                        // Get the charge vendor id and tax group. 
+                        if (charge.get('ysnAccrue') === true) {
+                            valEntityId = current.get('intEntityVendorId');
+                            valTaxGroupId = charge.get('intTaxGroupId');
                         }
                         var currentCharge = {
                                ItemId: charge.get('intChargeId'),
@@ -6279,7 +6308,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                TaxGroupId: valTaxGroupId,
                                EntityId: valEntityId,
                                BillShipToLocationId: current.get('intShipFromId'),
-                               FreightTermId: current.get('intFreightTermId')
+                               FreightTermId: current.get('intFreightTermId'),
+                               CardId: null,
+                               VehicleId: null,
+                               IncludeExemptedCodes: false
                         };
                         iRely.Functions.getItemTaxes(currentCharge, computeItemTax, me);
                      }

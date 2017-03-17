@@ -32,5 +32,6 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchReceiptCharges(GetParameter param);
         SaveResult UpdateReceiptVoucher();
         SaveResult CheckReceiptForValidReturn(int? receiptId);
+        SaveResult GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? entityVendorId, int? entityLocationId, out int? taxGroup, out string taxGroupName);
     }
 }

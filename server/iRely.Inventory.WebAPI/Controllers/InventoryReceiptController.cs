@@ -220,6 +220,31 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
+        [ActionName("GetDefaultReceiptTaxGroupId")]
+        public HttpResponseMessage GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? entityVendorId, int? entityLocationId)
+        {
+            int? taxGroup = null;
+            string taxGroupName = null;
+            var result = _bl.GetDefaultReceiptTaxGroupId(freightTermId, locationId, entityVendorId, entityLocationId, out taxGroup, out taxGroupName);
+
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    taxGroupId = taxGroup,
+                    taxGroupN = taxGroupName,
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
+        [HttpGet]
         [ActionName("SearchReceiptItems")]
         public async Task<HttpResponseMessage> SearchReceiptItems(GetParameter param)
         {

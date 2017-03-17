@@ -921,7 +921,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
        },
        readyOnlyChargeTaxGroup: function(get) {
-           if(get('grdCharges.selection.intEntityVendorId') == null || (get('grdCharges.selection.intEntityVendorId') == get('current.intEntityVendorId'))) {
+           if(get('grdCharges.selection.intEntityVendorId') || (get('grdCharges.selection.intEntityVendorId') == get('current.intEntityVendorId'))) {
               return false;
             }
            else {
