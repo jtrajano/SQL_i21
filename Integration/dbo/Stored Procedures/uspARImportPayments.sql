@@ -219,6 +219,7 @@ IF(@Checking = 1)
 		,[intEntityId] 
 		,[intConcurrencyId]
 		,[ysnImportedFromOrigin]
+		,[ysnImportedAsPosted]
 		)
 	SELECT
 		I.[intEntityCustomerId] 									AS [intEntityCustomerId]
@@ -242,6 +243,7 @@ IF(@Checking = 1)
 		,1													AS [ysnPosted]	
 		,@UserId											AS [intEntityId]										
 		,0
+		,1
 		,1
 
 	FROM
@@ -701,6 +703,7 @@ IF(@Checking = 1)
 		,[intEntityId] 
 		,[intConcurrencyId]
 		,[ysnImportedFromOrigin]
+		,[ysnImportedAsPosted]
 		)
 	SELECT
 		I.[intEntityCustomerId] 									AS [intEntityCustomerId]
@@ -725,6 +728,7 @@ IF(@Checking = 1)
 		,@UserId											AS [intEntityId]										
 		,0
 		,1
+		,0
 
 	FROM
 		[agpyemst] P1				--Origin UnPosted Payments Table
@@ -1013,6 +1017,7 @@ IF(@Checking = 1)
 			,[intEntityId] 
 			,[intConcurrencyId]
 			,[ysnImportedFromOrigin]
+			,[ysnImportedAsPosted]
 			)
 		SELECT
 			 C.[intEntityId] 							AS [intEntityCustomerId]
@@ -1036,6 +1041,7 @@ IF(@Checking = 1)
 			,1													AS [ysnPosted]	
 			,@UserId											AS [intEntityId]										
 			,0
+			,1
 			,1
 
 		FROM
@@ -1308,6 +1314,7 @@ IF(@Checking = 1)
 		,[intEntityId] 
 		,[intConcurrencyId]
 		,[ysnImportedFromOrigin]
+		,[ysnImportedAsPosted]
 		)
 	SELECT
 		I.[intEntityCustomerId] 									AS [intEntityCustomerId]
@@ -1331,6 +1338,7 @@ IF(@Checking = 1)
 		,1													AS [ysnPosted]	
 		,@UserId											AS [intEntityId]										
 		,0
+		,1
 		,1
 
 	FROM
@@ -1674,6 +1682,7 @@ IF(@Checking = 1)
 		,[intEntityId] 
 		,[intConcurrencyId]
 		,[ysnImportedFromOrigin]
+		,[ysnImportedAsPosted]
 		)
 	SELECT
 		I.[intEntityCustomerId] 									AS [intEntityCustomerId]
@@ -1698,6 +1707,7 @@ IF(@Checking = 1)
 		,@UserId											AS [intEntityId]										
 		,0
 		,1
+		,0
 
 	FROM
 		[ptpyemst] P1				--Origin UnPosted Payments Table
