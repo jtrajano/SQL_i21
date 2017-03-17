@@ -206,7 +206,7 @@ BEGIN
 			,ri.intStorageLocationId
 			,ri.intOwnershipType
 			,ri.dblOrderQty
-			,ri.dblBillQty
+			,dblBillQty = 0 
 			,dblOpenReceive = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
 			,ri.intLoadReceive
 			,ri.dblReceived
