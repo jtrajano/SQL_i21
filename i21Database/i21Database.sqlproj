@@ -5155,6 +5155,7 @@
     <Build Include="dbo\Stored Procedures\uspSTGenerateCSV.sql" />
     <Build Include="dbo\Functions\fnCTGetSampleDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetDefaultReceiptTaxGroupId.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetTerms.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

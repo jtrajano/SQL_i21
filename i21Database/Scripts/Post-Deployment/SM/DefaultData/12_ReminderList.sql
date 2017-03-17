@@ -661,7 +661,7 @@ END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET	[strMessage] = N'{0} {1} {2} unconfirmed.'
+	SET	[strMessage] = N'{0} {1} {2} without sequence.'
 	WHERE [strReminder] = N'Empty' AND [strType] = N'Contract' 
 END
 
@@ -700,7 +700,7 @@ BEGIN
 													tblCTEvent EV											
 											JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
 											WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') 
-											AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE strERPPONumber IS NULL)
+											AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE LTRIM(RTRIM(ISNULL(strERPPONumber,''''))) = '''')
 											AND		EV.strEventName  =  ''Unsubmitted Contract Alert'' AND ER.intEntityId = {0}
 											',
 			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Unsubmitted', 
@@ -715,7 +715,7 @@ BEGIN
 									tblCTEvent EV											
 									JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
 									WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') 
-									AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE strERPPONumber IS NULL)
+									AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE LTRIM(RTRIM(ISNULL(strERPPONumber,''''))) = '''')
 									AND		EV.strEventName = ''Unsubmitted Contract Alert'' AND ER.intEntityId = {0}
 										'
 	WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Contract' 
