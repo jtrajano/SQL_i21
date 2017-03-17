@@ -248,6 +248,12 @@ Begin
 	--Shipment Update
 	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')='U'
 	Begin
+		If @strRefNo like 'IR-%'
+		Begin
+			Set @strDeliveryType='P'
+			GOTO RECEIPT 
+		End
+
 		Set @strMesssageType='DESADV'
 
 		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
@@ -280,6 +286,7 @@ Begin
 	End
 
 	--Receipt
+	RECEIPT:
 	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')='P'
 	Begin
 		Select @intReceiptId=r.intInventoryReceiptId
