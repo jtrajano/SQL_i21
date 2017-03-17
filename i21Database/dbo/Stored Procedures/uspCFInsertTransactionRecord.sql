@@ -255,10 +255,10 @@ BEGIN
 			SET @dblOriginalGrossPrice = @dblTransferCost
 			--SET @dblTransferCost = 0
 		END
-		ELSE IF @strTransactionType != 'Local/Network'
-		BEGIN
-			SET @dblOriginalGrossPrice = @dblTransferCost
-		END
+		--ELSE IF @strTransactionType != 'Local/Network'
+		--BEGIN
+		--	SET @dblOriginalGrossPrice = @dblTransferCost
+		--END
 		-----------ORIGINAL GROSS PRICE-------
 
 
