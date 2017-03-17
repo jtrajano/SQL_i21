@@ -258,7 +258,33 @@ SELECT
 	AND INV.pttic_cus_no COLLATE Latin1_General_CI_AS = ENT.strEntityNo	
 	INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(pttic_itm_no  COLLATE Latin1_General_CI_AS)
 	INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityId = A.intEntityCustomerId
-	WHERE pttic_qty_ship IS NOT NULL AND pttic_unit_prc IS NOT NULL AND pttic_line_no <> 0
+	WHERE pttic_qty_ship IS NOT NULL AND pttic_unit_prc IS NOT NULL AND pttic_line_no <> 0 
+	
+--IMPORT DEBIT MEMO DETAIL	
+INSERT INTO tblARInvoiceDetail
+(
+  [intInvoiceId]
+ ,[intSalesAccountId]
+ ,[dblQtyOrdered]
+ ,[dblQtyShipped]
+ ,[dblPrice]
+ ,[dblTotal]
+)
+SELECT 
+		[intInvoiceId]		=	A.intInvoiceId,
+		[intSalesAccountId]	= GL.inti21Id,
+		[dblQtyOrdered]		= NULL,
+		[dblQtyShipped]		= 1,
+		[dblPrice]			= pttic_computed_total,
+		[dblTotal]			= pttic_computed_total 
+	FROM tblARInvoice A
+	INNER JOIN tblEMEntity ENT on ENT.intEntityId = A.intEntityCustomerId
+	INNER JOIN tmp_ptticmstImport INV ON INV.pttic_ivc_no COLLATE Latin1_General_CI_AS = A.strInvoiceOriginId  COLLATE Latin1_General_CI_AS
+	AND INV.pttic_cus_no COLLATE Latin1_General_CI_AS = ENT.strEntityNo	
+	INNER JOIN [tblGLCOACrossReference] GL ON INV.pttic_gl_acct = GL.[strExternalId]
+	INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityId = A.intEntityCustomerId
+	WHERE pttic_qty_ship IS NOT NULL AND pttic_unit_prc IS NOT NULL AND pttic_line_no <> 0 AND pttic_type = 'D'
+	
 
 SET @totalInsertedInvoiceDetail = @@ROWCOUNT;
 
