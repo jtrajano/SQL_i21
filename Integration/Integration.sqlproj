@@ -407,5 +407,7 @@
     <None Include="dbo\Stored Procedures\uspTRImportSupplyPointRackPriceEquation.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportSupplyPointProductSearch.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportRackPrice.sql" />
+    <None Include="dbo\Stored Procedures\uspSMImportTax.sql" />
+    <None Include="dbo\Stored Procedures\uspSMImportTaxRate.sql" />
   </ItemGroup>
 </Project>
