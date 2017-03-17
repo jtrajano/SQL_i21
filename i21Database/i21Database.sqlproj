@@ -5122,6 +5122,10 @@
     <Build Include="dbo\Stored Procedures\uspLGProcessToInventoryReceipt.sql" />
     <Build Include="dbo\Functions\fnCTGetSampleDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetDefaultReceiptTaxGroupId.sql" />
+    <Build Include="dbo\Views\vyuRKGetSequenceMonthNotMapping.sql" />
+    <Build Include="dbo\Views\vyuRKGetSequenceMonth.sql" />
+    <Build Include="dbo\Tables\tblRKM2MGrainBasis.sql" />
+    <Build Include="dbo\Functions\fnRKGetFutureAndBasisPriceForDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
