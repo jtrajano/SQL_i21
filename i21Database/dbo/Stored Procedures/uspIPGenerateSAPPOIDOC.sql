@@ -171,6 +171,7 @@ Begin
 	Set @strCondXml=''
 	Set @strCondXXml=''
 	Set @strTextXml=''
+	Set @strSeq=''
 
 	While(@intMinSeq is not null) --Sequence Loop
 	Begin
@@ -209,6 +210,8 @@ Begin
 			@strContractItemNo			= strContractItemNo,
 			@strOrigin					= strOrigin	
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
+
+		Set @strSeq=ISNULL(@strSeq,'') + CONVERT(VARCHAR,@intContractSeq) + ','
 
 		--Convert price USC to USD
 		If UPPER(@strCurrency)='USC'
@@ -564,6 +567,8 @@ Begin
 	
 		Exec sp_executesql @strSql
 	End
+
+	Set @strSeq=LTRIM(RTRIM(LEFT(@strSeq,LEN(@strSeq)-1)))
 
 	INSERT INTO @tblOutput(strContractFeedIds,strRowState,strXml,strContractNo,strPONo)
 	VALUES(@strContractFeedIds,CASE WHEN UPPER(@strHeaderState)='ADDED' THEN 'CREATE' ELSE 'UPDATE' END,@strXml,ISNULL(@strContractNumber,'') + ' / ' + ISNULL(@strSeq,''),ISNULL(@strERPPONumber,''))

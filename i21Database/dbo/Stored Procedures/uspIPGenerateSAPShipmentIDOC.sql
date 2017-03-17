@@ -289,7 +289,10 @@ Begin
 				Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
 			Else
 				Set @strItemXml += '<WERKS>'  +  '' + '</WERKS>' 
-			Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
+			If ISNULL(@ysnBatchSplit,0)=1 AND UPPER(@strHeaderRowState)='ADDED'--coffee batch split DESADV / shipping advice
+				Set @strItemXml += '<LGORT>'  +  '' + '</LGORT>' 
+			Else
+				Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 			If UPPER(@strCommodityCode)='COFFEE'
 				Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
 			Else
@@ -298,11 +301,14 @@ Begin
 			If ISNULL(@ysnBatchSplit,0)=0
 				Set @strItemXml += '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblNetWeight)),'') + '</LFIMG>'
 			Else
-				Set @strItemXml += '<LFIMG>'  +  '' + '</LFIMG>'
+				If UPPER(@strHeaderRowState)='ADDED'
+					Set @strItemXml += '<LFIMG>'  +  '0' + '</LFIMG>' --coffee batch split DESADV / shipping advice
+				Else
+					Set @strItemXml += '<LFIMG>'  +  '' + '</LFIMG>'
 			Set @strItemXml += '<VRKME>'  +  ISNULL(@strWeightUOM,'') + '</VRKME>' 
 			If UPPER(@strCommodityCode)='TEA' AND UPPER(@strHeaderRowState)='ADDED'
 				Set @strItemXml += '<VOLUM>'  +  '1' + '</VOLUM>' 
-			If ISNULL(@ysnBatchSplit,0)=1
+			If ISNULL(@ysnBatchSplit,0)=1 AND UPPER(@strHeaderRowState)='MODIFIED'
 				Set @strItemXml += '<HIPOS>'  +  ISNULL(@strDeliveryItemNo,'') + '</HIPOS>'
 
 			If UPPER(@strHeaderRowState)='MODIFIED'
@@ -349,7 +355,7 @@ Begin
 							+ '<E1EDL24 SEGMENT="1">'
 							+ '<POSNR>' + ISNULL(CONVERT(VARCHAR,lc.strExternalContainerId),'') + '</POSNR>' 
 							+ '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
-							+ '<WERKS>'  +  '' + '</WERKS>' 
+							+ '<WERKS>'  +  CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN ISNULL(@strSubLocation,'')  ELSE '' END + '</WERKS>' 
 							+ '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 							+ '<CHARG>'  +  ISNULL(lc.strContainerNo,'') + '</CHARG>' 
 							+ '<KDMAT>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</KDMAT>' 

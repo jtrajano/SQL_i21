@@ -297,7 +297,7 @@ Begin
 		Update tblICInventoryReceiptItem Set ysnExported=0 Where intInventoryReceiptId=@intMinHeader
 
 	INSERT INTO @tblOutput(strReceiptDetailIds,strRowState,strXml,strReceiptNo,strMessageType)
-	VALUES(@strReceiptDetailIds,'CREATE',@strXml,ISNULL(@strReceiptNo,''),CASE WHEN @ysnWMMBXY=1 THEN 'WMMBXY' ELSE 'WHSCON' END)
+	VALUES(@strReceiptDetailIds,'CREATE',@strXml,ISNULL(@strReceiptNo,''),CASE WHEN @ysnWMMBXY=1 AND UPPER(@strCommodityCode)='COFFEE' THEN 'WMMBXY' ELSE 'WHSCON' END)
 
 	Select @intMinHeader=Min(intInventoryReceiptId) From @tblReceiptHeader Where intInventoryReceiptId>@intMinHeader
 End

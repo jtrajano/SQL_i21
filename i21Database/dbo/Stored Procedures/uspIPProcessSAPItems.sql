@@ -138,6 +138,12 @@ Begin
 		If Not Exists (Select 1 From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where iu.intItemId=@intItemId AND um.strSymbol='TO')
 			Insert Into tblICItemUOM(intItemId,intUnitMeasureId,dblUnitQty,ysnStockUnit,ysnAllowPurchase,ysnAllowSale)
 			Select TOP 1 @intItemId,intUnitMeasureId,1000,0,1,1 From tblICUnitMeasure Where strSymbol='TO'
+
+		--Add 70/69/60/50/65 Kg Bags for coffee
+		If (Select UPPER(strCommodityCode) From tblICCommodity Where intCommodityId=@intCommodityId)='COFFEE'
+			Insert Into tblICItemUOM(intItemId,intUnitMeasureId,dblUnitQty,ysnStockUnit,ysnAllowPurchase,ysnAllowSale)
+			Select @intItemId,intUnitMeasureId,SUBSTRING(strUnitMeasure,1,2),0,1,1 From tblICUnitMeasure 
+			Where  UPPER(strUnitMeasure) like '%KG BAG%' AND ISNUMERIC(SUBSTRING(strUnitMeasure,1,2))=1
 	End
 
 	Insert Into tblICItemLocation(intItemId,intLocationId,intCostingMethod,intAllowNegativeInventory)
