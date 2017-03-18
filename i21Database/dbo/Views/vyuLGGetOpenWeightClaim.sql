@@ -30,8 +30,29 @@ FROM (
 	strWeightUOM = WUOM.strUnitMeasure,
 	CH.intWeightId,
 	WG.strWeightGradeDesc,
-	dblShippedNetWt = LD.dblNet,
-	dblReceivedNetWt = CASE Load.intPurchaseSale WHEN  1 THEN  RI.dblNet ELSE 0.0 END,
+	dblShippedNetWt = (LD.dblNet - ISNULL((
+					SELECT SUM(IRI.dblNet)
+					FROM tblICInventoryReceipt IR
+					JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+					WHERE IRI.intSourceId = LD.intLoadDetailId
+						AND IRI.intLineNo = CD.intContractDetailId
+						AND IRI.intOrderId = CH.intContractHeaderId
+						AND IR.strReceiptType = 'Inventory Return'
+					), 0)),
+	dblReceivedNetWt = ((CASE Load.intPurchaseSale
+						 WHEN 1
+							THEN RI.dblNet
+						 ELSE 0.0
+						 END) -
+				ISNULL((
+					SELECT SUM(IRI.dblNet)
+					FROM tblICInventoryReceipt IR
+					JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+					WHERE IRI.intSourceId = LD.intLoadDetailId
+						AND IRI.intLineNo = CD.intContractDetailId
+						AND IRI.intOrderId = CH.intContractHeaderId
+						AND IR.strReceiptType = 'Inventory Return'
+					),0)),
 	dblFranchisePercent = WG.dblFranchise,
 	dblFranchise = WG.dblFranchise / 100,
 	dblFranchiseWt = CASE Load.intPurchaseSale WHEN  1 THEN
@@ -100,6 +121,8 @@ LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
 LEFT JOIN (
 		SELECT SUM(ReceiptItem.dblNet) dblNet, ReceiptItem.intSourceId, ReceiptItem.intLineNo, ReceiptItem.intOrderId 
 		FROM tblICInventoryReceiptItem ReceiptItem 
+		JOIN tblICInventoryReceipt RI ON RI.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		WHERE RI.strReceiptType <> 'Inventory Return'
 		GROUP BY ReceiptItem.intSourceId, ReceiptItem.intLineNo, ReceiptItem.intOrderId
 	) RI ON RI.intSourceId = LD.intLoadDetailId AND RI.intLineNo = LD.intPContractDetailId AND RI.intOrderId = CH.intContractHeaderId AND Load.intPurchaseSale = 1
 LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = Load.intLoadId

@@ -47,6 +47,11 @@ BEGIN TRY
 	WHERE intContractHeaderId = @intContractHeaderId
 		AND ysnSlice = 1
 
+	IF OBJECT_ID('tempdb.dbo.#ContractToUpdateContainerCount') IS NOT NULL
+		DROP TABLE #ContractToUpdateContainerCount
+
+	SELECT * INTO #ContractToUpdateContainerCount FROM @ContractSliceDetail
+
 	IF ((SELECT COUNT(1) FROM @ContractSliceDetail) < 1)
 		RETURN;
 
@@ -115,6 +120,18 @@ BEGIN TRY
 			   ,dblGross = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intWeightItemUOMId,@dblOrgContractDetailQty)
 			WHERE intLoadDetailId = @intOrgLoadIDetaild
 
+			UPDATE L
+			SET intNumberOfContainers = CEILING(LD.dblNet / ISNULL(CTCQ.dblBulkQuantity,LD.dblNet))
+			FROM tblCTContractDetail CD
+			JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+			JOIN tblICItem I ON I.intItemId = CD.intItemId
+			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+			LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
+				AND CTCQ.intContainerTypeId = CT.intContainerTypeId
+			WHERE LD.intLoadDetailId = @intOrgLoadIDetaild
+
 			SET @dblOrgLoadDetailQty = (@dblOrgLoadDetailQty - @dblOrgContractDetailQty)
 			
 			-- Create contract sequence samples for the remaining representing qty
@@ -145,7 +162,19 @@ BEGIN TRY
 										  ,@intUserId = @intUserId
 
 				SET @dblOrgLoadDetailQty = (@dblOrgLoadDetailQty - @dblNewLoadDetailQty)
-								
+
+				UPDATE L
+				SET intNumberOfContainers = CEILING(LD.dblNet / ISNULL(CTCQ.dblBulkQuantity,LD.dblNet))
+				FROM tblCTContractDetail CD
+				JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+				JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+				JOIN tblICItem I ON I.intItemId = CD.intItemId
+				LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+				LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
+					AND CTCQ.intContainerTypeId = CT.intContainerTypeId
+				WHERE CD.intContractDetailId = @intCContractDetailId
+							
 				SELECT @intCRowNo = MIN(intCRowNo)
 				FROM @ContractSliceDetail
 				WHERE intCRowNo > @intCRowNo
