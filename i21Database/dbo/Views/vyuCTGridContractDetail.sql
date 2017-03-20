@@ -30,6 +30,7 @@ AS
 			IX.strIndex,
 			CS.strContractStatus,
 			PF.intPriceFixationId, 
+			PF.intPriceContractId, 
 			QA.strContainerNumber,
 			QA.strSampleTypeName,
 			QA.strSampleStatus,

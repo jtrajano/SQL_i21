@@ -37,7 +37,7 @@ AS
 			CH.dtmLastModified,				CP.strContractPlan,				UE.strName					AS	strLastModifiedBy,					
 			YR.strCropYear,					TM.strTermCode,										
 																		
-			CASE WHEN strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName	END	AS	strINCOLocation,
+			CASE WHEN NM.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName	END	AS	strINCOLocation,
 			dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses
 			
 	FROM	tblCTContractHeader					CH	
