@@ -716,6 +716,7 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON CC.intVendorId = D1.intEntityVendorId  
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
+	AND ysnBilled = 0
 		UNION ALL
 	SELECT
 	DISTINCT  
@@ -815,7 +816,7 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON CC.intVendorId = D1.intEntityVendorId  
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
-
+	AND ysnBilled = 0
 	UNION ALL
 		 SELECT
 		 [intEntityVendorId]							=	A.intVendorEntityId
