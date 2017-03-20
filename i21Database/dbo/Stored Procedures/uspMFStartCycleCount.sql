@@ -393,6 +393,7 @@ BEGIN TRY
 		,@strPackagingCategory NVARCHAR(50)
 		,@intPackagingCategoryId INT
 		,@intPMCategoryId INT
+		,@strInstantConsumption nvarchar(40)
 
 	SELECT @dblProduceQty = SUM(dblPhysicalCount)
 		,@intProduceUOMId = MIN(intPhysicalItemUOMId)
@@ -799,6 +800,12 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 90 --PM Staging Location
 
+	SELECT @strInstantConsumption = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 20
+
 	DECLARE @tblMFQtyInProductionStagingLocation TABLE (
 		intItemId INT
 		,dblQtyInProductionStagingLocation NUMERIC(18, 6)
@@ -1009,6 +1016,34 @@ BEGIN TRY
 			FROM @tblICFinalItem I
 			WHERE I.intMainItemId = FI.intItemId
 			)
+	If @strInstantConsumption='True'
+	Begin
+		INSERT INTO @tblMFQtyInProductionStagingLocation (
+			intItemId
+			,dblQtyInProductionStagingLocation
+			,dblOpeningQty
+			)
+		SELECT I.intItemId
+			,IsNULL(L.dblQty, 0) 
+			,(IsNULL(L.dblQty, 0) + IsNULL(I.dblRequiredQty, 0))- IsNULL(WI.dblQuantity, 0)
+		FROM @tblICItem I
+		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
+		LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+	End
+	Else
+	Begin
+		INSERT INTO @tblMFQtyInProductionStagingLocation (
+			intItemId
+			,dblQtyInProductionStagingLocation
+			,dblOpeningQty
+			)
+		SELECT I.intItemId
+			,IsNULL(L.dblQty, 0) - IsNULL(I.dblRequiredQty, 0)
+			,IsNULL(L.dblQty, 0) - IsNULL(WI.dblQuantity, 0)
+		FROM @tblICItem I
+		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
+		LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+	End
 
 	--BEGIN TRANSACTION
 	INSERT INTO dbo.tblMFProcessCycleCountSession (
