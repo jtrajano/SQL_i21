@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnRKGetFutureAndBasisPriceForDate]
 (
 	@intCommodityId int ,
+	@intCompanyLocationId int,
 	@dtmTicketDate datetime,
 	@intSequenceTypeId int, -- 1.	‘1’ Basis($) ,‘2’ Futures($), ‘3’ Futures and Basis 
 	@dblBasisCost NUMERIC(18, 6)
@@ -21,7 +22,8 @@ DECLARE @calculatedValue AS NUMERIC(18, 6)
 ---Scale Basis
 SELECT TOP 1 @dblScaleBasisValue= isnull(dblBasis,0)+@dblBasisCost,@intFutureMonthId=bd.intFutureMonthId,@intFutureMarketId=bd.intFutureMarketId  FROM tblRKM2MBasis b
 JOIN tblRKM2MGrainBasis bd on b.intM2MBasisId=bd.intM2MBasisId 
-WHERE  intCommodityId = @intCommodityId and strDeliveryMonth = @strSeqMonth	AND ISNULL(dblBasis,0) <> 0 	  
+WHERE  intCommodityId = @intCommodityId and strDeliveryMonth = @strSeqMonth	AND ISNULL(dblBasis,0) <> 0 
+	AND  intCompanyLocationId=@intCompanyLocationId 
 ORDER BY dtmM2MBasisDate Desc
 
 --FutureSettlemnt Price
