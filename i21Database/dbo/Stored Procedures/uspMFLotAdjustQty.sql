@@ -92,7 +92,7 @@ BEGIN TRY
 		END
 	END
 
-	IF @dblNewLotQty = 0
+	IF @dblNewLotQty = 0 and @intWeightUOMId is not null
 	BEGIN
 		SELECT @dblAdjustByQuantity = - @dblWeight
 
