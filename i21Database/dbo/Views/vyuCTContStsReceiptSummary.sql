@@ -18,6 +18,7 @@ AS
 									CAST(SUM(dblNetWeight) AS NUMERIC(18, 6)) dblNetWeight,
 									MIN(intItemUOMId) intItemUOMId
 							FROM	vyuCTContStsGoodsShipped
+							WHERE	intShipmentType <> 2
 							GROUP
 							BY		intContractDetailId		
 						)GS	ON	GS.intContractDetailId	=	CD.intContractDetailId	LEFT

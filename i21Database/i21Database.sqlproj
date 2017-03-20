@@ -5159,6 +5159,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessACHPayments.sql" />
     <Build Include="dbo\Views\vyuSMEmailHistory.sql" />
     <Build Include="dbo\Functions\fnSMConcatRecipients.sql" />
+    <Build Include="dbo\Views\vyuCTGridContractHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
