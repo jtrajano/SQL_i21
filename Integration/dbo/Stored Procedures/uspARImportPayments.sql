@@ -1112,7 +1112,11 @@ CREATE PROCEDURE uspARImportPayments
 	,@UserId	INT = 0 
 	,@Total		INT = 0		OUTPUT  
 AS  
-BEGIN  
+BEGIN 
+
+DECLARE @CR_Account NVARCHAR(100),@CR_AccounID int
+SET @CR_Account = (select ptmgl_cash from ptmglmst)
+SET @CR_AccounID = (SELECT GL.inti21Id from [tblGLCOACrossReference] GL WHERE @CR_Account = GL.[strExternalId]) 
 
 DECLARE @MaxPaymentID int, @OriginalMaxPaymentID int, @DefaultPaymenMethodtId int, @DefaultTermId int, @TotalCount int
 SET @TotalCount = 0
@@ -1977,7 +1981,7 @@ IF(@Checking = 1)
 				ELSE
 					NULL 
 			END)												AS [dtmDatePaid]
-			,ISNULL(GL.[inti21Id],0)							AS [intAccountId]
+			,ISNULL(GL.[inti21Id],@CR_AccounID)							AS [intAccountId]
 			,ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	AS [intPaymentMethodId] 
 			,CL.[intCompanyLocationId] 							AS [intLocationId]
 			,(P1.[ptcrd_amt])    								AS [dblAmountPaid]
