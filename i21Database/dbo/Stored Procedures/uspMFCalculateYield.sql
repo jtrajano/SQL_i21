@@ -31,6 +31,7 @@ BEGIN TRY
 		,@intPMStageLocationId int
 		,@strPMCategoryCode nvarchar(50)
 		,@intPMCategoryId int
+		,@strInstantConsumption nvarchar(50)
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -135,6 +136,12 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
+
+	SELECT @strInstantConsumption = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 20
 
 	INSERT INTO @tblInputItem (
 		intItemId
@@ -619,7 +626,7 @@ BEGIN TRY
 								END
 							)
 
-					IF @strAttributeValue = 'False'
+					IF (@strAttributeValue = 'False'  or (@strAttributeValue = 'True' and @strInstantConsumption ='True'))
 					BEGIN
 						EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
 							-- Parameters for filtering:
