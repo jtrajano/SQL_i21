@@ -42,7 +42,8 @@ BEGIN TRY
 	SELECT @strAttributeValue = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intAttributeId = 20
+		AND intAttributeId = 20--Is Instant Consumption
+		AND intLocationId =@intLocationId
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
