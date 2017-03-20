@@ -250,7 +250,7 @@ BEGIN
 
 
 		-----------ORIGINAL GROSS PRICE-------
-		IF(@dblOriginalGrossPrice IS NULL OR @dblOriginalGrossPrice = 0) AND @strTransactionType = 'Local/Network'
+		IF(@dblOriginalGrossPrice IS NULL OR @dblOriginalGrossPrice = 0)-- AND @strTransactionType = 'Local/Network'
 		BEGIN
 			SET @dblOriginalGrossPrice = @dblTransferCost
 			--SET @dblTransferCost = 0
@@ -1257,3 +1257,5 @@ BEGIN
 		------------------------------------------------------------
 	END
 END
+
+
