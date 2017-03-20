@@ -13,7 +13,7 @@ SELECT TL.intLoadHeaderId
 	, intCustomerCompanyLocationId = NULL
 	, strCustomerCompanyLocation = NULL
 	, intEntityVendorId = CAST(SP.intEntityVendorId AS NVARCHAR(100))
-	, SP.strFuelSupplier
+	, strFuelSupplier = Terminal.strName
 	, intVendorLocationId = CAST(SP.intEntityLocationId AS NVARCHAR(100))
 	, SP.strSupplyPoint
 	, strBOL = TR.strBillOfLading
@@ -39,6 +39,7 @@ SELECT TL.intLoadHeaderId
 	, strInvoiceNo = NULL
 FROM tblTRLoadHeader TL
 LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
+LEFT JOIN vyuTRTerminal Terminal ON Terminal.intEntityVendorId = TR.intTerminalId
 LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = TR.intSupplyPointId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = TR.intCompanyLocationId
 LEFT JOIN tblICItem Item ON Item.intItemId = TR.intItemId
