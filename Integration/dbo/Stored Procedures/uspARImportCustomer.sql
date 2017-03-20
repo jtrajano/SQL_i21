@@ -41,7 +41,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_state = SUBSTRING(Loc.strState,1,2),
 				agcus_zip = SUBSTRING(Loc.strZipCode,1,10),
 				agcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END),
-				agcus_terms_cd = Cus.intTermsId, --(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
+				agcus_terms_cd = (SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255),
 				--Contact
 				agcus_contact = SUBSTRING((Con.strName),1,20),
 				agcus_phone = ISNULL( (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END), '''' ),
@@ -173,7 +173,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SUBSTRING(Loc.strState,1,2) as strState,
 				SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
 				(CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)as strCountry,
-				Cus.intTermsId, --(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
+				(SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255),
 				--Customer
 				SUBSTRING(Cus.strCustomerNumber,1,10) as strCustomerNumber,
 				(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
@@ -406,7 +406,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@strLocationNotes        = NULL,
 						@intShipViaId = NULL,
 						@intTaxCodeId    = NULL,
-						@intTermsId      = (SELECT intTermID FROM tblSMTerm WHERE strTermCode = CAST(agcus_terms_cd AS CHAR(10))),
+						@intTermsId      = (SELECT  intTermID FROM tblSMTerm WHERE strTermCode = CAST(agcus_terms_cd AS CHAR(10))),
 						@intWarehouseId  = NULL,
 				
 						--Customer
@@ -736,7 +736,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),
 				ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
 				ptcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntitySalespersonId = Cus.intSalespersonId),
-				ptcus_srv_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId)
+				ptcus_srv_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
+				ptcus_terms_code = (SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255 )
 				--ptcus_dpa_cnt = Cus.strDPAContract,
 				--ptcus_dpa_rev_dt = CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),
 				--ptcus_gb_rcpt_no = Cus.strGBReceiptNumber,
@@ -800,7 +801,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_budget_end_mm,
 				ptcus_acct_stat_x_1,
 				ptcus_slsmn_id,
-				ptcus_srv_cd
+				ptcus_srv_cd,
+				ptcus_terms_code
 				--agcus_dpa_cnt
 				--agcus_dpa_rev_dt,
 				--agcus_gb_rcpt_no,
@@ -853,7 +855,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SUBSTRING(Cus.strBudgetBillingEndMonth,1,2) as strBudgetBillingEndMonth,
 				(SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
 				(SELECT strSalespersonId FROM tblARSalesperson WHERE intEntitySalespersonId = Cus.intSalespersonId),
-				(SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId)
+				(SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
+				(SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255)
 				--Cus.strDPAContract,
 				--CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),
 				--Cus.strGBReceiptNumber,
@@ -1044,7 +1047,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@strLocationNotes        = NULL,
 						@intShipViaId = NULL,
 						@intTaxCodeId    = NULL,
-						@intTermsId      = NULL,
+						@intTermsId      = (SELECT intTermID FROM tblSMTerm WHERE strTermCode = CAST(ptcus_terms_code  AS CHAR(10))),
 						@intWarehouseId  = NULL,
 
 						--Customer
