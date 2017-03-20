@@ -15,7 +15,7 @@
 	,@UnlimitedQuantity			BIT             = 0    OUTPUT
 	,@Deviation					NUMERIC(18,6)	= NULL OUTPUT
 	,@TermDiscount				NUMERIC(18,6)	= NULL OUTPUT
-	,@TermDiscountBy			NVARCHAR(50)	= NULL OUTPUT	
+	,@TermDiscountBy			NVARCHAR(50)	= NULL OUTPUT
 	,@OriginalQuantity			NUMERIC(18,6)	= NULL
 	,@CustomerPricingOnly		BIT				= 0
 	,@ItemPricingOnly			BIT				= 0
@@ -34,6 +34,7 @@
 	,@SubCurrency				NVARCHAR(250)	= NULL OUTPUT
 	,@SubCurrencyRate			NUMERIC(18,6)	= NULL OUTPUT
 	,@PricingType				NVARCHAR(50)	= NULL OUTPUT
+	,@TermIdOut					INT				= NULL OUTPUT
 	,@GetAllAvailablePricing	BIT				= 0	
 AS	
 
@@ -49,6 +50,7 @@ AS
 		,@Deviation			= dblDeviation
 		,@TermDiscount		= dblTermDiscount  
 		,@PricingType		= strPricingType
+		,@TermIdOut			= intTermId
 		,@TermDiscountBy	= strTermDiscountBy
 		,@SubCurrencyId		= intSubCurrencyId
 		,@SubCurrency		= strSubCurrency

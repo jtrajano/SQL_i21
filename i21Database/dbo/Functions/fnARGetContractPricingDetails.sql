@@ -28,6 +28,7 @@ RETURNS @returntable TABLE
 	,dblAvailableQty        NUMERIC(18,6)
 	,ysnUnlimitedQty        BIT
 	,strPricingType			NVARCHAR(50)
+	,intTermId				INT
 )
 AS
 BEGIN
@@ -42,6 +43,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@SubCurrencyRate	NUMERIC(18,6)
 		,@SubCurrency		NVARCHAR(40)
 		,@PriceUOM			NVARCHAR(50)
+		,@termId			INT
 
 	IF ISNULL(@ContractDetailId,0) <> 0 AND ISNULL(@ContractHeaderId,0) = 0
 	BEGIN
@@ -64,6 +66,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@PricingType		= ARCC.[strPricingType]
 		,@ItemUOMId			= ARCC.[intItemUOMId] 
 		,@PriceUOM			= ARCC.[strUnitMeasure] 
+		,@termId			= ARCC.[intTermId]
 	FROM
 		[vyuARCustomerContract] ARCC
 	WHERE
@@ -102,6 +105,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,[dblAvailableQty]
 			,[ysnUnlimitedQty]
 			,[strPricingType]
+			,[intTermId]
 		)
 		SELECT
 			 [dblPrice]				= @Price
@@ -118,7 +122,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,[dblAvailableQty]		= @AvailableQuantity
 			,[ysnUnlimitedQty]		= @UnlimitedQuantity
 			,[strPricingType]		= @PricingType
-
+			,[intTermId]			= @termId
 
 		RETURN
 	END
@@ -144,6 +148,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@PricingType		= ARCC.[strPricingType]
 		,@ItemUOMId			= ARCC.[intItemUOMId] 
 		,@PriceUOM			= ARCC.[strUnitMeasure] 
+		,@termId			= ARCC.[intTermId]
 	FROM
 		[vyuARCustomerContract] ARCC
 	WHERE
@@ -180,6 +185,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,[dblAvailableQty]
 			,[ysnUnlimitedQty]
 			,[strPricingType]
+			,[intTermId]
 		)
 		SELECT
 			 [dblPrice]				= @Price
@@ -196,11 +202,12 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,[dblAvailableQty]		= @AvailableQuantity
 			,[ysnUnlimitedQty]		= @UnlimitedQuantity
 			,[strPricingType]		= @PricingType
+			,[intTermId]			= @termId
 
 		RETURN
 	END		
 	
-	INSERT @returntable([dblPrice], [strPricing], [intContractHeaderId], [intContractDetailId], [strContractNumber], [intContractSeq], [dblAvailableQty], [ysnUnlimitedQty], [strPricingType])
-	SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
+	INSERT @returntable([dblPrice], [strPricing], [intContractHeaderId], [intContractDetailId], [strContractNumber], [intContractSeq], [dblAvailableQty], [ysnUnlimitedQty], [strPricingType], [intTermId])
+	SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @termId
 	RETURN				
 END
