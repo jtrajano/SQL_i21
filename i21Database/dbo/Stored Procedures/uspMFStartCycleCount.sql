@@ -375,6 +375,7 @@ BEGIN TRY
 		,@intProduceUOMId INT
 		,@strPackagingCategory NVARCHAR(50)
 		,@intPackagingCategoryId INT
+		,@strInstantConsumption nvarchar(40)
 
 	SELECT @dblProduceQty = SUM(dblPhysicalCount)
 		,@intProduceUOMId = MIN(intPhysicalItemUOMId)
@@ -527,6 +528,12 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intProductionStagingId
 
+	SELECT @strInstantConsumption = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 20
+
 	DECLARE @tblMFQtyInProductionStagingLocation TABLE (
 		intItemId INT
 		,dblQtyInProductionStagingLocation NUMERIC(18, 6)
@@ -571,17 +578,34 @@ BEGIN TRY
 		AND WI.intWorkOrderId = @intWorkOrderId
 	GROUP BY I.intItemId
 
-	INSERT INTO @tblMFQtyInProductionStagingLocation (
-		intItemId
-		,dblQtyInProductionStagingLocation
-		,dblOpeningQty
-		)
-	SELECT I.intItemId
-		,IsNULL(L.dblQty, 0) - IsNULL(I.dblRequiredQty, 0)
-		,IsNULL(L.dblQty, 0) - IsNULL(WI.dblQuantity, 0)
-	FROM @tblICItem I
-	LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
-	LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+	If @strInstantConsumption='True'
+	Begin
+		INSERT INTO @tblMFQtyInProductionStagingLocation (
+			intItemId
+			,dblQtyInProductionStagingLocation
+			,dblOpeningQty
+			)
+		SELECT I.intItemId
+			,IsNULL(L.dblQty, 0) 
+			,(IsNULL(L.dblQty, 0) + IsNULL(I.dblRequiredQty, 0))- IsNULL(WI.dblQuantity, 0)
+		FROM @tblICItem I
+		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
+		LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+	End
+	Else
+	Begin
+		INSERT INTO @tblMFQtyInProductionStagingLocation (
+			intItemId
+			,dblQtyInProductionStagingLocation
+			,dblOpeningQty
+			)
+		SELECT I.intItemId
+			,IsNULL(L.dblQty, 0) - IsNULL(I.dblRequiredQty, 0)
+			,IsNULL(L.dblQty, 0) - IsNULL(WI.dblQuantity, 0)
+		FROM @tblICItem I
+		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
+		LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+	End
 
 	--BEGIN TRANSACTION
 	INSERT INTO dbo.tblMFProcessCycleCountSession (
