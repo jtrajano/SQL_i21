@@ -842,6 +842,7 @@ BEGIN
 					ON LogisticsView.intLoadDetailId = RawData.intSourceId
 					AND RawData.strReceiptType = 'Purchase Contract'
 					AND RawData.intSourceType = 2
+					AND RawData.intContainerId = LogisticsView.intLoadContainerId
 
 				-- 5. Transport Loads (New tables)
 				LEFT JOIN vyuTRGetLoadReceipt TransportView 
