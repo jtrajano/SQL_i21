@@ -1,5 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARShippedItems]
 AS
+SELECT NEWID() AS id, ShippedItems.* FROM 
+(
 SELECT
 	 [strTransactionType]				= 'Sales Order'
 	,[strTransactionNumber]				= SO.[strSalesOrderNumber]
@@ -1835,3 +1837,4 @@ LEFT OUTER JOIN
 	tblSMCurrencyExchangeRateType SMCRT
 		ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE LC.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0
+) ShippedItems
