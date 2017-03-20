@@ -15,6 +15,8 @@ SELECT
 	, dblWeightPerQty = lot.dblWeightPerQty
 	, dblLastCost = lot.dblLastCost
 	, intLotId = lot.intLotId
+	, strWeightUOM = weightUOM.strUnitMeasure
+	, strCostUOM = costUOM.strUnitMeasure
 FROM tblICLot lot
 	INNER JOIN tblICItem item ON item.intItemId = lot.intItemId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = lot.intLocationId
@@ -25,3 +27,7 @@ FROM tblICLot lot
 	LEFT JOIN tblICItemUOM iuom ON iuom.intItemUOMId = lot.intItemUOMId
 		AND iuom.intItemId = lot.intItemId
 	LEFT JOIN tblICUnitMeasure uom ON uom.intUnitMeasureId = iuom.intUnitMeasureId
+	LEFT JOIN tblICItemUOM iweightUOM ON iweightUOM.intItemUOMId = lot.intWeightUOMId
+	LEFT JOIN tblICUnitMeasure weightUOM ON weightUOM.intUnitMeasureId = iweightUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM icostUOM ON icostUOM.intItemId = lot.intItemId AND icostUOM.ysnStockUnit=1
+	LEFT JOIN tblICUnitMeasure costUOM ON costUOM.intUnitMeasureId = icostUOM.intUnitMeasureId
