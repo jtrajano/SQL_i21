@@ -410,13 +410,7 @@ BEGIN TRY
 						)
 			END
 
-			SELECT @dblAdjustByQuantity = (@dblNewWeight - @dblWeight) / (
-					CASE 
-						WHEN @intWeightUOMId IS NULL
-							THEN 1
-						ELSE @dblWeightPerQty
-						END
-					)
+			SELECT @dblAdjustByQuantity = @dblNewWeight - @dblWeight 
 
 			EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
 				-- Parameters for filtering:
@@ -429,7 +423,7 @@ BEGIN TRY
 				-- Parameters for the new values: 
 				,@dblAdjustByQuantity = @dblAdjustByQuantity
 				,@dblNewUnitCost = NULL
-				,@intItemUOMId = @intNewItemUOMId
+				,@intItemUOMId = @intInputWeightUOMId
 				-- Parameters used for linking or FK (foreign key) relationships
 				,@intSourceId = 1
 				,@intSourceTransactionTypeId = 8
@@ -467,13 +461,7 @@ BEGIN TRY
 			PRINT 'Call Lot Adjust routine.'
 		END
 
-		SELECT @dblAdjustByQuantity = - @dblNewWeight / (
-				CASE 
-					WHEN @intWeightUOMId IS NULL
-						THEN 1
-					ELSE @dblWeightPerQty
-					END
-				)
+		SELECT @dblAdjustByQuantity = - @dblNewWeight
 
 		EXEC uspICInventoryAdjustment_CreatePostLotMerge
 			-- Parameters for filtering:
@@ -494,7 +482,7 @@ BEGIN TRY
 			,@intNewItemUOMId = NULL --New Item UOM Id should be NULL as per Feb
 			,@intNewWeightUOMId = NULL
 			,@dblNewUnitCost = NULL
-			,@intItemUOMId = @intNewItemUOMId
+			,@intItemUOMId = @intInputWeightUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
@@ -502,8 +490,7 @@ BEGIN TRY
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 	END
 
-	IF @intConsumptionMethodId = 2
-		AND @strInventoryTracking = 'Item Level'
+	IF @strInventoryTracking = 'Item Level'
 	BEGIN
 		IF NOT EXISTS (
 				SELECT 1
