@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets8c588b3588dd3a16256c9b2ee9a9b2e412d718e7c96a7b83f6f53b543cf10319))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets0545a538ceea6add417709ce1dbdcb4bbf47aba397fd72e341cbe59fac4a0e27))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets8c588b3588dd3a16256c9b2ee9a9b2e412d718e7c96a7b83f6f53b543cf10319 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets0545a538ceea6add417709ce1dbdcb4bbf47aba397fd72e341cbe59fac4a0e27 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "8c588b3588dd3a16256c9b2ee9a9b2e412d718e7c96a7b83f6f53b543cf10319"; }
+            get { return "0545a538ceea6add417709ce1dbdcb4bbf47aba397fd72e341cbe59fac4a0e27"; }
         }
 
         /// <summary>
@@ -10239,7 +10239,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICItemLot
-        [CodeFirstDatabaseSchema.vyuICItemLot](T1.vyuICItemLot_intLotId, T1.vyuICItemLot_strItemNo, T1.vyuICItemLot_strItemDescription, T1.vyuICItemLot_strProductType, T1.vyuICItemLot_strLocationName, T1.vyuICItemLot_strSubLocationName, T1.vyuICItemLot_strStorageLocation, T1.vyuICItemLot_strLotNumber, T1.vyuICItemLot_dblQty, T1.vyuICItemLot_dblWeight, T1.vyuICItemLot_strItemUOM, T1.vyuICItemLot_dblWeightPerQty, T1.vyuICItemLot_dblLastCost)
+        [CodeFirstDatabaseSchema.vyuICItemLot](T1.vyuICItemLot_intLotId, T1.vyuICItemLot_strItemNo, T1.vyuICItemLot_strItemDescription, T1.vyuICItemLot_strProductType, T1.vyuICItemLot_strLocationName, T1.vyuICItemLot_strSubLocationName, T1.vyuICItemLot_strStorageLocation, T1.vyuICItemLot_strLotNumber, T1.vyuICItemLot_dblQty, T1.vyuICItemLot_dblWeight, T1.vyuICItemLot_strItemUOM, T1.vyuICItemLot_dblWeightPerQty, T1.vyuICItemLot_dblLastCost, T1.vyuICItemLot_strWeightUOM, T1.vyuICItemLot_strCostUOM)
     FROM (
         SELECT 
             T.intLotId AS vyuICItemLot_intLotId, 
@@ -10255,6 +10255,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strItemUOM AS vyuICItemLot_strItemUOM, 
             T.dblWeightPerQty AS vyuICItemLot_dblWeightPerQty, 
             T.dblLastCost AS vyuICItemLot_dblLastCost, 
+            T.strWeightUOM AS vyuICItemLot_strWeightUOM, 
+            T.strCostUOM AS vyuICItemLot_strCostUOM, 
             True AS _from0
         FROM InventoryEntities.vyuICItemLots AS T
     ) AS T1");
@@ -10268,7 +10270,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICItemLots
-        [iRely.Inventory.Model.vyuICItemLot](T1.vyuICItemLot_intLotId, T1.vyuICItemLot_strItemNo, T1.vyuICItemLot_strItemDescription, T1.vyuICItemLot_strProductType, T1.vyuICItemLot_strLocationName, T1.vyuICItemLot_strSubLocationName, T1.vyuICItemLot_strStorageLocation, T1.vyuICItemLot_strLotNumber, T1.vyuICItemLot_dblQty, T1.vyuICItemLot_dblWeight, T1.vyuICItemLot_strItemUOM, T1.vyuICItemLot_dblWeightPerQty, T1.vyuICItemLot_dblLastCost)
+        [iRely.Inventory.Model.vyuICItemLot](T1.vyuICItemLot_intLotId, T1.vyuICItemLot_strItemNo, T1.vyuICItemLot_strItemDescription, T1.vyuICItemLot_strProductType, T1.vyuICItemLot_strLocationName, T1.vyuICItemLot_strSubLocationName, T1.vyuICItemLot_strStorageLocation, T1.vyuICItemLot_strLotNumber, T1.vyuICItemLot_dblQty, T1.vyuICItemLot_dblWeight, T1.vyuICItemLot_strItemUOM, T1.vyuICItemLot_dblWeightPerQty, T1.vyuICItemLot_dblLastCost, T1.vyuICItemLot_strWeightUOM, T1.vyuICItemLot_strCostUOM)
     FROM (
         SELECT 
             T.intLotId AS vyuICItemLot_intLotId, 
@@ -10284,6 +10286,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strItemUOM AS vyuICItemLot_strItemUOM, 
             T.dblWeightPerQty AS vyuICItemLot_dblWeightPerQty, 
             T.dblLastCost AS vyuICItemLot_dblLastCost, 
+            T.strWeightUOM AS vyuICItemLot_strWeightUOM, 
+            T.strCostUOM AS vyuICItemLot_strCostUOM, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICItemLot AS T
     ) AS T1");

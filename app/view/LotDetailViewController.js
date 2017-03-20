@@ -16,9 +16,11 @@ Ext.define('Inventory.view.LotDetailViewController', {
                 { dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string' },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblQty', text: 'Quantity', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblWeight', text: 'Weight', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
-                { dataIndex: 'strItemUOM', text: 'UOM', flex: 1, dataType: 'string' },
+                { dataIndex: 'strWeightUOM', text: 'Weight UOM', flex: 1, dataType: 'string' },
+                //{ dataIndex: 'strItemUOM', text: 'UOM', flex: 1, dataType: 'string' },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblWeightPerQty', text: 'Weight Per Qty', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblLastCost', text: 'Last Cost', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.usMoney(value); } },
+                { dataIndex: 'strCostUOM', text: 'Cost UOM', flex: 1, dataType: 'string' },
                 { dataIndex: 'intLotId', text: 'Lot Id', flex: 1, dataType: 'numeric', key: true, hidden: true }
             ],
             showNew: false,
