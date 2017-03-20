@@ -981,7 +981,24 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             else {
                 return 'New Owner Name';
             }
-        }                        
+        },
+
+        itemNoFilter: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.LotMerge:
+                case me.adjustmentTypes.LotMove:
+                case me.adjustmentTypes.LotOwnerChange:
+                     return 'Yes - Manual|^|Yes - Serial Number|^|Yes - Manual/Serial Number|^|';
+                default:
+                     return 'Yes - Manual|^|Yes - Serial Number|^|Yes - Manual/Serial Number|^|No';
+            }
+        }                       
     }
 
 });
