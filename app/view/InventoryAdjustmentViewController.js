@@ -201,6 +201,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 column: 'intLocationId',
                                 value: '{current.intLocationId}',
                                 conjunction: 'and'
+                            },
+                            {
+                                column: 'strLotTracking',
+                                value: '{itemNoFilter}',
+                                condition: 'eq',
+                                conjunction: 'and'
                             }
                         ]
                     }
@@ -1552,45 +1558,45 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    onItemNoBeforeQuery: function (obj) {
-        if (obj.combo) {
-            var win = obj.combo.up('window'),
-                cboAdjustmentType = win.down('#cboAdjustmentType'),
-                cboLocation = win.down('#cboLocation'),
-                store = obj.combo.store;
+    // onItemNoBeforeQuery: function (obj) {
+    //     if (obj.combo) {
+    //         var win = obj.combo.up('window'),
+    //             cboAdjustmentType = win.down('#cboAdjustmentType'),
+    //             cboLocation = win.down('#cboLocation'),
+    //             store = obj.combo.store;
 
-            if (store) {
-                store.remoteFilter = true;
-                store.remoteSort = true;
-            }
+    //         if (store) {
+    //             store.remoteFilter = true;
+    //             store.remoteSort = true;
+    //         }
 
-		    //Show only lot tracked items for Adjustments Types: Lot Status Change, Split Lot, Lot Merge, Lot Move
-            if(cboAdjustmentType.getValue() == 4 || cboAdjustmentType.getValue() == 5 || cboAdjustmentType.getValue() == 7 || cboAdjustmentType.getValue() == 8) {
-                obj.combo.defaultFilters = [
-                    {
-                        column: 'intLocationId',
-                        value: cboLocation.getValue(),
-                        conjunction: 'and'
-                    },
-                    {
-                        column: 'strLotTracking',
-                        value: 'No',
-                        condition: 'noteq',
-                        conjunction: 'and'
-                    }
-                ];
-            }
-            else {
-                obj.combo.defaultFilters = [
-                    {
-                        column: 'intLocationId',
-                        value: cboLocation.getValue(),
-                        conjunction: 'and'
-                    }
-                ];
-            }
-        }
-    },
+	// 	    //Show only lot tracked items for Adjustments Types: Lot Status Change, Split Lot, Lot Merge, Lot Move
+    //         if(cboAdjustmentType.getValue() == 4 || cboAdjustmentType.getValue() == 5 || cboAdjustmentType.getValue() == 7 || cboAdjustmentType.getValue() == 8) {
+    //             obj.combo.defaultFilters = [
+    //                 {
+    //                     column: 'intLocationId',
+    //                     value: cboLocation.getValue(),
+    //                     conjunction: 'and'
+    //                 },
+    //                 {
+    //                     column: 'strLotTracking',
+    //                     value: 'No',
+    //                     condition: 'noteq',
+    //                     conjunction: 'and'
+    //                 }
+    //             ];
+    //         }
+    //         else {
+    //             obj.combo.defaultFilters = [
+    //                 {
+    //                     column: 'intLocationId',
+    //                     value: cboLocation.getValue(),
+    //                     conjunction: 'and'
+    //                 }
+    //             ];
+    //         }
+    //     }
+    // },
 
     onSubLocationChange: function (control, newValue, oldValue, eOpts) {
         var me = this;
@@ -1606,8 +1612,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
     init: function (application) {
         this.control({
             "#cboItemNo": {
-                beforequery: this.onItemNoBeforeQuery,
-                select: this.onAdjustmentDetailSelect,
+                select: this.onAdjustmentDetailSelect
             },
             "#cboNewItemNo": {
                 select: this.onAdjustmentDetailSelect
