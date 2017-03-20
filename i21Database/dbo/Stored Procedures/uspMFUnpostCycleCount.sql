@@ -42,7 +42,8 @@ BEGIN TRY
 	SELECT @strAttributeValue = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intAttributeId = 20
+		AND intAttributeId = 20--Is Instant Consumption
+		AND intLocationId =@intLocationId
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -246,14 +247,20 @@ BEGIN TRY
 			,@strBatchId
 			,@intUserId
 			,0
-
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,0
+		if exists(Select *from @GLEntries)
+		Begin
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,0
+		End
 
 		DELETE
 		FROM tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
+
+		UPDATE tblMFProductionSummary
+		SET dblConsumedQuantity = 0
+		WHERE intWorkOrderId = @intWorkOrderId
 	END
 
 	IF @intTransactionCount = 0

@@ -120,7 +120,13 @@ BEGIN
 		,dtmDate = GetDate()
 		,dblQty = (- cl.dblIssuedQuantity)
 		,dblUOMQty = ItemUOM.dblUnitQty
-		,dblCost = IP.dblLastCost
+		,dblCost = ISNULL(IP.dblLastCost,0)+ISNULL((
+				CASE 
+					WHEN intMarginById = 2
+						THEN ISNULL(RI.dblMargin, 0)/ R.dblQuantity
+					ELSE (ISNULL(IP.dblLastCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
+					END
+				),0)
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
@@ -139,6 +145,9 @@ BEGIN
 	INNER JOIN tblICItemLocation il ON i.intItemId = il.intItemId
 		AND il.intLocationId = @intLocationId
 	INNER JOIN dbo.tblICItemPricing IP on IP.intItemId=i.intItemId AND IP.intItemLocationId =il.intItemLocationId
+	INNER JOIN dbo.tblMFWorkOrderRecipeItem RI On RI.intWorkOrderId=cl.intWorkOrderId and RI.intItemId=cl.intItemId
+	INNER JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
+		AND R.intRecipeId = RI.intRecipeId
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND cl.intBatchId = @intBatchId
 		AND ISNULL(cl.intLotId, 0) = 0
@@ -176,7 +185,13 @@ BEGIN
 		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
-		,dblCost = l.dblLastCost
+		,dblCost = ISNULL(l.dblLastCost, 0)+ISNULL((
+				CASE 
+					WHEN intMarginById = 2
+						THEN ISNULL(RI.dblMargin, 0)/ R.dblQuantity
+					ELSE (ISNULL(l.dblLastCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
+					END
+				), 0)
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
@@ -193,6 +208,9 @@ BEGIN
 	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
 	INNER JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
 	LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
+	INNER JOIN dbo.tblMFWorkOrderRecipeItem RI On RI.intWorkOrderId=cl.intWorkOrderId and RI.intItemId=cl.intItemId
+	INNER JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
+		AND R.intRecipeId = RI.intRecipeId
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND cl.intBatchId = @intBatchId
 
@@ -250,7 +268,7 @@ BEGIN
 	JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
 		AND RI.intRecipeItemTypeId = 1
 		AND RI.ysnCostAppliedAtInvoice = 0
-		AND I.strType = 'Other Charge'
+		AND I.strType in('Other Charge','Service')
 	JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
 		AND IL.intLocationId = @intLocationId
 	JOIN dbo.tblICItemPricing P ON P.intItemId = I.intItemId
