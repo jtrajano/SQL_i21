@@ -2766,13 +2766,13 @@ IF @raiseError = 0
 	COMMIT TRANSACTION
 
 	IF @recap = 0
-		BEGIN
-			--Update Customer's Budget 
-			DECLARE @tblPaymentsToUpdateBudget TABLE (intPaymentId INT)
-	
+		BEGIN			
+			DECLARE @tblPaymentsToUpdateBudget TABLE (intPaymentId INT)			
+
 			INSERT INTO @tblPaymentsToUpdateBudget
 			SELECT intPaymentId FROM @ARReceivablePostData
 
+			--Update Customer's Budget 
 			WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)
 				BEGIN
 					DECLARE @paymentToUpdate INT,
@@ -2785,6 +2785,30 @@ IF @raiseError = 0
 					EXEC dbo.uspARUpdateCustomerTotalAR @InvoiceId = NULL, @CustomerId = @customerId
 
 					DELETE FROM @tblPaymentsToUpdateBudget WHERE intPaymentId = @paymentToUpdate
+				END
+			
+			--Process ACH Payments
+			IF @post = 1
+				BEGIN
+					DECLARE @tblACHPayments TABLE (intPaymentId INT)
+					DECLARE @intACHPaymentMethodId INT
+
+					SELECT TOP 1 @intACHPaymentMethodId = intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'ACH'
+
+					INSERT INTO @tblACHPayments
+					SELECT ACH.intPaymentId FROM @ARReceivablePostData ACH 
+						INNER JOIN tblARPayment P ON ACH.intPaymentId = P.intPaymentId AND P.intPaymentMethodId = @intACHPaymentMethodId
+
+					WHILE EXISTS (SELECT NULL FROM @tblACHPayments)
+						BEGIN
+							DECLARE @paymentIdACH INT
+
+							SELECT TOP 1 @paymentToUpdate = intPaymentId FROM @tblPaymentsToUpdateBudget ORDER BY intPaymentId
+
+							EXEC dbo.uspARProcessACHPayments @paymentIdACH, @userId
+
+							DELETE FROM @tblACHPayments WHERE intPaymentId = @paymentIdACH				
+						END
 				END
 		END	
 RETURN 1;

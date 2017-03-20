@@ -5127,6 +5127,7 @@
     <Build Include="dbo\Tables\tblRKM2MGrainBasis.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureAndBasisPriceForDate.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetTerms.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessACHPayments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
