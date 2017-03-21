@@ -3566,13 +3566,13 @@ IF @post = 1
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId 
 			WHERE				
-				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND Detail.dblTotal <> 0) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
-				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
+				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND Detail.dblQtyShipped  <> 0) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
+				AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 				AND (IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (IST.strType = 'Finished Good' AND Detail.ysnBlended = 1))
 				AND Header.strTransactionType <> 'Debit Memo'
-				AND (Detail.intStorageScheduleTypeId IS NOT NULL OR ISNULL(Detail.intStorageScheduleTypeId,0) <> 0)		
+				AND ISNULL(Detail.intStorageScheduleTypeId,0) <> 0
 		
 		END TRY
 		BEGIN CATCH
