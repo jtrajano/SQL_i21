@@ -9,7 +9,7 @@ Ext.define('Inventory.view.LotDetailViewController', {
             columns: [
                 { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                 { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItem' },
-                { dataIndex: 'strProductType', text: 'Produt Type', flex: 1, dataType: 'string' },
+                { dataIndex: 'strProductType', text: 'Product Type', flex: 1, dataType: 'string' },
                 { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewLocation' },
                 { dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string' },
                 { dataIndex: 'strStorageLocation', text: 'Storage Location', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewStorageLocation' },
