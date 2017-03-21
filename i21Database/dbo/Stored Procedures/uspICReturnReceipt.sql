@@ -331,67 +331,68 @@ BEGIN
 	WHERE	r.intInventoryReceiptId = @intInventoryReturnId
 END 
 
--- Create the other charges. 
-BEGIN 
-	INSERT INTO tblICInventoryReceiptCharge (
-		intInventoryReceiptId
-		,intContractId
-		,intContractDetailId
-		,intChargeId
-		,ysnInventoryCost
-		,strCostMethod
-		,dblRate
-		,intCostUOMId
-		,ysnSubCurrency
-		,intCurrencyId
-		,dblExchangeRate
-		,intCent
-		,dblAmount
-		,strAllocateCostBy
-		,ysnAccrue
-		,intEntityVendorId
-		,ysnPrice
-		,dblAmountBilled
-		,dblAmountPaid
-		,dblAmountPriced
-		,intSort
-		,dblTax
-		,intConcurrencyId
-		,intTaxGroupId	
-		,intForexRateTypeId
-		,dblForexRate
-	)
-	SELECT	
-			intInventoryReceiptId = @intReceiptId
-			,c.intContractId
-			,c.intContractDetailId
-			,c.intChargeId
-			,c.ysnInventoryCost
-			,c.strCostMethod
-			,c.dblRate
-			,c.intCostUOMId
-			,c.ysnSubCurrency
-			,c.intCurrencyId
-			,c.dblExchangeRate
-			,c.intCent
-			,c.dblAmount
-			,c.strAllocateCostBy
-			,c.ysnAccrue
-			,c.intEntityVendorId
-			,c.ysnPrice
-			,c.dblAmountBilled
-			,c.dblAmountPaid
-			,c.dblAmountPriced
-			,c.intSort
-			,c.dblTax
-			,c.intConcurrencyId
-			,c.intTaxGroupId
-			,c.intForexRateTypeId
-			,c.dblForexRate
-	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge c
-				ON r.intInventoryReceiptId = c.intInventoryReceiptId
-	WHERE	r.intInventoryReceiptId = @intReceiptId
-END 
+-- Exclude the other charges (see IC-3595) 
+---- Create the other charges. 
+--BEGIN 
+--	INSERT INTO tblICInventoryReceiptCharge (
+--		intInventoryReceiptId
+--		,intContractId
+--		,intContractDetailId
+--		,intChargeId
+--		,ysnInventoryCost
+--		,strCostMethod
+--		,dblRate
+--		,intCostUOMId
+--		,ysnSubCurrency
+--		,intCurrencyId
+--		,dblExchangeRate
+--		,intCent
+--		,dblAmount
+--		,strAllocateCostBy
+--		,ysnAccrue
+--		,intEntityVendorId
+--		,ysnPrice
+--		,dblAmountBilled
+--		,dblAmountPaid
+--		,dblAmountPriced
+--		,intSort
+--		,dblTax
+--		,intConcurrencyId
+--		,intTaxGroupId	
+--		,intForexRateTypeId
+--		,dblForexRate
+--	)
+--	SELECT	
+--			intInventoryReceiptId = @intInventoryReturnId
+--			,c.intContractId
+--			,c.intContractDetailId
+--			,c.intChargeId
+--			,c.ysnInventoryCost
+--			,c.strCostMethod
+--			,c.dblRate
+--			,c.intCostUOMId
+--			,c.ysnSubCurrency
+--			,c.intCurrencyId
+--			,c.dblExchangeRate
+--			,c.intCent
+--			,c.dblAmount
+--			,c.strAllocateCostBy
+--			,c.ysnAccrue
+--			,c.intEntityVendorId
+--			,c.ysnPrice
+--			,c.dblAmountBilled
+--			,c.dblAmountPaid
+--			,c.dblAmountPriced
+--			,c.intSort
+--			,c.dblTax
+--			,c.intConcurrencyId
+--			,c.intTaxGroupId
+--			,c.intForexRateTypeId
+--			,c.dblForexRate
+--	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge c
+--				ON r.intInventoryReceiptId = c.intInventoryReceiptId
+--	WHERE	r.intInventoryReceiptId = @intReceiptId -- Copy the charges of the receipt to the return transaction. 
+--END 
 
 -- Create the taxes
 BEGIN 
