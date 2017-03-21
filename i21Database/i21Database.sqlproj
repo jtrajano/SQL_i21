@@ -5131,6 +5131,7 @@
     <Build Include="dbo\Views\vyuSMEmailHistory.sql" />
     <Build Include="dbo\Functions\fnSMConcatRecipients.sql" />
     <Build Include="dbo\Views\vyuCTGridContractHeader.sql" />
+    <Build Include="dbo\Functions\fnSMGetForexRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

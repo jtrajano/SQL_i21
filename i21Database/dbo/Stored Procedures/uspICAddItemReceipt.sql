@@ -142,10 +142,16 @@ BEGIN
 	GOTO _Exit;
 END 
 
--- Get the functional currency
+-- Get the functional currency and default Forex Rate Type Id 
 BEGIN 
 	DECLARE @intFunctionalCurrencyId AS INT
+	DECLARE @intDefaultForexRateTypeId AS INT 
+	 
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+
+	SELECT	TOP 1 
+			@intDefaultForexRateTypeId = intInventoryRateTypeId 
+	FROM	tblSMMultiCurrency
 END 
 
 -- Do a loop using a cursor. 
@@ -689,7 +695,7 @@ BEGIN
 			GOTO _Exit_With_Rollback;
 		END
 
-		--  Flush out existing detail detail data for re-insertion
+		--  Flush out existing item and charges detail data for re-insertion
 		BEGIN 
 			DELETE FROM dbo.tblICInventoryReceiptCharge
 			WHERE intInventoryReceiptId = @inventoryReceiptId
@@ -796,8 +802,8 @@ BEGIN
 				,intDiscountSchedule	= RawData.intDiscountSchedule
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0)
 				,intTaxGroupId			= RawData.intTaxGroupId
-				,intForexRateTypeId		= RawData.intForexRateTypeId
-				,dblForexRate			= RawData.dblForexRate
+				,intForexRateTypeId		= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+				,dblForexRate			= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate)  ELSE NULL END 
 				,intContainerId			= RawData.intContainerId 
 
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
@@ -820,6 +826,14 @@ BEGIN
                     AND GrossNetUnitMeasure.strUnitType IN ('Weight', 'Volume')
 				LEFT JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intItemId = RawData.intItemId AND ItemLocation.intLocationId = RawData.intLocationId
+
+				-- Get the SM forex rate. 
+				OUTER APPLY dbo.fnSMGetForexRate(
+					ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId)
+					,CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+					,RawData.dtmDate
+				) forexRate
+
 				-- Integrations with the other modules: 
 				-- 1. Purchase Order
 				LEFT JOIN vyuPODetails POView
@@ -1181,6 +1195,8 @@ BEGIN
 				,[intCurrencyId]
 				,[intCent]
 				,[intTaxGroupId]
+				,[intForexRateTypeId]
+				,[dblForexRate]
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1200,6 +1216,9 @@ BEGIN
 				,[intCurrencyId]			= COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) 
 				,[intCent]					= CostCurrency.intCent
 				,[intTaxGroupId]			= RawData.intTaxGroupId
+				,[intForexRateTypeId]		= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+				,[dblForexRate]				= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 
+
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1208,11 +1227,23 @@ BEGIN
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId)
+
+				INNER JOIN tblICInventoryReceipt r
+					ON r.intInventoryReceiptId = @inventoryReceiptId
+
 				LEFT JOIN dbo.tblICItemUOM ItemUOM			
 					ON ItemUOM.intItemId = RawData.intChargeId  
 					AND ItemUOM.intItemUOMId = RawData.intCostUOMId
 				LEFT JOIN dbo.tblSMCurrency CostCurrency
 					ON CostCurrency.intCurrencyID = RawData.intCostCurrencyId
+
+				-- Get the SM forex rate. 
+				OUTER APPLY dbo.fnSMGetForexRate(
+					COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) 
+					,CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+					,r.dtmReceiptDate
+				) forexRate
+
 		WHERE RawHeaderData.intId = @intId
 
 		-- Add taxes into the receipt. 
