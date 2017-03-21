@@ -191,7 +191,18 @@ GO
 		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (System Manager)', 'Arrange User Role Menus - Role Menu (System Manager)', GETDATE())
 	END
 
+	/* ARRANGE USER ROLE MENUS SCREENS */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu (Screens)')
+	BEGIN
+		UPDATE RoleMenu SET intSort = ISNULL(MasterMenu.intSort, 0)
+		FROM tblSMUserRoleMenu RoleMenu
+		INNER JOIN tblSMMasterMenu MasterMenu ON RoleMenu.intMenuId = MasterMenu.intMenuID
+		WHERE intParentMenuID <> 0 AND ysnIsLegacy = 0
 
+		PRINT N'ARRANGE USER ROLE MENUS (Screens)'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (Screens)', 'Arrange User Role Menus - Role Menu (Screens)', GETDATE())
+	END
 
 GO
 	/* REPLACE ActivityEmail-1 TO 1 */
