@@ -84,6 +84,7 @@ BEGIN TRY
 	DECLARE @strOrderType NVARCHAR(50)
 	DECLARE @dblUnits DECIMAL(24, 10)
 	DECLARE @intShipFromId INT
+	DECLARE @dblUOMQty NUMERIC(38,20)
 
 	SET @dtmDate = GETDATE()
 	SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROm tblSMCompanyPreference
@@ -279,7 +280,7 @@ BEGIN TRY
 		RAISERROR ('The stock UOM of the commodity must exist in the conversion table of the item',16,1);
 	END
 
-	SELECT @intSourceItemUOMId = intItemUOMId
+	SELECT @intSourceItemUOMId = intItemUOMId,@dblUOMQty=UOM.dblUnitQty
 	FROM tblICItemUOM UOM
 	WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId
 
@@ -907,23 +908,23 @@ BEGIN TRY
 		 ,ysnIsStorage
 		)
 		SELECT  
-		 SV.[intItemId]
-		,@intItemLocationId	
-		,@intSourceItemUOMId
-		,GetDATE()
-		,-SV.[dblUnits]
-		,SV.[dblUnits]	
-		,SV.[dblCashPrice]
-		,0.00
-		,@intDefaultCurrencyId
-		,1
-		,1
-		,SV.[intCustomerStorageId]
-		,@strStorageAdjustment
-		,4
-		,CS.intCompanyLocationSubLocationId
-		,CS.intStorageLocationId
-		,0
+		  intItemId  = SV.[intItemId]
+		 ,intItemLocationId	= @intItemLocationId	
+		 ,intItemUOMId  = @intSourceItemUOMId
+		 ,dtmDate  = GetDATE()
+		 ,dblQty  = -SV.[dblUnits]
+		 ,dblUOMQty  = @dblUOMQty
+		 ,dblCost  = 0
+		 ,dblSalesPrice = 0.00
+		 ,intCurrencyId  = @intDefaultCurrencyId
+		 ,dblExchangeRate  = 1
+		 ,intTransactionId  = SV.[intCustomerStorageId]
+		 ,intTransactionDetailId = SV.[intCustomerStorageId]
+		 ,strTransactionId  = @TicketNo
+		 ,intTransactionTypeId = 44
+		 ,intSubLocationId  = CS.intCompanyLocationSubLocationId
+		 ,intStorageLocationId = CS.intStorageLocationId
+		 ,ysnIsStorage = 0 
 		FROM @SettleVoucherCreate SV
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=1
