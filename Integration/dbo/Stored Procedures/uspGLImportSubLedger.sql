@@ -24,7 +24,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 		BEGIN
 			IF @importLogId = 0
     			EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'',@intUserId,@version ,@importLogId OUTPUT
-			EXEC dbo.[uspGLCreateImportLogDetail]	@importLogId ,  ''Unable to Post because there is no cross reference between i21 and Origin.'' ,null ,null
+			EXEC dbo.[uspGLCreateImportLogDetail]	@importLogId ,  ''There are non imported Credit Card Reconciliation entries. Import voucher from origin first.'' ,null ,null
 			SET @halt = 1
 		END
 
