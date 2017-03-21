@@ -121,7 +121,7 @@ BEGIN
 			,dblCost				= PODetail.dblCost
 			,intCostUOMId			= ItemUOM.intItemUOMId
 			,intCurrencyId			= PO.intCurrencyId
-			,intSubCurrencyCents	= NULL 
+			,intSubCurrencyCents	= (CASE WHEN PODetail.ysnSubCurrency > 0 THEN PO.intSubCurrencyCents ELSE 1 END)
 			,dblExchangeRate		= ISNULL(PO.dblExchangeRate, 1) 
 			,intLotId				= NULL 
 			,intSubLocationId		= PODetail.intSubLocationId
@@ -149,6 +149,66 @@ BEGIN
 	WHERE	PODetail.intPurchaseId = @poId
 			AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
 			AND PODetail.dblQtyOrdered != PODetail.dblQtyReceived
+	
+	INSERT INTO	@OtherCharges
+	(
+			 [strReceiptType] 
+			,[intEntityVendorId] 
+			,[intLocationId] 
+			,[intShipFromId] 
+			,[intChargeId] 
+			,[intCurrencyId] 
+			,[ysnInventoryCost] 
+			,[intCostCurrencyId] 
+			,[dblRate] 
+			,[intCostUOMId] 
+			,[intOtherChargeEntityVendorId] 
+			,[strCostMethod] 
+			,[dblAmount] 
+			,[ysnAccrue] 
+			,[ysnPrice] 
+			,[intContractHeaderId] 
+			,[intContractDetailId]  
+			,[ysnSubCurrency] 
+			,[intTaxGroupId] 
+	)
+	SELECT 
+		    [strReceiptType]					= @ReceiptType_PurchaseOrder          
+			,[intEntityVendorId]				= PO.intEntityVendorId
+			,[intLocationId]					= PO.intShipToId			
+			,[intShipFromId]					= PO.intShipFromId
+			,[intChargeId]						= CC.intItemId
+			,[intCurrencyId]					= CASE WHEN CY.ysnSubCurrency > 0 
+															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
+															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
+														END	
+			,[ysnInventoryCost]					= 0
+			,[intCostCurrencyId]				= ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
+			,[dblRate]							= CC.dblFX
+			,[intCostUOMId]						= PD.intUnitOfMeasureId
+			,[intOtherChargeEntityVendorId]		= CC.intVendorId
+			,[strCostMethod]					= CC.strCostMethod
+			,[dblAmount]						= CC.dblRate
+			,[ysnAccrue]						= CC.ysnAccrue
+			,[ysnPrice]							= CC.ysnPrice
+			,[intContractHeaderId]				= CD.intContractHeaderId
+			,[intContractDetailId]				= CC.intContractDetailId
+			,[ysnSubCurrency]					= 0
+			,[intTaxGroupId]					= NULL
+	FROM vyuCTContractCostView CC
+	JOIN tblCTContractDetail CD	
+		ON	CD.intContractDetailId = CC.intContractDetailId
+	JOIN tblCTContractHeader CH		
+		ON	CH.intContractHeaderId = CD.intContractHeaderId
+	INNER JOIN dbo.tblPOPurchaseDetail PD 
+		ON PD.intContractHeaderId = CC.intContractHeaderId 
+	INNER JOIN dbo.tblPOPurchase PO
+		ON PO.intPurchaseId = PD.intPurchaseId
+	LEFT JOIN	tblSMCurrency CY	
+		ON	CY.intCurrencyID = CC.intCurrencyId
+	LEFT JOIN	tblSMCurrency CU	
+		ON	CU.intCurrencyID = CD.intCurrencyId
+	WHERE PD.intPurchaseId = @poId
 
 	-- Call this sp to Process the PO to IR. 
 	EXEC dbo.uspICAddItemReceipt 
