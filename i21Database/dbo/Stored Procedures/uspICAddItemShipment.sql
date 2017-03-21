@@ -224,6 +224,18 @@ SELECT	@intEntityId = intEntityUserSecurityId
 FROM	dbo.tblSMUserSecurity 
 WHERE	intEntityUserSecurityId = @intUserId
 
+-- Get the functional currency and default Forex Rate Type Id 
+BEGIN 
+	DECLARE @intFunctionalCurrencyId AS INT
+	DECLARE @intDefaultForexRateTypeId AS INT 
+	 
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+
+	SELECT	TOP 1 
+			@intDefaultForexRateTypeId = intInventoryRateTypeId 
+	FROM	tblSMMultiCurrency
+END 
+
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
 BEGIN 
@@ -250,15 +262,35 @@ DECLARE @Header TABLE (
 ;WITH headers (intId)
 AS
 (
-	SELECT MIN(intId) intId
-	FROM @ShipmentEntries
+	SELECT	MIN(intId) intId
+	FROM	@ShipmentEntries
 	GROUP BY intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId, intFreightTermId
 )
-INSERT INTO @Header(intBaseId, intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId, intFreightTermId, strSourceScreenName, intCurrencyId)
-SELECT h.intId, se.intOrderType, se.intSourceType, se.intEntityCustomerId,
-	se.dtmShipDate, se.intShipFromLocationId, se.intShipToLocationId, se.intFreightTermId, se.strSourceScreenName, se.intCurrencyId
-FROM @ShipmentEntries se
-	INNER JOIN headers h ON h.intId = se.intId
+INSERT INTO @Header(
+		intBaseId
+		, intOrderType
+		, intSourceType
+		, intEntityCustomerId
+		, dtmShipDate
+		, intShipFromLocationId
+		, intShipToLocationId
+		, intFreightTermId
+		, strSourceScreenName
+		, intCurrencyId
+)
+SELECT 
+		h.intId
+		, se.intOrderType
+		, se.intSourceType
+		, se.intEntityCustomerId
+		, se.dtmShipDate
+		, se.intShipFromLocationId
+		, se.intShipToLocationId
+		, se.intFreightTermId
+		, se.strSourceScreenName
+		, se.intCurrencyId
+FROM	@ShipmentEntries se INNER JOIN headers h 
+		ON h.intId = se.intId
 	
 -- Merge shipment items
 MERGE INTO @ShipmentEntries s
@@ -291,20 +323,48 @@ WHEN NOT MATCHED BY SOURCE THEN DELETE;
 
 ------------------------------------------- CURSOR -------------------------------------------
 -- Scan Headers
-DECLARE cur CURSOR LOCAL FAST_FORWARD
-	FOR 
-		SELECT intId, intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, 
-			intShipFromLocationId, intShipToLocationId, intFreightTermId, intBaseId, strSourceScreenName, intCurrencyId
-		FROM @Header
+DECLARE @intId INT
+		, @intOrderType INT
+		, @intSourceType INT
+		, @intEntityCustomerId INT
+		, @dtmShipDate DATETIME
+		, @intShipFromLocationId INT
+		, @intShipToLocationId INT
+		, @intFreightTermId INT
+		, @intBaseId INT
+		, @strSourceScreenName NVARCHAR(100)
+		, @intCurrencyId INT
 
-DECLARE @intId INT, @intOrderType INT, @intSourceType INT, @intEntityCustomerId INT, @dtmShipDate DATETIME, 
-@intShipFromLocationId INT, @intShipToLocationId INT, @intFreightTermId INT, @intBaseId INT, @strSourceScreenName NVARCHAR(100),
-@intCurrencyId INT
+DECLARE cur CURSOR LOCAL FAST_FORWARD
+FOR 
+	SELECT 
+		intId
+		, intOrderType
+		, intSourceType
+		, intEntityCustomerId
+		, dtmShipDate
+		, intShipFromLocationId
+		, intShipToLocationId
+		, intFreightTermId
+		, intBaseId
+		, strSourceScreenName
+		, intCurrencyId
+	FROM @Header
 
 OPEN cur
 
-FETCH NEXT FROM cur INTO @intId, @intOrderType, @intSourceType, @intEntityCustomerId, @dtmShipDate, 
-			@intShipFromLocationId, @intShipToLocationId, @intFreightTermId, @intBaseId, @strSourceScreenName, @intCurrencyId
+FETCH NEXT FROM cur INTO 
+	@intId
+	, @intOrderType
+	, @intSourceType
+	, @intEntityCustomerId
+	, @dtmShipDate
+	, @intShipFromLocationId
+	, @intShipToLocationId
+	, @intFreightTermId
+	, @intBaseId
+	, @strSourceScreenName
+	, @intCurrencyId
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
@@ -312,10 +372,30 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryShipment, @ShipmentNumber OUTPUT
 	
 	-- Insert New Shipment
-	INSERT INTO tblICInventoryShipment(strShipmentNumber, dtmShipDate, intOrderType, intSourceType,
-		intShipFromLocationId, intEntityCustomerId, intShipToLocationId, intFreightTermId, strBOLNumber, intCurrencyId)
-	VALUES(@ShipmentNumber, @dtmShipDate, @intOrderType, @intSourceType, @intShipFromLocationId,
-		@intEntityCustomerId, @intShipToLocationId, @intFreightTermId, '', @intCurrencyId)
+	INSERT INTO tblICInventoryShipment(
+		strShipmentNumber
+		, dtmShipDate
+		, intOrderType
+		, intSourceType
+		, intShipFromLocationId
+		, intEntityCustomerId
+		, intShipToLocationId
+		, intFreightTermId
+		, strBOLNumber
+		, intCurrencyId
+	)
+	VALUES(
+		@ShipmentNumber
+		, @dtmShipDate
+		, @intOrderType
+		, @intSourceType
+		, @intShipFromLocationId
+		, @intEntityCustomerId
+		, @intShipToLocationId
+		, @intFreightTermId
+		, ''
+		, ISNULL(@intCurrencyId, @intFunctionalCurrencyId)
+	)
 
 	-- Get Inserted Shipment ID
 	SET @CurrentShipmentId = SCOPE_IDENTITY()
@@ -349,8 +429,18 @@ BEGIN
 	END
 
 	-- Get Next Header
-	FETCH NEXT FROM cur INTO @intId, @intOrderType, @intSourceType, @intEntityCustomerId, @dtmShipDate, 
-			@intShipFromLocationId, @intShipToLocationId, @intFreightTermId, @intBaseId, @strSourceScreenName, @intCurrencyId
+	FETCH NEXT FROM cur INTO 
+		@intId
+		, @intOrderType
+		, @intSourceType
+		, @intEntityCustomerId
+		, @dtmShipDate
+		, @intShipFromLocationId
+		, @intShipToLocationId
+		, @intFreightTermId
+		, @intBaseId
+		, @strSourceScreenName
+		, @intCurrencyId
 END
 
 CLOSE cur
@@ -376,12 +466,12 @@ INSERT INTO tblICInventoryShipmentItem(
 	, strNotes
 	, intGradeId
 	, intDiscountSchedule
-	, intConcurrencyId
 	, intStorageScheduleTypeId
 	, intDestinationGradeId
 	, intDestinationWeightId
 	, intForexRateTypeId
 	, dblForexRate
+	, intConcurrencyId
 )
 SELECT 
 	se.intShipmentId
@@ -401,24 +491,82 @@ SELECT
 	, se.strNotes
 	, se.intGradeId
 	, se.intDiscountSchedule
-	, 1
 	, se.intStorageScheduleTypeId
 	, se.intDestinationGradeId
 	, se.intDestinationWeightId
-	, se.intForexRateTypeId
-	, se.dblForexRate
-FROM @ShipmentEntries se
+	, intForexRateTypeId = CASE WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(se.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+	, dblForexRate = CASE WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(se.dblForexRate, forexRate.dblRate)  ELSE NULL END 
+	, intConcurrencyId = 1
+FROM @ShipmentEntries se INNER JOIN tblICInventoryShipment s
+		ON se.intShipmentId = s.intInventoryShipmentId
+	-- Get the SM forex rate. 
+	OUTER APPLY dbo.fnSMGetForexRate(
+		ISNULL(s.intCurrencyId, @intFunctionalCurrencyId)
+		,CASE WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(se.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+		,se.dtmShipDate
+	) forexRate
 
 -- Insert shipment charges
-INSERT INTO tblICInventoryShipmentCharge(intInventoryShipmentId, intEntityVendorId, intChargeId, strCostMethod, dblAmount, dblRate, intConcurrencyId, intContractId, ysnPrice, ysnAccrue, intCostUOMId, intCurrencyId)
-SELECT intShipmentId, intEntityVendorId, intChargeId, strCostMethod, dblAmount, dblRate, 1, intContractId, ysnPrice, ysnAccrue, intCostUOMId, intCurrency
-FROM @ShipmentCharges
+INSERT INTO tblICInventoryShipmentCharge(
+	intInventoryShipmentId
+	, intEntityVendorId
+	, intChargeId
+	, strCostMethod
+	, dblAmount
+	, dblRate
+	, intContractId
+	, ysnPrice
+	, ysnAccrue
+	, intCostUOMId
+	, intCurrencyId
+	, intForexRateTypeId 
+	, dblForexRate 
+	, intConcurrencyId
+)
+SELECT 
+	sc.intShipmentId
+	, sc.intEntityVendorId
+	, sc.intChargeId
+	, sc.strCostMethod
+	, sc.dblAmount
+	, sc.dblRate
+	, sc.intContractId
+	, sc.ysnPrice
+	, sc.ysnAccrue
+	, sc.intCostUOMId
+	, ISNULL(sc.intCurrency, @intFunctionalCurrencyId)
+	, intForexRateTypeId = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END  
+	, dblForexRate = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.dblForexRate, forexRate.dblRate) ELSE NULL END   
+	, intConcurrencyId = 1
+FROM @ShipmentCharges sc INNER JOIN tblICInventoryShipment s
+		ON sc.intShipmentId = s.intInventoryShipmentId 
+	-- Get the SM forex rate. 
+	OUTER APPLY dbo.fnSMGetForexRate(
+		ISNULL(sc.intCurrency, @intFunctionalCurrencyId)
+		,CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END  
+		,s.dtmShipDate
+	) forexRate			
 
 -- Insert item lots
-INSERT INTO tblICInventoryShipmentItemLot(intInventoryShipmentItemId, intLotId, dblQuantityShipped, dblGrossWeight, dblTareWeight, dblWeightPerQty, strWarehouseCargoNumber)
-SELECT si.intInventoryShipmentItemId, l.intLotId, l.dblQuantityShipped, l.dblGrossWeight, l.dblTareWeight, l.dblWeightPerQty, l.strWarehouseCargoNumber
-FROM @ShipmentItemLots l
-	INNER JOIN @ShipmentEntries se ON l.intItemLotGroup = se.intItemLotGroup
+INSERT INTO tblICInventoryShipmentItemLot(
+	intInventoryShipmentItemId
+	, intLotId
+	, dblQuantityShipped
+	, dblGrossWeight
+	, dblTareWeight
+	, dblWeightPerQty
+	, strWarehouseCargoNumber
+)
+SELECT 
+	si.intInventoryShipmentItemId
+	, l.intLotId
+	, l.dblQuantityShipped
+	, l.dblGrossWeight
+	, l.dblTareWeight
+	, l.dblWeightPerQty
+	, l.strWarehouseCargoNumber
+FROM @ShipmentItemLots l INNER JOIN @ShipmentEntries se 
+		ON l.intItemLotGroup = se.intItemLotGroup
 		AND se.intOrderType = l.intOrderType
 		AND se.intSourceType = l.intSourceType
 		AND se.intEntityCustomerId = l.intEntityCustomerId
@@ -426,16 +574,19 @@ FROM @ShipmentItemLots l
 		AND se.intShipFromLocationId = l.intShipFromLocationId
 		AND se.intShipToLocationId = l.intShipToLocationId
 		AND se.intFreightTermId = l.intFreightTermId
-	INNER JOIN tblICInventoryShipment s ON se.intOrderType = s.intOrderType
-			AND se.intSourceType = s.intSourceType
-			AND se.intEntityCustomerId = s.intEntityCustomerId
-			AND se.dtmShipDate = s.dtmShipDate
-			AND se.intShipFromLocationId = s.intShipFromLocationId
-			AND se.intShipToLocationId = s.intShipToLocationId
-			AND se.intFreightTermId = s.intFreightTermId
-	INNER JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+	INNER JOIN tblICInventoryShipment s 
+		ON se.intOrderType = s.intOrderType
+		AND se.intSourceType = s.intSourceType
+		AND se.intEntityCustomerId = s.intEntityCustomerId
+		AND se.dtmShipDate = s.dtmShipDate
+		AND se.intShipFromLocationId = s.intShipFromLocationId
+		AND se.intShipToLocationId = s.intShipToLocationId
+		AND se.intFreightTermId = s.intFreightTermId
+	INNER JOIN tblICInventoryShipmentItem si 
+		ON si.intInventoryShipmentId = s.intInventoryShipmentId
 		AND si.intItemId = se.intItemId
-	INNER JOIN tblICItem i ON i.intItemId = si.intItemId
+	INNER JOIN tblICItem i 
+		ON i.intItemId = si.intItemId
 WHERE i.strLotTracking <> 'No'
 
 -- Insert into the reservation table.
