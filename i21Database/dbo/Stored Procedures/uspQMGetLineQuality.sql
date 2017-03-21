@@ -18,6 +18,7 @@ BEGIN TRY
 		,@PropList NVARCHAR(MAX)
 		,@ErrMsg NVARCHAR(MAX)
 		,@SQL NVARCHAR(MAX)
+		,@strColumnsList NVARCHAR(MAX)
 	DECLARE @ysnShowSampleFromAllLocation BIT
 
 	SELECT @ysnShowSampleFromAllLocation = ISNULL(ysnShowSampleFromAllLocation, 0)
@@ -50,8 +51,19 @@ BEGIN TRY
 	SET @SQL = @SQL + ' JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 	   JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
 	   JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
-	   JOIN tblQMTest AS T ON TR.intTestId = T.intTestId
-     ) t  
+	   JOIN tblQMTest AS T ON TR.intTestId = T.intTestId'
+
+	IF (LEN(@strFilterCriteria) > 0)
+	BEGIN
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemNo]', 'I.strItemNo')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strWorkOrderStatus]', 'WS.strName')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strSampleStatus]', 'SS.strSecondaryStatus')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strComment]', 'S.strComment')
+		SET @SQL = @SQL + ' WHERE ' + @strFilterCriteria
+	END
+
+    SET @SQL = @SQL + ') t  
     ORDER BY ''],['' + strTestName,strPropertyName  
     FOR XML Path('''')  
     ), 1, 2, '''') + '']'''
@@ -122,6 +134,9 @@ BEGIN TRY
 	SET @SQL = @SQL + ') t '
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
+	SET @strColumnsList = 'intTotalCount,strCategoryCode,intItemId,strItemNo,strDescription,intWorkOrderId,strWorkOrderNo'
+	SET @strColumnsList = @strColumnsList + ',strWorkOrderStatus,strSampleNumber,strSampleStatus,strSampleTypeName,intSampleId,dtmSampleReceivedDate,strComment'
+	SET @strColumnsList = @strColumnsList + ',' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
 	intTotalCount
 	,strCategoryCode  
@@ -137,7 +152,8 @@ BEGIN TRY
 	,intSampleId
 	,dtmSampleReceivedDate
 	,strComment
-	,' + @str + 'FROM (  
+	,' + @str + ',''' + @strColumnsList + ''' AS strColumnsList ' + 
+	'FROM (  
 		SELECT intTotalCount
 			,strCategoryCode
 			,CQ.intItemId

@@ -18,6 +18,7 @@ BEGIN TRY
 		,@PropList NVARCHAR(MAX)
 		,@ErrMsg NVARCHAR(MAX)
 		,@SQL NVARCHAR(MAX)
+		,@strColumnsList NVARCHAR(MAX)
 	DECLARE @ysnShowSampleFromAllLocation BIT
 
 	SELECT @ysnShowSampleFromAllLocation = ISNULL(ysnShowSampleFromAllLocation, 0)
@@ -49,7 +50,28 @@ BEGIN TRY
      JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
      JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
      JOIN tblQMTest AS T ON TR.intTestId = T.intTestId
-     ) t  
+	 LEFT JOIN tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
+	 LEFT JOIN tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+	 LEFT JOIN tblLGLoad L ON L.intLoadId = S.intLoadId
+	 LEFT JOIN tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
+	 LEFT JOIN tblEMEntity AS E1 ON E1.intEntityId = S.intShipperEntityId'
+
+	IF (LEN(@strFilterCriteria) > 0)
+	BEGIN
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strContractNumber]', 'CH.strContractNumber + '' - '' + LTRIM(CD.intContractSeq)')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strName]', 'E.strName')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strBundleItemNo]', 'I1.strItemNo')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemNo]', 'I.strItemNo')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strStatus]', 'SS.strStatus')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strMarks]', 'S.strMarks')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strShipperCode]', 'E1.strEntityNo')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strShipperName]', 'E1.strName')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strComment]', 'S.strComment')
+		SET @SQL = @SQL + ' WHERE ' + @strFilterCriteria
+	END
+
+	SET @SQL = @SQL + ') t  
     ORDER BY ''],['' + strTestName,strPropertyName  
     FOR XML Path('''')  
     ), 1, 2, '''') + '']'''
@@ -135,6 +157,9 @@ BEGIN TRY
 	SET @SQL = @SQL + ') t '
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
+	SET @strColumnsList = 'intTotalCount,strContractNumber,strName,strContractItemName,strBundleItemNo,strItemNo,strDescription'
+	SET @strColumnsList = @strColumnsList + ',strLoadNumber,strContainerNumber,strMarks,strShipperCode,strShipperName,strSubLocationName,strSampleNumber,strSampleTypeName'
+	SET @strColumnsList = @strColumnsList + ',strStatus,intSampleId,dtmSampleReceivedDate,dtmSamplingEndDate,strComment,' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
   intTotalCount
   ,strContractNumber  
@@ -156,7 +181,7 @@ BEGIN TRY
   ,dtmSampleReceivedDate
   ,dtmSamplingEndDate
   ,strComment
-  ,' + @str + 
+  ,' + @str + ',''' + @strColumnsList + ''' AS strColumnsList ' + 
 		'FROM (  
 	SELECT intTotalCount
 		,strContractNumber

@@ -18,6 +18,7 @@ BEGIN TRY
 		,@PropList NVARCHAR(MAX)
 		,@ErrMsg NVARCHAR(MAX)
 		,@SQL NVARCHAR(MAX)
+		,@strColumnsList NVARCHAR(MAX)
 	DECLARE @ysnShowSampleFromAllLocation BIT
 
 	SELECT @ysnShowSampleFromAllLocation = ISNULL(ysnShowSampleFromAllLocation, 0)
@@ -49,7 +50,23 @@ BEGIN TRY
 	SET @SQL = @SQL + ' JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId
 		JOIN tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
 		JOIN tblQMTest AS T ON T.intTestId = TR.intTestId
-     ) t  
+		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+		JOIN tblICLotStatus AS LS ON LS.intLotStatusId = PL.intLotStatusId'
+
+	IF (LEN(@strFilterCriteria) > 0)
+	BEGIN
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemNo]', 'I.strItemNo')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strLotNumber]', 'PL.strParentLotNumber')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strLotStatus]', 'LS.strSecondaryStatus')
+		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dblLotQty]', 'ISNULL(L.dblWeight,L.dblQty)')
+		--SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[dtmDateCreated]', 'L.dtmDateCreated')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strSampleStatus]', 'SS.strSecondaryStatus')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strComment]', 'S.strComment')
+		SET @SQL = @SQL + ' WHERE ' + @strFilterCriteria
+	END
+
+    SET @SQL = @SQL + ') t  
     ORDER BY ''],['' + strTestName,strPropertyName  
     FOR XML Path('''')  
     ), 1, 2, '''') + '']'''
@@ -142,6 +159,9 @@ BEGIN TRY
 	SET @SQL = @SQL + ') t '
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
+	SET @strColumnsList = 'intTotalCount,strCategoryCode,intItemId,strItemNo,strDescription,intLotId,strLotNumber'
+	SET @strColumnsList = @strColumnsList + ',strLotStatus,strLotAlias,strSampleNumber,strSampleStatus,dblLotQty,strUnitMeasure,dtmDateCreated,intSampleId'
+	SET @strColumnsList = @strColumnsList + ',strComment,' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
 	intTotalCount
 	,strCategoryCode  
@@ -159,7 +179,8 @@ BEGIN TRY
 	,dtmDateCreated
 	,intSampleId
 	,strComment
-	,' + @str + 'FROM (  
+	,' + @str + ',''' + @strColumnsList + ''' AS strColumnsList ' + 
+	'FROM (  
 		SELECT intTotalCount
 			,strCategoryCode
 			,CQ.intItemId
