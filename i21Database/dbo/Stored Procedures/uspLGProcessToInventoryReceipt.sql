@@ -16,9 +16,10 @@ BEGIN TRY
 	DECLARE @dblLoadDetailQty NUMERIC(18, 6)
 	DECLARE @intInventoryReceiptItemId INT
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
+	DECLARE @LotEntries ReceiptItemLotStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
 	DECLARE @tblLoadDetail TABLE (
-		 intRecordId INT Identity(1, 1)
+		intRecordId INT Identity(1, 1)
 		,intLoadDetailId INT
 		,intContractDetailId INT
 		,dblLoadDetailQty NUMERIC(18, 6)
@@ -42,11 +43,7 @@ BEGIN TRY
 		RAISERROR ('Receipt has already been created for the inbound shipment.',16,1)
 	END
 
-	IF NOT EXISTS (
-			SELECT 1
-			FROM tempdb..sysobjects
-			WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')
-			)
+	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult'))
 	BEGIN
 		CREATE TABLE #tmpAddItemReceiptResult (
 			intSourceId INT
@@ -99,7 +96,7 @@ BEGIN TRY
 		,intItemUOMId = LD.intItemUOMId
 		,intContractHeaderId = LD.intPContractHeaderId
 		,intContractDetailId = LD.intPContractDetailId
-		,dtmDate = CD.dtmStartDate
+		,dtmDate = GETDATE()
 		,intShipViaId = CD.intShipViaId
 		,dblQty = LD.dblQuantity
 		,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, 0)
@@ -204,21 +201,69 @@ BEGIN TRY
 	WHERE L.intLoadId = @intLoadId
 		AND ysnAccrue = 1
 
-	IF NOT EXISTS (SELECT 1 FROM @ReceiptStagingTable)
+	IF NOT EXISTS (
+			SELECT 1
+			FROM @ReceiptStagingTable
+			)
 	BEGIN
 		RETURN
 	END
 
-	EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable
-		,@OtherCharges
-		,@intEntityUserSecurityId;
+	EXEC dbo.uspICAddItemReceipt @ReceiptEntries = @ReceiptStagingTable
+								,@OtherCharges = @OtherCharges
+								,@intUserId = @intEntityUserSecurityId;
 
 	SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
 	FROM #tmpAddItemReceiptResult
+
+	DECLARE @intMinInvRecItemId INT
+
+	SELECT @intMinInvRecItemId = MIN(intInventoryReceiptItemId)
+	FROM tblICInventoryReceiptItem
+	WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+	WHILE @intMinInvRecItemId > 0
+	BEGIN
+		INSERT INTO dbo.tblICInventoryReceiptItemLot (
+			[intInventoryReceiptItemId]
+			,[intLotId]
+			,[strLotNumber]
+			,[strLotAlias]
+			,intSubLocationId
+			,intStorageLocationId
+			,[intItemUnitMeasureId]
+			,dblQuantity
+			,dblGrossWeight
+			,dblTareWeight
+			,strContainerNo
+			,[intSort]
+			,[intConcurrencyId]
+			)
+		SELECT intInventoryReceiptItemId
+			,NULL
+			,''
+			,''
+			,intSubLocationId
+			,intStorageLocationId
+			,RI.intUnitMeasureId
+			,dblQuantity
+			,dblGross
+			,0
+			,LC.strContainerNumber
+			,1
+			,1
+		FROM tblICInventoryReceiptItem RI
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RI.intContainerId
+		WHERE intInventoryReceiptItemId = @intMinInvRecItemId
+
+		SELECT @intMinInvRecItemId = MIN(intInventoryReceiptItemId)
+		FROM tblICInventoryReceiptItem
+		WHERE intInventoryReceiptId = @intInventoryReceiptId
+		  AND intInventoryReceiptItemId > @intMinInvRecItemId
+	END
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
-
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
 END CATCH
