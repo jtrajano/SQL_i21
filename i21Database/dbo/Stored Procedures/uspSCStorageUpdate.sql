@@ -413,7 +413,7 @@ BEGIN TRY
 				,dblUOMQty = ItemUOM.dblUnitQty
 				,dblCost = 
 				CASE 
-					WHEN ISNULL(@intDPContractId,0) > 0 THEN ISNULL(dbo.fnRKGetFutureAndBasisPrice(1,ScaleTicket.intCommodityId,LEFT(DATENAME(MONTH, CNT.dtmEndDate), 3) + ' ' + RIGHT('0' + DATENAME(YEAR, CNT.dtmEndDate), 4),3,IC.intFutureMarketId,ScaleTicket.intProcessingLocationId,0),0)
+					WHEN ISNULL(@intDPContractId,0) > 0 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(ScaleTicket.intCommodityId,ScaleTicket.intProcessingLocationId,ScaleTicket.dtmTicketDateTime,3,0),0)
 					WHEN ISNULL(@intDPContractId,0) = 0 THEN 0
 				END
 				,dblSalesPrice = 0

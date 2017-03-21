@@ -82,6 +82,8 @@ INSERT into @ReceiptStagingTable(
 		,intShipViaId
 		,intDiscountSchedule
 		,strVendorRefNo
+		,intForexRateTypeId
+		,dblForexRate
 				
 		-- Detail				
 		,intItemId
@@ -120,7 +122,14 @@ SELECT
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
 		,strVendorRefNo				= 'TKT-' + SC.strTicketNumber
-
+		,intForexRateTypeId			= CASE
+										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.intRateTypeId
+										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
+									END
+		,dblForexRate				= CASE
+										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.dblRate
+										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
+									END
 		--Detail
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
@@ -143,9 +152,8 @@ SELECT
 		,intContractDetailId		= LI.intTransactionDetailId
 		,dtmDate					= SC.dtmTicketDateTime
 		,dblQty						= LI.dblQty
-		--,dblCost					= LI.dblCost
 		,dblCost					= CASE
-										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPrice(1,SC.intCommodityId,LEFT(DATENAME(MONTH, CNT.dtmEndDate), 3) + ' ' + RIGHT('0' + DATENAME(YEAR, CNT.dtmEndDate), 4),2,@intFutureMarketId,SC.intProcessingLocationId,LI.dblCost),0)
+										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(SC.intCommodityId,SC.intProcessingLocationId,SC.dtmTicketDateTime,2,LI.dblCost),0)
 										ELSE LI.dblCost
 									END
 		,dblExchangeRate			= 1 -- Need to check this

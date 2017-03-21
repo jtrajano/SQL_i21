@@ -89,6 +89,8 @@ BEGIN
 		,intFreightTermId
 		,strBOLNumber
 		,intDiscountSchedule
+		,intForexRateTypeId
+		,dblForexRate
 		
 		,intItemId
 		,intLineNo
@@ -120,6 +122,14 @@ BEGIN
 		,intFreightTermId			= 1
 		,strBOLNumber				= SC.strTicketNumber
 		,intDiscountSchedule		= SC.intDiscountId
+		,intForexRateTypeId			= CASE
+										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.intRateTypeId
+										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
+									END
+		,dblForexRate				= CASE
+										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.dblRate
+										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
+									END
 		
 		
 		,intItemId					= LI.intItemId
