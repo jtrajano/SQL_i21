@@ -8,10 +8,10 @@ AS
 			UP.strValue
 	FROM	(
 				SELECT	CD.intContractDetailId,
-						CAST(LTRIM(VI.dblTotal) + ' ' + VI.strCurrency AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [Invoiced(P)],
-						CAST(LTRIM(CI.dblTotal) + ' ' + CI.strCurrency AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [Invoiced(S)],
-						CAST(CI.dblNetWeight AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [Invoiced Wt(S)],
-						CAST(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity) - CI.dblNetWeight AS NUMERIC(18, 6))  AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [To be Invoiced(S)]
+						CAST(dbo.fnRemoveTrailingZeroes(VI.dblTotal) + ' ' + VI.strCurrency AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [Invoiced(P)],
+						CAST(dbo.fnRemoveTrailingZeroes(CI.dblTotal) + ' ' + CI.strCurrency AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [Invoiced(S)],
+						CAST(dbo.fnRemoveTrailingZeroes(CI.dblNetWeight) AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [Invoiced Wt(S)],
+						CAST(dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity) - CI.dblNetWeight)  AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [To be Invoiced(S)]
 				FROM	tblCTContractDetail CD LEFT
 				JOIN	(
 							SELECT		intContractDetailId,CAST(ISNULL(SUM(dblTotal),0)AS NUMERIC(18, 6)) AS dblTotal,MAX(strCurrency)  strCurrency

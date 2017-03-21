@@ -15,7 +15,9 @@ BEGIN TRY
 			@intLastModifiedById	INT,
 			@intInventoryReceiptId	INT,
 			@intPricingTypeId		INT,
-			@intContractHeaderId	INT
+			@intContractHeaderId	INT,
+			@ysnOnceApproved		BIT,
+			@ysnApprovalExist		BIT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -28,7 +30,19 @@ BEGIN TRY
 
 	IF @ScreenName = 'Price Contract'
 	BEGIN
-		EXEC [uspCTContractApproved] @intContractHeaderId,@intUserId,@intContractDetailId
+		SELECT	@ysnOnceApproved = TR.ysnOnceApproved
+		FROM	tblSMTransaction	TR
+		JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
+		WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
+									'ContractManagement.view.Amendments')
+				AND TR.intRecordId = @intContractHeaderId
+		
+		SELECT	@ysnApprovalExist = dbo.fnCTContractApprovalExist(@intUserId,'ContractManagement.view.Amendments')
+
+		IF ISNULL(@ysnOnceApproved,0) = 1 AND ISNULL(@ysnApprovalExist,0) = 0
+		BEGIN
+			EXEC [uspCTContractApproved] @intContractHeaderId,@intUserId,@intContractDetailId
+		END
 	END
 
 	IF 	@intPricingTypeId NOT IN (1,6)

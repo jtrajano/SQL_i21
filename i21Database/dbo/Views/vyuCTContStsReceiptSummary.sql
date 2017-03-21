@@ -8,10 +8,10 @@ AS
 			UP.strValue
 	FROM	(
 				SELECT	CD.intContractDetailId,
-						CAST(GS.dblNetWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS						[Shipped],
-						CAST(CAST(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,GS.intItemUOMId, CD.dblQuantity) AS NUMERIC(18, 6)) - GS.dblNetWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS		[To be Shipped],
-						CAST(CR.dblShippedWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS					[Recd Wt in Wh],
-						CAST(CAST(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,GS.intItemUOMId, CD.dblQuantity) AS NUMERIC(18, 6)) - CR.dblShippedWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS	[To be Received]
+						CAST(dbo.fnRemoveTrailingZeroes(GS.dblNetWeight) AS NVARCHAR(100)) collate Latin1_General_CI_AS						[Shipped],
+						CAST(dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,GS.intItemUOMId, CD.dblQuantity)) - GS.dblNetWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS		[To be Shipped],
+						CAST(dbo.fnRemoveTrailingZeroes(CR.dblShippedWeight) AS NVARCHAR(100)) collate Latin1_General_CI_AS					[Recd Wt in Wh],
+						CAST(dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,GS.intItemUOMId, CD.dblQuantity)) - CR.dblShippedWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS	[To be Received]
 				FROM	tblCTContractDetail			CD								LEFT
 				JOIN	(
 							SELECT	intContractDetailId,

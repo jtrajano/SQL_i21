@@ -8,8 +8,8 @@ AS
 			UP.strValue
 	FROM	(
 				SELECT	AD.intPContractDetailId intContractDetailId,
-						LTRIM(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,SUM(SI.dblQuantity))AS NUMERIC(18, 6))) Delivered,
-						LTRIM(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity - SUM(SI.dblQuantity)) AS NUMERIC(18, 6))) AS [To be Delivered]
+						dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,SUM(SI.dblQuantity))AS NUMERIC(18, 6))) Delivered,
+						dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity - SUM(SI.dblQuantity)) AS NUMERIC(18, 6))) AS [To be Delivered]
 				FROM	tblLGPickLotDetail			PL
 				JOIN	tblLGPickLotHeader			LH	ON	LH.intPickLotHeaderId		=	PL.intPickLotHeaderId
 				JOIN	tblLGAllocationDetail		AD	ON	AD.intAllocationDetailId	=	PL.intAllocationDetailId
@@ -27,8 +27,8 @@ AS
 				UNION ALL
 				
 				SELECT	AD.intSContractDetailId,
-						LTRIM(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,SUM(SI.dblQuantity))AS NUMERIC(18, 6))) Delivered,
-						LTRIM(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity - SUM(SI.dblQuantity)) AS NUMERIC(18, 6))) AS [To be Delivered]
+						dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,SUM(SI.dblQuantity))AS NUMERIC(18, 6))) Delivered,
+						dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity - SUM(SI.dblQuantity)) AS NUMERIC(18, 6))) AS [To be Delivered]
 				FROM	tblLGPickLotDetail			PL
 				JOIN	tblLGPickLotHeader			LH	ON	LH.intPickLotHeaderId		=	PL.intPickLotHeaderId
 				JOIN	tblLGAllocationDetail		AD	ON	AD.intAllocationDetailId	=	PL.intAllocationDetailId
