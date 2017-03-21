@@ -218,12 +218,11 @@ BEGIN
 																		END																		
 																		+ CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
 															END
-															* 
-															ISNULL(NULLIF(B.dblRate,0),1)
+															
 															
 														END
 												AS DECIMAL(18,2)
-											), --Bill Detail
+											) * ISNULL(NULLIF(B.dblRate,0),1), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
