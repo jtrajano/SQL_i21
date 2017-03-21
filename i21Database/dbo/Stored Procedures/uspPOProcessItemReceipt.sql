@@ -115,13 +115,13 @@ BEGIN
 			,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
 			,intShipViaId			= PO.intShipViaId
 			,dblQty					= ISNULL(PODetail.dblQtyOrdered,0) - ISNULL(PODetail.dblQtyReceived,0)
-			,intGrossNetUOMId		= NULL 
+			,intGrossNetUOMId		= PODetail.intWeightUOMId 
 			,dblGross				= PODetail.dblQtyOrdered
-			,dblNet					= PODetail.dblQtyOrdered
+			,dblNet					= PODetail.dblNetWeight
 			,dblCost				= PODetail.dblCost
-			,intCostUOMId			= ItemUOM.intItemUOMId
+			,intCostUOMId			= ISNULL(PODetail.intCostUOMId, ItemUOM.intItemUOMId)
 			,intCurrencyId			= PO.intCurrencyId
-			,intSubCurrencyCents	= NULL 
+			,intSubCurrencyCents	= PO.intSubCurrencyCents 
 			,dblExchangeRate		= ISNULL(PO.dblExchangeRate, 1) 
 			,intLotId				= NULL 
 			,intSubLocationId		= PODetail.intSubLocationId
