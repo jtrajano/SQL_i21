@@ -115,6 +115,7 @@ AS
 		WHERE		ISNULL(CD.ysnMultiplePriceFixation,0) = 1
 		AND			CD.intContractHeaderId NOT IN (SELECT ISNULL(intContractHeaderId,0) FROM tblCTPriceFixation)
 		AND			CD.intContractStatusId NOT IN (2,3)
+		AND			CH.intPricingTypeId = 2
 		GROUP BY	CD.intContractHeaderId,
 					CD.strContractNumber,
 					CD.intContractTypeId,

@@ -22,15 +22,15 @@ BEGIN
 	IF EXISTS(SELECT * FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3)
 	BEGIN
 		SELECT @dblRepresentingQty = SUM(dblRepresentingQty) FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3
-		IF @dblRepresentingQty > @dblQuantity
+		IF @dblRepresentingQty >= @dblQuantity
 			SET @strSampleStatus = 'Approved'
 		ELSE
 			SET @strSampleStatus = 'Partially Approved'
 	END		
 	ELSE IF EXISTS(SELECT * FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 4)
 	BEGIN
-		SELECT @dblRepresentingQty = SUM(dblRepresentingQty) FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3
-		IF @dblRepresentingQty > @dblQuantity
+		SELECT @dblRepresentingQty = SUM(dblRepresentingQty) FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 4
+		IF @dblRepresentingQty >= @dblQuantity
 			SET @strSampleStatus = 'Rejected'
 		ELSE
 			SET @strSampleStatus = 'Partially Rejected'
