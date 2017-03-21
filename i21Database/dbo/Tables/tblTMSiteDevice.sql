@@ -64,17 +64,20 @@ GO
 CREATE INDEX [IX_tblTMSiteDevice_intSiteID] ON [dbo].[tblTMSiteDevice] ([intSiteID])
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblTMSiteDevice_intSiteID_intSiteDeviceID_intDeviceId] ON [dbo].[tblTMSiteDevice]
-(
-	[intSiteID] ASC,
-	[intSiteDeviceID] ASC,
-	[intDeviceId] ASC
-)
-GO
-
 CREATE NONCLUSTERED INDEX [IX_tblTMSiteDevice_intDeviceId_intSiteID] ON [dbo].[tblTMSiteDevice]
 (
 	[intDeviceId] ASC,
 	[intSiteID] ASC
 )
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTMSiteDevice_intSiteID_intSiteDeviceID_intDeviceId] ON [dbo].[tblTMSiteDevice]
+(
+	[intSiteID] ASC,
+	[intSiteDeviceID] ASC,
+	[intDeviceId] ASC
+)
+INCLUDE ([intConcurrencyId],
+	[ysnAtCustomerToBeTransferred]) 
+GO
+

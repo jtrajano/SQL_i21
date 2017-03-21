@@ -243,3 +243,11 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMCOBOLREADSite',
     @level2type = N'COLUMN',
     @level2name = N'SerialNumber'
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTMCOBOLREADSite_CustomerNumber] ON [dbo].[tblTMCOBOLREADSite]([CustomerNumber] ASC)
+GO
+
+
+
+

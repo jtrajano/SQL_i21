@@ -22,7 +22,7 @@ BEGIN
 		[ActualPercentAfterDelivery] DECIMAL (18, 6) CONSTRAINT [DEF_tblTMCOBOLWRITE_ActualPercentAfterDelivery] DEFAULT ((0)) NULL,
 		[InvoiceType]                CHAR (1)        CONSTRAINT [DEF_tblTMCOBOLWRITE_InvoiceType] DEFAULT ((0)) NULL,
 		[SalesPersonID]              CHAR (3)        CONSTRAINT [DEF_tblTMCOBOLWRITE_SalesPersonID] DEFAULT ((0)) NULL,
-		CONSTRAINT [PK_tblTMCOBOLWRITE] PRIMARY KEY CLUSTERED ([BulkPlantNumber] ASC, [CustomerNumber] ASC, [InvoiceLineNumber] ASC, [InvoiceNumber] ASC, [SiteNumber] ASC)
+		CONSTRAINT [PK_tblTMCOBOLWRITE] PRIMARY KEY CLUSTERED ([InvoiceLineNumber] ASC, [SiteNumber] ASC,[BulkPlantNumber] ASC, [InvoiceNumber] ASC, [CustomerNumber] ASC)
 	);
 
 
@@ -172,8 +172,12 @@ BEGIN
 		@level2name = N'SalesPersonID'
 
 END
+ELSE
+BEGIN
+	ALTER TABLE tblTMCOBOLWRITE DROP CONSTRAINT PK_tblTMCOBOLWRITE
 
-
+	ALTER TABLE tblTMCOBOLWRITE ADD CONSTRAINT [PK_tblTMCOBOLWRITE] PRIMARY KEY CLUSTERED ([InvoiceLineNumber] ASC, [SiteNumber] ASC,[BulkPlantNumber] ASC, [InvoiceNumber] ASC, [CustomerNumber] ASC)
+END
 GO
 PRINT 'END CREATE tblTMCOBOLWRITE'
 GO
