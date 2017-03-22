@@ -17,20 +17,19 @@ FROM (
 				THEN 'FX'
 			ELSE 'UF'
 			END
-		,dblBasis = MAX(CD.dblBasis)
+		,dblBasis = CD.dblBasis
 		,strFinalPrice = MAX(CD.dblCashPrice)
 		,strPriceWeightUOM = MAX(U2.strUnitMeasure)
 		,strPriceCurrency = MAX(CU.strCurrency)
 		,dblSeqQuantity = SUM(CD.dblQuantity)
 		,dblContractQuantity = CH.dblQuantity
-		,strQuantityUOM = MAX(UM.strUnitMeasure)
 		,dblWeight = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), CD.dblQuantity), 0))
 		,dblShippedWeight = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(LoadDetail.intWeightItemUOMId, (dbo.fnLGGetDefaultWeightItemUOM()), LoadDetail.dblNet), 0))
 		,intNoOfContainers = COUNT(CD.intContractDetailId)
 		,intNoOfApprovals = SUM(ISNULL(Samp.intApprovalCount, 0))
 		,intNoOfRejects = SUM(ISNULL(RSamp.intApprovalCount, 0))
 		,intNoOfIntegrationRequests = SUM(CAST(ISNULL(LDLink.ysnExported, 0) AS INT))
-		,intTrucksRemaining = dbo.fnGetTrucksRemaining(CH.intContractHeaderId,CD.intItemUOMId)
+		,intTrucksRemaining = dbo.fnGetTrucksRemaining(CH.intContractHeaderId,MAX(CD.intItemUOMId))
 		,strRemarks = CH.strInternalComment
 		,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, MAX(CD.dtmEndDate)), 2)
 	FROM tblCTContractHeader CH
@@ -89,6 +88,6 @@ FROM (
 	WHERE ISNULL(LC.ysnRejected, 0) = 0
 	GROUP BY CD.intItemId,I.strItemNo,I.strDescription,CH.strContractNumber,CH.intContractHeaderId,CH.strCustomerContract
 		,Pos.strPosition,EY.strName,CB.strDescription,CH.dblQuantity
-		,CH.strInternalComment,CD.intItemUOMId
+		,CH.strInternalComment,CD.dblBasis
 	) tbl
 WHERE intTrucksRemaining > 0
