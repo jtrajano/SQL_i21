@@ -86,6 +86,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblWeightPerQty).HasColumnName("dblWeightPerQty");
             this.Property(t => t.dblLastCost).HasColumnName("dblLastCost");
             this.Property(t => t.intLotId).HasColumnName("intLotId");
+            this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
+            this.Property(t => t.strCostUOM).HasColumnName("strCostUOM");
         }
     }
 

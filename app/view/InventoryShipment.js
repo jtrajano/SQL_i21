@@ -210,6 +210,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                             type: 'vbox',
                                             align: 'stretch'
                                         },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'tabDetails'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'container',
@@ -303,7 +307,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 flex: 1.5,
                                                                 itemId: 'cboCustomer',
                                                                 margin: '0 5 0 0',
-                                                                fieldLabel: 'Customer<font color="red"> *</font>',
+                                                                fieldLabel: 'Customer',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 60,
                                                                 displayField: 'strName',
@@ -546,7 +550,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 ],
                                                                                 itemId: 'cboShipToAddress',
                                                                                 fieldLabel: 'Ship To',
-                                                                                labelWidth: 50,
+                                                                                labelWidth: 60,
                                                                                 displayField: 'strLocationName',
                                                                                 valueField: 'intEntityLocationId'
                                                                             },
@@ -581,7 +585,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 hidden: true,
                                                                                 itemId: 'cboShipToCompanyAddress',
                                                                                 fieldLabel: 'Ship To',
-                                                                                labelWidth: 50,
+                                                                                labelWidth: 60,
                                                                                 displayField: 'strLocationName',
                                                                                 valueField: 'intCompanyLocationId'
                                                                             },
@@ -589,8 +593,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 xtype: 'textareafield',
                                                                                 flex: 1,
                                                                                 itemId: 'txtShipToAddress',
-                                                                                margin: '-6 0 0 55',
-                                                                                labelWidth: 60,
+                                                                                margin: '-6 0 0 65',
+                                                                                labelWidth: 80,
                                                                                 grow: true
                                                                             }
                                                                         ]
@@ -1173,10 +1177,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         xtype: 'griduomcolumn',
                                                                         decimalPrecisionField: 'intDecimalPlaces',
                                                                         displayField: 'strUnitMeasure',
-                                                                        dataIndex: 'dblQuantity',
                                                                         itemId: 'colGumQuantity',
                                                                         width: 200,
                                                                         align: 'right',
+                                                                        dataIndex: 'dblQuantity',
                                                                         text: 'Quantity',
                                                                         editor: {
                                                                             xtype: 'griduomfield',
@@ -1820,6 +1824,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                             type: 'hbox',
                                             align: 'stretch'
                                         },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'tabCharges'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
@@ -2217,6 +2225,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         xtype: 'glrecaptab',
                                         itemId: 'pgePostPreview',
                                         title: 'Post Preview',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'tabPostPreview'
+                                        },
                                         listeners: {
                                             show: 'onPnlRecapBeforeShow'
                                         }

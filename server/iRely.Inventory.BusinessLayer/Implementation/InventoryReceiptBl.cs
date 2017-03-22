@@ -509,6 +509,9 @@ namespace iRely.Inventory.BusinessLayer
             param.sort = sorts;
 
             var data = await query.ExecuteProjection(param, "intInventoryReceiptId").ToListAsync();
+            var countDistinctUOM = await query.Select(q => q.strUnitMeasure).Distinct().CountAsync();
+
+            param.aggregates = countDistinctUOM == 1? param.aggregates : param.aggregates.Replace("dblQtyToReceive|sum:", "");
 
             return new SearchResult()
             {
@@ -826,6 +829,78 @@ namespace iRely.Inventory.BusinessLayer
             }
             taxGroup = newTaxGroupId;
             taxGroupName = newTaxGroupName;
+            return saveResult;
+        }        
+
+        public SaveResult GetDefaultReceiptTaxGroupId(int? freightTermId, int? locationId, int? entityVendorId, int? entityLocationId, out int? taxGroup, out string taxGroupName)
+        {
+            SaveResult saveResult = new SaveResult();
+            taxGroup = null;
+            taxGroupName = null;
+
+            try
+            {
+                var freightTermIdParam = new SqlParameter("@intFreightTermId", freightTermId);
+                freightTermIdParam.DbType = System.Data.DbType.Int32;
+                freightTermIdParam.SqlDbType = System.Data.SqlDbType.Int;
+                if (freightTermId == null)
+                    freightTermIdParam.Value = DBNull.Value; 
+                else
+                    freightTermIdParam.Value = freightTermId;
+
+                var locationIdParam = new SqlParameter("@intLocationId", locationId);
+                locationIdParam.DbType = System.Data.DbType.Int32;
+                locationIdParam.SqlDbType = System.Data.SqlDbType.Int;
+                if (locationId == null)
+                    locationIdParam.Value = DBNull.Value;
+                else
+                    locationIdParam.Value = locationId;
+
+                var entityVendorIdParam = new SqlParameter("@intEntityVendorId", entityVendorId);
+                entityVendorIdParam.DbType = System.Data.DbType.Int32;
+                entityVendorIdParam.SqlDbType = System.Data.SqlDbType.Int;
+                if (entityVendorId == null)
+                    entityVendorIdParam.Value = DBNull.Value;
+                else
+                    entityVendorIdParam.Value = entityVendorId;
+
+                var entityLocationIdParam = new SqlParameter("@intEntityLocationId", entityLocationId);
+                entityLocationIdParam.DbType = System.Data.DbType.Int32;
+                entityLocationIdParam.SqlDbType = System.Data.SqlDbType.Int;
+                if (entityLocationId == null)
+                    entityLocationIdParam.Value = DBNull.Value;
+                else
+                    entityLocationIdParam.Value = entityLocationId;
+
+                var intTaxGroupIdOutput = new SqlParameter("@intTaxGroupId", SqlDbType.Int);
+                intTaxGroupIdOutput.Direction = System.Data.ParameterDirection.Output;
+                intTaxGroupIdOutput.DbType = System.Data.DbType.Int32;
+
+                var strTaxGroupOutput = new SqlParameter("@strTaxGroup", SqlDbType.NVarChar);
+                strTaxGroupOutput.Direction = System.Data.ParameterDirection.Output;
+                strTaxGroupOutput.DbType = System.Data.DbType.String;
+                strTaxGroupOutput.Size = 50;
+
+                _db.ContextManager.Database.ExecuteSqlCommand(
+                    "uspICGetDefaultReceiptTaxGroupId @intFreightTermId, @intLocationId, @intEntityVendorId, @intEntityLocationId, @intTaxGroupId OUTPUT, @strTaxGroup OUTPUT"
+                    , freightTermIdParam
+                    , locationIdParam
+                    , entityVendorIdParam
+                    , entityLocationIdParam
+                    , intTaxGroupIdOutput
+                    , strTaxGroupOutput
+                );
+
+                taxGroup = (int)intTaxGroupIdOutput.Value;
+                taxGroupName = (string)strTaxGroupOutput.Value;
+                saveResult.HasError = false;
+            }
+            catch (Exception ex)
+            {
+                saveResult.BaseException = ex;
+                saveResult.Exception = new ServerException(ex);
+                saveResult.HasError = true;
+            }
             return saveResult;
         }
 

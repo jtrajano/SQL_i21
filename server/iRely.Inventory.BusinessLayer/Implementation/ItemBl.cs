@@ -300,10 +300,17 @@ namespace iRely.Inventory.BusinessLayer
 
             if (excludePhasedOutZeroStockItem)
             {
-                var query = _db.GetQuery<vyuICGetItemStock>()
-                .Include(p => p.tblICItemAccounts)
-                .Include(p => p.tblICItemPricings).Filter(param, true)
-                .Where(p => p.strStatus != "Discontinued" || (p.strStatus == "Phased Out" && p.dblAvailable > 0));
+                var query = 
+                        _db.GetQuery<vyuICGetItemStock>()
+                        .Include(p => p.tblICItemAccounts)
+                        .Include(p => p.tblICItemPricings).Filter(param, true)
+                        .Where(p => 
+                            // Use ternary operators. It is translated as CASE WHEN statements in SQL: 
+                            true ==
+                                (p.strStatus == "Phased Out" && p.dblAvailable <= 0) ? false :
+                                (p.strStatus == "Discontinued") ? false : 
+                                true
+                        );
 
                 var data = await query.ExecuteProjection(param, "strItemNo").ToListAsync();
 
@@ -1006,7 +1013,13 @@ namespace iRely.Inventory.BusinessLayer
             try
             {
                 var db = (InventoryEntities)_db.ContextManager;
-                db.CopyItemLocation(intSourceItemId, strDestinationItemIds);
+
+                if (string.IsNullOrEmpty(strDestinationItemIds))
+                {
+                    throw new System.ArgumentException("Cannot copy the location without a target item. Please specify the target items.");
+                }
+
+                db.CopyItemLocation(intSourceItemId, strDestinationItemIds, iRely.Common.Security.GetEntityId());
                 result = _db.Save(false);
                 result.HasError = false;
             }

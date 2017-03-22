@@ -10,12 +10,13 @@ namespace iRely.Inventory.Model
 {
     public partial class InventoryEntities : DbContext
     {
-        public int CopyItemLocation(int intSourceItemId, string strDestinationItemIds)
+        public int CopyItemLocation(int intSourceItemId, string strDestinationItemIds, int intEntityUserSecurityId)
         {
             return this.Database.ExecuteSqlCommand(
-                "dbo.uspICCopyItemLocation @intSourceItemId, @strDestinationItemIds",
+                "dbo.uspICCopyItemLocation @intSourceItemId, @strDestinationItemIds, @intEntityUserSecurityId",
                 new SqlParameter("@intSourceItemId", intSourceItemId),
-                new SqlParameter("@strDestinationItemIds", strDestinationItemIds)
+                new SqlParameter("@strDestinationItemIds", strDestinationItemIds),
+                new SqlParameter("@intEntityUserSecurityId", intEntityUserSecurityId) 
             );
         }
     }

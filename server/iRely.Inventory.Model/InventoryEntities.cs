@@ -208,6 +208,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptChargeMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptVoucherMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemViewMap());
+            modelBuilder.Configurations.Add(new vyuICGetItemUOMMap());
 
             modelBuilder.Configurations.Add(new vyuICInventoryReceiptLookUpMap());
             modelBuilder.Configurations.Add(new vyuICInventoryReceiptItemLookUpMap());            
@@ -217,7 +218,9 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageBinsMap());
+            modelBuilder.Configurations.Add(new vyuICGetSubLocationBinsMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageBinDetailsMap());
+            modelBuilder.Configurations.Add(new vyuICGetSubLocationBinDetailsMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageBinMeasurementReadingMap());
 
             modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());

@@ -30,6 +30,20 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
+        [ActionName("GetSubLocationBins")]
+        public async Task<HttpResponseMessage> GetSubLocationBins(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetSubLocationBins(param));
+        }
+
+        [HttpGet]
+        [ActionName("GetSubLocationBinDetails")]
+        public async Task<HttpResponseMessage> GetSubLocationBinDetails(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetSubLocationBinDetails(param));
+        }
+
+        [HttpGet]
         [ActionName("GetStorageBinDetails")]
         public async Task<HttpResponseMessage> GetStorageBinDetails(GetParameter param)
         {

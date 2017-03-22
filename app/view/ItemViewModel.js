@@ -921,11 +921,13 @@ Ext.define('Inventory.view.ItemViewModel', {
         accountCategoryFilter: function(get) {
             var category = get('grdGlAccounts.selection.strAccountCategory');
             switch(category) {
-                case 'Other Charge Expense':
-                case 'Other Charge Income':
-                    return 'General|^|' + category;
-                default:
+                case 'AP Clearing':
+                case 'Inventory':
+                case 'Work In Progress':
+                case 'Inventory In-Transit':
                     return category;
+                default:
+                    return 'General|^|' + category;
             }
         },
 

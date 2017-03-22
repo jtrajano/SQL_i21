@@ -83,6 +83,8 @@ namespace iRely.Inventory.Model
         public decimal? dblWeightPerQty { get; set; }
         public decimal? dblLastCost { get; set; }
         public int intLotId { get; set; }
+        public string strWeightUOM { get; set; }
+        public string strCostUOM { get; set; }
     }
 
     public class vyuICLotHistory

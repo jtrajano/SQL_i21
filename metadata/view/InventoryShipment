@@ -447,6 +447,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "tabDetails"
+                                    },
                                     "name": "TabConfig2",
                                     "designerId": "f45270e7-78c1-4823-a05b-3dfb733ef87b"
                                 },
@@ -618,7 +621,7 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strName",
                                                         "enableDrillDown": true,
-                                                        "fieldLabel": "Customer<font color=\"red\"> *</font>",
+                                                        "fieldLabel": "Customer",
                                                         "itemId": "cboCustomer",
                                                         "labelAlign": "top",
                                                         "labelWidth": 60,
@@ -1090,7 +1093,7 @@
                                                                         "displayField": "strLocationName",
                                                                         "fieldLabel": "Ship To",
                                                                         "itemId": "cboShipToAddress",
-                                                                        "labelWidth": 50,
+                                                                        "labelWidth": 60,
                                                                         "layout|flex": null,
                                                                         "layout|margins": null,
                                                                         "name": null,
@@ -1152,7 +1155,7 @@
                                                                         "fieldLabel": "Ship To",
                                                                         "hidden": true,
                                                                         "itemId": "cboShipToCompanyAddress",
-                                                                        "labelWidth": 50,
+                                                                        "labelWidth": 60,
                                                                         "layout|flex": null,
                                                                         "layout|margins": null,
                                                                         "name": null,
@@ -1184,9 +1187,9 @@
                                                                         "fieldLabel": null,
                                                                         "grow": true,
                                                                         "itemId": "txtShipToAddress",
-                                                                        "labelWidth": 60,
+                                                                        "labelWidth": 80,
                                                                         "layout|flex": 1,
-                                                                        "margin": "-6 0 0 55"
+                                                                        "margin": "-6 0 0 65"
                                                                     },
                                                                     "name": "MyTextArea1",
                                                                     "designerId": "b23c0c8a-0827-4e72-b7ee-4908ed8816e8"
@@ -1927,7 +1930,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter128",
+                                                                    "name": "filter123",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3299,7 +3302,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter129",
+                                                                    "name": "filter124",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3785,6 +3788,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "tabCharges"
+                                    },
                                     "name": "TabConfig3",
                                     "designerId": "e7c92b41-b70d-4a91-bc4a-533a7ff38cd2"
                                 },
@@ -3906,7 +3912,7 @@
                                                         "layout|flex": null,
                                                         "width": 198
                                                     },
-                                                    "name": "filter130",
+                                                    "name": "filter125",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4796,6 +4802,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "tabPostPreview"
+                                    },
                                     "name": "TabConfig16",
                                     "designerId": "9655a910-861f-4660-b4ff-ee174fc51ba9"
                                 },
@@ -4870,7 +4879,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

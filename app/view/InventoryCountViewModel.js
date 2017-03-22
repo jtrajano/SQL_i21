@@ -91,6 +91,10 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
     },
 
     formulas: {
+        intCurrencyId: function(get) {
+            return get('current.intCurrencyId');
+        },
+        
         checkPrintCountSheet: function (get) {
             if (get('current.intStatus') == 4) {
                 return true;

@@ -75,9 +75,72 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public async Task<SearchResult> GetSubLocationBins(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetSubLocationBins>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intSubLocationId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
+
         class StorageBin
         {
             public int intStorageLocationId { get; set; }
+        }
+
+        class SubLocationBin
+        {
+            public int intSubLocationId { get; set; }
+        }
+
+        public async Task<SearchResult> GetSubLocationBinDetails(GetParameter param)
+        {
+            int subLocationId = 0;
+            if (param.chartinfo != null)
+            {
+                ChartInfo chartinfo = param.chartinfo.First();
+                if (chartinfo != null)
+                {
+                    try
+                    {
+                        SubLocationBin m = JsonConvert.DeserializeObject<SubLocationBin>(chartinfo.data.ToString());
+                        subLocationId = m.intSubLocationId;
+                    }
+                    catch (Exception)
+                    {
+                        subLocationId = 0;
+                    }
+                }
+            }
+
+            IQueryable<vyuICGetSubLocationBinDetails> query = null;
+            if (subLocationId != 0)
+            {
+                query = _db.GetQuery<vyuICGetSubLocationBinDetails>()
+                    .Where(w => w.intSubLocationId == subLocationId)
+                    .Filter(param, true);
+            }
+            else
+            {
+                query = _db.GetQuery<vyuICGetSubLocationBinDetails>()
+                    .Where(w => w.intSubLocationId == subLocationId)
+                    .Filter(param, true);
+            }
+
+            var data = await query.ExecuteProjection(param, "intItemLocationId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
         }
 
         public async Task<SearchResult> GetStorageBinDetails(GetParameter param)

@@ -138,6 +138,10 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
     },
 
     formulas: {
+        intCurrencyId: function(get) {
+            return get('current.intCurrencyId');
+        },
+        
         destinationWeightsDisabled: function(get) {
             if(!(get('current.ysnShipmentRequired') && get('current.strTransferType') === 'Location to Location') || get('current.ysnPosted') || get('current.intSourceType') === 1) {
                 return true;

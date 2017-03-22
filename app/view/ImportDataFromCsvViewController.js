@@ -86,11 +86,12 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
     },
 
     ajaxRequest: function (p, win) {
-        var options = {
+        jQuery.ajax({
             url: p.url,
             method: p.method,
             headers: {
                'Content-Type': 'multipart/form-data',
+               'Authorization': iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId),
                'X-File-Name': p.file.name,
                'X-File-Size': p.file.size,
                'X-File-Type': p.file.type,
@@ -98,46 +99,47 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                'X-Import-Allow-Overwrite': p.allowOverwrite ? "true" : "false",
                'X-Import-Allow-LineOfBusiness': p.lineOfBusiness
             },
-            formData: p.file,
-            isUpload: true,
-            isFormUpload: true,
-            processData: false
-        };
+            data: p.file,
+            processData: false,
+            beforeSend: function(jqXHR, settings) {
+                iRely.Msg.showWait('Importing in progress...');
+            },
 
-        iRely.Msg.showWait('Importing in progress...');
-        var a = ic.utils.ajax(options)
-            //.retry(3) -- Test: will retry call three times
-            .finally(function() { iRely.Msg.close(); })
-            .subscribe(function(data) {
+            success: function(data, status, jqXHR) {
+                iRely.Msg.close();
                 var type = 'info';
                 var msg = "File imported successfully.";
-                var json = JSON.parse(data.responseText);
-                if (json.rows === 0)
+                var json = JSON.parse(jqXHR.responseText);
+                if(json.rows === 0)
                     msg = "There's nothing to import.";
 
                 if (json.result.Info == "warning") {
                     type = "warning";
                     msg = "File imported successfully with warnings.";
                 }
-                if (json.result.Info === "error") {
+                if(json.result.Info == "error") {
                     type = "warning";
                     msg = "File imported successfully with errors.";
                 }
 
-                i21.functions.showCustomDialog(type, 'ok', msg, function () {
+                i21.functions.showCustomDialog(type, 'ok', msg, function() {
                     win.close();
 
-                    if (json.messages !== null && json.messages.length > 0) {
+                    if (data.messages !== null && data.messages.length > 0) {
                         iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                            data: json
+                            data: data
                         });
+                    }
+                    if(!iRely.Functions.isEmpty(json.result.Description)) {
+                        iRely.Functions.openScreen('Inventory.view.InventoryCount', json.result.Description);
                     }
                 });
             },
-            function(error) {
-                var json = JSON.parse(error.responseText);
+            error: function(jqXHR, status, error) {
+                iRely.Msg.close();
+                var json = JSON.parse(jqXHR.responseText);
                 i21.functions.showCustomDialog('error', 'ok', 'Import completed with error(s)! ' + json.info,
-                    function () {
+                    function() {
                         win.close();
 
                         if (json.messages !== null && json.messages.length > 0) {
@@ -147,6 +149,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                         }
                     }
                 );
-            });
+            }
+        });
     }
-})
+});

@@ -134,7 +134,7 @@ namespace iRely.Inventory.BusinessLayer
             return false;
         }
         
-        public ImportDataResult Import()
+        public virtual ImportDataResult Import()
         {
             ImportDataResult dr = new ImportDataResult()
             {
