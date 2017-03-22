@@ -184,6 +184,8 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateCustomerContractSubReportView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateAssociateSiteSearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMCreateMigrateOriginToi21TMDataSP.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateDeliveryFillGroupSubReportView.sql"
+
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql"
