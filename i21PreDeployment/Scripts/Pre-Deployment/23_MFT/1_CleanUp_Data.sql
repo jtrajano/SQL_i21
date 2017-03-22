@@ -13,6 +13,8 @@ IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFRep
 			UPDATE tblTFReportingComponent
 			SET intConcurrencyId = 1
 			WHERE intConcurrencyId IS NULL
+
+			UPDATE tblTFReportingComponent SET strType = 'NE EDI' WHERE strScheduleName = 'NE EDI file'
 		END
 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFReportingComponentConfiguration')
