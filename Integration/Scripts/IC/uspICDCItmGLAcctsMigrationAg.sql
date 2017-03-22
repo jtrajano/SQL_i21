@@ -1,6 +1,10 @@
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCItmGLAcctsMigrationAg]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [uspICDCItmGLAcctsMigrationAg]; 
-GO 
+/****** Object:  StoredProcedure [dbo].[uspICDCGLAcctsMigration]    Script Date: 07/28/2016 09:41:05 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
 
 Create PROCEDURE [dbo].[uspICDCItmGLAcctsMigrationAg]
 --** Below Stored Procedure is to migrate inventory related gl accounts from origin to i21 tables such as tblICCategoryAccount, tblICItemAccount. **
@@ -12,8 +16,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
----------------------------------------------------------------------------------------------------
-
+--=============================================================
+--RUN THIS SCRIPT ONLY IF ACCOUNTS ARE SETUP ONLY IN ITEMS IN ORIGIN
+---------=======================================================
 --** From Inventory (agitmmst) table below 2 accounts (Sales and Variance account) are mapped 
 --   into tblICItemAccount table removing duplicates and ignoring the invalid accounts. **
 -- select top 1 as multiple locations are repeated in origin table
@@ -102,4 +107,6 @@ Cross Apply
 	WHERE coa.strExternalId = itm.agitm_pur_acct
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
+
+GO
 

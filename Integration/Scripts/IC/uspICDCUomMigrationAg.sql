@@ -1,6 +1,9 @@
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCUomMigrationAg]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [uspICDCUomMigrationAg]; 
-GO 
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
 
 Create PROCEDURE [dbo].[uspICDCUomMigrationAg]
 
@@ -50,3 +53,14 @@ where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS in
 (select upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) 
 COLLATE SQL_Latin1_General_CP1_CS_AS
 from agitmmst where agitm_un_per_pak > 1) 
+
+--insert conversion factors for units with pack per unit > 1
+insert into tblICUnitMeasureConversion (intUnitMeasureId, intStockUnitMeasureId, dblConversionToStock, intSort, intConcurrencyId)
+select intUnitMeasureId, 
+(select top 1 intUnitMeasureId from tblICUnitMeasure U where U.strUnitMeasure = upper(rtrim(agitm_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS) intToUnit,
+agitm_un_per_pak, 0,1
+from tblICUnitMeasure U join agitmmst I on U.strUnitMeasure = upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) COLLATE SQL_Latin1_General_CP1_CS_AS
+where agitm_un_per_pak > 1
+
+GO
+
