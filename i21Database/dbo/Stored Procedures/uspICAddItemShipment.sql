@@ -165,6 +165,8 @@ INSERT INTO @ShipmentCharges(
 		, ysnAccrue
 		, intEntityVendorId
 		, ysnPrice
+		, intForexRateTypeId 
+		, dblForexRate 
 )
 SELECT 
 		intOrderType
@@ -184,6 +186,8 @@ SELECT
 		, ysnAccrue
 		, intEntityVendorId
 		, ysnPrice
+		, intForexRateTypeId 
+		, dblForexRate 
 FROM @Charges
 
 -- 3. Item Lots
