@@ -28,7 +28,7 @@ SELECT W.strWorkOrderNo
 					THEN (MAX(W.dblProducedQuantity) * I.dblWeight) / (
 							CASE 
 								WHEN (
-										SELECT SUM(dblConsumedQuantity)
+										SELECT SUM(dblConsumedQuantity+(dblYieldQuantity*-1))
 										FROM tblMFProductionSummary PS
 										JOIN dbo.tblICItem II1 ON II1.intItemId = PS.intItemId
 										JOIN dbo.tblICCategory C1 ON C1.intCategoryId = II1.intCategoryId
@@ -42,7 +42,7 @@ SELECT W.strWorkOrderNo
 										) = 0
 									THEN 1
 								ELSE (
-										SELECT SUM(dblConsumedQuantity)
+										SELECT SUM(dblConsumedQuantity+(dblYieldQuantity*-1))
 										FROM tblMFProductionSummary PS
 										JOIN dbo.tblICItem II1 ON II1.intItemId = PS.intItemId
 										JOIN dbo.tblICCategory C1 ON C1.intCategoryId = II1.intCategoryId
