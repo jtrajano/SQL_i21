@@ -102,7 +102,7 @@ BEGIN TRY
 		,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, 0)
 		,dblGross = LD.dblGross
 		,dblNet = LD.dblNet
-		,dblCost = LD.dblCost
+		,dblCost = ISNULL(LD.dblCost,0)
 		,intCostUOMId = LD.intPCostUOMId
 		,intCurrencyId = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
 		,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
