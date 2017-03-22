@@ -126,7 +126,7 @@ BEGIN
 		SET @InvalidSetup = 1
 	END
 		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 --AND @DisregardExemptionSetup <> 1
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
