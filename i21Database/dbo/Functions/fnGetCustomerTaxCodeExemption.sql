@@ -231,7 +231,7 @@ BEGIN
 		AND	ISNULL(TC.[intSalesTaxAccountId],0) = 0	
 			
 				
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
@@ -240,7 +240,12 @@ BEGIN
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
-		END					
+		END
+		
+	SET @TaxCodeExemption = NULL
+	SET @ExemptionPercent = 0.00000
+	SET @TaxExempt = 0
+	SET @InvalidSetup = 0				
 	
 	INSERT INTO @returntable
 	SELECT 
