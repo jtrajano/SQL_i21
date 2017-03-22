@@ -6,24 +6,24 @@ EXEC
 ('
 	CREATE PROCEDURE [dbo].[uspSMImportTax]
 		@taxCode NVARCHAR(100),
-		@description NVARCHAR(150) = '',
-		@taxClass NVARCHAR(100) = '',
-		@taxGroup NVARCHAR(100) = '',
-		@taxAgency NVARCHAR(100) = '',
+		@description NVARCHAR(150) = '''',
+		@taxClass NVARCHAR(100) = '''',
+		@taxGroup NVARCHAR(100) = '''',
+		@taxAgency NVARCHAR(100) = '''',
 		@taxAgencyId INT = NULL,
-		@address NVARCHAR(250) = '',
-		@zipcode NVARCHAR(20) = '',
-		@state NVARCHAR(50) = '',
-		@city NVARCHAR(50) = '',
-		@country NVARCHAR(50) = '',
-		@county NVARCHAR(50) = '',
+		@address NVARCHAR(250) = '''',
+		@zipcode NVARCHAR(20) = '''',
+		@state NVARCHAR(50) = '''',
+		@city NVARCHAR(50) = '''',
+		@country NVARCHAR(50) = '''',
+		@county NVARCHAR(50) = '''',
 		@matchTaxAddress BIT = 0,
 		@salesTaxAccountId INT = NULL,
 		@purchaseTaxAccountId INT = NULL,
-		@taxableByOtherTaxes NVARCHAR(50) = '',
+		@taxableByOtherTaxes NVARCHAR(50) = '''',
 		@checkoffTax BIT = 1,
 		@taxCategoryId INT = NULL ,
-		@storeTaxNumber NVARCHAR(50) = '',
+		@storeTaxNumber NVARCHAR(50) = '''',
 		@payToVendorId INT = NULL
 	AS
 
@@ -37,7 +37,7 @@ EXEC
 	SELECT @entityExist = COUNT(1) FROM tblEMEntity WHERE strName = @taxAgency
 
 	-- Check if vendor is existing ?? if not continue the loop
-	IF @entityExist > 0 OR @taxAgency = ''
+	IF @entityExist > 0 OR @taxAgency = ''''
 	BEGIN
 		DECLARE @taxGroupId INT
 		DECLARE @taxClassId INT
