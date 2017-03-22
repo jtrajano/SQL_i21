@@ -32,12 +32,14 @@ DECLARE	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods
 		,@FOB_DESTINATION AS INT = 2
 
 -- Get the default currency ID
-DECLARE @functionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 -- Get the Inventory Shipment batch number
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@ysnAllowBlankGLEntries AS BIT = 1
 		,@intItemId AS INT
+		,@strCurrencyId AS NVARCHAR(50)
+		,@strFunctionalCurrencyId AS NVARCHAR(50)
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
@@ -278,24 +280,32 @@ BEGIN
 	BEGIN 		
 		SELECT @strItemNo = NULL
 				,@intItemId = NULL 
+				,@strCurrencyId = NULL 
+				,@strFunctionalCurrencyId = NULL 
 
 		SELECT TOP 1 
 				@strTransactionId = Shipment.strShipmentNumber 
 				,@strItemNo = Item.strItemNo
 				,@intItemId = Item.intItemId
+				,@strCurrencyId = c.strCurrency
+				,@strFunctionalCurrencyId = fc.strCurrency
 		FROM	tblICInventoryShipment Shipment INNER JOIN tblICInventoryShipmentItem ShipmentItem
 					ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId	
 				INNER JOIN tblICItem Item
 					ON Item.intItemId = ShipmentItem.intItemId
+				LEFT JOIN tblSMCurrency c
+					ON c.intCurrencyID =  Shipment.intCurrencyId
+				LEFT JOIN tblSMCurrency fc
+					ON fc.intCurrencyID =  @intFunctionalCurrencyId
 		WHERE	ISNULL(ShipmentItem.dblForexRate, 0) = 0 
 				AND Shipment.intCurrencyId IS NOT NULL 
-				AND Shipment.intCurrencyId <> @functionalCurrencyId
+				AND Shipment.intCurrencyId <> @intFunctionalCurrencyId
 				AND Shipment.strShipmentNumber = @strTransactionId
 
 		IF @intItemId IS NOT NULL 
 		BEGIN 
-			-- '{Transaction Id} is using a foreign currency. Please check if {Charge No} has a forex rate.'
-			RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo)
+			-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'
+			RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId)
 			RETURN -1; 
 		END 
 	END 
@@ -440,7 +450,7 @@ BEGIN
 												END
 
 				,dblSalesPrice              = 0.00
-				,intCurrencyId              = @functionalCurrencyId 
+				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
 				,intTransactionId           = Header.intInventoryShipmentId
 				,intTransactionDetailId     = DetailItem.intInventoryShipmentItemId
@@ -709,7 +719,7 @@ BEGIN
 														Lot.dblLastCost + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
 												END, 0 + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId))
 				,dblSalesPrice              = 0.00
-				,intCurrencyId              = @functionalCurrencyId 
+				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
 				,intTransactionId           = Header.intInventoryShipmentId
 				,intTransactionDetailId     = DetailItem.intInventoryShipmentItemId
@@ -942,7 +952,7 @@ BEGIN
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = si.intForexRateTypeId
 	WHERE	s.strShipmentNumber = @strTransactionId
-			AND s.intCurrencyId <> @functionalCurrencyId
+			AND s.intCurrencyId <> @intFunctionalCurrencyId
 END 
 
 --------------------------------------------------------------------------------------------  
