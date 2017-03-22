@@ -518,218 +518,218 @@ StartTest (function (t) {
         .displayText('===== Create Purchase Order Inventory Receipt for Lotted Item "Add Orders Screen" Done=====')
 
 
-        //region Scenario 7. Create Purchase Contract Inventory Receipt for Non Lotted Item "Process Button"
-        .displayText('=====  Scenario 7. Create Purchase Contract Inventory Receipt for Non Lotted Item "Process Button"  =====')
-        .clickMenuFolder('Contract Management','Folder')
-        .clickMenuScreen('Contracts','Screen')
-        .clickButton('New')
-        .waitUntilLoaded('ctcontract')
-        .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
-        .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',1)
-        .enterData('Text Field','Quantity','100')
-        .selectComboBoxRowValue('CommodityUOM', 'LB', 'CommodityUOM',1)
-        .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
-        .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
-        .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
-        .clickButton('AddDetail')
-        .waitUntilLoaded('ctcontractsequence')
-        .waitUntilLoaded('')
-        .addFunction (function (next){
-        var date = new Date().toLocaleDateString();
-        new iRely.FunctionalTest().start(t, next)
-            .enterData('Date Field','EndDate', date, 0, 10)
-            .done();
-        })
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectComboBoxRowValue('Item', 'NLTI - 100', 'Item',1)
-        .selectComboBoxRowValue('NetWeightUOM', 'LB', 'NetWeightUOM',1)
-        .selectComboBoxRowValue('PriceCurrency', 'USD', 'NetWeightUOM',1)
-        .verifyData('Text Field','NetWeight','100.0000')
-        .verifyData('Combo Box','PricingType','Cash')
-        .verifyData('Combo Box','PriceCurrency','USD')
-        .verifyData('Combo Box','CashPriceUOM','LB')
-        .enterData('Text Field','CashPrice','10')
-        .clickButton('Save')
-        .waitUntilLoaded('')
-        .waitUntilLoaded('ctcontract')
-        .clickButton('Save')
-        .waitUntilLoaded('')
-        .clickButton('Process')
-        .waitUntilLoaded('icinventoryreceipt')
-        .waitUntilLoaded('')
-        .waitUntilLoaded('')
-
-
-        .verifyData('Combo Box','ReceiptType','Purchase Contract')
-        .verifyData('Combo Box','Vendor','ABC Trucking')
-        .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 100')
-        .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
-        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
-        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
-        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-
-       .addFunction(function (next){
-           var win =  Ext.WindowManager.getActive(),
-               total = win.down('#txtTotal').value;
-           if (total == 1000) {
-               t.ok(true, 'Total is correct.');
-           }
-           else {
-               t.ok(false, 'Total is incorrect.');
-           }
-           next();
-       })
-
-        .clickTab('Post Preview')
-        .waitUntilLoaded('')
-        .clickTab('Details')
-        .waitUntilLoaded('')
-        .clickTab('Post Preview')
-        .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colDebit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colCredit', '1000')
-        .clickButton('Post')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',3000)
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('ctcontract')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .clickMenuFolder('Contract Management','Folder')
-        .displayText('===== Create Purchase Contract Inventory Receipt for Non Lotted Item "Process Button" Done=====')
-
-
-         //region Scenario 8. Create Purchase Contract Inventory Receipt for Lotted Item "Process Button" - (Comment this out until TF bug fix is done for scroll bars)
-        .displayText('=====  Scenario 8. Create Purchase Contract Inventory Receipt for Lotted Item "Process Button"  =====')
-        .clickMenuFolder('Contract Management','Folder')
-        .clickMenuScreen('Contracts','Screen')
-        .clickButton('New')
-        .waitUntilLoaded('ctcontract')
-        .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
-        .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',1)
-        .enterData('Text Field','Quantity','100')
-        .selectComboBoxRowValue('CommodityUOM', 'LB', 'CommodityUOM',1)
-        .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
-        .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
-        .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
-        .clickButton('AddDetail')
-        .waitUntilLoaded('ctcontractsequence')
-        .waitUntilLoaded()
-        .addFunction (function (next){
-        var date = new Date().toLocaleDateString();
-        new iRely.FunctionalTest().start(t, next)
-            .enterData('Date Field','EndDate', date, 0, 10)
-            .done();
-          })
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
-        .selectComboBoxRowValue('Item', 'LTI - 100', 'Item',1)
-        .selectComboBoxRowValue('NetWeightUOM', 'LB', 'NetWeightUOM',1)
-        .selectComboBoxRowValue('PriceCurrency', 'USD', 'NetWeightUOM',1)
-        .verifyData('Text Field','NetWeight','100.0000')
-        .verifyData('Combo Box','PricingType','Cash')
-        .verifyData('Combo Box','PriceCurrency','USD')
-        .verifyData('Combo Box','CashPriceUOM','LB')
-        .enterData('Text Field','CashPrice','10')
-        .clickButton('Save')
-        .waitUntilLoaded('ctcontract')
-        .clickButton('Save')
-        .waitUntilLoaded('')
-        .clickButton('Process')
-        .waitUntilLoaded('icinventoryreceipt')
-        .waitUntilLoaded('')
-        .waitUntilLoaded('')
-
-        .verifyData('Combo Box','ReceiptType','Purchase Contract')
-        .verifyData('Combo Box','Vendor','ABC Trucking')
-        .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 100')
-        .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
-        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
-        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
-        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM','LB','strWeightUOM')
-        .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
-        .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
-        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strSubLocationName','Raw Station','strSubLocationName')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strStorageLocationName','RM Storage','strStorageLocationName')
-        .waitUntilLoaded('')
-
-
-        .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
-        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','LB','strUnitMeasure')
-        .enterGridData('LotTracking', 1, 'colLotQuantity', '100')
-        .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100')
-        .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
-        .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100')
-        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'LB')
-        .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
-       .addFunction(function (next){
-           var win =  Ext.WindowManager.getActive(),
-               total = win.down('#txtGrossWgt').value;
-           if (total == 100) {
-               t.ok(true, 'Gross is correct.');
-           }
-           else {
-               t.ok(false, 'Grossl is incorrect.');
-           }
-           next();
-       })
-       .addFunction(function (next){
-           var win =  Ext.WindowManager.getActive(),
-               total = win.down('#txtNetWgt').value;
-           if (total == 100) {
-               t.ok(true, 'Net is correct.');
-           }
-           else {
-               t.ok(false, 'Net is incorrect.');
-           }
-           next();
-       })
-       .addFunction(function (next){
-           var win =  Ext.WindowManager.getActive(),
-               total = win.down('#txtTotal').value;
-           if (total == 1000) {
-               t.ok(true, 'Total is correct.');
-           }
-           else {
-               t.ok(false, 'Total is incorrect.');
-           }
-           next();
-       })
-        .clickTab('Post Preview')
-        .waitUntilLoaded('')
-        .clickTab('Details')
-        .waitUntilLoaded('')
-        .clickTab('Post Preview')
-        .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colDebit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colCredit', '1000')
-        .clickButton('Post')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',300)
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .clickMenuFolder('Contract Management','Folder')
-        .displayText('===== 8. Create Purchase Contract Inventory Receipt for Lotted Item "Process Button" Done=====')
+//        //region Scenario 7. Create Purchase Contract Inventory Receipt for Non Lotted Item "Process Button"
+//        .displayText('=====  Scenario 7. Create Purchase Contract Inventory Receipt for Non Lotted Item "Process Button"  =====')
+//        .clickMenuFolder('Contract Management','Folder')
+//        .clickMenuScreen('Contracts','Screen')
+//        .clickButton('New')
+//        .waitUntilLoaded('ctcontract')
+//        .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
+//        .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
+//        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',1)
+//        .enterData('Text Field','Quantity','100')
+//        .selectComboBoxRowValue('CommodityUOM', 'LB', 'CommodityUOM',1)
+//        .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
+//        .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
+//        .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
+//        .clickButton('AddDetail')
+//        .waitUntilLoaded('ctcontractsequence')
+//        .waitUntilLoaded('')
+//        .addFunction (function (next){
+//        var date = new Date().toLocaleDateString();
+//        new iRely.FunctionalTest().start(t, next)
+//            .enterData('Date Field','EndDate', date, 0, 10)
+//            .done();
+//        })
+//        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
+//        .selectComboBoxRowValue('Item', 'NLTI - 100', 'Item',1)
+//        .selectComboBoxRowValue('NetWeightUOM', 'LB', 'NetWeightUOM',1)
+//        .selectComboBoxRowValue('PriceCurrency', 'USD', 'NetWeightUOM',1)
+//        .verifyData('Text Field','NetWeight','100.0000')
+//        .verifyData('Combo Box','PricingType','Cash')
+//        .verifyData('Combo Box','PriceCurrency','USD')
+//        .verifyData('Combo Box','CashPriceUOM','LB')
+//        .enterData('Text Field','CashPrice','10')
+//        .clickButton('Save')
+//        .waitUntilLoaded('')
+//        .waitUntilLoaded('ctcontract')
+//        .clickButton('Save')
+//        .waitUntilLoaded('')
+//        .clickButton('Process')
+//        .waitUntilLoaded('icinventoryreceipt')
+//        .waitUntilLoaded('')
+//        .waitUntilLoaded('')
+//
+//
+//        .verifyData('Combo Box','ReceiptType','Purchase Contract')
+//        .verifyData('Combo Box','Vendor','ABC Trucking')
+//        .verifyData('Combo Box','Currency','USD')
+//        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'NLTI - 100')
+//        .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
+//        .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
+//        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
+//        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
+//        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
+//        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
+//        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
+//
+//       .addFunction(function (next){
+//           var win =  Ext.WindowManager.getActive(),
+//               total = win.down('#txtTotal').value;
+//           if (total == 1000) {
+//               t.ok(true, 'Total is correct.');
+//           }
+//           else {
+//               t.ok(false, 'Total is incorrect.');
+//           }
+//           next();
+//       })
+//
+//        .clickTab('Post Preview')
+//        .waitUntilLoaded('')
+//        .clickTab('Details')
+//        .waitUntilLoaded('')
+//        .clickTab('Post Preview')
+//        .waitUntilLoaded('')
+//        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+//        .verifyGridData('RecapTransaction', 1, 'colDebit', '1000')
+//        .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+//        .verifyGridData('RecapTransaction', 2, 'colCredit', '1000')
+//        .clickButton('Post')
+//        .waitUntilLoaded('')
+//        .addResult('Successfully Posted',3000)
+//        .waitUntilLoaded('')
+//        .clickButton('Close')
+//        .waitUntilLoaded('ctcontract')
+//        .clickButton('Close')
+//        .waitUntilLoaded('')
+//        .clickMenuFolder('Contract Management','Folder')
+//        .displayText('===== Create Purchase Contract Inventory Receipt for Non Lotted Item "Process Button" Done=====')
+//
+//
+//         //region Scenario 8. Create Purchase Contract Inventory Receipt for Lotted Item "Process Button" - (Comment this out until TF bug fix is done for scroll bars)
+//        .displayText('=====  Scenario 8. Create Purchase Contract Inventory Receipt for Lotted Item "Process Button"  =====')
+//        .clickMenuFolder('Contract Management','Folder')
+//        .clickMenuScreen('Contracts','Screen')
+//        .clickButton('New')
+//        .waitUntilLoaded('ctcontract')
+//        .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
+//        .selectComboBoxRowValue('Customer', 'ABC Trucking', 'Customer',1)
+//        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',1)
+//        .enterData('Text Field','Quantity','100')
+//        .selectComboBoxRowValue('CommodityUOM', 'LB', 'CommodityUOM',1)
+//        .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
+//        .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
+//        .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
+//        .clickButton('AddDetail')
+//        .waitUntilLoaded('ctcontractsequence')
+//        .waitUntilLoaded()
+//        .addFunction (function (next){
+//        var date = new Date().toLocaleDateString();
+//        new iRely.FunctionalTest().start(t, next)
+//            .enterData('Date Field','EndDate', date, 0, 10)
+//            .done();
+//          })
+//        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
+//        .selectComboBoxRowValue('Item', 'LTI - 100', 'Item',1)
+//        .selectComboBoxRowValue('NetWeightUOM', 'LB', 'NetWeightUOM',1)
+//        .selectComboBoxRowValue('PriceCurrency', 'USD', 'NetWeightUOM',1)
+//        .verifyData('Text Field','NetWeight','100.0000')
+//        .verifyData('Combo Box','PricingType','Cash')
+//        .verifyData('Combo Box','PriceCurrency','USD')
+//        .verifyData('Combo Box','CashPriceUOM','LB')
+//        .enterData('Text Field','CashPrice','10')
+//        .clickButton('Save')
+//        .waitUntilLoaded('ctcontract')
+//        .clickButton('Save')
+//        .waitUntilLoaded('')
+//        .clickButton('Process')
+//        .waitUntilLoaded('icinventoryreceipt')
+//        .waitUntilLoaded('')
+//        .waitUntilLoaded('')
+//
+//        .verifyData('Combo Box','ReceiptType','Purchase Contract')
+//        .verifyData('Combo Box','Vendor','ABC Trucking')
+//        .verifyData('Combo Box','Currency','USD')
+//        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'LTI - 100')
+//        .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
+//        .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
+//        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
+//        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
+//        .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
+//        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
+//        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
+//        .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 100, 'LB', 'equal')
+//        .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM','LB','strWeightUOM')
+//        .verifyGridData('InventoryReceipt', 1, 'colGross', '100')
+//        .verifyGridData('InventoryReceipt', 1, 'colNet', '100')
+//        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
+//        .selectGridComboBoxRowValue('InventoryReceipt',1,'strSubLocationName','Raw Station','strSubLocationName')
+//        .selectGridComboBoxRowValue('InventoryReceipt',1,'strStorageLocationName','RM Storage','strStorageLocationName')
+//        .waitUntilLoaded('')
+//
+//
+//        .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
+//        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','LB','strUnitMeasure')
+//        .enterGridData('LotTracking', 1, 'colLotQuantity', '100')
+//        .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '100')
+//        .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
+//        .verifyGridData('LotTracking', 1, 'colLotNetWeight', '100')
+//        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'LB')
+//        .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
+//       .addFunction(function (next){
+//           var win =  Ext.WindowManager.getActive(),
+//               total = win.down('#txtGrossWgt').value;
+//           if (total == 100) {
+//               t.ok(true, 'Gross is correct.');
+//           }
+//           else {
+//               t.ok(false, 'Grossl is incorrect.');
+//           }
+//           next();
+//       })
+//       .addFunction(function (next){
+//           var win =  Ext.WindowManager.getActive(),
+//               total = win.down('#txtNetWgt').value;
+//           if (total == 100) {
+//               t.ok(true, 'Net is correct.');
+//           }
+//           else {
+//               t.ok(false, 'Net is incorrect.');
+//           }
+//           next();
+//       })
+//       .addFunction(function (next){
+//           var win =  Ext.WindowManager.getActive(),
+//               total = win.down('#txtTotal').value;
+//           if (total == 1000) {
+//               t.ok(true, 'Total is correct.');
+//           }
+//           else {
+//               t.ok(false, 'Total is incorrect.');
+//           }
+//           next();
+//       })
+//        .clickTab('Post Preview')
+//        .waitUntilLoaded('')
+//        .clickTab('Details')
+//        .waitUntilLoaded('')
+//        .clickTab('Post Preview')
+//        .waitUntilLoaded('')
+//        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+//        .verifyGridData('RecapTransaction', 1, 'colDebit', '1000')
+//        .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+//        .verifyGridData('RecapTransaction', 2, 'colCredit', '1000')
+//        .clickButton('Post')
+//        .waitUntilLoaded('')
+//        .addResult('Successfully Posted',300)
+//        .waitUntilLoaded('')
+//        .clickButton('Close')
+//        .waitUntilLoaded('')
+//        .clickButton('Close')
+//        .waitUntilLoaded('')
+//        .clickMenuFolder('Contract Management','Folder')
+//        .displayText('===== 8. Create Purchase Contract Inventory Receipt for Lotted Item "Process Button" Done=====')
 
         //region Scenario 9. Create Purchase Contract Inventory Receipt for Non Lotted Item "Add Orders Screen"
         .displayText('=====  Scenario 9. Create Purchase Contract to IR Add Orders Screen for Non Lotted Item  =====')
