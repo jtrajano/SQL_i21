@@ -14,44 +14,7 @@ IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFRep
 			SET intConcurrencyId = 1
 			WHERE intConcurrencyId IS NULL
 
-			DECLARE @RCID1 INT
-			
-			DECLARE @CountDeleted INT
-			SET @RCID1 = (SELECT TOP 1 intReportingComponentId 
-			FROM tblTFReportingComponent 
-			WHERE strType = 'NE EDI')
-
-			IF (@RCID1 IS NOT NULL)
-			BEGIN
-				DELETE FROM tblTFFilingPacket 
-				WHERE intReportingComponentId = @RCID1
-
-				SET @CountDeleted = (SELECT @@ROWCOUNT)
-				IF(@CountDeleted > 0)
-				BEGIN
-					DELETE FROM tblTFReportingComponent 
-					WHERE strType = 'NE EDI'
-				END
-			END
-
-			DECLARE @RCID2 INT
-			SET @CountDeleted = 0
-			SET @RCID2 = (SELECT TOP 1 intReportingComponentId 
-			FROM tblTFReportingComponent 
-			WHERE strType = 'EDI' AND strScheduleName = 'NE EDI file')
-
-			IF (@RCID2 IS NOT NULL)
-			BEGIN
-				DELETE FROM tblTFFilingPacket 
-				WHERE intReportingComponentId = @RCID2
-
-				SET @CountDeleted = (SELECT @@ROWCOUNT)
-				IF(@CountDeleted > 0)
-				BEGIN
-					DELETE FROM tblTFReportingComponent 
-					WHERE strType = 'EDI' AND strScheduleName = 'NE EDI file'
-				END
-			END
+			UPDATE tblTFReportingComponent SET strType = 'NE EDI' WHERE strScheduleName = 'NE EDI file'
 		END
 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFReportingComponentConfiguration')
