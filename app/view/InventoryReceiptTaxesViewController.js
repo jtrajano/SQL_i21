@@ -22,10 +22,10 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
 
         var me = this;
         var win = this.getView();
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window: win,
             store: Ext.create('Inventory.store.ReceiptItemTax'),
-            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
+            singleGridMgr: Ext.create('iRely.grid.Manager', {
                 grid: win.down('grid'),
                 position: 'none',
                 title: 'Tax Details',

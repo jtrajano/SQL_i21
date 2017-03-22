@@ -593,7 +593,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             store = Ext.create('Inventory.store.Adjustment', { pageSize: 1 }),
             grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
             enableActivity: true,
@@ -604,14 +604,14 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             createRecord: me.createRecord,
             validateRecord: me.validateRecord,
             binding: me.config.binding,
-            attachment: Ext.create('iRely.mvvm.attachment.Manager', {
+            attachment: Ext.create('iRely.attachment.Manager', {
                 type: 'Inventory.InventoryAdjustment',
                 window: win
             }),
             details: [
                 {
                     key: 'tblICInventoryAdjustmentDetails',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: grdInventoryAdjustment,
                         deleteButton: win.down('#btnRemoveItem')
                     })

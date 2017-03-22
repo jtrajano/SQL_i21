@@ -16,6 +16,10 @@
 Ext.define('Inventory.view.CompanyPreferenceOptionViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.iccompanypreferenceoption',
+    requires: [
+        "Inventory.controller.Inventory",
+        "i21.controller.ModuleManager"
+    ],
 
     config: {
         binding: {

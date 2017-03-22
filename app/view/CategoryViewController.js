@@ -238,7 +238,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Category', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
             include: 'tblICCategoryAccounts.tblGLAccount, ' +
@@ -256,14 +256,14 @@ Ext.define('Inventory.view.CategoryViewController', {
             details: [
                 {
                     key: 'tblICCategoryAccounts',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdGlAccounts'),
                         deleteButton : win.down('#btnDeleteGlAccounts')
                     })
                 },
                 {
                     key: 'tblICCategoryLocations',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdLocation'),
                         deleteButton : win.down('#btnDeleteLocation'),
                         position: 'none'
@@ -271,21 +271,21 @@ Ext.define('Inventory.view.CategoryViewController', {
                 },
                 {
                     key: 'tblICCategoryVendors',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdVendorCategoryXref'),
                         deleteButton : win.down('#btnDeleteVendorCategoryXref')
                     })
                 },
                 // {
                 //     key: 'tblICCategoryUOMs',
-                //     component: Ext.create('iRely.mvvm.grid.Manager', {
+                //     component: Ext.create('iRely.grid.Manager', {
                 //         grid: win.down('#grdUnitOfMeasure'),
                 //         deleteButton : win.down('#btnDeleteUom')
                 //     })
                 // },
                 {
                     key: 'tblICCategoryTaxes',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdTax'),
                         deleteButton : win.down('#btnDeleteTax')
                     })

@@ -79,7 +79,7 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
 
         var grdPackingType = win.down('#grdPackingType');
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             binding: me.config.binding,
             createRecord : me.createRecord,
             window : win,
@@ -87,7 +87,7 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
             details: [
                 {
                     key: 'tblICManufacturingCellPackTypes',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: grdPackingType,
                         deleteButton : grdPackingType.down('#btnDeletePackingType')
                     })

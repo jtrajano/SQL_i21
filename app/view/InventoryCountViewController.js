@@ -391,12 +391,12 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             store = Ext.create('Inventory.store.InventoryCount', { pageSize: 1 }),
             grdPhysicalCount = win.down('#grdPhysicalCount');
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
             enableActivity: true,
             enableAttachment: true,
-            attachment: Ext.create('iRely.mvvm.attachment.Manager', {
+            attachment: Ext.create('iRely.attachment.Manager', {
                 type: 'Inventory.InventoryCount',
                 window: win
             }),
@@ -408,7 +408,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             details: [
                 {
                     key: 'tblICInventoryCountDetails',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: grdPhysicalCount,
                         deleteButton: win.down('#btnRemove'),
                         createRecord: me.createLineItemRecord

@@ -184,7 +184,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             store = Ext.create('Inventory.store.ItemLocation', { pageSize: 1 });
 
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
             binding: me.config.binding,

@@ -20,10 +20,10 @@ Ext.define('Inventory.view.ProcessCodeViewController', {
     setupContext: function () {
         "use strict";
         var win = this.getView();
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window: win,
             store: Ext.create('Inventory.store.ProcessCode'),
-            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
+            singleGridMgr: Ext.create('iRely.grid.Manager', {
                 grid: win.down('grid'),
                 title: 'Production Process',
                 columns: [

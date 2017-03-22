@@ -262,7 +262,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
             win = config.window,
             store = Ext.create('Inventory.store.RebuildInventory', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
             createRecord: me.createRecord,

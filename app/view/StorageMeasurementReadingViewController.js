@@ -136,7 +136,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.StorageMeasurementReading', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
             include: 'tblICStorageMeasurementReadingConversions.vyuICGetStorageMeasurementReadingConversion',
@@ -145,7 +145,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
             details: [
                 {
                     key: 'tblICStorageMeasurementReadingConversions',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdStorageMeasurementReading'),
                         deleteButton : win.down('#btnRemove')
                     })

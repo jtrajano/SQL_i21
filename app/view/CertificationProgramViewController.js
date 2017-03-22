@@ -75,7 +75,7 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Certification', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
             include: 'tblICCertificationCommodities.tblICCommodity, ' +
@@ -85,7 +85,7 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
             details: [
                 {
                     key: 'tblICCertificationCommodities',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdCertificationProgram'),
                         deleteButton : win.down('#btnDeleteCertificationProgram')
                     })
