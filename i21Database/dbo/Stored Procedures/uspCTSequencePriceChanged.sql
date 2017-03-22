@@ -17,7 +17,8 @@ BEGIN TRY
 			@intPricingTypeId		INT,
 			@intContractHeaderId	INT,
 			@ysnOnceApproved		BIT,
-			@ysnApprovalExist		BIT
+			@ysnApprovalExist		BIT,
+			@ysnAllowChangePricing	BIT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -27,6 +28,8 @@ BEGIN TRY
 	WHERE	intContractDetailId		=	@intContractDetailId
 
 	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById)
+
+	SELECT @ysnAllowChangePricing = ysnAllowChangePricing FROM tblCTCompanyPreference
 
 	IF @ScreenName = 'Price Contract'
 	BEGIN
@@ -45,7 +48,7 @@ BEGIN TRY
 		END
 	END
 
-	IF 	@intPricingTypeId NOT IN (1,6)
+	IF 	@intPricingTypeId NOT IN (1,6) OR @ysnAllowChangePricing = 1
 		RETURN
 
 	IF OBJECT_ID('tempdb..#tblReceipt') IS NOT NULL  								
