@@ -197,6 +197,8 @@ BEGIN
 		,[intShipFromLocationId]
 		,[intShipToLocationId]
 		,[intFreightTermId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
 
 		-- Charges
 		,[intContractId]
@@ -218,6 +220,9 @@ BEGIN
 	,[intShipFromLocationId]			= SE.intShipFromLocationId
 	,[intShipToLocationId]				= SE.intShipToLocationId
 	,[intFreightTermId]					= SE.intFreightTermId
+	,[intForexRateTypeId]				= SE.intForexRateTypeId
+	,[dblForexRate]						= SE.dblForexRate
+
 	--Charges
 	,[intContractId]					= NULL
 	,[intCurrencyId]  					= SE.intCurrencyId
@@ -251,6 +256,8 @@ BEGIN
 		,[intShipFromLocationId]
 		,[intShipToLocationId]
 		,[intFreightTermId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
 
 		-- Charges
 		,[intContractId]
@@ -272,6 +279,9 @@ BEGIN
 	,[intShipFromLocationId]			= SE.intShipFromLocationId
 	,[intShipToLocationId]				= SE.intShipToLocationId
 	,[intFreightTermId]					= SE.intFreightTermId
+	,[intForexRateTypeId]				= SE.intForexRateTypeId
+	,[dblForexRate]						= SE.dblForexRate
+
 	--Charges
 	,[intContractId]					= NULL
 	,[intCurrencyId]  					= SC.intCurrencyId
@@ -326,6 +336,8 @@ ELSE
 			,[intShipFromLocationId]
 			,[intShipToLocationId]
 			,[intFreightTermId]
+			,[intForexRateTypeId]
+			,[dblForexRate]
 
 			-- Charges
 			,[intContractId]
@@ -347,6 +359,9 @@ ELSE
 		,[intShipFromLocationId]			= SE.intShipFromLocationId
 		,[intShipToLocationId]				= SE.intShipToLocationId
 		,[intFreightTermId]					= SE.intFreightTermId
+		,[intForexRateTypeId]				= SE.intForexRateTypeId
+		,[dblForexRate]						= SE.dblForexRate
+
 		--Charges
 		,[intContractId]					= SE.intOrderId
 		,[intCurrencyId]  					= SE.intCurrencyId
