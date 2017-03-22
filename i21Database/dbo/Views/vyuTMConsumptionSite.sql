@@ -11,7 +11,7 @@ AS
 		,strCustomerContact = G.strName
 		,strCustomerComments = G.strInternalNotes
 		,strCustomerSalesPerson = I.strSalespersonId
-		,intCustomerTerms = H.intTermsId
+		,intCustomerTerms = D.intTermsId
 		,strCustomerStatementFormat = D.strStatementFormat
 		,dblCustomerYTDSales = ISNULL(CI.dblYTDSales,0.0)
 		,dblCustomerBudgetAmountForBudgetBilling = D.dblBudgetAmountForBudgetBilling
@@ -125,7 +125,7 @@ AS
 	LEFT JOIN [vyuARCustomerInquiryReport] CI
 		ON C.intEntityId = CI.intEntityCustomerId
 	LEFT JOIN tblSMTerm J
-		ON H.intTermsId = J.intTermID
+		ON D.intTermsId = J.intTermID
 	LEFT JOIN tblARAccountStatus K
 		ON D.intAccountStatusId = K.intAccountStatusId
 	----Start Getting Site Driver	
