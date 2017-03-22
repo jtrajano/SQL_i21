@@ -2,7 +2,7 @@
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
-SET QUOTED_IDENTIFIER OFF
+ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -37,6 +37,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@begingroup				AS NVARCHAR(50)
 		,@endgroup					AS NVARCHAR(50)
 		,@datatype					AS NVARCHAR(50)
+		,@strCustomerName			AS NVARCHAR(MAX)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -106,6 +107,12 @@ DECLARE @temp_cf_table TABLE(
 	,[strInvoiceReportNumber]	NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,[dtmInvoiceDate]			DATETIME
 )
+
+IF OBJECT_ID('tempdb..#SelectedCustomer') IS NOT NULL DROP TABLE #SelectedCustomer
+CREATE TABLE #SelectedCustomer (	
+	strCustomerName	VARCHAR(MAX)	COLLATE Latin1_General_CI_AS 
+)
+
 -- Prepare the XML 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
 
@@ -155,7 +162,34 @@ SELECT @ysnPrintOnlyPastDue = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'ysnPrintOnlyPastDue'
 
--- SANITIZE THE DATE AND REMOVE THE TIME.
+SELECT @strCustomerName = [from]
+FROM @temp_xml_table
+WHERE [fieldname] IN ('strName', 'strCustomerName')
+
+IF (@strCustomerName IS NULL OR @strCustomerName = '')
+BEGIN
+ 
+	SELECT @strCustomerName = strName
+	FROM (
+		SELECT 
+			strName  + ', '
+		FROM 
+			tblEMEntity
+		FOR XML PATH ('')
+	) c (strName)
+END
+	
+SET @strCustomerName = REPLACE (@strCustomerName, '|^|', ',')
+SET @strCustomerName = REVERSE(SUBSTRING(REVERSE(@strCustomerName),PATINDEX('%[A-Za-z0-9]%',REVERSE(@strCustomerName)),LEN(@strCustomerName) - (PATINDEX('%[A-Za-z0-9]%',REVERSE(@strCustomerName)) - 1)	) )
+
+INSERT INTO 
+	#SelectedCustomer	
+SELECT 
+	* 
+FROM 
+	fnARGetRowsFromDelimitedValues(@strCustomerName)
+	
+ -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
 ELSE 			  
@@ -172,7 +206,7 @@ SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 INSERT INTO @temp_aging_table
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
 
-DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
+DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue', 'strName', 'strCustomerName')
 
 SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
 
@@ -216,7 +250,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
 	 , dblARBalance = CUST.dblARBalance
-FROM vyuARCustomer C
+	FROM (SELECT * FROM vyuARCustomer WHERE strName IN (SELECT strCustomerName FROM #SelectedCustomer) ) C
 	INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
 	LEFT JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1
 	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -251,6 +285,8 @@ END
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
 
+
+
 IF @ysnIncludeBudget = 1
 	BEGIN
 		SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
@@ -281,7 +317,8 @@ IF @ysnIncludeBudget = 1
 				INNER JOIN vyuARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId
 				INNER JOIN tblARCustomer CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId	
 			WHERE CB.dtmBudgetDate BETWEEN @dtmDateFrom AND @dtmDateTo
-			  AND CB.dblAmountPaid < CB.dblBudgetAmount '
+			  AND CB.dblAmountPaid < CB.dblBudgetAmount 
+			  AND C.strName IN (SELECT strCustomerName FROM #SelectedCustomer)'
 
 		SET @filter = ''
 
