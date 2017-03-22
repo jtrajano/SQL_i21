@@ -168,7 +168,7 @@ BEGIN
 				FROM #tmpTermTable A
 				WHERE tblTMDeliveryHistory.intWillCallDeliveryTermId = A.intOriginId
 
-				PRINT ''END UPDATE LOCATION RELATED RECORDS''
+				PRINT ''END UPDATE TERM RELATED RECORDS''
 
 
 				PRINT ''START UPDATE LOCALE TAX RELATED RECORDS''
@@ -179,11 +179,19 @@ BEGIN
 
 				SELECT
 					intOriginId = A.A4GLIdentity
-					,intI21Id = B.intTaxGroupId
+					,intI21Id = A.intTaxGroupId
 				INTO #tmpTaxLocaleTable 
-				FROM vwlclmst A
-				INNER JOIN tblSMTaxGroup B
-					ON A.vwlcl_tax_state COLLATE Latin1_General_CI_AS = B.strTaxGroup
+				FROM (
+					SELECT DISTINCT
+						B.A4GLIdentity
+						,A.intTaxGroupId
+					FROM tblSMTaxXRef A
+					INNER JOIN vwlclmst	B
+						ON A.strOrgState COLLATE Latin1_General_CI_AS = B.vwlcl_tax_state COLLATE Latin1_General_CI_AS
+						AND A.strOrgLocal1 COLLATE Latin1_General_CI_AS = B.vwlcl_tax_auth_id1 COLLATE Latin1_General_CI_AS 
+						AND A.strOrgLocal2 COLLATE Latin1_General_CI_AS = B.vwlcl_tax_auth_id2 COLLATE Latin1_General_CI_AS 
+				) A
+		
 
 				-- Update tblTMSite
 				UPDATE tblTMSite
@@ -194,7 +202,7 @@ BEGIN
 				--Update tblTMLease
 				UPDATE tblTMLease
 				SET intLeaseTaxGroupId = A.intI21Id
-				FROM #tmpTermTable A
+				FROM #tmpTaxLocaleTable A
 				WHERE tblTMLease.intLeaseTaxGroupId = A.intOriginId
 
 				PRINT ''END UPDATE LOCALE TAX  RELATED RECORDS''
@@ -294,23 +302,65 @@ BEGIN
 					,intI21Id = B.intContractHeaderId
 					,stri21Number = B.strInvoiceNumber
 					,strOriginNumber = A.vwivc_ivc_no COLLATE Latin1_General_CI_AS
+					,intEntityId = C.intEntityId
+					,intLocationId = D.intCompanyLocationId
 				INTO #tmpInvoiceTable 
 				FROM vwivcmst A
 				INNER JOIN tblARInvoice B
 					ON A.vwivc_ivc_no COLLATE Latin1_General_CI_AS = B.strInvoiceOriginId
+				INNER JOIN tblEMEntity C
+					ON B.intEntityCustomerId = C.intEntityId
+					AND A.vwivc_bill_to_cus COLLATE Latin1_General_CI_AS = C.strEntityNo
+				INNER JOIN tblSMCompanyLocation D
+					ON B.intCompanyLocationId = D.intCompanyLocationId
+					AND A.vwivc_loc_no COLLATE Latin1_General_CI_AS = D.strLocationNumber
+				GO
 
 				-- Update tblTMDeliveryHistory
 				UPDATE tblTMDeliveryHistory
 				SET intInvoiceId = A.intI21Id
 					,strInvoiceNumber = A.stri21Number
-				FROM #tmpInvoiceTable A
-				WHERE tblTMDeliveryHistory.strInvoiceNumber = A.strOriginNumber
+				FROM (
+				SELECT 
+					V.stri21Number
+					,Z.intDeliveryHistoryID
+					,V.intI21Id
+				FROM tblTMDeliveryHistory Z
+				INNER JOIN tblTMSite Y
+					ON Z.intSiteID = Y.intSiteID
+				INNER JOIN tblTMCustomer X
+					ON Y.intCustomerID = X.intCustomerID
+				INNER JOIN #tmpInvoiceTable V
+					ON X.intCustomerNumber = V.intEntityId
+					AND Y.intLocationId = V.intLocationId
+					AND RTRIM(Z.strInvoiceNumber) = RTRIM(V.strOriginNumber)
+				) A
+				WHERE tblTMDeliveryHistory.intDeliveryHistoryID = A.intDeliveryHistoryID
+				GO
 
 				-- Update tblTMDeliveryHistoryDetail
 				UPDATE tblTMDeliveryHistoryDetail
 				SET strInvoiceNumber = A.stri21Number
-				FROM #tmpInvoiceTable A
-				WHERE tblTMDeliveryHistoryDetail.strInvoiceNumber = A.strOriginNumber
+				FROM (
+					SELECT 
+						V.stri21Number
+						,W.intDeliveryHistoryDetailID
+						,V.intI21Id
+					FROM tblTMDeliveryHistory Z
+					INNER JOIN tblTMDeliveryHistoryDetail W
+						ON Z.intDeliveryHistoryID = W.intDeliveryHistoryID
+					INNER JOIN tblTMSite Y
+						ON Z.intSiteID = Y.intSiteID
+					INNER JOIN tblTMCustomer X
+						ON Y.intCustomerID = X.intCustomerID
+					INNER JOIN #tmpInvoiceTable V
+						ON X.intCustomerNumber = V.intEntityId
+						AND Y.intLocationId = V.intLocationId
+						AND RTRIM(W.strInvoiceNumber) = RTRIM(V.strOriginNumber)
+
+				) A
+				WHERE tblTMDeliveryHistoryDetail.intDeliveryHistoryDetailID = A.intDeliveryHistoryDetailID
+				GO
 
 				PRINT ''END UPDATE INVOICE RELATED RECORDS''
 
