@@ -116,7 +116,10 @@ SELECT
 									  END
 		,intEntityVendorId			= @intEntityId
 		,strBillOfLadding			= NULL
-		,intCurrencyId				= SC.intCurrencyId
+		,intCurrencyId				= CASE
+										WHEN ISNULL(CNT.intContractDetailId,0) = 0 THEN SC.intCurrencyId 
+										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
+									END
 		,intLocationId				= SC.intProcessingLocationId
 		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityVendorId = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId

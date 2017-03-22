@@ -115,7 +115,10 @@ BEGIN
 		SELECT
 		intOrderType				= @intOrderType
 		,intEntityCustomerId		= @intEntityId
-		,intCurrencyId				= SC.intCurrencyId
+		,intCurrencyId				= CASE
+										WHEN ISNULL(CNT.intContractDetailId,0) = 0 THEN SC.intCurrencyId 
+										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
+									END
 		,intShipFromLocationId		= SC.intProcessingLocationId
 		,intShipToLocationId		= (select top 1 intShipToId from tblARCustomer where intEntityCustomerId = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId
