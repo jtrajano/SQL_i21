@@ -1,6 +1,9 @@
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCCommodityMigrationGr]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [uspICDCCommodityMigrationGr]; 
-GO 
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
 
 Create PROCEDURE [dbo].[uspICDCCommodityMigrationGr]
 
@@ -134,3 +137,7 @@ where U.ysnStockUnit = 1)
 --join gacommst cmst on strDiscountId COLLATE SQL_Latin1_General_CP1_CS_AS = CAST(gacom_def_disc_schd_no AS VARCHAR(15)) COLLATE SQL_Latin1_General_CP1_CS_AS
 --) as St
 --where St.gacom_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = tblICCommodity.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS
+
+
+GO
+

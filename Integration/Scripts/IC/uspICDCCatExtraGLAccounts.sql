@@ -1,6 +1,9 @@
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCCatExtraGLAccounts]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [uspICDCCatExtraGLAccounts]; 
-GO 
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
 
 Create PROCEDURE [dbo].[uspICDCCatExtraGLAccounts]
 
@@ -10,6 +13,8 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
+
+
 
 
 --insert extra inventory accounts to Category GL table
@@ -28,3 +33,5 @@ select top 1 46 intAccountCategoryId, intAccountId from tblGLAccount where strDe
 --select top 1 45 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%Clearing%'
 ) ac
 where C.strInventoryType = 'Inventory' )
+
+GO
