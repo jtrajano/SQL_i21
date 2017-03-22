@@ -1,6 +1,9 @@
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCCommodityGLMigrationGr]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [uspICDCCommodityGLMigrationGr]; 
-GO 
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
 
 Create PROCEDURE [dbo].[uspICDCCommodityGLMigrationGr]
 
@@ -10,6 +13,7 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
+
 
 
 ----===============================STEP 5===================================
@@ -113,4 +117,8 @@ JOIN
 select distinct(CAST(gacom_gl_inv AS VARCHAR)) code, 'Inventory' cat from gacommst
 ) as t 
 ON tgs.strCode = t.code  
-JOIN dbo.tblGLAccountCategory tgc ON t.cat  = tgc.strAccountCategory
+JOIN dbo.tblGLAccountCategory tgc ON t.cat  = tgc.strAccountCategory 
+
+
+
+GO
