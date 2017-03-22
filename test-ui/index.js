@@ -414,7 +414,7 @@ if(_url.indexOf('version=TF') < 1) {
                         {
                             url: 'CRUDScripts/InventoryAdjustment/DeleteInventoryAdjustment.js?v='+version,
                             title: 'DeleteInventoryAdjustment',
-                            preload: [
+                    preload: [
                                 functionalTest,
                                 commonIC
                             ]
