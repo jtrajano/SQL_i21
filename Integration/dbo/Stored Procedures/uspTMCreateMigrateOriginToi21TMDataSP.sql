@@ -363,7 +363,95 @@ BEGIN
 				GO
 
 				PRINT ''END UPDATE INVOICE RELATED RECORDS''
+				
 
+				PRINT ''START UPDATE TM Preference''
+				---Update tblTMPreference
+				
+					UPDATE tblTMPreferenceCompany
+					SET ysnOriginToi21TMData = 1
+						,ysnUseOriginIntegration = 0
+
+				PRINT ''START UPDATE TM Preference''
+
+
+				PRINT ''START UPDATE Recreate SP and views''
+
+					EXEC uspTMRecreateAccountStatusView
+					GO
+					EXEC uspTMRecreateSalesPersonView
+					GO
+					EXEC uspTMRecreateCommentsView
+					GO 
+					EXEC uspTMRecreateContractView
+					GO 
+					EXEC uspTMRecreateOriginOptionView
+					GO 
+					EXEC uspTMRecreateCTLMSTView
+					GO 
+					EXEC uspTMRecreateItemView
+					GO 
+					EXEC uspTMRecreateInvoiceView
+					GO 
+					EXEC uspTMRecreateLocaleTaxView
+					GO 
+					EXEC uspTMRecreateLocationView
+					GO 
+					EXEC uspTMRecreateCustomerView
+					GO
+					EXEC uspTMRecreateTermsView
+					GO
+					EXEC uspTMRecreateSiteOrderView
+					GO
+					EXEC uspTMAlterCobolWrite
+					GO
+					EXEC uspTMRecreateOpenCallEntryView
+					GO
+					EXEC uspTMRecreateOpenWorkOrderView
+					GO
+					EXEC uspTMRecreateConsumptionSiteSearchView
+					GO
+					EXEC uspTMRecreateGetSpecialPricingPriceTableFn
+					GO
+					EXEC uspTMRecreateItemUsedBySiteView
+					GO
+					EXEC uspTMRecreateLocationUsedBySiteView
+					GO
+					EXEC uspTMRecreateDriverUsedBySiteView
+					GO
+					EXEC uspTMRecreateLeaseSearchView
+					GO
+					EXEC uspTMRecreateDeviceSearchView
+					GO
+					EXEC uspTMRecreateGeneratedCallEntryView
+					GO
+					EXEC uspTMRecreateDeliveryHistoryCallEntryView
+					GO
+					EXEC uspTMRecreateOriginDegreeOptionView
+					GO
+					EXEC uspTMRecreateOutOfRangeBurnRateSearchView
+					GO
+					EXEC uspTMRecreateLeakGasCheckSearchView
+					GO
+					EXEC uspTMRecreateEfficiencySearchView
+					GO
+					EXEC uspTMRecreateDeliveriesSearchView
+					GO
+					EXEC uspTMRecreateCustomerContractSubReportView
+					GO
+					EXEC uspTMRecreateCallEntryPrintOutReportView
+					GO
+					EXEC uspTMRecreateDeliveryFillReportView
+					GO
+					EXEC uspTMRecreateWorkOrderReportView
+					GO
+					EXEC uspTMRecreateDYMOCustomerLabelReportView
+					GO
+					EXEC uspTMRecreateAssociateSiteSearchView
+					GO
+
+
+				PRINT ''START UPDATE Recreate SP and views''
 			END
 		')
 	END
