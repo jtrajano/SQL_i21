@@ -6214,7 +6214,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
             var countCharges = charges.getRange().length;
-            var lineCharge = 1;
+            var lineCharge = 0;
 
             if (charges) {
                Ext.Array.each(charges.data.items, function (charge) {
@@ -6341,11 +6341,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     iRely.Functions.showErrorDialog(jsonData.message.statusText);
                 }
                 else {
-                    // context.configuration.paging.store.load({
-                    //     callback: function(records, options, success) {
-                    //         me.doOtherChargeTaxCalculate(win);
-                    //     }
-                    // });
+
+                    if(!successCallback) {
+                        context.configuration.paging.store.load({
+                            callback: function(records, options, success) {
+                                me.doOtherChargeTaxCalculate(win);
+                            }
+                        });
+                    }
 
                     if (successCallback) successCallback();
                 };
@@ -6775,11 +6778,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             .subscribe(
                 function(successResponse) {
                     me.onAfterReceive(true);
-                    context.configuration.paging.store.load({
-                        callback: function(records, options, success) {
-                            me.doOtherChargeTaxCalculate(win);
-                        }
-                    });
+                    // context.configuration.paging.store.load({
+                    //     callback: function(records, options, success) {
+                    //         me.doOtherChargeTaxCalculate(win);
+                    //     }
+                    // });
                     // Check what is the active tab. If it is the Post Preview tab, load the recap data. 
                     if (activeTab.itemId == 'pgePostPreview'){
                         var cfg = {
