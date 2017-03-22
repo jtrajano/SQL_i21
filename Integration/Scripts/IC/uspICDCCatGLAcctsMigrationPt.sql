@@ -124,7 +124,7 @@ INSERT INTO tblICCategoryAccount (
 --	,act.intAccountId
 --	,1 FROM ptclsmst AS cls INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS INNER JOIN ptmglmst AS mgl ON mgl.ptmgl_key = 01 INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = mgl.ptmgl_pur_variance INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId INNER JOIN tblGLAccountSegmentMapping AS segm ON segm.intAccountId = coa.intCrossReferenceId INNER JOIN tblGLAccountSegment AS seg ON seg.intAccountSegmentId = segm.intAccountSegmentId WHERE coa.strExternalId = mgl.ptmgl_pur_variance
 --	AND seg.strCode = SUBSTRING(strExternalId, 0, CHARINDEX('.', strExternalId))
-	)
+--)
 
 ------------------------------------------------------
 --import gl accounts for 'Other Charge' category
