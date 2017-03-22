@@ -164,14 +164,99 @@ BEGIN
 						WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate
 				) x
 			END
+			--END Insert data from tblSTstgRebatesPMMorris
+
+			--START Insert data from tblSTstgRebatesRJReynolds
+			IF(@strTableName = 'tblSTstgRebatesRJReynolds')
+			BEGIN
+				INSERT INTO tblSTstgRebatesRJReynolds
+				(
+					strOutletName
+					, intOutletNumber
+					, strOutletAddress 
+					, strOutletCity
+					, strOutletState 
+					, intOutletZipCode
+					, strTransactionDateTime
+					, intMarketBasketTransactionId
+					, intScanTransactionId
+					, intRegisterId
+					, intQuantity
+					, dblPrice
+					, dblCouponAmount
+					, intCouponPid
+					, strUpcCode
+					, strUpcDescription
+					, strUnitOfMeasure
+					, strPromotionFlag
+					, strOutletMultipackFlag
+					, intOutletMultipackQuantity
+					, dblOutletMultipackDiscountAmount
+					, strAccountPromotionName
+					, dblAccountDiscountAmount
+					, dblManufacturerDiscountAmount
+				)
+				SELECT
+					x.strOutletName
+					, x.intOutletNumber
+					, x.strOutletAddress
+					, x.strOutletCity
+					, x.strOutletState
+					, x.intOutletZipCode
+					, x.strTransactionDateTime
+					, x.intMarketBasketTransactionId
+					, x.intScanTransactionId
+					, x.intRegisterId
+					, x.intQuantity
+					, x.dblPrice
+					, x.dblCouponAmount
+					, x.intCouponPid
+					, x.strUpcCode
+					, x.strUpcDescription
+					, x.strUnitOfMeasure
+					, x.strPromotionFlag
+					, x.strOutletMultipackFlag
+					, x.intOutletMultipackQuantity
+					, x.dblOutletMultipackDiscountAmount
+					, x.strAccountPromotionName
+					, x.dblAccountDiscountAmount
+					, x.dblManufacturerDiscountAmount
+				FROM
+				(
+					SELECT
+							ST.strDescription as strOutletName
+							, ST.intStoreNo as intOutletNumber
+							, ST.strAddress as strOutletAddress
+							, ST.strCity as strOutletCity
+							, ST.strState as strOutletState
+							, ST.strZipCode as intOutletZipCode
+							, FORMAT(CAST(dtmDate AS datetime), 'yyyy-MM-dd-HH:mm:ss') as strTransactionDateTime
+							, intTermMsgSN as intMarketBasketTransactionId
+							, intTermMsgSN as intScanTransactionId
+							, intPosNum as intRegisterId
+							, dblTrlQty as intQuantity
+							, dblTrlLineTot as dblPrice
+							, CASE WHEN strTrpPaycode = 'COUPONS' THEN dblTrpAmt ELSE 0 END as dblCouponAmount
+							, 21 as intCouponPid
+							, strTrlUPC as strUpcCode
+							, strTrlDesc as strUpcDescription
+							, 'PACK' as strUnitOfMeasure
+							, CASE WHEN strTrpPaycode IN ('COUPONS', 'LOTTERY PO') THEN 'Y' ELSE 'N' END as strPromotionFlag
+							, 'N' as strOutletMultipackFlag
+							, 0 as intOutletMultipackQuantity
+							, 0 as dblOutletMultipackDiscountAmount
+							, 'None' as strAccountPromotionName
+							, 0 as dblAccountDiscountAmount
+							, 0 as dblManufacturerDiscountAmount
+						FROM tblSTTranslogRebates TR
+						JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
+						WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate
+				) x
+			END
+			--END Insert data from tblSTstgRebatesRJReynolds
 		END
 			
 		PRINT @intStoreIdMin
-
-	--IF(@strTableName = 'tblSTstgRebatesRJReynolds')
-	--BEGIN
-		
-	--END
 		
 		SET @intStoreIdMin = @intStoreIdMin + 1
 	END
@@ -256,108 +341,190 @@ BEGIN
 				SET @intMin = @intMin + 1
 			END
 
-
-			--GET values
-			SELECT @intMin = MIN(intPMMId), @intMax = MAX(intPMMId)
-			FROM tblSTstgRebatesPMMorris
-
-			SET @intLoopCount = 0
-
-			DECLARE @intManagementOrRetailNumber INT
-					, @strWeekEndingDate nvarchar(20)
-					, @strTransactionDate nvarchar(20)
-					, @strTransactionTime nvarchar(10)
-					, @strTransactionIdCode nvarchar(50)
-					, @strStoreNumber nvarchar(10)
-					, @strStoreName nvarchar(50)
-					, @strStoreAddress nvarchar(60)
-					, @strStoreCity nvarchar(50)
-					, @strStoreState nvarchar(2)
-					, @intStoreZipCode int
-					, @strCategory nvarchar(20)
-					, @strManufacturerName nvarchar(20)
-					, @strSKUCode nvarchar(50)
-					, @strUpcCode nvarchar(14)
-					, @strSkuUpcDescription nvarchar(50)
-					, @strUnitOfMeasure nvarchar(20)
-					, @intQuantitySold numeric(10, 2)
-					, @intConsumerUnits int
-					, @strMultiPackIndicator nvarchar(1)
-					, @intMultiPackRequiredQuantity int
-					, @dblMultiPackDiscountAmount numeric(10, 2)
-					, @strRetailerFundedDIscountName nvarchar(20)
-					, @dblRetailerFundedDiscountAmount numeric(10, 2)
-					, @strMFGDealNameONE nvarchar(20)
-					, @dblMFGDealDiscountAmountONE numeric(10, 2)
-					, @strMFGDealNameTWO nvarchar(20)
-					, @dblMFGDealDiscountAmountTWO numeric(10, 2)
-					, @strMFGDealNameTHREE nvarchar(20)
-					, @dblMFGDealDiscountAmountTHREE numeric(10, 2)
-					, @dblFinalSalesPrice numeric(10, 2)
-
-			WHILE(@intMin <= @intMax)
+			--START tblSTstgRebatesPMMorris
+			IF(@strTableName = 'tblSTstgRebatesPMMorris')
 			BEGIN
-				IF EXISTS (SELECT * FROM tblSTstgRebatesPMMorris WHERE intPMMId = @intMin)
+				--GET values
+				SELECT @intMin = MIN(intPMMId), @intMax = MAX(intPMMId)
+				FROM tblSTstgRebatesPMMorris
+
+				SET @intLoopCount = 0
+
+				DECLARE @intManagementOrRetailNumber INT
+						, @strWeekEndingDate nvarchar(20)
+						, @strTransactionDate nvarchar(20)
+						, @strTransactionTime nvarchar(10)
+						, @strTransactionIdCode nvarchar(50)
+						, @strStoreNumber nvarchar(10)
+						, @strStoreName nvarchar(50)
+						, @strStoreAddress nvarchar(60)
+						, @strStoreCity nvarchar(50)
+						, @strStoreState nvarchar(2)
+						, @intStoreZipCode int
+						, @strCategory nvarchar(20)
+						, @strManufacturerName nvarchar(20)
+						, @strSKUCode nvarchar(50)
+						, @strUpcCode nvarchar(14)
+						, @strSkuUpcDescription nvarchar(50)
+						, @strUnitOfMeasure nvarchar(20)
+						, @intQuantitySold numeric(10, 2)
+						, @intConsumerUnits int
+						, @strMultiPackIndicator nvarchar(1)
+						, @intMultiPackRequiredQuantity int
+						, @dblMultiPackDiscountAmount numeric(10, 2)
+						, @strRetailerFundedDIscountName nvarchar(20)
+						, @dblRetailerFundedDiscountAmount numeric(10, 2)
+						, @strMFGDealNameONE nvarchar(20)
+						, @dblMFGDealDiscountAmountONE numeric(10, 2)
+						, @strMFGDealNameTWO nvarchar(20)
+						, @dblMFGDealDiscountAmountTWO numeric(10, 2)
+						, @strMFGDealNameTHREE nvarchar(20)
+						, @dblMFGDealDiscountAmountTHREE numeric(10, 2)
+						, @dblFinalSalesPrice numeric(10, 2)
+
+				WHILE(@intMin <= @intMax)
 				BEGIN
-					SELECT @intManagementOrRetailNumber = intManagementOrRetailNumber
-						   , @strWeekEndingDate = strWeekEndingDate
-						   , @strTransactionDate = strTransactionDate
-						   , @strTransactionTime = strTransactionTime
-						   , @strTransactionIdCode = strTransactionIdCode
-						   , @strStoreNumber = strStoreNumber
-						   , @strStoreName = strStoreName
-						   , @strStoreAddress = strStoreAddress
-						   , @strStoreCity = strStoreCity
-						   , @strStoreState = strStoreState
-						   , @intStoreZipCode = intStoreZipCode
-						   , @strCategory = strCategory
-						   , @strManufacturerName = strManufacturerName
-						   , @strSKUCode = strSKUCode
-						   , @strUpcCode = strUpcCode
-						   , @strSkuUpcDescription = strSkuUpcDescription
-						   , @strUnitOfMeasure = strUnitOfMeasure
-						   , @intQuantitySold = intQuantitySold
-						   , @intConsumerUnits = intConsumerUnits
-						   , @strMultiPackIndicator = strMultiPackIndicator
-						   , @intMultiPackRequiredQuantity = intMultiPackRequiredQuantity
-						   , @dblMultiPackDiscountAmount = dblMultiPackDiscountAmount
-						   , @strRetailerFundedDIscountName = strRetailerFundedDIscountName
-						   , @dblRetailerFundedDiscountAmount = dblRetailerFundedDiscountAmount
-						   , @strMFGDealNameONE = strMFGDealNameONE
-						   , @dblMFGDealDiscountAmountONE = dblMFGDealDiscountAmountONE
-						   , @strMFGDealNameTWO = strMFGDealNameTWO
-						   , @dblMFGDealDiscountAmountTWO = dblMFGDealDiscountAmountTWO
-						   , @strMFGDealNameTHREE = strMFGDealNameTHREE
-						   , @dblMFGDealDiscountAmountTHREE = dblMFGDealDiscountAmountTHREE
-						   , @dblFinalSalesPrice = dblFinalSalesPrice
-					FROM tblSTstgRebatesPMMorris WHERE intPMMId = @intMin
+					IF EXISTS (SELECT * FROM tblSTstgRebatesPMMorris WHERE intPMMId = @intMin)
+					BEGIN
+						SELECT @intManagementOrRetailNumber = intManagementOrRetailNumber
+							   , @strWeekEndingDate = strWeekEndingDate
+							   , @strTransactionDate = strTransactionDate
+							   , @strTransactionTime = strTransactionTime
+							   , @strTransactionIdCode = strTransactionIdCode
+							   , @strStoreNumber = strStoreNumber
+							   , @strStoreName = strStoreName
+							   , @strStoreAddress = strStoreAddress
+							   , @strStoreCity = strStoreCity
+							   , @strStoreState = strStoreState
+							   , @intStoreZipCode = intStoreZipCode
+							   , @strCategory = strCategory
+							   , @strManufacturerName = strManufacturerName
+							   , @strSKUCode = strSKUCode
+							   , @strUpcCode = strUpcCode
+							   , @strSkuUpcDescription = strSkuUpcDescription
+							   , @strUnitOfMeasure = strUnitOfMeasure
+							   , @intQuantitySold = intQuantitySold
+							   , @intConsumerUnits = intConsumerUnits
+							   , @strMultiPackIndicator = strMultiPackIndicator
+							   , @intMultiPackRequiredQuantity = intMultiPackRequiredQuantity
+							   , @dblMultiPackDiscountAmount = dblMultiPackDiscountAmount
+							   , @strRetailerFundedDIscountName = strRetailerFundedDIscountName
+							   , @dblRetailerFundedDiscountAmount = dblRetailerFundedDiscountAmount
+							   , @strMFGDealNameONE = strMFGDealNameONE
+							   , @dblMFGDealDiscountAmountONE = dblMFGDealDiscountAmountONE
+							   , @strMFGDealNameTWO = strMFGDealNameTWO
+							   , @dblMFGDealDiscountAmountTWO = dblMFGDealDiscountAmountTWO
+							   , @strMFGDealNameTHREE = strMFGDealNameTHREE
+							   , @dblMFGDealDiscountAmountTHREE = dblMFGDealDiscountAmountTHREE
+							   , @dblFinalSalesPrice = dblFinalSalesPrice
+						FROM tblSTstgRebatesPMMorris WHERE intPMMId = @intMin
 
-					--IF(@intLoopCount = 0)
-					--BEGIN
+						--IF(@intLoopCount = 0)
+						--BEGIN
 				
-					--END
-					--ELSE IF(@intLoopCount >= 1)
-					--BEGIN
-					--	SET @strCSV = @strCSV + ', ' + @strColumnNameVal
-					--END
+						--END
+						--ELSE IF(@intLoopCount >= 1)
+						--BEGIN
+						--	SET @strCSV = @strCSV + ', ' + @strColumnNameVal
+						--END
 
-					--Removed CAST(@intManagementOrRetailNumber as NVARCHAR(20))
-					--For now intManagementOrRetailNumber will be empty
-					SET @strCSV = @strCSV + CHAR(13) + '' + ', ' + CAST(REPLACE(@strWeekEndingDate, '-', '') as NVARCHAR(20)) + ', ' + CAST(REPLACE(@strTransactionDate, '-', '') as NVARCHAR(50))
-												+ ', ' + @strTransactionTime + ', ' + @strTransactionIdCode + ', ' + @strStoreNumber + ', ' + @strStoreName + ', ' + @strStoreAddress + ', ' + @strStoreCity + ', ' + @strStoreState
-												+ ', ' + CAST(@intStoreZipCode as NVARCHAR(50)) + ', ' + @strCategory + ', ' + @strManufacturerName + ', ' + @strSKUCode + ', ' + @strUpcCode + ', ' + @strSkuUpcDescription 
-												+ ', ' + @strUnitOfMeasure + ', ' + CAST(@intQuantitySold as NVARCHAR(50)) + ', ' + CAST(@intConsumerUnits as NVARCHAR(50)) + ', ' + @strMultiPackIndicator 
-												+ ', ' + CAST(@intMultiPackRequiredQuantity as NVARCHAR(50)) + ', ' + CAST(@dblMultiPackDiscountAmount as NVARCHAR(50)) + ', ' + @strRetailerFundedDIscountName 
-												+ ', ' + CAST(@dblRetailerFundedDiscountAmount as NVARCHAR(50)) + ', ' + @strMFGDealNameONE + ', ' + CAST(@dblMFGDealDiscountAmountONE as NVARCHAR(50)) + ', ' + @strMFGDealNameTWO
-												+ ', ' + CAST(@dblMFGDealDiscountAmountTWO as NVARCHAR(50)) + ', ' + @strMFGDealNameTHREE + ', ' + CAST(@dblMFGDealDiscountAmountTHREE as NVARCHAR(50)) + ', ' + CAST(@dblFinalSalesPrice as NVARCHAR(50))
+						--Removed CAST(@intManagementOrRetailNumber as NVARCHAR(20))
+						--For now intManagementOrRetailNumber will be empty
+						SET @strCSV = @strCSV + CHAR(13) + '' + ', ' + CAST(REPLACE(@strWeekEndingDate, '-', '') as NVARCHAR(20)) + ', ' + CAST(REPLACE(@strTransactionDate, '-', '') as NVARCHAR(50))
+													+ ', ' + @strTransactionTime + ', ' + @strTransactionIdCode + ', ' + @strStoreNumber + ', ' + @strStoreName + ', ' + @strStoreAddress + ', ' + @strStoreCity + ', ' + @strStoreState
+													+ ', ' + CAST(@intStoreZipCode as NVARCHAR(50)) + ', ' + @strCategory + ', ' + @strManufacturerName + ', ' + @strSKUCode + ', ' + @strUpcCode + ', ' + @strSkuUpcDescription 
+													+ ', ' + @strUnitOfMeasure + ', ' + CAST(@intQuantitySold as NVARCHAR(50)) + ', ' + CAST(@intConsumerUnits as NVARCHAR(50)) + ', ' + @strMultiPackIndicator 
+													+ ', ' + CAST(@intMultiPackRequiredQuantity as NVARCHAR(50)) + ', ' + CAST(@dblMultiPackDiscountAmount as NVARCHAR(50)) + ', ' + @strRetailerFundedDIscountName 
+													+ ', ' + CAST(@dblRetailerFundedDiscountAmount as NVARCHAR(50)) + ', ' + @strMFGDealNameONE + ', ' + CAST(@dblMFGDealDiscountAmountONE as NVARCHAR(50)) + ', ' + @strMFGDealNameTWO
+													+ ', ' + CAST(@dblMFGDealDiscountAmountTWO as NVARCHAR(50)) + ', ' + @strMFGDealNameTHREE + ', ' + CAST(@dblMFGDealDiscountAmountTHREE as NVARCHAR(50)) + ', ' + CAST(@dblFinalSalesPrice as NVARCHAR(50))
 
 
 
-					SET @intLoopCount = @intLoopCount + 1
+						SET @intLoopCount = @intLoopCount + 1
+					END
+
+					SET @intMin = @intMin + 1
 				END
-
-				SET @intMin = @intMin + 1
 			END
+			--END tblSTstgRebatesPMMorris
+
+			-- START tblSTstgRebatesRJReynolds
+			IF(@strTableName = 'tblSTstgRebatesRJReynolds')
+			BEGIN
+				--GET values
+				SELECT @intMin = MIN(intRJRId), @intMax = MAX(intRJRId)
+				FROM tblSTstgRebatesRJReynolds
+
+				SET @intLoopCount = 0
+
+				DECLARE @strOutletName nvarchar(50)
+						, @intOutletNumber int
+						, @strOutletAddress nvarchar(100)
+						, @strOutletCity nvarchar(50)
+						, @strOutletState nvarchar(50)
+						, @intOutletZipCode int
+						, @strTransactionDateTime nvarchar(50)
+						, @intMarketBasketTransactionId int
+						, @intScanTransactionId int
+						, @intRegisterId int
+						, @intQuantity int
+						, @dblPrice decimal(18, 6)
+						, @dblCouponAmount decimal(18, 6)
+						, @intCouponPid int
+						--, @strUpcCode nvarchar(14)
+						, @strUpcDescription nvarchar(100)
+						--, @strUnitOfMeasure nvarchar(20)
+						, @strPromotionFlag nvarchar(1)
+						, @strOutletMultipackFlag nvarchar(1)
+						, @intOutletMultipackQuantity int
+						, @dblOutletMultipackDiscountAmount decimal(18, 6)
+						, @strAccountPromotionName nvarchar(50)
+						, @dblAccountDiscountAmount decimal(18, 6)
+						, @dblManufacturerDiscountAmount decimal(18, 6)
+
+				WHILE(@intMin <= @intMax)
+				BEGIN
+					IF EXISTS (SELECT * FROM tblSTstgRebatesRJReynolds WHERE intRJRId = @intMin)
+					BEGIN
+						SELECT @strOutletName = strOutletName
+							    , @intOutletNumber = intOutletNumber
+								, @strOutletAddress = strOutletAddress
+								, @strOutletCity = strOutletCity
+								, @strOutletState = strOutletState
+								, @intOutletZipCode = intOutletZipCode
+								, @strTransactionDateTime = strTransactionDateTime
+								, @intMarketBasketTransactionId = intMarketBasketTransactionId
+								, @intScanTransactionId = intScanTransactionId
+								, @intRegisterId = intRegisterId
+								, @intQuantity = intQuantity
+								, @dblPrice = dblPrice
+								, @dblCouponAmount = dblCouponAmount
+								, @intCouponPid = intCouponPid
+								, @strUpcCode = strUpcCode
+								, @strUpcDescription = strUpcDescription
+								, @strUnitOfMeasure = strUnitOfMeasure
+								, @strPromotionFlag = strPromotionFlag
+								, @strOutletMultipackFlag = strOutletMultipackFlag
+								, @intOutletMultipackQuantity = intOutletMultipackQuantity
+								, @dblOutletMultipackDiscountAmount = dblOutletMultipackDiscountAmount
+								, @strAccountPromotionName = strAccountPromotionName
+								, @dblAccountDiscountAmount = dblAccountDiscountAmount
+								, @dblManufacturerDiscountAmount = dblManufacturerDiscountAmount
+						FROM tblSTstgRebatesRJReynolds WHERE intRJRId = @intMin
+
+						SET @strCSV = @strCSV + CHAR(13) + @strOutletName + ', ' + CAST(@intOutletNumber as NVARCHAR(20)) + ', ' + @strOutletAddress + ', ' + @strOutletCity + ', ' + @strOutletState + ', ' + CAST(@intOutletZipCode as NVARCHAR(20)) 
+						                            + ', ' + @strTransactionDateTime + ', ' + CAST(@intMarketBasketTransactionId as NVARCHAR(20)) + ', ' + CAST(@intScanTransactionId as NVARCHAR(20)) + ', ' + CAST(@intRegisterId as NVARCHAR(20))
+													+ ', ' + CAST(@intQuantity as NVARCHAR(50)) + ', ' + CAST(@dblPrice as NVARCHAR(50)) + ', ' + CAST(@dblCouponAmount as NVARCHAR(50)) + ', ' + CAST(@intCouponPid as NVARCHAR(20)) 
+													+ ', ' + @strUpcCode + ', ' + @strUpcDescription + ', ' + @strUnitOfMeasure + ', ' + @strPromotionFlag + ', ' + @strOutletMultipackFlag + ', ' + CAST(@intOutletMultipackQuantity as NVARCHAR(50)) 
+													+ ', ' + CAST(@dblOutletMultipackDiscountAmount as NVARCHAR(50)) + ', ' + @strAccountPromotionName + ', ' + CAST(@dblAccountDiscountAmount as NVARCHAR(50)) + ', ' + CAST(@dblManufacturerDiscountAmount as NVARCHAR(50))
+
+						SET @intLoopCount = @intLoopCount + 1
+					END
+
+					SET @intMin = @intMin + 1
+				END
+			END
+			--END tblSTstgRebatesRJReynolds
 
 		SET @strStatusMsg = 'Success'
 	END
@@ -366,8 +533,6 @@ BEGIN
 	BEGIN
 		SET @strStatusMsg = 'No records found in ' + @strTableName
 	END
-
-	--EXEC XMLDB.dbo.PrintString @strCSV
 	
 	DECLARE @SQL NVARCHAR(MAX)
 	SET @SQL = 'DELETE FROM ' + @strTableName
