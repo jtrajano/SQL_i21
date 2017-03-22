@@ -17,6 +17,12 @@ IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFRep
 			DELETE FROM tblTFReportingComponent WHERE strScheduleName = 'NE EDI file'
 		END
 
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFFilingPacket')
+		BEGIN
+			DELETE FROM tblTFFilingPacket WHERE intReportingComponentId = '70' AND intTaxAuthorityId = 27
+			DELETE FROM tblTFFilingPacket WHERE intReportingComponentId = '161' AND intTaxAuthorityId = 14
+		END
+
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFReportingComponentConfiguration')
 		BEGIN
 		  IF EXISTS(SELECT *
