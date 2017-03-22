@@ -5156,7 +5156,6 @@
     <Build Include="dbo\Functions\fnCTGetSampleDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetDefaultReceiptTaxGroupId.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetTerms.sql" />
-    <Build Include="dbo\Stored Procedures\uspARProcessACHPayments.sql" />
     <Build Include="dbo\Views\vyuSMEmailHistory.sql" />
     <Build Include="dbo\Functions\fnSMConcatRecipients.sql" />
     <Build Include="dbo\Views\vyuCTGridContractHeader.sql" />
