@@ -1,5 +1,27 @@
 ﻿
 GO
+DECLARE @intImportFileHeaderId INT
+
+--START IF EXISTS
+IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = 'Radiant - MCM')
+BEGIN
+	SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = 'Radiant - MCM'
+
+	--DELETE FROM dbo.tblSMXMLTagAttribute
+	DELETE TA
+	FROM dbo.tblSMXMLTagAttribute TA
+	JOIN dbo.tblSMImportFileColumnDetail IFC ON IFC.intImportFileColumnDetailId = TA.intImportFileColumnDetailId
+	WHERE IFC.intImportFileHeaderId = @intImportFileHeaderId
+
+	--DELETE FROM dbo.tblSMImportFileColumnDetail
+	DELETE
+	FROM dbo.tblSMImportFileColumnDetail
+	WHERE intImportFileHeaderId = @intImportFileHeaderId
+END
+--END IF EXISTS
+
+
+--START IF NOT EXISTS
 --HEADER
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileHeader] WHERE [strLayoutTitle] = 'Radiant - MCM')
 BEGIN
@@ -9,8 +31,9 @@ INSERT INTO [dbo].[tblSMImportFileHeader]
      VALUES
            ('Radiant - MCM'				,'XML'			  ,NULL		            ,'Inbound'
            ,'<?xml version="1.0" encoding="utf-8"?>'		,1		          ,0)
+END
+--END IF NOT EXISTS
 
-DECLARE @intImportFileHeaderId INT
 SELECT @intImportFileHeaderId = intImportFileHeaderId FROM [dbo].[tblSMImportFileHeader] WHERE [strLayoutTitle] = 'Radiant - MCM'
 
 --LEVEL 1
@@ -684,8 +707,6 @@ BEGIN
 			   (@intImportFileColumnDetailId	,2						   ,'xmlns'
 			   ,NULL							,NULL					   ,'http://www.naxml.org/POSBO/Vocabulary/2003-10-16'
 			   ,1							    ,1)
-
-END
 
 END
 GO

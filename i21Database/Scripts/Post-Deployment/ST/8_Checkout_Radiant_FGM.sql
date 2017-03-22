@@ -1,5 +1,27 @@
 ﻿
 GO
+DECLARE @intImportFileHeaderId INT
+
+--START IF EXISTS
+IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = 'Radiant - FGM')
+BEGIN
+	SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = 'Radiant - FGM'
+
+	--DELETE FROM dbo.tblSMXMLTagAttribute
+	DELETE TA
+	FROM dbo.tblSMXMLTagAttribute TA
+	JOIN dbo.tblSMImportFileColumnDetail IFC ON IFC.intImportFileColumnDetailId = TA.intImportFileColumnDetailId
+	WHERE IFC.intImportFileHeaderId = @intImportFileHeaderId
+
+	--DELETE FROM dbo.tblSMImportFileColumnDetail
+	DELETE
+	FROM dbo.tblSMImportFileColumnDetail
+	WHERE intImportFileHeaderId = @intImportFileHeaderId
+END
+--END IF EXISTS
+
+
+--START IF NOT EXISTS
 --HEADER
 IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileHeader] WHERE [strLayoutTitle] = 'Radiant - FGM')
 BEGIN
@@ -9,8 +31,9 @@ INSERT INTO [dbo].[tblSMImportFileHeader]
      VALUES
            ('Radiant - FGM'				,'XML'			  ,NULL		            ,'Inbound'
            ,'<?xml version="1.0" encoding="utf-8"?>'		,1		          ,0)
+END
+--END IF NOT EXISTS
 
-DECLARE @intImportFileHeaderId INT
 SELECT @intImportFileHeaderId = intImportFileHeaderId FROM [dbo].[tblSMImportFileHeader] WHERE [strLayoutTitle] = 'Radiant - FGM'
 
 --LEVEL 1
@@ -767,8 +790,6 @@ BEGIN
 			   (@intImportFileColumnDetailId	,1						   ,'value'
 			   ,NULL							,NULL					   ,'NULL'
 			   ,1							   ,1)
-
-END
 
 END
 GO
