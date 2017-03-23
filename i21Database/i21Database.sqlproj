@@ -4865,4 +4865,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\Reports\5_DeleteInvalidReports.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql" />
+  </ItemGroup>
 </Project>
