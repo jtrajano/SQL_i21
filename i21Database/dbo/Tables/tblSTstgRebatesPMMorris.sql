@@ -13,7 +13,7 @@
 	[strStoreState] nvarchar(2) COLLATE Latin1_General_CI_AS NULL,
 	[intStoreZipCode] int NULL,
 	[strCategory] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
-	[strManufacturerName] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+	[strManufacturerName] nvarchar(250) COLLATE Latin1_General_CI_AS NULL,
 	[strSKUCode] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strUpcCode] nvarchar(14) COLLATE Latin1_General_CI_AS NULL,
 	[strSkuUpcDescription] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
