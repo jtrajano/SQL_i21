@@ -365,6 +365,30 @@ BEGIN TRY
 
 	END
 
+	UPDATE L
+	SET intNumberOfContainers = CEILING(LD.dblNet / ISNULL(CTCQ.dblBulkQuantity, LD.dblNet))
+	FROM tblCTContractDetail CD
+	LEFT JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+	LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+	LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+	LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
+		AND CTCQ.intContainerTypeId = CT.intContainerTypeId
+	WHERE CD.intContractHeaderId = @intContractHeaderId
+
+	UPDATE CD
+	SET intNumberOfContainers = CEILING(LD.dblNet / ISNULL(CTCQ.dblBulkQuantity, LD.dblNet))
+	FROM tblCTContractDetail CD
+	LEFT JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+	LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+	LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+	LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
+		AND CTCQ.intContainerTypeId = CT.intContainerTypeId
+	WHERE CD.intContractHeaderId = @intContractHeaderId
+
 END TRY
 	
 BEGIN CATCH
