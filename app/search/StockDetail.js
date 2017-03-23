@@ -1,5 +1,5 @@
 Ext.define('Inventory.search.StockDetail', {
-    alias: 'search.stockdetail',
+    alias: 'search.icstockdetail',
     singleton: true,
 
     searchConfigs: [

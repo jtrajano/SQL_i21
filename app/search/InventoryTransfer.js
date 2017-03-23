@@ -1,5 +1,5 @@
 Ext.define('Inventory.search.InventoryTransfer', {
-    alias: 'search.inventorytransfer',
+    alias: 'search.icinventorytransfer',
     singleton: true,
 
     searchConfigs: [

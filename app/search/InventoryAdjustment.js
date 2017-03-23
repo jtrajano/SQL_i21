@@ -1,5 +1,5 @@
 Ext.define('Inventory.search.InventoryAdjustment', {
-    alias: 'search.inventoryadjustment',
+    alias: 'search.icinventoryadjustment',
     singleton: true,
 
     searchConfigs: [

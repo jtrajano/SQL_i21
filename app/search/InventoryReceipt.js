@@ -1,5 +1,5 @@
 Ext.define('Inventory.search.InventoryReceipt', {
-    alias: 'search.inventoryreceipt',
+    alias: 'search.icinventoryreceipt',
     singleton: true,
     searchConfigs: [
         {
