@@ -240,6 +240,8 @@ BEGIN
 			,[intSalesTaxAccountId]
 			,[dblTax]
 			,[dblAdjustedTax]
+			,[dblExemptionPercent]
+			,[ysnTaxExempt]
 			,[ysnTaxAdjusted]
 			,[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]
@@ -256,11 +258,13 @@ BEGIN
 			,[intSalesTaxAccountId]
 			,[dblTax]
 			,[dblAdjustedTax]
+			,[dblExemptionPercent]
+			,[ysnTaxExempt]
 			,[ysnTaxAdjusted]
 			,[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]
 			,[strNotes] 
-			,0
+			,1
 		FROM tblSOSalesOrderDetailTax
 		WHERE intSalesOrderDetailId = @SalesOrderDetailId
 			
