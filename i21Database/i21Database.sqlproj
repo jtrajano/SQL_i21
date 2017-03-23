@@ -5134,6 +5134,7 @@
     <Build Include="dbo\Functions\fnSMGetForexRate.sql" />
     <Build Include="dbo\Views\vyuHDTicketHoursWorkedReport.sql" />
     <Build Include="dbo\Views\vyuHDTicketDetailsReport.sql" />
+    <Build Include="dbo\Views\vyuAPBillDetailTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
