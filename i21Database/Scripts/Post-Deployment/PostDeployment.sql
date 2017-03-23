@@ -165,6 +165,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\ReportData\TrialBalance.sql
 :r .\GL\ReportData\TrialBalanceDetail.sql
 :r .\GL\ReportData\BalanceSheetStandard.sql
+:r .\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
