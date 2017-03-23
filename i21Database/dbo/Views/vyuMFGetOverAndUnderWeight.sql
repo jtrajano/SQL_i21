@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetOverAndUnderWeight
 AS
-SELECT W.dtmPlannedDate AS [Production Date]
+SELECT Convert(char,W.dtmPlannedDate,101) AS [Production Date]
 	,I.strItemNo AS Item
 	,I.strDescription AS Description
 	,W.strWorkOrderNo AS [Job #]

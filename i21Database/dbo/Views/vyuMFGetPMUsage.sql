@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetPMUsage
 AS
-SELECT DISTINCT W.dtmPlannedDate [Dump Date]
+SELECT DISTINCT Convert(char, W.dtmPlannedDate,101) [Dump Date]
 	,I.strItemNo [Product]
 	,I.strDescription [Product Description]
 	,(
