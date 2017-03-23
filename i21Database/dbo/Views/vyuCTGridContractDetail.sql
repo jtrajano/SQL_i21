@@ -61,7 +61,12 @@ AS
 			SL.strName						AS	strStorageLocationName,		
 			LP.strCity						AS	strLoadingPoint,
 			DP.strCity						AS	strDestinationPoint,
-			AP.strApprovalStatus
+			AP.strApprovalStatus,
+			MA.dblContractSize				AS dblMarketContractSize,
+			MA.intUnitMeasureId				AS intMarketUnitMeasureId,
+			MA.intCurrencyId				AS intMarketCurrencyId,
+			MU.strUnitMeasure				AS strMarketUnitMeasure,
+			XM.strUnitType					AS strQtyUnitType
 
 FROM		tblCTContractDetail			CD
 	 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=		CD.intContractHeaderId	
@@ -76,6 +81,7 @@ LEFT JOIN	tblCTFreightRate			FR	ON	FR.intFreightRateId				=		CD.intFreightRateId
 LEFT JOIN	tblCTRailGrade				RG	ON	RG.intRailGradeId				=		CD.intRailGradeId
 LEFT JOIN	tblCTPricingType			PT	ON	PT.intPricingTypeId				=		CD.intPricingTypeId
 LEFT JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=		CD.intFutureMarketId
+LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId				=		MA.intUnitMeasureId
 LEFT JOIN	tblCTContractOptHeader		OH	ON	OH.intContractOptHeaderId		=		CD.intContractOptHeaderId
 LEFT JOIN	tblCTDiscountType			DT	ON	DT.intDiscountTypeId			=		CD.intDiscountTypeId
 LEFT JOIN	tblGRDiscountId				DC	ON	DC.intDiscountId				=		CD.intDiscountId
@@ -115,7 +121,7 @@ LEFT JOIN	(
 					 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
 			FROM	 tblCTPriceFixationDetail
 			GROUP BY intPriceFixationId
-			)							PD	ON	PD.intPriceFixationId			=		PF.intPriceFixationId
+			)							PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
 LEFT JOIN	tblLGContainerTypeCommodityQty	CQ	ON	CQ.intCommodityId			=	CH.intCommodityId 
 												AND CQ.intContainerTypeId		=	CD.intContainerTypeId 
 												AND CQ.intCommodityAttributeId	=	IM.intOriginId

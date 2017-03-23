@@ -58,7 +58,9 @@ AS
 				intLineNo,
 				intWeightUOMId,
 				dblUnitPrice,
-				intCurrencyId
+				intCurrencyId,
+				intForexRateTypeId,
+				dblForexRate
 		)	
 		SELECT	intOrderType			=	1,
 				intSourceType			=	0,
@@ -78,7 +80,9 @@ AS
 				intLineNo				=	CD.intContractDetailId,
 				intWeightUOMId			=	CD.intNetWeightUOMId,
 				dblUnitPrice			=	ISNULL(AD.dblSeqPrice,0),
-				intCurrencyId			=	CD.intCurrencyId
+				intCurrencyId			=	CD.intCurrencyId,
+				intForexRateTypeId		=	CD.intRateTypeId,
+				dblForexRate			=	CD.dblRate
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId

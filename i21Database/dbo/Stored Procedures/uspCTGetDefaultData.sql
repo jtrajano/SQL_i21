@@ -22,13 +22,17 @@ BEGIN
 
 		IF	ISNULL(@intFutureMarketId,0) > 0
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId FROM tblRKFutureMarket M 
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure 
+			FROM tblRKFutureMarket M 
+			LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId				=		M.intUnitMeasureId
 			LEFT JOIN tblICItemUOM IU ON IU.intItemId = @intItemId AND IU.intUnitMeasureId = M.intUnitMeasureId
 			WHERE M.intFutureMarketId = @intFutureMarketId
 		END
 		ELSE
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId FROM tblRKFutureMarket M 
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure 
+			FROM tblRKFutureMarket M 
+			LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId				=		M.intUnitMeasureId
 			JOIN tblRKCommodityMarketMapping C ON C.intFutureMarketId = M.intFutureMarketId 
 			LEFT JOIN tblICItemUOM IU ON IU.intItemId = @intItemId AND IU.intUnitMeasureId = M.intUnitMeasureId
 			WHERE C.intCommodityId = @intCommodityId  ORDER BY M.intFutureMarketId ASC
