@@ -364,7 +364,165 @@ BEGIN
 		--EXEC('SELECT * FROM vyuCFInvoiceReport ' + @whereClause)
 		--SELECT * FROM vyuCFInvoiceReport where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 
-		SELECT * FROM vyuCFInvoiceReport AS main 
+		INSERT INTO tblCFInvoiceReportTempTable (
+		intCustomerGroupId			
+		,intTransactionId			
+		,intOdometer				
+		,intOdometerAging			
+		,intInvoiceId				
+		,intProductId				
+		,intCardId					
+		,main.intAccountId				
+		,intInvoiceCycle			
+		,intSubAccountId			
+		,intCustomerId				
+		,strGroupName				
+		,strCustomerNumber			
+		,strShipTo					
+		,strBillTo					
+		,strCompanyName				
+		,strCompanyAddress			
+		,strType					
+		,strCustomerName			
+		,strLocationName			
+		,main.strInvoiceNumber			
+		,strTransactionId			
+		,strTransactionType			
+		,strInvoiceReportNumber		
+		,strTempInvoiceReportNumber	
+		,strMiscellaneous			
+		,strName					
+		,strCardNumber				
+		,strCardDescription			
+		,strNetwork					
+		,strInvoiceCycle			
+		,strPrimarySortOptions		
+		,strSecondarySortOptions	
+		,strPrintRemittancePage		
+		,strPrintPricePerGallon		
+		,strPrintSiteAddress		
+		,strSiteNumber				
+		,strSiteName				
+		,strProductNumber			
+		,strItemNo					
+		,strDescription				
+		,strVehicleNumber			
+		,strVehicleDescription		
+		,strTaxState				
+		,strDepartment				
+		,strSiteType				
+		,strState					
+		,strSiteAddress				
+		,strSiteCity				
+		,strPrintTimeStamp			
+		,strEmailDistributionOption	
+		,strEmail					
+		,dtmTransactionDate			
+		,dtmDate					
+		,dtmPostedDate				
+		,dblTotalMiles				
+		,dblQuantity				
+		,dblCalculatedTotalAmount	
+		,dblOriginalTotalAmount		
+		,dblCalculatedGrossAmount	
+		,dblOriginalGrossAmount		
+		,dblCalculatedNetAmount		
+		,dblOriginalNetAmount		
+		,dblMargin					
+		,dblTotalTax				
+		,dblTotalSST				
+		,dblTaxExceptSST			
+		,dblInvoiceTotal			
+		,ysnPrintMiscellaneous		
+		,ysnSummaryByCard			
+		,ysnSummaryByDepartment		
+		,ysnSummaryByMiscellaneous	
+		,ysnSummaryByProduct		
+		,ysnSummaryByVehicle		
+		,ysnPrintTimeOnInvoices		
+		,ysnPrintTimeOnReports		
+		,ysnInvalid					
+		,ysnPosted)
+		SELECT
+		 intCustomerGroupId			
+		,intTransactionId			
+		,intOdometer				
+		,intOdometerAging			
+		,intInvoiceId				
+		,intProductId				
+		,intCardId					
+		,main.intAccountId				
+		,intInvoiceCycle			
+		,intSubAccountId			
+		,intCustomerId				
+		,strGroupName				
+		,strCustomerNumber			
+		,strShipTo					
+		,strBillTo					
+		,strCompanyName				
+		,strCompanyAddress			
+		,strType					
+		,strCustomerName			
+		,strLocationName			
+		,main.strInvoiceNumber			
+		,strTransactionId			
+		,strTransactionType			
+		,strInvoiceReportNumber		
+		,strTempInvoiceReportNumber	
+		,strMiscellaneous			
+		,strName					
+		,strCardNumber				
+		,strCardDescription			
+		,strNetwork					
+		,strInvoiceCycle			
+		,strPrimarySortOptions		
+		,strSecondarySortOptions	
+		,strPrintRemittancePage		
+		,strPrintPricePerGallon		
+		,strPrintSiteAddress		
+		,strSiteNumber				
+		,strSiteName				
+		,strProductNumber			
+		,strItemNo					
+		,strDescription				
+		,strVehicleNumber			
+		,strVehicleDescription		
+		,strTaxState				
+		,strDepartment				
+		,strSiteType				
+		,strState					
+		,strSiteAddress				
+		,strSiteCity				
+		,strPrintTimeStamp			
+		,strEmailDistributionOption	
+		,strEmail					
+		,dtmTransactionDate			
+		,dtmDate					
+		,dtmPostedDate				
+		,dblTotalMiles				
+		,dblQuantity				
+		,dblCalculatedTotalAmount	
+		,dblOriginalTotalAmount		
+		,dblCalculatedGrossAmount	
+		,dblOriginalGrossAmount		
+		,dblCalculatedNetAmount		
+		,dblOriginalNetAmount		
+		,dblMargin					
+		,dblTotalTax				
+		,dblTotalSST				
+		,dblTaxExceptSST			
+		,dblInvoiceTotal			
+		,ysnPrintMiscellaneous		
+		,ysnSummaryByCard			
+		,ysnSummaryByDepartment		
+		,ysnSummaryByMiscellaneous	
+		,ysnSummaryByProduct		
+		,ysnSummaryByVehicle		
+		,ysnPrintTimeOnInvoices		
+		,ysnPrintTimeOnReports		
+		,ysnInvalid					
+		,ysnPosted					
+	    FROM vyuCFInvoiceReport AS main 
 		INNER JOIN @tblCFInvoiceNunber as cfInvRptNo
 		on main.intAccountId = cfInvRptNo.intAccountId
 		INNER JOIN 
@@ -375,6 +533,9 @@ BEGIN
 		) AS sub
 		ON main.intAccountId = sub.intSubAccountId 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+
+		SELECT * FROM tblCFInvoiceReportTempTable
+
 	END
     
 END
