@@ -1,12 +1,8 @@
-/****** Object:  StoredProcedure [dbo].[uspICDCGLAcctsMigration]    Script Date: 07/28/2016 09:41:05 ******/
-SET ANSI_NULLS ON
-GO
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCItmGLAcctsMigrationAg]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCItmGLAcctsMigrationAg]; 
+GO 
 
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-Create PROCEDURE [dbo].[uspICDCItmGLAcctsMigrationAg]
+CREATE PROCEDURE [dbo].[uspICDCItmGLAcctsMigrationAg]
 --** Below Stored Procedure is to migrate inventory related gl accounts from origin to i21 tables such as tblICCategoryAccount, tblICItemAccount. **
 
 AS

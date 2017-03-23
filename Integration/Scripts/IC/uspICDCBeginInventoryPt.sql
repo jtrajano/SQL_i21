@@ -1,4 +1,8 @@
-Create PROCEDURE [dbo].[uspICDCBeginInventoryPt]
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCBeginInventoryPt]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCBeginInventoryPt]; 
+GO 
+
+CREATE PROCEDURE [dbo].[uspICDCBeginInventoryPt]
 --** Below Stored Procedure is to migrate origin onhand unit balances from ptitmmst table to i21 inventory by creating adjustments.
 --   Then adjustment posting need to be done in i21 application, which will update the onhand units of inventory.
 --   So here we do not directly update the onhand units from ptitmmst origin table into i21 item tblICItem table, rather we update 
@@ -154,10 +158,13 @@ BEGIN
 
 	INSERT INTO tblGLSummary
 	SELECT
-			intAccountId
+			intCompanyId
+			,intAccountId
 			,dtmDate
 			,SUM(ISNULL(dblDebit,0)) as dblDebit
 			,SUM(ISNULL(dblCredit,0)) as dblCredit
+			,SUM(ISNULL(dblDebitForeign,0)) as dblDebitForeign
+			,SUM(ISNULL(dblCreditForeign,0)) as dblCreditForeign
 			,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
 			,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
 			,strCode
@@ -165,6 +172,6 @@ BEGIN
 	FROM	tblGLDetail
 	WHERE	ysnIsUnposted = 0
 			AND dbo.fnDateEquals(dtmDate, @adjdt) = 1	
-	GROUP BY intAccountId, dtmDate, strCode
+	GROUP BY intCompanyId, intAccountId, dtmDate, strCode
 END
 

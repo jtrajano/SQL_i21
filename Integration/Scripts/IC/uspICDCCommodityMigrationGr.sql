@@ -1,11 +1,8 @@
-SET ANSI_NULLS ON
-GO
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCCommodityMigrationGr]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCCommodityMigrationGr]; 
+GO 
 
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-Create PROCEDURE [dbo].[uspICDCCommodityMigrationGr]
+CREATE PROCEDURE [dbo].[uspICDCCommodityMigrationGr]
 
 AS
 SET QUOTED_IDENTIFIER OFF
