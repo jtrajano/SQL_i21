@@ -23,5 +23,5 @@
 			left outer join tblARInvoice d on d.intInvoiceId = b.intInvoiceId
 			left outer join tblEMEntity entity on entity.intEntityId = a.intCustomerId
 			left outer join tblEMEntity entityContact on entityContact.intEntityId = a.intCustomerContactId
-			left outer join tblEMEntity entityCreator on entityCreator.intEntityId = a.intCreatedUserEntityId
+			left outer join tblEMEntity entityCreator on entityCreator.intEntityId = b.intAgentEntityId
 			left outer join tblEMEntityType typ on typ.intEntityId = b.intCreatedUserEntityId
