@@ -129,9 +129,12 @@ BEGIN
 				(
 					SELECT
 							intTermMsgSN
-							, FORMAT(CAST(dtmClosedTime AS DATE), 'yyyyMMdd') as dtmWeekEndingDate 
-							, FORMAT(CAST(dtmDate AS DATE), 'yyyyMMdd') as dtmTransactionDate
-							, FORMAT(dtmDate, 'hh:mm:ss') as strTransactionTime
+							--, FORMAT(CAST(dtmClosedTime AS DATE), 'yyyyMMdd') as dtmWeekEndingDate 
+							--, FORMAT(CAST(dtmDate AS DATE), 'yyyyMMdd') as dtmTransactionDate
+							--, FORMAT(dtmDate, 'hh:mm:ss') as strTransactionTime
+							, replace(convert(NVARCHAR, dtmClosedTime, 111), '/', '') as dtmWeekEndingDate 
+							, replace(convert(NVARCHAR, dtmDate, 111), '/', '') as dtmTransactionDate 
+							, convert(NVARCHAR, dtmDate, 108) as strTransactionTime
 							, intTermMsgSN as strTransactionIdCode
 							, ST.intStoreNo as strStoreNumber
 							, ST.strDescription as strStoreName
@@ -230,7 +233,8 @@ BEGIN
 							, ST.strCity as strOutletCity
 							, ST.strState as strOutletState
 							, ST.strZipCode as intOutletZipCode
-							, FORMAT(CAST(dtmDate AS datetime), 'yyyy-MM-dd-HH:mm:ss') as strTransactionDateTime
+							--, FORMAT(CAST(dtmDate AS datetime), 'yyyy-MM-dd-HH:mm:ss') as strTransactionDateTime
+							, replace(convert(NVARCHAR, dtmDate, 120), ' ', '-') as strTransactionDateTime
 							, intTermMsgSN as intMarketBasketTransactionId
 							, intTermMsgSN as intScanTransactionId
 							, intPosNum as intRegisterId
