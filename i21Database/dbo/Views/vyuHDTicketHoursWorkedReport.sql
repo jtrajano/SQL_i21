@@ -16,6 +16,7 @@
 			,ysnExported = b.ysnBilled
 			,strInvoiceNo = d.strInvoiceNumber
 			,dtmDateExported = b.dtmBilled
+			,b.intTicketHoursWorkedId
         from
 			tblHDTicket a
 			inner join tblHDTicketHoursWorked b on b.intTicketId = a.intTicketId
