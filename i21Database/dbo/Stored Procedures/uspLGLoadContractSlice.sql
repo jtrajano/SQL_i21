@@ -194,7 +194,7 @@ BEGIN TRY
 				,L.strBLNumber
 				,L.strShippingLine
 				,V.strVendorAccountNum
-				,NULL
+				,L.strExternalShipmentNumber
 				,'015' AS strDateQualifier
 				,L.dtmScheduledDate
 				,L.dtmETAPOD
@@ -240,7 +240,7 @@ BEGIN TRY
 				,dtmFeedCreated
 				,strCommodityCode)
 			SELECT @intLoadStgId
-				,@intLoadId
+				,@intOrgLoadId
 				,CASE 
 					WHEN ISNULL(LSID.intLoadDetailId, 0) = 0
 						THEN LD.intLoadDetailId
@@ -284,10 +284,10 @@ BEGIN TRY
 				,'001' AS strRefDataInfo
 				,0 AS strSeq
 				,LD.strLoadNumber
-				,NULL
-				,NULL
-				,NULL
-				,NULL
+				,CD.strERPPONumber
+				,CD.strERPItemNumber
+				,CD.strERPBatchNumber
+				,D.strExternalShipmentItemNumber
 				,D.strExternalBatchNo
 				,'QUA' AS strChangeType
 				,@strRowState AS strRowState
