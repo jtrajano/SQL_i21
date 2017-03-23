@@ -1,9 +1,6 @@
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCUomMigrationPt]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCUomMigrationPt]; 
+GO 
 
 Create PROCEDURE [dbo].[uspICDCUomMigrationPt]
 
@@ -42,8 +39,3 @@ when upper(strSymbol) = 'FT' then 'Length'
 when upper(strSymbol) in ('HOUR', 'HR') then 'Time'
 else 'Quantity'
 End 
-
-
-
-GO
-
