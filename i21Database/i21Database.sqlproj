@@ -5235,6 +5235,7 @@
     <Build Include="dbo\Views\vyuLGContarctWithoutShippingAdvice.sql" />
     <Build Include="dbo\Tables\tblSMApprovalHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspAREntityTypeConversion.sql" />
+    <Build Include="dbo\Views\vyuAPBillDetailTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
