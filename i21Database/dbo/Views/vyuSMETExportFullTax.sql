@@ -8,57 +8,57 @@ SELECT ItemNumber
 , Authority2
 , Authority2Description
 , [Description]
-, ISNULL(MAX(FETRatePerUnit), '0.000000') AS FETRatePerUnit
+, ISNULL(MAX(FETRatePerUnit), 0.000000) / 100 AS FETRatePerUnit
 , FETGLAccount
 , EFTonFET
-, ISNULL(MAX(SETRatePerUnit), '0.000000') AS SETRatePerUnit
+, ISNULL(MAX(SETRatePerUnit), 0.000000) / 100 AS SETRatePerUnit
 , SETGLAccount, EFTonSET
-, ISNULL(MAX(SSTRatePerUnit), '0.000000') AS SSTRatePerUnit
+, ISNULL(MAX(SSTRatePerUnit), 0.000000) / 100 AS SSTRatePerUnit
 , SSTGLAccount
 , ISNULL(MAX(SSTMethod), 'P') AS SSTMethod
 , ISNULL(MAX(SSTOnFET), 'N') AS SSTOnFET
 , ISNULL(MAX(SSTOnSET), 'N') AS SSTOnSET
 , EFTOnSST
-, ISNULL(MAX(PSTRatePerUnit), '0.000000') AS PSTRatePerUnit
+, ISNULL(MAX(PSTRatePerUnit), 0.000000) / 100 AS PSTRatePerUnit
 , PSTGLAccount
 , ISNULL(MAX(PSTMethod), 'U') AS PSTMethod
 , ISNULL(MAX(Locale1Description), 'Locale 1 Tax') AS Locale1Description
-, ISNULL(MAX(Locale1Rate), '0.000000') AS Locale1Rate
+, ISNULL(MAX(Locale1Rate), 0.000000) / 100 AS Locale1Rate
 , Locale1GLAccount
 , ISNULL(MAX(Locale1Method), 'U') AS Locale1Method
 , Locale1EFT
 , ISNULL(MAX(Locale1SSTOnLC1), 'N') AS Locale1SSTOnLC1
 , Locale1LC1OnFET
 , ISNULL(MAX(Locale2Description), 'Locale 2 Tax') AS Locale2Description
-, ISNULL(MAX(Locale2Rate), '0.000000') AS Locale2Rate
+, ISNULL(MAX(Locale2Rate), 0.000000) / 100 AS Locale2Rate
 , Locale2GLAccount
 , ISNULL(MAX(Locale2Method), 'U') AS Locale2Method
 , Locale2EFT
 , ISNULL(MAX(Locale2SSTOnLC2), 'N') AS Locale2SSTOnLC2
 , Locale2LC2OnFET
 , ISNULL(MAX(Locale3Description), 'Locale 3 Tax') AS Locale3Description
-, ISNULL(MAX(Locale3Rate), '0.000000') AS Locale3Rate
+, ISNULL(MAX(Locale3Rate), 0.000000) / 100 AS Locale3Rate
 , Locale3GLAccount
 , ISNULL(MAX(Locale3Method), 'U') AS Locale3Method
 , Locale3EFT
 , ISNULL(MAX(Locale3SSTOnLC3), 'N') AS Locale3SSTOnLC3
 , Locale3LC3OnFET
 , ISNULL(MAX(Locale4Description), 'Locale 4 Tax') AS Locale4Description
-, ISNULL(MAX(Locale4Rate), '0.000000') AS Locale4Rate
+, ISNULL(MAX(Locale4Rate), 0.000000) / 100 AS Locale4Rate
 , Locale4GLAccount
 , ISNULL(MAX(Locale4Method), 'U') AS Locale4Method
 , Locale4EFT
 , ISNULL(MAX(Locale4SSTOnLC4), 'N') AS Locale4SSTOnLC4
 , Locale4LC4OnFET
 , ISNULL(MAX(Locale5Description), 'Locale 5 Tax') AS Locale5Description
-, ISNULL(MAX(Locale5Rate), '0.000000') AS Locale5Rate
+, ISNULL(MAX(Locale5Rate), 0.000000) / 100 AS Locale5Rate
 , Locale5GLAccount
 , ISNULL(MAX(Locale5Method), 'U') AS Locale5Method
 , Locale5EFT
 , ISNULL(MAX(Locale5SSTOnLC5), 'N') AS Locale5SSTOnLC5
 , Locale5LC5OnFET
 , ISNULL(MAX(Locale6Description), 'Locale 6 Tax') AS Locale6Description
-, ISNULL(MAX(Locale6Rate), '0.000000') AS Locale6Rate
+, ISNULL(MAX(Locale6Rate), 0.000000) / 100 AS Locale6Rate
 , Locale6GLAccount
 , ISNULL(MAX(Locale6Method), 'U') AS Locale6Method
 , Locale6EFT
