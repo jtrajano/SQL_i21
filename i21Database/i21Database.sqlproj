@@ -2671,6 +2671,7 @@
     <Build Include="dbo\Tables\tblPATTransfer.sql" />
     <Build Include="dbo\Tables\tblPATTransferDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
+    <Build Include="dbo\Functions\fnGLGetMTDActivity.sql" />
     <Build Include="dbo\Stored Procedures\uspPATProcessVoid.sql" />
     <Build Include="dbo\Functions\fnIsAllowUserSelfPost.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099MISC.sql" />
