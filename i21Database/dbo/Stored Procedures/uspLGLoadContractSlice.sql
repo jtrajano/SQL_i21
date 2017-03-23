@@ -20,7 +20,8 @@ BEGIN TRY
 	DECLARE @dblCQuantity NUMERIC(18, 6)
 	DECLARE @intCItemUOMId INT
 	DECLARE @intUserId INT
-
+	DECLARE @intLoadStgId INT
+	DECLARE @strRowState NVARCHAR(100)
 	DECLARE @ContractSliceDetail TABLE (
 		 intCRowNo INT IDENTITY(1, 1)
 		,intCContractDetailId INT
@@ -67,7 +68,7 @@ BEGIN TRY
 		RAISERROR ('Shipment exists for the contract sequence. Cannot proceed.',16,1)
 	END
 
-
+	SELECT @strRowState = 'Modified'
 	SELECT @intUserId = intLastModifiedById
 	FROM tblCTContractDetail
 	WHERE intContractDetailId = @intParentContractDetailId
@@ -131,6 +132,183 @@ BEGIN TRY
 			LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
 				AND CTCQ.intContainerTypeId = CT.intContainerTypeId
 			WHERE LD.intLoadDetailId = @intOrgLoadIDetaild
+
+			IF EXISTS(SELECT 1 FROM tblLGLoadStg WHERE ISNULL(strFeedStatus,'') = '' AND intLoadId = @intOrgLoadId AND strRowState = 'Added')
+			BEGIN
+				DELETE FROM tblLGLoadStg WHERE intLoadId = @intOrgLoadId AND strRowState = 'Added'
+				SET @strRowState = 'Added'
+			END
+
+			INSERT INTO tblLGLoadStg (
+				intLoadId
+				,strTransactionType
+				,strLoadNumber
+				,strShippingInstructionNumber
+				,strContractBasis
+				,strContractBasisDesc
+				,strBillOfLading
+				,strShippingLine
+				,strShippingLineAccountNo
+				,strExternalShipmentNumber
+				,strDateQualifier
+				,dtmScheduledDate
+				,dtmETAPOD
+				,dtmETAPOL
+				,dtmETSPOL
+				,dtmBLDate
+				,strRowState
+				,dtmFeedCreated
+				)
+			SELECT intLoadId
+				,strShipmentType = CASE L.intShipmentType
+					WHEN 1
+						THEN 'Shipment'
+					WHEN 2
+						THEN 'Shipping Instructions'
+					WHEN 3
+						THEN 'Vessel Nomination'
+					ELSE ''
+					END COLLATE Latin1_General_CI_AS
+				,strLoadNumber
+				,CASE 
+					WHEN ISNULL(L.strShippingInstructionNumber, '') = ''
+						THEN L.strLoadNumber
+					ELSE L.strShippingInstructionNumber
+					END
+				,strContractBasis = (
+					SELECT TOP 1 CB.strContractBasis
+					FROM tblCTContractHeader CH
+					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+					JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+					WHERE LD.intLoadId = L.intLoadId
+					)
+				,strContractBasisDesc = (
+					SELECT TOP 1 CB.strDescription
+					FROM tblCTContractHeader CH
+					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+					JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+					WHERE LD.intLoadId = L.intLoadId
+					)
+				,L.strBLNumber
+				,L.strShippingLine
+				,V.strVendorAccountNum
+				,NULL
+				,'015' AS strDateQualifier
+				,L.dtmScheduledDate
+				,L.dtmETAPOD
+				,L.dtmETAPOL
+				,L.dtmETSPOL
+				,L.dtmBLDate
+				,@strRowState
+				,GETDATE()
+			FROM vyuLGLoadView L
+			LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
+			LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
+			WHERE intLoadId = @intOrgLoadId
+
+			SELECT @intLoadStgId = SCOPE_IDENTITY()
+
+			INSERT INTO tblLGLoadDetailStg(
+				 intLoadStgId
+				,intLoadId
+				,intSIDetailId
+				,intLoadDetailId
+				,intRowNumber
+				,strItemNo
+				,strSubLocationName
+				,strStorageLocationName
+				,strBatchNumber
+				,dblDeliveredQty
+				,strUnitOfMeasure
+				,dblNetWt
+				,dblGrossWt
+				,strWeightUOM
+				,intHigherPositionRef
+				,strDocumentCategory
+				,strReferenceDataInfo
+				,strSeq
+				,strLoadNumber
+				,strExternalPONumber
+				,strExternalPOItemNumber
+				,strExternalPOBatchNumber
+				,strExternalShipmentItemNumber
+				,strExternalBatchNo
+				,strChangeType
+				,strRowState
+				,dtmFeedCreated
+				,strCommodityCode)
+			SELECT @intLoadStgId
+				,@intLoadId
+				,CASE 
+					WHEN ISNULL(LSID.intLoadDetailId, 0) = 0
+						THEN LD.intLoadDetailId
+					ELSE LSID.intLoadDetailId
+					END AS intSIDetailId
+				,LD.intLoadDetailId
+				,Row_NUMBER() OVER (
+					PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
+					) AS intRowNumber
+				,LD.strItemNo
+				,strSubLocationName = (
+					SELECT CLSL.strSubLocationName AS strStorageLocationName
+					FROM tblCTContractDetail CD
+					JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+					WHERE CD.intContractDetailId = CASE 
+							WHEN LD.intPurchaseSale = 1
+								THEN LD.intPContractDetailId
+							ELSE LD.intSContractDetailId
+							END
+					)
+				,strStorageLocationName = (
+					SELECT SL.strName AS strStorageLocationName
+					FROM tblCTContractDetail CD
+					JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+					WHERE CD.intContractDetailId = CASE 
+							WHEN LD.intPurchaseSale = 1
+								THEN LD.intPContractDetailId
+							ELSE LD.intSContractDetailId
+							END
+					)
+				,LD.strLoadNumber
+				,LD.dblQuantity
+				,LD.strItemUOM
+				,LD.dblGross
+				,LD.dblNet
+				,LD.strWeightItemUOM
+				,Row_NUMBER() OVER (
+					PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
+					)
+				,'C' AS strDocumentCategory
+				,'001' AS strRefDataInfo
+				,0 AS strSeq
+				,LD.strLoadNumber
+				,NULL
+				,NULL
+				,NULL
+				,NULL
+				,D.strExternalBatchNo
+				,'QUA' AS strChangeType
+				,@strRowState AS strRowState
+				,GETDATE()
+				,C.strCommodityCode
+			FROM vyuLGLoadDetailView LD
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+					WHEN LD.intPurchaseSale = 1
+						THEN LD.intPContractDetailId
+					ELSE LD.intSContractDetailId
+					END
+			JOIN tblLGLoadDetail D ON D.intLoadDetailId = LD.intLoadDetailId
+			JOIN tblICCommodity C ON C.intCommodityId = CASE 
+					WHEN LD.intPurchaseSale = 1
+						THEN LD.intPCommodityId
+					ELSE LD.intSCommodityId
+					END
+			LEFT JOIN tblLGLoad L ON L.intLoadId = D.intLoadId
+			LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
+			LEFT JOIN tblLGLoadDetail LSID ON LSID.intLoadId = LSI.intLoadId AND D.intPContractDetailId = LSID.intPContractDetailId
+			WHERE LD.intLoadId = @intOrgLoadId
 
 			SET @dblOrgLoadDetailQty = (@dblOrgLoadDetailQty - @dblOrgContractDetailQty)
 			

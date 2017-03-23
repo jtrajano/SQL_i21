@@ -246,7 +246,7 @@ BEGIN TRY
 			,intSubLocationId
 			,intStorageLocationId
 			,RI.intUnitMeasureId
-			,dblQuantity
+			,ISNULL(dblQuantity,RI.dblOpenReceive)
 			,dblGross
 			,0
 			,LC.strContainerNumber
