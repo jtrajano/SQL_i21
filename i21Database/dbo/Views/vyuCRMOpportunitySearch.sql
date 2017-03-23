@@ -10,6 +10,9 @@
 					,strPipePercentage
 					,dblOpportunityAmmount = (case when dblOpportunityAmmount is null then 0.00 else dblOpportunityAmmount end)
 					,dblNetOpportunityAmmount = (case when dblNetOpportunityAmmount is null then 0.00 else dblNetOpportunityAmmount end)
+					,dblSoftwareAmmount = isnull(dblSoftwareAmmount,0)
+					,dblMaintenanceAmmount = isnull(dblMaintenanceAmmount,0)
+					,dblOtherAmmount = isnull(dblOtherAmmount,0)
 					,dtmLastActivityDate
 					,strSalesPerson
 					,strDescription
@@ -47,8 +50,13 @@
 					,dtmExpectedCloseDate = proj.dtmSalesDate
 					,strExpectedCloseDate = CONVERT(nvarchar(10),proj.dtmSalesDate,101)
 					,strPipePercentage = convert(nvarchar(20), cast(round(pipe.dblProbability,2) as numeric(36,2))) + '%'
-					,dblOpportunityAmmount = (select sum(vyuSOSalesOrderSearch.dblAmountDue) from vyuSOSalesOrderSearch where vyuSOSalesOrderSearch.strTransactionType = 'Quote' and vyuSOSalesOrderSearch.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId))
-					,dblNetOpportunityAmmount = (cast(round(pipe.dblProbability/100,2) as numeric (36,2))*(select sum(vyuSOSalesOrderSearch.dblAmountDue) from vyuSOSalesOrderSearch where vyuSOSalesOrderSearch.strTransactionType = 'Quote' and vyuSOSalesOrderSearch.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId)))
+					--,dblOpportunityAmmount = (select sum(vyuSOSalesOrderSearch.dblAmountDue) from vyuSOSalesOrderSearch where vyuSOSalesOrderSearch.strTransactionType = 'Quote' and vyuSOSalesOrderSearch.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId))
+					--,dblNetOpportunityAmmount = (cast(round(pipe.dblProbability/100,2) as numeric (36,2))*(select sum(vyuSOSalesOrderSearch.dblAmountDue) from vyuSOSalesOrderSearch where vyuSOSalesOrderSearch.strTransactionType = 'Quote' and vyuSOSalesOrderSearch.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId)))
+					,dblOpportunityAmmount = (select sum(distinct vyuCRMOpportunityQuoteSummary.dblSalesOrderTotal) from vyuCRMOpportunityQuoteSummary where vyuCRMOpportunityQuoteSummary.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId))
+					,dblNetOpportunityAmmount = (cast(round(pipe.dblProbability/100,2) as numeric (36,2))*(select sum(distinct vyuCRMOpportunityQuoteSummary.dblSalesOrderTotal) from vyuCRMOpportunityQuoteSummary where vyuCRMOpportunityQuoteSummary.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId)))
+					,dblSoftwareAmmount = (select sum(distinct vyuCRMOpportunityQuoteSummary.dblSoftwareAmount) from vyuCRMOpportunityQuoteSummary where vyuCRMOpportunityQuoteSummary.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId))
+					,dblMaintenanceAmmount = (select sum(distinct vyuCRMOpportunityQuoteSummary.dblMaintenanceAmount) from vyuCRMOpportunityQuoteSummary where vyuCRMOpportunityQuoteSummary.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId))
+					,dblOtherAmmount = (select sum(distinct vyuCRMOpportunityQuoteSummary.dblOtherAmount) from vyuCRMOpportunityQuoteSummary where vyuCRMOpportunityQuoteSummary.intSalesOrderId in (select tblCRMOpportunityQuote.intSalesOrderId from tblCRMOpportunityQuote where tblCRMOpportunityQuote.intOpportunityId = proj.intOpportunityId))
 					,dtmLastActivityDate = (
 						select
 							max(tblSMActivity.dtmCreated)
