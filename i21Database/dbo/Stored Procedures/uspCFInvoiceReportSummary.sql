@@ -2,7 +2,7 @@
 	@xmlParam NVARCHAR(MAX)=null
 )
 AS
-BEGIN
+BEGIN 
 	SET NOCOUNT ON;
 	IF (ISNULL(@xmlParam,'') = '')
 	BEGIN 
@@ -163,8 +163,57 @@ BEGIN
 		SET @Condition = ''
 		SET @Fieldname = ''
 
-		
-		EXEC('SELECT * FROM vyuCFInvoiceReportSummary ' + @whereClause)
+		EXEC('
+		INSERT INTO tblCFInvoiceSummaryTempTable
+		(
+			 intDiscountScheduleId
+			,intTermsCode
+			,intTermsId
+			,intARItemId
+			,strDepartmentDescription
+			,strShortName
+			,strProductDescription
+			,strItemNumber
+			,strItemDescription
+			,dblTotalQuantity
+			,dblTotalGrossAmount
+			,dblTotalNetAmount
+			,dblTotalAmount
+			,dblTotalTaxAmount
+			,TotalFET
+			,TotalSET
+			,TotalSST
+			,TotalLC
+			,ysnIncludeInQuantityDiscount
+			,intAccountId
+			,intTransactionId
+		)
+		SELECT 
+			intDiscountScheduleId
+			,intTermsCode
+			,intTermsId
+			,intARItemId
+			,strDepartmentDescription
+			,strShortName
+			,strProductDescription
+			,strItemNumber
+			,strItemDescription
+			,dblTotalQuantity
+			,dblTotalGrossAmount
+			,dblTotalNetAmount
+			,dblTotalAmount
+			,dblTotalTaxAmount
+			,TotalFET
+			,TotalSET
+			,TotalSST
+			,TotalLC
+			,ysnIncludeInQuantityDiscount
+			,intAccountId
+			,intTransactionId
+		FROM vyuCFInvoiceReportSummary ' + @whereClause)
+
+		SELECT  * FROM tblCFInvoiceSummaryTempTable
+		---EXEC('SELECT * FROM vyuCFInvoiceReportSummary ' + @whereClause)
 	END
     
 END

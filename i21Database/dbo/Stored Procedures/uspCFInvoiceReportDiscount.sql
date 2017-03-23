@@ -824,7 +824,55 @@ BEGIN
 		----------------------------------
 
 		-------------SELECT MAIN TABLE FOR OUTPUT---------------
-		EXEC('SELECT * FROM ##tblCFInvoiceDiscount ' + @endWhereClause) 
+		EXEC('
+		INSERT INTO tblCFInvoiceDiscountTempTable(
+			 intSalesPersonId
+			,intTermID
+			,intBalanceDue
+			,intDiscountDay
+			,intDayofMonthDue
+			,intDueNextMonth
+			,intSort
+			,strTerm
+			,strTermCode
+			,dtmDiscountDate
+			,dtmDueDate
+			,dtmInvoiceDate
+			,dblDiscountRate
+			,dblDiscount
+			,dblAccountTotalAmount
+			,dblAccountTotalDiscount
+			,dblAccountTotalLessDiscount
+			,dblDiscountEP
+			,dblAPR
+			,intAccountId
+			,intTransactionId)
+		SELECT 
+			 intSalesPersonId
+			,intTermID
+			,intBalanceDue
+			,intDiscountDay
+			,intDayofMonthDue
+			,intDueNextMonth
+			,intSort
+			,strTerm
+			,strTermCode
+			,dtmDiscountDate
+			,dtmDueDate
+			,dtmInvoiceDate
+			,dblDiscountRate
+			,dblDiscount
+			,dblAccountTotalAmount
+			,dblAccountTotalDiscount
+			,dblAccountTotalLessDiscount
+			,dblDiscountEP
+			,dblAPR
+			,intAccountId
+			,intTransactionId
+	    FROM ##tblCFInvoiceDiscount' + @endWhereClause) 
+
+		--EXEC('SELECT * FROM ##tblCFInvoiceDiscount ' + @endWhereClause) 
+		SELECT * FROM tblCFInvoiceDiscountTempTable
 		-------------SELECT MAIN TABLE FOR OUTPUT---------------
 
 		-------------DROP TEMPORARY TABLES---------------
