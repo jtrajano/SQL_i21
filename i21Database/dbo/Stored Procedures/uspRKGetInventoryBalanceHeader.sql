@@ -64,10 +64,10 @@ DECLARE @tblResultFinal TABLE
 )
 
 INSERT INTO @tblResult (intRowNum ,dtmDate ,    [Distribution] ,     [Unpaid IN] , [Unpaid Out] ,       [Unpaid Balance],InventoryBalanceCarryForward,strReceiptNumber,intReceiptId )
-EXEC uspRKGetCompanyOwnership @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId
+EXEC uspRKGetCompanyOwnership @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId, @intItemId=@intItemId
 
 INSERT INTO @tblFirstResult (dtmDate ,   tranShipQty , tranRecQty ,  dblAdjustmentQty , BalanceForward )
-EXEC uspRKGetInventoryBalance @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId
+EXEC uspRKGetInventoryBalance @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId, @intItemId=@intItemId
 
 
 INSERT INTO @tblResultFinal (dtmDate,dblUnpaidIn,dblUnpaidOut,BalanceForward,dblUnpaidBalance,InventoryBalanceCarryForward)
