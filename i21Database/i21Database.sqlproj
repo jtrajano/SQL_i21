@@ -5135,6 +5135,7 @@
     <Build Include="dbo\Views\vyuHDTicketHoursWorkedReport.sql" />
     <Build Include="dbo\Views\vyuHDTicketDetailsReport.sql" />
     <Build Include="dbo\Views\vyuAPBillDetailTax.sql" />
+    <Build Include="dbo\Views\vyuARPaymentACHSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
