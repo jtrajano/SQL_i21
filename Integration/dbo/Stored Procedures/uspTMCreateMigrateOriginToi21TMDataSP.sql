@@ -27,7 +27,7 @@ BEGIN
 			CREATE PROCEDURE [dbo].[uspTMMigrateOriginToi21TMData]
 			AS
 			BEGIN
-				PRINT ''START UPDATE CUSTOMER RELATED RECORDS''
+				PRINT ''START UPDATE CUSTOMER RELATED RECORDS''				
 				--- Prepare staging table
 				IF OBJECT_ID(''tempdb..#tmpCustomerTable'') IS NOT NULL DROP TABLE #tmpCustomerTable
 
@@ -258,9 +258,9 @@ BEGIN
 				WHERE tblTMBudgetCalculationItemPricing.intItemId = A.intOriginId
 
 				PRINT ''END UPDATE ITEM RELATED RECORDS''
-
-
+	
 				PRINT ''START UPDATE CONTRACT RELATED RECORDS''
+				
 				---Prepare Staging Table
 				IF OBJECT_ID(''tempdb..#tmpContractTable'') IS NOT NULL DROP TABLE #tmpContractTable
 
@@ -291,7 +291,7 @@ BEGIN
 				WHERE tblTMDeliveryHistory.intWillCallContractId = A.intOriginId
 
 				PRINT ''END UPDATE CONTRACT RELATED RECORDS''
-
+				
 
 				PRINT ''START UPDATE INVOICE RELATED RECORDS''
 				---Prepare Staging Table
@@ -314,7 +314,7 @@ BEGIN
 				INNER JOIN tblSMCompanyLocation D
 					ON B.intCompanyLocationId = D.intCompanyLocationId
 					AND A.vwivc_loc_no COLLATE Latin1_General_CI_AS = D.strLocationNumber
-				GO
+				
 
 				-- Update tblTMDeliveryHistory
 				UPDATE tblTMDeliveryHistory
@@ -336,7 +336,7 @@ BEGIN
 					AND RTRIM(Z.strInvoiceNumber) = RTRIM(V.strOriginNumber)
 				) A
 				WHERE tblTMDeliveryHistory.intDeliveryHistoryID = A.intDeliveryHistoryID
-				GO
+				
 
 				-- Update tblTMDeliveryHistoryDetail
 				UPDATE tblTMDeliveryHistoryDetail
@@ -360,7 +360,7 @@ BEGIN
 
 				) A
 				WHERE tblTMDeliveryHistoryDetail.intDeliveryHistoryDetailID = A.intDeliveryHistoryDetailID
-				GO
+				
 
 				PRINT ''END UPDATE INVOICE RELATED RECORDS''
 				
@@ -378,77 +378,77 @@ BEGIN
 				PRINT ''START UPDATE Recreate SP and views''
 
 					EXEC uspTMRecreateAccountStatusView
-					GO
+					
 					EXEC uspTMRecreateSalesPersonView
-					GO
+					
 					EXEC uspTMRecreateCommentsView
-					GO 
+					
 					EXEC uspTMRecreateContractView
-					GO 
+					
 					EXEC uspTMRecreateOriginOptionView
-					GO 
+					
 					EXEC uspTMRecreateCTLMSTView
-					GO 
+					
 					EXEC uspTMRecreateItemView
-					GO 
+					
 					EXEC uspTMRecreateInvoiceView
-					GO 
+					
 					EXEC uspTMRecreateLocaleTaxView
-					GO 
+					
 					EXEC uspTMRecreateLocationView
-					GO 
+					
 					EXEC uspTMRecreateCustomerView
-					GO
+					
 					EXEC uspTMRecreateTermsView
-					GO
+					
 					EXEC uspTMRecreateSiteOrderView
-					GO
+					
 					EXEC uspTMAlterCobolWrite
-					GO
+					
 					EXEC uspTMRecreateOpenCallEntryView
-					GO
+					
 					EXEC uspTMRecreateOpenWorkOrderView
-					GO
+					
 					EXEC uspTMRecreateConsumptionSiteSearchView
-					GO
+					
 					EXEC uspTMRecreateGetSpecialPricingPriceTableFn
-					GO
+					
 					EXEC uspTMRecreateItemUsedBySiteView
-					GO
+					
 					EXEC uspTMRecreateLocationUsedBySiteView
-					GO
+					
 					EXEC uspTMRecreateDriverUsedBySiteView
-					GO
+					
 					EXEC uspTMRecreateLeaseSearchView
-					GO
+					
 					EXEC uspTMRecreateDeviceSearchView
-					GO
+					
 					EXEC uspTMRecreateGeneratedCallEntryView
-					GO
+					
 					EXEC uspTMRecreateDeliveryHistoryCallEntryView
-					GO
+					
 					EXEC uspTMRecreateOriginDegreeOptionView
-					GO
+					
 					EXEC uspTMRecreateOutOfRangeBurnRateSearchView
-					GO
+					
 					EXEC uspTMRecreateLeakGasCheckSearchView
-					GO
+					
 					EXEC uspTMRecreateEfficiencySearchView
-					GO
+					
 					EXEC uspTMRecreateDeliveriesSearchView
-					GO
+					
 					EXEC uspTMRecreateCustomerContractSubReportView
-					GO
+					
 					EXEC uspTMRecreateCallEntryPrintOutReportView
-					GO
+					
 					EXEC uspTMRecreateDeliveryFillReportView
-					GO
+					
 					EXEC uspTMRecreateWorkOrderReportView
-					GO
+					
 					EXEC uspTMRecreateDYMOCustomerLabelReportView
-					GO
+					
 					EXEC uspTMRecreateAssociateSiteSearchView
-					GO
+					
 
 
 				PRINT ''START UPDATE Recreate SP and views''
