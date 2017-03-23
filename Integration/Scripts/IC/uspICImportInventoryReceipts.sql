@@ -1,7 +1,6 @@
-/****** Object:  StoredProcedure [dbo].[uspICImportInventoryReceipts]    Script Date: 08/24/2016 06:24:06 ******/
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICImportInventoryReceipts]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [uspICImportInventoryReceipts]; 
-GO 
+GO
 
 CREATE PROCEDURE [dbo].[uspICImportInventoryReceipts]
 	@Checking BIT = 0,

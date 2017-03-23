@@ -1,11 +1,8 @@
-SET ANSI_NULLS ON
-GO
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCCatExtraGLAccounts]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCCatExtraGLAccounts]; 
+GO 
 
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-Create PROCEDURE [dbo].[uspICDCCatExtraGLAccounts]
+CREATE PROCEDURE [dbo].[uspICDCCatExtraGLAccounts]
 
 AS
 SET QUOTED_IDENTIFIER OFF

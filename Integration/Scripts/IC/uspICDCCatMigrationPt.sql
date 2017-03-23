@@ -1,4 +1,8 @@
-Create PROCEDURE [dbo].[uspICDCCatMigrationPt]
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCCatMigrationPt]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [uspICDCCatMigrationPt]; 
+GO 
+
+CREATE PROCEDURE [dbo].[uspICDCCatMigrationPt]
 --** Below Stored Procedure is to migrate inventory and related tables like class, location, unit measure, item pricing, etc.
 --   It loads data into item and related i21 tables like tblICCategory, tblICUnitMeasure, tblICItem,
 --   tblICItemUOM, tblICItemLocation, tblICItemPricing. **

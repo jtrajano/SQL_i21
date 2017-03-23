@@ -2,7 +2,7 @@ IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICD
 	DROP PROCEDURE [uspICDCItmGLAcctsMigrationPt]; 
 GO 
 
-Create PROCEDURE [dbo].[uspICDCItmGLAcctsMigrationPt]
+CREATE PROCEDURE [dbo].[uspICDCItmGLAcctsMigrationPt]
 --** Below Stored Procedure is to migrate inventory related gl accounts from origin to i21 tables such as tblICCategoryAccount, tblICItemAccount. **
 
 AS
