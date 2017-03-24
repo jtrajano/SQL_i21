@@ -129,17 +129,7 @@ Begin
 	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
 	Values (@intEntityId,'Vendor',0)
 	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
-	Values (@intEntityId,'Ship Via',0)
-	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
 	Values (@intEntityId,'Producer',0)
-	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
-	Values (@intEntityId,'Shipping Line',0)
-	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
-	Values (@intEntityId,'Forwarding Agent',0)
-	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
-	Values (@intEntityId,'Insurer',0)
-	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
-	Values (@intEntityId,'Futures Broker',0)
 
 	--Entity Location
 	Insert Into tblEMEntityLocation(intEntityId,strLocationName,strAddress,strCity,strCountry,strZipCode,intTermsId,ysnDefaultLocation,ysnActive)
@@ -152,6 +142,11 @@ Begin
 	Insert Into tblAPVendor(intEntityVendorId,intCurrencyId,strVendorId,ysnPymtCtrlActive,strTaxNumber,intBillToId,intShipFromId,strFLOId,intVendorType,ysnWithholding,dblCreditLimit,strVendorAccountNum,intTermsId)
 	Select @intEntityId,@intCurrencyId,@strEntityNo,1,strTaxNo,@intEntityLocationId,@intEntityLocationId,strFLOId,0,0,0.0,strAccountNo,@intTermId
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
+
+	--available to term list
+	If not exists(Select 1 From tblAPVendorTerm Where intEntityVendorId=@intEntityId AND intTermId=@intTermId)
+		Insert Into tblAPVendorTerm(intEntityVendorId,intTermId)
+		Values(@intEntityId,@intTermId)
 
 	--Add Contacts to Entity table
 	Insert Into tblEMEntity(strName,strContactNumber,ysnActive)
@@ -175,10 +170,6 @@ Begin
 	Join
 	(Select ROW_NUMBER() OVER(ORDER BY intStageEntityContactId ASC) AS intRowNo,* from tblIPEntityContactStage Where intStageEntityId=@intStageEntityId) t2
 	on t1.intRowNo=t2.intRowNo
-
-	--Ship Via
-	Insert Into tblSMShipVia(intEntityShipViaId,strShipVia,strShippingService,intSort)
-	Values(@intEntityId,LEFT(@strVendorName + '[' + @strAccountNo + ']',100),'None',0)
 
 	--Add Audit Trail Record
 	Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intEntityId) + '","keyValue":' + CONVERT(VARCHAR,@intEntityId) + ',"iconCls":"small-new-plus","leaf":true}'
@@ -245,6 +236,11 @@ Begin --Update
 		Begin
 			Update tblEMEntityLocation Set intTermsId=@intTermId Where intEntityLocationId=@intEntityLocationId
 			Update tblAPVendor Set intTermsId=@intTermId Where intEntityVendorId=@intEntityId
+
+			--available to term list
+			If not exists(Select 1 From tblAPVendorTerm Where intEntityVendorId=@intEntityId AND intTermId=@intTermId)
+				Insert Into tblAPVendorTerm(intEntityVendorId,intTermId)
+				Values(@intEntityId,@intTermId)
 		End
 
 	--Entity table Update
