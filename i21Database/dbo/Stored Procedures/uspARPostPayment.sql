@@ -2803,7 +2803,7 @@ IF @raiseError = 0
 						BEGIN
 							DECLARE @paymentIdACH INT
 
-							SELECT TOP 1 @paymentToUpdate = intPaymentId FROM @tblPaymentsToUpdateBudget ORDER BY intPaymentId
+							SELECT TOP 1 @paymentIdACH = intPaymentId FROM @tblACHPayments ORDER BY intPaymentId
 
 							EXEC dbo.uspARProcessACHPayments @paymentIdACH, @userId
 
