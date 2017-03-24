@@ -62,8 +62,8 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('AddLocation')
             .waitUntilLoaded('icitemlocation')
             .selectComboBoxRowNumber('Location',1,0)
-            .selectComboBoxRowNumber('SubLocation',4,0)
-            .selectComboBoxRowNumber('StorageLocation',1,0)
+//            .selectComboBoxRowNumber('SubLocation',4,0)
+//            .selectComboBoxRowNumber('StorageLocation',1,0)
             .selectComboBoxRowValue('SubLocation', 'Raw Station', 'intSubLocationId',0)
             .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'intStorageLocationId',0)
             .selectComboBoxRowValue('IssueUom', saleuom, 'strUnitMeasure')
@@ -75,7 +75,7 @@ Ext.define('Inventory.CommonIC', {
 
             .clickButton('AddLocation')
             .waitUntilLoaded('')
-            .selectComboBoxRowNumber('Location',2,0)
+//            .selectComboBoxRowNumber('Location',2,0)
 //            .selectComboBoxRowNumber('SubLocation',1,0)
 //            .selectComboBoxRowNumber('StorageLocation',1,0)
             .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
@@ -239,11 +239,11 @@ Ext.define('Inventory.CommonIC', {
         .enterData('Text Field','Description', description)
         .enterData('Text Field','DecimalsOnDpr','6.00')
 
-        .enterUOMGridData('Uom', 1, 'colUnitQty', 'strUnitMeasure', 1, 'LB')
-        .enterUOMGridData('Uom', 2, 'colUnitQty', 'strUnitMeasure', 50, '50 lb bag')
-        .enterUOMGridData('Uom', 3, 'colUnitQty', 'strUnitMeasure', 56, 'Bushels')
-        .enterUOMGridData('Uom', 4, 'colUnitQty', 'strUnitMeasure', 55.1156, '25 kg bag')
-        .clickGridCheckBox('Uom',1,'strUnitMeasure', 'LB', 'ysnStockUnit', true)
+        .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','LB','strUnitMeasure')
+        .clickGridCheckBox('Uom', 1,'strUnitMeasure', 'LB', 'ysnStockUnit', true)
+        .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
+        .selectGridComboBoxRowValue('Uom',3,'strUnitMeasure','Bushels','strUnitMeasure')
+        .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','25 kg bag','strUnitMeasure')
 
         .clickButton('Save')
         .waitUntilLoaded()
@@ -349,14 +349,17 @@ Ext.define('Inventory.CommonIC', {
             .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
             .verifyGridData('InventoryReceipt', 1, 'colLineTotal', linetotal)
 
-//            .clickTab('Post Preview')
-//            .waitUntilLoaded('')
-//            .addResult('Open Post Preview',2000)
-//            .waitUntilLoaded('')
-//            .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//            .verifyGridData('RecapTransaction', 1, 'colRecapDebit', linetotal)
-//            .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
-//            .verifyGridData('RecapTransaction', 2, 'colRecapCredit', linetotal)
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colDebit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colCredit', linetotal)
+
             .clickButton('Post')
             .waitUntilLoaded('')
             .addResult('Successfully Posted',2000)
@@ -371,7 +374,7 @@ Ext.define('Inventory.CommonIC', {
 
 
     /**
-     * Add Direct Inventory Receipt for Non Lotted Item
+     * Add Direct Inventory Receipt for Lotted Item
      *
      */
 
@@ -407,15 +410,17 @@ Ext.define('Inventory.CommonIC', {
             .verifyGridData('LotTracking', 1, 'colLotWeightUOM',lotuom)
             .verifyGridData('LotTracking', 1, 'colLotStorageLocation', storagelocation)
 
-//
-//            .clickTab('Post Preview')
-//            .waitUntilLoaded('')
-//            .addResult('Open Post Preview',2000)
-//            .waitUntilLoaded('')
-//            .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//            .verifyGridData('RecapTransaction', 1, 'colRecapDebit', linetotal)
-//            .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
-//            .verifyGridData('RecapTransaction', 2, 'colRecapCredit', linetotal)
+
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colDebit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colCredit', linetotal)
             .clickButton('Post')
             .waitUntilLoaded('')
             .addResult('Successfully Posted',2000)
@@ -429,6 +434,853 @@ Ext.define('Inventory.CommonIC', {
     },
 
 
+
+
+    /**
+     * Add PO to IR Inventory Receipt for Non Lotted Item "Process Button"
+     *
+     */
+
+
+    addPOtoIRProcessButtonNonLotted: function (t,next, vendor, location,itemno,receiptuom, qtytoreceive,cost ) {
+        var linetotal =  qtytoreceive * cost;
+        new iRely.FunctionalTest().start(t, next)
+
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+            .clickMenuScreen('Purchase Orders','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('appurchaseorder')
+            .selectComboBoxRowValue('VendorId', vendor , 'VendorId',1)
+            .selectComboBoxRowValue('ShipTo', location , 'VendorId',1)
+            .waitUntilLoaded('')
+            .selectGridComboBoxRowValue('Items',1,'strItemNo',itemno,'strItemNo')
+            .selectGridComboBoxRowValue('Items',1,'strUOM', receiptuom,'strUOM')
+            .enterGridData('Items', 1, 'colQtyOrdered', qtytoreceive)
+            .enterGridData('Items', 1, 'colCost', cost)
+            .verifyGridData('Items', 1, 'colTotal', linetotal)
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .clickButton('Process')
+            .addResult('Processing PO to IR',1000)
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .verifyData('Combo Box','ReceiptType','Purchase Order')
+            .verifyData('Combo Box','Vendor', vendor)
+            .verifyGridData('InventoryReceipt', 1, 'colItemNo', itemno)
+            .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', qtytoreceive, receiptuom, 'equal')
+            .verifyGridData('InventoryReceipt', 1, 'colCostUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colLineTotal', linetotal)
+
+
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtTotal').value;
+                if (total == linetotal) {
+                    t.ok(true, 'Total is correct.');
+                }
+                else {
+                    t.ok(false, 'Total is incorrect.');
+                }
+                next();
+            })
+
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('Open Post Preview Tab',2000)
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('Open Post Preview Tab',2000)
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colDebit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colCredit', linetotal)
+            .addResult('Successfully Posted',2000)
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+
+            .done();
+    },
+
+
+    /**
+     * Add PO to IR Inventory Receipt for  Lotted Item "Process Button"
+     *
+     */
+
+
+    addPOtoIRProcessButtonLotted: function (t,next, vendor, location,itemno,receiptuom, qtytoreceive,cost,sublocation, storagelocation, lotno, lotuom) {
+        var linetotal =  qtytoreceive * cost;
+        new iRely.FunctionalTest().start(t, next)
+
+
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+            .clickMenuScreen('Purchase Orders','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('appurchaseorder')
+            .selectComboBoxRowValue('VendorId', vendor , 'VendorId',1)
+            .selectComboBoxRowValue('ShipTo', location , 'VendorId',1)
+            .waitUntilLoaded('')
+            .selectGridComboBoxRowValue('Items',1,'strItemNo',itemno,'strItemNo')
+            .selectGridComboBoxRowValue('Items',1,'strUOM', receiptuom,'strUOM')
+            .enterGridData('Items', 1, 'colQtyOrdered', qtytoreceive)
+            .enterGridData('Items', 1, 'colCost', cost)
+            .verifyGridData('Items', 1, 'colTotal', linetotal)
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .clickButton('Process')
+            .addResult('Processing PO to IR',1000)
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .verifyData('Combo Box','ReceiptType','Purchase Order')
+            .verifyData('Combo Box','Vendor', vendor)
+            .verifyGridData('InventoryReceipt', 1, 'colItemNo', itemno)
+            .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', qtytoreceive, receiptuom, 'equal')
+            .verifyGridData('InventoryReceipt', 1, 'colCostUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colLineTotal', linetotal)
+
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM', receiptuom,'strWeightUOM')
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strSubLocationName',sublocation,'strSubLocationName')
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strStorageLocationName',storagelocation,'strSubLocationName')
+
+            .enterGridData('LotTracking', 1, 'colLotId', lotno)
+            .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure',lotuom,'strUnitMeasure')
+            .enterGridData('LotTracking', 1, 'colLotQuantity', qtytoreceive)
+            .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
+            .verifyGridData('LotTracking', 1, 'colLotWeightUOM',lotuom)
+            .verifyGridData('LotTracking', 1, 'colLotStorageLocation', storagelocation)
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtGrossWgt').value;
+                if (total == qtytoreceive) {
+                    t.ok(true, 'Gross is correct.');
+                }
+                else {
+                    t.ok(false, 'Grossl is incorrect.');
+                }
+                next();
+            })
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtNetWgt').value;
+                if (total == qtytoreceive) {
+                    t.ok(true, 'Net is correct.');
+                }
+                else {
+                    t.ok(false, 'Net is incorrect.');
+                }
+                next();
+            })
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtTotal').value;
+                if (total == linetotal) {
+                    t.ok(true, 'Total is correct.');
+                }
+                else {
+                    t.ok(false, 'Total is incorrect.');
+                }
+                next();
+            })
+
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('Open Post Preview Tab',2000)
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('Open Post Preview Tab',2000)
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colDebit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colCredit', linetotal)
+            .addResult('Successfully Posted',2000)
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+
+            .done();
+    },
+
+
+
+    /**
+     * Add PO to IR Inventory Receipt for Non Lotted Item "Add Orders Button" for non lotted
+     *
+     */
+
+
+    addPOtoIRAddOrdersButtonNonLotted: function (t,next, vendor, location,itemno,receiptuom, qtytoreceive,cost ) {
+        var linetotal =  qtytoreceive * cost;
+        new iRely.FunctionalTest().start(t, next)
+
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+            .clickMenuScreen('Purchase Orders','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('appurchaseorder')
+            .selectComboBoxRowValue('VendorId', vendor, 'VendorId',1)
+            .selectComboBoxRowValue('ShipTo', location , 'VendorId',1)
+            .waitUntilLoaded('')
+            .selectGridComboBoxRowValue('Items',1,'strItemNo', itemno,'strItemNo')
+            .selectGridComboBoxRowValue('Items',1,'strUOM', receiptuom,'strUOM')
+            .enterGridData('Items', 1, 'colQtyOrdered', qtytoreceive)
+            .enterGridData('Items', 1, 'colCost', cost)
+            .verifyGridData('Items', 1, 'colTotal', linetotal)
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Inventory Receipts','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .selectComboBoxRowNumber('ReceiptType',2,0)
+            .selectComboBoxRowValue('Vendor', vendor, 'Vendor',1)
+            .waitUntilLoaded('')
+            .selectSearchRowNumber(1)
+            .clickButton('OpenSelected')
+            .waitUntilLoaded('icinventoryreceipt')
+            .verifyData('Combo Box','ReceiptType','Purchase Order')
+            .verifyData('Combo Box','Vendor','ABC Trucking')
+
+            .verifyGridData('InventoryReceipt', 1, 'colItemNo', itemno)
+            .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', qtytoreceive)
+            .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', qtytoreceive, receiptuom, 'equal')
+            .verifyGridData('InventoryReceipt', 1, 'colUnitCost', cost)
+            .verifyGridData('InventoryReceipt', 1, 'colLineTotal', linetotal)
+
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtTotal').value;
+                if (total == linetotal) {
+                    t.ok(true, 'Total is correct.');
+                }
+                else {
+                    t.ok(false, 'Total is incorrect.');
+                }
+                next();
+            })
+
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('Open Post Preview Tab',2000)
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('Open Post Preview Tab',2000)
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colDebit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colCredit', linetotal)
+            .waitUntilLoaded('')
+            .clickButton('Post')
+            .addResult('Successfully Posted',2000)
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+            .clickMenuFolder('Inventory','Folder')
+
+            .done();
+    },
+
+
+
+    /**
+     * Add PO to IR Inventory Receipt for Non Lotted Item "Add Orders Button" for  lotted
+     *
+     */
+
+
+    addPOtoIRAddOrdersButtonLotted: function (t,next, vendor, location,itemno,receiptuom, qtytoreceive,cost,sublocation, storagelocation, lotno, lotuom ) {
+        var linetotal =  qtytoreceive * cost;
+        new iRely.FunctionalTest().start(t, next)
+
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+            .clickMenuScreen('Purchase Orders','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('appurchaseorder')
+            .selectComboBoxRowValue('VendorId', vendor , 'VendorId',1)
+            .selectComboBoxRowValue('ShipTo', location , 'VendorId',1)
+            .waitUntilLoaded('')
+            .selectGridComboBoxRowValue('Items',1,'strItemNo',itemno,'strItemNo')
+            .selectGridComboBoxRowValue('Items',1,'strUOM', receiptuom,'strUOM')
+            .enterGridData('Items', 1, 'colQtyOrdered', qtytoreceive)
+            .enterGridData('Items', 1, 'colCost', cost)
+            .verifyGridData('Items', 1, 'colTotal', linetotal)
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Inventory Receipts','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('icinventoryreceipt')
+            .selectComboBoxRowNumber('ReceiptType',2,0)
+            .selectComboBoxRowValue('Vendor', vendor, 'Vendor',1)
+            .waitUntilLoaded('')
+            .selectSearchRowNumber(1)
+            .clickButton('OpenSelected')
+            .waitUntilLoaded('icinventoryreceipt')
+
+
+            .verifyData('Combo Box','ReceiptType','Purchase Order')
+            .verifyData('Combo Box','Vendor', vendor)
+            .verifyGridData('InventoryReceipt', 1, 'colItemNo', itemno)
+            .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', qtytoreceive, receiptuom, 'equal')
+            .verifyGridData('InventoryReceipt', 1, 'colLineTotal', linetotal)
+
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM', receiptuom,'strWeightUOM')
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strSubLocationName',sublocation,'strSubLocationName')
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strStorageLocationName',storagelocation,'strSubLocationName')
+
+            .enterGridData('LotTracking', 1, 'colLotId', lotno)
+            .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure',lotuom,'strUnitMeasure')
+            .enterGridData('LotTracking', 1, 'colLotQuantity', qtytoreceive)
+            .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
+            .verifyGridData('LotTracking', 1, 'colLotWeightUOM',lotuom)
+            .verifyGridData('LotTracking', 1, 'colLotStorageLocation', storagelocation)
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtGrossWgt').value;
+                if (total == qtytoreceive) {
+                    t.ok(true, 'Gross is correct.');
+                }
+                else {
+                    t.ok(false, 'Grossl is incorrect.');
+                }
+                next();
+            })
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtNetWgt').value;
+                if (total == qtytoreceive) {
+                    t.ok(true, 'Net is correct.');
+                }
+                else {
+                    t.ok(false, 'Net is incorrect.');
+                }
+                next();
+            })
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtTotal').value;
+                if (total == linetotal) {
+                    t.ok(true, 'Total is correct.');
+                }
+                else {
+                    t.ok(false, 'Total is incorrect.');
+                }
+                next();
+            })
+
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('Open Post Preview Tab',2000)
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('Open Post Preview Tab',2000)
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colDebit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colCredit', linetotal)
+            .waitUntilLoaded('')
+            .clickButton('Post')
+            .addResult('Successfully Posted',2000)
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Inventory','Folder')
+
+            .done();
+    },
+
+
+    /**
+     * Add CT to IR Inventory Receipt for Non Lotted Item "Process Button"
+     *
+     */
+
+
+    addCTtoIRAddOrdersButtonNonLotted: function (t,next, vendor, commodity, location,itemno,receiptuom, qtytoreceive,cost) {
+        var linetotal =  qtytoreceive * cost;
+        new iRely.FunctionalTest().start(t, next)
+
+            .clickMenuFolder('Contract Management','Folder')
+            .clickMenuScreen('Contracts','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('ctcontract')
+            .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
+            .selectComboBoxRowValue('Customer', vendor, 'Customer',1)
+            .selectComboBoxRowValue('Commodity', commodity, 'Commodity',1)
+            .enterData('Text Field','Quantity', qtytoreceive)
+            .selectComboBoxRowValue('CommodityUOM', receiptuom, 'CommodityUOM',1)
+            .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
+            .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
+            .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
+            .clickButton('AddDetail')
+            .waitUntilLoaded('ctcontractsequence')
+            .waitUntilLoaded('')
+            .addFunction (function (next){
+            var date = new Date().toLocaleDateString();
+            new iRely.FunctionalTest().start(t, next)
+                .enterData('Date Field','EndDate', date, 0, 10)
+                .done();
+            })
+            .selectComboBoxRowValue('Location', location , 'Location',1)
+            .selectComboBoxRowValue('Item', itemno, 'Item',1)
+            .selectComboBoxRowValue('NetWeightUOM', receiptuom, 'NetWeightUOM',1)
+            .selectComboBoxRowValue('PriceCurrency', 'USD', 'PriceCurrency',1)
+            .enterData('Text Field','CashPrice', cost)
+            .selectComboBoxRowValue('CashPriceUOM', receiptuom, 'CashPriceUOM',1)
+            .clickButton('Save')
+            .waitUntilLoaded('ctcontract')
+            .waitUntilLoaded('')
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Contract Management','Folder')
+
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Inventory Receipts','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('icinventoryreceipt')
+            .selectComboBoxRowNumber('ReceiptType',1,0)
+            .selectComboBoxRowValue('SourceType', 'None', 'Vendor',1)
+            .selectComboBoxRowValue('Vendor', vendor, 'Vendor',1)
+            .waitUntilLoaded('')
+            .addResult('Successfully Opened',2000)
+//            .doubleClickSearchRowValue(itemno, 1)
+            .selectSearchRowNumber([1])
+            .clickButton('OpenSelected')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('Successfully Opened',2000)
+            .waitUntilLoaded('')
+
+            .verifyData('Combo Box','ReceiptType','Purchase Contract')
+            .verifyData('Combo Box','Vendor',vendor)
+            .verifyData('Combo Box','Currency','USD')
+            .verifyGridData('InventoryReceipt', 1, 'colItemNo', itemno)
+            .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', qtytoreceive)
+            .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', qtytoreceive, receiptuom, 'equal')
+            .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
+            .verifyGridData('InventoryReceipt', 1, 'colUnitCost', cost)
+            .verifyGridData('InventoryReceipt', 1, 'colCostUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colLineTotal', linetotal)
+
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtTotal').value;
+                if (total == linetotal) {
+                    t.ok(true, 'Total is correct.');
+                }
+                else {
+                    t.ok(false, 'Total is incorrect.');
+                }
+                next();
+            })
+
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colDebit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colCredit', linetotal)
+            .clickButton('Post')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',2000)
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Inventory','Folder')
+
+            .done();
+    },
+
+
+    /**
+     * Add PO to IR Inventory Receipt for Non Lotted Item "Add Orders Button" for  lotted
+     *
+     */
+
+
+    addCTtoIRAddOrdersButtonLotted: function (t,next, vendor, commodity, location,itemno,receiptuom, qtytoreceive,cost,sublocation, storagelocation, lotno, lotuom ) {
+        var linetotal =  qtytoreceive * cost;
+        new iRely.FunctionalTest().start(t, next)
+
+            .clickMenuFolder('Contract Management','Folder')
+            .clickMenuScreen('Contracts','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('ctcontract')
+            .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
+            .selectComboBoxRowValue('Customer', vendor, 'Customer',1)
+            .selectComboBoxRowValue('Commodity', commodity, 'Commodity',1)
+            .enterData('Text Field','Quantity', qtytoreceive)
+            .selectComboBoxRowValue('CommodityUOM', receiptuom, 'CommodityUOM',1)
+            .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
+            .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
+            .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
+            .clickButton('AddDetail')
+            .waitUntilLoaded('ctcontractsequence')
+            .waitUntilLoaded('')
+            .addFunction (function (next){
+            var date = new Date().toLocaleDateString();
+            new iRely.FunctionalTest().start(t, next)
+                .enterData('Date Field','EndDate', date, 0, 10)
+                .done();
+        })
+            .selectComboBoxRowValue('Location', location , 'Location',1)
+            .selectComboBoxRowValue('Item', itemno, 'Item',1)
+            .selectComboBoxRowValue('NetWeightUOM', receiptuom, 'NetWeightUOM',1)
+            .selectComboBoxRowValue('PriceCurrency', 'USD', 'PriceCurrency',1)
+            .enterData('Text Field','CashPrice', cost)
+            .selectComboBoxRowValue('CashPriceUOM', receiptuom, 'CashPriceUOM',1)
+            .clickButton('Save')
+            .waitUntilLoaded('ctcontract')
+            .waitUntilLoaded('')
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Contract Management','Folder')
+
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Inventory Receipts','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('icinventoryreceipt')
+            .selectComboBoxRowNumber('ReceiptType',1,0)
+            .selectComboBoxRowValue('SourceType', 'None', 'Vendor',1)
+            .selectComboBoxRowValue('Vendor', vendor, 'Vendor',1)
+            .waitUntilLoaded('')
+//            .doubleClickSearchRowValue(itemno, 1)
+            .selectSearchRowNumber(1)
+            .clickButton('OpenSelected')
+            .waitUntilLoaded('icinventoryreceipt')
+            .waitUntilLoaded('')
+            .addResult('Successfully Opened',2000)
+            .waitUntilLoaded('')
+
+            .verifyData('Combo Box','ReceiptType','Purchase Contract')
+            .verifyData('Combo Box','Vendor',vendor)
+            .verifyData('Combo Box','Currency','USD')
+            .verifyGridData('InventoryReceipt', 1, 'colItemNo', itemno)
+            .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', qtytoreceive)
+            .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', qtytoreceive, receiptuom, 'equal')
+            .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
+            .verifyGridData('InventoryReceipt', 1, 'colUnitCost', cost)
+            .verifyGridData('InventoryReceipt', 1, 'colCostUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colLineTotal', linetotal)
+
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM',receiptuom,'strWeightUOM')
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strSubLocationName',sublocation,'strSubLocationName')
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strStorageLocationName', storagelocation,'strStorageLocationName')
+            .waitUntilLoaded('')
+
+
+            .enterGridData('LotTracking', 1, 'colLotId', lotno)
+            .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure',lotuom,'strUnitMeasure')
+            .enterGridData('LotTracking', 1, 'colLotQuantity', qtytoreceive)
+            .verifyGridData('LotTracking', 1, 'colLotGrossWeight', qtytoreceive)
+            .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
+            .verifyGridData('LotTracking', 1, 'colLotNetWeight', qtytoreceive)
+            .verifyGridData('LotTracking', 1, 'colLotWeightUOM', receiptuom)
+            .verifyGridData('LotTracking', 1, 'colLotStorageLocation', storagelocation)
+
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtTotal').value;
+                if (total == linetotal) {
+                    t.ok(true, 'Total is correct.');
+                }
+                else {
+                    t.ok(false, 'Total is incorrect.');
+                }
+                next();
+            })
+
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colDebit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colCredit', linetotal)
+            .clickButton('Post')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',2000)
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Inventory','Folder')
+
+            .done();
+    },
+
+
+
+    /**
+     * Add CT to IR Inventory Receipt for Non Lotted Item "Process Button"
+     *
+     */
+
+
+    addCTtoIRProcessButtonNonLotted: function (t,next, vendor, commodity, location,itemno,receiptuom, qtytoreceive,cost) {
+        var linetotal =  qtytoreceive * cost;
+        new iRely.FunctionalTest().start(t, next)
+
+            .clickMenuFolder('Contract Management','Folder')
+            .clickMenuScreen('Contracts','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('ctcontract')
+            .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
+            .selectComboBoxRowValue('Customer', vendor, 'Customer',1)
+            .selectComboBoxRowValue('Commodity', commodity, 'Commodity',1)
+            .enterData('Text Field','Quantity', qtytoreceive)
+            .selectComboBoxRowValue('CommodityUOM', receiptuom, 'CommodityUOM',1)
+            .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
+            .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
+            .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
+            .clickButton('AddDetail')
+            .waitUntilLoaded('ctcontractsequence')
+            .waitUntilLoaded('')
+            .addFunction (function (next){
+            var date = new Date().toLocaleDateString();
+            new iRely.FunctionalTest().start(t, next)
+                .enterData('Date Field','EndDate', date, 0, 10)
+                .done();
+        })
+            .selectComboBoxRowValue('Location', location , 'Location',1)
+            .selectComboBoxRowValue('Item', itemno, 'Item',1)
+            .selectComboBoxRowValue('NetWeightUOM', receiptuom, 'NetWeightUOM',1)
+            .selectComboBoxRowValue('PriceCurrency', 'USD', 'PriceCurrency',1)
+            .enterData('Text Field','CashPrice', cost)
+            .selectComboBoxRowValue('CashPriceUOM', receiptuom, 'CashPriceUOM',1)
+            .clickButton('Save')
+            .waitUntilLoaded('ctcontract')
+            .waitUntilLoaded('')
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .clickButton('Process')
+            .clickButton('IR')
+            .waitUntilLoaded('')
+            .clickMessageBoxButton('yes')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',2000)
+            .waitUntilLoaded('')
+
+            .clickTab('Post Preview')
+            .addResult('Successfully Posted',2000)
+            .waitUntilLoaded('')
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .verifyData('Combo Box','ReceiptType','Purchase Contract')
+            .verifyData('Combo Box','Vendor',vendor)
+            .verifyData('Combo Box','Currency','USD')
+            .verifyGridData('InventoryReceipt', 1, 'colItemNo', itemno)
+            .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', qtytoreceive)
+            .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', qtytoreceive, receiptuom, 'equal')
+            .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
+            .verifyGridData('InventoryReceipt', 1, 'colUnitCost', cost)
+            .verifyGridData('InventoryReceipt', 1, 'colCostUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colLineTotal', linetotal)
+
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtTotal').value;
+                if (total == linetotal) {
+                    t.ok(true, 'Total is correct.');
+                }
+                else {
+                    t.ok(false, 'Total is incorrect.');
+                }
+                next();
+            })
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',2000)
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colDebit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colCredit', linetotal)
+            .clickButton('Post')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',2000)
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Contract Management','Folder')
+
+            .done();
+    },
+
+
+
+    /**
+     * Add CT to IR Inventory Receipt for  Lotted Item "Process Button"
+     *
+     */
+
+
+    addCTtoIRProcessButtonLotted: function (t,next, vendor, commodity, location,itemno,receiptuom, qtytoreceive,cost,sublocation, storagelocation, lotno, lotuom ) {
+        var linetotal =  qtytoreceive * cost;
+        new iRely.FunctionalTest().start(t, next)
+
+            .clickMenuFolder('Contract Management','Folder')
+            .clickMenuScreen('Contracts','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('ctcontract')
+            .selectComboBoxRowValue('Type', 'Purchase', 'Type',1)
+            .selectComboBoxRowValue('Customer', vendor, 'Customer',1)
+            .selectComboBoxRowValue('Commodity', commodity, 'Commodity',1)
+            .enterData('Text Field','Quantity', qtytoreceive)
+            .selectComboBoxRowValue('CommodityUOM', receiptuom, 'CommodityUOM',1)
+            .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
+            .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
+            .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
+            .clickButton('AddDetail')
+            .waitUntilLoaded('ctcontractsequence')
+            .waitUntilLoaded('')
+            .addFunction (function (next){
+            var date = new Date().toLocaleDateString();
+            new iRely.FunctionalTest().start(t, next)
+                .enterData('Date Field','EndDate', date, 0, 10)
+                .done();
+        })
+            .selectComboBoxRowValue('Location', location , 'Location',1)
+            .selectComboBoxRowValue('Item', itemno, 'Item',1)
+            .selectComboBoxRowValue('NetWeightUOM', receiptuom, 'NetWeightUOM',1)
+            .selectComboBoxRowValue('PriceCurrency', 'USD', 'PriceCurrency',1)
+            .enterData('Text Field','CashPrice', cost)
+            .selectComboBoxRowValue('CashPriceUOM', receiptuom, 'CashPriceUOM',1)
+            .clickButton('Save')
+            .waitUntilLoaded('ctcontract')
+            .waitUntilLoaded('')
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .clickButton('Process')
+            .clickButton('IR')
+            .waitUntilLoaded('')
+            .clickMessageBoxButton('yes')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',2000)
+            .waitUntilLoaded('')
+
+            .clickTab('FreightInvoice')
+            .waitUntilLoaded('')
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',2000)
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM',receiptuom,'strWeightUOM')
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strSubLocationName',sublocation,'strSubLocationName')
+            .selectGridComboBoxRowValue('InventoryReceipt',1,'strStorageLocationName', storagelocation,'strStorageLocationName')
+            .waitUntilLoaded('')
+
+
+            .enterGridData('LotTracking', 1, 'colLotId', lotno)
+            .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure',lotuom,'strUnitMeasure')
+            .enterGridData('LotTracking', 1, 'colLotQuantity', qtytoreceive)
+            .verifyGridData('LotTracking', 1, 'colLotGrossWeight', qtytoreceive)
+            .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
+            .verifyGridData('LotTracking', 1, 'colLotNetWeight', qtytoreceive)
+            .verifyGridData('LotTracking', 1, 'colLotWeightUOM', receiptuom)
+            .verifyGridData('LotTracking', 1, 'colLotStorageLocation', storagelocation)
+
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',2000)
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .verifyData('Combo Box','ReceiptType','Purchase Contract')
+            .verifyData('Combo Box','Vendor',vendor)
+            .verifyData('Combo Box','Currency','USD')
+            .verifyGridData('InventoryReceipt', 1, 'colItemNo', itemno)
+            .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', qtytoreceive)
+            .verifyUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', qtytoreceive, receiptuom, 'equal')
+            .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
+            .verifyGridData('InventoryReceipt', 1, 'colUnitCost', cost)
+            .verifyGridData('InventoryReceipt', 1, 'colCostUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', receiptuom)
+            .verifyGridData('InventoryReceipt', 1, 'colLineTotal', linetotal)
+
+            .addFunction(function (next){
+                var win =  Ext.WindowManager.getActive(),
+                    total = win.down('#txtTotal').value;
+                if (total == linetotal) {
+                    t.ok(true, 'Total is correct.');
+                }
+                else {
+                    t.ok(false, 'Total is incorrect.');
+                }
+                next();
+            })
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',2000)
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colDebit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '21000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colCredit', linetotal)
+            .clickButton('Post')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',2000)
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Contract Management','Folder')
+
+            .done();
+    },
 
 
     /**
@@ -456,14 +1308,17 @@ Ext.define('Inventory.CommonIC', {
             .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
             .enterUOMGridData('InventoryShipment', 1, 'colGumQuantity', 'strUnitMeasure', quantity, uom)
 
-//            .clickButton('PostPreview')
-//            .waitUntilLoaded('cmcmrecaptransaction')
-//            .waitUntilLoaded('')
-//            .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//            .verifyGridData('RecapTransaction', 1, 'colRecapCredit', linetotal)
-//            .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-//
-//            .verifyGridData('RecapTransaction', 2, 'colRecapDebit', linetotal)
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colCredit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colDebit', linetotal)
+            
             .clickButton('Post')
             .waitUntilLoaded('')
             .addResult('Successfully Posted',1500)
@@ -511,14 +1366,17 @@ Ext.define('Inventory.CommonIC', {
             .verifyGridData('LotTracking', 1, 'colNetWeight', '100')
             .verifyGridData('LotTracking', 1, 'colLotWeightUOM', uom)
 
-//            .clickButton('PostPreview')
-//            .waitUntilLoaded('cmcmrecaptransaction')
-//            .waitUntilLoaded('')
-//            .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//            .verifyGridData('RecapTransaction', 1, 'colRecapCredit', linetotal)
-//            .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-//
-//            .verifyGridData('RecapTransaction', 2, 'colRecapDebit', linetotal)
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 1, 'colCredit', linetotal)
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colDebit', linetotal)
+
             .clickButton('Post')
             .waitUntilLoaded('')
             .addResult('Successfully Posted',1500)
@@ -531,6 +1389,74 @@ Ext.define('Inventory.CommonIC', {
             .done();
     },
 
+
+
+    /**
+     * Add SO to Inventory Shipment for Non Lotted Item
+     *
+     */
+    addSOtoISNonLotted: function (t,next, customer, freight, itemno,uom, quantity) {
+        var linetotal =  quantity * 10;
+        new iRely.FunctionalTest().start(t, next)
+
+
+            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuScreen('Sales Orders','Screen')
+            .waitUntilLoaded()
+            .clickButton('New')
+            .waitUntilLoaded('arsalesorder')
+            .selectComboBoxRowValue('Customer', customer, 'Customer',1)
+            .enterData('Text Field','BOLNo','Test BOL - 01')
+            .selectComboBoxRowValue('FreightTerm', freight, 'FreightTerm',1)
+            .selectGridComboBoxRowValue('SalesOrder',1,'strItemNo', itemno,'strItemNo')
+            .selectGridComboBoxRowValue('SalesOrder',1,'strUnitMeasure', uom,'strUnitMeasure')
+
+            .addResult('Item Selected',1500)
+            .enterGridData('SalesOrder', 1, 'colOrdered', quantity)
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .verifyMessageBox('iRely i21','WARNING: Customer may exceed credit limit!','ok','information')
+            .clickMessageBoxButton('ok')
+            .waitUntilLoaded('')
+            .clickButton('Ship')
+            .waitUntilLoaded('')
+            .addResult('Clicked Ship Button',3000)
+            .waitUntilLoaded('')
+            .verifyMessageBox('iRely i21','WARNING: Customer may exceed credit limit!','ok','information')
+            .clickMessageBoxButton('ok')
+            .waitUntilLoaded('')
+            .addResult('Open Inventory Shipment Screen',3000)
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+
+            .verifyData('Combo Box','OrderType','Sales Order')
+            .verifyData('Combo Box','Customer', customer)
+            .verifyData('Combo Box','FreightTerms', freight)
+            .selectGridComboBoxRowValue('InventoryShipment',1,'strSubLocationName','Raw Station','strSubLocationName')
+            .selectGridComboBoxRowValue('InventoryShipment',1,'strStorageLocationName','RM Storage','strStorageLocationName')
+            .verifyGridData('InventoryShipment', 1, 'colItemNumber', itemno)
+            .verifyGridData('InventoryShipment', 1, 'colUOM', uom)
+
+
+            .clickButton('PostPreview')
+            .waitUntilLoaded('')
+            .clickButton('Details')
+            .waitUntilLoaded('')
+            .clickButton('PostPreview')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
+            .clickButton('Post')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',1500)
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+
+            .done();
+    },
 
 
 
@@ -546,7 +1472,6 @@ Ext.define('Inventory.CommonIC', {
      *
      *
      */
-
 
 
     addDiscountItem: function (t,next, item, itemshort,itemdesc){
@@ -601,7 +1526,7 @@ Ext.define('Inventory.CommonIC', {
         },
 
 
-    addOtherChargeItem: function (t,next, item, description) {
+    addOtherChargeItem: function (t,next, item, description, location) {
         new iRely.FunctionalTest().start(t, next)
 
 
@@ -629,18 +1554,20 @@ Ext.define('Inventory.CommonIC', {
             .enterGridData('UnitOfMeasure', 5, 'colDetailUnitQty', '1')
             .waitUntilLoaded('')
             .clickTab('Setup')
-            .displayText('===== Setup Item Location=====')
+            .waitUntilLoaded('')
+
+
             .clickTab('Location')
             .clickButton('AddLocation')
-            .waitUntilLoaded('')
+            .waitUntilLoaded('icitemlocation')
+            .selectComboBoxRowValue('Location', location, 'Location',0)
             .clickButton('Save')
+            .waitUntilLoaded()
+            .verifyStatusMessage('Saved')
             .clickButton('Close')
-            .clickButton('AddLocation')
-            .waitUntilLoaded('')
-            .selectComboBoxRowNumber('Location',2,0)
+
             .clickButton('Save')
-            .clickButton('Close')
-            .clickButton('Save')
+            .waitUntilLoaded()
             .clickButton('Close')
             .waitUntilLoaded()
             .clickMenuFolder('Inventory','Folder')
