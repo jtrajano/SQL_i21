@@ -5146,6 +5146,7 @@
     <Build Include="dbo\Stored Procedures\uspGRReportStorageStatementDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostBillCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
