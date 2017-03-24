@@ -376,7 +376,7 @@ BEGIN
 			,@strRelatedTransactionId				= @CostBucketStrTransactionId
 			,@strTransactionForm					= @strTransactionForm
 			,@intEntityUserSecurityId				= @intEntityUserSecurityId
-			,@intCostingMethod						= @AVERAGECOST
+			,@intCostingMethod						= @LIFO
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
@@ -598,7 +598,7 @@ BEGIN
 						,@strRelatedTransactionId				= @InvTranStringTransactionId 
 						,@strTransactionForm					= @strTransactionForm
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
-						,@intCostingMethod						= @AVERAGECOST
+						,@intCostingMethod						= @LIFO
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
@@ -670,7 +670,7 @@ BEGIN
 						,@strRelatedTransactionId				= @InvTranStringTransactionId 
 						,@strTransactionForm					= @strTransactionForm
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
-						,@intCostingMethod						= @AVERAGECOST
+						,@intCostingMethod						= @LIFO
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
