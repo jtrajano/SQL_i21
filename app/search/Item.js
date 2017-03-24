@@ -4,7 +4,7 @@ Ext.define('Inventory.search.Item', {
 
     searchConfigs: [
         {
-            title: 'Search Item',
+            title: 'Search Items',
             type: 'Inventory.Item',
             api: {
                 read: '../Inventory/api/Item/Search'

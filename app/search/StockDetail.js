@@ -4,7 +4,7 @@ Ext.define('Inventory.search.StockDetail', {
 
     searchConfigs: [
         {
-            title: 'Locations YTD',
+            title: 'Search Locations YTD',
             url: '../Inventory/api/Item/GetItemStocks',
             groupedOnLoad: true,
             columns: [
