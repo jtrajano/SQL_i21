@@ -123,11 +123,6 @@ SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE 
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmDate'
 
-IF OBJECT_ID('tempdb..#SelectedCustomer') IS NOT NULL DROP TABLE #SelectedCustomer
-CREATE TABLE #SelectedCustomer (	
-	strCustomerName	VARCHAR(MAX)	COLLATE Latin1_General_CI_AS 
-)
-
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -163,32 +158,9 @@ BEGIN
 	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
 	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
 	
-
-SELECT @strCustomerName = [from]
-FROM @temp_xml_table
-WHERE [fieldname] IN ('strName', 'strCustomerName')
-
-IF (@strCustomerName IS NULL OR @strCustomerName = '')
-BEGIN 
-	SELECT @strCustomerName = strName
-	FROM (
-		SELECT 
-			strName  + ', '
-		FROM 
-			tblEMEntity
-		FOR XML PATH ('')
-	) c (strName)	 
-END
-	
-SET @strCustomerName = REPLACE (@strCustomerName, '|^|', ',')
-SET @strCustomerName = REVERSE(SUBSTRING(REVERSE(@strCustomerName),PATINDEX('%[A-Za-z0-9]%',REVERSE(@strCustomerName)),LEN(@strCustomerName) - (PATINDEX('%[A-Za-z0-9]%',REVERSE(@strCustomerName)) - 1)	) )
-
-INSERT INTO 
-	#SelectedCustomer	
-SELECT 
-	* 
-FROM 
-	fnARGetRowsFromDelimitedValues(@strCustomerName)
+	IF (@fieldname = 'strName' OR @fieldname = 'strCustomerName' )
+		SET @filter = REPLACE (@filter, '|^|', ''',''')
+		SET @filter = REPLACE (@filter, ''',''''', '''')
 
 	DELETE FROM @temp_xml_table WHERE id = @id
 
@@ -197,107 +169,52 @@ FROM
 		SET @filter = @filter + ' AND '
 	END
 END
+ 
+SET @query = 'SELECT * FROM
+(SELECT I.strInvoiceNumber AS strReferenceNumber
+		, strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
+		, I.intEntityCustomerId
+		, dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
+		, I.dtmPostDate
+		, intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +')
+		, dblTotalAmount = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
+		, dblAmountPaid = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
+		, dblAmountDue = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
+		, dblPastDue = CASE WHEN '+ @strDateTo +' > I.[dtmDueDate] AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
+						THEN ISNULL(I.dblAmountDue, 0)
+						ELSE 0
+					END
+		, dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
+		, strDescription = CASE WHEN I.strType = ''Service Charge'' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE IC.strDescription END
+		, IC.strItemNo
+		, ID.dblQtyOrdered
+		, ID.dblQtyShipped
+		, ID.dblTotal
+		, ID.dblPrice
+		, I.intInvoiceId
+		, C.strCustomerNumber
+		, C.strName
+		, I.strBOLNumber
+		, C.dblCreditLimit
+		, strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
+		, strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
+		, strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
+		, strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', 0) FROM tblSMCompanySetup)
+FROM tblARInvoice I
+	INNER JOIN (tblARInvoiceDetail ID 
+		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	
+	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
+	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
+WHERE I.ysnPosted = 1
+	AND I.ysnPaid = 0
+	AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
+	'+ @innerQuery +'
+) MainQuery'
 
-DECLARE @intDetailCount INT
-SELECT @intDetailCount = COUNT(*) FROM #SelectedCustomer
-
-
-IF (@intDetailCount > 0)
-BEGIN
-	SET @query = 'SELECT * FROM
-	(SELECT I.strInvoiceNumber AS strReferenceNumber
-		 , strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
-		 , I.intEntityCustomerId
-		 , dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
-		 , I.dtmPostDate
-		 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +')
-		 , dblTotalAmount = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
-		 , dblAmountPaid = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
-		 , dblAmountDue = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
-		 , dblPastDue = CASE WHEN '+ @strDateTo +' > I.[dtmDueDate] AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
-							THEN ISNULL(I.dblAmountDue, 0)
-							ELSE 0
-						END
-		 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
-		 , strDescription = CASE WHEN I.strType = ''Service Charge'' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE IC.strDescription END
-		 , IC.strItemNo
-		 , ID.dblQtyOrdered
-		 , ID.dblQtyShipped
-		 , ID.dblTotal
-		 , ID.dblPrice
-		 , I.intInvoiceId
-		 , C.strCustomerNumber
-		 , C.strName
-		 , I.strBOLNumber
-		 , C.dblCreditLimit
-		 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
-		 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
-		 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-		 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', 0) FROM tblSMCompanySetup)
-	FROM tblARInvoice I
-		INNER JOIN (tblARInvoiceDetail ID 
-			LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	
-		INNER JOIN ((SELECT * FROM vyuARCustomer WHERE strName IN (SELECT strCustomerName FROM #SelectedCustomer) ) C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
-		LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
-	WHERE I.ysnPosted = 1
-	  AND I.ysnPaid = 0
-	  AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
-	  '+ @innerQuery +'
-	) MainQuery'
-
-END
-ELSE 
-BEGIN
-	SET @query = 'SELECT * FROM
-	(SELECT I.strInvoiceNumber AS strReferenceNumber
-		 , strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
-		 , I.intEntityCustomerId
-		 , dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
-		 , I.dtmPostDate
-		 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +')
-		 , dblTotalAmount = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
-		 , dblAmountPaid = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
-		 , dblAmountDue = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
-		 , dblPastDue = CASE WHEN '+ @strDateTo +' > I.[dtmDueDate] AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
-							THEN ISNULL(I.dblAmountDue, 0)
-							ELSE 0
-						END
-		 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
-		 , strDescription = CASE WHEN I.strType = ''Service Charge'' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE IC.strDescription END
-		 , IC.strItemNo
-		 , ID.dblQtyOrdered
-		 , ID.dblQtyShipped
-		 , ID.dblTotal
-		 , ID.dblPrice
-		 , I.intInvoiceId
-		 , C.strCustomerNumber
-		 , C.strName
-		 , I.strBOLNumber
-		 , C.dblCreditLimit
-		 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
-		 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
-		 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-		 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', 0) FROM tblSMCompanySetup)
-	FROM tblARInvoice I
-		INNER JOIN (tblARInvoiceDetail ID 
-			LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	
-		INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
-		LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
-	WHERE I.ysnPosted = 1
-	  AND I.ysnPaid = 0
-	  AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
-	  '+ @innerQuery +'
-	) MainQuery'
-
-END
-
-IF (ISNULL(@filter,'') != '')  AND (ISNULL(@filter,'') NOT LIKE '%|^|%')
+IF (ISNULL(@filter,'') != '')  
 BEGIN
 	SET @query = @query + ' WHERE ' + @filter
 END
-
- 
-
 
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
@@ -313,7 +230,53 @@ WHERE
 					       WHERE 
 								strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo') )
 
-
+--- Get only valid customers
+TRUNCATE TABLE tblARSearchStatementCustomer
+INSERT INTO tblARSearchStatementCustomer (intEntityCustomerId, strCustomerNumber, strCustomerName, dblARBalance, intConcurrencyId)
+SELECT DISTINCT ABC.intEntityCustomerId, ABC.strCustomerNumber, ABC.strName, ARC.dblARBalance, 0 	 
+FROM
+(SELECT STATEMENTREPORT.strReferenceNumber
+      ,STATEMENTREPORT.strTransactionType
+	  ,STATEMENTREPORT.intEntityCustomerId
+	  ,STATEMENTREPORT.dtmDueDate
+	  ,STATEMENTREPORT.dtmDate
+	  ,STATEMENTREPORT.intDaysDue
+	  ,STATEMENTREPORT.dblTotalAmount
+	  ,STATEMENTREPORT.dblAmountPaid
+	  ,STATEMENTREPORT.dblAmountDue
+	  ,STATEMENTREPORT.dblPastDue
+	  ,STATEMENTREPORT.dblMonthlyBudget
+	  ,STATEMENTREPORT.strDescription
+	  ,STATEMENTREPORT.strItemNo
+	  ,STATEMENTREPORT.dblQtyOrdered
+	  ,STATEMENTREPORT.dblQtyShipped
+	  ,STATEMENTREPORT.dblTotal
+	  ,STATEMENTREPORT.dblPrice
+	  ,STATEMENTREPORT.intInvoiceId
+	  ,STATEMENTREPORT.strCustomerNumber
+	  ,STATEMENTREPORT.strName
+	  ,STATEMENTREPORT.strBOLNumber
+	  ,STATEMENTREPORT.dblCreditLimit
+	  ,dblCreditAvailable = STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+	  ,dbl0Days = ISNULL(AGINGREPORT.dbl0Days, 0)
+	  ,dbl10Days = ISNULL(AGINGREPORT.dbl10Days, 0)
+	  ,dbl30Days = ISNULL(AGINGREPORT.dbl30Days, 0)
+	  ,dbl60Days = ISNULL(AGINGREPORT.dbl60Days, 0)
+	  ,dbl90Days = ISNULL(AGINGREPORT.dbl90Days, 0)
+	  ,dbl91Days = ISNULL(AGINGREPORT.dbl91Days, 0)
+	  ,dblCredits = ISNULL(AGINGREPORT.dblCredits, 0)
+	  ,dblPrepayments = ISNULL(AGINGREPORT.dblPrepayments, 0)
+	  ,STATEMENTREPORT.strFullAddress
+	  ,STATEMENTREPORT.strStatementFooterComment	  
+	  ,STATEMENTREPORT.strCompanyName
+	  ,STATEMENTREPORT.strCompanyAddress	  
+	  ,dtmAsOfDate = @dtmDateTo
+FROM @temp_statement_table AS STATEMENTREPORT
+LEFT JOIN @temp_aging_table AS AGINGREPORT 
+ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId) ABC 
+INNER JOIN 
+	(SELECT intEntityCustomerId, dblARBalance FROM tblARCustomer ) ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
+  
 SELECT STATEMENTREPORT.strReferenceNumber
       ,STATEMENTREPORT.strTransactionType
 	  ,STATEMENTREPORT.intEntityCustomerId
