@@ -107,7 +107,7 @@ DECLARE @intId AS INT
 		,@intInTransitSourceLocationId INT 
 
 DECLARE @CostingMethod AS INT 
-		,@TransactionTypeName AS NVARCHAR(200) 
+		,@TransactionFormName AS NVARCHAR(200)
 		,@InventoryTransactionIdentityId INT
 
 -- Create the CONSTANT variables for the costing methods
@@ -119,9 +119,9 @@ DECLARE @AVERAGECOST AS INT = 1
 
 -- Initialize the transaction name. Use this as the transaction form name
 SELECT	TOP 1 
-		@TransactionTypeName = strName
-FROM	dbo.tblICInventoryTransactionType
-WHERE	intTransactionTypeId = @intTransactionTypeId
+		@TransactionFormName = strTransactionForm
+FROM	tblICInventoryTransactionType transType INNER JOIN @ItemsToAdjust tmp
+			ON transType.intTransactionTypeId = tmp.intTransactionTypeId
 
 -----------------------------------------------------------------------------------------------------------------------------
 --	EXEC [dbo].[uspICValidateCostingOnPost] 
@@ -187,7 +187,7 @@ BEGIN
 			,[intRelatedInventoryTransactionId]
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
-	FROM	@ItemsToAdjust
+	FROM	@ItemsToAdjust 
 END 
 
 START_LOOP:
@@ -299,7 +299,7 @@ BEGIN
 			,@dblExchangeRate
 			,@intEntityUserSecurityId
 			,@intRelatedInventoryTransactionId
-			,'Bill'
+			,@TransactionFormName
 			,@intFobPointId
 			,@intInTransitSourceLocationId
 
@@ -332,7 +332,7 @@ BEGIN
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
 			,@intRelatedInventoryTransactionId
-			,'Bill'
+			,@TransactionFormName
 			,@intFobPointId
 			,@intInTransitSourceLocationId
 
@@ -365,7 +365,7 @@ BEGIN
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
 			,@intRelatedInventoryTransactionId
-			,'Bill'
+			,@TransactionFormName
 			,@intFobPointId
 			,@intInTransitSourceLocationId
 
@@ -399,7 +399,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intRelatedInventoryTransactionId
 			,@intLotId
-			,'Bill'
+			,@TransactionFormName
 			,@intFobPointId
 			,@intInTransitSourceLocationId
 
@@ -433,7 +433,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@strActualCostId
 			,@intRelatedInventoryTransactionId
-			,'Bill'
+			,@TransactionFormName
 			,@intFobPointId
 			,@intInTransitSourceLocationId
 
@@ -582,7 +582,7 @@ BEGIN
 						,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId
 						,@intRelatedTransactionId				= NULL 
 						,@strRelatedTransactionId				= NULL						
-						,@strTransactionForm					= @TransactionTypeName
+						,@strTransactionForm					= @TransactionFormName
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
 						,@intCostingMethod						= @AVERAGECOST
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT 

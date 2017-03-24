@@ -5162,8 +5162,12 @@
     <Build Include="dbo\Functions\fnSMGetForexRate.sql" />
     <Build Include="dbo\Views\vyuHDTicketHoursWorkedReport.sql" />
     <Build Include="dbo\Views\vyuHDTicketDetailsReport.sql" />
+    <Build Include="dbo\Views\vyuARPaymentACHSearch.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityQuoteSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
+    <Build Include="dbo\Views\vyuARPaymentACHSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostBillCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
