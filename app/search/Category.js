@@ -1,5 +1,5 @@
 Ext.define('Inventory.search.Category', {
-    alias: 'search.category',
+    alias: 'search.iccategory',
     singleton: true,
 
     searchConfigs: [

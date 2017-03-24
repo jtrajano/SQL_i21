@@ -1,5 +1,5 @@
 Ext.define('Inventory.search.StorageMeasurementReading', {
-    alias: 'search.storagemeasurementreading',
+    alias: 'search.icstoragemeasurementreading',
     singleton: true,
 
     searchConfigs: [
