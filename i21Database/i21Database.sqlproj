@@ -5163,6 +5163,7 @@
     <Build Include="dbo\Views\vyuHDTicketHoursWorkedReport.sql" />
     <Build Include="dbo\Views\vyuHDTicketDetailsReport.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityQuoteSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
