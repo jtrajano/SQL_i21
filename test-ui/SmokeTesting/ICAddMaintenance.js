@@ -204,6 +204,18 @@ StartTest (function (t) {
             )
         })
 
+        //Add Other Charge Item
+        .displayText('===== Scenario 7: Add Other Charge Item =====')
+        .addFunction(function(next){
+            commonIC.addOtherChargeItem
+            (t,next,
+                'Smoke - Other Charge Item - 01'
+                , 'Test Other Charge Item Smoke Testing'
+                , '0001 - Fort Wayne'
+            )
+        })
+        .displayText('===== Add Maintenance Screens Done =====')
+
         .done();
 
 })

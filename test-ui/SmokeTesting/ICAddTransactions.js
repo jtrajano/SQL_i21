@@ -36,11 +36,11 @@ StartTest (function (t) {
 
         //Calculate Charge Amount
         .clickTab('FreightInvoice')
-        .selectGridComboBoxRowValue('Charges',1,'strItemNo','FRT','strItemNo')
+        .selectGridComboBoxRowValue('Charges',1,'strItemNo','Smoke - Other Charge Item - 01','strItemNo')
         .selectGridComboBoxRowNumber('Charges',1,'colCostMethod',2)
         .selectGridComboBoxRowValue('Charges',1,'strCurrency','USD','strCurrency')
         .enterGridData('Charges', 1, 'colRate', '10')
-        .clickGridCheckBox('Charges',0, 'strItemNo', 'FRT', 'ysnAccrue', true)
+        .clickGridCheckBox('Charges',0, 'strItemNo', 'Smoke - Other Charge Item - 01', 'ysnAccrue', true)
 
         .clickButton('CalculateCharges')
         .waitUntilLoaded()
@@ -49,15 +49,26 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .waitUntilLoaded()
         .addResult('Successfully Calculated',2000)
+
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .clickTab('Details')
+        .waitUntilLoaded('')
+        .clickTab('FreightInvoice')
+        .waitUntilLoaded('')
         .verifyGridData('Charges', 1, 'colChargeAmount', '100')
         .clickButton('Save')
         .waitUntilLoaded()
 
-        .clickButton('Post')
+        .clickTab('Post Preview')
         .waitUntilLoaded('')
+        .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',2000)
         .waitUntilLoaded('')
+        .clickTab('FreightInvoice')
+        .waitUntilLoaded('')
+        .verifyGridData('Charges', 1, 'colChargeAmount', '100')
         .clickButton('Close')
         .waitUntilLoaded('')
         .clickMenuFolder('Inventory','Folder')
@@ -70,24 +81,45 @@ StartTest (function (t) {
             commonIC.addDirectIRNonLotted (t,next, 'ABC Trucking', 1, 'Smoke - NLTI - 01','LB', 1000, 10)
         })
 
-
         //Create Direct IR for Lotted Item
         .displayText('===== Scenario 3: Create Direct IR for Lotted Item =====')
         .addFunction(function(next){
             commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
         })
 
+        //Create PO to IR for Non Lotted Item Add Orders Screen
+        .displayText('===== Scenario 6: Create PO to IR for Non Lotted Item Add Orders Screen =====')
+        .addFunction(function(next){
+            commonIC.addPOtoIRAddOrdersButtonNonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - NLTI - 01','LB', 1000, 10)
+        })
 
+        //Create PO to IR for Lotted Item  Add Orders Screen
+        .displayText('===== Scenario 7: Create PO to IR for Lotted Item  Add Orders Screen =====')
+        .addFunction(function(next){
+            commonIC.addPOtoIRAddOrdersButtonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+        })
+
+        //Create CT to IR for  Non Lotted Item Process Button
+        .displayText('===== Scenario 8: Create CT to IR for  Non Lotted Item Process Button =====')
+        .addFunction(function(next){
+            commonIC.addCTtoIRProcessButtonNonLotted (t,next, 'ABC Trucking','SC - Commodity - 01','0001 - Fort Wayne', 'Smoke - NLTI - 01','LB', 1000, 10)
+        })
+
+        //Create CT to IR for  Lotted Item Process Button
+        .displayText('===== Scenario 9:  CT to IR for Non Lotted Item Process Button =====')
+        .addFunction(function(next){
+            commonIC.addCTtoIRProcessButtonLotted (t,next, 'ABC Trucking', 'SC - Commodity - 01' ,'0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+        })
 
         //Create Direct IS for Non Lotted Item
-        .displayText('===== Scenario 4: Create Direct IS for Non Lotted Item =====')
+        .displayText('===== Scenario 10: Create Direct IS for Non Lotted Item =====')
         .addFunction(function(next){
             commonIC.addDirectISNonLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne','Smoke - NLTI - 01','LB', 100)
         })
 
 
         //Create Direct IS for Non Lotted Item
-        .displayText('===== Scenario 5: Create Direct IS for Lotted Item =====')
+        .displayText('===== Scenario 11: Create Direct IS for Lotted Item =====')
         .addFunction(function(next){
             commonIC.addDirectISLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 100, 'LOT-01')
         })
@@ -115,13 +147,14 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
 
-//        .clickButton('PostPreview')
-//        .waitUntilLoaded('cmcmrecaptransaction')
-//        .waitUntilLoaded('')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0002-000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .clickButton('PostPreview')
+        .waitUntilLoaded('cmcmrecaptransaction')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',1500)
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0002-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',1500)
@@ -153,14 +186,15 @@ StartTest (function (t) {
         .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
-//
-//        .clickButton('PostPreview')
-//        .waitUntilLoaded('cmcmrecaptransaction')
-//        .waitUntilLoaded('')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0002-000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+
+        .clickButton('PostPreview')
+        .waitUntilLoaded('cmcmrecaptransaction')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',1500)
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0002-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',1500)
@@ -196,13 +230,15 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
 
-//        .clickButton('PostPreview')
-//        .waitUntilLoaded('cmcmrecaptransaction')
-//        .waitUntilLoaded('')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .clickButton('PostPreview')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',1500)
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',1500)
@@ -241,14 +277,17 @@ StartTest (function (t) {
         .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'LB')
         .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'Indy Storage')
 
-//
-//        .clickButton('PostPreview')
-//        .waitUntilLoaded('cmcmrecaptransaction')
-//        .waitUntilLoaded('')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0002-000')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
+
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .clickTab('Details')
+        .waitUntilLoaded('')
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0002-000')
+        .verifyGridData('RecapTransaction', 1, 'colDebit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colCredit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',2000)
@@ -277,13 +316,13 @@ StartTest (function (t) {
         .verifyGridData('InventoryAdjustment', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryAdjustment', 1, 'colNewUnitCost', '10')
 
-//        .clickButton('PostPreview')
-//        .waitUntilLoaded('cmcmrecaptransaction')
-//        .waitUntilLoaded('')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16040-0001-000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
+        .clickButton('PostPreview')
+        .waitUntilLoaded('cmcmrecaptransaction')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16040-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',1000)
@@ -310,14 +349,14 @@ StartTest (function (t) {
         .verifyGridData('InventoryAdjustment', 1, 'colStorageLocation', 'RM Storage')
         .verifyGridData('InventoryAdjustment', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryAdjustment', 1, 'colNewUnitCost', '10')
-//
-//        .clickButton('PostPreview')
-//        .waitUntilLoaded('cmcmrecaptransaction')
-//        .waitUntilLoaded('')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16040-0001-000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
+
+        .clickButton('PostPreview')
+        .waitUntilLoaded('cmcmrecaptransaction')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16040-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',1000)
@@ -342,6 +381,7 @@ StartTest (function (t) {
 
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','Smoke - LTI - 01','strItemNo')
         .selectGridComboBoxRowNumber('InventoryAdjustment',1,'colLotNumber',1)
+        .enterGridData('InventoryAdjustment', 1, 'colNewLotNumber', 'LOT-01')
         .enterGridData('InventoryAdjustment', 1, 'colAdjustByQuantity', '-100')
         .verifyGridData('InventoryAdjustment', 1, 'colSubLocation', 'Raw Station')
         .verifyGridData('InventoryAdjustment', 1, 'colStorageLocation', 'RM Storage')
@@ -351,18 +391,18 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strNewSubLocation','Indy','strNewSubLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strNewStorageLocation','Indy Storage','strNewStorageLocation')
 
-//        .clickButton('PostPreview')
-//        .waitUntilLoaded('cmcmrecaptransaction')
-//
-//        .waitUntilLoaded('')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-//        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0002-000')
-//        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
-//        .verifyGridData('RecapTransaction', 3, 'colRecapAccountId', '16040-0001-000')
-//        .verifyGridData('RecapTransaction', 3, 'colRecapDebit', '1000')
-//        .verifyGridData('RecapTransaction', 4, 'colRecapAccountId', '16040-0002-000')
-//        .verifyGridData('RecapTransaction', 4, 'colRecapCredit', '1000')
+        .clickButton('PostPreview')
+        .waitUntilLoaded('cmcmrecaptransaction')
+
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0002-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .verifyGridData('RecapTransaction', 3, 'colRecapAccountId', '16040-0001-000')
+        .verifyGridData('RecapTransaction', 3, 'colRecapDebit', '1000')
+        .verifyGridData('RecapTransaction', 4, 'colRecapAccountId', '16040-0002-000')
+        .verifyGridData('RecapTransaction', 4, 'colRecapCredit', '1000')
 
         .clickButton('Post')
         .waitUntilLoaded('')
