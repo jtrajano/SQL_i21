@@ -366,7 +366,7 @@ BEGIN
 						, @strStoreState nvarchar(2)
 						, @intStoreZipCode int
 						, @strCategory nvarchar(20)
-						, @strManufacturerName nvarchar(20)
+						, @strManufacturerName nvarchar(250)
 						, @strSKUCode nvarchar(50)
 						, @strUpcCode nvarchar(14)
 						, @strSkuUpcDescription nvarchar(50)
