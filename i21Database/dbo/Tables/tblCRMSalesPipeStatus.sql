@@ -9,7 +9,8 @@
 	[intStatusId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
  CONSTRAINT [PK_tblCRMSalesPipeStatus_intSalesPipeStatusId] PRIMARY KEY CLUSTERED ([intSalesPipeStatusId] ASC),
- CONSTRAINT [UQ_tblCRMSalesPipeStatus_strStatus] UNIQUE ([strStatus])
+ CONSTRAINT [UQ_tblCRMSalesPipeStatus_strStatus] UNIQUE ([strStatus]),
+ CONSTRAINT [UQ_tblCRMSalesPipeStatus_strOrder] UNIQUE ([strOrder])
  --CONSTRAINT [FK_tblCRMSalesPipeStatus_tblCRMStatus_intStatusId] FOREIGN KEY ([intStatusId]) REFERENCES [dbo].[tblCRMStatus] ([intStatusId])
 )
 GO
