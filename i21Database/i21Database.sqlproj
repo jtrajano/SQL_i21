@@ -5077,6 +5077,7 @@
     <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
     <Build Include="dbo\Views\vyuEMEntityCusVenCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessToInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
