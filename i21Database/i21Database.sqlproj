@@ -5136,6 +5136,14 @@
     <Build Include="dbo\Views\vyuHDTicketDetailsReport.sql" />
     <Build Include="dbo\Views\vyuAPBillDetailTax.sql" />
     <Build Include="dbo\Views\vyuARPaymentACHSearch.sql" />
+    <Build Include="dbo\Tables\tblGRStorageStatement.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageEntity.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageStmtItem.sql" />
+    <Build Include="dbo\Views\vyuGRStorageStatement.sql" />
+    <Build Include="dbo\Views\vyuGRStorageStmtSchedule.sql" />
+    <Build Include="dbo\Views\vyuGRStorageStmtStorageType.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportStorageStatement.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportStorageStatementDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

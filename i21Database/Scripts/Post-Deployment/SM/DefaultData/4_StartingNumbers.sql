@@ -1117,6 +1117,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Revalue Transaction')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 117
+			,[strTransactionType]	= N'Storage Statement FormNo'
+			,[strPrefix]			= N'L '
+			,[intNumber]			= 1
+			,[strModule]			= 'Grain'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Storage Statement FormNo')
 	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
