@@ -117,7 +117,7 @@ DECLARE @temp_statement_table TABLE(
     ,[dblPayment]           NUMERIC(18,6)
     ,[dblBalance]           NUMERIC(18,6)	
     ,[strSalespersonName]   NVARCHAR(100)
-	,[strAccountStatusCode] NVARCHAR(5)	
+	,[strAccountStatusCode] NVARCHAR(50)	
 	,[strLocationName]      NVARCHAR(100)
     ,[strFullAddress]       NVARCHAR(MAX)
     ,[strCompanyName]       NVARCHAR(MAX)
@@ -253,7 +253,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , C.dblCreditLimit
 	  , I.intInvoiceId
 	  , I.strInvoiceNumber
-	  , strBOLNumber		= ''BOL# '' + I.strBOLNumber
+	  , strBOLNumber		= CASE WHEN I.strTransactionType = ''Customer Prepayment'' THEN ''Prepayment: '' + ISNULL(PCREDITS.strPaymentInfo, '''') ELSE ''BOL# '' + I.strBOLNumber END
       , I.dtmDate
       , I.dtmDueDate
 	  , I.dtmShipDate

@@ -92,7 +92,7 @@ DECLARE @temp_statement_table TABLE(
 	,[strName]						NVARCHAR(100)
 	,[strBOLNumber]					NVARCHAR(100)
 	,[dblCreditLimit]				NUMERIC(18,6)
-	,[strAccountStatusCode]			NVARCHAR(5)	
+	,[strAccountStatusCode]			NVARCHAR(50)	
 	,[strLocationName]				NVARCHAR(100)
 	,[strFullAddress]				NVARCHAR(MAX)
 	,[strStatementFooterComment]	NVARCHAR(MAX)	
