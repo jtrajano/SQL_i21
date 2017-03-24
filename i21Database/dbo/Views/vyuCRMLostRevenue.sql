@@ -122,7 +122,7 @@ select
 				intEntityCustomerId = c.intEntityId
 				,strName = c.strName
 				,intDate = convert(int,convert(nvarchar(8),b.dtmContractDate,112))
-				,intEntityContactId = d.intEntityId
+				,intEntityContactId = b.intEntityContactId
 				,f.intSalespersonId
 				,dblSalesOrderTotal = 0
 				,dblSalesOrderTotalShip = 0
@@ -138,21 +138,18 @@ select
 				tblCTContractDetail a
 				,tblCTContractHeader b
 				,tblEMEntity c
-				,tblEMEntity d
 				,tblARCustomer f
 			where
 				b.intContractHeaderId = a.intContractHeaderId
 				and c.intEntityId = b.intEntityId
-				and d.intEntityId = b.intEntityContactId
 				and f.intEntityCustomerId = c.intEntityId
 			group by
 				c.intEntityId
 				,c.strName
-				,d.intEntityId
 				,f.intSalespersonId
-				,d.strName
 				,b.dtmContractDate
 				,b.intContractHeaderId
+				,b.intEntityContactId
 		) as contracts
 	) as overall
 
