@@ -223,7 +223,6 @@ BEGIN
 														END
 												* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) , --Bill Detail
 		[dblCredit]						=	0, -- Bill
-		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strReference,
