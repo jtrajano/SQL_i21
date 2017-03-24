@@ -11,7 +11,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @intBankAccountId INT
       , @strTransactionId NVARCHAR(100)
-	  , @STARTING_NUMBER_BANK_TRANSACTION AS NVARCHAR(100) = 'Bank Transaction'
+	  , @STARTING_NUMBER_BANK_DEPOSIT AS NVARCHAR(100) = 'Bank Deposit'
 	  , @BankTransaction BankTransactionTable
 	  , @BankTransactionDetail BankTransactionDetailTable
 	  , @ysnSuccess	BIT
@@ -24,15 +24,15 @@ EXEC dbo.uspCMRefreshUndepositedFundsFromOrigin @intBankAccountId, @intUserId
 
 --Get the Bank Deposit strTransactionId by using this script.
 SELECT  @strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20))
-FROM tblSMStartingNumber WHERE strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
+FROM tblSMStartingNumber WHERE strTransactionType = @STARTING_NUMBER_BANK_DEPOSIT
  
 -- Increment the next transaction number
 UPDATE tblSMStartingNumber SET intNumber += 1
-WHERE strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
+WHERE strTransactionType = @STARTING_NUMBER_BANK_DEPOSIT
 
 --Payment Header
 INSERT INTO @BankTransaction (
-		[intBankAccountId]
+	  [intBankAccountId]
 	, [strTransactionId]
 	, [intCurrencyId]
 	, [intBankTransactionTypeId] 
@@ -41,7 +41,7 @@ INSERT INTO @BankTransaction (
 	, [strMemo]			
 	, [intCompanyLocationId])
 SELECT 
-		[intBankAccountId]				= UF.intBankAccountId
+	 [intBankAccountId]				= UF.intBankAccountId
 	,[strTransactionId]				= @strTransactionId
 	,[intCurrencyId]				= P.intCurrencyId
 	,[intBankTransactionTypeId]		= 1
