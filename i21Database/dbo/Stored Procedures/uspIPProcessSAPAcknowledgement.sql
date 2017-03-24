@@ -145,6 +145,11 @@ Begin
 			Update tblCTContractFeed Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')=''
 
+			--update po details in shipping instruction/advice staging table
+			Update sld Set sld.strExternalPONumber=@strParam,sld.strExternalPOItemNumber=@strPOItemNo,sld.strExternalPOBatchNumber=@strLineItemBatchNo 
+			From tblLGLoadDetailStg sld Join tblLGLoadDetail ld on sld.intLoadDetailId=ld.intLoadDetailId 
+			Where ld.intPContractDetailId=@strTrackingNo
+
 			Select @strContractSeq=CONVERT(VARCHAR,intContractSeq) From tblCTContractDetail Where intContractDetailId=@strTrackingNo
 
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
