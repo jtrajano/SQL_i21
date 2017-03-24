@@ -66,6 +66,16 @@ SELECT
 	 AS ysnQuantityFinal
 	,CH.strInternalComment
 	,LG.dblQuantity AS dblShippingInsQty
+	,CASE 
+		WHEN	ISNULL(CD.ysnRiskToProducer,0)=0 THEN 'N'	
+		ELSE 'Y' 
+	 END 
+	 AS ysnRiskToProducer
+	,CASE 
+		WHEN	ISNULL(CD.ysnClaimsToProducer,0)=0 THEN 'N'	
+		ELSE 'Y' 
+	 END  
+	 AS ysnClaimsToProducer
 FROM vyuCTContractSequence CSeq
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = CSeq.intContractDetailId
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CSeq.intContractHeaderId
