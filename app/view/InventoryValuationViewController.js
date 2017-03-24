@@ -96,7 +96,7 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
             win = options.window;
 
         var context =
-            Ext.create('iRely.mvvm.Engine', {
+            Ext.create('iRely.Engine', {
                 window : win,
                 store  : Ext.create('Inventory.store.BufferedInventoryValuation', { pageSize: 1 }),
                 binding: me.config.binding,

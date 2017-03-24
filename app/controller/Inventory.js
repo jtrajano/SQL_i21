@@ -7,7 +7,14 @@ Ext.define('Inventory.controller.Inventory', {
     requires: [
         'Inventory.Utils',
         'Inventory.ux.GridUOMColumn',
-        'Inventory.ux.GridUOMField'
+        'Inventory.ux.GridUOMField',
+        'iRely.form.field.NumericField',
+        'iRely.form.field.DateTimeField',
+        'iRely.grid.CustomSummary',
+        'GlobalComponentEngine.view.ActivityGrid',
+        'GlobalComponentEngine.view.AttachmentGrid',
+        'GlobalComponentEngine.view.AuditLogTree',
+        'GlobalComponentEngine.view.AdvanceSearchGrid'
     ],
     singleton: true,
 

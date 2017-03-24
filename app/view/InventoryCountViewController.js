@@ -7,63 +7,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
     ],
 
     config: {
-        searchConfig: {
-            title: 'Search Inventory Count',
-            type: 'Inventory.InventoryCount',
-            api: {
-                read: '../Inventory/api/InventoryCount/Search'
-            },
-            columns: [
-                {dataIndex: 'intInventoryCountId', text: "Count Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strCountNo', text: 'Count No', flex: 1, dataType: 'string'},
-                {dataIndex: 'strLocationName', text: 'Location', flex: 1, dataType: 'string'},
-                {dataIndex: 'strCategory', text: 'Category', flex: 1, dataType: 'string'},
-                {dataIndex: 'strCommodity', text: 'Commodity', flex: 1, dataType: 'string'},
-                {dataIndex: 'strCountGroup', text: 'Count Group', flex: 1, dataType: 'string'},
-                {dataIndex: 'dtmCountDate', text: 'Count Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string'},
-                {dataIndex: 'strStorageLocationName', text: 'Storage Location', flex: 1, dataType: 'string'},
-                {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string'}
-            ],
-            buttons: [
-                {
-                    text: 'Items',
-                    itemId: 'btnItem',
-                    clickHandler: 'onItemClick',
-                    width: 80
-                },
-                {
-                    text: 'Categories',
-                    itemId: 'btnCategory',
-                    clickHandler: 'onCategoryClick',
-                    width: 100
-                },
-                {
-                    text: 'Commodities',
-                    itemId: 'btnCommodity',
-                    clickHandler: 'onCommodityClick',
-                    width: 100
-                },
-                {
-                    text: 'Locations',
-                    itemId: 'btnLocation',
-                    clickHandler: 'onLocationClick',
-                    width: 100
-                },
-                {
-                    text: 'Storage Locations',
-                    itemId: 'btnStorageLocation',
-                    clickHandler: 'onStorageLocationClick',
-                    width: 110
-                },
-                {
-                    text: 'Count Group',
-                    itemId: 'btnCountGroup',
-                    clickHandler: 'onCountGroupClick',
-                    width: 80
-                }
-            ]
-        },
         binding: {
             bind: {
                 title: 'Inventory Count - {current.strCountNo}'
@@ -391,12 +334,12 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             store = Ext.create('Inventory.store.InventoryCount', { pageSize: 1 }),
             grdPhysicalCount = win.down('#grdPhysicalCount');
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
             enableActivity: true,
             enableAttachment: true,
-            attachment: Ext.create('iRely.mvvm.attachment.Manager', {
+            attachment: Ext.create('iRely.attachment.Manager', {
                 type: 'Inventory.InventoryCount',
                 window: win
             }),
@@ -408,7 +351,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             details: [
                 {
                     key: 'tblICInventoryCountDetails',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: grdPhysicalCount,
                         deleteButton: win.down('#btnRemove'),
                         createRecord: me.createLineItemRecord
@@ -1156,30 +1099,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     break;
             }
         }
-    },
-
-    onItemClick: function () {
-        iRely.Functions.openScreen('Inventory.view.Item', { action: 'new', viewConfig: { modal: true }});
-    },
-
-    onCategoryClick: function () {
-        iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true }});
-    },
-
-    onCommodityClick: function () {
-        iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
-    },
-
-    onLocationClick: function () {
-        iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
-    },
-
-    onStorageLocationClick: function () {
-        iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true }});
-    },
-
-    onCountGroupClick: function () {
-        iRely.Functions.openScreen('Inventory.view.InventoryCountGroup', { action: 'new', viewConfig: { modal: true }});
     },
     
     onGrdPhysicalClick: function(view, record, cellIndex, e, eOpts) {

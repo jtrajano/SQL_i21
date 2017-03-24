@@ -3,19 +3,6 @@ Ext.define('Inventory.view.CategoryViewController', {
     alias: 'controller.iccategory',
 
     config: {
-        searchConfig: {
-            title: 'Search Category',
-            type: 'Inventory.Category',
-            api: {
-                read: '../Inventory/api/Category/Search'
-            },
-            columns: [
-                {dataIndex: 'intCategoryId', text: "Category Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strCategoryCode', text: 'Category Code', flex: 1, dataType: 'string'},
-                {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
-                {dataIndex: 'strInventoryType', text: 'Inventory Type', flex: 1, dataType: 'string'}
-            ]
-        },
         binding: {
             bind: {
                 title: 'Category - {current.strCategoryCode}'
@@ -238,7 +225,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Category', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
             include: 'tblICCategoryAccounts.tblGLAccount, ' +
@@ -256,14 +243,14 @@ Ext.define('Inventory.view.CategoryViewController', {
             details: [
                 {
                     key: 'tblICCategoryAccounts',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdGlAccounts'),
                         deleteButton : win.down('#btnDeleteGlAccounts')
                     })
                 },
                 {
                     key: 'tblICCategoryLocations',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdLocation'),
                         deleteButton : win.down('#btnDeleteLocation'),
                         position: 'none'
@@ -271,21 +258,21 @@ Ext.define('Inventory.view.CategoryViewController', {
                 },
                 {
                     key: 'tblICCategoryVendors',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdVendorCategoryXref'),
                         deleteButton : win.down('#btnDeleteVendorCategoryXref')
                     })
                 },
                 // {
                 //     key: 'tblICCategoryUOMs',
-                //     component: Ext.create('iRely.mvvm.grid.Manager', {
+                //     component: Ext.create('iRely.grid.Manager', {
                 //         grid: win.down('#grdUnitOfMeasure'),
                 //         deleteButton : win.down('#btnDeleteUom')
                 //     })
                 // },
                 {
                     key: 'tblICCategoryTaxes',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdTax'),
                         deleteButton : win.down('#btnDeleteTax')
                     })

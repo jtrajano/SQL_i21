@@ -34,7 +34,7 @@ Ext.define('Inventory.view.InventoryCountGroupViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.CountGroup', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
             createRecord : me.createRecord,

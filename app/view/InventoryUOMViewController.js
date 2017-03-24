@@ -69,7 +69,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
 
         var grdConversion = win.down('#grdConversion');
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             binding: me.config.binding,
             window : win,
             store  : store,
@@ -77,7 +77,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
             details: [
                 {
                     key: 'tblICUnitMeasureConversions',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: grdConversion,
                         deleteButton : grdConversion.down('#btnDeleteConversion')
                     })

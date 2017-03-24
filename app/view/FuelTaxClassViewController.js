@@ -58,7 +58,7 @@ Ext.define('Inventory.view.FuelTaxClassViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.FuelTaxClass', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
             include: 'tblICFuelTaxClassProductCodes',
@@ -66,7 +66,7 @@ Ext.define('Inventory.view.FuelTaxClassViewController', {
             details: [
                 {
                     key: 'tblICFuelTaxClassProductCodes',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdProductCode'),
                         deleteButton: win.down('#btnDeleteProductCode')
                     })

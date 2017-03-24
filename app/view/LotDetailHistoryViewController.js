@@ -15,7 +15,7 @@ Ext.define('Inventory.view.LotDetailHistoryViewController', {
         var win = options.window;
         var store = Ext.create('Inventory.store.LotDetailHistory', { pageSize: 50 });
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
             binding: me.config.binding

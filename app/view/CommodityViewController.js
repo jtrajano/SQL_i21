@@ -18,18 +18,6 @@ Ext.define('Inventory.view.CommodityViewController', {
     alias: 'controller.iccommodity',
 
     config: {
-        searchConfig: {
-            title:  'Search Commodity',
-            type: 'Inventory.Commodity',
-            api: {
-                read: '../Inventory/api/Commodity/Search'
-            },
-            columns: [
-                {dataIndex: 'intCommodityId',text: "Commodity Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strCommodityCode', text: 'Commodity Code', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'}
-            ]
-        },
         binding: {
             bind: {
                 title: 'Commodity - {current.strCommodityCode}'
@@ -196,7 +184,7 @@ Ext.define('Inventory.view.CommodityViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Commodity', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
             include: 'tblICCommodityUnitMeasures.tblICUnitMeasure, ' +
@@ -215,63 +203,63 @@ Ext.define('Inventory.view.CommodityViewController', {
             details: [
                 {
                     key: 'tblICCommodityUnitMeasures',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdUom'),
                         deleteButton : win.down('#btnDeleteUom')
                     })
                 },
                 {
                     key: 'tblICCommodityAccounts',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdGlAccounts'),
                         deleteButton : win.down('#btnDeleteGlAccounts')
                     })
                 },
                 {
                     key: 'tblICCommodityClassVariants',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdClassVariant'),
                         deleteButton : win.down('#btnDeleteClasses')
                     })
                 },
                 {
                     key: 'tblICCommodityGrades',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdGrade'),
                         deleteButton : win.down('#btnDeleteGrades')
                     })
                 },
                 {
                     key: 'tblICCommodityOrigins',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdOrigin'),
                         deleteButton : win.down('#btnDeleteOrigins')
                     })
                 },
                 {
                     key: 'tblICCommodityProductLines',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdProductLine'),
                         deleteButton : win.down('#btnDeleteProductLines')
                     })
                 },
                 {
                     key: 'tblICCommodityProductTypes',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdProductType'),
                         deleteButton : win.down('#btnDeleteProductTypes')
                     })
                 },
                 {
                     key: 'tblICCommodityRegions',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdRegion'),
                         deleteButton : win.down('#btnDeleteRegions')
                     })
                 },
                 {
                     key: 'tblICCommoditySeasons',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdSeason'),
                         deleteButton : win.down('#btnDeleteSeasons')
                     })
