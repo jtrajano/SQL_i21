@@ -73,7 +73,7 @@ SELECT TOP 1 @defaultCurrencyId = intCurrencyID FROM tblSMCurrency WHERE strCurr
 
 --AR Account
 DECLARE @ARAccount VARCHAR(250)
-SET @ARAccount = (SELECT [intARAccountId] FROM tblARCompanyPreference)
+SET @ARAccount = (SELECT TOP 1 [intARAccountId] FROM tblARCompanyPreference)
 
 DECLARE @maxInvoiceId INT
 	
