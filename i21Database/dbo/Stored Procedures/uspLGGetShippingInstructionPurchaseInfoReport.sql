@@ -46,7 +46,7 @@ SELECT L.intLoadId,
 	   CT.intContractSeq,
 	   LD.dblQuantity,
 	   UM.strUnitMeasure,
-	   CT.strItemDescription,
+	   CASE WHEN ISNULL(CT.strContractItemName,'') = '' THEN CT.strItemDescription ELSE CT.strContractItemName END AS strItemDescription,
 	   CT.strCustomerContract AS strPCustomerContract
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
