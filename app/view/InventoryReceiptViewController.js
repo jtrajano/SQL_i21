@@ -54,7 +54,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 disabled: '{isOriginOrInventoryReturn}'
             },
             cboVendor: {
-                value: '{current.intEntityVendorId}',
+                origValueField: '{current.intEntityVendorId}',
+                origUpdateField: '{current.intEntityVendorId}',
+                value: '{current.strVendorName}',
                 store: '{vendor}',
                 readOnly: '{checkReadOnlyWithOrder}',
                 hidden: '{checkHiddenInTransferOrder}',
@@ -68,7 +70,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 disabled: '{current.ysnOrigin}'
             },
             cboLocation: {
-                value: '{current.intLocationId}',
+                origValueField: '{current.intLocationId}',
+                origUpdateField: '{current.intLocationId}',
+                value: '{current.strLocationName}',
                 store: '{location}',
                 readOnly: '{locationCheckReadOnlyWithOrder}',
                 disabled: '{current.ysnOrigin}'
@@ -78,7 +82,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{isOriginOrPosted}'
             },
             cboCurrency: {
-                value: '{current.intCurrencyId}',
+                origValueField: '{current.intCurrencyId}',
+                origUpdateField: '{current.intCurrencyId}',
+                value: '{current.strCurrency}',
                 disabled: '{current.ysnOrigin}',
                 store: '{currency}',
                 readOnly: '{isReceiptReadonly}',
@@ -1314,6 +1320,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var subCurrencyCents = records[0].get('intSubCurrencyCent');
             subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
             current.set('intSubCurrencyCents', subCurrencyCents);
+            current.set('intCurrencyId', records[0].get('intCurrencyID'));
         }
     },
 
@@ -1327,7 +1334,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (current) {
             current.set('strVendorName', records[0].get('strName'));
-            current.set('intVendorEntityId', records[0].get('intEntityVendorId'));
+            current.set('intEntityVendorId', records[0].get('intEntityVendorId'));
             current.set('intCurrencyId', records[0].get('intCurrencyId'));
 
             var subCurrencyCents = records[0].get('intSubCurrencyCent');
@@ -1408,7 +1415,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
 
-            if (Inventory.view.InventoryReceiptViewController.orgValueLocation !== current.get('intLocationId')) {
+            if (Inventory.view.InventoryReceiptViewController.orgValueLocation !== records[0].get('strLocationName')) {
                 var buttonAction = function (button) {
                     if (button === 'yes') {
                         //Remove all Sub and Storage Locations Receipt Grid                   
@@ -1440,7 +1447,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             }
 
                         }
-                        current.set('strLocationName', records[0].get('strLocationName'));
+                        current.set('intLocationId', records[0].get('intCompanyLocationId'));
 
                         var valFOBPoint = current.get('strFobPoint').trim();
 
@@ -1461,7 +1468,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }
                     }
                     else {
-                        current.set('intLocationId', Inventory.view.InventoryReceiptViewController.orgValueLocation);
+                        current.set('strLocationName', Inventory.view.InventoryReceiptViewController.orgValueLocation);
                     }
                 };
 
@@ -1469,10 +1476,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Location will clear ALL Sub Locations and Storage Locations. Do you want to continue?', buttonAction);
                 }
                 else {
-                    current.set('strLocationName', records[0].get('strLocationName'));
+                    current.set('intLocationId', records[0].get('intCompanyLocationId'));
                 }
             }
-
         }
     },
 
@@ -5971,7 +5977,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
 
-        Inventory.view.InventoryReceiptViewController.orgValueLocation = current.get('intLocationId');
+        Inventory.view.InventoryReceiptViewController.orgValueLocation = current.get('strLocationName');
     },
     
     doPostPreview: function(win, cfg){
@@ -6750,8 +6756,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     var vm = win.viewModel;
                     vm.set('modifiedOnPosted', false);
                     var posted = vm.get('readOnlyReceiptItemGrid');
-                    if(posted)
-                        e.setDisabled(true);
+                    //Removed this part since it is already included in binding
+                    // if(posted)
+                    //     e.setDisabled(true);
                 }
             },
             "#cboLotUOM": {

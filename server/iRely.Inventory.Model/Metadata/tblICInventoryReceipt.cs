@@ -131,6 +131,25 @@ namespace iRely.Inventory.Model
                 _locationName = value;
             }
         }
+        private string _currencyName;
+        [NotMapped]
+        public string strCurrency
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_currencyName))
+                    if (vyuICInventoryReceiptLookUp != null)
+                        return vyuICInventoryReceiptLookUp.strCurrency;
+                    else
+                        return null;
+                else
+                    return _currencyName;
+            }
+            set
+            {
+                _currencyName = value;
+            }
+        }
 
         public ICollection<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
@@ -208,7 +227,7 @@ namespace iRely.Inventory.Model
         public int? intEntityId { get; set; }
         public string strFobPoint { get; set; }
         public string strLocationName { get; set; }
-
+        public string strCurrency { get; set; }
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
     }
 

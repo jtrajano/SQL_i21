@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets0545a538ceea6add417709ce1dbdcb4bbf47aba397fd72e341cbe59fac4a0e27))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets3cb8291125636a80f938eda0c1b7dfc2cddc2f4893dda18cdcd85e12306162a6))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets0545a538ceea6add417709ce1dbdcb4bbf47aba397fd72e341cbe59fac4a0e27 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets3cb8291125636a80f938eda0c1b7dfc2cddc2f4893dda18cdcd85e12306162a6 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "0545a538ceea6add417709ce1dbdcb4bbf47aba397fd72e341cbe59fac4a0e27"; }
+            get { return "3cb8291125636a80f938eda0c1b7dfc2cddc2f4893dda18cdcd85e12306162a6"; }
         }
 
         /// <summary>
@@ -3838,7 +3838,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICInventoryReceiptLookUp
-        [CodeFirstDatabaseSchema.vyuICInventoryReceiptLookUp](T1.vyuICInventoryReceiptLookUp_intInventoryReceiptId, T1.vyuICInventoryReceiptLookUp_strVendorName, T1.vyuICInventoryReceiptLookUp_intEntityId, T1.vyuICInventoryReceiptLookUp_strFobPoint, T1.vyuICInventoryReceiptLookUp_strLocationName)
+        [CodeFirstDatabaseSchema.vyuICInventoryReceiptLookUp](T1.vyuICInventoryReceiptLookUp_intInventoryReceiptId, T1.vyuICInventoryReceiptLookUp_strVendorName, T1.vyuICInventoryReceiptLookUp_intEntityId, T1.vyuICInventoryReceiptLookUp_strFobPoint, T1.vyuICInventoryReceiptLookUp_strLocationName, T1.vyuICInventoryReceiptLookUp_strCurrency)
     FROM (
         SELECT 
             T.intInventoryReceiptId AS vyuICInventoryReceiptLookUp_intInventoryReceiptId, 
@@ -3846,6 +3846,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intEntityId AS vyuICInventoryReceiptLookUp_intEntityId, 
             T.strFobPoint AS vyuICInventoryReceiptLookUp_strFobPoint, 
             T.strLocationName AS vyuICInventoryReceiptLookUp_strLocationName, 
+            T.strCurrency AS vyuICInventoryReceiptLookUp_strCurrency, 
             True AS _from0
         FROM InventoryEntities.vyuICInventoryReceiptLookUps AS T
     ) AS T1");
@@ -7249,7 +7250,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICInventoryReceiptLookUps
-        [iRely.Inventory.Model.vyuICInventoryReceiptLookUp](T1.vyuICInventoryReceiptLookUp_intInventoryReceiptId, T1.vyuICInventoryReceiptLookUp_strVendorName, T1.vyuICInventoryReceiptLookUp_intEntityId, T1.vyuICInventoryReceiptLookUp_strFobPoint, T1.vyuICInventoryReceiptLookUp_strLocationName)
+        [iRely.Inventory.Model.vyuICInventoryReceiptLookUp](T1.vyuICInventoryReceiptLookUp_intInventoryReceiptId, T1.vyuICInventoryReceiptLookUp_strVendorName, T1.vyuICInventoryReceiptLookUp_intEntityId, T1.vyuICInventoryReceiptLookUp_strFobPoint, T1.vyuICInventoryReceiptLookUp_strLocationName, T1.vyuICInventoryReceiptLookUp_strCurrency)
     FROM (
         SELECT 
             T.intInventoryReceiptId AS vyuICInventoryReceiptLookUp_intInventoryReceiptId, 
@@ -7257,6 +7258,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intEntityId AS vyuICInventoryReceiptLookUp_intEntityId, 
             T.strFobPoint AS vyuICInventoryReceiptLookUp_strFobPoint, 
             T.strLocationName AS vyuICInventoryReceiptLookUp_strLocationName, 
+            T.strCurrency AS vyuICInventoryReceiptLookUp_strCurrency, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICInventoryReceiptLookUp AS T
     ) AS T1");

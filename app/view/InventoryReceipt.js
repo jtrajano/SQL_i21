@@ -312,8 +312,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         fieldLabel: 'Vendor<font color="red"> *</font>',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
-                                                        displayField: 'strName',
-                                                        valueField: 'intEntityVendorId'
+                                                        displayField: 'strVendorName',
+                                                        valueField: 'strVendorName'
                                                     },
                                                     {
                                                         xtype: 'gridcombobox',
@@ -350,7 +350,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
                                                         displayField: 'strLocationName',
-                                                        valueField: 'intCompanyLocationId'
+                                                        valueField: 'strLocationName'
                                                     },
                                                     {
                                                         xtype: 'gridcombobox',
@@ -386,7 +386,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
                                                         displayField: 'strLocationName',
-                                                        valueField: 'intCompanyLocationId'
+                                                        valueField: 'strLocationName'
                                                     },
                                                     {
                                                         xtype: 'datefield',
@@ -443,7 +443,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelAlign: 'top',
                                                         labelWidth: 105,
                                                         displayField: 'strCurrency',
-                                                        valueField: 'intCurrencyID'
+                                                        valueField: 'strCurrency'
                                                     },
                                                     {
                                                         xtype: 'textfield',
