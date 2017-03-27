@@ -252,18 +252,18 @@ BEGIN
 			END
 
 		-- Validate Currency Id
-		DECLARE @valueCurrencyId INT
+		--DECLARE @valueCurrencyId INT
 
-		SELECT @valueCurrencyId = RawHeaderData.Currency
-		FROM @DataForReceiptHeader RawHeaderData
-		WHERE RawHeaderData.intId = @intId
+		--SELECT @valueCurrencyId = RawHeaderData.Currency
+		--FROM @DataForReceiptHeader RawHeaderData
+		--WHERE RawHeaderData.intId = @intId
 
-		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @valueCurrencyId)
-			BEGIN
-				-- Currency Id is invalid or missing.
-				RAISERROR(80113, 11, 1);
-				GOTO _Exit_With_Rollback;
-			END
+		--IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @valueCurrencyId)
+		--	BEGIN
+		--		-- Currency Id is invalid or missing.
+		--		RAISERROR(80113, 11, 1);
+		--		GOTO _Exit_With_Rollback;
+		--	END
 
 		-- Validate Freight Term Id
 		DECLARE @valueFreightTermId INT
@@ -972,24 +972,24 @@ BEGIN
 		END
 
 		-- Validate Other Charge Currency Id
-		SET @valueChargeId = NULL
-		SET @valueCharge = NULL
+		--SET @valueChargeId = NULL
+		--SET @valueCharge = NULL
 
-		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM	@OtherCharges RawData LEFT JOIN tblSMCurrency currency 
-					ON currency.intCurrencyID = RawData.intCurrencyId
-		WHERE	RawData.intCurrencyId IS NOT NULL 
-				AND currency.intCurrencyID IS NULL 
+		--SELECT TOP 1 @valueChargeId = RawData.intChargeId
+		--FROM	@OtherCharges RawData LEFT JOIN tblSMCurrency currency 
+		--			ON currency.intCurrencyID = RawData.intCurrencyId
+		--WHERE	RawData.intCurrencyId IS NOT NULL 
+		--		AND currency.intCurrencyID IS NULL 
 
-		IF @valueChargeId IS NOT NULL
-		BEGIN
-			SELECT @valueCharge = strItemNo
-			FROM tblICItem
-			WHERE intItemId = @valueChargeId
-			-- Currency Id is invalid for other charge item {Other Charge Item No.}.
-			RAISERROR(80145, 11, 1, @valueCharge);
-			GOTO _Exit_With_Rollback;
-		END
+		--IF @valueChargeId IS NOT NULL
+		--BEGIN
+		--	SELECT @valueCharge = strItemNo
+		--	FROM tblICItem
+		--	WHERE intItemId = @valueChargeId
+		--	-- Currency Id is invalid for other charge item {Other Charge Item No.}.
+		--	RAISERROR(80145, 11, 1, @valueCharge);
+		--	GOTO _Exit_With_Rollback;
+		--END
 
 		-- Validate Other Charge Item Id
 		IF EXISTS(
@@ -1027,30 +1027,30 @@ BEGIN
 			GOTO _Exit_With_Rollback;
 		END
 
-		-- Validate Cost Currency Id
-		DECLARE @valueCostCurrencyId INT
-		SET @valueChargeId = NULL
-		SET @valueCharge = NULL
+		---- Validate Cost Currency Id
+		--DECLARE @valueCostCurrencyId INT
+		--SET @valueChargeId = NULL
+		--SET @valueCharge = NULL
 
-		SELECT	TOP 1 
-				@valueCostCurrencyId = RawData.intCostCurrencyId
-				,@valueChargeId = RawData.intChargeId
-		FROM	@OtherCharges RawData LEFT JOIN tblSMCurrency c 
-					ON RawData.intCostCurrencyId = c.intCurrencyID
-		WHERE	c.intCurrencyID IS NULL 
+		--SELECT	TOP 1 
+		--		@valueCostCurrencyId = RawData.intCostCurrencyId
+		--		,@valueChargeId = RawData.intChargeId
+		--FROM	@OtherCharges RawData LEFT JOIN tblSMCurrency c 
+		--			ON RawData.intCostCurrencyId = c.intCurrencyID
+		--WHERE	c.intCurrencyID IS NULL 
 
-		IF @valueCostCurrencyId IS NOT NULL 
-		BEGIN
-			SELECT @valueCharge = strItemNo
-			FROM tblICItem
-			WHERE intItemId = @valueChargeId
+		--IF @valueCostCurrencyId IS NOT NULL 
+		--BEGIN
+		--	SELECT @valueCharge = strItemNo
+		--	FROM tblICItem
+		--	WHERE intItemId = @valueChargeId
 
-			DECLARE @valueCostCurrencyIdStr NVARCHAR(50)
-			SET @valueCostCurrencyIdStr = CAST(@valueCostCurrencyId AS NVARCHAR(50))
-			-- Cost Currency Id %s is invalid for other charge item %s.
-			RAISERROR(80126, 11, 1, @valueCostCurrencyIdStr, @valueCharge);
-			GOTO _Exit_With_Rollback;
-		END
+		--	DECLARE @valueCostCurrencyIdStr NVARCHAR(50)
+		--	SET @valueCostCurrencyIdStr = CAST(@valueCostCurrencyId AS NVARCHAR(50))
+		--	-- Cost Currency Id %s is invalid for other charge item %s.
+		--	RAISERROR(80126, 11, 1, @valueCostCurrencyIdStr, @valueCharge);
+		--	GOTO _Exit_With_Rollback;
+		--END
 
 		-- Validate Cost UOM Id
 		-- Cost UOM Id is required if Cost Method is 'Per Unit'
@@ -1672,19 +1672,19 @@ BEGIN
 								GOTO _Exit_With_Rollback;
 							END
 
-						-- Validate Lot Currency Id
-						SET @valueLotRecordNo = NULL
+						---- Validate Lot Currency Id
+						--SET @valueLotRecordNo = NULL
 
-						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-						FROM @LotEntries ItemLot
-						WHERE ItemLot.intCurrencyId IS NULL OR ItemLot.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
+						--SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						--FROM @LotEntries ItemLot
+						--WHERE ItemLot.intCurrencyId IS NULL OR ItemLot.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
 
-						IF @valueLotRecordNo IS NOT NULL
-							BEGIN
-								-- Currency Id is invalid or missing for lot {Lot Number}.
-								RAISERROR(80151, 11, 1, @valueLotRecordNo);
-								GOTO _Exit_With_Rollback;
-							END
+						--IF @valueLotRecordNo IS NOT NULL
+						--	BEGIN
+						--		-- Currency Id is invalid or missing for lot {Lot Number}.
+						--		RAISERROR(80151, 11, 1, @valueLotRecordNo);
+						--		GOTO _Exit_With_Rollback;
+						--	END
 
 						-- Validate Lot Source Type Id
 						SET @valueLotRecordNo = NULL
