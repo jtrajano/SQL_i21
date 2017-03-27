@@ -176,7 +176,7 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 	WHERE intItemId = @intItemId
 		AND intManufacturingProcessId = @intManufacturingProcessId
-		AND intStatusId <> 13
+		AND intCountStatusId = 10
 		AND (
 			CASE 
 				WHEN intPlannedShiftId IS NOT NULL
@@ -299,7 +299,7 @@ BEGIN TRY
 							AND DATEPART(dy, ri.dtmValidTo)
 						)
 					)
-				AND intCountStatusId <> 13
+				AND intCountStatusId = 10
 				AND intStatusId <> 13
 				AND (
 					CASE 
@@ -343,7 +343,7 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND intCountStatusId <> 13
+			AND intCountStatusId =10
 			AND intStatusId <> 13
 			AND (
 				CASE 
