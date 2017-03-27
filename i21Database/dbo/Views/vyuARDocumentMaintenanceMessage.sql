@@ -12,7 +12,7 @@ SELECT A.intDocumentMaintenanceId
 	 , B.intDocumentMaintenanceMessageId
 	 , B.strHeaderFooter
 	 , B.intCharacterLimit
-	 , strMessage								= CONVERT(VarChar(max), B.blbMessage)
+	 , strMessage								= REPLACE(REPLACE(CONVERT(VarChar(max), B.blbMessage), '<p>', ''), '</p>','')
 	 , B.ysnRecipe
 	 , B.ysnQuote
 	 , B.ysnSalesOrder
@@ -22,7 +22,14 @@ SELECT A.intDocumentMaintenanceId
 	 , B.ysnScaleTicket 
 	 , C.strCustomerNumber
 	 , CL.strLocationName
-FROM tblSMDocumentMaintenance A 
-INNER JOIN tblSMDocumentMaintenanceMessage B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
-LEFT JOIN vyuARCustomer C ON A.intEntityCustomerId = C.intEntityCustomerId
-LEFT JOIN tblSMCompanyLocation CL ON A.intCompanyLocationId = CL.intCompanyLocationId
+FROM
+	(SELECT intDocumentMaintenanceId, intEntityCustomerId, intCompanyLocationId, strCode, strTitle, intLineOfBusinessId, strSource, strType, ysnCopyAll 
+	 FROM tblSMDocumentMaintenance) A 
+INNER JOIN 
+	(SELECT intDocumentMaintenanceId, blbMessage, intDocumentMaintenanceMessageId, strHeaderFooter, intCharacterLimit, ysnRecipe, ysnQuote, ysnSalesOrder, ysnPickList, ysnBOL, 
+		ysnInvoice, ysnScaleTicket 
+	 FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+LEFT JOIN 
+	(SELECT intEntityCustomerId, strCustomerNumber FROM vyuARCustomer) C ON A.intEntityCustomerId = C.intEntityCustomerId
+LEFT JOIN 
+	(SELECT intCompanyLocationId, strLocationName FROM tblSMCompanyLocation) CL ON A.intCompanyLocationId = CL.intCompanyLocationId
