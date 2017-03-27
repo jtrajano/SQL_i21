@@ -183,16 +183,6 @@ BEGIN TRY
 	SELECT DISTINCT intItemId
 	FROM @voucherDetailData
 
-	IF EXISTS (SELECT 1 
-		   FROM tblICItem I
-		   LEFT JOIN tblICItemAccount IA ON IA.intItemId = I.intItemId
-		   LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = IA.intAccountCategoryId
-		   WHERE strAccountCategory IS NULL
-			  AND I.intItemId IN (SELECT intItemId FROM @distinctItem))
-	BEGIN
-		RAISERROR ('''AP Clearing'' is not configured for one or more item(s).',11,1);
-	END
-
 	SELECT @total = COUNT(*)
 	FROM @voucherDetailData;
 
