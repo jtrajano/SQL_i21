@@ -966,6 +966,7 @@ BEGIN
 
 				END
 
+				UPDATE @tblCFOriginalTax SET ysnInvalidSetup = 1, dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 				INSERT INTO @tblCFTransactionTax
 				(
 					 [intTransactionDetailTaxId]	
@@ -1267,6 +1268,8 @@ BEGIN
 
 				END
 			
+				UPDATE @tblCFOriginalTax SET ysnInvalidSetup = 1, dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
+
 				INSERT INTO @tblCFTransactionTax
 				(
 					 [intTransactionDetailTaxId]	
@@ -1377,6 +1380,9 @@ BEGIN
 				,@StateSalesTax					=@StateSalesTax		
 				,@CountySalesTax				=@CountySalesTax	
 				,@CitySalesTax					=@CitySalesTax
+
+
+				UPDATE @tblCFRemoteTax SET ysnInvalidSetup = 1 , dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 
 				INSERT INTO @tblCFTransactionTax
 				(
