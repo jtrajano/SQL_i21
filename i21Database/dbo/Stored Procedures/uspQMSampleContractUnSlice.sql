@@ -51,6 +51,7 @@ BEGIN TRY
 		,@intDelSampleId INT
 		,@dblDelRepresentingQty NUMERIC(18, 6)
 		,@intDelRepresentingUOMId INT
+		,@intParentContractDetailId INT
 	DECLARE @intCRowNo INT
 
 	-- Only Unsliced. ie., existing contract sequence records got merged only (not the parent)
@@ -119,23 +120,60 @@ BEGIN TRY
 
 		WHILE ISNULL(@intParentRowNo, 0) > 0
 		BEGIN
+			DECLARE @intItemId INT
+
+			SELECT @intItemId = NULL
+
 			SELECT @intSampleId = intSampleId
 				,@intSampleTypeId = intSampleTypeId
 				,@intSampleStatusId = intSampleStatusId
 				,@dblRepresentingQty = dblRepresentingQty
 				,@intRepresentingUOMId = intRepresentingUOMId
-			FROM @ParentContractSample
+				,@intItemId = CD.intItemId
+				,@intParentContractDetailId = PCS.intContractDetailId
+			FROM @ParentContractSample PCS
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = PCS.intContractDetailId
 			WHERE intRowNo = @intParentRowNo
 
 			SELECT @dblDelRepresentingQty = NULL
 
 			SELECT @intDelContractDetailId = intContractDetailId
 				,@intDelSampleId = intSampleId
-				,@dblDelRepresentingQty = dblRepresentingQty
+				--,@dblDelRepresentingQty = dblRepresentingQty
+				,@dblDelRepresentingQty = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, intRepresentingUOMId, @intRepresentingUOMId, dblRepresentingQty)
 				,@intDelRepresentingUOMId = intRepresentingUOMId
 			FROM @DeleteContractSample
 			WHERE intSampleTypeId = @intSampleTypeId
 				AND intSampleStatusId = @intSampleStatusId
+
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblCTContractDetail CD
+					JOIN tblICItemUOM IUOM ON IUOM.intItemId = CD.intItemId
+					WHERE CD.intContractDetailId = @intParentContractDetailId
+						AND IUOM.intUnitMeasureId = @intDelRepresentingUOMId
+					)
+			BEGIN
+				DECLARE @strItemNo NVARCHAR(50)
+				DECLARE @strUnitMeasure NVARCHAR(50)
+
+				SELECT @strItemNo = I.strItemNo
+				FROM tblCTContractDetail CD
+				JOIN tblICItem I ON I.intItemId = CD.intItemId
+				WHERE CD.intContractDetailId = @intParentContractDetailId
+
+				SELECT @strUnitMeasure = strUnitMeasure
+				FROM tblICUnitMeasure
+				WHERE intUnitMeasureId = @intDelRepresentingUOMId
+
+				SET @ErrMsg = '''' + @strUnitMeasure + ''' unit of measure is not configured for the item ''' + @strItemNo + '''.'
+
+				RAISERROR (
+						@ErrMsg
+						,16
+						,1
+						)
+			END
 
 			UPDATE tblQMSample
 			SET dblRepresentingQty += ISNULL(@dblDelRepresentingQty, 0)
@@ -144,7 +182,10 @@ BEGIN TRY
 			DELETE tblQMSample
 			WHERE intSampleId = @intDelSampleId
 
-			IF (@intSampleId > 0 AND ISNULL(@dblDelRepresentingQty, 0) > 0)
+			IF (
+					@intSampleId > 0
+					AND ISNULL(@dblDelRepresentingQty, 0) > 0
+					)
 			BEGIN
 				SET @strDetails = '{"change":"dblRepresentingQty","iconCls":"small-gear","from":"' + LTRIM(@dblRepresentingQty) + '","to":"' + LTRIM(@dblRepresentingQty + @dblDelRepresentingQty) + '","leaf":true}'
 

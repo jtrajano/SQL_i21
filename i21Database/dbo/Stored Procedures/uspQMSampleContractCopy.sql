@@ -32,6 +32,35 @@ BEGIN TRY
 	IF (@intNewContractDetailId <= 0)
 		RETURN;
 
+	IF NOT EXISTS (
+			SELECT 1
+			FROM tblCTContractDetail CD
+			JOIN tblICItemUOM IUOM ON IUOM.intItemId = CD.intItemId
+			WHERE CD.intContractDetailId = @intNewContractDetailId
+				AND IUOM.intUnitMeasureId = @intNewRepresentingUOMId
+			)
+	BEGIN
+		DECLARE @strItemNo NVARCHAR(50)
+		DECLARE @strUnitMeasure NVARCHAR(50)
+
+		SELECT @strItemNo = I.strItemNo
+		FROM tblCTContractDetail CD
+		JOIN tblICItem I ON I.intItemId = CD.intItemId
+		WHERE CD.intContractDetailId = @intNewContractDetailId
+
+		SELECT @strUnitMeasure = strUnitMeasure
+		FROM tblICUnitMeasure
+		WHERE intUnitMeasureId = @intNewRepresentingUOMId
+
+		SET @ErrMsg = '''' + @strUnitMeasure + ''' unit of measure is not configured for the item ''' + @strItemNo + '''.'
+
+		RAISERROR (
+				@ErrMsg
+				,16
+				,1
+				)
+	END
+
 	-- New Sample
 	EXEC uspMFGeneratePatternId @intCategoryId = NULL
 		,@intItemId = NULL

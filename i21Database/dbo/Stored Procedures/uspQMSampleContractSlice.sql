@@ -93,7 +93,8 @@ BEGIN TRY
 		FROM @ParentContractSample
 		WHERE intSRowNo = @intSRowNo
 
-		SELECT @dblOrgQuantity = dblQuantity
+		--SELECT @dblOrgQuantity = dblQuantity
+		SELECT @dblOrgQuantity = dbo.fnCTConvertQuantityToTargetItemUOM(intItemId, intUnitMeasureId, @intSRepresentingUOMId, dblQuantity)
 			,@intOrgUnitMeasureId = intUnitMeasureId
 		FROM tblCTContractDetail
 		WHERE intContractDetailId = @intOrgParentDetailId
@@ -103,7 +104,7 @@ BEGIN TRY
 			-- Update sample representing qty for the original parent contract sequence
 			UPDATE tblQMSample
 			SET dblRepresentingQty = @dblOrgQuantity
-				,intRepresentingUOMId = @intOrgUnitMeasureId
+				--,intRepresentingUOMId = @intOrgUnitMeasureId
 				,intConcurrencyId = (intConcurrencyId + 1)
 			WHERE intSampleId = @intSSampleId
 
@@ -144,10 +145,12 @@ BEGIN TRY
 
 				SELECT @intCRowNo = intCRowNo
 					,@intCContractDetailId = intCContractDetailId
-					,@dblCQuantity = dblCQuantity
+					--,@dblCQuantity = dblCQuantity
+					,@dblCQuantity = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, intCUnitMeasureId, @intSRepresentingUOMId, dblCQuantity)
 					,@intCUnitMeasureId = intCUnitMeasureId
-					,@intNewRepresentingUOMId = intCUnitMeasureId
-				FROM @ContractSliceDetail
+					,@intNewRepresentingUOMId = @intSRepresentingUOMId
+				FROM @ContractSliceDetail CSD
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = CSD.intCContractDetailId
 				WHERE intCRowNo = @intCRowNo
 
 				IF (@dblSRepresentingQty > @dblCQuantity)
