@@ -2963,7 +2963,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         else if (sourceType === 'Inbound Shipment') {
-            iRely.Functions.openScreen('Logistics.view.LoadSchedule', {
+            iRely.Functions.openScreen('Logistics.view.ShipmentSchedule', {
                     filters: [{
                         column: 'strLoadNumber',
                         value: value,
