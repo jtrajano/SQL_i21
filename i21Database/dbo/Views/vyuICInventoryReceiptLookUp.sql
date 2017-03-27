@@ -7,6 +7,7 @@ SELECT
 	, Receipt.intEntityId
 	, FreightTerm.strFobPoint
 	, Location.strLocationName
+	, Currency.strCurrency
 
 FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor 
 		ON Vendor.intEntityVendorId = Receipt.intEntityVendorId
@@ -14,7 +15,8 @@ FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor
 		ON Location.intCompanyLocationId = Receipt.intLocationId
 	LEFT JOIN tblSMFreightTerms FreightTerm 
 		ON FreightTerm.intFreightTermId = Receipt.intFreightTermId
-
+	LEFT JOIN tblSMCurrency Currency
+		ON Currency.intCurrencyID = Receipt.intCurrencyId
 
 	--LEFT JOIN tblSMCompanyLocation Transferor 
 	--	ON Transferor.intCompanyLocationId = Receipt.intTransferorId
