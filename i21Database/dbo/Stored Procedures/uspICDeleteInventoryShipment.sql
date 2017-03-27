@@ -32,6 +32,28 @@ END
 DELETE FROM	dbo.tblICInventoryShipment 
 WHERE intInventoryShipmentId = @InventoryShipmentId
 
+
+--------------------------------------------------------------------
+-- Remove the stock reservation
+--------------------------------------------------------------------
+BEGIN 
+	DECLARE @ItemsToReserve AS ItemReservationTableType
+			,@intInventoryTransactionType AS INT 
+
+	-- Get the transaction type id
+	BEGIN 
+		SELECT	TOP 1 
+				@intInventoryTransactionType = intTransactionTypeId
+		FROM	dbo.tblICInventoryTransactionType
+		WHERE	strName = 'Inventory Shipment'
+	END
+
+	EXEC dbo.uspICCreateStockReservation
+		@ItemsToReserve
+		,@InventoryShipmentId
+		,@intInventoryTransactionType
+END 
+
 --------------------------------------------------------------------
 -- Audit Log          
 --------------------------------------------------------------------
