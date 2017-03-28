@@ -592,7 +592,7 @@ BEGIN
 		,LDL.intLotId
 		,Lot.strLotNumber
 		,[intLocationId] = LD.intSCompanyLocationId
-		,[intItemLocationId] = IL.intItemLocationId
+		,[intItemLocationId] = CASE WHEN IL.intItemLocationId IS NULL THEN (SELECT TOP 1 ITL.intItemLocationId FROM tblICItemLocation ITL WHERE ITL.intItemId = LD.intItemId AND ITL.intLocationId = CD.intCompanyLocationId) ELSE IL.intItemLocationId END
 		,[intSubLocationId] = LD.intSSubLocationId
 		,[intStorageLocationId] = NULL
 		,[intItemUOMId] = LD.intItemUOMId
@@ -613,9 +613,9 @@ BEGIN
 					END
 		,[dblUOMQty] = IU.dblUnitQty
 		,[dblNetWeight] = LDL.dblGross - LDL.dblTare
-		,[dblSalesPrice] = CD.dblCashPrice
+		,[dblSalesPrice] = ISNULL(CD.dblCashPrice,0)
 		,[intDockDoorId] = NULL
-		,[intOwnershipType] = Lot.intOwnershipType
+		,[intOwnershipType] = ISNULL(Lot.intOwnershipType,0)
 		,[intOrderId] = NULL
 		,[intSourceId] = NULL
 		,[intLineNo] = ISNULL(LD.intSContractDetailId, 0)
