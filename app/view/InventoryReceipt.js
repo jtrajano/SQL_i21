@@ -312,8 +312,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         fieldLabel: 'Vendor<font color="red"> *</font>',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
-                                                        displayField: 'strVendorName',
-                                                        valueField: 'strVendorName'
+                                                        displayField: 'strName',
+                                                        valueField: 'strName'
                                                     },
                                                     {
                                                         xtype: 'gridcombobox',
@@ -551,7 +551,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         fieldLabel: 'Receiver',
                                                                         labelWidth: 65,
                                                                         displayField: 'strUserName',
-                                                                        valueField: 'intEntityUserSecurityId'
+                                                                        valueField: 'strUserName'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
@@ -573,13 +573,19 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 dataType: 'string',
                                                                                 text: 'Address',
                                                                                 flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'intShipViaId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Ship Via Id',
+                                                                                hidden: true
                                                                             }
                                                                         ],
                                                                         itemId: 'cboShipFrom',
                                                                         fieldLabel: 'Ship From',
                                                                         labelWidth: 65,
                                                                         displayField: 'strLocationName',
-                                                                        valueField: 'intEntityLocationId'
+                                                                        valueField: 'strLocationName'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
@@ -607,7 +613,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         fieldLabel: 'Ship Via',
                                                                         labelWidth: 65,
                                                                         displayField: 'strShipVia',
-                                                                        valueField: 'intEntityShipViaId'
+                                                                        valueField: 'strShipVia'
                                                                     }
                                                                 ]
                                                             },
@@ -646,7 +652,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         fieldLabel: 'Freight Terms',
                                                                         labelWidth: 85,
                                                                         displayField: 'strFreightTerm',
-                                                                        valueField: 'intFreightTermId'
+                                                                        valueField: 'strFreightTerm'
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',

@@ -146,6 +146,11 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strFobPoint).HasColumnName("strFobPoint");
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.strCurrency).HasColumnName("strCurrency");
+            this.Property(t => t.strFromLocation).HasColumnName("strFromLocation");
+            this.Property(t => t.strUserName).HasColumnName("strUserName");
+            this.Property(t => t.strShipFrom).HasColumnName("strShipFrom");
+            this.Property(t => t.strShipVia).HasColumnName("strShipVia");
+            this.Property(t => t.strFreightTerm).HasColumnName("strFreightTerm");
         }
     }
 

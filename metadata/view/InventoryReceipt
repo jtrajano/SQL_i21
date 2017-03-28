@@ -609,7 +609,7 @@
                                                     "]"
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
-                                                "displayField": "strVendorName",
+                                                "displayField": "strName",
                                                 "enableDrillDown": true,
                                                 "fieldLabel": "Vendor<font color=\"red\"> *</font>",
                                                 "itemId": "cboVendor",
@@ -619,7 +619,7 @@
                                                 "layout|margins": null,
                                                 "margin": "0 5 0 0",
                                                 "name": null,
-                                                "valueField": "strVendorName",
+                                                "valueField": "strName",
                                                 "width": null
                                             },
                                             "name": "MyComboBox3",
@@ -1100,7 +1100,7 @@
                                                                 "layout|margins": null,
                                                                 "name": null,
                                                                 "readOnly": null,
-                                                                "valueField": "intEntityUserSecurityId",
+                                                                "valueField": "strUserName",
                                                                 "width": null
                                                             },
                                                             "name": "MyComboBox27",
@@ -1144,6 +1144,12 @@
                                                                     "\t\tdataType: 'string',",
                                                                     "\t\ttext: 'Address',",
                                                                     "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "    {",
+                                                                    "\t\tdataIndex: 'intShipViaId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Ship Via Id',",
+                                                                    "\t\thidden: true",
                                                                     "\t}",
                                                                     "]"
                                                                 ],
@@ -1156,7 +1162,7 @@
                                                                 "layout|flex": null,
                                                                 "layout|margins": null,
                                                                 "name": null,
-                                                                "valueField": "intEntityLocationId"
+                                                                "valueField": "strLocationName"
                                                             },
                                                             "name": "MyComboBox6",
                                                             "configAlternates": {
@@ -1217,7 +1223,7 @@
                                                                 "layout|flex": null,
                                                                 "layout|margins": null,
                                                                 "name": null,
-                                                                "valueField": "intEntityShipViaId"
+                                                                "valueField": "strShipVia"
                                                             },
                                                             "name": "MyComboBox10",
                                                             "configAlternates": {
@@ -1298,7 +1304,7 @@
                                                                 "layout|margins": null,
                                                                 "name": null,
                                                                 "readOnly": null,
-                                                                "valueField": "intFreightTermId",
+                                                                "valueField": "strFreightTerm",
                                                                 "width": null
                                                             },
                                                             "name": "MyComboBox15",

@@ -54,8 +54,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 disabled: '{isOriginOrInventoryReturn}'
             },
             cboVendor: {
-                origValueField: '{current.intEntityVendorId}',
-                origUpdateField: '{current.intEntityVendorId}',
+                origValueField: 'intEntityVendorId',
+                origUpdateField: 'intEntityVendorId',
                 value: '{current.strVendorName}',
                 store: '{vendor}',
                 readOnly: '{checkReadOnlyWithOrder}',
@@ -63,15 +63,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 disabled: '{current.ysnOrigin}'
             },
             cboTransferor: {
-                value: '{current.intTransferorId}',
+                origValueField: 'intCompanyLocationId',
+                origUpdateField: 'intTransferorId',
+                value: '{current.strFromLocation}',
                 store: '{transferor}',
                 hidden: '{checkHiddenIfNotTransferOrder}',
                 readOnly: '{isOriginOrInventoryReturn}',
                 disabled: '{current.ysnOrigin}'
             },
             cboLocation: {
-                origValueField: '{current.intLocationId}',
-                origUpdateField: '{current.intLocationId}',
+                origValueField: 'intCompanyLocationId',
+                origUpdateField: 'intLocationId',
                 value: '{current.strLocationName}',
                 store: '{location}',
                 readOnly: '{locationCheckReadOnlyWithOrder}',
@@ -82,8 +84,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{isOriginOrPosted}'
             },
             cboCurrency: {
-                origValueField: '{current.intCurrencyId}',
-                origUpdateField: '{current.intCurrencyId}',
+                origValueField: 'intCurrencyID',
+                origUpdateField: 'intCurrencyId',
                 value: '{current.strCurrency}',
                 disabled: '{current.ysnOrigin}',
                 store: '{currency}',
@@ -115,12 +117,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{isReceiptReadonly}'
             },
             cboShipVia: {
-                value: '{current.intShipViaId}',
+                origValueField: 'intEntityShipViaId',
+                origUpdateField: 'intShipViaId',
+                value: '{current.strShipVia}',
                 store: '{shipvia}',
                 readOnly: '{isReceiptReadonly}'
             },
             cboShipFrom: {
-                value: '{current.intShipFromId}',
+                origValueField: 'intEntityLocationId',
+                origUpdateField: 'intShipFromId',
+                value: '{current.strShipFrom}',
                 store: '{shipFrom}',
                 defaultFilters: [
                     {
@@ -137,7 +143,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{isReceiptReadonly}'
             },
             cboReceiver: {
-                value: '{current.intReceiverId}',
+                origValueField: 'intEntityUserSecurityId',
+                origUpdateField: 'intReceiverId',
+                value: '{current.strUserName}',
                 store: '{users}',
                 readOnly: '{isReceiptReadonly}'
             },
@@ -146,7 +154,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{isReceiptReadonly}'
             },
             cboFreightTerms: {
-                value: '{current.intFreightTermId}',
+                origValueField: 'intFreightTermId',
+                origUpdateField: 'intFreightTermId',
+                value: '{current.strFreightTerm}',
                 store: '{freightTerm}',
                 defaultFilters: [
                     {
@@ -1320,7 +1330,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var subCurrencyCents = records[0].get('intSubCurrencyCent');
             subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
             current.set('intSubCurrencyCents', subCurrencyCents);
-            current.set('intCurrencyId', records[0].get('intCurrencyID'));
         }
     },
 
@@ -1333,8 +1342,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            current.set('strVendorName', records[0].get('strName'));
-            current.set('intEntityVendorId', records[0].get('intEntityVendorId'));
             current.set('intCurrencyId', records[0].get('intCurrencyId'));
 
             var subCurrencyCents = records[0].get('intSubCurrencyCent');
@@ -1447,7 +1454,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             }
 
                         }
-                        current.set('intLocationId', records[0].get('intCompanyLocationId'));
 
                         var valFOBPoint = current.get('strFobPoint').trim();
 
@@ -1475,9 +1481,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (grdInventoryReceiptCount > 0) {
                     iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Location will clear ALL Sub Locations and Storage Locations. Do you want to continue?', buttonAction);
                 }
-                else {
-                    current.set('intLocationId', records[0].get('intCompanyLocationId'));
-                }
             }
         }
     },
@@ -1489,21 +1492,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
         var isHidden = true;
-        switch (current.get('strReceiptType')) {
-            case 'Transfer Order':
-                if (iRely.Functions.isEmpty(current.get('intTransferorId'))) {
+        if (current) {
+            switch (current.get('strReceiptType')) {
+                case 'Transfer Order':
+                    if (iRely.Functions.isEmpty(current.get('intTransferorId'))) {
+                        isHidden = true;
+                    }
+                    else {
+                        isHidden = false;
+                    }
+                    break;
+                default:
                     isHidden = true;
-                }
-                else {
-                    isHidden = false;
-                }
-                break;
-            default:
-                isHidden = true;
-                break;
-        }
-        if (isHidden === false) {
-            this.showAddOrders(win);
+                    break;
+            }
+            if (isHidden === false) {
+                this.showAddOrders(win);
+            }
         }
     },
 

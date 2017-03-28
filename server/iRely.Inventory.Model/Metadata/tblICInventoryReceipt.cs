@@ -150,7 +150,101 @@ namespace iRely.Inventory.Model
                 _currencyName = value;
             }
         }
-
+        private string _fromLocation;
+        [NotMapped]
+        public string strFromLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_fromLocation))
+                    if (vyuICInventoryReceiptLookUp != null)
+                        return vyuICInventoryReceiptLookUp.strFromLocation;
+                    else
+                        return null;
+                else
+                    return _fromLocation;
+            }
+            set
+            {
+                _fromLocation = value;
+            }
+        }
+        private string _receiver;
+        [NotMapped]
+        public string strUserName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_receiver))
+                    if (vyuICInventoryReceiptLookUp != null)
+                        return vyuICInventoryReceiptLookUp.strUserName;
+                    else
+                        return null;
+                else
+                    return _receiver;
+            }
+            set
+            {
+                _receiver = value;
+            }
+        }
+        private string _shipFrom;
+        [NotMapped]
+        public string strShipFrom
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_shipFrom))
+                    if (vyuICInventoryReceiptLookUp != null)
+                        return vyuICInventoryReceiptLookUp.strShipFrom;
+                    else
+                        return null;
+                else
+                    return _shipFrom;
+            }
+            set
+            {
+                _shipFrom = value;
+            }
+        }
+        private string _shipVia;
+        [NotMapped]
+        public string strShipVia
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_shipVia))
+                    if (vyuICInventoryReceiptLookUp != null)
+                        return vyuICInventoryReceiptLookUp.strShipVia;
+                    else
+                        return null;
+                else
+                    return _shipVia;
+            }
+            set
+            {
+                _shipVia = value;
+            }
+        }
+        private string _freightTerm;
+        [NotMapped]
+        public string strFreightTerm
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_freightTerm))
+                    if (vyuICInventoryReceiptLookUp != null)
+                        return vyuICInventoryReceiptLookUp.strFreightTerm;
+                    else
+                        return null;
+                else
+                    return _freightTerm;
+            }
+            set
+            {
+                _freightTerm = value;
+            }
+        }
         public ICollection<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
         public ICollection<tblICInventoryReceiptCharge> tblICInventoryReceiptCharges { get; set; }
@@ -228,6 +322,11 @@ namespace iRely.Inventory.Model
         public string strFobPoint { get; set; }
         public string strLocationName { get; set; }
         public string strCurrency { get; set; }
+        public string strFromLocation { get; set; }
+        public string strUserName { get; set; }
+        public string strShipFrom { get; set; }
+        public string strShipVia { get; set; }
+        public string strFreightTerm { get; set; }
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
     }
 
