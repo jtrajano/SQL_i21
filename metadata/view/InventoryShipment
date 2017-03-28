@@ -619,7 +619,7 @@
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strName",
+                                                        "displayField": "strCustomerName",
                                                         "enableDrillDown": true,
                                                         "fieldLabel": "Customer",
                                                         "itemId": "cboCustomer",
@@ -630,7 +630,7 @@
                                                         "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
-                                                        "valueField": "intEntityCustomerId"
+                                                        "valueField": "strCustomerName"
                                                     },
                                                     "name": "MyComboBox71",
                                                     "configAlternates": {
@@ -763,7 +763,7 @@
                                                         "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
-                                                        "valueField": "intFreightTermId"
+                                                        "valueField": "strFreightTerm"
                                                     },
                                                     "name": "MyComboBox73",
                                                     "configAlternates": {
@@ -835,7 +835,7 @@
                                                         "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
-                                                        "valueField": "intCurrencyID",
+                                                        "valueField": "strCurrency",
                                                         "width": 60
                                                     },
                                                     "name": "MyComboBox16",
@@ -1005,7 +1005,7 @@
                                                                         "layout|margins": "0 0 0 5",
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "intCompanyLocationId",
+                                                                        "valueField": "strLocationName",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox27",
@@ -1098,7 +1098,7 @@
                                                                         "layout|margins": null,
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "intEntityLocationId",
+                                                                        "valueField": "strLocationName",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox70",
@@ -1160,7 +1160,7 @@
                                                                         "layout|margins": null,
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "intCompanyLocationId",
+                                                                        "valueField": "strLocationName",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox8",
@@ -1930,7 +1930,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter123",
+                                                                    "name": "filter1",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3302,7 +3302,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter124",
+                                                                    "name": "filter11",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3912,7 +3912,7 @@
                                                         "layout|flex": null,
                                                         "width": 198
                                                     },
-                                                    "name": "filter125",
+                                                    "name": "filter12",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4879,7 +4879,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging1",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

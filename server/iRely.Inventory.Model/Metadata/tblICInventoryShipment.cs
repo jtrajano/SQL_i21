@@ -49,6 +49,106 @@ namespace iRely.Inventory.Model
         public int? intCreatedUserId { get; set; }
         public int? intShipToCompanyLocationId { get; set; }
 
+        private string _shipVia;
+        [NotMapped]
+        public string strShipVia
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_shipVia))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strShipVia;
+                    else
+                        return null;
+                else
+                    return _shipVia;
+            }
+            set
+            {
+                _shipVia = value;
+            }
+        }
+
+        private string _shipToLocation;
+        [NotMapped]
+        public string strShipToLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_shipToLocation))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strShipToLocation;
+                    else
+                        return null;
+                else
+                    return _shipToLocation;
+            }
+            set
+            {
+                _shipToLocation = value;
+            }
+        }
+
+        private string _shipFromLocation;
+        [NotMapped]
+        public string strShipFromLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_shipFromLocation))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strShipFromLocation;
+                    else
+                        return null;
+                else
+                    return _shipFromLocation;
+            }
+            set
+            {
+                _shipFromLocation = value;
+            }
+        }
+
+        private string _freightTerm;
+        [NotMapped]
+        public string strFreightTerm
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_freightTerm))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strFreightTerm;
+                    else
+                        return null;
+                else
+                    return _freightTerm;
+            }
+            set
+            {
+                _freightTerm = value;
+            }
+        }
+
+        private string _currency;
+        [NotMapped]
+        public string strCurrency
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_currency))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strCurrency;
+                    else
+                        return null;
+                else
+                    return _currency;
+            }
+            set
+            {
+                _currency = value;
+            }
+        }
+
         private string _shipFromAddress;
         [NotMapped]
         public string strShipFromAddress

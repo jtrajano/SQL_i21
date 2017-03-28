@@ -64,12 +64,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 readOnly: '{current.ysnPosted}'
             },
             cboFreightTerms: {
-                value: '{current.intFreightTermId}',
+                value: '{current.strFreightTerm}',
+                origValueField: 'intFreightTermId',
                 store: '{freightTerm}',
                 readOnly: '{current.ysnPosted}'
             },
             cboCurrency: {
-                value: '{current.intCurrencyId}',                
+                value: '{current.strCurrency}',                
+                origValueField: 'intCurrencyID',
+                origUpdateField: 'intCurrencyId',
                 readOnly: '{current.ysnPosted}',
                 store: '{currency}',
                 defaultFilters: [
@@ -80,7 +83,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 ]
             },            
             cboCustomer: {
-                value: '{current.intEntityCustomerId}',
+                value: '{current.strCustomerName}',
+                origValueField: 'intEntityCustomerId',
                 store: '{customer}',
                 readOnly: '{current.ysnPosted}',
                 fieldLabel: '{setCustomerFieldLabel}',
@@ -90,13 +94,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 }]
             },
             cboShipFromAddress: {
-                value: '{current.intShipFromLocationId}',
+                value: '{current.strShipFromLocation}',
+                origValueField: 'intCompanyLocationId',
+                origUpdateField: 'intShipFromLocationId',
                 store: '{shipFromLocation}',
                 readOnly: '{current.ysnPosted}'
             },
             txtShipFromAddress: '{current.strShipFromAddress}',
             cboShipToAddress: {
-                value: '{current.intShipToLocationId}',
+                value: '{current.strShipToLocation}',
+                origValueField: 'intEntityLocationId',
+                origUpdateField: 'intShipToLocationId',
                 store: '{shipToLocation}',
                 readOnly: '{current.ysnPosted}',
                 defaultFilters: [{
@@ -107,7 +115,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 fieldLabel: '{setShipToFieldLabel}'
             },
             cboShipToCompanyAddress: {
-                value: '{current.intShipToCompanyLocationId}',
+                value: '{current.strShipToLocation}',
+                origValueField: 'intCompanyLocationId',
+                origUpdateField: 'intShipToCompanyLocationId',
                 store: '{shipToCompanyLocation}',
                 readOnly: '{current.ysnPosted}',
                 defaultFilters: [{
@@ -137,7 +147,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 readOnly: '{current.ysnPosted}'
             },
             cboShipVia: {
-                value: '{current.intShipViaId}',
+                value: '{current.strShipVia}',
+                origValueField: 'intEntityShipViaId',
+                origUpdateField: 'intShipViaId',
                 store: '{shipVia}',
                 readOnly: '{current.ysnPosted}'
             },
