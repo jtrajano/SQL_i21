@@ -2,7 +2,7 @@
 AS   
 SELECT 
 	intLoadDetailId
-	,intLoadId
+	,LD.intLoadId
 	,strLoadNumber
 	,intPContractDetailId
 	,intPContractHeaderId
@@ -10,7 +10,7 @@ SELECT
 	,strPContractNumber
 	,intPSubLocationId
 	,intPCommodityId
-	,intItemId
+	,LD.intItemId
 	,intPLifeTime
 	,strPLifeTimeType
 	,intItemUOMId
@@ -61,7 +61,12 @@ SELECT
 	,intTransUsedBy
 	,intSourceType
 	,ysnPosted
-FROM vyuLGLoadDetailView WHERE intLoadDetailId NOT IN (Select intLoadDetailId FROM vyuLGLoadContainerPurchaseContracts)
+	,intStorageLocationId = SL.intStorageLocationId
+	,strStorageLocationName = SL.strName 
+FROM vyuLGLoadDetailView LD
+LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = LD.intLoadId
+LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
+WHERE intLoadDetailId NOT IN (Select intLoadDetailId FROM vyuLGLoadContainerPurchaseContracts)
 
 UNION ALL
 
@@ -127,4 +132,6 @@ SELECT
 	,intTransUsedBy
 	,intSourceType
 	,ysnPosted
+	,intStorageLocationId = intStorageLocationId 
+	,strStorageLocationName = strStorageLocationName COLLATE Latin1_General_CI_AS
 FROM vyuLGLoadContainerPurchaseContracts

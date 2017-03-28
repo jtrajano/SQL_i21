@@ -39,7 +39,7 @@ AS
 									THEN	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,LB.intUnitMeasureId,PU.intUnitMeasureId,CD.dblCashPrice)*100
 									WHEN	PT.strDescription = 'Robusta'
 									THEN	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,TN.intUnitMeasureId,PU.intUnitMeasureId,CD.dblCashPrice)
-									ELSE	CD.dblFutures
+									ELSE	CD.dblCashPrice
 							END	
 					ELSE	0
 			END	dblCashPrice

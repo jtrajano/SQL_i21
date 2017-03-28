@@ -10,6 +10,8 @@ BEGIN TRY
 	DECLARE @intMinLoadDetailId INT
 	DECLARE @intContractDetailId INT
 	DECLARE @dblQuantityToUpdate NUMERIC(18, 6)
+	DECLARE @dblAvailableContractQty NUMERIC(18, 6)
+	DECLARE @dblContractSIQty NUMERIC(18, 6)
 	DECLARE @intExternalId INT
 	DECLARE @strScreenName NVARCHAR(100)
 	DECLARE @tblLoadDetail TABLE (intLoadDetailRecordId INT Identity(1, 1)
@@ -153,6 +155,38 @@ BEGIN TRY
 		END
 		ELSE 
 		BEGIN
+			SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
+			FROM @tblLoadDetail
+
+			WHILE (@intMinLoadDetailId IS NOT NULL)
+			BEGIN
+				SET @intContractDetailId = NULL
+				SET @dblQuantityToUpdate = NULL
+				SET @dblAvailableContractQty = NULL
+
+				SELECT @intContractDetailId = intContractDetailId
+					,@dblQuantityToUpdate = dblLoadDetailQuantity
+				FROM @tblLoadDetail
+				WHERE intLoadDetailId = @intMinLoadDetailId
+
+				SELECT @dblContractSIQty = ISNULL(SUM(LD.dblQuantity),0) FROM tblLGLoadDetail LD
+				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+				WHERE intPContractDetailId = @intContractDetailId AND ISNULL(L.ysnCancelled,0) = 0 
+
+				SELECT @dblAvailableContractQty = dblQuantity - ISNULL(@dblContractSIQty, 0)
+				FROM tblCTContractDetail
+				WHERE intContractDetailId = @intContractDetailId
+
+				IF @dblAvailableContractQty<=0
+				BEGIN
+					RAISERROR('Adequate qty is not there for the contract. Cannot reverse cancel.',16,1)
+				END
+
+				SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
+				FROM @tblLoadDetail
+				WHERE intLoadDetailId > @intMinLoadDetailId
+			END
+
 			UPDATE tblLGLoad
 			SET intShipmentStatus = 1
 				,ysnCancelled = @ysnCancel

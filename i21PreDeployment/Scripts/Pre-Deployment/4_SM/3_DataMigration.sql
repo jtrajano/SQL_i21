@@ -219,8 +219,15 @@ GO
 			EXEC
 			('
 
-			ALTER TABLE tblAPPayment DROP CONSTRAINT [FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId]
-			ALTER TABLE tblCCSite DROP CONSTRAINT FK_tblCCSite_tblSMPaymentMethod_intPaymentMethodId
+			IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS where CONSTRAINT_NAME = ''FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId'')
+			BEGIN
+				ALTER TABLE tblAPPayment DROP CONSTRAINT [FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId]
+			END
+
+			IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS where CONSTRAINT_NAME = ''FK_tblCCSite_tblSMPaymentMethod_intPaymentMethodId'')
+			BEGIN
+				ALTER TABLE tblCCSite DROP CONSTRAINT FK_tblCCSite_tblSMPaymentMethod_intPaymentMethodId
+			END
 
 			SELECT * INTO tmpSMPaymentMethod FROM tblSMPaymentMethod
 
@@ -290,8 +297,15 @@ GO
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = ''Prepay'' AND intPaymentMethodID = 8)
 				BEGIN
 				
-					ALTER TABLE tblAPPayment DROP CONSTRAINT [FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId]
-					ALTER TABLE tblCCSite DROP CONSTRAINT FK_tblCCSite_tblSMPaymentMethod_intPaymentMethodId
+					IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS where CONSTRAINT_NAME = ''FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId'')
+					BEGIN
+						ALTER TABLE tblAPPayment DROP CONSTRAINT [FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId]
+					END
+					
+					IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS where CONSTRAINT_NAME = ''FK_tblCCSite_tblSMPaymentMethod_intPaymentMethodId'')
+					BEGIN
+						ALTER TABLE tblCCSite DROP CONSTRAINT FK_tblCCSite_tblSMPaymentMethod_intPaymentMethodId
+					END
 
 					IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS where CONSTRAINT_NAME = ''FK_tblARInvoice_tblSMPaymentMethod_intPaymentMethodId'')
 					BEGIN

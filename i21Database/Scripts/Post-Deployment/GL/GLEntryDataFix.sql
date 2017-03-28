@@ -18,6 +18,8 @@ UPDATE tblGLDetail SET dblDebitReport =  0 WHERE dblDebitReport IS NULL
 UPDATE tblGLDetail SET dblCreditReport =  0 WHERE dblCreditReport IS NULL
 UPDATE tblGLDetail SET dblReportingRate =  0 WHERE dblReportingRate IS NULL
 
+IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'tblGLViewCache' AND type = 'U')
+	DROP TABLE [dbo].[tblGLViewCache]
 GO
 	PRINT N'END Normalize tblGLDetail Fields'
 GO

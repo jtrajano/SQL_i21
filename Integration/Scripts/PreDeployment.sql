@@ -19,6 +19,8 @@
 :r "..\dbo\Stored Procedures\uspSMSyncPaymentMethod.sql"
 :r "..\dbo\Stored Procedures\uspSMImportShipVia.sql"
 :r "..\dbo\Stored Procedures\uspSMSyncShipVia.sql"
+:r "..\dbo\Stored Procedures\uspSMImportTax.sql"
+:r "..\dbo\Stored Procedures\uspSMImportTaxRate.sql"
 
 -- GENERAL LEDGER
 :r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
@@ -184,6 +186,8 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateCustomerContractSubReportView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateAssociateSiteSearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMCreateMigrateOriginToi21TMDataSP.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateDeliveryFillGroupSubReportView.sql"
+
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql"
@@ -216,6 +220,7 @@
 :r "..\dbo\Stored Procedures\uspARImportTerm.sql"
 :r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
+:r "..\dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql"
 
 -- EnergyTrac
 :r "..\dbo\Stored Procedures\uspETRecreateDeliveryMetricsView.sql"

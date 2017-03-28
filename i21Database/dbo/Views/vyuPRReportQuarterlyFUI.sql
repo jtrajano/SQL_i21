@@ -58,7 +58,7 @@ FROM
 	INNER JOIN vyuPRPaycheckTax ON tblPRPaycheck.intPaycheckId = vyuPRPaycheckTax.intPaycheckId
 								AND tblPRPaycheck.intYear = YEAR(vyuPRPaycheckTax.dtmPayDate)
 								AND tblPRPaycheck.intQuarter = DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate)
-WHERE (vyuPRPaycheckTax.strCalculationType = 'USA FUTA')
+WHERE (vyuPRPaycheckTax.strCalculationType = 'USA FUTA' AND vyuPRPaycheckTax.ysnVoid = 0)
 GROUP BY 
 	tblPREmployee.strEmployeeId
 	, tblPREmployee.strSocialSecurity

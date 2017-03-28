@@ -176,8 +176,7 @@ BEGIN
 				LEFT JOIN tblTMGlobalJulianCalendar R
 					ON C.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 				,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
-				WHERE H.strCurrentSeason IS NOT NULL 
-					AND vwcus_active_yn = ''Y'' 
+				WHERE vwcus_active_yn = ''Y'' 
 					AND C.ysnActive = 1
 				')
 		END
@@ -312,8 +311,7 @@ BEGIN
 				LEFT JOIN tblTMGlobalJulianCalendar R
 					ON C.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 				,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
-				WHERE H.strCurrentSeason IS NOT NULL 
-					AND vwcus_active_yn = ''Y'' 
+				WHERE vwcus_active_yn = ''Y'' 
 					AND C.ysnActive = 1
 		')
 	END

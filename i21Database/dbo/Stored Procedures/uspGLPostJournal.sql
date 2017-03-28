@@ -254,7 +254,8 @@ ELSE
 			,[strCode]
 			,[strTransactionType]
 			,[strTransactionForm]
-			,[strModuleName]			
+			,[strModuleName]	
+			,strRateType		
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
@@ -283,8 +284,9 @@ ELSE
 			,[strTransactionType]	= B.[strJournalType]
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger' 
-			
+			,strCurrencyExchangeRateType
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
+		LEFT JOIN tblSMCurrencyExchangeRateType Rate on A.intCurrencyExchangeRateTypeId = Rate.intCurrencyExchangeRateTypeId
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 
 		EXEC dbo.uspGLPostRecap 

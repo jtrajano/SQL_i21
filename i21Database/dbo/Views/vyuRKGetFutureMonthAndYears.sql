@@ -7,6 +7,7 @@ dtmLastTradingDate as dtmLastTradingDate,
 strFutureMonth strFutureMonthYearWOSymbol,
 strFutureMonth strRollingMonth,
 ysnExpired,
-intFutureMarketId,CONVERT(DATETIME,'01 '+strFutureMonth) as dtmMonthYear 
+intFutureMarketId,CONVERT(DATETIME,'01 '+strFutureMonth) as dtmMonthYear,
+strFutureMonth +' ('+strSymbol+')' strFutureMonthWithSymbol
 FROM tblRKFuturesMonth  
 ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC 

@@ -5999,4 +5999,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intGeneralJournalRateTypeId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f9b4a060-cec4-4878-8b1d-a2780460567b" ChangeDateTime="03/14/2017 08:25:23">
+    <Property Name="ElementName" Value="[dbo].[tblCFVehicle].[ ysnCardForOwnUse bit True ]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCFVehicle]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnActive" />
+  </Operation>
 </Operations>

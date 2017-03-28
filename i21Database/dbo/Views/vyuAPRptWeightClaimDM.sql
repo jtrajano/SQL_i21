@@ -66,7 +66,11 @@ FROM
 	--UNION ALL --Weight Claim 2nd Version from weight claim screen
 	SELECT
 		strContractNumber		=	ContractHeader.strContractNumber
-		,strMiscDescription		=	Item.strDescription
+		,strMiscDescription		=	CASE WHEN WC2Details.intContractDetailId > 0
+												AND ContractDetail.intItemContractId > 0
+										THEN ItemContract.strContractItemName
+										ELSE ISNULL(Item.strDescription,'')
+									END
 		,strItemNo				=	Item.strItemNo
 		,strBillOfLading		=	(SELECT TOP 1 Loads.strBLNumber FROM tblLGLoad Loads WHERE Loads.intLoadId = WC2Details.intLoadId)--GET FROM LOAD --GET FROM LOAD
 		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
@@ -111,7 +115,11 @@ FROM
 	UNION ALL -- DEBIT MEMO
 	SELECT
 		strContractNumber		=	ContractHeader.strContractNumber
-		,strMiscDescription		=	Item.strDescription
+		,strMiscDescription		=	CASE WHEN DMDetails.intContractDetailId > 0
+												AND ContractDetail.intItemContractId > 0
+										THEN ItemContract.strContractItemName
+										ELSE ISNULL(Item.strDescription,'')
+									END
 		,strItemNo				=	Item.strItemNo
 		,strBillOfLading		=	Receipt.strBillOfLading
 		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
@@ -216,7 +224,11 @@ FROM
 	--UNION ALL
 	SELECT
 		strContractNumber		=	ContractHeader.strContractNumber
-		,strMiscDescription		=	Item.strDescription
+		,strMiscDescription		=	CASE WHEN DMDetails.intContractDetailId > 0
+												AND ContractDetail.intItemContractId > 0
+										THEN ItemContract.strContractItemName
+										ELSE ISNULL(Item.strDescription,'')
+									END
 		,strItemNo				=	CASE WHEN Item.strType = 'Other Charge' THEN '' ELSE Item.strItemNo END --AP-3233
 		,strBillOfLading		=	Receipt.strBillOfLading
 		,strCountryOrigin		=	CASE WHEN ContractDetail.intItemId > 0 THEN 

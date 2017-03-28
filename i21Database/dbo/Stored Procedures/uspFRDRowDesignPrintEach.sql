@@ -86,7 +86,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 				
 					FROM #tempRowDesignPrintEach ORDER BY [intSort]
 				
-		IF(@ysnSupressZero = 1)
+		IF(@ysnSupressZero = 1 and @strAccountsType != 'RE')
 		BEGIN
 			SET @queryString = 'SELECT intAccountId, strAccountId, strAccountType, strAccountId + '' - '' + strDescription as strDescription FROM vyuGLSummary where ' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ' ORDER BY strAccountId'
 		END

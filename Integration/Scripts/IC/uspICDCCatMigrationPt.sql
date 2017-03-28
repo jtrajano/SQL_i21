@@ -2,8 +2,7 @@ IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICD
 	DROP PROCEDURE [uspICDCCatMigrationPt]; 
 GO 
 
-
-Create PROCEDURE [dbo].[uspICDCCatMigrationPt]
+CREATE PROCEDURE [dbo].[uspICDCCatMigrationPt]
 --** Below Stored Procedure is to migrate inventory and related tables like class, location, unit measure, item pricing, etc.
 --   It loads data into item and related i21 tables like tblICCategory, tblICUnitMeasure, tblICItem,
 --   tblICItemUOM, tblICItemLocation, tblICItemPricing. **
@@ -51,3 +50,6 @@ SELECT RTRIM(ptcls_class)
 			END
 		)
 FROM ptclsmst
+
+
+GO

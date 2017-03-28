@@ -232,7 +232,7 @@ SELECT
 		,[intTransactionId]					=	A.intBillId
 		,[intTransactionDetailId] 			=	B.intBillDetailId
 		,[strTransactionId] 				=	A.strBillId
-		,[intTransactionTypeId] 			=	25
+		,[intTransactionTypeId] 			=	transType.intTransactionTypeId
 		,[intLotId] 						=	NULL 
 		,[intSubLocationId] 				=	E2.intSubLocationId
 		,[intStorageLocationId] 			=	E2.intStorageLocationId
@@ -267,6 +267,8 @@ FROM	tblAPBill A INNER JOIN tblAPBillDetail B
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 		LEFT JOIN tblICItemUOM receiptCostUOM
 			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
+		LEFT JOIN tblICInventoryTransactionType transType
+			ON transType.strName = 'Bill' -- 'Cost Adjustment'
 
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NULL 

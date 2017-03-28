@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPPreShipmentSample]
+@strSessionId NVARCHAR(50)=''
 AS
 BEGIN TRY
 
@@ -27,7 +28,10 @@ Declare @intMinRowNo int,
 		@intSampleId int,
 		@strFinalErrMsg NVARCHAR(MAX)=''
 
-Select @intMinRowNo=Min(intStageSampleId) From tblIPPreShipmentSampleStage
+If ISNULL(@strSessionId,'')=''
+	Select @intMinRowNo=Min(intStageSampleId) From tblIPPreShipmentSampleStage
+Else
+	Select @intMinRowNo=Min(intStageSampleId) From tblIPPreShipmentSampleStage Where strSessionId=@strSessionId
 
 While(@intMinRowNo is not null)
 Begin
@@ -94,7 +98,10 @@ Begin
 		Delete From tblIPPreShipmentSampleStage Where intStageSampleId=@intMinRowNo
 	END CATCH
 
-	Select @intMinRowNo=Min(intStageSampleId) From tblIPPreShipmentSampleStage Where intStageSampleId>@intMinRowNo
+	If ISNULL(@strSessionId,'')=''
+		Select @intMinRowNo=Min(intStageSampleId) From tblIPPreShipmentSampleStage Where intStageSampleId>@intMinRowNo
+	Else
+		Select @intMinRowNo=Min(intStageSampleId) From tblIPPreShipmentSampleStage Where intStageSampleId>@intMinRowNo AND strSessionId=@strSessionId
 End
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)

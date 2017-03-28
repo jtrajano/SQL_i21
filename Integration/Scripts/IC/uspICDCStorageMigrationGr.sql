@@ -2,8 +2,7 @@ IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICD
 	DROP PROCEDURE [uspICDCStorageMigrationGr]; 
 GO 
 
-
-Create PROCEDURE [dbo].[uspICDCStorageMigrationGr]
+CREATE PROCEDURE [dbo].[uspICDCStorageMigrationGr]
 
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -30,3 +29,8 @@ from gaphymst os
 join tblSMCompanyLocation L on os.gaphy_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = L.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblSMCompanyLocationSubLocation SL on L.intCompanyLocationId = SL.intCompanyLocationId
 left join tblICCommodity C on os.gaphy_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = C.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS
+
+
+
+GO
+

@@ -30,10 +30,10 @@ FROM
 	(SELECT SLT.intPaycheckId, SLT.dtmPayDate, SLT.intTypeTaxStateId, MAX(SLT.intTypeTaxLocalId) intTypeTaxLocalId, SLT.dblAdjustedGross, 
 			dblStateTotal = SUM(SLT.dblStateTotal), dblLocalTotal = SUM(SLT.dblLocalTotal) FROM
 		(SELECT intPaycheckId, dtmPayDate, intTypeTaxStateId, intTypeTaxLocalId, dblAdjustedGross, dblStateTotal = dblTotal, dblLocalTotal = 0
-			FROM vyuPRPaycheckTax WHERE strCalculationType IN ('USA State')
+			FROM vyuPRPaycheckTax WHERE strCalculationType IN ('USA State') AND ysnVoid = 0
 		 UNION ALL
 		 SELECT intPaycheckId, dtmPayDate, intTypeTaxStateId, intTypeTaxLocalId, dblAdjustedGross, dblStateTotal = 0, dblLocalTotal = dblTotal
-			FROM vyuPRPaycheckTax WHERE strCalculationType IN ('USA Local')
+			FROM vyuPRPaycheckTax WHERE strCalculationType IN ('USA Local') AND ysnVoid = 0
 		) SLT
 	 GROUP BY SLT.intPaycheckId, SLT.dtmPayDate, SLT.intTypeTaxStateId, SLT.dblAdjustedGross
 	) vyuPRPaycheckTax

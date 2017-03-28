@@ -11,6 +11,14 @@ BEGIN
 	DECLARE @strItemNo AS NVARCHAR(50)
 			,@intItemId AS INT 
 			,@strTransactionId AS NVARCHAR(50)
+			,@strCurrencyId AS NVARCHAR(50)
+			,@strFunctionalCurrencyId AS NVARCHAR(50)
+END 
+
+-- Get the functional currency
+BEGIN 
+	DECLARE @intFunctionalCurrencyId AS INT
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 END 
 
 -- Validate 
@@ -109,27 +117,35 @@ END
 BEGIN 
 	-- Check if the transaction is using a foreign currency and it has a missing forex rate. 
 	SELECT @strItemNo = NULL
-			, @intItemId = NULL 
-			, @strTransactionId = NULL 
+			,@intItemId = NULL 
+			,@strTransactionId = NULL 
+			,@strCurrencyId = NULL 
+			,@strFunctionalCurrencyId = NULL 
 
 	SELECT TOP 1 
 			@strTransactionId = Shipment.strShipmentNumber 
 			,@strItemNo = Item.strItemNo
 			,@intItemId = Item.intItemId
+			,@strCurrencyId = c.strCurrency
+			,@strFunctionalCurrencyId = fc.strCurrency
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge OtherCharge
 				ON Shipment.intInventoryShipmentId = OtherCharge.intInventoryShipmentId	
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = OtherCharge.intChargeId
+			LEFT JOIN tblSMCurrency c
+				ON c.intCurrencyID =  OtherCharge.intCurrencyId
+			LEFT JOIN tblSMCurrency fc
+				ON fc.intCurrencyID =  @intFunctionalCurrencyId
 	WHERE	ISNULL(OtherCharge.dblForexRate, 0) = 0 
 			AND OtherCharge.intCurrencyId IS NOT NULL 
-			AND OtherCharge.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+			AND OtherCharge.intCurrencyId <> @intFunctionalCurrencyId
 			AND Shipment.intInventoryShipmentId = @intInventoryShipmentId
-			AND OtherCharge.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency WHERE ysnSubCurrency = 1 AND intMainCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
+			AND OtherCharge.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency WHERE ysnSubCurrency = 1 AND intMainCurrencyId = @intFunctionalCurrencyId)
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- '{Transaction Id} is using a foreign currency. Please check if {Charge No} has a forex rate.'
-		RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo)
+		-- '{Transaction Id} is using a foreign currency. Please check if {Other Charge} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'
+		RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId)
 		RETURN -1
 	END 
 END 
@@ -317,13 +333,6 @@ BEGIN
 			,intOtherChargeIncome
 			,intOtherChargeAsset			
 	FROM	@OtherChargesGLAccounts
-	;
-
-	-- Get the functional currency
-	BEGIN 
-		DECLARE @intFunctionalCurrencyId AS INT
-		SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
-	END 
 	;
 
 	-- Generate the G/L Entries here: 

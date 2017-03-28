@@ -89,6 +89,8 @@ BEGIN
 		,intFreightTermId
 		,strBOLNumber
 		,intDiscountSchedule
+		,intForexRateTypeId
+		,dblForexRate
 		
 		,intItemId
 		,intLineNo
@@ -113,13 +115,24 @@ BEGIN
 		SELECT
 		intOrderType				= @intOrderType
 		,intEntityCustomerId		= @intEntityId
-		,intCurrencyId				= SC.intCurrencyId
+		,intCurrencyId				= CASE
+										WHEN ISNULL(CNT.intContractDetailId,0) = 0 THEN SC.intCurrencyId 
+										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
+									END
 		,intShipFromLocationId		= SC.intProcessingLocationId
 		,intShipToLocationId		= (select top 1 intShipToId from tblARCustomer where intEntityCustomerId = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intFreightTermId			= 1
 		,strBOLNumber				= SC.strTicketNumber
 		,intDiscountSchedule		= SC.intDiscountId
+		,intForexRateTypeId			= CASE
+										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.intRateTypeId
+										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
+									END
+		,dblForexRate				= CASE
+										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.dblRate
+										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
+									END
 		
 		
 		,intItemId					= LI.intItemId
@@ -187,6 +200,8 @@ BEGIN
 		,[intShipFromLocationId]
 		,[intShipToLocationId]
 		,[intFreightTermId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
 
 		-- Charges
 		,[intContractId]
@@ -208,6 +223,9 @@ BEGIN
 	,[intShipFromLocationId]			= SE.intShipFromLocationId
 	,[intShipToLocationId]				= SE.intShipToLocationId
 	,[intFreightTermId]					= SE.intFreightTermId
+	,[intForexRateTypeId]				= SE.intForexRateTypeId
+	,[dblForexRate]						= SE.dblForexRate
+
 	--Charges
 	,[intContractId]					= NULL
 	,[intCurrencyId]  					= SE.intCurrencyId
@@ -241,6 +259,8 @@ BEGIN
 		,[intShipFromLocationId]
 		,[intShipToLocationId]
 		,[intFreightTermId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
 
 		-- Charges
 		,[intContractId]
@@ -262,6 +282,9 @@ BEGIN
 	,[intShipFromLocationId]			= SE.intShipFromLocationId
 	,[intShipToLocationId]				= SE.intShipToLocationId
 	,[intFreightTermId]					= SE.intFreightTermId
+	,[intForexRateTypeId]				= SE.intForexRateTypeId
+	,[dblForexRate]						= SE.dblForexRate
+
 	--Charges
 	,[intContractId]					= NULL
 	,[intCurrencyId]  					= SC.intCurrencyId
@@ -316,6 +339,8 @@ ELSE
 			,[intShipFromLocationId]
 			,[intShipToLocationId]
 			,[intFreightTermId]
+			,[intForexRateTypeId]
+			,[dblForexRate]
 
 			-- Charges
 			,[intContractId]
@@ -337,6 +362,9 @@ ELSE
 		,[intShipFromLocationId]			= SE.intShipFromLocationId
 		,[intShipToLocationId]				= SE.intShipToLocationId
 		,[intFreightTermId]					= SE.intFreightTermId
+		,[intForexRateTypeId]				= SE.intForexRateTypeId
+		,[dblForexRate]						= SE.dblForexRate
+
 		--Charges
 		,[intContractId]					= SE.intOrderId
 		,[intCurrencyId]  					= SE.intCurrencyId

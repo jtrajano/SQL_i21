@@ -202,7 +202,7 @@ BEGIN TRY
 		,intTransUsedBy
 		,intShipmentType
 		,intLoadShippingInstructionId
-		,strExternalShipmentNumber
+		,NULL
 	FROM tblLGLoad
 	WHERE intLoadId = @intOldLoadId
 
@@ -284,10 +284,12 @@ BEGIN TRY
 		,intPickLotDetailId
 		,intPSubLocationId
 		,intSSubLocationId
-		,strExternalShipmentItemNumber
-		,strExternalBatchNo
+		,NULL
+		,NULL
 	FROM tblLGLoadDetail
 	WHERE intLoadDetailId = @intOldLoadDetailId
+
+	EXEC uspLGCreateLoadIntegrationLog @intNewLoadId,'Added',2
 
 END TRY
 

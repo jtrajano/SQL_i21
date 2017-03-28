@@ -25,6 +25,7 @@ FROM
 		,intMonth	= DATEPART(MM, vyuPRPaycheckTax.dtmPayDate)
 		,intDay		= DATEPART(DD, vyuPRPaycheckTax.dtmPayDate)
 		FROM vyuPRPaycheckTax
+		WHERE ysnVoid = 0
 	) Months
 	LEFT JOIN
 	(SELECT 
@@ -36,6 +37,7 @@ FROM
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Social Security'
 			AND vyuPRPaycheckTax.strPaidBy = 'Company'
+			AND vyuPRPaycheckTax.ysnVoid = 0
 	 GROUP BY 
 		DATEPART(YY, vyuPRPaycheckTax.dtmPayDate), 
 		DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate), 
@@ -56,6 +58,7 @@ FROM
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
 			AND vyuPRPaycheckTax.strPaidBy = 'Company'
+			AND vyuPRPaycheckTax.ysnVoid = 0
 	 GROUP BY 
 		DATEPART(YY, vyuPRPaycheckTax.dtmPayDate), 
 		DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate), 
@@ -76,6 +79,7 @@ FROM
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Social Security'
 			AND vyuPRPaycheckTax.strPaidBy = 'Employee'
+			AND vyuPRPaycheckTax.ysnVoid = 0
 	GROUP BY
 		DATEPART(YY, vyuPRPaycheckTax.dtmPayDate), 
 		DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate), 
@@ -97,6 +101,7 @@ FROM
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
 			AND vyuPRPaycheckTax.strPaidBy = 'Employee'
+			AND vyuPRPaycheckTax.ysnVoid = 0
 	 GROUP BY 
 		DATEPART(YY, vyuPRPaycheckTax.dtmPayDate), 
 		DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate), 
@@ -116,6 +121,7 @@ FROM
 		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Federal Tax'
+	 AND vyuPRPaycheckTax.ysnVoid = 0
 	GROUP BY
 		DATEPART(YY, vyuPRPaycheckTax.dtmPayDate), 
 		DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate), 

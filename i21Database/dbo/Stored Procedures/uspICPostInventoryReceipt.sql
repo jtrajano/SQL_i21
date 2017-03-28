@@ -39,7 +39,11 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT
 		,@ysnAllowBlankGLEntries AS BIT = 1
-		,@intFunctionalCurrencyId AS INT 
+		,@strCurrencyId AS NVARCHAR(50)
+		,@strFunctionalCurrencyId AS NVARCHAR(50)
+
+-- Get the default currency ID
+DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
@@ -246,6 +250,40 @@ BEGIN
 			GOTO Post_Exit  
 		END 
 	END 
+
+	-- Check if the transaction is using a foreign currency and it has a missing forex rate. 
+	BEGIN 		
+		SELECT @strItemNo = NULL
+				,@intItemId = NULL 
+				,@strCurrencyId = NULL 
+				,@strFunctionalCurrencyId = NULL 
+
+		SELECT TOP 1 
+				@strTransactionId = Receipt.strReceiptNumber 
+				,@strItemNo = Item.strItemNo
+				,@intItemId = Item.intItemId
+				,@strCurrencyId = c.strCurrency
+				,@strFunctionalCurrencyId = fc.strCurrency
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId
+				LEFT JOIN tblSMCurrency c
+					ON c.intCurrencyID =  Receipt.intCurrencyId
+				LEFT JOIN tblSMCurrency fc
+					ON fc.intCurrencyID = @intFunctionalCurrencyId
+		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+				AND ISNULL(ReceiptItem.dblForexRate, 0) = 0 
+				AND Receipt.intCurrencyId IS NOT NULL 
+				AND Receipt.intCurrencyId <> @intFunctionalCurrencyId
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'
+			RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId)
+			RETURN -1; 
+		END 
+	END 
 END
 
 -- Check if sub location and storage locations are valid. 
@@ -267,11 +305,6 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
 	IF @@ERROR <> 0 GOTO Post_Exit;
 END
-
--- Get the functional currency
-BEGIN 
-	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
-END 
 
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 

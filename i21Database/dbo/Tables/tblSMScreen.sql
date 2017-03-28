@@ -9,7 +9,8 @@
 	[ysnActivity]	   BIT NULL,
 	[ysnCustomTab]	   BIT NULL,
     [ysnDocumentSource] BIT NULL, 
-    [intConcurrencyId] INT CONSTRAINT [DF__tblSMScreen] DEFAULT ((1)) NOT NULL,
+    [strApprovalMessage]	NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intConcurrencyId] INT CONSTRAINT [DF_tblSMScreen] DEFAULT ((1)) NOT NULL,
     CONSTRAINT [PK_tblSMScreen] PRIMARY KEY CLUSTERED ([intScreenId] ASC)
 );
 

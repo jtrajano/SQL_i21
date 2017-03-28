@@ -2,7 +2,6 @@
 	DROP PROCEDURE uspMFImportRecipe
 GO
 
-CREATE PROCEDURE uspMFImportRecipe
 	@Checking BIT = 0,
 	@UserId INT = 0,
 	@Total INT = 0 OUTPUT
@@ -97,6 +96,7 @@ BEGIN
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = FRM.ptfrm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = FRM.ptfrm_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId
+			WHERE NOT EXISTS (select * from tblMFRecipe WHERE intItemId = ITM.intItemId AND intLocationId = LOC.intCompanyLocationId )			
 		 end
 		
 			--==========================================================
@@ -169,7 +169,8 @@ BEGIN
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblMFRecipe RCP ON RCP.intItemId = ITM.intItemId AND RCP.intLocationId = LOC.intCompanyLocationId
-			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId    
+			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId 
+			WHERE NOT EXISTS (SELECT * FROM tblMFRecipeItem WHERE intRecipeId = RCP.intRecipeId )			
 
 			--Insert all ingredient items 
 			WHILE @cnt < 11
@@ -215,7 +216,6 @@ BEGIN
 					   ,FRMI.ptfrm_ingr_qty_'+CAST(@cnt AS NVARCHAR)+'
 					   ,0  --[dblShrinkage]
 					   ,1  --[ysnScaled]
-					   ,(SELECT intConsumptionMethodId FROM tblMFConsumptionMethod WHERE strName = ''None'')
 					   ,0  --[ysnYearValidationRequired]
 					   ,0  --[ysnMinorIngredient]
 					   ,0  --[ysnOutputItemMandatory]
@@ -234,7 +234,7 @@ BEGIN
 			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblMFRecipe RCP ON RCP.intItemId = ITM.intItemId AND RCP.intLocationId = LOC.intCompanyLocationId
 			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM1.intItemId   
-			WHERE FRMI.ptfrm_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' IS NOT NULL'
+			WHERE FRMI.ptfrm_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' IS NOT NULL AND NOT EXISTS (SELECT * FROM tblMFRecipeItem WHERE intRecipeId = RCP.intRecipeId  AND intItemId = ITM1.intItemId )' 
 
 			   EXEC (@SQLCMD)
 
@@ -261,6 +261,7 @@ BEGIN
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = FRM.ptfrm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = FRM.ptfrm_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId
+			WHERE NOT EXISTS (select * from tblMFRecipe WHERE intItemId = ITM.intItemId AND intLocationId = LOC.intCompanyLocationId )				
 		 END		
 		
 	END

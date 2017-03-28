@@ -413,7 +413,11 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		IF @strYieldCostValue = 'True'
+		IF @strYieldCostValue = 'True' 
+		--and exists(SELECT *
+		--	FROM tblMFWorkOrderProducedLotTransaction PL
+		--	WHERE intWorkOrderId = @intWorkOrderId
+		--		AND PL.dblQuantity < 0)
 		BEGIN
 			INSERT INTO dbo.tblMFWorkOrderConsumedLot (
 				intWorkOrderId
@@ -457,6 +461,8 @@ BEGIN TRY
 			JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND PL.dblQuantity < 0
+
+			delete from @ItemsForPost
 
 			--Lot Tracking
 			INSERT INTO @ItemsForPost (
@@ -505,6 +511,9 @@ BEGIN TRY
 			LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
 			WHERE cl.intWorkOrderId = @intWorkOrderId
 				AND intSequenceNo = 9999
+
+			DELETE
+			FROM @GLEntries
 
 			-- Call the post routine 
 			INSERT INTO @GLEntries (

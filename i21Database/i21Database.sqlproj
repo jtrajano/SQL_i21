@@ -2216,7 +2216,6 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\TankInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryReceiptUnitCost.sql" />
-    <None Include="Scripts\Post-Deployment\GL\InventoryCategoryFix.sql" />
     <Build Include="dbo\Tables\tblSTRadiantItemTypeCode.sql" />
     <Build Include="dbo\Views\vyuARDepositAccount.sql" />
     <Build Include="dbo\Tables\tblICCommodityProductLine.sql" />
@@ -2671,6 +2670,7 @@
     <Build Include="dbo\Tables\tblPATTransfer.sql" />
     <Build Include="dbo\Tables\tblPATTransferDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
+    <Build Include="dbo\Functions\fnGLGetMTDActivity.sql" />
     <Build Include="dbo\Functions\fnGLValidateRevaluePeriod.sql" />
     <Build Include="dbo\Stored Procedures\uspPATProcessVoid.sql" />
     <Build Include="dbo\Functions\fnIsAllowUserSelfPost.sql" />
@@ -5121,6 +5121,41 @@
     <Build Include="dbo\Views\vyuICGetSubLocationBins.sql" />
     <Build Include="dbo\Views\vyuICGetSubLocationBinDetails.sql" />
     <Build Include="dbo\Views\vyuLGContractsWithoutDocuments.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSearchStatementsCustomer.sql" />
+    <Build Include="dbo\Tables\tblLGShippingMode.sql" />
+    <Build Include="dbo\Tables\tblLGReasonCode.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGenerateCSV.sql" />
+    <Build Include="dbo\Views\vyuEMEntityCusVenCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessToInventoryReceipt.sql" />
+    <Build Include="dbo\Functions\fnCTGetSampleDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetDefaultReceiptTaxGroupId.sql" />
+    <Build Include="dbo\Views\vyuRKGetSequenceMonthNotMapping.sql" />
+    <Build Include="dbo\Views\vyuRKGetSequenceMonth.sql" />
+    <Build Include="dbo\Tables\tblRKM2MGrainBasis.sql" />
+    <Build Include="dbo\Functions\fnRKGetFutureAndBasisPriceForDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetTerms.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessACHPayments.sql" />
+    <Build Include="dbo\Views\vyuSMEmailHistory.sql" />
+    <Build Include="dbo\Functions\fnSMConcatRecipients.sql" />
+    <Build Include="dbo\Views\vyuCTGridContractHeader.sql" />
+    <Build Include="dbo\Functions\fnSMGetForexRate.sql" />
+    <Build Include="dbo\Views\vyuHDTicketHoursWorkedReport.sql" />
+    <Build Include="dbo\Views\vyuHDTicketDetailsReport.sql" />
+    <Build Include="dbo\Views\vyuAPBillDetailTax.sql" />
+    <Build Include="dbo\Views\vyuARPaymentACHSearch.sql" />
+    <Build Include="dbo\Tables\tblGRStorageStatement.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageEntity.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageStmtItem.sql" />
+    <Build Include="dbo\Views\vyuGRStorageStatement.sql" />
+    <Build Include="dbo\Views\vyuGRStorageStmtSchedule.sql" />
+    <Build Include="dbo\Views\vyuGRStorageStmtStorageType.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportStorageStatement.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportStorageStatementDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostBillCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
+    <Build Include="dbo\Tables\tblARSearchStatementCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetStatementsCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5315,5 +5350,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\24_OfflineMenu.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql" />
   </ItemGroup>
 </Project>

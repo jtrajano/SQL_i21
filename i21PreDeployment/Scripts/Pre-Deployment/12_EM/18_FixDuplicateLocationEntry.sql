@@ -20,7 +20,7 @@ BEGIN
 			PRINT ''EXECUTE''
 
 			UPDATE tblEMEntityLocation SET strLocationName = RTRIM(strLocationName) + '' '' + cast(intEntityLocationId as nvarchar)
-			where cast(intEntityId as nvarchar) + ''.'' + strLocationName in (select cast(intEntityId as nvarchar) + ''.'' + strLocationName from @LocationTable)
+			where cast(intEntityId as nvarchar) + ''.'' + strLocationName in (select cast(intEntityId as nvarchar) + ''.'' + strLocationName COLLATE Latin1_General_CI_AS from @LocationTable)
 		END
 
 	')

@@ -132,6 +132,19 @@ Begin
 	Select TOP 1 @strVendorAccountNo=v.strVendorAccountNum 
 	From tblLGLoadDetail ld Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityId Where intLoadId = @intLoadId
 
+	--Validation
+	Update tblLGLoadStg Set strMessage=NULL  Where intLoadStgId=@intLoadStgId --message should be null not empty(used in loadstg sps as null)
+	If ISNULL(@strLoadNumber,'')=''
+	Begin
+		Update tblLGLoadStg Set strMessage='Load/Shipping Instruction Number is empty.'  Where intLoadStgId=@intLoadStgId
+		GOTO NEXT_SHIPMENT
+	End
+	If @dtmETAPOD is null
+	Begin
+		Update tblLGLoadStg Set strMessage='ETA POD is empty.'  Where intLoadStgId=@intLoadStgId
+		GOTO NEXT_SHIPMENT
+	End
+
 	If (Select intLoadShippingInstructionId From tblLGLoad Where intLoadId=@intLoadId AND intShipmentType=1) is not null
 		Set @strHeaderRowState='MODIFIED'
 	Else
@@ -279,6 +292,28 @@ Begin
 			@strRowState				=	strRowState
 		From @tblDetail Where intRowNo=@intMinDetail
 
+			--Validation
+			If ISNULL(@dblNetWeight,0)<=0
+			Begin
+				Update tblLGLoadStg Set strMessage='Net Weight is empty.'  Where intLoadStgId=@intLoadStgId
+				GOTO NEXT_SHIPMENT
+			End
+			If ISNULL(@strWeightUOM,'')=''
+			Begin
+				Update tblLGLoadStg Set strMessage='Weight UOM is empty.'  Where intLoadStgId=@intLoadStgId
+				GOTO NEXT_SHIPMENT
+			End
+			If ISNULL(@strPONo,'')=''
+			Begin
+				Update tblLGLoadStg Set strMessage='PO No is empty.'  Where intLoadStgId=@intLoadStgId
+				GOTO NEXT_SHIPMENT
+			End
+			If ISNULL(@strPOLineItemNo,'')=''
+			Begin
+				Update tblLGLoadStg Set strMessage='PO Line No is empty.'  Where intLoadStgId=@intLoadStgId
+				GOTO NEXT_SHIPMENT
+			End
+
 			--update strExternalShipmentItemNumber if null
 			Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@intLoadDetailId AND ISNULL(strExternalShipmentItemNumber,'')=''
 
@@ -289,7 +324,10 @@ Begin
 				Set @strItemXml += '<WERKS>'  +  ISNULL(@strSubLocation,'') + '</WERKS>' 
 			Else
 				Set @strItemXml += '<WERKS>'  +  '' + '</WERKS>' 
-			Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
+			If ISNULL(@ysnBatchSplit,0)=1 AND UPPER(@strHeaderRowState)='ADDED'--coffee batch split DESADV / shipping advice
+				Set @strItemXml += '<LGORT>'  +  '' + '</LGORT>' 
+			Else
+				Set @strItemXml += '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 			If UPPER(@strCommodityCode)='COFFEE'
 				Set @strItemXml += '<CHARG>'  +  ISNULL(@strContainerNo,'') + '</CHARG>' 
 			Else
@@ -298,11 +336,14 @@ Begin
 			If ISNULL(@ysnBatchSplit,0)=0
 				Set @strItemXml += '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblNetWeight)),'') + '</LFIMG>'
 			Else
-				Set @strItemXml += '<LFIMG>'  +  '' + '</LFIMG>'
+				If UPPER(@strHeaderRowState)='ADDED'
+					Set @strItemXml += '<LFIMG>'  +  '0' + '</LFIMG>' --coffee batch split DESADV / shipping advice
+				Else
+					Set @strItemXml += '<LFIMG>'  +  '' + '</LFIMG>'
 			Set @strItemXml += '<VRKME>'  +  ISNULL(@strWeightUOM,'') + '</VRKME>' 
 			If UPPER(@strCommodityCode)='TEA' AND UPPER(@strHeaderRowState)='ADDED'
 				Set @strItemXml += '<VOLUM>'  +  '1' + '</VOLUM>' 
-			If ISNULL(@ysnBatchSplit,0)=1
+			If ISNULL(@ysnBatchSplit,0)=1 AND UPPER(@strHeaderRowState)='MODIFIED'
 				Set @strItemXml += '<HIPOS>'  +  ISNULL(@strDeliveryItemNo,'') + '</HIPOS>'
 
 			If UPPER(@strHeaderRowState)='MODIFIED'
@@ -340,25 +381,42 @@ Begin
 					From tblLGLoadContainerStg lc
 					Left Join tblLGLoadContainer c on lc.intLoadContainerId=c.intLoadContainerId
 					Left Join tblLGLoadDetailContainerLink cl on lc.intLoadContainerId=cl.intLoadContainerId
-					Left Join tblLGLoadDetail ld on ld.intLoadDetailId=cl.intLoadDetailId
-					Where lc.intLoadStgId=@intLoadStgId AND ld.intLoadDetailId=@intLoadDetailId
+					Left Join tblLGLoadDetail ld on ld.intLoadDetailId=cl.intLoadDetailId AND ld.intLoadDetailId=@intLoadDetailId
+					Where lc.intLoadStgId=@intLoadStgId
 					Order By lc.strExternalContainerId
+
+					--Validation
+					If Exists (Select 1 From @tblContainer Where ISNULL(strContainerNo,'')='')
+					Begin
+						Update tblLGLoadStg Set strMessage='Container No is empty.'  Where intLoadStgId=@intLoadStgId
+						GOTO NEXT_SHIPMENT
+					End
+					If Exists (Select 1 From @tblContainer Where ISNULL(dblNetWt,0)<=0)
+					Begin
+						Update tblLGLoadStg Set strMessage='Container Net Weight is empty.'  Where intLoadStgId=@intLoadStgId
+						GOTO NEXT_SHIPMENT
+					End
+					If Exists (Select 1 From @tblContainer Where ISNULL(strWeightUOM,'')='')
+					Begin
+						Update tblLGLoadStg Set strMessage='Container Weight UOM is empty.'  Where intLoadStgId=@intLoadStgId
+						GOTO NEXT_SHIPMENT
+					End
 
 					Set @strContainerXml=''
 					Select @strContainerXml=@strContainerXml
 							+ '<E1EDL24 SEGMENT="1">'
 							+ '<POSNR>' + ISNULL(CONVERT(VARCHAR,lc.strExternalContainerId),'') + '</POSNR>' 
 							+ '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
-							+ '<WERKS>'  +  '' + '</WERKS>' 
+							+ '<WERKS>'  +  CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN ISNULL(@strSubLocation,'')  ELSE '' END + '</WERKS>' 
 							+ '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
 							+ '<CHARG>'  +  ISNULL(lc.strContainerNo,'') + '</CHARG>' 
 							+ '<KDMAT>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</KDMAT>' 
-							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),CASE WHEN UPPER(lc.strRowState)='DELETE' Then 0 ELSE lc.dblNetWt END)),'') + '</LFIMG>' 
+							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),lc.dblNetWt)),'') + '</LFIMG>' 
 							+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(lc.strWeightUOM,'')) + '</VRKME>' 
 							+ '<HIPOS>' + ISNULL(@strDeliveryItemNo,'') + '</HIPOS>' 
 
 							+ '<E1EDL19 SEGMENT="1">'
-							+ '<QUALF>'  +  'QUA' + '</QUALF>' 
+							+ '<QUALF>'  + CASE WHEN UPPER(lc.strRowState)='DELETE' Then 'DEL' ELSE 'QUA' END + '</QUALF>' 
 							+ '</E1EDL19>'
 
 							+
@@ -401,6 +459,18 @@ Begin
 			Insert Into @tblContainer(intLoadContainerId,strContainerNo,strContainerSizeCode)
 			Select DISTINCT c.intLoadContainerId,c.strContainerNo,c.strContainerSizeCode
 			From tblLGLoadContainerStg c Where c.intLoadStgId=@intMinHeader
+
+			--Validation
+			If Exists (Select 1 From @tblContainer Where ISNULL(strContainerNo,'')='')
+			Begin
+				Update tblLGLoadStg Set strMessage='Container No is empty.'  Where intLoadStgId=@intLoadStgId
+				GOTO NEXT_SHIPMENT
+			End
+			If Exists (Select 1 From @tblContainer Where ISNULL(@strContainerSizeCode,'')='')
+			Begin
+				Update tblLGLoadStg Set strMessage='Container Size is empty.'  Where intLoadStgId=@intLoadStgId
+				GOTO NEXT_SHIPMENT
+			End
 
 			Select @intMinContainer=Min(intRowNo) From @tblContainer
 

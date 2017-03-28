@@ -36,6 +36,8 @@ SELECT TR.intTestResultId
 	,ito1.intOwnerId AS intEntityId
 	,S.intSampleTypeId
 	,TR.dtmLastModified
+	,S.dtmBusinessDate
+	,SHI.strShiftName
 FROM dbo.tblQMTestResult AS TR
 JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
 JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
@@ -52,6 +54,7 @@ LEFT JOIN dbo.tblICParentLot AS PL ON PL.intParentLotId = S.intProductValueId
 	AND S.intProductTypeId = 11
 LEFT JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
 LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = LI.intItemOwnerId
+LEFT JOIN tblMFShift SHI ON SHI.intShiftId = S.intShiftId
 LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intProductValueId
 	AND S.intProductTypeId = 8
 LEFT JOIN dbo.tblCTContractHeader AS CH ON CH.intContractHeaderId = CD.intContractHeaderId

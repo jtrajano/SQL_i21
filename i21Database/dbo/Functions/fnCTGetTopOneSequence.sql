@@ -31,7 +31,8 @@ RETURNS @returntable	TABLE
 	strSubLocation			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strItemDescription		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	intContractDetailId		INT,
-	strProductType			NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	strProductType			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	ysnSubCurrency			BIT
 )
 AS
 BEGIN
@@ -44,7 +45,7 @@ BEGIN
 				dblScheduleQty,					dblNoOfLots,				strItemNo,						strPricingType,
 				strFutMarketName,				strItemUOM,					strLocationName,				strPriceUOM,
 				strCurrency,					strFutureMonth,				strStorageLocation,				strSubLocation,
-				strItemDescription,				intContractDetailId,		strProductType
+				strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency
 				
 		FROM	vyuCTContractSequence WHERE intContractDetailId = @intContractDetailId
 	ELSE
@@ -55,7 +56,7 @@ BEGIN
 				dblScheduleQty,					dblNoOfLots,				strItemNo,						strPricingType,
 				strFutMarketName,				strItemUOM,					strLocationName,				strPriceUOM,
 				strCurrency,					strFutureMonth,				strStorageLocation,				strSubLocation,
-				strItemDescription,				intContractDetailId,		strProductType
+				strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency
 				
 		FROM	vyuCTContractSequence WHERE intContractHeaderId = @intContractHeaderId
 	RETURN;

@@ -9,6 +9,7 @@
 	CONSTRAINT [PK_tblTFFilingPacket] PRIMARY KEY ([intFilingPacketId]),
 	CONSTRAINT [FK_tblTFFilingPacket_tblTFTaxAuthority] FOREIGN KEY([intTaxAuthorityId]) REFERENCES [tblTFTaxAuthority] ([intTaxAuthorityId]),
 	CONSTRAINT [FK_tblTFFilingPacket_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId]) REFERENCES [tblTFReportingComponent] ([intReportingComponentId])
+	ON DELETE CASCADE
 )
 
 GO

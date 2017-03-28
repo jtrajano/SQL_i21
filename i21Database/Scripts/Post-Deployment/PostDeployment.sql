@@ -168,6 +168,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\ReportData\TrialBalance.sql
 :r .\GL\ReportData\TrialBalanceDetail.sql
 :r .\GL\ReportData\BalanceSheetStandard.sql
+:r .\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -364,7 +365,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\10_Checkout_Commander_Translog.sql
 
 -- Motor Fuel Tax
---:r .\TF\DefaultData\_TaxAuthority.sql
+:r .\TF\DefaultData\_TaxAuthority.sql
 --:r .\TF\DefaultData\_Frequency.sql
 --:r .\TF\DefaultData\_ReportingComponent.sql
 --:r .\TF\DefaultData\_ProductCode.sql

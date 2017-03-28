@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPItems]
+@strSessionId NVARCHAR(50)=''
 AS
 BEGIN TRY
 
@@ -28,7 +29,10 @@ Declare @intUserId Int
 Declare @strUserName NVARCHAR(100)
 Declare @strFinalErrMsg NVARCHAR(MAX)=''
 
-Select @intMinItem=MIN(intStageItemId) From tblIPItemStage
+If ISNULL(@strSessionId,'')=''
+	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage
+Else
+	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where strSessionId=@strSessionId
 
 While(@intMinItem is not null)
 Begin
@@ -92,10 +96,10 @@ Begin
 		End
 
 	If @ysnDeleted=1
-		Delete From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo
+		Delete From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo AND strContractItemName=@strDescription
 	Else
 	Begin
-		If Not Exists (Select 1 From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo) --Add
+		If Not Exists (Select 1 From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo AND strContractItemName=@strDescription) --Add
 		Begin
 			Insert Into tblICItemContract(intItemId,strContractItemNo,strContractItemName,intItemLocationId)
 			Select @intItemId,@strItemNo,@strDescription,intItemLocationId 
@@ -103,7 +107,7 @@ Begin
 		End
 		Else
 		Begin --Update
-			Update tblICItemContract Set strContractItemName=@strDescription Where intItemId=@intItemId AND strContractItemNo=@strItemNo
+			Update tblICItemContract Set strContractItemName=@strDescription Where intItemId=@intItemId AND strContractItemNo=@strItemNo AND strContractItemName=@strDescription
 		End
 	End
 	GOTO MOVE_TO_ARCHIVE
@@ -134,6 +138,12 @@ Begin
 		If Not Exists (Select 1 From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where iu.intItemId=@intItemId AND um.strSymbol='TO')
 			Insert Into tblICItemUOM(intItemId,intUnitMeasureId,dblUnitQty,ysnStockUnit,ysnAllowPurchase,ysnAllowSale)
 			Select TOP 1 @intItemId,intUnitMeasureId,1000,0,1,1 From tblICUnitMeasure Where strSymbol='TO'
+
+		--Add 70/69/60/50/65 Kg Bags for coffee
+		If (Select UPPER(strCommodityCode) From tblICCommodity Where intCommodityId=@intCommodityId)='COFFEE'
+			Insert Into tblICItemUOM(intItemId,intUnitMeasureId,dblUnitQty,ysnStockUnit,ysnAllowPurchase,ysnAllowSale)
+			Select @intItemId,intUnitMeasureId,SUBSTRING(strUnitMeasure,1,2),0,1,1 From tblICUnitMeasure 
+			Where  UPPER(strUnitMeasure) like '%KG BAG%' AND ISNUMERIC(SUBSTRING(strUnitMeasure,1,2))=1
 	End
 
 	Insert Into tblICItemLocation(intItemId,intLocationId,intCostingMethod,intAllowNegativeInventory)
@@ -201,8 +211,8 @@ End
 	MOVE_TO_ARCHIVE:
 
 	--Move to Archive
-	Insert into tblIPItemArchive(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription)
-	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription
+	Insert into tblIPItemArchive(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strSessionId)
+	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strSessionId
 	From tblIPItemStage Where intStageItemId=@intStageItemId
 
 	Select @intNewStageItemId=SCOPE_IDENTITY()
@@ -230,8 +240,8 @@ BEGIN CATCH
 	SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 	--Move to Error
-	Insert into tblIPItemError(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strErrorMessage,strImportStatus)
-	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,@ErrMsg,'Failed'
+	Insert into tblIPItemError(strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,strErrorMessage,strImportStatus,strSessionId)
+	Select strItemNo,dtmCreated,strCreatedUserName,dtmLastModified,strLastModifiedUserName,ysnDeleted,strItemType,strStockUOM,strSKUItemNo,strDescription,@ErrMsg,'Failed',strSessionId
 	From tblIPItemStage Where intStageItemId=@intStageItemId
 
 	Select @intNewStageItemId=SCOPE_IDENTITY()
@@ -247,7 +257,10 @@ BEGIN CATCH
 	Delete From tblIPItemStage Where intStageItemId=@intStageItemId
 END CATCH
 
-	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem
+	If ISNULL(@strSessionId,'')=''
+		Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem
+	Else
+		Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem AND strSessionId=@strSessionId
 End
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)

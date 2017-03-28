@@ -23,8 +23,9 @@ AS
 		,strAssignedTo = (select top 1 strName from tblEMEntity where intEntityId = tic.intAssignedToEntity)
 		,tic.intConcurrencyId
 		,intAssignToEntity = tic.intAssignedToEntity
-		,strContactName = (select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerContactId)
+		,strContactName = contact.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerContactId)
 		,tic.intCustomerContactId
+		,intContactRank = contact.intEntityRank
 		,strDateCreated = convert(nvarchar,tic.dtmCreated, 101)
 		,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101)
 		,tic.strJiraKey
@@ -55,3 +56,4 @@ AS
 		left outer join [tblCRMCampaign] cam on cam.[intCampaignId] = tic.intOpportunityCampaignId
 		left outer join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = tic.intCompanyLocationId
 		left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = tic.intEntityLocationId
+		left outer join tblEMEntity contact on contact.intEntityId = tic.intCustomerContactId

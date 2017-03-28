@@ -1,5 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARShippedItems]
 AS
+SELECT NEWID() AS id, ShippedItems.* FROM 
+(
 SELECT
 	 [strTransactionType]				= 'Sales Order'
 	,[strTransactionNumber]				= SO.[strSalesOrderNumber]
@@ -1403,11 +1405,11 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[strOrderUnitMeasure]				= ARCC.[strOrderUnitMeasure]
 	,[intShipmentItemUOMId]				= ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId])
 	,[strShipmentUnitMeasure]			= ISNULL(ARCC.[strUnitMeasure],ICUM.[strUnitMeasure])
-	,[dblQtyShipped]					= [dbo].[fnCalculateQtyBetweenUOM](LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity])
+	,[dblQtyShipped]					= [dbo].[fnCalculateQtyBetweenUOM](ISNULL(ARCC.[intOrderUOMId],LD.[intWeightItemUOMId]), ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity])
 	,[dblQtyOrdered]					= ISNULL(LD.dblQuantity,0)
-	,[dblShipmentQuantity]				= [dbo].[fnCalculateQtyBetweenUOM](LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity]) --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
-	,[dblShipmentQtyShippedTotal]		= [dbo].[fnCalculateQtyBetweenUOM](LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity])
-	,[dblQtyRemaining]					= [dbo].[fnCalculateQtyBetweenUOM](LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity])
+	,[dblShipmentQuantity]				= [dbo].[fnCalculateQtyBetweenUOM](ISNULL(ARCC.[intOrderUOMId],LD.[intWeightItemUOMId]), ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity]) --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
+	,[dblShipmentQtyShippedTotal]		= [dbo].[fnCalculateQtyBetweenUOM](ISNULL(ARCC.[intOrderUOMId],LD.[intWeightItemUOMId]), ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity])
+	,[dblQtyRemaining]					= [dbo].[fnCalculateQtyBetweenUOM](ISNULL(ARCC.[intOrderUOMId],LD.[intWeightItemUOMId]), ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), LD.[dblQuantity])
 	,[dblDiscount]						= 0
 	,[dblPrice]							= ARCC.[dblCashPrice] 
 	,[dblShipmentUnitPrice]				= ARCC.[dblCashPrice]
@@ -1835,3 +1837,4 @@ LEFT OUTER JOIN
 	tblSMCurrencyExchangeRateType SMCRT
 		ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE LC.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0
+) ShippedItems

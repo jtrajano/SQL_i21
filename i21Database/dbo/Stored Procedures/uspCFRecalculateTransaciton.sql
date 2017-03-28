@@ -735,6 +735,7 @@ BEGIN
 
 				IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
 				OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
+				OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
 				OR @strPriceMethod = 'Import File Price' 
 				OR @strPriceMethod = 'Credit Card' 
 				OR @strPriceMethod = 'Posted Trans from CSV'
@@ -965,6 +966,7 @@ BEGIN
 
 				END
 
+				UPDATE @tblCFOriginalTax SET ysnInvalidSetup = 1, dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 				INSERT INTO @tblCFTransactionTax
 				(
 					 [intTransactionDetailTaxId]	
@@ -1028,6 +1030,7 @@ BEGIN
 
 				IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
 				OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
+				OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
 				OR @strPriceMethod = 'Import File Price' 
 				OR @strPriceMethod = 'Credit Card' 
 				OR @strPriceMethod = 'Posted Trans from CSV'
@@ -1265,6 +1268,8 @@ BEGIN
 
 				END
 			
+				UPDATE @tblCFOriginalTax SET ysnInvalidSetup = 1, dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
+
 				INSERT INTO @tblCFTransactionTax
 				(
 					 [intTransactionDetailTaxId]	
@@ -1376,6 +1381,9 @@ BEGIN
 				,@CountySalesTax				=@CountySalesTax	
 				,@CitySalesTax					=@CitySalesTax
 
+
+				UPDATE @tblCFRemoteTax SET ysnInvalidSetup = 1 , dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
+
 				INSERT INTO @tblCFTransactionTax
 				(
 					 [intTransactionDetailTaxId]	
@@ -1456,6 +1464,12 @@ BEGIN
 	END
 	
 
+	--SELECT * FROM @tblCFBackoutTax
+	--SELECT * FROM @tblCFCalculatedTax
+	--SELECT * FROM @tblCFOriginalTax
+	--SELECT * FROM @tblCFRemoteTax
+	--SELECT * FROM @tblCFTransactionTax
+
 	---------------------------------------------------
 	--				TAX COMPUTATION					 --
 	---------------------------------------------------
@@ -1484,6 +1498,7 @@ BEGIN
 
 	IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
 	OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
+	OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
 	OR @strPriceMethod = 'Import File Price' 
 	OR @strPriceMethod = 'Credit Card' 
 	OR @strPriceMethod = 'Posted Trans from CSV'
@@ -1499,17 +1514,17 @@ BEGIN
 			(
 				 'Gross Price'
 				,@dblOriginalPrice
-				,@dblPrice
+				,@dblPrice - (@totalOriginalTax / @dblQuantity) + (@totalCalculatedTax / @dblQuantity)
 			),
 			(
 				 'Net Price'
 				,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
-				,@dblPrice - (@totalCalculatedTax / @dblQuantity)
+				,@dblPrice - (@totalOriginalTax / @dblQuantity) -- @totalOriginalTax to handle tax exemption
 			),
 			(
 				 'Total Amount'
 				,ROUND(@dblOriginalPrice * @dblQuantity,2)
-				,ROUND(@dblPrice * @dblQuantity,2)
+				,ROUND((@dblPrice - (@totalOriginalTax / @dblQuantity) + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
 			)
 		END
 	ELSE

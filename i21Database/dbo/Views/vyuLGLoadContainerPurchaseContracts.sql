@@ -106,6 +106,8 @@ SELECT
 	,L.intSourceType
 	,L.intTransUsedBy
 	,L.ysnPosted
+	,SL.intStorageLocationId
+	,SL.strName AS strStorageLocationName
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
@@ -123,6 +125,7 @@ LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 LEFT JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId 
 LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
 LEFT JOIN tblICItem Item ON Item.intItemId = LD.intItemId
 LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = L.intContainerTypeId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = LW.intSubLocationId

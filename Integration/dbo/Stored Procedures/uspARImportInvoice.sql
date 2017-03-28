@@ -112,6 +112,7 @@ BEGIN
 			   ,[ysnPosted]
 			   ,[ysnPaid]
 			   ,[ysnImportedFromOrigin]
+			   ,[ysnImportedAsPosted]
 			   ,[intEntityId]
 			   ,[strShipToAddress] --just for insertion of identity field from origin in format LTRIM(RTRIM(agivc_ivc_no)) + LTRIM(RTRIM(agivc_bill_to_cus))
 			   )
@@ -154,6 +155,7 @@ BEGIN
 				@ARAccount, --to do [intAccountId]
 				1, --"If Invoice exists in the agivcmst, that means it is posted" -Joe [ysnPosted]
 				(CASE WHEN agivc_bal_due = 0 THEN 1 ELSE 0 END),--"If the agivc-bal-due equals zero, then it is paid." -Joe [ysnPaid]
+				1,
 				1,
 				@EntityId,
 				LTRIM(RTRIM(agivc_ivc_no)) + LTRIM(RTRIM(agivc_bill_to_cus))		
@@ -203,6 +205,7 @@ BEGIN
 			   ,[ysnPosted]
 			   ,[ysnPaid]
 			   ,[ysnImportedFromOrigin]
+			   ,[ysnImportedAsPosted]
 			   ,[intEntityId]
 			   ,[strShipToAddress] --just for insertion of identity field from origin in format LTRIM(RTRIM(agivc_ivc_no)) + LTRIM(RTRIM(agivc_bill_to_cus))
 			   )
@@ -249,6 +252,7 @@ BEGIN
 				@ARAccount, --to do [intAccountId]
 				1, --"If Invoice exists in the ptivcmst, that means it is posted" -Joe [ysnPosted]
 				(CASE WHEN ptivc_bal_due = 0 THEN 1 ELSE 0 END),--"If the ptivc-bal-due equals zero, then it is paid." -Joe [ysnPaid]
+				1,
 				1,
 				@EntityId,
 				LTRIM(RTRIM(ptivc_invc_no)) + LTRIM(RTRIM(ptivc_sold_to))		

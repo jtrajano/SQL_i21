@@ -81,6 +81,7 @@ BEGIN
 			LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
 		WHERE DH.intLoadHeaderId = @TransactionId
 			AND DH.strDestination = 'Customer'
+			AND DD.intLoadDistributionDetailId != NULL
 
 		IF (@ForDelete = 1)
 		BEGIN

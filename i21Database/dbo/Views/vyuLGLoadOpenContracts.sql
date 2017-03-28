@@ -101,7 +101,7 @@ JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
 			END
 		)
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
-LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
@@ -112,7 +112,7 @@ LEFT JOIN (
 	SELECT *
 	FROM (
 		SELECT ROW_NUMBER() OVER (
-				PARTITION BY S.intContractDetailId ORDER BY S.intSampleId DESC
+				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate DESC
 				) intRowNum
 			,S.intContractDetailId
 			,S.strSampleNumber
@@ -259,7 +259,7 @@ JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
 			END
 		)
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
-LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
@@ -270,7 +270,7 @@ LEFT JOIN (
 	SELECT *
 	FROM (
 		SELECT ROW_NUMBER() OVER (
-				PARTITION BY S.intContractDetailId ORDER BY S.intSampleId DESC
+				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate DESC
 				) intRowNum
 			,S.intContractDetailId
 			,S.strSampleNumber

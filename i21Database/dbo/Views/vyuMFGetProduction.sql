@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetProduction
 AS
-SELECT WP.dtmProductionDate AS [Production Date]
+SELECT Convert(char,WP.dtmProductionDate,101) AS [Production Date]
 	,I.strItemNo AS Item
 	,I.strDescription AS Description
 	,W.strWorkOrderNo AS [Job #]

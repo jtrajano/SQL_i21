@@ -61,3 +61,11 @@ CREATE INDEX [IX_tblTMSyncOutOfRange_dtmDateSync] ON [dbo].[tblTMSyncOutOfRange]
 GO
 
 CREATE INDEX [IX_tblTMSyncOutOfRange_intSiteID] ON [dbo].[tblTMSyncOutOfRange] ([intSiteID])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTMSyncOutOfRange_ysnCommit] ON [dbo].[tblTMSyncOutOfRange]
+(
+	[ysnCommit] ASC
+)
+INCLUDE ([intSyncOutOfRangeID]) 
+GO

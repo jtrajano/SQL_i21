@@ -407,15 +407,15 @@ BEGIN
         ELSE ''''  
        END)      --[agloc_dflt_pic_tkt_type_pms]  
       ,NULL       --[agloc_wn_retailer_ic_cd]  
-      ,CL.[strPriceLevel1]   --[agloc_prc1_desc]  
-      ,CL.[strPriceLevel2]   --[agloc_prc2_desc]  
-      ,CL.[strPriceLevel3]   --[agloc_prc3_desc]  
-      ,CL.[strPriceLevel4]   --[agloc_prc4_desc]  
-      ,CL.[strPriceLevel5]   --[agloc_prc5_desc]  
-      ,NULL       --[agloc_prc6_desc]  
-      ,NULL       --[agloc_prc7_desc]  
-      ,NULL       --[agloc_prc8_desc]  
-      ,NULL       --[agloc_prc9_desc]  
+      ,(select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 1)--CL.[strPriceLevel1]   --[agloc_prc1_desc]  
+      ,(select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 2)--CL.[strPriceLevel2]   --[agloc_prc2_desc]  
+      ,(select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 3)--CL.[strPriceLevel3]   --[agloc_prc3_desc]  
+      ,(select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 4)--CL.[strPriceLevel4]   --[agloc_prc4_desc]  
+      ,(select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 5)--CL.[strPriceLevel5]   --[agloc_prc5_desc]  
+      ,(select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 6)--NULL       --[agloc_prc6_desc]  
+      ,(select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 7)--NULL       --[agloc_prc7_desc]  
+      ,(select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 8)--NULL       --[agloc_prc8_desc]  
+      ,(select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 9)--NULL       --[agloc_prc9_desc]  
       ,CL.[intProfitCenter]   --[agloc_gl_profit_center]  
       ,FE.[strExternalId]    --[agloc_frt_exp_acct_no]  
       ,FI.[strExternalId]    --[agloc_frt_inc_acct_no]  
@@ -742,15 +742,15 @@ BEGIN
          ELSE ''''  
           END)  
       ,[agloc_wn_retailer_ic_cd] = [agloc_wn_retailer_ic_cd]  
-      ,[agloc_prc1_desc] = CL.[strPriceLevel1]  
-      ,[agloc_prc2_desc] = CL.[strPriceLevel2]  
-      ,[agloc_prc3_desc] = CL.[strPriceLevel3]  
-      ,[agloc_prc4_desc] = CL.[strPriceLevel4]  
-      ,[agloc_prc5_desc] = CL.[strPriceLevel5]  
-      ,[agloc_prc6_desc] = [agloc_prc6_desc]  
-      ,[agloc_prc7_desc] = [agloc_prc7_desc]  
-      ,[agloc_prc8_desc] = [agloc_prc8_desc]  
-      ,[agloc_prc9_desc] = [agloc_prc9_desc]  
+      ,[agloc_prc1_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 1)--CL.[strPriceLevel1]  
+      ,[agloc_prc2_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 2)--CL.[strPriceLevel2]  
+      ,[agloc_prc3_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 3)--CL.[strPriceLevel3]  
+      ,[agloc_prc4_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 4)--CL.[strPriceLevel4]  
+      ,[agloc_prc5_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 5)--CL.[strPriceLevel5]  
+      ,[agloc_prc6_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 6)--[agloc_prc6_desc]  
+      ,[agloc_prc7_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 7)--[agloc_prc7_desc]  
+      ,[agloc_prc8_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 8)--[agloc_prc8_desc]  
+      ,[agloc_prc9_desc] = (select top 1 strPricingLevelName from tblSMCompanyLocationPricingLevel where intCompanyLocationId = CL.intCompanyLocationId and intSort = 9)--[agloc_prc9_desc]  
       ,[agloc_gl_profit_center] = CL.[intProfitCenter]  
       ,[agloc_frt_exp_acct_no] = FE.[strExternalId]  
       ,[agloc_frt_inc_acct_no] = FI.[strExternalId]  
@@ -1678,6 +1678,30 @@ BEGIN
       RTRIM(LTRIM([strLocationNumber])) COLLATE Latin1_General_CI_AS = RTRIM(LTRIM(AG.[agloc_loc_no])) COLLATE Latin1_General_CI_AS  
         
      SET @UpdatedCount = @@ROWCOUNT  
+
+
+	declare @counter_part int
+	set @counter_part = 1
+	while @counter_part < 10
+	begin
+		declare @s_counter_part nvarchar
+		set @s_counter_part = cast(@counter_part as nvarchar) 
+		exec(''
+				insert into tblSMCompanyLocationPricingLevel (intCompanyLocationId, strPricingLevelName, intSort, intConcurrencyId)
+				select b.intCompanyLocationId, a.agloc_prc'' + @s_counter_part + ''_desc, '' + @s_counter_part  + '', 0 from aglocmst a
+					join tblSMCompanyLocation b
+						on a.agloc_loc_no COLLATE Latin1_General_CI_AS   = RTRIM(LTRIM([strLocationNumber])) COLLATE Latin1_General_CI_AS
+					where isnull(ltrim(rtrim(a.agloc_prc'' + @s_counter_part + ''_desc COLLATE Latin1_General_CI_AS)),'''''''') <> ''''''''
+		'')	
+		set @counter_part = @counter_part + 1
+	end
+
+	
+
+
+
+
+
     END    
          
    END   	

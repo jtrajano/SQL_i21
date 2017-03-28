@@ -17,7 +17,11 @@ AS
 			END	AS	ysnActive,
 			CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShipVia,
 			CAST(ISNULL(V.intEntityVendorId	,0) AS BIT) ysnVendor,
-			L.intTermsId AS intTermId
+			CASE	WHEN Y.strType = 'Vendor'	THEN	V.intTermsId
+					WHEN Y.strType = 'Customer'	THEN	U.intTermsId
+					ELSE L.intTermsId 
+			END AS intTermId,
+			V.strVendorAccountNum
 	FROM	tblEMEntity				E
 	JOIN	[tblEMEntityLocation]	L	ON	E.intEntityId			=	L.intEntityId 
 										AND L.ysnDefaultLocation	=	1

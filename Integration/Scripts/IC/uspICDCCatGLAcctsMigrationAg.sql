@@ -160,3 +160,6 @@ INSERT INTO tblICCategoryAccount (
 	WHERE coa.strExternalId = cls.agcls_pur_acct_no
 	and cat.strInventoryType = 'Other Charge'
 )
+
+GO
+

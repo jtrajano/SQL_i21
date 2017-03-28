@@ -24,8 +24,10 @@ BEGIN TRY
 	DECLARE @Count INT	
 	DECLARE @InventoryReceiptItemId INT
 	DECLARE @TaxCategory NVARCHAR(100) = 'IN Gasoline Use Tax (GUT)'
-	DECLARE @RCId NVARCHAR(50)
-	DECLARE @TaxAmount NUMERIC(18, 6)
+	DECLARE @RCId INT
+		, @TaxAmount NUMERIC(18, 6)
+		, @CompanyName NVARCHAR(250)
+		, @CompanyEIN NVARCHAR(100)
 
 	IF @Refresh = 'true'
 	BEGIN
@@ -36,6 +38,8 @@ BEGIN TRY
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
 	INTO #tmpRC
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
+
+	SELECT TOP 1 @CompanyName = strCompanyName, @CompanyEIN = strEin FROM tblSMCompanySetup
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
 	BEGIN
@@ -205,6 +209,8 @@ BEGIN TRY
 				, strTaxPayerFEIN
 				, strOriginState
 				, strDestinationState
+				, strCustomerName
+				, strCustomerFederalTaxId
 				, leaf)
 			SELECT DISTINCT @Guid
 				, intInventoryReceiptItemId
@@ -237,6 +243,8 @@ BEGIN TRY
 				, strHeaderFederalTaxID
 				, strOriginState
 				, strDestinationState
+				, @CompanyName
+				, @CompanyEIN
 				, 1
 			FROM @TFTransaction TRANS
 			LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = TRANS.intTaxAuthorityId

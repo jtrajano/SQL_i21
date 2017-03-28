@@ -142,10 +142,16 @@ BEGIN
 	GOTO _Exit;
 END 
 
--- Get the functional currency
+-- Get the functional currency and default Forex Rate Type Id 
 BEGIN 
 	DECLARE @intFunctionalCurrencyId AS INT
+	DECLARE @intDefaultForexRateTypeId AS INT 
+	 
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+
+	SELECT	TOP 1 
+			@intDefaultForexRateTypeId = intInventoryRateTypeId 
+	FROM	tblSMMultiCurrency
 END 
 
 -- Do a loop using a cursor. 
@@ -246,18 +252,18 @@ BEGIN
 			END
 
 		-- Validate Currency Id
-		DECLARE @valueCurrencyId INT
+		--DECLARE @valueCurrencyId INT
 
-		SELECT @valueCurrencyId = RawHeaderData.Currency
-		FROM @DataForReceiptHeader RawHeaderData
-		WHERE RawHeaderData.intId = @intId
+		--SELECT @valueCurrencyId = RawHeaderData.Currency
+		--FROM @DataForReceiptHeader RawHeaderData
+		--WHERE RawHeaderData.intId = @intId
 
-		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @valueCurrencyId)
-			BEGIN
-				-- Currency Id is invalid or missing.
-				RAISERROR(80113, 11, 1);
-				GOTO _Exit_With_Rollback;
-			END
+		--IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @valueCurrencyId)
+		--	BEGIN
+		--		-- Currency Id is invalid or missing.
+		--		RAISERROR(80113, 11, 1);
+		--		GOTO _Exit_With_Rollback;
+		--	END
 
 		-- Validate Freight Term Id
 		DECLARE @valueFreightTermId INT
@@ -689,7 +695,7 @@ BEGIN
 			GOTO _Exit_With_Rollback;
 		END
 
-		--  Flush out existing detail detail data for re-insertion
+		--  Flush out existing item and charges detail data for re-insertion
 		BEGIN 
 			DELETE FROM dbo.tblICInventoryReceiptCharge
 			WHERE intInventoryReceiptId = @inventoryReceiptId
@@ -725,6 +731,7 @@ BEGIN
 				,intTaxGroupId
 				,intForexRateTypeId
 				,dblForexRate 
+				,intContainerId 
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -795,8 +802,9 @@ BEGIN
 				,intDiscountSchedule	= RawData.intDiscountSchedule
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0)
 				,intTaxGroupId			= RawData.intTaxGroupId
-				,intForexRateTypeId		= RawData.intForexRateTypeId
-				,dblForexRate			= RawData.dblForexRate
+				,intForexRateTypeId		= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+				,dblForexRate			= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate)  ELSE NULL END 
+				,intContainerId			= RawData.intContainerId 
 
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
@@ -818,6 +826,14 @@ BEGIN
                     AND GrossNetUnitMeasure.strUnitType IN ('Weight', 'Volume')
 				LEFT JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intItemId = RawData.intItemId AND ItemLocation.intLocationId = RawData.intLocationId
+
+				-- Get the SM forex rate. 
+				OUTER APPLY dbo.fnSMGetForexRate(
+					ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId)
+					,CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+					,RawData.dtmDate
+				) forexRate
+
 				-- Integrations with the other modules: 
 				-- 1. Purchase Order
 				LEFT JOIN vyuPODetails POView
@@ -840,6 +856,7 @@ BEGIN
 					ON LogisticsView.intLoadDetailId = RawData.intSourceId
 					AND RawData.strReceiptType = 'Purchase Contract'
 					AND RawData.intSourceType = 2
+					AND RawData.intContainerId = LogisticsView.intLoadContainerId
 
 				-- 5. Transport Loads (New tables)
 				LEFT JOIN vyuTRGetLoadReceipt TransportView 
@@ -956,24 +973,24 @@ BEGIN
 		END
 
 		-- Validate Other Charge Currency Id
-		SET @valueChargeId = NULL
-		SET @valueCharge = NULL
+		--SET @valueChargeId = NULL
+		--SET @valueCharge = NULL
 
-		SELECT TOP 1 @valueChargeId = RawData.intChargeId
-		FROM	@OtherCharges RawData LEFT JOIN tblSMCurrency currency 
-					ON currency.intCurrencyID = RawData.intCurrencyId
-		WHERE	RawData.intCurrencyId IS NOT NULL 
-				AND currency.intCurrencyID IS NULL 
+		--SELECT TOP 1 @valueChargeId = RawData.intChargeId
+		--FROM	@OtherCharges RawData LEFT JOIN tblSMCurrency currency 
+		--			ON currency.intCurrencyID = RawData.intCurrencyId
+		--WHERE	RawData.intCurrencyId IS NOT NULL 
+		--		AND currency.intCurrencyID IS NULL 
 
-		IF @valueChargeId IS NOT NULL
-		BEGIN
-			SELECT @valueCharge = strItemNo
-			FROM tblICItem
-			WHERE intItemId = @valueChargeId
-			-- Currency Id is invalid for other charge item {Other Charge Item No.}.
-			RAISERROR(80145, 11, 1, @valueCharge);
-			GOTO _Exit_With_Rollback;
-		END
+		--IF @valueChargeId IS NOT NULL
+		--BEGIN
+		--	SELECT @valueCharge = strItemNo
+		--	FROM tblICItem
+		--	WHERE intItemId = @valueChargeId
+		--	-- Currency Id is invalid for other charge item {Other Charge Item No.}.
+		--	RAISERROR(80145, 11, 1, @valueCharge);
+		--	GOTO _Exit_With_Rollback;
+		--END
 
 		-- Validate Other Charge Item Id
 		IF EXISTS(
@@ -1011,30 +1028,30 @@ BEGIN
 			GOTO _Exit_With_Rollback;
 		END
 
-		-- Validate Cost Currency Id
-		DECLARE @valueCostCurrencyId INT
-		SET @valueChargeId = NULL
-		SET @valueCharge = NULL
+		---- Validate Cost Currency Id
+		--DECLARE @valueCostCurrencyId INT
+		--SET @valueChargeId = NULL
+		--SET @valueCharge = NULL
 
-		SELECT	TOP 1 
-				@valueCostCurrencyId = RawData.intCostCurrencyId
-				,@valueChargeId = RawData.intChargeId
-		FROM	@OtherCharges RawData LEFT JOIN tblSMCurrency c 
-					ON RawData.intCostCurrencyId = c.intCurrencyID
-		WHERE	c.intCurrencyID IS NULL 
+		--SELECT	TOP 1 
+		--		@valueCostCurrencyId = RawData.intCostCurrencyId
+		--		,@valueChargeId = RawData.intChargeId
+		--FROM	@OtherCharges RawData LEFT JOIN tblSMCurrency c 
+		--			ON RawData.intCostCurrencyId = c.intCurrencyID
+		--WHERE	c.intCurrencyID IS NULL 
 
-		IF @valueCostCurrencyId IS NOT NULL 
-		BEGIN
-			SELECT @valueCharge = strItemNo
-			FROM tblICItem
-			WHERE intItemId = @valueChargeId
+		--IF @valueCostCurrencyId IS NOT NULL 
+		--BEGIN
+		--	SELECT @valueCharge = strItemNo
+		--	FROM tblICItem
+		--	WHERE intItemId = @valueChargeId
 
-			DECLARE @valueCostCurrencyIdStr NVARCHAR(50)
-			SET @valueCostCurrencyIdStr = CAST(@valueCostCurrencyId AS NVARCHAR(50))
-			-- Cost Currency Id %s is invalid for other charge item %s.
-			RAISERROR(80126, 11, 1, @valueCostCurrencyIdStr, @valueCharge);
-			GOTO _Exit_With_Rollback;
-		END
+		--	DECLARE @valueCostCurrencyIdStr NVARCHAR(50)
+		--	SET @valueCostCurrencyIdStr = CAST(@valueCostCurrencyId AS NVARCHAR(50))
+		--	-- Cost Currency Id %s is invalid for other charge item %s.
+		--	RAISERROR(80126, 11, 1, @valueCostCurrencyIdStr, @valueCharge);
+		--	GOTO _Exit_With_Rollback;
+		--END
 
 		-- Validate Cost UOM Id
 		-- Cost UOM Id is required if Cost Method is 'Per Unit'
@@ -1178,6 +1195,8 @@ BEGIN
 				,[intCurrencyId]
 				,[intCent]
 				,[intTaxGroupId]
+				,[intForexRateTypeId]
+				,[dblForexRate]
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1197,6 +1216,9 @@ BEGIN
 				,[intCurrencyId]			= COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) 
 				,[intCent]					= CostCurrency.intCent
 				,[intTaxGroupId]			= RawData.intTaxGroupId
+				,[intForexRateTypeId]		= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+				,[dblForexRate]				= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 
+
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1205,11 +1227,23 @@ BEGIN
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId)
+
+				INNER JOIN tblICInventoryReceipt r
+					ON r.intInventoryReceiptId = @inventoryReceiptId
+
 				LEFT JOIN dbo.tblICItemUOM ItemUOM			
 					ON ItemUOM.intItemId = RawData.intChargeId  
 					AND ItemUOM.intItemUOMId = RawData.intCostUOMId
 				LEFT JOIN dbo.tblSMCurrency CostCurrency
 					ON CostCurrency.intCurrencyID = RawData.intCostCurrencyId
+
+				-- Get the SM forex rate. 
+				OUTER APPLY dbo.fnSMGetForexRate(
+					COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) 
+					,CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+					,r.dtmReceiptDate
+				) forexRate
+
 		WHERE RawHeaderData.intId = @intId
 
 		-- Add taxes into the receipt. 
@@ -1639,19 +1673,19 @@ BEGIN
 								GOTO _Exit_With_Rollback;
 							END
 
-						-- Validate Lot Currency Id
-						SET @valueLotRecordNo = NULL
+						---- Validate Lot Currency Id
+						--SET @valueLotRecordNo = NULL
 
-						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-						FROM @LotEntries ItemLot
-						WHERE ItemLot.intCurrencyId IS NULL OR ItemLot.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
+						--SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
+						--FROM @LotEntries ItemLot
+						--WHERE ItemLot.intCurrencyId IS NULL OR ItemLot.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency)
 
-						IF @valueLotRecordNo IS NOT NULL
-							BEGIN
-								-- Currency Id is invalid or missing for lot {Lot Number}.
-								RAISERROR(80151, 11, 1, @valueLotRecordNo);
-								GOTO _Exit_With_Rollback;
-							END
+						--IF @valueLotRecordNo IS NOT NULL
+						--	BEGIN
+						--		-- Currency Id is invalid or missing for lot {Lot Number}.
+						--		RAISERROR(80151, 11, 1, @valueLotRecordNo);
+						--		GOTO _Exit_With_Rollback;
+						--	END
 
 						-- Validate Lot Source Type Id
 						SET @valueLotRecordNo = NULL

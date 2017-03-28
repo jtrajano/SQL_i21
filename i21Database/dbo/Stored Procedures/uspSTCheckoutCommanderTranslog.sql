@@ -2,6 +2,10 @@
 @intCheckoutId Int
 AS
 BEGIN
+	--Get StoreId
+	DECLARE @intStoreId int
+	SELECT @intStoreId = intStoreId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId
+
 	--Insert #tempCheckoutInsert to tblSTTranslogRebates
 	INSERT INTO dbo.tblSTTranslogRebates 
 	(
@@ -67,6 +71,8 @@ BEGIN
 		, strTrpPaycodenacstendersubcode
 		, strTrpPaycode
 		, dblTrpAmt
+		, intStoreId
+		, intCheckoutId
 	)
 	SELECT 	
 		left(REPLACE(openedTime, 'T', ' '), len(openedTime) - 6)
@@ -81,7 +87,7 @@ BEGIN
 		, transrecalled
 		, termMsgSNtype
 		, termMsgSNterm
-		, termMsgSN
+		, x.termMsgSN
 		, periodlevel
 		, periodseq
 		, periodname
@@ -131,7 +137,14 @@ BEGIN
 		, trpPaycodenacstendersubcode
 		, trpPaycode
 		, trpAmt
+		, @intStoreId
+		, @intCheckoutId
 	FROM #tempCheckoutInsert chk
-	WHERE chk.transtype = 'sale' AND chk.trlDept = 'CIGARETTES'
-
+		JOIN
+	(
+		SELECT c.termMsgSN as termMsgSN
+		FROM #tempCheckoutInsert c
+		WHERE trlDept = 'CIGARETTES' AND transtype = 'sale'
+		GROUP BY c.termMsgSN
+	) x ON x.termMsgSN = chk.termMsgSN
 END

@@ -245,7 +245,7 @@ BEGIN TRY
 	        CASE WHEN LEN(LTRIM(RTRIM(@strAmendedColumns))) = 0 THEN
 			'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition and the particular conditions mentioned below.' 
 		    ELSE
-				'Subject - Contract Amendment' + CHAR(13) + CHAR(10) + 'The field highlighted in bold have been amended.'
+				'Subject - Contract Amendment' + CHAR(13) + CHAR(10) + 'The field/s highlighted in bold have been amended.'
 			END strCondition,
 			PO.strPosition +' ('+SQ.strPackingDescription +') ' AS strPositionWithPackDesc,
 			TX.strText+' '+CH.strPrintableRemarks AS strText,

@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPVendors]
+@strSessionId NVARCHAR(50)=''
 AS
 BEGIN TRY
 
@@ -40,7 +41,10 @@ Declare @strFinalErrMsg NVARCHAR(MAX)=''
 
 DECLARE @tblEntityContactIdOutput table (intEntityId int)
 
-Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor'
+If ISNULL(@strSessionId,'')=''
+	Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor'
+Else
+	Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND strSessionId=@strSessionId
 
 While(@intMinVendor is not null)
 Begin
@@ -125,17 +129,7 @@ Begin
 	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
 	Values (@intEntityId,'Vendor',0)
 	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
-	Values (@intEntityId,'Ship Via',0)
-	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
 	Values (@intEntityId,'Producer',0)
-	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
-	Values (@intEntityId,'Shipping Line',0)
-	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
-	Values (@intEntityId,'Forwarding Agent',0)
-	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
-	Values (@intEntityId,'Insurer',0)
-	Insert Into tblEMEntityType(intEntityId,strType,intConcurrencyId)
-	Values (@intEntityId,'Futures Broker',0)
 
 	--Entity Location
 	Insert Into tblEMEntityLocation(intEntityId,strLocationName,strAddress,strCity,strCountry,strZipCode,intTermsId,ysnDefaultLocation,ysnActive)
@@ -148,6 +142,11 @@ Begin
 	Insert Into tblAPVendor(intEntityVendorId,intCurrencyId,strVendorId,ysnPymtCtrlActive,strTaxNumber,intBillToId,intShipFromId,strFLOId,intVendorType,ysnWithholding,dblCreditLimit,strVendorAccountNum,intTermsId)
 	Select @intEntityId,@intCurrencyId,@strEntityNo,1,strTaxNo,@intEntityLocationId,@intEntityLocationId,strFLOId,0,0,0.0,strAccountNo,@intTermId
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
+
+	--available to term list
+	If not exists(Select 1 From tblAPVendorTerm Where intEntityVendorId=@intEntityId AND intTermId=@intTermId)
+		Insert Into tblAPVendorTerm(intEntityVendorId,intTermId)
+		Values(@intEntityId,@intTermId)
 
 	--Add Contacts to Entity table
 	Insert Into tblEMEntity(strName,strContactNumber,ysnActive)
@@ -171,10 +170,6 @@ Begin
 	Join
 	(Select ROW_NUMBER() OVER(ORDER BY intStageEntityContactId ASC) AS intRowNo,* from tblIPEntityContactStage Where intStageEntityId=@intStageEntityId) t2
 	on t1.intRowNo=t2.intRowNo
-
-	--Ship Via
-	Insert Into tblSMShipVia(intEntityShipViaId,strShipVia,strShippingService,intSort)
-	Values(@intEntityId,LEFT(@strVendorName + '[' + @strAccountNo + ']',100),'None',0)
 
 	--Add Audit Trail Record
 	Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intEntityId) + '","keyValue":' + CONVERT(VARCHAR,@intEntityId) + ',"iconCls":"small-new-plus","leaf":true}'
@@ -241,6 +236,11 @@ Begin --Update
 		Begin
 			Update tblEMEntityLocation Set intTermsId=@intTermId Where intEntityLocationId=@intEntityLocationId
 			Update tblAPVendor Set intTermsId=@intTermId Where intEntityVendorId=@intEntityId
+
+			--available to term list
+			If not exists(Select 1 From tblAPVendorTerm Where intEntityVendorId=@intEntityId AND intTermId=@intTermId)
+				Insert Into tblAPVendorTerm(intEntityVendorId,intTermId)
+				Values(@intEntityId,@intTermId)
 		End
 
 	--Entity table Update
@@ -293,8 +293,8 @@ End
 	MOVE_TO_ARCHIVE:
 
 	--Move to Archive
-	Insert into tblIPEntityArchive(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName)
-	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName
+	Insert into tblIPEntityArchive(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,strSessionId)
+	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,@strSessionId
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	Select @intNewStageEntityId=SCOPE_IDENTITY()
@@ -318,8 +318,8 @@ BEGIN CATCH
 	SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 	--Move to Error
-	Insert into tblIPEntityError(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,strErrorMessage,strImportStatus)
-	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,@ErrMsg,'Failed'
+	Insert into tblIPEntityError(strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,strErrorMessage,strImportStatus,strSessionId)
+	Select strName,strEntityType,strAddress,strAddress1,strCity,strState,strCountry,strZipCode,strPhone,strAccountNo,strTaxNo,strFLOId,strTerm,strCurrency,ysnDeleted,dtmCreated,strCreatedUserName,@ErrMsg,'Failed',@strSessionId
 	From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 
 	Select @intNewStageEntityId=SCOPE_IDENTITY()
@@ -331,7 +331,10 @@ BEGIN CATCH
 	Delete From tblIPEntityStage Where intStageEntityId=@intStageEntityId
 END CATCH
 
-	Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor
+	If ISNULL(@strSessionId,'')=''
+		Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor
+	Else
+		Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor AND strSessionId=@strSessionId
 End
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)

@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPGenerateSAPAcknowledgementIDOC]
-@strMsgType NVARCHAR(50)
+@strMsgType NVARCHAR(50),
+@ysnUpdateFeedStatusOnRead bit=0,
+@strSessionId NVARCHAR(50)=''
 AS
 BEGIN TRY
 
@@ -29,7 +31,8 @@ DECLARE @intId INT
 DECLARE @strPartnerNo NVARCHAR(100)
 DECLARE @strInfo1 NVARCHAR(MAX)
 DECLARE @strInfo2 NVARCHAR(MAX)
-
+DECLARE @strSQL NVARCHAR(MAX)
+ 
 Declare @tblAcknowledgement AS TABLE
 (
 	intRowNo INT IDENTITY(1,1),
@@ -66,26 +69,26 @@ Declare @tblOutput AS Table
 If @strMsgType='Item'
 	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo,strInfo1,strInfo2)
 	SELECT intStageItemId,'MATMAS','53','Success','S','Material Number',strItemNo,strItemNo,'','tblIPItemArchive','intStageItemId','strImportStatus','',strItemNo,strItemType
-	FROM tblIPItemArchive Where ISNULL(strImportStatus,'')<>'Ack Sent'
+	FROM tblIPItemArchive Where ISNULL(strImportStatus,'')<>'Ack Sent' AND strSessionId=@strSessionId
 	UNION
 	SELECT intStageItemId,'MATMAS','51',strErrorMessage,'E','Material Number',strItemNo,strItemNo,'','tblIPItemError','intStageItemId','strImportStatus','',strItemNo,strItemType
-	FROM tblIPItemError Where ISNULL(strImportStatus,'')<>'Ack Sent'
+	FROM tblIPItemError Where ISNULL(strImportStatus,'')<>'Ack Sent' AND strSessionId=@strSessionId
 
 If @strMsgType='Vendor'
 	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo,strInfo1,strInfo2)
 	SELECT intStageEntityId,'CREMAS','53','Success','S','Vendor Number',strAccountNo,strAccountNo,'','tblIPEntityArchive','intStageEntityId','strImportStatus','',strAccountNo,strName
-	FROM tblIPEntityArchive Where strEntityType='Vendor' AND ISNULL(strImportStatus,'')<>'Ack Sent'
+	FROM tblIPEntityArchive Where strEntityType='Vendor' AND ISNULL(strImportStatus,'')<>'Ack Sent' AND strSessionId=@strSessionId
 	UNION
 	SELECT intStageEntityId,'CREMAS','51',strErrorMessage,'E','Vendor Number',strAccountNo,strAccountNo,'','tblIPEntityError','intStageEntityId','strImportStatus','',strAccountNo,strName
-	FROM tblIPEntityError Where strEntityType='Vendor' AND ISNULL(strImportStatus,'')<>'Ack Sent'
+	FROM tblIPEntityError Where strEntityType='Vendor' AND ISNULL(strImportStatus,'')<>'Ack Sent' AND strSessionId=@strSessionId
 
 If @strMsgType='PreShipment Sample'
 	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo,strInfo1,strInfo2)
 	SELECT  intStageSampleId,'QCERT','53','Success','S','Sample Number',strSampleNo,strPONo,strPOItemNo,'tblIPPreShipmentSampleArchive','intStageSampleId','strImportStatus','',strPONo,strItemNo + ' / ' +  ISNULL(strSampleNo,'')
-	FROM tblIPPreShipmentSampleArchive Where ISNULL(strImportStatus,'')<>'Ack Sent'
+	FROM tblIPPreShipmentSampleArchive Where ISNULL(strImportStatus,'')<>'Ack Sent' AND strSessionId=@strSessionId
 	UNION
 	SELECT intStageSampleId,'QCERT','51',strErrorMessage,'E','Sample Number',strSampleNo,strPONo,strPOItemNo,'tblIPPreShipmentSampleError','intStageSampleId','strImportStatus','',strPONo,strItemNo + ' / ' +  ISNULL(strSampleNo,'')
-	FROM tblIPPreShipmentSampleError Where ISNULL(strImportStatus,'')<>'Ack Sent'
+	FROM tblIPPreShipmentSampleError Where ISNULL(strImportStatus,'')<>'Ack Sent' AND strSessionId=@strSessionId
 
 If @strMsgType='LSP Receipt'
 	Insert Into @tblAcknowledgement(intId,strMesssageType,strStatus,strStatusDesc,strStatusType,strParamType,strParam,strRefNo,strTrackingNo,strTableName,strColumnName,strStatusColumnName,strPartnerNo,strInfo1,strInfo2)
@@ -178,6 +181,12 @@ Begin
 
 		Insert Into @tblOutput(strIds,strTableName,strColumnName,strStatusColumnName,strRowState,strXml,strInfo1,strInfo2)
 		Values(@intId,@strTableName,@strColumnName,@strStatusColumnName,'CREATE',@strXml,ISNULL(@strInfo1,''),ISNULL(@strInfo2,''))
+
+		If @ysnUpdateFeedStatusOnRead=1
+		Begin
+			Set @strSQL = 'Update ' + @strTableName + ' Set ' + @strStatusColumnName + '=''Ack Sent'' Where ' + @strColumnName + ' IN (' + CONVERT(VARCHAR,@intId) + ')' 
+			Exec sp_executesql @strSQL
+		End
 
 	Select @intMinRowNo=MIN(intRowNo) From @tblAcknowledgement Where intRowNo>@intMinRowNo
 End --Loop End

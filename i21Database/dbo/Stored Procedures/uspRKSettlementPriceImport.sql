@@ -69,7 +69,8 @@ WHILE @mRowNumber > 0
 	INSERT INTO tblRKFutSettlementPriceMarketMap (intConcurrencyId,intFutureSettlementPriceId,intFutureMonthId,dblLastSettle,dblLow,dblHigh,strComments)
 	SELECT 1,@intFutureSettlementPriceId,intFutureMonthId,dblLastSettle,dblLow,dblHigh,strFutComments FROM tblRKSettlementPriceImport i
 	JOIN tblRKFuturesMonth fm on fm.strFutureMonth=replace(i.strFutureMonth ,'-',' ') and intFutureMarketId=@intFutureMarketId
-	WHERE strInstrumentType='Futures' and strFutureMarket=@strMarket
+	WHERE strInstrumentType='Futures' and strFutureMarket=@strMarket 
+	order by CONVERT(DATETIME,'01 '+replace(i.strFutureMonth ,'-',' ')) 
 
 -- Insert Options Month settlement Price	
 	INSERT INTO tblRKOptSettlementPriceMarketMap (intConcurrencyId,intFutureSettlementPriceId,intOptionMonthId,dblStrike,intTypeId,dblSettle,dblDelta,strComments)
@@ -78,6 +79,7 @@ WHILE @mRowNumber > 0
 			  dblSettle,dblDelta,strFutComments FROM tblRKSettlementPriceImport i
 	JOIN tblRKOptionsMonth fm on fm.strOptionMonth=replace(i.strFutureMonth ,'-',' ')  and intFutureMarketId=@intFutureMarketId
 	WHERE strInstrumentType like 'Opt%' and strFutureMarket=@strMarket
+	order by CONVERT(DATETIME,'01 '+replace(i.strFutureMonth ,'-',' ')) 
 
 select * from tblRKFutSettlementPriceMarketMap
 SELECT @mRowNumber = MIN(intRowNum)	FROM #temp	WHERE intRowNum > @mRowNumber
@@ -98,4 +100,3 @@ BEGIN CATCH
  SET @ErrMsg = ERROR_MESSAGE()  
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
 End Catch
-

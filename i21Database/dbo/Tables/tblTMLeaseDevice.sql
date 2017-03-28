@@ -45,3 +45,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMLeaseDevice',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTMLeaseDevice_intDeviceId_intLeaseId] ON [dbo].[tblTMLeaseDevice]
+(
+	[intDeviceId] ASC,
+	[intLeaseId] ASC
+)
+INCLUDE ( 	[intLeaseDeviceId],
+	[intConcurrencyId]) 

@@ -82,6 +82,8 @@ INSERT into @ReceiptStagingTable(
 		,intShipViaId
 		,intDiscountSchedule
 		,strVendorRefNo
+		,intForexRateTypeId
+		,dblForexRate
 				
 		-- Detail				
 		,intItemId
@@ -114,13 +116,23 @@ SELECT
 									  END
 		,intEntityVendorId			= @intEntityId
 		,strBillOfLadding			= NULL
-		,intCurrencyId				= SC.intCurrencyId
+		,intCurrencyId				= CASE
+										WHEN ISNULL(CNT.intContractDetailId,0) = 0 THEN SC.intCurrencyId 
+										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
+									END
 		,intLocationId				= SC.intProcessingLocationId
 		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityVendorId = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
 		,strVendorRefNo				= 'TKT-' + SC.strTicketNumber
-
+		,intForexRateTypeId			= CASE
+										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.intRateTypeId
+										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
+									END
+		,dblForexRate				= CASE
+										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.dblRate
+										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
+									END
 		--Detail
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
@@ -143,9 +155,8 @@ SELECT
 		,intContractDetailId		= LI.intTransactionDetailId
 		,dtmDate					= SC.dtmTicketDateTime
 		,dblQty						= LI.dblQty
-		--,dblCost					= LI.dblCost
 		,dblCost					= CASE
-										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPrice(1,SC.intCommodityId,LEFT(DATENAME(MONTH, CNT.dtmEndDate), 3) + ' ' + RIGHT('0' + DATENAME(YEAR, CNT.dtmEndDate), 4),2,@intFutureMarketId,SC.intProcessingLocationId,LI.dblCost),0)
+										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(SC.intCommodityId,SC.intProcessingLocationId,SC.dtmTicketDateTime,2,LI.dblCost),0)
 										ELSE LI.dblCost
 									END
 		,dblExchangeRate			= 1 -- Need to check this
@@ -189,7 +200,9 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[intShipFromId] 
 				,[intCurrencyId]
 				,[intCostCurrencyId]  	
-				,[intChargeId] 
+				,[intChargeId]
+				,[intForexRateTypeId]
+				,[dblForexRate] 
 				,[ysnInventoryCost] 
 				,[strCostMethod] 
 				,[dblRate] 
@@ -213,6 +226,8 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[intCurrencyId]  					= RE.intCurrencyId
 		,[intCostCurrencyId]  				= RE.intCurrencyId
 		,[intChargeId]						= IC.intItemId
+		,[intForexRateTypeId]				= RE.intForexRateTypeId
+		,[dblForexRate]						= RE.dblForexRate
 		,[ysnInventoryCost]					= 0
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
@@ -278,7 +293,9 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[intShipFromId] 
 				,[intCurrencyId]
 				,[intCostCurrencyId]  	
-				,[intChargeId] 
+				,[intChargeId]
+				,[intForexRateTypeId]
+				,[dblForexRate]  
 				,[ysnInventoryCost] 
 				,[strCostMethod] 
 				,[dblRate] 
@@ -301,6 +318,8 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[intCurrencyId]  					= RE.intCurrencyId
 		,[intCostCurrencyId]  				= RE.intCurrencyId
 		,[intChargeId]						= IC.intItemId
+		,[intForexRateTypeId]				= RE.intForexRateTypeId
+		,[dblForexRate]						= dblForexRate
 		,[ysnInventoryCost]					= 0
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
@@ -368,7 +387,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intShipFromId] 
 								,[intCurrencyId]  	
 								,[intCostCurrencyId]
-								,[intChargeId] 
+								,[intChargeId]
+								,[intForexRateTypeId]
+								,[dblForexRate]  
 								,[ysnInventoryCost] 
 								,[strCostMethod] 
 								,[dblRate] 
@@ -390,6 +411,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]				= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
 								,[dblRate]							= RE.dblFreightRate
@@ -419,7 +442,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 										,[intShipFromId] 
 										,[intCurrencyId]
 										,[intCostCurrencyId]  	
-										,[intChargeId] 
+										,[intChargeId]
+										,[intForexRateTypeId]
+										,[dblForexRate] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
 										,[dblRate] 
@@ -442,6 +467,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
 								,[dblRate]							= LoadCost.dblRate
@@ -473,7 +500,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 										,[intShipFromId] 
 										,[intCurrencyId]
 										,[intCostCurrencyId]  	
-										,[intChargeId] 
+										,[intChargeId]
+										,[intForexRateTypeId]
+										,[dblForexRate] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
 										,[dblRate] 
@@ -496,6 +525,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= ContractCost.dblRate
@@ -528,7 +559,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intShipFromId] 
 								,[intCurrencyId]
 								,[intCostCurrencyId]  	
-								,[intChargeId] 
+								,[intChargeId]
+								,[intForexRateTypeId]
+								,[dblForexRate] 
 								,[ysnInventoryCost] 
 								,[strCostMethod] 
 								,[dblRate] 
@@ -550,6 +583,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
 								,[dblRate]							= RE.dblFreightRate
@@ -582,7 +617,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 										,[intShipFromId] 
 										,[intCurrencyId]
 										,[intCostCurrencyId]  	
-										,[intChargeId] 
+										,[intChargeId]
+										,[intForexRateTypeId]
+										,[dblForexRate] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
 										,[dblRate] 
@@ -605,6 +642,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
 								,[dblRate]							= LoadCost.dblRate
@@ -635,7 +674,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 										,[intShipFromId] 
 										,[intCurrencyId]
 										,[intCostCurrencyId]  	
-										,[intChargeId] 
+										,[intChargeId]
+										,[intForexRateTypeId]
+										,[dblForexRate] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
 										,[dblRate] 
@@ -657,6 +698,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
 								,[dblRate]							= LoadCost.dblRate
@@ -688,7 +731,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intShipFromId] 
 									,[intCurrencyId]
 									,[intCostCurrencyId]  	
-									,[intChargeId] 
+									,[intChargeId]
+									,[intForexRateTypeId]
+									,[dblForexRate] 
 									,[ysnInventoryCost] 
 									,[strCostMethod] 
 									,[dblRate] 
@@ -711,6 +756,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= ContractCost.dblRate
@@ -739,7 +786,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 										,[intShipFromId] 
 										,[intCurrencyId]
 										,[intCostCurrencyId]  	
-										,[intChargeId] 
+										,[intChargeId]
+										,[intForexRateTypeId]
+										,[dblForexRate] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
 										,[dblRate] 
@@ -762,6 +811,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= ContractCost.dblRate
@@ -795,7 +846,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 										,[intShipFromId] 
 										,[intCurrencyId]
 										,[intCostCurrencyId]  	
-										,[intChargeId] 
+										,[intChargeId]
+										,[intForexRateTypeId]
+										,[dblForexRate] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
 										,[dblRate] 
@@ -818,6 +871,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
 								,[dblRate]							= LoadCost.dblRate
@@ -848,7 +903,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 										,[intShipFromId] 
 										,[intCurrencyId]
 										,[intCostCurrencyId]  	
-										,[intChargeId] 
+										,[intChargeId]
+										,[intForexRateTypeId]
+										,[dblForexRate] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
 										,[dblRate] 
@@ -871,6 +928,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
 								,[dblRate]							= LoadCost.dblRate
@@ -903,7 +962,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intShipFromId] 
 									,[intCurrencyId]
 									,[intCostCurrencyId]  	
-									,[intChargeId] 
+									,[intChargeId]
+									,[intForexRateTypeId]
+									,[dblForexRate] 
 									,[ysnInventoryCost] 
 									,[strCostMethod] 
 									,[dblRate] 
@@ -926,6 +987,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= ContractCost.dblRate
@@ -954,7 +1017,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 										,[intShipFromId] 
 										,[intCurrencyId]
 										,[intCostCurrencyId]  	
-										,[intChargeId] 
+										,[intChargeId]
+										,[intForexRateTypeId]
+										,[dblForexRate] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
 										,[dblRate] 
@@ -977,6 +1042,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= ContractCost.dblRate
@@ -1011,7 +1078,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intShipFromId] 
 									,[intCurrencyId]
 									,[intCostCurrencyId]  	
-									,[intChargeId] 
+									,[intChargeId]
+									,[intForexRateTypeId]
+									,[dblForexRate]	 
 									,[ysnInventoryCost] 
 									,[strCostMethod] 
 									,[dblRate] 
@@ -1033,6 +1102,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intCurrencyId]  					= RE.intCurrencyId
 									,[intCostCurrencyId]				= RE.intCurrencyId
 									,[intChargeId]						= @intFreightItemId
+									,[intForexRateTypeId]				= RE.intForexRateTypeId
+									,[dblForexRate]						= RE.dblForexRate
 									,[ysnInventoryCost]					= 0
 									,[strCostMethod]					= 'Per Unit'
 									,[dblRate]							= RE.dblFreightRate
@@ -1063,6 +1134,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  	
 								,[intCostCurrencyId]  
 								,[intChargeId] 
+								,[intForexRateTypeId]
+								,[dblForexRate]
 								,[ysnInventoryCost] 
 								,[strCostMethod] 
 								,[dblRate] 
@@ -1084,6 +1157,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]                    = ContractCost.strCostMethod
 								,[dblRate]							= CASE
@@ -1120,7 +1195,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intShipFromId] 
 								,[intCurrencyId]
 								,[intCostCurrencyId]  	
-								,[intChargeId] 
+								,[intChargeId]
+								,[intForexRateTypeId]
+								,[dblForexRate] 
 								,[ysnInventoryCost] 
 								,[strCostMethod] 
 								,[dblRate] 
@@ -1142,6 +1219,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intCostCurrencyId]				= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
+								,[intForexRateTypeId]				= RE.intForexRateTypeId
+								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= 0
                                 ,[strCostMethod]                    = ContractCost.strCostMethod
 								,[dblRate]							= CASE
@@ -1178,7 +1257,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intShipFromId] 
 								,[intCurrencyId]
 								,[intCostCurrencyId]  	
-								,[intChargeId] 
+								,[intChargeId]
+								,[intForexRateTypeId]
+								,[dblForexRate] 
 								,[ysnInventoryCost] 
 								,[strCostMethod] 
 								,[dblRate] 
@@ -1201,6 +1282,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[intCurrencyId]  					= RE.intCurrencyId
 						,[intCostCurrencyId]				= RE.intCurrencyId
 						,[intChargeId]						= ContractCost.intItemId
+						,[intForexRateTypeId]				= RE.intForexRateTypeId
+						,[dblForexRate]						= RE.dblForexRate
 						,[ysnInventoryCost]					= 0
 						,[strCostMethod]					= ContractCost.strCostMethod
 						,[dblRate]							= CASE
@@ -1240,6 +1323,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[intCurrencyId]
 						,[intCostCurrencyId]  	
 						,[intChargeId] 
+						,[intForexRateTypeId]
+						,[dblForexRate]
 						,[ysnInventoryCost] 
 						,[strCostMethod] 
 						,[dblRate] 
@@ -1262,6 +1347,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 				,[intCurrencyId]  					= RE.intCurrencyId
 				,[intCostCurrencyId]				= RE.intCurrencyId
 				,[intChargeId]						= ContractCost.intItemId
+				,[intForexRateTypeId]				= RE.intForexRateTypeId
+				,[dblForexRate]						= RE.dblForexRate
 				,[ysnInventoryCost]					= 0
 				,[strCostMethod]					= ContractCost.strCostMethod
 				,[dblRate]							= CASE
