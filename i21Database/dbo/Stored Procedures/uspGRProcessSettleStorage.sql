@@ -842,6 +842,7 @@ BEGIN TRY
 		SELECT	@LocationId = intCompanyLocationId
 				,@intCustomerStorageId = intCustomerStorageId
 				,@strOrderType = strOrderType
+				,@dblUnits=dblUnits
 		FROM	@SettleVoucherCreate
 		WHERE	intSettleVoucherKey = @intSettleVoucherKey
 		
@@ -1091,15 +1092,26 @@ BEGIN TRY
 			-- Update the cost of the voucher detail. 
 			UPDATE	bd
 			SET		 bd.dblCost = SV.[dblCashPrice]
-					,bd.dblQtyReceived = ISNULL(SV.[dblUnits], 0)
-					,bd.dblTotal = ROUND(ISNULL(SV.[dblUnits], 0) * SV.[dblCashPrice], 2) 
+					,bd.dblQtyOrdered  = CASE WHEN SV.intItemSort = 1 THEN @dblUnits ELSE  CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END END 
+					,bd.dblQtyReceived = CASE WHEN SV.intItemSort = 1 THEN @dblUnits ELSE  CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END END 
+					,bd.dblTotal = ROUND(ISNULL(@dblUnits, 0) * SV.[dblCashPrice], 2) 
 					,bd.intInventoryReceiptItemId = NULL -- and disconnect the IR from the Voucher to avoid double cost-adjustment. 					
 			FROM	tblAPBill b 
 			JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
 			JOIN @SettleVoucherCreate SV  ON SV.intItemId=bd.intItemId
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 			JOIN tblSCTicket SC ON SC.intTicketId=CS.intTicketId		
-			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.strOrderType = @strOrderType		
+			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 
+			AND   b.intBillId = @intBillId
+			
+			UPDATE	bd
+			SET  bd.intContractHeaderId= CASE WHEN @strOrderType='Direct' THEN NULL ELSE bd.intContractHeaderId END
+				,bd.intContractDetailId=CASE  WHEN @strOrderType='Direct' THEN NULL ELSE bd.intContractDetailId END
+			FROM	tblAPBill b 
+			JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
+			JOIN @SettleVoucherCreate SV  ON SV.intItemId=bd.intItemId
+			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
+			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort=1
 			AND   b.intBillId = @intBillId
 			
 			INSERT INTO tblAPBillDetail
@@ -1120,17 +1132,18 @@ BEGIN TRY
 			 intBillId = @intBillId 
 			,intAccountId = dbo.[fnGetItemGLAccount](SV.intItemId, @intItemLocationId, 'Other Charge Expense')
 			,intItemId = SV.intItemId
-			,intContractHeaderId = SV.intContractHeaderId
-			,intContractDetailId = SV.intContractDetailId
-			,dblTotal = SV.dblUnits * SV.dblCashPrice 					
-			,dblQtyOrdered = CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END
+			,intContractHeaderId = NULL
+			,intContractDetailId = NULL
+			,dblTotal = @dblUnits * SV.dblCashPrice 					
+			,dblQtyOrdered =  CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END
 			,dblQtyReceived = CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END			
 			,dblRate = 0
-			,dblCost = SV.dblCashPrice
+			,dblCost = @dblUnits * SV.dblCashPrice
 			,intCurrencyId = @intCurrencyId
 			FROM   @SettleVoucherCreate SV
 			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort <> 1
 			AND   SV.intItemId NOT IN (SELECT intItemId FROM tblAPBillDetail Where intBillId=@intBillId)
+
 										
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
 
