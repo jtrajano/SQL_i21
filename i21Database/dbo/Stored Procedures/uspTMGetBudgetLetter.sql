@@ -123,10 +123,10 @@ BEGIN
 			,strCompanyState = A.strState 
 			,strCompanyZip = A.strZip
 			,strCustomerName = C.strName
-			,strCustomerAddress = D.strAddress
-			,strCustomerCity = D.strCity
-			,strCustomerState = D.strState
-			,strCustomerZip = D.strZipCode
+			,strCustomerAddress = E.strAddress
+			,strCustomerCity = E.strCity
+			,strCustomerState = E.strState
+			,strCustomerZip = E.strZipCode
 			,intEntityCustomerId = B.intEntityCustomerId
 			,dblBudget = B.dblMonthlyBudget
 			,dtmFirstDueDate = CAST(''' + @strFirstPaymentDue + ''' AS DATETIME)
@@ -142,6 +142,9 @@ BEGIN
 			ON F.intCustomerID = G.intCustomerID
 		INNER JOIN tblARCustomer D
 			ON C.intEntityId = D.intEntityCustomerId
+		INNER JOIN tblEMEntityLocation E
+			ON D.intEntityCustomerId = E.intEntityId
+				AND ysnDefaultLocation = 1
 		,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') E
 		' + @strWhereClause
 		)
