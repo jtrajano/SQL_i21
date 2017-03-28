@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblHDTicketWatcher]
 (
 	[intTicketWatcherId] [int] IDENTITY(1,1) NOT NULL,
-	[intTicketId] [int] NOT NULL,
+	[intTicketId] [int] NULL,
 	[strTicketNumber] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[intUserId] [int] NOT NULL,
 	[intUserEntityId] [int] NULL,
