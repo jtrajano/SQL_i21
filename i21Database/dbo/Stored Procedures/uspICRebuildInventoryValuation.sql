@@ -621,7 +621,7 @@ BEGIN
 
 		-- Run the post routine. 
 		BEGIN 
-			--PRINT 'Posting ' + @strBatchId
+			PRINT 'Posting ' + @strBatchId
 
 			-- Setup the GL Description
 			SET @strGLDescription = 
@@ -664,7 +664,7 @@ BEGIN
 			BEGIN 
 				PRINT 'Reposting Bill Cost Adjustments: ' + @strTransactionId
 				
-				-- uspICRepostCostAdjustment creates and posts it own g/l entries 
+				-- uspICRepostBillCostAdjustment creates and posts it own g/l entries 
 				EXEC uspICRepostBillCostAdjustment
 					@strTransactionId
 					,@strBatchId
@@ -675,8 +675,7 @@ BEGIN
 			BEGIN 
 				PRINT 'Reposting Settle Storage Cost Adjustments: ' + @strTransactionId
 				
-				-- uspICRepostCostAdjustment creates and posts it own g/l entries 
-				-- TODO: 
+				-- uspICRepostSettleStorageCostAdjustment creates and posts it own g/l entries 
 				EXEC uspICRepostSettleStorageCostAdjustment
 					@strTransactionId
 					,@strBatchId
@@ -1582,7 +1581,7 @@ BEGIN
 					,@strAccountToCounterInventory
 					,@intEntityUserSecurityId
 					,@strGLDescription
-					,@strAccountToCounterInventory 
+					,NULL  
 					,@intItemId -- This is only used when rebuilding the stocks. 
 					
 				IF @intReturnId <> 0 
