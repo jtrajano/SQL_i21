@@ -4081,6 +4081,14 @@ BEGIN
 		UPDATE tblSMContactMenu SET ysnContactOnly = 1 WHERE intMasterMenuId = @VendorContactListMenuId
 END
 
+DECLARE @PurchaseOrdersMenuId INT
+SELECT  @PurchaseOrdersMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Purchase Orders' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Purchase Orders' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PurchaseOrdersMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@PurchaseOrdersMenuId)
+END
+
 /* Ticket Management */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TicketManagementParentMenuId)
 INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@TicketManagementParentMenuId)
