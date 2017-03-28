@@ -5168,6 +5168,7 @@
     <Build Include="dbo\Views\vyuARPaymentACHSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostBillCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
+    <Build Include="dbo\Tables\tblPRDepartmentShift.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
