@@ -250,6 +250,13 @@ Begin
 		End
 	End
 
+	--Shipment Delete
+	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')=''
+	Begin
+		If @strRefNo like 'LSI-%'
+			Set @strDeliveryType='U'
+	End
+
 	--Shipment Update
 	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')='U'
 	Begin
@@ -265,6 +272,11 @@ Begin
 
 		If Exists(Select 1 From tblLGLoad Where intLoadShippingInstructionId=@intLoadId)
 			Select TOP 1 @intLoadId=intLoadId,@strRefNo=@strRefNo + ' / ' + strLoadNumber From tblLGLoad Where intLoadShippingInstructionId=@intLoadId
+
+		--Check for Delete
+		If ISNULL(@intLoadId,0)=0
+			If (Select TOP 1 UPPER(strRowState) From tblLGLoadStg Where strShippingInstructionNumber=@strRefNo Order By intLoadStgId Desc)='DELETE'
+				Select TOP 1 @intLoadId=intLoadId From tblLGLoadStg Where strShippingInstructionNumber=@strRefNo AND UPPER(strRowState)='DELETE' Order By intLoadStgId Desc
 
 		If @strStatus IN (52,53) --Success
 		Begin
@@ -312,6 +324,32 @@ Begin
 
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
+		End
+	End
+
+	--Receipt WMMBXY
+	If @strMesssageType='WMMBXY'
+	Begin
+		Set @strMesssageType='WHSCON'
+
+		Select @intReceiptId=r.intInventoryReceiptId
+		From tblICInventoryReceipt r 
+		Where r.strReceiptNumber=@strRefNo
+
+		If @strStatus IN (52,53) --Success
+		Begin
+			Update tblICInventoryReceiptItem  Set ysnExported=1 Where intInventoryReceiptId=@intReceiptId
+
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,'Success',@strRefNo,'')
+		End
+
+		If @strStatus NOT IN (52,53) --Error
+		Begin
+			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
+
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,@strMessage,@strRefNo,'')
 		End
 	End
 
