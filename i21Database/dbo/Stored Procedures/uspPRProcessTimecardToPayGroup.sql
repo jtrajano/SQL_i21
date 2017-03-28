@@ -99,7 +99,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TC.dblRegularHours
 			,TC.dblRegularHours
 			,EE.dblRateAmount
-			,ROUND(TC.dblRegularHours * EE.dblRateAmount, 2)
+			,CASE WHEN (EE.strCalculationType IN ('Fixed Amount')) THEN EE.dblRateAmount ELSE ROUND(TC.dblRegularHours * EE.dblRateAmount, 2) END
 			,@dtmBegin 
 			,@dtmEnd
 			,1
