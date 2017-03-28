@@ -662,7 +662,7 @@ BEGIN
 			-- Repost the Bill cost adjustments
 			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment') AND ISNULL(@strTransactionForm, 'Bill') IN ('Bill'))
 			BEGIN 
-				PRINT 'Reposting Bill Cost Adjustments: ' + @strTransactionId
+				--PRINT 'Reposting Bill Cost Adjustments: ' + @strTransactionId
 				
 				-- uspICRepostBillCostAdjustment creates and posts it own g/l entries 
 				EXEC uspICRepostBillCostAdjustment
@@ -673,7 +673,7 @@ BEGIN
 			END
 			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment') AND @strTransactionForm IN ('Settle Storage'))
 			BEGIN 
-				PRINT 'Reposting Settle Storage Cost Adjustments: ' + @strTransactionId
+				--PRINT 'Reposting Settle Storage Cost Adjustments: ' + @strTransactionId
 				
 				-- uspICRepostSettleStorageCostAdjustment creates and posts it own g/l entries 
 				EXEC uspICRepostSettleStorageCostAdjustment
@@ -1586,7 +1586,7 @@ BEGIN
 					
 				IF @intReturnId <> 0 
 				BEGIN 
-					PRINT 'Error found in uspICCreateGLEntries - Inventory Shipment'
+					--PRINT 'Error found in uspICCreateGLEntries - Inventory Shipment'
 					GOTO _EXIT_WITH_ERROR
 				END 			
 
@@ -1693,7 +1693,7 @@ BEGIN
 
 				IF @intReturnId <> 0 
 				BEGIN 
-					PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Inventory Shipment'
+					--PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Inventory Shipment'
 					GOTO _EXIT_WITH_ERROR
 				END 	
 			END
@@ -1847,7 +1847,7 @@ BEGIN
 						
 				IF @intReturnId <> 0 
 				BEGIN 
-					PRINT 'Error found in uspICCreateGLEntries - Invoice'
+					--PRINT 'Error found in uspICCreateGLEntries - Invoice'
 					GOTO _EXIT_WITH_ERROR
 				END 			
 
@@ -1959,7 +1959,7 @@ BEGIN
 
 				IF @intReturnId <> 0 
 				BEGIN 
-					PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Invoice'
+					--PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Invoice'
 					GOTO _EXIT_WITH_ERROR
 				END 
 			END							
@@ -2245,7 +2245,7 @@ BEGIN
 
 				IF @intReturnId <> 0 
 				BEGIN 
-					PRINT 'Error found in uspICCreateGLEntries'
+					--PRINT 'Error found in uspICCreateGLEntries'
 					GOTO _EXIT_WITH_ERROR
 				END 
 			END 
@@ -2253,7 +2253,7 @@ BEGIN
 			-- Fix discrepancies when posting Consume and Produce. 
 			IF ISNULL(@ysnPost, 1) = 1 AND EXISTS (SELECT TOP 1 1 FROM @GLEntries WHERE strTransactionType = 'Consume' OR strTransactionType = 'Produce')
 			BEGIN 
-				PRINT 'Update decimal issue for Produce'
+				--PRINT 'Update decimal issue for Produce'
 
 				UPDATE	@GLEntries 
 				SET		dblDebit = (SELECT SUM(dblCredit) FROM @GLEntries WHERE strTransactionType = 'Consume') 
