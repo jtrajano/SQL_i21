@@ -1,7 +1,7 @@
 ﻿IF EXISTS(select top 1 1 from sys.procedures where name = 'uspMFImportRecipe')
 	DROP PROCEDURE uspMFImportRecipe
 GO
-
+CREATE PROCEDURE uspMFImportRecipe
 	@Checking BIT = 0,
 	@UserId INT = 0,
 	@Total INT = 0 OUTPUT
