@@ -3558,7 +3558,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            current.set('intShipViaId', records[0].get('intShipViaId'));
+            ic.utils.ajax({
+              url: '../entitymanagement/api/shipvia/searchshipviaview'
+            })
+            .flatMap(function(res) {
+                var json = JSON.parse(res.responseText);
+                return json.data;
+            })
+            .filter(function(data) {
+                return data.intEntityShipViaId === records[0].get('intShipViaId');
+            })
+            .subscribe(
+                function(successResponse) {
+                    current.set('strShipVia', successResponse.strShipVia);
+                    current.set('intShipViaId', records[0].get('intShipViaId'));           
+                }
+                ,function(failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                }
+            );
             //current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
         }
     },
