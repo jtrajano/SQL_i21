@@ -1253,7 +1253,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter118",
                                                     "designerId": "8725b495-60b5-4fac-b7b6-11f36b61fc8d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1652,13 +1652,13 @@
                                                             "    {",
                                                             "\t\tdataIndex: 'intSubLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Sub Location Id',",
+                                                            "\t\ttext: 'Storage Location Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "    {",
                                                             "\t\tdataIndex: 'intStorageLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Storage Location Id',",
+                                                            "\t\ttext: 'Storage Unit Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "    {",
@@ -2216,7 +2216,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging111",
                     "designerId": "819ea614-6c35-4e6e-8d56-521d4ef1d53e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

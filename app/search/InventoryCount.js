@@ -49,7 +49,7 @@ Ext.define('Inventory.search.InventoryCount', {
             width: 100
         },
         {
-            text: 'Storage Locations',
+            text: 'Storage Unit',
             itemId: 'btnStorageLocation',
             clickHandler: 'onStorageLocationClick',
             width: 110

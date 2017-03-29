@@ -112,14 +112,14 @@ Ext.define('Inventory.model.AdjustmentDetail', {
                 if(iRely.Functions.isEmpty(this.get('strSubLocation')) && (AdjustmentType == 4 || AdjustmentType == 9)) {
                     errors.add({
                         field: 'strSubLocation',
-                        message: 'Sub Location must have a value.'
+                        message: 'Storage Location must have a value.'
                     })
                 }
 
                 if(iRely.Functions.isEmpty(this.get('strStorageLocation')) && (AdjustmentType == 4 || AdjustmentType == 9)) {
                     errors.add({
                         field: 'strStorageLocation',
-                        message: 'Storage Location must have a value.'
+                        message: 'Storage Unit must have a value.'
                     })
                 }
 
@@ -168,14 +168,14 @@ Ext.define('Inventory.model.AdjustmentDetail', {
                 if(iRely.Functions.isEmpty(this.get('strNewSubLocation')) && (AdjustmentType == 5 || AdjustmentType == 7 || AdjustmentType == 8)) {
                     errors.add({
                         field: 'strNewSubLocation',
-                        message: 'New Sub Location must have a value.'
+                        message: 'New Storage Location must have a value.'
                     })
                 }
 
                 if(iRely.Functions.isEmpty(this.get('strNewStorageLocation')) && (AdjustmentType == 5 || AdjustmentType == 7 || AdjustmentType == 8)) {
                     errors.add({
                         field: 'strNewStorageLocation',
-                        message: 'New Storage Location must have a value.'
+                        message: 'New Storage Unit must have a value.'
                     })
                 }
                 

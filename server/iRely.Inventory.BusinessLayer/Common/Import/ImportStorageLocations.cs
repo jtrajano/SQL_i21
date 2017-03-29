@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
     {
         protected override string[] GetRequiredFields()
         {
-            return new string[] { "name", "sub location", "location" };
+            return new string[] { "name", "storage location", "location" };
         }
 
         protected override tblICStorageLocation ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
@@ -95,7 +95,7 @@ namespace iRely.Inventory.BusinessLayer
                             dr.Info = INFO_WARN;
                         }
                         break;
-                    case "sub location":
+                    case "storage location":
                         if (string.IsNullOrEmpty(value))
                         {
                             valid = false;
@@ -104,7 +104,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_WARN,
-                                Message = "Sub Location should not be blank.",
+                                Message = "Storage Location should not be blank.",
                                 Status = REC_SKIP
                             });
                             dr.Info = INFO_WARN;
@@ -124,7 +124,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Message = string.Format("Invalid Sub Location: {0}.", value),
+                                Message = string.Format("Invalid Storage Location: {0}.", value),
                                 Status = REC_SKIP
                             });
                             dr.Info = INFO_WARN;
@@ -306,7 +306,7 @@ namespace iRely.Inventory.BusinessLayer
                         Status = REC_SKIP,
                         Column = headers[0],
                         Row = row,
-                        Message = "The storage location already exists. The system does not allow existing records to be modified."
+                        Message = "The storage unit already exists. The system does not allow existing records to be modified."
                     });
                     return null;
                 }

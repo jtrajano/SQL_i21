@@ -318,7 +318,7 @@ namespace iRely.Inventory.BusinessLayer
                             //dr.Info = INFO_WARN;
                         }
                         break;
-                    case "sub location":
+                    case "storage location":
                         if (string.IsNullOrEmpty(value))
                         {
                             break;
@@ -337,12 +337,12 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Status = STAT_INNER_COL_SKIP,
-                                Message = string.Format("Invalid Sub Location: {0}.", value)
+                                Message = string.Format("Invalid Storage Location: {0}.", value)
                             });
                             dr.Info = INFO_WARN;
                         }
                         break;
-                    case "storage location":
+                    case "storage unit":
                         if (string.IsNullOrEmpty(value))
                         {
                             break;

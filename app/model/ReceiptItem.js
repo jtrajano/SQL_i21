@@ -97,14 +97,14 @@ Ext.define('Inventory.model.ReceiptItem', {
             if (iRely.Functions.isEmpty(this.get('intSubLocationId'))) {
                 errors.add({
                     field: 'strSubLocationName',
-                    message: 'Sub Location must be present.'
+                    message: 'Storage Location must be present.'
                 });
                 return false;
             }
             if (iRely.Functions.isEmpty(this.get('intStorageLocationId'))) {
                 errors.add({
                     field: 'strStorageLocationName',
-                    message: 'Storage Location must be present.'
+                    message: 'Storage Unit must be present.'
                 });
 
                 return false;

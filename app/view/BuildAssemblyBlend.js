@@ -435,20 +435,20 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                             xtype: 'gridcolumn',
                                             itemId: 'colSubLocation',
                                             dataIndex: 'string',
-                                            text: 'Sub Location',
+                                            text: 'Storage Location',
                                             editor: {
                                                 xtype: 'gridcombobox',
                                                 columns: [
                                                     {
                                                         dataIndex: 'intSubLocationId',
                                                         dataType: 'numeric',
-                                                        text: 'Sub Location Id',
+                                                        text: 'Storage Location Id',
                                                         hidden: true
                                                     },
                                                     {
                                                         dataIndex: 'strSubLocationName',
                                                         dataType: 'string',
-                                                        text: 'Sub Location',
+                                                        text: 'Storage Location',
                                                         flex: 2
                                                     }
                                                 ],

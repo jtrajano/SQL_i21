@@ -827,13 +827,13 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     {
                                                         dataIndex: 'intSubLocationId',
                                                         dataType: 'numeric',
-                                                        text: 'Sub Location Id',
+                                                        text: 'Storage Location Id',
                                                         hidden: true
                                                     },
                                                     {
                                                         dataIndex: 'intStorageLocationId',
                                                         dataType: 'numeric',
-                                                        text: 'Storage Location Id',
+                                                        text: 'Storage Unit Id',
                                                         hidden: true
                                                     },
                                                     {

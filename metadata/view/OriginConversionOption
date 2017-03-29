@@ -994,7 +994,7 @@
                                                 "height": 40,
                                                 "itemId": "btnImportStorageLocations",
                                                 "layout|flex": 1,
-                                                "text": "Import Storage Locations",
+                                                "text": "Import Storage Units",
                                                 "width": 150
                                             },
                                             "name": "MyButton9",
@@ -1026,7 +1026,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "itemId": null,
-                                                        "text": "Import Storage Locations from CSV"
+                                                        "text": "Import Storage Units from CSV"
                                                     },
                                                     "name": "MyLabel9",
                                                     "designerId": "d277ab54-d8eb-469c-94f6-af50078e4739"
@@ -2473,7 +2473,7 @@
                                                 "height": 40,
                                                 "itemId": "btnOriginLocations",
                                                 "layout|flex": 1,
-                                                "text": "Sub Locations and Storage Locations"
+                                                "text": "Storage Locations and Storage Units"
                                             },
                                             "name": "MyButton25",
                                             "configAlternates": {
@@ -2515,7 +2515,7 @@
                                                     "userConfig": {
                                                         "itemId": null,
                                                         "padding": "0 0 0 10",
-                                                        "text": "\"Imports storage location like elevators and bins. Origin does not have sub locations. System will create a sub location automatically for each company location.\""
+                                                        "text": "\"Imports storage location like elevators and bins. Origin does not have storage locations. System will create a storage location automatically for each company location.\""
                                                     },
                                                     "name": "MyLabel9",
                                                     "designerId": "6ee59d84-8785-47cf-b9dd-6954d9efe2c4"

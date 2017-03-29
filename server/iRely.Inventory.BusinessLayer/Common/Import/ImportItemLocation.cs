@@ -122,7 +122,7 @@ namespace iRely.Inventory.BusinessLayer
                                 break;
                         }
 	                    break;
-                    case "sub location":
+                    case "storage location":
                         if (!string.IsNullOrEmpty(value))
                         {
                             lu = GetLookUpId<tblSMCompanyLocationSubLocation>(
@@ -139,14 +139,14 @@ namespace iRely.Inventory.BusinessLayer
                                     Column = header,
                                     Row = row,
                                     Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Sub Location: " + value + '.',
+                                    Message = "Can't find Storage Location: " + value + '.',
                                     Status = STAT_INNER_COL_SKIP
                                 });
                                 dr.Info = INFO_WARN;
                             }
                         }
                         break;
-                    case "storage location":
+                    case "storage unit":
                         if (!string.IsNullOrEmpty(value))
                         {
                             lu = GetLookUpId<vyuICGetStorageLocation>(
@@ -162,7 +162,7 @@ namespace iRely.Inventory.BusinessLayer
                                     Column = header,
                                     Row = row,
                                     Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Storage Location: " + value + '.',
+                                    Message = "Can't find Storage Unit: " + value + '.',
                                     Status = STAT_INNER_COL_SKIP
                                 });
                                 dr.Info = INFO_WARN;

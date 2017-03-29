@@ -20,7 +20,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
                 {dataIndex: 'dtmBuildDate', text: 'Build Date', flex: 1,  dataType: 'date', xtype: 'datecolumn'},
                 {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string'},
                 {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string'},
-                {dataIndex: 'strSubLocationName', text: 'Sub Location Name', flex: 1, dataType: 'string'},
+                {dataIndex: 'strSubLocationName', text: 'Storage Location Name', flex: 1, dataType: 'string'},
                 {dataIndex: 'strItemUOM', text: 'Item UOM', flex: 1, dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'}
             ]

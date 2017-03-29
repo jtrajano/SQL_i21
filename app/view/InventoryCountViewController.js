@@ -724,8 +724,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         { dataIndex: 'strCountLine', text: 'Count Line No', dataType: 'string' },
                         { dataIndex: 'strItemNo', text: 'Item No', dataType: 'string' },
                         { dataIndex: 'strItemDescription', text: 'Description', dataType: 'string' },
-                        { dataIndex: 'strSubLocationName', text: 'Sub Location', dataType: 'string' },
-                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
+                        { dataIndex: 'strSubLocationName', text: 'Storage Location', dataType: 'string' },
+                        { dataIndex: 'strStorageLocationName', text: 'Storage Unit', dataType: 'string' },
                         { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
                         { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
                         { dataIndex: 'dblSystemCount', text: 'System Count', dataType: 'numeric' },
@@ -751,8 +751,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         { dataIndex: 'strCountLine', text: 'Count Line No', dataType: 'string' },
                         { dataIndex: 'strItemNo', text: 'Item No', dataType: 'string' },
                         { dataIndex: 'strItemDescription', text: 'Description', dataType: 'string' },
-                        { dataIndex: 'strSubLocationName', text: 'Sub Location', dataType: 'string' },
-                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
+                        { dataIndex: 'strSubLocationName', text: 'Storage Location', dataType: 'string' },
+                        { dataIndex: 'strStorageLocationName', text: 'Storage Unit', dataType: 'string' },
                         { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
                         { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
                         { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
@@ -1273,7 +1273,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                                  conjunction: 'and'
                             }  
                         ],
-                        activeTab: 'Sub Location'
+                        activeTab: 'Storage Location'
                     });
                 }
             }

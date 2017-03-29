@@ -323,7 +323,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                              conjunction: 'and'
                         }  
                     ],
-                    activeTab: 'Sub Location'
+                    activeTab: 'Storage Location'
                 });
             }
         }

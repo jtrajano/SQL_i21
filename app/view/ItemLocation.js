@@ -208,8 +208,8 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                         }
                                                                     ],
                                                                     enableDrillDown: true,
-                                                                    flex: 1,
                                                                     lookUpField: true,
+                                                                    flex: 1,
                                                                     itemId: 'cboDefaultVendor',
                                                                     margin: '0 5',
                                                                     fieldLabel: 'Vendor',

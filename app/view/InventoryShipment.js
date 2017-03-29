@@ -1482,14 +1482,14 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         itemId: 'colSubLocation',
                                                                         width: 100,
                                                                         dataIndex: 'strSubLocation',
-                                                                        text: 'Sub Location',
+                                                                        text: 'Storage Location',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
                                                                                     dataIndex: 'intCompanyLocationSubLocationId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Sub Location Id',
+                                                                                    text: 'Storage Location Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
@@ -1501,7 +1501,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 {
                                                                                     dataIndex: 'strSubLocationName',
                                                                                     dataType: 'string',
-                                                                                    text: 'Sub Location Name',
+                                                                                    text: 'Storage Location Name',
                                                                                     flex: 1
                                                                                 },
                                                                                 {
@@ -1521,7 +1521,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         itemId: 'colStorageLocation',
                                                                         width: 100,
                                                                         dataIndex: 'string',
-                                                                        text: 'Storage Location',
+                                                                        text: 'Storage Unit',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -1546,10 +1546,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 {
                                                                                     dataIndex: 'intSubLocationId',
                                                                                     dataType: 'numeric',
+                                                                                    text: 'Storage Location Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strSubLocationName',
+                                                                                    text: 'Storage Location',
                                                                                     dataType: 'string',
                                                                                     hidden: true
                                                                                 }
@@ -1738,13 +1740,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 {
                                                                                     dataIndex: 'strSubLocationName',
                                                                                     dataType: 'string',
-                                                                                    text: 'Sub Location',
+                                                                                    text: 'Storage Location',
                                                                                     flex: 1
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strStorageLocation',
                                                                                     dataType: 'string',
-                                                                                    text: 'Storage Location',
+                                                                                    text: 'Storage Unit',
                                                                                     flex: 1
                                                                                 },
                                                                                 {
