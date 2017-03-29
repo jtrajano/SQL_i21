@@ -60,7 +60,7 @@ AS
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity)				AS	dblQtyInPriceUOM,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SM.intItemUOMId,CD.dblQuantity)					AS	dblQtyInStockUOM,
 			dbo.fnCTConvertQtyToTargetItemUOM(SM.intItemUOMId,CD.intPriceItemUOMId,CD.dblCashPrice)				AS	dblCashPriceInStockUOM,
-			dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,CD.intItemUOMId,1)							AS	dblPriceToQtyConvFactor,
+			dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),CD.intItemUOMId,1)AS	dblPriceToQtyConvFactor,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intNetWeightUOMId,CD.intItemUOMId,1)							AS	dblWeightToQtyConvFactor,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)		
 																		      -	ISNULL(CD.dblScheduleQty,0))	AS	dblAvailableNetWeight,
