@@ -24,7 +24,6 @@ AS
 		,dtmDispatchedDate = A.dtmWillCallDispatch
 		,intConcurrencyId = A.intConcurrencyId
 		,intDispatchId = CAST(A.intWillCallDispatchId AS INT)
-		,intCustomerID = B.intCustomerID
 		,intCompanyLocationId  = B.intLocationId
 		,strCompanyLocationName  = I.strLocationName
 		,dblLocationLongitude = ISNULL(I.dblLongitude,0.0)
