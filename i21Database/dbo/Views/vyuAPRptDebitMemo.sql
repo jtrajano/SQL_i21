@@ -47,7 +47,7 @@ SELECT
 	  ORDER BY intAttachmentId DESC
 	)) AS strFooter
 FROM tblAPBill A
-INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityVendorId = B2.intEntityId) ON A.intEntityVendorId = B.intEntityVendorId
+INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.[intEntityId] = B2.intEntityId) ON A.intEntityVendorId = B.[intEntityId]
 INNER JOIN tblAPBillDetail C2 ON A.intBillId = C2.intBillId
 INNER JOIN tblGLAccount E ON C2.intAccountId = E.intAccountId
 LEFT JOIN tblICItem H ON C2.intItemId = H.intItemId

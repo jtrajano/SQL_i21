@@ -39,7 +39,7 @@ WITH FiscalSum AS(
 	INNER JOIN tblARCustomer AC
 		ON AC.intEntityCustomerId = RC.intCustomerId
 	INNER JOIN tblAPVendor APV
-		ON APV.intEntityVendorId = RC.intCustomerId
+		ON APV.[intEntityId] = RC.intCustomerId
 	GROUP BY R.intFiscalYearId,
 			RC.intCustomerId,
 			RC.ysnEligibleRefund,

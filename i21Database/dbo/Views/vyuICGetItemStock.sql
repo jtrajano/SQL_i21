@@ -171,7 +171,7 @@ FROM
 		ON Grade.intCommodityAttributeId = Item.intGradeId
 
 	LEFT JOIN tblAPVendor v
-		ON v.intEntityVendorId = ItemLocation.intVendorId
+		ON v.[intEntityId] = ItemLocation.intVendorId
 
 	LEFT JOIN tblICUnitMeasure TonnageUOM 
 		ON TonnageUOM.intUnitMeasureId = Item.intTonnageTaxUOMId

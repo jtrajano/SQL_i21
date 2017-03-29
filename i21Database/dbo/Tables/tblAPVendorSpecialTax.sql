@@ -20,9 +20,9 @@
 	
 	CONSTRAINT [PK_dbo_tblAPVendorSpecialTax]					PRIMARY KEY CLUSTERED ([intAPVendorSpecialTaxId] ASC),
 	
-	CONSTRAINT FK_tblAPVendorSpecialTax_tblAPVendor_Parent		FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
+	CONSTRAINT FK_tblAPVendorSpecialTax_tblAPVendor_Parent		FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]),
 	
-	CONSTRAINT FK_tblAPVendorSpecialTax_tblAPVendor_Tax			FOREIGN KEY ([intTaxEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
+	CONSTRAINT FK_tblAPVendorSpecialTax_tblAPVendor_Tax			FOREIGN KEY ([intTaxEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]),
 	
 	CONSTRAINT FK_tblAPVendorSpecialTax_tbltblICItem			FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	

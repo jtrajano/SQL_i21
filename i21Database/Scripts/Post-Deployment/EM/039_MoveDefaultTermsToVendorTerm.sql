@@ -5,7 +5,7 @@ begin
 	PRINT ('*****RUNNING Move Default Terms For Vendor*****')
 	
 	INSERT INTO tblAPVendorTerm (intEntityVendorId, intTermId)
-	select intEntityVendorId, intTermsId from tblAPVendor where intTermsId is not null
+	select [intEntityId], intTermsId from tblAPVendor where intTermsId is not null
 
 	INSERT INTO tblEMEntityPreferences(strPreference,strValue)
 	select 'Move Default Terms For Vendor', '1'

@@ -20,5 +20,5 @@ AS
 	JOIN	[tblEMEntityType]		Y	ON	Y.intEntityId			=	E.intEntityId
 	JOIN	[tblEMEntityToContact]	C	ON	C.intEntityId			=	E.intEntityId AND C.ysnDefaultContact = 1
 	JOIN	tblEMEntity			T	ON	T.intEntityId			=	C.intEntityContactId	LEFT 
-	JOIN	tblAPVendor			V	ON	V.intEntityVendorId		=	E.intEntityId
+	JOIN	tblAPVendor			V	ON	V.[intEntityId]		=	E.intEntityId
 	WHERE Y.strType = 'Vendor'

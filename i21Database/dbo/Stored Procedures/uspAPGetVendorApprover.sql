@@ -15,15 +15,15 @@ SET ANSI_WARNINGS OFF
 DECLARE @VendorAprover INT
 
 SELECT DISTINCT @VendorAprover = C.strUserName FROM tblAPVendor A 
-INNER JOIN [tblEMEntityToContact] B ON A.intEntityVendorId = B.intEntityId 
-INNER JOIN [tblEMEntityCredential] C ON B.intEntityContactId = C.intEntityId WHERE A.intEntityVendorId = @intEntityId
+INNER JOIN [tblEMEntityToContact] B ON A.[intEntityId] = B.intEntityId 
+INNER JOIN [tblEMEntityCredential] C ON B.intEntityContactId = C.intEntityId WHERE A.[intEntityId] = @intEntityId
 
 IF (@VendorAprover > 0) 
 	BEGIN
 		--HAS VENDOR APPROVER  
 		SELECT DISTINCT C.strUserName FROM tblAPVendor A 
-		INNER JOIN [tblEMEntityToContact] B ON A.intEntityVendorId = B.intEntityId 
-		INNER JOIN [tblEMEntityCredential] C ON B.intEntityContactId = C.intEntityId WHERE A.intEntityVendorId = @intEntityId
+		INNER JOIN [tblEMEntityToContact] B ON A.[intEntityId] = B.intEntityId 
+		INNER JOIN [tblEMEntityCredential] C ON B.intEntityContactId = C.intEntityId WHERE A.[intEntityId] = @intEntityId
 	END
 ELSE
 	BEGIN

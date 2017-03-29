@@ -49,7 +49,7 @@ LEFT OUTER JOIN tblGLFiscalYear F
 LEFT OUTER JOIN tblARCustomer C
 	ON C.intEntityCustomerId = RC.intCustomerId
 LEFT OUTER JOIN tblAPVendor APV
-	ON APV.intEntityVendorId = RC.intCustomerId
+	ON APV.[intEntityId] = RC.intCustomerId
 GROUP BY R.intRefundId,
 		R.strRefundNo,
 		R.intFiscalYearId,

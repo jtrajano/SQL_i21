@@ -36,7 +36,7 @@ JOIN dbo.tblSTCheckoutItemMovements CIM ON CIM.intItemUPCId = IM.intItemUOMId AN
 JOIN dbo.tblSTCheckoutHeader CH ON CH.intCheckoutId = CIM.intCheckoutId
 JOIN dbo.tblICItemUOM UOM ON UOM.intItemUOMId = CIM.intItemUPCId
 JOIN dbo.tblICItem I ON I.intItemId = UOM.intItemId
-JOIN dbo.tblAPVendor V ON V.intEntityVendorId = CIM.intVendorId
+JOIN dbo.tblAPVendor V ON V.[intEntityId] = CIM.intVendorId
 JOIN dbo.tblICItemSpecialPricing SP ON I.intItemId = SP.intItemId 
 LEFT JOIN dbo.tblICItemPricing Pr ON Pr.intItemId = I.intItemId 
 ) t

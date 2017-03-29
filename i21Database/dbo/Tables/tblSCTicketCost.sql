@@ -14,7 +14,7 @@
     CONSTRAINT [PK_tblSCTicketCost_intTicketCostId] PRIMARY KEY ([intTicketCostId]),
 	CONSTRAINT [FK_tblSCTicketCost_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]),
 	CONSTRAINT [FK_tblSCTicketCost_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblSCTicketCost_tblAPVendor_intEntityVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
+	CONSTRAINT [FK_tblSCTicketCost_tblAPVendor_intEntityVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]),
 	CONSTRAINT [FK_tblSCTicketCost_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]) 
 )
 

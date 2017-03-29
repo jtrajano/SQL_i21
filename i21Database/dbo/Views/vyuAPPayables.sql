@@ -21,8 +21,8 @@ SELECT
 	, A.ysnPaid
 	, A.intAccountId
 FROM dbo.tblAPBill A
-LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityVendorId] = C2.intEntityId)
-	ON C1.[intEntityVendorId] = A.[intEntityVendorId]
+LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
+	ON C1.[intEntityId] = A.[intEntityVendorId]
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7)
 UNION ALL   
 SELECT A.dtmDatePaid AS dtmDate,   
@@ -48,8 +48,8 @@ SELECT A.dtmDatePaid AS dtmDate,
 FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
  LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
- LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityVendorId] = D2.intEntityId)
- 	ON A.[intEntityVendorId] = D.[intEntityVendorId]
+ LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
+ 	ON A.[intEntityVendorId] = D.[intEntityId]
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
  WHERE A.ysnPosted = 1  
@@ -76,7 +76,7 @@ SELECT
 FROM dbo.tblAPBill A
 INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = B.intBillId
-INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.intEntityVendorId = D2.intEntityId) ON A.intEntityVendorId = D.intEntityVendorId
+INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 WHERE A.ysnPosted = 1
 UNION ALL
 SELECT --OVERPAYMENT
@@ -96,7 +96,7 @@ SELECT --OVERPAYMENT
 	, A.ysnPaid
 	,A.intAccountId
 FROM dbo.tblAPBill A
-LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityVendorId] = C2.intEntityId)
-	ON C1.[intEntityVendorId] = A.[intEntityVendorId]
+LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
+	ON C1.[intEntityId] = A.[intEntityVendorId]
 WHERE intTransactionType IN (8) AND A.ysnPaid != 1
 

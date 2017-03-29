@@ -73,8 +73,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation D
 		ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
-	INNER JOIN (tblAPVendor F INNER JOIN tblEMEntity F2 ON F.intEntityVendorId = F2.intEntityId)
-		ON F.intEntityVendorId = A.intEntityVendorId
+	INNER JOIN (tblAPVendor F INNER JOIN tblEMEntity F2 ON F.[intEntityId] = F2.intEntityId)
+		ON F.[intEntityId] = A.intEntityVendorId
 	LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId) 
 		ON E.intEntityId = A.intEntityVendorId 
 				AND E.intContractHeaderId = B.intOrderId 

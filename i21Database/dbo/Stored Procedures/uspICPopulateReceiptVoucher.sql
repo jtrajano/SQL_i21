@@ -74,11 +74,11 @@ BEGIN
 			,receiptItem.intCurrencyId
 			,receiptItem.strCurrency
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
-				ON entity.intEntityId = vendor.intEntityVendorId
+				ON entity.intEntityId = vendor.[intEntityId]
 			CROSS APPLY (
 				SELECT	* 
 				FROM	vyuICGetInventoryReceiptVoucherItems items
-				WHERE	items.intEntityVendorId = vendor.intEntityVendorId
+				WHERE	items.intEntityVendorId = vendor.[intEntityId]
 			) receiptItem
 	UNION ALL 
 	SELECT	
@@ -110,10 +110,10 @@ BEGIN
 			,receiptCharges.intCurrencyId
 			,receiptCharges.strCurrency
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
-				ON entity.intEntityId = vendor.intEntityVendorId
+				ON entity.intEntityId = vendor.[intEntityId]
 			CROSS APPLY (
 				SELECT	* 
 				FROM	vyuICGetInventoryReceiptVoucherCharges charges
-				WHERE	charges.intEntityVendorId = vendor.intEntityVendorId
+				WHERE	charges.intEntityVendorId = vendor.[intEntityId]
 			) receiptCharges
 END 

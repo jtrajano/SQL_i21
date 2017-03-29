@@ -92,12 +92,12 @@ BEGIN
 				FROM [tblEMEntityLocation]
 				WHERE ysnDefaultLocation = 1
 			) EntityLocation 
-			ON Vendor.intEntityVendorId = EntityLocation.intEntityId
+			ON Vendor.[intEntityId] = EntityLocation.intEntityId
 	LEFT OUTER JOIN 
 		[tblEMEntityLocation] ShipFromLocation 
 			ON Vendor.intShipFromId = ShipFromLocation.intEntityLocationId
 	WHERE 
-		Vendor.intEntityVendorId = @ItemVendorId						
+		Vendor.[intEntityId] = @ItemVendorId						
 			
 	
 	INSERT @returntable

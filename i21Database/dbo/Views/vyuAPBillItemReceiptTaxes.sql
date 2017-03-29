@@ -97,7 +97,7 @@ SELECT DISTINCT
 		[ysnSeparateOnBill]			= Taxes.ysnSeparateOnInvoice,
 		[ysnCheckOffTax]			= Taxes.ysnCheckoffTax
 	FROM vyuICShipmentChargesForBilling A
-	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
 	INNER JOIN dbo.tblICItem I ON I.intItemId = A.intItemId
 	LEFT JOIN dbo.tblEMEntityLocation EL ON A.intEntityVendorId = EL.intEntityId AND D1.intShipFromId = EL.intEntityLocationId
 	LEFT JOIN dbo.tblAPVendorSpecialTax VST ON VST.intEntityVendorId = A.intEntityVendorId
@@ -131,7 +131,7 @@ SELECT DISTINCT
 		[ysnSeparateOnBill]			= Taxes.ysnSeparateOnInvoice,
 		[ysnCheckOffTax]			= Taxes.ysnCheckoffTax
 	FROM dbo.vyuICChargesForBilling A
-	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
 	INNER JOIN dbo.tblICItem I ON I.intItemId = A.intItemId
 	LEFT JOIN dbo.tblEMEntityLocation EL ON A.intEntityVendorId = EL.intEntityId AND D1.intShipFromId = EL.intEntityLocationId
 	LEFT JOIN dbo.tblAPVendorSpecialTax VST ON VST.intEntityVendorId = A.intEntityVendorId

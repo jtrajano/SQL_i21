@@ -5,7 +5,7 @@ AS
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Vendor')
 	BEGIN
-		UPDATE tblAPVendor SET ysnPymtCtrlActive = 0 WHERE intEntityVendorId = @Id
+		UPDATE tblAPVendor SET ysnPymtCtrlActive = 0 WHERE [intEntityId] = @Id
 	END	
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Customer')

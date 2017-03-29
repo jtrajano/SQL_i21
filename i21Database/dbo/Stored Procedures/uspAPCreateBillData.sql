@@ -42,7 +42,7 @@ DECLARE @startingRecordId INT;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
-	IF NOT EXISTS(SELECT 1 FROM tblAPVendor WHERE intEntityVendorId = @vendorId)
+	IF NOT EXISTS(SELECT 1 FROM tblAPVendor WHERE [intEntityId] = @vendorId)
 	BEGIN
 		RAISERROR('Vendor does not exists.', 16, 1);
 	END

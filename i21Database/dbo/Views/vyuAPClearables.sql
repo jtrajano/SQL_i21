@@ -78,7 +78,7 @@ FROM vyuICGetInventoryReceiptItem Receipt
 	--RECEIPT CHARGES EXCLUDE 3RD PARTY VENDOR
 	OUTER APPLY (
 		SELECT SUM(dblAmount) + SUM(dblTax) AS dblCharges FROM dbo.tblICInventoryReceiptCharge A 
-		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId AND A.intEntityVendorId IN (select intEntityVendorId FROM tblAPVendor WHERE strVendorId = Receipt.strVendorId)
+		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId AND A.intEntityVendorId IN (select [intEntityId] FROM tblAPVendor WHERE strVendorId = Receipt.strVendorId)
 	) ReceiptCharges
 	
 WHERE Receipt.ysnPosted = 1 AND ((Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) != 0 OR  (CASE WHEN Receipt.dblQtyToReceive = 0  THEN 0  
@@ -122,7 +122,7 @@ SELECT DISTINCT
 FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId and ReceiptCharge.intEntityVendorId NOT IN (Receipt.intEntityVendorId)
 LEFT JOIN vyuAPVendor Vendor
-			ON Vendor.intEntityVendorId = ReceiptCharge.intEntityVendorId
+			ON Vendor.[intEntityId] = ReceiptCharge.intEntityVendorId
 	LEFT JOIN (
 		SELECT DISTINCT 
 			  Header.strBillId
@@ -191,8 +191,8 @@ FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
  LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
  LEFT JOIN dbo.tblSMTerm T  ON C.intTermsId = T.intTermID
- LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityVendorId] = D2.intEntityId)
-	ON A.[intEntityVendorId] = D.[intEntityVendorId]
+ LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
+	ON A.[intEntityVendorId] = D.[intEntityId]
 OUTER APPLY (
 		SELECT DISTINCT 
 			IR.dtmReceiptDate,

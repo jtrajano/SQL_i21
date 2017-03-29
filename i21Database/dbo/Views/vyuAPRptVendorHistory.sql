@@ -2,7 +2,7 @@
 AS
 SELECT 
 		 strVendorId = APV.strVendorId
-		,APV.[intEntityVendorId]
+		,APV.[intEntityId]
 		,ISNULL(APV.strVendorId, '') + ' - ' + isnull(E.strName,'''') as strVendorIdName 
 		,APB.dtmDate
 		,APB.dtmBillDate
@@ -28,9 +28,9 @@ SELECT
 						ISNULL(((Payments.dblPayment + Payments.dblDiscount) - Payments.dblInterest),0)
 	FROM dbo.tblAPBill APB
 	LEFT JOIN dbo.tblAPVendor APV
-		ON APV.[intEntityVendorId] = APB.[intEntityVendorId]
+		ON APV.[intEntityId] = APB.[intEntityVendorId]
 	LEFT JOIN dbo.tblEMEntity E
-		ON E.intEntityId = APV.intEntityVendorId
+		ON E.intEntityId = APV.[intEntityId]
 	OUTER APPLY
 	(
 		SELECT

@@ -7,7 +7,7 @@
 	,ent_no			= a.strEntityNo
 	,name			= a.strName
 	,website		= a.strWebsite
-	,type			= case when e.intEntityVendorId is not null then 'vendor,' else '' end + 
+	,type			= case when e.[intEntityId] is not null then 'vendor,' else '' end + 
 						case when f.intEntityCustomerId is not null then 'customer,' else '' end + 
 						case when g.intEntitySalespersonId is not null then 'salesperson,' else '' end
 	--Contact
@@ -61,7 +61,7 @@
 	join [tblEMEntityLocation] d
 		on d.intEntityId = a.intEntityId and ysnDefaultLocation = 1
 	left join tblAPVendor e
-		on e.intEntityVendorId = a.intEntityId
+		on e.[intEntityId] = a.intEntityId
 	left join tblARCustomer f
 		on f.intEntityCustomerId = a.intEntityId
 	left join tblARSalesperson g

@@ -31,7 +31,7 @@ SELECT
 	 ,B.strPONumber
 	 ,B.intLineNo
 	 ,C.strVendorId
-	 ,C.intEntityVendorId
+	 ,C.[intEntityId]
 	 ,C2.strName
 	 ,D.strItemNo
 	 ,D.strLotTracking
@@ -52,7 +52,7 @@ SELECT
 	 ,intForexRateTypeId
 FROM tblPOPurchase A
  INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
- INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.intEntityVendorId = C2.intEntityId) ON A.[intEntityVendorId] = C.intEntityVendorId
+ INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.[intEntityId] = C2.intEntityId) ON A.[intEntityVendorId] = C.[intEntityId]
  LEFT JOIN tblICItem D ON B.intItemId = D.intItemId
  LEFT JOIN tblICItemUOM E ON B.intUnitOfMeasureId = E.intItemUOMId
  LEFT JOIN tblICUnitMeasure H ON E.intUnitMeasureId = H.intUnitMeasureId

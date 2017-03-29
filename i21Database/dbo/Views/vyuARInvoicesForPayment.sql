@@ -189,17 +189,17 @@ FROM
 				AND EMET.[strType] = 'Customer'	
 		INNER JOIN
 			(SELECT 				
-				intEntityVendorId,
+				[intEntityId],
 				intPaymentMethodId,
 				strVendorId
 			 FROM 
-				dbo.tblAPVendor) AS APV ON APV.[intEntityVendorId] = APB.[intEntityVendorId] 
+				dbo.tblAPVendor) AS APV ON APV.[intEntityId] = APB.[intEntityVendorId] 
 		INNER JOIN
 			(SELECT	
 				intEntityId,
 				strName
 			 FROM
-				dbo.tblEMEntity) AS CE ON APV.[intEntityVendorId] = CE.intEntityId 	
+				dbo.tblEMEntity) AS CE ON APV.[intEntityId] = CE.intEntityId 	
 		LEFT OUTER JOIN
 			(SELECT 
 				intPaymentMethodID,

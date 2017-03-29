@@ -2,7 +2,7 @@
 AS
 SELECT
       C.strVendorId
-	, C.intEntityVendorId
+	, C.[intEntityId]
     , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE((CASE WHEN ISNULL(C2.str1099Name,'') <> '' THEN dbo.fnTrimX(C2.str1099Name) ELSE dbo.fnTrimX(C2.strName) END), '&', 'and'))  COLLATE Latin1_General_CI_AS 
     , strAddress = SUBSTRING(REPLACE(REPLACE(dbo.fnTrimX(D.strAddress), CHAR(10), ' ') , CHAR(13), ' '),0,40) COLLATE Latin1_General_CI_AS  --max char 40       
 	, SUBSTRING(C2.strName, 0, 40) AS strPayeeName  --max char 40
@@ -64,10 +64,10 @@ INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId
 LEFT JOIN vyuAPBillPayment B2
 	ON B.intBillId = B2.intBillId   
-LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.intEntityVendorId = C2.intEntityId)
-    ON C.intEntityVendorId = B.intEntityVendorId
+LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.[intEntityId] = C2.intEntityId)
+    ON C.[intEntityId] = B.intEntityVendorId
 LEFT JOIN [tblEMEntityLocation] D
-	ON C.intEntityVendorId = D.intEntityId AND D.ysnDefaultLocation = 1     
+	ON C.[intEntityId] = D.intEntityId AND D.ysnDefaultLocation = 1     
 WHERE ((B.ysnPosted = 1 AND B2.dblPayment IS NOT NULL) OR B.intTransactionType = 9) AND A.int1099Form <> 0
 AND C2.ysnPrint1099 = 1
 

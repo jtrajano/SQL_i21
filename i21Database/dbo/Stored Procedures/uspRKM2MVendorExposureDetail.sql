@@ -157,7 +157,7 @@ FROM(
 	join tblCTContractHeader ch on ch.intContractHeaderId=det.intContractHeaderId
 	JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId                                   
 	JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-	JOIN tblAPVendor e on e.intEntityVendorId=fd.intEntityId
+	JOIN tblAPVendor e on e.[intEntityId]=fd.intEntityId
 	LEFT JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId
 	LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
 	WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)') 
@@ -227,10 +227,10 @@ INSERT INTO @tblDerivative (intRowNum,intContractHeaderId,strContractSeq,strEnti
 						join tblCTContractHeader ch on ch.intContractHeaderId=det.intContractHeaderId
                         JOIN tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId                                   
                         JOIN tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-                        LEFT JOIN tblAPVendor e on e.intEntityVendorId=fd.intProducerId
+                        LEFT JOIN tblAPVendor e on e.[intEntityId]=fd.intProducerId
                         LEFT JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId 
                         LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
-                        LEFT JOIN tblAPVendor e1 on e1.intEntityVendorId=fd.intEntityId 
+                        LEFT JOIN tblAPVendor e1 on e1.[intEntityId]=fd.intEntityId 
                         LEFT JOIN tblICCommodityUnitMeasure cum1 on cum1.intCommodityId=@intCommodityId and cum1.intUnitMeasureId=  e1.intRiskUnitOfMeasureId        
                         LEFT JOIN tblRKVendorPriceFixationLimit pf1 on pf1.intVendorPriceFixationLimitId=e1.intRiskVendorPriceFixationLimitId
                         WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' ) 

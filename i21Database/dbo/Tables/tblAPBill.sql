@@ -73,7 +73,7 @@
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity(intEntityId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo_tblEMEntity_intContactId] FOREIGN KEY (intContactId) REFERENCES tblEMEntity(intEntityId),
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor([intEntityVendorId]),
+	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor([intEntityId]),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMCompanyLocation_intShipToId] FOREIGN KEY (intShipToId) REFERENCES tblSMCompanyLocation(intCompanyLocationId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEMEntityLocation_intShipFromId] FOREIGN KEY (intShipFromId) REFERENCES [tblEMEntityLocation](intEntityLocationId),

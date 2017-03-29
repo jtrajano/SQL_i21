@@ -231,7 +231,7 @@ BEGIN TRY
 			
 			SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey), @UserKey)
 			
-			SET @intCurrencyId = ISNULL((SELECT intCurrencyId FROM tblAPVendor WHERE intEntityVendorId = @EntityId), @intDefaultCurrencyId)
+			SET @intCurrencyId = ISNULL((SELECT intCurrencyId FROM tblAPVendor WHERE [intEntityId] = @EntityId), @intDefaultCurrencyId)
 
 			SELECT @intTermId = intTermsId FROM tblEMEntityLocation WHERE intEntityId = @EntityId
 

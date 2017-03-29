@@ -504,8 +504,8 @@ BEGIN TRY
 				INNER JOIN tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 				INNER JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityShipViaId 
 				INNER JOIN tblEMEntity ON tblSMShipVia.intEntityShipViaId = tblEMEntity.intEntityId 
-				INNER JOIN tblAPVendor ON tblTRLoadReceipt.intTerminalId = tblAPVendor.intEntityVendorId 
-				INNER JOIN tblEMEntity AS EntityAPVendor ON tblAPVendor.intEntityVendorId = EntityAPVendor.intEntityId 
+				INNER JOIN tblAPVendor ON tblTRLoadReceipt.intTerminalId = tblAPVendor.[intEntityId] 
+				INNER JOIN tblEMEntity AS EntityAPVendor ON tblAPVendor.[intEntityId] = EntityAPVendor.intEntityId 
 				INNER JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
 				INNER JOIN tblEMEntityLocation ON tblTRSupplyPoint.intEntityLocationId = tblEMEntityLocation.intEntityLocationId 
 				LEFT OUTER JOIN tblTFTaxCategory 

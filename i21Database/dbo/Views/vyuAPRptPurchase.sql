@@ -32,8 +32,8 @@ SELECT
 	,B.strMiscDescription AS strDescription
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 FROM dbo.tblPOPurchase A
-	INNER JOIN (dbo.tblAPVendor C INNER JOIN dbo.tblEMEntity C1 ON C.intEntityVendorId = C1.intEntityId)
-			ON A.[intEntityVendorId] = C.intEntityVendorId
+	INNER JOIN (dbo.tblAPVendor C INNER JOIN dbo.tblEMEntity C1 ON C.[intEntityId] = C1.intEntityId)
+			ON A.[intEntityVendorId] = C.[intEntityId]
 	LEFT JOIN dbo.tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	LEFT JOIN dbo.tblICItem D ON B.intItemId = D.intItemId
 	LEFT JOIN (dbo.tblICItemUOM E1 

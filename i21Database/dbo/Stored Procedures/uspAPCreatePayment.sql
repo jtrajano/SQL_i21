@@ -62,14 +62,14 @@ BEGIN
 	SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
 
 	SELECT 
-		TOP 1 @vendorId = C.[intEntityVendorId] 
+		TOP 1 @vendorId = C.[intEntityId] 
 		,@vendorWithhold = C.ysnWithholding
 		,@location = A.intShipToId
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
 		INNER JOIN tblAPVendor C
-			ON A.[intEntityVendorId] = C.[intEntityVendorId]
+			ON A.[intEntityVendorId] = C.[intEntityId]
 
 	--VALIDATION
 	--Make sure there is user to use

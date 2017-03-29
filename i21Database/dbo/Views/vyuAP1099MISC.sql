@@ -67,12 +67,12 @@ AS
 		, CASE WHEN SUM(A.dblSubstitutePayments) >= MIN(C.dbl1099MISCSubstitute) AND SUM(A.dblSubstitutePayments) != 0 THEN SUM(dblSubstitutePayments) ELSE NULL END AS dblSubstitutePayments
 		, CASE WHEN SUM(A.dblDirectSales) >= MIN(C.dbl1099MISCDirecSales) AND SUM(A.dblDirectSales) != 0 THEN SUM(A.dblDirectSales) ELSE NULL END AS dblDirectSales
 		, (CASE WHEN SUM(A.dblDirectSales) >= MIN(C.dbl1099MISCDirecSales) AND SUM(A.dblDirectSales) != 0 THEN 'X' ELSE NULL END) AS strDirectSales
-		, A.intEntityVendorId
+		, A.[intEntityId]
 	FROM vyuAP1099 A
 	CROSS JOIN tblSMCompanySetup B
 	CROSS JOIN tblAP1099Threshold C
 	WHERE A.int1099Form = 1
-	GROUP BY intYear, intEntityVendorId
+	GROUP BY intYear, [intEntityId]
 	,B.strCompanyName, B.strAddress, B.strCity, B.strState, B.strZip, B.strCountry, B.strPhone, B.strEin--B.strFederalTaxID
 	, A.strAddress
 	, A.strVendorCompanyName

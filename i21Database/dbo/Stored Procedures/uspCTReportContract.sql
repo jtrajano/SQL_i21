@@ -275,7 +275,7 @@ BEGIN TRY
 	JOIN	tblEMEntity			PR	ON	PR.intEntityId			=	CH.intProducerId		LEFT
 	JOIN	tblCTPosition		PO	ON	PO.intPositionId		=	CH.intPositionId		LEFT
 	JOIN	tblSMCountry		CO	ON	CO.intCountryID			=	CH.intCountryId			LEFT
-	JOIN	tblAPVendor			VR	ON	VR.intEntityVendorId	=	CH.intEntityId			LEFT
+	JOIN	tblAPVendor			VR	ON	VR.[intEntityId]	=	CH.intEntityId			LEFT
 	JOIN	tblARCustomer		CR	ON	CR.intEntityCustomerId	=	CH.intEntityId			LEFT	
 	JOIN	tblSMCity			CT	ON	CT.intCityId			=	CH.intINCOLocationTypeId	LEFT
 	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intINCOLocationTypeId LEFT

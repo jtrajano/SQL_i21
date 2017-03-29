@@ -37,7 +37,7 @@ FROM tblTRQuoteDetail Detail
 LEFT JOIN tblTRQuoteHeader Header ON Header.intQuoteHeaderId = Detail.intQuoteHeaderId
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = Header.intEntityCustomerId
 LEFT JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
-LEFT JOIN vyuAPVendor Terminal ON Terminal.intEntityVendorId = Detail.intTerminalId
+LEFT JOIN vyuAPVendor Terminal ON Terminal.[intEntityId] = Detail.intTerminalId
 LEFT JOIN vyuTRSupplyPointView SupplyPoint ON SupplyPoint.intSupplyPointId = Detail.intSupplyPointId
 LEFT JOIN tblEMEntityLocation ShipToLocation ON ShipToLocation.intEntityLocationId = Detail.intShipToLocationId
 LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Detail.intTaxGroupId

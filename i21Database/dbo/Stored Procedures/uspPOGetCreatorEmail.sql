@@ -20,9 +20,9 @@ OUTER APPLY (
 		F.strEmail
 	FROM tblAPVendor C
 	INNER JOIN ([tblEMEntityToContact] D INNER JOIN tblEMEntity E ON D.intEntityContactId = E.intEntityId)
-	 ON C.intEntityVendorId = D.intEntityId
+	 ON C.[intEntityId] = D.intEntityId
 	INNER JOIN tblEMEntity F ON F.intEntityId = D.intEntityContactId
-	WHERE C.intEntityVendorId = A.intEntityVendorId
+	WHERE C.[intEntityId] = A.intEntityVendorId
 	AND A.intEntityId = E.intEntityId
 ) VendorContactCreated
 OUTER APPLY (

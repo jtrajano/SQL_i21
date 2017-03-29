@@ -34,7 +34,7 @@ SELECT
 			ON A.intBankAccountId = B.intBankAccountId
 		LEFT JOIN dbo.tblCMBank C
 			ON B.intBankId = C.intBankId
-		LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D1 ON D.intEntityVendorId = D1.intEntityId)
-			ON A.[intEntityVendorId] = D.[intEntityVendorId]
+		LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D1 ON D.[intEntityId] = D1.intEntityId)
+			ON A.[intEntityVendorId] = D.[intEntityId]
 		LEFT JOIN dbo.tblCMBankTransaction E
 			ON A.strPaymentRecordNum = E.strTransactionId

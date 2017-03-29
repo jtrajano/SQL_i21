@@ -66,7 +66,7 @@ BEGIN
 	
 	--INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 
-	IF(EXISTS(SELECT 1 FROM tblAPPayment A INNER JOIN tblAPVendor B ON A.intEntityVendorId = B.intEntityVendorId
+	IF(EXISTS(SELECT 1 FROM tblAPPayment A INNER JOIN tblAPVendor B ON A.intEntityVendorId = B.[intEntityId]
 					WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND B.ysnWithholding = 1))
 	BEGIN
 		SET @applyWithHold = 1;
@@ -121,7 +121,7 @@ BEGIN
 		[strRateType]				=	NULL
 	FROM	[dbo].tblAPPayment A 
 	INNER JOIN tblAPVendor C
-		ON A.intEntityVendorId = C.intEntityVendorId
+		ON A.intEntityVendorId = C.[intEntityId]
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 
 	--Withheld
@@ -164,7 +164,7 @@ BEGIN
 			FROM [dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
 					ON A.intAccountId = GLAccnt.intAccountId
 				INNER JOIN tblAPVendor B
-					ON A.intEntityVendorId = B.intEntityVendorId AND B.ysnWithholding = 1
+					ON A.intEntityVendorId = B.[intEntityId] AND B.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	END
 
@@ -209,7 +209,7 @@ BEGIN
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPVendor C
-					ON A.intEntityVendorId = C.intEntityVendorId
+					ON A.intEntityVendorId = C.[intEntityId]
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND 1 = (CASE WHEN B.dblAmountDue = CAST(((B.dblPayment + B.dblDiscount) - B.dblInterest) AS DECIMAL(18,2)) THEN 1 ELSE 0 END)
 		AND B.dblDiscount <> 0 AND B.dblPayment > 0
@@ -258,7 +258,7 @@ BEGIN
 		[strRateType]					=	NULL
 	FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
+			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId] 
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND B.dblPayment <> 0
 	AND B.intInvoiceId IS NULL
@@ -312,7 +312,7 @@ BEGIN
 			[strRateType]					=	NULL
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
+				INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId] 
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND B.dblPayment <> 0
 		AND B.intInvoiceId IS NOT NULL
@@ -369,7 +369,7 @@ BEGIN
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPVendor C
-					ON A.intEntityVendorId = C.intEntityVendorId
+					ON A.intEntityVendorId = C.[intEntityId]
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND 1 = (CASE WHEN B.dblAmountDue = CAST(((B.dblPayment + B.dblDiscount) - B.dblInterest) AS DECIMAL(18,2)) THEN 1 ELSE 0 END)
 		AND B.dblInterest <> 0 AND B.dblPayment > 0
@@ -420,7 +420,7 @@ BEGIN
 			[strRateType]					=	NULL
 		FROM [dbo].tblAPPayment A 
 				INNER JOIN tblAPVendor B
-					ON A.intEntityVendorId = B.intEntityVendorId
+					ON A.intEntityVendorId = B.[intEntityId]
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND A.dblUnapplied > 0
 		GROUP BY A.[strPaymentRecordNum],

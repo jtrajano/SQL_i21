@@ -64,7 +64,7 @@ SELECT Receipt.intInventoryReceiptId
 	, dblGrandTotal =  ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 6),0)
 	--, WeightLoss.dblClaimableWt
 FROM tblICInventoryReceipt Receipt
-	LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = Receipt.intEntityVendorId
+	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN tblSMCompanyLocation Transferor ON Transferor.intCompanyLocationId = Receipt.intTransferorId
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Receipt.intLocationId
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = Receipt.intCurrencyId

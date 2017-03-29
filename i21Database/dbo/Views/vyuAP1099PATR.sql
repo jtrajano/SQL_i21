@@ -61,12 +61,12 @@ AS
 	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 8 THEN SUM(A.dbl1099) ELSE NULL END AS dblOpportunity
 	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 9 THEN SUM(A.dbl1099) ELSE NULL END AS dblAMT
 	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 10 THEN SUM(A.dbl1099) ELSE NULL END AS dblOther
-	, A.intEntityVendorId
+	, A.[intEntityId]
 FROM vyuAP1099 A
 CROSS JOIN tblSMCompanySetup B
 CROSS JOIN tblAP1099Threshold C
 WHERE A.int1099Form = 4
-GROUP BY intYear, intEntityVendorId
+GROUP BY intYear, [intEntityId]
 ,B.strCompanyName, B.strAddress, B.strCity, B.strState, B.strZip, B.strCountry, B.strPhone, B.strEin--B.strFederalTaxID
 ,A.int1099Form
 ,A.int1099Category

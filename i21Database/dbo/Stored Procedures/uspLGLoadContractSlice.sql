@@ -205,7 +205,7 @@ BEGIN TRY
 				,GETDATE()
 			FROM vyuLGLoadView L
 			LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
-			LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
+			LEFT JOIN tblAPVendor V ON V.[intEntityId] = E.intEntityId
 			WHERE intLoadId = @intOrgLoadId
 
 			SELECT @intLoadStgId = SCOPE_IDENTITY()

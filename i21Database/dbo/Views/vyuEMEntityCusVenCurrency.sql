@@ -22,7 +22,7 @@
 				and (b.Vendor = 1 or b.Customer = 1)
 
 		left join tblAPVendor c
-			on a.intEntityId = c.intEntityVendorId
+			on a.intEntityId = c.[intEntityId]
 		left join tblARCustomer d
 			on a.intEntityId = d.intEntityCustomerId
 		left join tblSMCurrency e

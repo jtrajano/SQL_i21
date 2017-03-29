@@ -5858,8 +5858,8 @@
     <Property Name="ParentElementName" Value="[dbo].[tblSTRetailPriceAdjustmentDetail]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intEntityId" />
-</Operation>
-<Operation Name="Rename Refactor" Key="c3f0ab57-1a4b-4f2c-93bb-57163f8b8481" ChangeDateTime="02/16/2017 07:25:38">
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c3f0ab57-1a4b-4f2c-93bb-57163f8b8481" ChangeDateTime="02/16/2017 07:25:38">
     <Property Name="ElementName" Value="[dbo].[tblTFValidAccountStatusCode].[intValidAccountStatusCodeId]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
     <Property Name="ParentElementName" Value="[dbo].[tblTFValidAccountStatusCode]" />
@@ -6467,5 +6467,12 @@
     <Property Name="ParentElementName" Value="[dbo].[tblCFVehicle]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnActive" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a4244acc-e0b7-4259-8b74-c94b54101b1c" ChangeDateTime="03/29/2017 07:32:33">
+    <Property Name="ElementName" Value="[dbo].[tblAPVendor].[intEntityVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPVendor]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityId]" />
   </Operation>
 </Operations>

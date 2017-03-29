@@ -154,7 +154,7 @@ BEGIN TRY
 			,dblStorageDue DECIMAL(24, 10)
 	 )
 	
-	SET @intCurrencyId = ISNULL((SELECT intCurrencyId FROM tblAPVendor WHERE intEntityVendorId = @EntityId), @intDefaultCurrencyId)
+	SET @intCurrencyId = ISNULL((SELECT intCurrencyId FROM tblAPVendor WHERE [intEntityId] = @EntityId), @intDefaultCurrencyId)
 	
 	SET @strUpdateType = 'estimate'
 	SET @strProcessType = CASE WHEN @strStorageAdjustment IN ('No additional','Override') THEN 'Unpaid' ELSE 'calculate' END
@@ -240,7 +240,7 @@ BEGIN TRY
 	SELECT TOP 1 
 			@intShipFromId = intShipFromId 
 	FROM	tblAPVendor 
-	WHERE	intEntityVendorId =@EntityId
+	WHERE	[intEntityId] =@EntityId
 	 
 	SELECT	@ItemDescription = strItemNo
 	FROM	tblICItem

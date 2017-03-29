@@ -16,7 +16,7 @@ BEGIN
 		GOTO ExitHere
 	END
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblAPVendor where strVendorId = @Identification  AND intEntityVendorId != @EntityId)
+	IF EXISTS(SELECT TOP 1 1 FROM tblAPVendor where strVendorId = @Identification  AND [intEntityId] != @EntityId)
 	BEGIN
 		Set @Message = 'Entity No already exists as Vendor'
 		GOTO ExitHere

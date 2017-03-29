@@ -15,7 +15,7 @@ INNER JOIN tblEMEntity ENT
 INNER JOIN tblARCustomer ARC
 	ON ARC.intEntityCustomerId = ENT.intEntityId
 INNER JOIN tblAPVendor APV
-	ON APV.intEntityVendorId = CS.intCustomerPatronId
+	ON APV.[intEntityId] = CS.intCustomerPatronId
 LEFT JOIN tblSMTaxCode TC
 	ON TC.intTaxCodeId = ARC.intTaxCodeId
 WHERE CS.strActivityStatus <> 'Retired'

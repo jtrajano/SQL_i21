@@ -58,7 +58,7 @@ SELECT		Total.intFiscalYear,
 	INNER JOIN tblPATRefundRate RR
              ON RR.intRefundTypeId = Total.intRefundTypeId
 	INNER JOIN tblAPVendor APV
-		ON APV.intEntityVendorId = Total.intCustomerPatronId
+		ON APV.[intEntityId] = Total.intCustomerPatronId
 	INNER JOIN tblARCustomer AC
 			 ON AC.intEntityCustomerId = Total.intCustomerPatronId
 	CROSS APPLY ComPref

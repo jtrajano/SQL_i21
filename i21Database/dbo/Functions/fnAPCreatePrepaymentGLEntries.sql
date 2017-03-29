@@ -81,7 +81,7 @@ BEGIN
 			[strRateType]				=	NULL          
 		FROM	[dbo].tblAPPayment A 
 		INNER JOIN tblAPVendor C
-			ON A.intEntityVendorId = C.intEntityVendorId
+			ON A.intEntityVendorId = C.[intEntityId]
 		WHERE	A.intPaymentId IN (SELECT intId FROM @prepaymentIds)
 		---- DEBIT SIDE
 		UNION ALL 
@@ -120,7 +120,7 @@ BEGIN
 			[strRateType]				=	NULL
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
+				INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId] 
 		WHERE	A.intPaymentId IN (SELECT intId FROM @prepaymentIds)
 		AND B.dblPayment <> 0
 		GROUP BY A.[strPaymentRecordNum],

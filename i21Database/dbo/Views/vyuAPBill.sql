@@ -52,8 +52,8 @@ SELECT
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
-		(dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity B1 ON B.[intEntityVendorId] = B1.intEntityId)
-		ON A.[intEntityVendorId] = B.[intEntityVendorId]
+		(dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity B1 ON B.[intEntityId] = B1.intEntityId)
+		ON A.[intEntityVendorId] = B.[intEntityId]
 	INNER JOIN dbo.tblGLAccount C
 		ON A.intAccountId = C.intAccountId
 	INNER JOIN dbo.tblEMEntityLocation EL

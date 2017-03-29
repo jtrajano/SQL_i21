@@ -23,12 +23,12 @@ SELECT
 	, A.strFederalTaxId
 	, A.intYear
 	, CASE WHEN SUM(A.dbl1099B) >= MIN(C.dbl1099B) THEN SUM(A.dbl1099B) ELSE 0 END AS dbl1099B
-	, A.intEntityVendorId
+	, A.[intEntityId]
 FROM vyuAP1099 A
 CROSS JOIN tblSMCompanySetup B
 CROSS JOIN tblAP1099Threshold C
 WHERE A.int1099Form = 3
-GROUP BY intYear, intEntityVendorId
+GROUP BY intYear, [intEntityId]
 ,B.strCompanyName, B.strAddress, B.strCity, B.strState, B.strZip, B.strCountry, B.strPhone, B.strEin--B.strFederalTaxID
 --,C.dbl1099B
 , A.strAddress

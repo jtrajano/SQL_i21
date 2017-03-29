@@ -48,7 +48,7 @@ SELECT Receipt.intLoadReceiptId
 
 FROM tblTRLoadReceipt Receipt
 LEFT JOIN tblTRLoadHeader Header ON Header.intLoadHeaderId = Receipt.intLoadHeaderId
-LEFT JOIN vyuTRTerminal Terminal ON Terminal.intEntityVendorId = Receipt.intTerminalId
+LEFT JOIN vyuTRTerminal Terminal ON Terminal.[intEntityId] = Receipt.intTerminalId
 LEFT JOIN vyuTRSupplyPointView SupplyPoint ON SupplyPoint.intSupplyPointId = Receipt.intSupplyPointId
 LEFT JOIN tblSMCompanyLocation CompanyLocation ON CompanyLocation.intCompanyLocationId = Receipt.intCompanyLocationId
 LEFT JOIN tblICItem Item ON Item.intItemId = Receipt.intItemId

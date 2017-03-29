@@ -72,4 +72,4 @@ AS
 			) AP ON AP.intRecordId = CD.intContractHeaderId											LEFT
 	JOIN	tblEMEntity	AE	ON	AE.intEntityId	=	AP.intSubmittedById
 	JOIN	tblEMEntity	UE	ON	UE.intEntityId	=	ISNULL(CH.intLastModifiedById,CH.intCreatedById)LEFT
-	JOIN	tblAPVendor	VE	ON	VE.intEntityVendorId	=	CH.intEntityId
+	JOIN	tblAPVendor	VE	ON	VE.[intEntityId]	=	CH.intEntityId

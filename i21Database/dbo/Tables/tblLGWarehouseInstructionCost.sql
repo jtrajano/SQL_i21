@@ -15,6 +15,6 @@ CREATE TABLE [dbo].[tblLGWarehouseInstructionCost]
 	CONSTRAINT [PK_tblLGWarehouseInstructionCost] PRIMARY KEY ([intWarehouseInstructionCostId]), 
     CONSTRAINT [FK_tblLGWarehouseInstructionCost_tblLGWarehouseInstructionHeader_intWarehouseInstructionHeaderId] FOREIGN KEY ([intWarehouseInstructionHeaderId]) REFERENCES [tblLGWarehouseInstructionHeader]([intWarehouseInstructionHeaderId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblLGWarehouseInstructionCost_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblLGWarehouseInstructionCost_tblAPVendor_intVendorId] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
+	CONSTRAINT [FK_tblLGWarehouseInstructionCost_tblAPVendor_intVendorId] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityId]),
 	CONSTRAINT [FK_tblLGWarehouseInstructionCost_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 )

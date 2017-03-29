@@ -167,7 +167,7 @@ AS
 	(
 		SELECT TOP 1 * FROM tblAP1099History B
 		WHERE A.intYear = B.intYear AND B.int1099Form = 1
-		AND B.intEntityVendorId = A.intEntityVendorId
+		AND B.intEntityVendorId = A.[intEntityId]
 		ORDER BY B.dtmDatePrinted DESC
 	) History
 	WHERE 1 = (CASE WHEN @vendorFromParam IS NOT NULL THEN

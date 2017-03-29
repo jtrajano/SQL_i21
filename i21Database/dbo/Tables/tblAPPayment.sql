@@ -25,7 +25,7 @@
 	[dtmDateDeleted] DATETIME NULL,
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 
     CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC), 
-    CONSTRAINT [FK_tblAPPayment_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
+    CONSTRAINT [FK_tblAPPayment_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]),
 	CONSTRAINT [FK_tblAPPayment_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_dbo.tblAPPayment_tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity(intEntityId),
 	CONSTRAINT [FK_dbo.tblAPPayment_tblSMCurrency_intCurrencyId] FOREIGN KEY (intCurrencyId) REFERENCES tblSMCurrency(intCurrencyID),

@@ -14,7 +14,7 @@ SELECT
 	, ShipVia.strShipVia
 	, FreightTerm.strFreightTerm
 FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor 
-		ON Vendor.intEntityVendorId = Receipt.intEntityVendorId
+		ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN tblSMCompanyLocation Location 
 		ON Location.intCompanyLocationId = Receipt.intLocationId
 	LEFT JOIN tblSMFreightTerms FreightTerm 

@@ -4,7 +4,7 @@ AS
 
 SELECT DISTINCT VendorDefault.intVendorDefaultId
 	, VendorDefault.intVendorId
-	, intEntityId = Vendor.intEntityVendorId
+	, intEntityId = Vendor.[intEntityId]
 	, Vendor.strVendorId
 	, Entity.strName
 	, EntityLocation.strAddress
@@ -27,8 +27,8 @@ SELECT DISTINCT VendorDefault.intVendorDefaultId
 	, VendorDefault.intImportFileHeaderId
 FROM tblCCVendorDefault VendorDefault
 INNER JOIN tblCCDealerSite DealerSite ON DealerSite.intVendorDefaultId = VendorDefault.intVendorDefaultId
-INNER JOIN tblAPVendor Vendor ON VendorDefault.intVendorId = Vendor.intEntityVendorId
-INNER JOIN tblEMEntity Entity ON Vendor.intEntityVendorId = Entity.intEntityId
+INNER JOIN tblAPVendor Vendor ON VendorDefault.intVendorId = Vendor.[intEntityId]
+INNER JOIN tblEMEntity Entity ON Vendor.[intEntityId] = Entity.intEntityId
 LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityId = Entity.intEntityId AND EntityLocation.ysnActive = 1 AND EntityLocation.ysnDefaultLocation = 1
 LEFT JOIN tblSMTerm Term ON Term.intTermID = EntityLocation.intTermsId
 LEFT JOIN tblSMPaymentMethod F ON F.intPaymentMethodID = Vendor.intPaymentMethodId

@@ -52,7 +52,7 @@ SELECT	Total.intCustomerId,
 	INNER JOIN tblARCustomer AC
 			ON AC.intEntityCustomerId = Total.intCustomerId
 	INNER JOIN tblAPVendor APV
-			ON APV.intEntityVendorId = Total.intCustomerId
+			ON APV.[intEntityId] = Total.intCustomerId
 	LEFT JOIN tblSMTaxCode TC
 			ON TC.intTaxCodeId = AC.intTaxCodeId
 	INNER JOIN tblEMEntity ENT

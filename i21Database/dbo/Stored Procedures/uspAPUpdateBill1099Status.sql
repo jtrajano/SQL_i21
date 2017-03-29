@@ -15,7 +15,7 @@ UPDATE A
 	SET A.ysn1099Printed = Status1099.ysnPrinted
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
-INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.intEntityVendorId
+INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.[intEntityId]
 CROSS APPLY (
 	SELECT
 		TOP 1 *

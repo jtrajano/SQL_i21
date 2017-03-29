@@ -2,7 +2,7 @@
 AS
 SELECT
 	 [intInventoryShipmentId]					=	ShipmentCharge.intInventoryShipmentId
-	,[intEntityVendorId]						=	Vendor.intEntityVendorId
+	,[intEntityVendorId]						=	Vendor.[intEntityId]
 	,[dtmDate]									=	Shipment.dtmShipDate
 	,[strReference]								=	Shipment.strReferenceNumber
 	,[strSourceNumber]							=	Shipment.strShipmentNumber
@@ -45,9 +45,9 @@ FROM tblICInventoryShipmentCharge ShipmentCharge INNER JOIN tblICItem Item
 		ON ShipmentCharge.intInventoryShipmentId = Shipment.intInventoryShipmentId
 	INNER JOIN (
 		tblAPVendor Vendor INNER JOIN tblEMEntity Entity
-			ON Vendor.intEntityVendorId = Entity.intEntityId
+			ON Vendor.[intEntityId] = Entity.intEntityId
 	) 
-		ON Vendor.intEntityVendorId = ShipmentCharge.intEntityVendorId
+		ON Vendor.[intEntityId] = ShipmentCharge.intEntityVendorId
 	INNER JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = Item.intItemId
 		AND ItemLocation.intLocationId = Shipment.intShipFromLocationId

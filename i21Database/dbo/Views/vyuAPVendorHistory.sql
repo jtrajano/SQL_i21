@@ -3,8 +3,8 @@
 AS
 
 SELECT 
-	tblAPVendor.intEntityVendorId as intEntityId
-	,intEntityVendorId = tblAPVendor.intEntityVendorId
+	tblAPVendor.[intEntityId] as intEntityId
+	,intEntityVendorId = tblAPVendor.[intEntityId]
 	,strVendorId = tblAPVendor.strVendorId
 	,A.dtmDate
 	,intTransactionId = A.intBillId 
@@ -31,7 +31,7 @@ FROM dbo.tblAPBill A
 						LEFT JOIN dbo.tblCMBankTransaction C ON B1.strPaymentRecordNum = C.strTransactionId)
 		 ON A.intBillId = B.intBillId
 		LEFT JOIN dbo.tblAPVendor
-			ON tblAPVendor.intEntityVendorId = A.[intEntityVendorId]
+			ON tblAPVendor.[intEntityId] = A.[intEntityVendorId]
 --WHERE 
 --1 = CASE WHEN B1.intPaymentId IS NULL 
 --		THEN 1
@@ -43,9 +43,9 @@ GROUP BY A.intBillId,
 	A.dblTotal,
 	B.dblDiscount,
 	B.dblWithheld,
-	tblAPVendor.intEntityVendorId,
+	tblAPVendor.[intEntityId],
 	tblAPVendor.strVendorId,
-	tblAPVendor.intEntityVendorId,
+	tblAPVendor.[intEntityId],
 	--tblAPVendor.intVendorId,
     strVendorOrderNumber,
 	A.strBillId,

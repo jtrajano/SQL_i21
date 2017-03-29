@@ -31,7 +31,7 @@ BEGIN TRY
 	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 	LEFT JOIN tblEMEntity WE ON WE.intEntityId = CLSL.intVendorId
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = WE.intEntityId
-	LEFT JOIN tblAPVendor A ON A.intEntityVendorId = WE.intEntityId
+	LEFT JOIN tblAPVendor A ON A.[intEntityId] = WE.intEntityId
 	WHERE LD.intLoadId = @intLoadId
 
 	SELECT @intMaxLoadStgId = intLoadStgId FROM tblLGLoadStg WHERE intLoadId = @intLoadId
@@ -196,7 +196,7 @@ BEGIN TRY
 				,(
 					SELECT TOP 1 A.strVendorAccountNum
 					FROM tblLGLoadDetail LD
-					JOIN tblAPVendor A ON A.intEntityVendorId = LD.intVendorEntityId
+					JOIN tblAPVendor A ON A.[intEntityId] = LD.intVendorEntityId
 					WHERE LD.intLoadId = L.intLoadId
 					) strVendorAccountNo
 				,L.strOriginPort
@@ -282,12 +282,12 @@ BEGIN TRY
 			LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
 			LEFT JOIN tblEMEntityLocation SLEL ON SLEL.intEntityId = E.intEntityId
 			LEFT JOIN tblSMCountry SLCountry ON SLCountry.strCountry = SLEL.strCountry
-			LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
+			LEFT JOIN tblAPVendor V ON V.[intEntityId] = E.intEntityId
 			LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 			LEFT JOIN tblEMEntity WE ON WE.intEntityId = CLSL.intVendorId
 			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = WE.intEntityId
-			LEFT JOIN tblAPVendor A ON A.intEntityVendorId = WE.intEntityId
+			LEFT JOIN tblAPVendor A ON A.[intEntityId] = WE.intEntityId
 			LEFT JOIN tblSMCity OCity ON OCity.strCity = L.strOriginPort
 			LEFT JOIN tblSMCountry OCountry ON OCountry.intCountryID = OCity.intCountryId
 			LEFT JOIN tblSMCity DCity ON DCity.strCity = L.strDestinationPort
@@ -295,7 +295,7 @@ BEGIN TRY
 			LEFT JOIN tblEMEntity FA ON FA.intEntityId = L.intForwardingAgentEntityId
 			LEFT JOIN tblEMEntityLocation FAEL ON FAEL.intEntityId = FA.intEntityId
 			LEFT JOIN tblSMCountry FACountry ON FACountry.strCountry = FAEL.strCountry
-			LEFT JOIN tblAPVendor FAV ON FAV.intEntityVendorId = FA.intEntityId
+			LEFT JOIN tblAPVendor FAV ON FAV.[intEntityId] = FA.intEntityId
 			WHERE L.intLoadId = @intLoadId
 
 			SELECT @intLoadStgId = SCOPE_IDENTITY()
@@ -609,7 +609,7 @@ BEGIN TRY
 			,(
 				SELECT TOP 1 A.strVendorAccountNum
 				FROM tblLGLoadDetail LD
-				JOIN tblAPVendor A ON A.intEntityVendorId = LD.intVendorEntityId
+				JOIN tblAPVendor A ON A.[intEntityId] = LD.intVendorEntityId
 				WHERE LD.intLoadId = L.intLoadId
 				) strVendorAccountNo
 			,L.strOriginPort
@@ -695,12 +695,12 @@ BEGIN TRY
 		LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
 		LEFT JOIN tblEMEntityLocation SLEL ON SLEL.intEntityId = E.intEntityId
 		LEFT JOIN tblSMCountry SLCountry ON SLCountry.strCountry = SLEL.strCountry
-		LEFT JOIN tblAPVendor V ON V.intEntityVendorId = E.intEntityId
+		LEFT JOIN tblAPVendor V ON V.[intEntityId] = E.intEntityId
 		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 		LEFT JOIN tblEMEntity WE ON WE.intEntityId = CLSL.intVendorId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = WE.intEntityId
-		LEFT JOIN tblAPVendor A ON A.intEntityVendorId = WE.intEntityId
+		LEFT JOIN tblAPVendor A ON A.[intEntityId] = WE.intEntityId
 		LEFT JOIN tblSMCity OCity ON OCity.strCity = L.strOriginPort
 		LEFT JOIN tblSMCountry OCountry ON OCountry.intCountryID = OCity.intCountryId
 		LEFT JOIN tblSMCity DCity ON DCity.strCity = L.strDestinationPort
@@ -708,7 +708,7 @@ BEGIN TRY
 		LEFT JOIN tblEMEntity FA ON FA.intEntityId = L.intForwardingAgentEntityId
 		LEFT JOIN tblEMEntityLocation FAEL ON FAEL.intEntityId = FA.intEntityId
 		LEFT JOIN tblSMCountry FACountry ON FACountry.strCountry = FAEL.strCountry
-		LEFT JOIN tblAPVendor FAV ON FAV.intEntityVendorId = FA.intEntityId
+		LEFT JOIN tblAPVendor FAV ON FAV.[intEntityId] = FA.intEntityId
 		WHERE L.intLoadId = @intLoadId
 
 		SELECT @intLoadStgId = SCOPE_IDENTITY()

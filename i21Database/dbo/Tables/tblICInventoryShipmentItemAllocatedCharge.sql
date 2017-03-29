@@ -9,7 +9,7 @@
 	[ysnAccrue] BIT NULL DEFAULT ((0)),
 	[ysnPrice] BIT NULL DEFAULT ((0)),	
 	CONSTRAINT [PK_tblICInventoryShipmentItemAllocatedCharge] PRIMARY KEY ([intInventoryShipmentItemAllocatedChargeId]),
-	CONSTRAINT [FK_tblICInventoryShipmentItemAllocatedCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
+	CONSTRAINT [FK_tblICInventoryShipmentItemAllocatedCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]), 
     CONSTRAINT [FK_tblICInventoryShipmentItemAllocatedCharge_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE
 )
 GO

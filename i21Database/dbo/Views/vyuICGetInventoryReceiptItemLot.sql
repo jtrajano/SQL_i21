@@ -67,6 +67,6 @@ LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyL
 LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = receiptItemLot.intStorageLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = receiptItemLot.intItemUnitMeasureId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-LEFT JOIN tblAPVendor Vendor ON Vendor.intEntityVendorId = receiptItemLot.intEntityVendorId
+LEFT JOIN tblAPVendor Vendor ON Vendor.[intEntityId] = receiptItemLot.intEntityVendorId
 LEFT JOIN tblSMCountry Origin ON Origin.intCountryID = receiptItemLot.intOriginId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = receiptItemLot.intGradeId

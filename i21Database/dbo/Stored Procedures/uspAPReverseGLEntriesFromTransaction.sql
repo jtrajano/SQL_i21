@@ -96,7 +96,7 @@ BEGIN
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A
 			LEFT JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityVendorId
+				ON A.intEntityVendorId = C.[intEntityId]
 			--CROSS APPLY
 			--(
 			--	SELECT * FROM #tmpGLUnits WHERE intAccountId = A.intAccountId
@@ -138,7 +138,7 @@ BEGIN
 			LEFT JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
 			LEFT JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityVendorId
+				ON A.intEntityVendorId = C.[intEntityId]
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM #tmpTransacions)
 END
 

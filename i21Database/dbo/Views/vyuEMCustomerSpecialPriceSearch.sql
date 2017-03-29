@@ -32,18 +32,18 @@
 			on cus_location.intEntityId = special_price.intEntityCustomerId
 				and special_price.intCustomerLocationId = cus_location.intEntityLocationId
 		left join tblAPVendor vend
-			on vend.intEntityVendorId = special_price.intEntityVendorId	
+			on vend.[intEntityId] = special_price.intEntityVendorId	
 		left join tblAPVendor vend_rank
-			on vend_rank.intEntityVendorId = special_price.intRackVendorId
+			on vend_rank.[intEntityId] = special_price.intRackVendorId
 		left join tblICItem item
 			on item.intItemId = special_price.intItemId
 		left join tblICItem item_rank
 			on item_rank.intItemId = special_price.intRackItemId
 		left join [tblEMEntityLocation] vend_location
-			on vend_location.intEntityId = vend.intEntityVendorId
+			on vend_location.intEntityId = vend.[intEntityId]
 				and vend_location.intEntityLocationId = special_price.intEntityLocationId
 		left join [tblEMEntityLocation] vend_location_rank
-			on vend_location_rank.intEntityId = vend_rank.intEntityVendorId
+			on vend_location_rank.intEntityId = vend_rank.[intEntityId]
 				and vend_location_rank.intEntityLocationId = special_price.intRackLocationId
 		left join tblICCategory category
 			on category.intCategoryId = special_price.intCategoryId

@@ -4,7 +4,7 @@ WITH SCHEMABINDING
 	AS 
 SELECT 
    
-	A.intEntityVendorId,	
+	A.[intEntityId],	
      case when A.strVendorId is null then C.strEntityNo 	   	
 	     when A.strVendorId = '          ' then C.strEntityNo
 	     when A.strVendorId is not null then A.strVendorId 
@@ -15,7 +15,7 @@ FROM
     
 	 dbo.tblAPVendor A
 	INNER JOIN dbo.tblEMEntity C
-		ON A.intEntityVendorId = C.intEntityId and A.ysnTransportTerminal = 1
+		ON A.[intEntityId] = C.intEntityId and A.ysnTransportTerminal = 1
 		
 	
 	

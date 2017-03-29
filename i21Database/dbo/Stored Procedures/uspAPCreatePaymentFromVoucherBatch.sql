@@ -41,7 +41,7 @@ AS
 		,E.intBankAccountId
 	FROM tblAPBillBatch A
 	INNER JOIN tblAPBill B ON A.intBillBatchId = B.intBillBatchId
-	INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.intEntityVendorId
+	INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.[intEntityId]
 	INNER JOIN tblSMCompanyLocation D ON B.intShipToId = D.intCompanyLocationId
 	LEFT JOIN tblCMBankAccount E ON D.intCashAccount = E.intGLAccountId
 	WHERE A.intBillBatchId = @voucherBatchId

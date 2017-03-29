@@ -16,7 +16,7 @@ AS
 					ELSE CAST(1 AS BIT)
 			END	AS	ysnActive,
 			CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShipVia,
-			CAST(ISNULL(V.intEntityVendorId	,0) AS BIT) ysnVendor,
+			CAST(ISNULL(V.[intEntityId]	,0) AS BIT) ysnVendor,
 			CASE	WHEN Y.strType = 'Vendor'	THEN	V.intTermsId
 					WHEN Y.strType = 'Customer'	THEN	U.intTermsId
 					ELSE L.intTermsId 
@@ -29,7 +29,7 @@ AS
 	JOIN	[tblEMEntityToContact]	C	ON	C.intEntityId			=	E.intEntityId 
 										AND C.ysnDefaultContact		=	1
 	JOIN	tblEMEntity				T	ON	T.intEntityId			=	C.intEntityContactId	LEFT 
-	JOIN	tblAPVendor				V	ON	V.intEntityVendorId		=	E.intEntityId			LEFT
+	JOIN	tblAPVendor				V	ON	V.[intEntityId]		=	E.intEntityId			LEFT
 	JOIN	tblARCustomer			U	ON	U.intEntityCustomerId	=	E.intEntityId			LEFT
 	JOIN	(
 				SELECT	EY.intEntityId 

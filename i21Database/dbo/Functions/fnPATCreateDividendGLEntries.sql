@@ -133,7 +133,7 @@ BEGIN
 	INNER JOIN tblPATDividendsCustomer B
 			ON A.intDividendId = B.intDividendId
 	INNER JOIN tblAPVendor APV
-			ON APV.intEntityVendorId = B.intCustomerId
+			ON APV.[intEntityId] = B.intCustomerId
 	WHERE	A.intDividendId IN (SELECT intTransactionId FROM @tmpTransacions)	
 	RETURN 
 END

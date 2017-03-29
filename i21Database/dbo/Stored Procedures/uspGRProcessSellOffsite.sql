@@ -571,7 +571,7 @@ BEGIN TRY
 	--CREATING INVOICE
 	    SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROM tblSMCompanyPreference
 		SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey), @UserKey)			
-		SET @intCurrencyId = ISNULL((SELECT intCurrencyId FROM tblAPVendor WHERE intEntityVendorId = @intSaleEntityId), @intDefaultCurrencyId)
+		SET @intCurrencyId = ISNULL((SELECT intCurrencyId FROM tblAPVendor WHERE [intEntityId] = @intSaleEntityId), @intDefaultCurrencyId)
 		SELECT @intTermId = intTermsId FROM tblEMEntityLocation WHERE intEntityId = @intSaleEntityId
 
 		BEGIN TRANSACTION

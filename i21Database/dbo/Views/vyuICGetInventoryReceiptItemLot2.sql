@@ -66,7 +66,7 @@ FROM	tblICInventoryReceiptItemLot receiptItemLot
 		LEFT OUTER JOIN tblICCommodityAttribute attr 
 			ON attr.intCommodityAttributeId = receiptItemLot.intGradeId
 		LEFT OUTER JOIN tblAPVendor v 
-			ON v.intEntityVendorId = receiptItemLot.intEntityVendorId
+			ON v.[intEntityId] = receiptItemLot.intEntityVendorId
 		LEFT OUTER JOIN tblICItemUOM iuom 
 			ON iuom.intItemUOMId = receiptItemLot.intItemUnitMeasureId
 		LEFT OUTER JOIN tblICUnitMeasure uom 
