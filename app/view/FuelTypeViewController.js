@@ -27,23 +27,28 @@ Ext.define('Inventory.view.FuelTypeViewController', {
             txtPercentOfDenaturant: '{current.dblPercentDenaturant}',
             chkDeductDenaturantFromRin: '{current.ysnDeductDenaturant}',
             cboFuelCategory: {
-                value: '{current.intRinFuelCategoryId}',
+                value: '{current.strFuelCategory}',
+                origValueField: 'intRinFuelCategoryId',
                 store: '{fuelCategory}'
             },
             cboFeedStock: {
-                value: '{current.intRinFeedStockId}',
+                value: '{current.strFeedStock}',
+                origValueField: 'intRinFeedStockId',
                 store: '{feedStock}'
             },
             cboFuelCode: {
-                value: '{current.intRinFuelId}',
+                value: '{current.strFuelCode}',
+                origValueField: 'intRinFuelId',
                 store: '{fuelCode}'
             },
             cboProductionProcess: {
-                value: '{current.intRinProcessId}',
+                value: '{current.strProcessCode}',
+                origValueField: 'intRinProcessId',
                 store: '{productionProcess}'
             },
             cboFeedStockUom: {
-                value: '{current.intRinFeedStockUOMId}',
+                value: '{current.strFeedStockUOM}',
+                origValueField: 'intRinFeedStockUOMId',
                 store: '{feedStockUom}'
             }
         }
@@ -59,6 +64,7 @@ Ext.define('Inventory.view.FuelTypeViewController', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
+            include: 'RinFuelCategory, RinFeedStock, RinFuel, RinFeedStockUOM, RinProcess',
             binding: me.config.binding
         });
 
@@ -101,6 +107,26 @@ Ext.define('Inventory.view.FuelTypeViewController', {
 
         if (current)
             current.set('strEquivalenceValue', records[0].get('strEquivalenceValue'));
+    },
+
+    onFuelCategoryDrilldown: function() {
+        iRely.Functions.openScreen('Inventory.view.FuelCategory', {viewConfig: { modal: true }});
+    },
+
+    onFeedStockDrilldown: function() {
+        iRely.Functions.openScreen('Inventory.view.FeedStockCode', {viewConfig: { modal: true }});
+    },
+
+    onFuelCodeDrilldown: function() {
+        iRely.Functions.openScreen('Inventory.view.FuelCode', {viewConfig: { modal: true }});
+    },
+
+    onProductionProcessDrilldown: function() {
+        iRely.Functions.openScreen('Inventory.view.ProcessCode', {viewConfig: { modal: true }});
+    },
+
+    onFeedStockUomDrilldown: function() {
+        iRely.Functions.openScreen('Inventory.view.FeedStockUom', {viewConfig: { modal: true }});
     },
     
     init: function(application) {

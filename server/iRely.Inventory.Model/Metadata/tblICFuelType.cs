@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using iRely.Common;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iRely.Inventory.Model
 {
@@ -23,6 +24,106 @@ namespace iRely.Inventory.Model
         public bool ysnRenewableBiomass { get; set; }
         public decimal? dblPercentDenaturant { get; set; }
         public bool ysnDeductDenaturant { get; set; }
+
+        private string _fuelCategory;
+        [NotMapped]
+        public string strFuelCategory
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_fuelCategory))
+                    if (RinFuelCategory != null)
+                        return RinFuelCategory.strRinFuelCategoryCode;
+                    else
+                        return null;
+                else
+                    return _fuelCategory;
+            }
+            set
+            {
+                _fuelCategory = value;
+            }
+        }
+
+        private string _feedStock;
+        [NotMapped]
+        public string strFeedStock
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_feedStock))
+                    if (RinFeedStock != null)
+                        return RinFeedStock.strRinFeedStockCode;
+                    else
+                        return null;
+                else
+                    return _feedStock;
+            }
+            set
+            {
+                _feedStock = value;
+            }
+        }
+
+        private string _fuelCode;
+        [NotMapped]
+        public string strFuelCode
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_fuelCode))
+                    if (RinFuel != null)
+                        return RinFuel.strRinFuelCode;
+                    else
+                        return null;
+                else
+                    return _fuelCode;
+            }
+            set
+            {
+                _fuelCode = value;
+            }
+        }
+
+        private string _feedStockUOM;
+        [NotMapped]
+        public string strFeedStockUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_feedStockUOM))
+                    if (RinFeedStockUOM != null)
+                        return RinFeedStockUOM.strRinFeedStockUOMCode;
+                    else
+                        return null;
+                else
+                    return _feedStockUOM;
+            }
+            set
+            {
+                _feedStockUOM = value;
+            }
+        }
+
+        private string _processCode;
+        [NotMapped]
+        public string strProcessCode
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_processCode))
+                    if (RinProcess != null)
+                        return RinProcess.strRinProcessCode;
+                    else
+                        return null;
+                else
+                    return _processCode;
+            }
+            set
+            {
+                _processCode = value;
+            }
+        }
 
         public tblICRinFuelCategory RinFuelCategory { get; set; }
         public tblICRinFeedStock RinFeedStock { get; set; }
