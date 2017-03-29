@@ -39,6 +39,7 @@
 [intCostUOMId] [int] NULL,
 [intCurrencyId] [int] NULL,
 [dblTotalCost] NUMERIC(18, 6) NULL,
+[ysnNewContainer] BIT DEFAULT (1),
 
 CONSTRAINT [PK_tblLGLoadContainer] PRIMARY KEY ([intLoadContainerId]), 
 CONSTRAINT [FK_tblLGLoadContainer_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,
