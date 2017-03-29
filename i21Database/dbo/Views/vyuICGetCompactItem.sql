@@ -36,6 +36,18 @@ SELECT Item.intItemId
 , M2M.strM2MComputation
 , strTonnageTaxUOM = TonnageUOM.strUnitMeasure
 , Item.intTonnageTaxUOMId
+, strFuelCategory 		= FuelCategory.strRinFuelCategoryCode
+, strMedicationTag 		= Medication.strDescription
+, strIngredientTag 		= Ingredient.strDescription
+, strPhysicalItem 		= PhysicalItem.strItemNo
+, strPatronageCategory 	= PatronageCategory.strCategoryCode
+, strPatronageDirect 	= PatronageDirect.strCategoryCode
+, strOrigin 			= Origin.strDescription
+, strProductType		= ProductType.strDescription
+, strRegion 			= Region.strDescription
+, strSeason 			= Season.strDescription
+, strClass 				= Class.strDescription
+, strProductLine 		= ProductLine.strDescription
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -47,3 +59,15 @@ LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = CostItemUOM.int
 LEFT JOIN tblICUnitMeasure TonnageUOM ON TonnageUOM.intUnitMeasureId = Item.intTonnageTaxUOMId
 LEFT JOIN tblICCommodityAttribute CommodityAttrib ON CommodityAttrib.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblICM2MComputation M2M ON M2M.intM2MComputationId = Item.intM2MComputationId
+LEFT JOIN tblICRinFuelCategory FuelCategory ON FuelCategory.intRinFuelCategoryId = Item.intRINFuelTypeId
+LEFT JOIN tblICTag Medication ON Medication.intTagId = Item.intMedicationTag
+LEFT JOIN tblICTag Ingredient ON Ingredient.intTagId = Item.intIngredientTag
+LEFT JOIN tblICItem PhysicalItem ON PhysicalItem.intItemId = Item.intPhysicalItem
+LEFT JOIN tblPATPatronageCategory PatronageCategory ON PatronageCategory.intPatronageCategoryId = Item.intPatronageCategoryId
+LEFT JOIN tblPATPatronageCategory PatronageDirect ON PatronageDirect.intPatronageCategoryId = Item.intPatronageCategoryDirectId
+LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId
+LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = Item.intRegionId
+LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = Item.intSeasonId
+LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = Item.intClassVarietyId
+LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = Item.intProductLineId
