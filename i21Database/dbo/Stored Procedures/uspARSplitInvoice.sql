@@ -19,14 +19,14 @@ BEGIN
 		  , @errorMsg				NVARCHAR(500)
 
 	SET @ZeroDecimal	= 0.000000
-	SET @EntityId		= ISNULL((SELECT TOP 1 [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId), 0)
+	SET @EntityId		= ISNULL((SELECT TOP 1 [intEntityUserSecurityId] FROM tblSMUserSecurity WITH (NOLOCK)  WHERE [intEntityUserSecurityId] = @UserId), 0)
 	SET @InvoiceDate	= ISNULL(@InvoiceDate, CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), GETDATE()))))
 
 	IF ISNULL(@SplitDetailId, 0) > 0 
 		BEGIN
 			SELECT @intSplitEntityId = intEntityId
 			      ,@dblSplitPercent = dblSplitPercent/100
-			FROM [tblEMEntitySplitDetail] 
+			FROM [tblEMEntitySplitDetail] WITH (NOLOCK)
 			WHERE intSplitDetailId = @SplitDetailId
 		END
 
@@ -46,7 +46,7 @@ BEGIN
 		  @InvoiceType			= strType
 		, @TransactionType		= strTransactionType
 		, @DistributionHeaderId	= ISNULL(intDistributionHeaderId, intLoadDistributionHeaderId)
-	FROM tblARInvoice
+	FROM tblARInvoice WITH (NOLOCK)
 	WHERE intInvoiceId = @InvoiceId
 	
 	--VALIDATE INVOICE TYPES
@@ -183,7 +183,7 @@ BEGIN
 		,0
 		,@EntityId
 	FROM 
-		tblARInvoice
+		tblARInvoice WITH (NOLOCK)
 	WHERE
 		intInvoiceId = @InvoiceId
 				
@@ -196,7 +196,7 @@ BEGIN
 	SELECT 	
 		 [intInvoiceDetailId]
 	FROM
-		tblARInvoiceDetail
+		tblARInvoiceDetail WITH (NOLOCK)
 	WHERE
 		[intInvoiceId] = @InvoiceId
 	ORDER BY
@@ -328,7 +328,7 @@ BEGIN
 								,[dblSubCurrencyRate]
 								,1
 							FROM
-								tblARInvoiceDetail
+								tblARInvoiceDetail WITH (NOLOCK)
 							WHERE
 								[intInvoiceDetailId] = @InvoiceDetailId
 												
@@ -367,7 +367,7 @@ BEGIN
 								,[ysnTaxExempt]
 								,[strNotes] 
 								,1
-							FROM tblARInvoiceDetailTax 
+							FROM tblARInvoiceDetailTax WITH (NOLOCK)
 							WHERE intInvoiceDetailId = @InvoiceDetailId
 				END
 			ELSE
@@ -405,7 +405,7 @@ BEGIN
 						,@ItemSubCurrencyId				= [intSubCurrencyId]
 						,@ItemSubCurrencyId				= [dblSubCurrencyRate]
 					FROM
-						tblARInvoiceDetail
+						tblARInvoiceDetail WITH (NOLOCK)
 					WHERE
 						[intInvoiceDetailId] = @InvoiceDetailId
 

@@ -105,7 +105,7 @@ SELECT
 	,@InvoiceDate		= [dtmDate]
 	,@CurrencyId		= [intCurrencyId]
 FROM
-	tblARInvoice
+	tblARInvoice WITH (NOLOCK)
 WHERE
 	intInvoiceId = @InvoiceId
 	
@@ -132,17 +132,6 @@ IF NOT EXISTS(	SELECT NULL
 			RAISERROR(120004, 16, 1);
 		RETURN 0;
 	END
-
-
---IF EXISTS(	SELECT	NULL 
---			FROM	tblICItem IC 
---			WHERE	IC.[intItemId] = @ItemId AND ISNULL(IC.[strLotTracking], 'No') <> 'No'
---		)
---	BEGIN		
---		IF ISNULL(@RaiseError,0) = 1
---			RAISERROR(120076, 16, 1);
---		RETURN 0;
---	END
 	
 IF ISNULL(@RaiseError,0) = 0	
 	BEGIN TRANSACTION
@@ -156,7 +145,7 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 				,@TermId			INT
 
 		BEGIN TRY
-		SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
+		SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WITH (NOLOCK) WHERE intInvoiceId = @InvoiceId 
 		EXEC dbo.[uspARGetItemPrice]  
 			 @ItemId					= @ItemId
 			,@CustomerId				= @EntityCustomerId
@@ -172,18 +161,6 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			,@ContractSeq				= @ContractSeq			OUTPUT
 			,@TermDiscount				= @ItemTermDiscount		OUTPUT
 			,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT
-			--,@AvailableQuantity			= NULL OUTPUT
-			--,@UnlimitedQuantity			= 0    OUTPUT
-			--,@OriginalQuantity			= NULL
-			--,@CustomerPricingOnly			= 0
-			--,@ItemPricingOnly				= 0
-			--,@VendorId					= NULL
-			--,@SupplyPointId				= NULL
-			--,@LastCost					= NULL
-			--,@ShipToLocationId			= NULL
-			--,@VendorLocationId			= NULL
-			--,@PricingLevelId			= NULL
-			--,@AllowQtyToExceedContract	= 0
 			,@InvoiceType				= @InvoiceType
 			,@TermId					= @TermId
 		END TRY
@@ -197,7 +174,7 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 
 BEGIN TRY
 	SELECT TOP 1 @existingInvoiceDetail = intInvoiceDetailId 
-		FROM tblARInvoiceDetail 
+		FROM tblARInvoiceDetail WITH (NOLOCK)
 		WHERE intSalesOrderDetailId = @ItemSalesOrderDetailId 
 		  AND strSalesOrderNumber = @ItemSalesOrderNumber 
 		  AND intInvoiceId = @InvoiceId		  
@@ -298,7 +275,7 @@ BEGIN TRY
 				,[strItemDescription]				= (CASE WHEN ISNULL(@ItemDescription, '') = '' THEN IC.[strDescription] ELSE ISNULL(@ItemDescription, '') END)
 				,[intOrderUOMId]					= @OrderUOMId
 				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
-				,[intItemUOMId]						= ISNULL(ISNULL(@ItemUOMId, IL.intIssueUOMId), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = IC.[intItemId] ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
+				,[intItemUOMId]						= ISNULL(ISNULL(@ItemUOMId, IL.intIssueUOMId), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK) WHERE [intItemId] = IC.[intItemId] ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 				,[dblItemTermDiscount]				= ISNULL(@ItemTermDiscount, @ZeroDecimal)
@@ -368,12 +345,23 @@ BEGIN TRY
 				,[intDestinationWeightId]			= @ItemDestinationWeightId
 				,[intConcurrencyId]					= 0
 			FROM
-				tblICItem IC
+				(SELECT intItemId
+						, [strDescription]
+				FROM tblICItem WITH (NOLOCK)) IC
 			INNER JOIN
-				tblICItemLocation IL
+				(SELECT intItemId
+						,[intLocationId] 
+						,[intIssueUOMId]
+				 FROM tblICItemLocation WITH (NOLOCK)) IL
 					ON IC.intItemId = IL.intItemId
 			LEFT OUTER JOIN
-				vyuARGetItemAccount Acct
+				(SELECT [intAccountId] 
+				,[intCOGSAccountId] 
+				,[intSalesAccountId]
+				,[intInventoryAccountId]				
+				,[intItemId]
+				,[intLocationId]			
+				FROM vyuARGetItemAccount WITH (NOLOCK)) Acct
 					ON IC.[intItemId] = Acct.[intItemId]
 					AND IL.[intLocationId] = Acct.[intLocationId]
 			WHERE

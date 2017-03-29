@@ -102,57 +102,37 @@ SELECT
 	,strCustomerReferences			= dbo.fnARGetCustomerReferencesFromInvoice(I.intInvoiceId)
 	,ysnHasEmailSetup				= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = I.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + I.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM         
-	dbo.tblARInvoice AS I 
+	(SELECT strType, [intEntityCustomerId], intCompanyLocationId, intTermId, intEntityContactId, intPaymentMethodId, [intEntitySalespersonId], intCurrencyId, intShipViaId,[intEntityId],
+		intInvoiceId, strInvoiceNumber, intAccountId, strTransactionType, strPONumber, strBOLNumber, strComments, dtmDate, dtmDueDate, dtmPostDate, dtmShipDate, ysnPosted, ysnPaid,
+		ysnProcessed, ysnRecurring, ysnForgiven, ysnCalculated, dblInvoiceTotal, dblDiscount, dblDiscountAvailable, dblInterest, dblAmountDue, dblPayment, dblInvoiceSubtotal, dblShipping, dblTax
+	 FROM dbo.tblARInvoice WITH (NOLOCK)) AS I 
 INNER JOIN
-	dbo.tblARCustomer AS C 
+	(SELECT [intEntityCustomerId], strCustomerNumber FROM dbo.tblARCustomer WITH (NOLOCK)) AS C 
 		ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
 LEFT OUTER JOIN
-	(SELECT TOP 1 strName, strEmail, intEntityContactId FROM vyuEMEntityContact) EC ON I.intEntityContactId = EC.intEntityContactId	
+	(SELECT TOP 1 strName, strEmail, intEntityContactId FROM vyuEMEntityContact WITH (NOLOCK)) EC ON I.intEntityContactId = EC.intEntityContactId	
 INNER JOIN
-	dbo.tblEMEntity AS CE 
+	(SELECT intEntityId, strName FROM dbo.tblEMEntity WITH (NOLOCK)) AS CE 
 		ON C.[intEntityCustomerId] = CE.intEntityId 
 LEFT OUTER JOIN
-	dbo.tblSMTerm AS T 
+	(SELECT intTermID, strTerm FROM dbo.tblSMTerm WITH (NOLOCK)) AS T 
 		ON I.intTermId = T.intTermID 
 LEFT OUTER JOIN
-	dbo.tblSMCompanyLocation AS L 
+	(SELECT intCompanyLocationId, strLocationName FROM dbo.tblSMCompanyLocation WITH (NOLOCK))AS L 
 		ON I.intCompanyLocationId  = L.intCompanyLocationId 
 LEFT OUTER JOIN
-	dbo.tblSMPaymentMethod AS P 
+	(SELECT intPaymentMethodID, strPaymentMethod FROM dbo.tblSMPaymentMethod WITH (NOLOCK)) AS P 
 		ON I.intPaymentMethodId = P.intPaymentMethodID
 LEFT OUTER JOIN
-	dbo.tblSMShipVia AS SV 
+	(SELECT [intEntityShipViaId], strShipVia FROM dbo.tblSMShipVia WITH (NOLOCK)) AS SV 
 		ON I.intShipViaId = SV.[intEntityShipViaId]
 LEFT OUTER JOIN
-	dbo.tblEMEntity AS SE 
+	(SELECT intEntityId, strName FROM dbo.tblEMEntity WITH (NOLOCK)) AS SE 
 		ON I.[intEntitySalespersonId] = SE.intEntityId 
 LEFT OUTER JOIN
-	dbo.tblSMCurrency CUR
+	(SELECT intCurrencyID, strCurrency FROM dbo.tblSMCurrency WITH (NOLOCK)) CUR
 		ON I.intCurrencyId = CUR.intCurrencyID
 LEFT OUTER JOIN
-	dbo.tblEMEntity AS EB 
+	(SELECT intEntityId, strName FROM dbo.tblEMEntity WITH (NOLOCK)) AS EB 
 		ON I.[intEntityId] = EB.intEntityId
---LEFT OUTER JOIN
---	(
---	SELECT TOP 1
---		 G.intTransactionId
---		,G.strTransactionId
---		,G.intAccountId
---		,G.strTransactionType
---		,G.dtmDate
---		,G.strBatchId
---		,E.intEntityId
---		,E.strName
---	FROM
---		tblGLDetail G
---	LEFT OUTER JOIN
---		tblEMEntity E
---			ON G.intEntityId = E.intEntityId
---	WHERE
---		G.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Customer Prepayment')
---		AND G.ysnIsUnposted = 0
---		AND G.strCode = 'AR'
---	) GL
---		ON I.intInvoiceId = GL.intTransactionId
---		AND I.intAccountId = GL.intAccountId
---		AND I.strInvoiceNumber = GL.strTransactionId					 
+ 
