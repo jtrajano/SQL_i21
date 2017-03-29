@@ -14,5 +14,7 @@ namespace iRely.Inventory.Model
         public int intLineOfBusinessId { get; set; }
         public string strLineOfBusiness { get; set; }
         public int intEntityId { get; set; }
+
+        public ICollection<tblICCategory> tblICCategories { get; set; }
     }
 }

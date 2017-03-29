@@ -14,7 +14,8 @@ Ext.define('Inventory.controller.Inventory', {
         'GlobalComponentEngine.view.ActivityGrid',
         'GlobalComponentEngine.view.AttachmentGrid',
         'GlobalComponentEngine.view.AuditLogTree',
-        'GlobalComponentEngine.view.AdvanceSearchGrid'
+        'GlobalComponentEngine.view.AdvanceSearchGrid',
+        'iRely.container.ImageContainer'
     ],
     singleton: true,
 

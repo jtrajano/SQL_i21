@@ -206,7 +206,7 @@ Ext.define('Inventory.view.Category', {
                                                                 labelWidth: 130,
                                                                 displayField: 'strLineOfBusiness',
                                                                 forceSelection: true,
-                                                                valueField: 'intLineOfBusinessId'
+                                                                valueField: 'strLineOfBusiness'
                                                             },
                                                             {
                                                                 xtype: 'combobox',

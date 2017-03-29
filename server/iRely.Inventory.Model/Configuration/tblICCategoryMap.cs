@@ -68,6 +68,10 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICUnitMeasure)
                 .WithMany(p => p.tblICCategories)
                 .HasForeignKey(p => p.intUOMId);
+
+            this.HasOptional(p => p.tblSMLineOfBusiness)
+                .WithMany(p => p.tblICCategories)
+                .HasForeignKey(p => p.intLineOfBusinessId);
                 
         }
     }

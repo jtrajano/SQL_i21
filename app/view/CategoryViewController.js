@@ -10,7 +10,8 @@ Ext.define('Inventory.view.CategoryViewController', {
             txtCategoryCode: '{current.strCategoryCode}',
             txtDescription: '{current.strDescription}',
             cboLineOfBusiness: {
-                value: '{current.intLineOfBusinessId}',
+                value: '{current.strLineOfBusiness}',
+                origValueField: 'intLineOfBusinessId',
                 store: '{linesOfBusiness}'
             },
             cboCostingMethod: {
@@ -228,7 +229,7 @@ Ext.define('Inventory.view.CategoryViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
-            include: 'tblICCategoryAccounts.tblGLAccount, ' +
+            include: 'tblSMLineOfBusiness, tblICCategoryAccounts.tblGLAccount, ' +
                 'tblICCategoryAccounts.tblGLAccountCategory, ' +
                 'tblICCategoryLocations.tblSMCompanyLocation, ' +
                 'tblICCategoryTaxes.vyuICGetCategoryTax, ' +

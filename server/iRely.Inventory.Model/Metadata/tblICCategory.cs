@@ -58,6 +58,27 @@ namespace iRely.Inventory.Model
         public bool ysnYieldAdjustment { get; set; }
         public bool ysnWarehouseTracked { get; set; }
 
+        private string _lineOfBusiness;
+
+        [NotMapped]
+        public string strLineOfBusiness
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_lineOfBusiness))
+                    if (tblSMLineOfBusiness != null)
+                        return tblSMLineOfBusiness.strLineOfBusiness;
+                    else
+                        return null;
+                else
+                    return _lineOfBusiness;
+            }
+            set
+            {
+                _lineOfBusiness = value;
+            }
+        }
+
         public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
         public ICollection<tblICCategoryLocation> tblICCategoryLocations { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
@@ -67,6 +88,7 @@ namespace iRely.Inventory.Model
 
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
         public ICollection<tblICStorageLocationCategory> tblICStorageLocationCategories { get; set; }
+        public tblSMLineOfBusiness tblSMLineOfBusiness { get; set; }
 
     }
 
