@@ -370,7 +370,7 @@
             // 
             this.lblStorageLocation.Dpi = 254F;
             this.lblStorageLocation.Name = "lblStorageLocation";
-            this.lblStorageLocation.Text = "Storage Location";
+            this.lblStorageLocation.Text = "Storage Unit";
             this.lblStorageLocation.Weight = 0.15187369082599467D;
             // 
             // lblLotID
@@ -773,7 +773,7 @@
             this.xrLabel5.StylePriority.UseFont = false;
             this.xrLabel5.StylePriority.UsePadding = false;
             this.xrLabel5.StylePriority.UseTextAlignment = false;
-            this.xrLabel5.Text = "Sub Location:";
+            this.xrLabel5.Text = "Storage Unit:";
             this.xrLabel5.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             // 
             // xrLabel6

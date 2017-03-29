@@ -31,7 +31,7 @@ namespace iRely.Inventory.BusinessLayer
             {
                 if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICStorageLocation_strName'"))
                 {
-                    msg = "Storage Location must be unique per Location and Sub Location.";
+                    msg = "Storage Unit must be unique per Location and Storage Location.";
                 }
             }
 

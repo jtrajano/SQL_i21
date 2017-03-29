@@ -126,7 +126,7 @@ namespace iRely.Inventory.Model
         public int? intItemOwnerId { get; set; }
         public int? intNewItemOwnerId { get; set; }
 
-        // 1: Sub Location
+        // 1: Storage Location
         private string _subLocation;
         [NotMapped]
         public string strSubLocation
@@ -487,7 +487,7 @@ namespace iRely.Inventory.Model
         }
 
 
-        // 12. New Sub Location 
+        // 12. New Storage Location 
         private string _strNewSubLocation;
         [NotMapped]
         public string strNewSubLocation

@@ -470,7 +470,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                             height: 40,
                                             itemId: 'btnImportStorageLocations',
                                             width: 150,
-                                            text: 'Import Storage Locations'
+                                            text: 'Import Storage Units'
                                         },
                                         {
                                             xtype: 'container',
@@ -484,7 +484,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                             items: [
                                                 {
                                                     xtype: 'label',
-                                                    text: 'Import Storage Locations from CSV'
+                                                    text: 'Import Storage Units from CSV'
                                                 }
                                             ]
                                         }
@@ -1235,7 +1235,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                             flex: 1,
                                             height: 40,
                                             itemId: 'btnOriginLocations',
-                                            text: 'Sub Locations and Storage Locations'
+                                            text: 'Storage Locations and Storage Units'
                                         },
                                         {
                                             xtype: 'container',
@@ -1250,7 +1250,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                                 {
                                                     xtype: 'label',
                                                     padding: '0 0 0 10',
-                                                    text: '"Imports storage location like elevators and bins. Origin does not have sub locations. System will create a sub location automatically for each company location."'
+                                                    text: '"Imports storage location like elevators and bins. Origin does not have storage locations. System will create a storage location automatically for each company location."'
                                                 }
                                             ]
                                         }

@@ -4125,25 +4125,25 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     {
                         dataIndex: 'intStorageLocationId',
                         dataType: 'numeric',
-                        text: 'Storage Location Id',
+                        text: 'Storage Unit Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'intSubLocationId',
                         dataType: 'numeric',
-                        text: 'Sub Location Id',
+                        text: 'Storage Location Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'strSubLocationName',
                         dataType: 'string',
-                        text: 'Sub Location Name',
+                        text: 'Storage Location Name',
                         hidden: true
                     },
                     {
                         dataIndex: 'strStorageName',
                         dataType: 'string',
-                        text: 'Storage Location Name',
+                        text: 'Storage Unit Name',
                         hidden: true
                     },
                     {
@@ -6048,7 +6048,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 };
 
                 if (grdInventoryReceiptCount > 0) {
-                    iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Location will clear ALL Sub Locations and Storage Locations. Do you want to continue?', buttonAction);
+                    iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Location will clear ALL Storage Locations and Storage Units. Do you want to continue?', buttonAction);
                 }
             }
         }

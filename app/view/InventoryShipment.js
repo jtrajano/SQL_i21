@@ -1759,13 +1759,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 {
                                                                                     dataIndex: 'strSubLocationName',
                                                                                     dataType: 'string',
-                                                                                    text: 'Sub Location',
+                                                                                    text: 'Storage Location',
                                                                                     flex: 1
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strStorageLocation',
                                                                                     dataType: 'string',
-                                                                                    text: 'Storage Location',
+                                                                                    text: 'Storage Unit',
                                                                                     flex: 1
                                                                                 },
                                                                                 {

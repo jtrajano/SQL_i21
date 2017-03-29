@@ -50,8 +50,6 @@ Ext.define('Inventory.search.StockDetail', {
                 { dataIndex: 'intItemId', text: 'Item Id', width: 100, flex: 1, hidden: true, key: true },
                 { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, flex: 1, hidden: true },
                 { dataIndex: 'intCompanyLocationId', text: 'Company Location Id', width: 100, flex: 1, hidden: true },
-                /*{ dataIndex: 'intCompanyLocationSubLocationId', text: 'Company Sub Location Id', width: 100, flex: 1, hidden: true },*/
-                /*{ dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, flex: 1, hidden: true },*/
                 { dataIndex: 'strCommodityCode', text: 'Commodity', width: 100, flex: 1, hidden: false },
                 { dataIndex: 'strItemNo', text: 'Item No', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                 { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, flex: 1 },
@@ -233,12 +231,9 @@ Ext.define('Inventory.search.StockDetail', {
                                     { dataIndex: 'intItemId', text: 'Item Id', width: 100, flex: 1, hidden: true, key: true },
                                     { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, flex: 1, hidden: true },
                                     { dataIndex: 'intCompanyLocationId', text: 'Company Location Id', width: 100, flex: 1, hidden: true },
-                                    /*{ dataIndex: 'intCompanyLocationSubLocationId', text: 'Company Sub Location Id', width: 100, flex: 1, hidden: true },*/
-                                    /*{ dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, flex: 1, hidden: true },*/
                                     { dataIndex: 'strItemNo', text: 'Item No', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                                     { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, flex: 1 },
                                     { dataIndex: 'strLocation', text: 'Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinLocation' },
-                                    /*{ dataIndex: 'strSubLocation', text: 'Sub Location', width: 100, flex: 1 },*/
                                     { dataIndex: 'strStorageLocation', text: 'Storage Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinStorageLocation' },
                                     { dataIndex: 'dblStock', text: 'Stock', xtype: 'numbercolumn', summaryType: 'sum', width: 100, flex: 1 },
                                     { dataIndex: 'strUOM', text: 'UOM', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinUOM' },
@@ -476,13 +471,10 @@ Ext.define('Inventory.search.StockDetail', {
                                     { dataIndex: 'intItemId', text: 'Item Id', width: 100, flex: 1, hidden: true, key: true },
                                     { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, flex: 1, hidden: true },
                                     { dataIndex: 'intCompanyLocationId', text: 'Company Location Id', width: 100, flex: 1, hidden: true },
-                                    /*{ dataIndex: 'intCompanyLocationSubLocationId', text: 'Company Sub Location Id', width: 100, flex: 1, hidden: true },*/
-                                    /*{ dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, flex: 1, hidden: true },*/
                                     { dataIndex: 'strItemNo', text: 'Item No', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                                     { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, flex: 1 },
                                     { dataIndex: 'strLocation', text: 'Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinLocation' },
-                                    /*{ dataIndex: 'strSubLocation', text: 'Sub Location', width: 100, flex: 1 },*/
-                                    { dataIndex: 'strStorageLocation', text: 'Storage Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinStorageLocation' },
+                                    { dataIndex: 'strStorageLocation', text: 'Storage Unit', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinStorageLocation' },
                                     { dataIndex: 'dblStock', text: 'Stock', xtype: 'numbercolumn', summaryType: 'sum', width: 100, flex: 1 },
                                     { dataIndex: 'strUOM', text: 'UOM', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinUOM' },
                                     { dataIndex: 'dblCapacity', xtype: 'numbercolumn', text: 'Capacity', width: 100, flex: 1, summaryType: 'sum' },

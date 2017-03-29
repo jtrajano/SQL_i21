@@ -627,13 +627,13 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 {
                                                                     dataIndex: 'intSubLocationId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Sub Location Id',
+                                                                    text: 'Storage Location Id',
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'intStorageLocationId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Storage Location Id',
+                                                                    text: 'Storage Unit Id',
                                                                     hidden: true
                                                                 },
                                                                 {
@@ -645,13 +645,13 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Sub Location Name',
+                                                                    text: 'Storage Location Name',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     dataIndex: 'strStorageLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Storage Location Name',
+                                                                    text: 'Storage Unit Name',
                                                                     flex: 1
                                                                 },
                                                                 {
@@ -734,27 +734,27 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 {
                                                                     dataIndex: 'intStorageLocationId',
                                                                     dataType: 'float',
-                                                                    text: 'Storage Location Id',
+                                                                    text: 'Storage Unit Id',
                                                                     flex: 1,
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strStorageLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Storage Location',
+                                                                    text: 'Storage Unit',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     dataIndex: 'intSubLocationId',
                                                                     dataType: 'float',
-                                                                    text: 'Sub Location Id',
+                                                                    text: 'Storage Location Id',
                                                                     flex: 1,
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Sub Location',
+                                                                    text: 'Storage Location',
                                                                     flex: 1
                                                                 },
                                                                 
@@ -1141,7 +1141,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 {
                                                                     dataIndex: 'intCompanyLocationSubLocationId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Sub Location Id',
+                                                                    text: 'Storage Location Id',
                                                                     hidden: true
                                                                 },
                                                                 {
@@ -1159,7 +1159,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Sub Location Name',
+                                                                    text: 'Storage Location Name',
                                                                     flex: 1
                                                                 },
                                                                 {

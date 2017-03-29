@@ -994,7 +994,7 @@ namespace iRely.Inventory.BusinessLayer
         }
 
         /// <summary>
-        /// Return the sub locations of an item. 
+        /// Return the storage locations of an item. 
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>

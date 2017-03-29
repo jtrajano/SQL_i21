@@ -147,7 +147,7 @@ namespace iRely.Inventory.BusinessLayer
                             break;
                         SetDate(value, del => fc.dtmCountDate = del, "Count Date", dr, header, row);
                         break;
-                    case "sub location":
+                    case "storage unit":
                         if (string.IsNullOrEmpty(value))
                             break;
                         lu = GetLookUpId<tblSMCompanyLocationSubLocation>(
@@ -165,7 +165,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Message = string.Format("Invalid Sub Location: {0}.", value),
+                                Message = string.Format("Invalid Storage Location: {0}.", value),
                                 Status = STAT_INNER_COL_SKIP
                             });
                             dr.Info = INFO_WARN;

@@ -9,7 +9,7 @@ Ext.define('Inventory.search.InventoryValuationSummary', {
                 { dataIndex: 'strItemNo', text: 'Item No', allowSort: true, flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                 { dataIndex: 'strItemDescription', text: 'Description', allowSort: true, flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                 { dataIndex: 'strLocationName', text: 'Location', allowSort: true, flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocation' },
-                { dataIndex: 'strSubLocationName', text: 'Sub Location', allowSort: true, flex: 1, dataType: 'string' },
+                { dataIndex: 'strSubLocationName', text: 'Storage Location', allowSort: false, flex: 1, dataType: 'string' },
                 { dataIndex: 'strCategoryCode', text: 'Category', allowSort: true, flex: 1, dataType: 'string' },
                 { dataIndex: 'strCommodityCode', text: 'Commodity', allowSort: true, flex: 1, dataType: 'string' },
                 { dataIndex: 'strStockUOM', text: 'Stock UOM', allowSort: true, flex: 1, dataType: 'string' },

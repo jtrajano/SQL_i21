@@ -3,13 +3,13 @@ Ext.define('Inventory.search.StorageUnit', {
     singleton: true,
     searchConfigs: [
         {
-            title:  'Search Storage Locations',
+            title:  'Search Storage Units',
             type: 'Inventory.StorageLocation',
             api: {
                 read: '../Inventory/api/StorageLocation/Search'
             },
             columns: [
-                {dataIndex: 'intStorageLocationId',text: "Storage Location Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'intStorageLocationId',text: "Storage Unit Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strName', text: 'Name', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strStorageUnitType', text: 'Storage Unit Type', flex: 1,  dataType: 'string'},

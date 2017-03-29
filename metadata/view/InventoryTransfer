@@ -1183,7 +1183,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter131",
+                                                    "name": "filter127",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1429,7 +1429,7 @@
                                                 "dataIndex": "strFromSubLocation",
                                                 "itemId": "colFromSubLocation",
                                                 "text": "From Storage Location",
-                                                "width": 110
+                                                "width": 130
                                             },
                                             "name": "MyColumn35",
                                             "designerId": "cc374ce2-300e-4c96-a6f1-93945dcfb99f",
@@ -1539,7 +1539,7 @@
                                                 "headerDrillDownText": "Open Storage Unit",
                                                 "itemId": "colFromStorage",
                                                 "text": "From Storage Unit",
-                                                "width": 88
+                                                "width": 130
                                             },
                                             "name": "MyColumn22",
                                             "designerId": "4d214fd7-8e7c-40b4-960d-48cc227999fd",
@@ -1748,13 +1748,13 @@
                                                             "    {",
                                                             "\t\tdataIndex: 'intSubLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Sub Location Id',",
+                                                            "\t\ttext: 'Storage Location Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "    {",
                                                             "\t\tdataIndex: 'intStorageLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Storage Location Id',",
+                                                            "\t\ttext: 'Storage Unit Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "    {",
@@ -1914,7 +1914,7 @@
                                                 "dataIndex": "strToSubLocation",
                                                 "itemId": "colToSubLocation",
                                                 "text": "To Storage Location",
-                                                "width": 96
+                                                "width": 130
                                             },
                                             "name": "MyColumn36",
                                             "designerId": "5a7a1f44-ae91-46ea-b27e-2e963029761e",
@@ -1986,7 +1986,7 @@
                                                 "dataIndex": "strToStorage",
                                                 "itemId": "colToStorage",
                                                 "text": "To Storage Unit",
-                                                "width": 88
+                                                "width": 130
                                             },
                                             "name": "MyColumn34",
                                             "designerId": "28a6f806-6a7f-435c-b00c-6478331c606a",

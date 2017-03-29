@@ -269,7 +269,7 @@ namespace iRely.Inventory.BusinessLayer
                         if ((bool)ysnValidLocation.Value == false)
                         {
                             //throw new Exception("Please ensure that the line items and lots are located in the receipt's origin.");
-                            var msg = System.String.Format("The sub location and storage location in {0} does not match.", strItemNo.Value);
+                            var msg = System.String.Format("The storage location and storage unit in {0} does not match.", strItemNo.Value);
                             throw new Exception(msg); 
                         }
 

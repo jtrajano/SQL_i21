@@ -833,10 +833,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 4 || get('current.intAdjustmentType') == 9) {
-                return 'Sub Location <span style="color:red">*</span>';
+                return 'Storage Location <span style="color:red">*</span>';
             }
             else {
-                return 'Sub Location';
+                return 'Storage Location';
             }
         },
 
@@ -937,10 +937,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 7 || get('current.intAdjustmentType') == 8) {
-                return 'New Sub Location <span style="color:red">*</span>';
+                return 'New Storage Location <span style="color:red">*</span>';
             }
             else {
-                return 'New Sub Location';
+                return 'New Storage Location';
             }
         },
 
@@ -950,10 +950,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var gridColumns = grdInventoryAdjustment.headerCt.getGridColumns();
 
             if (get('current.intAdjustmentType') == 5 || get('current.intAdjustmentType') == 7 || get('current.intAdjustmentType') == 8) {
-                return 'New Storage Location <span style="color:red">*</span>';
+                return 'New Storage Unit <span style="color:red">*</span>';
             }
             else {
-                return 'New Storage Location';
+                return 'New Storage Unit';
             }
         },
 

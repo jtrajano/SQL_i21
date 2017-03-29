@@ -1812,23 +1812,25 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     {
                         dataIndex: 'intStorageLocationId',
                         dataType: 'numeric',
+                        text: 'Storage Unit Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'intSubLocationId',
                         dataType: 'numeric',
-                        text: 'Sub Location Id',
+                        text: 'Storage Location Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'strSubLocationName',
                         dataType: 'string',
-                        text: 'Sub Location Name',
+                        text: 'Storage Location Name',
                         hidden: true
                     },
                     {
                         dataIndex: 'strStorageLocationName',
                         dataType: 'string',
+                        text: 'Storage Unit Name',
                         hidden: true
                     },
                     {
@@ -1971,25 +1973,25 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     {
                         dataIndex: 'intStorageLocationId',
                         dataType: 'numeric',
-                        text: 'Storage Location Id',
+                        text: 'Storage Unit Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'intSubLocationId',
                         dataType: 'numeric',
-                        text: 'Sub Location Id',
+                        text: 'Storage Location Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'strSubLocationName',
                         dataType: 'string',
-                        text: 'Sub Location Name',
+                        text: 'Storage Location Name',
                         hidden: true
                     },
                     {
                         dataIndex: 'strStorageName',
                         dataType: 'string',
-                        text: 'Storage Location Name',
+                        text: 'Storage Unit Name',
                         hidden: true
                     },
                     {
@@ -2380,7 +2382,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         });
 
         if (!subLocation) {
-            iRely.Functions.showErrorDialog('Atleast one(1) line item must have a Sub Location specified.');
+            iRely.Functions.showErrorDialog('Atleast one(1) line item must have a Storage Location specified.');
             return;
         }
 

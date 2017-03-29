@@ -435,8 +435,8 @@ function getTemplateColumns(name) {
         case "Storage Unit Types":
             return ["Name", "Description", "Internal Code", "Capacity UOM", "Max Weight", "Allows Picking", "Dimension UOM",
                 "Height", "Depth", "Width", "Pallet Stack", "Pallet Columns", "Pallet Rows"];
-        case "Storage Locations":
-            return ["Name", "Description", "Storage Unit Type", "Location", "Sub Location", "Parent Unit", "Restriction Type",
+        case "Storage Units":
+            return ["Name", "Description", "Storage Unit Type", "Location", "Storage Location", "Parent Unit", "Restriction Type",
                 "Aisle", "Min Batch Size", "Batch Size", "Batch Size UOM", "Commodity", "Pack Factor", "Effective Depth", "Units Per Foot", "Residual Units",
                 "Sequence", "Active", "X Position", "Y Position", "Z Position", "Allow Consume", "Allow Multiple Items",
                 "Allow Multiple Lots", "Merge on Move", "Cycle Counted", "Default Warehouse Staging Unit"];
@@ -466,13 +466,13 @@ function getTemplateColumns(name) {
         case "Contract Items":
             return ["Item No","Location","Contract Name","Origin","Grade","Grade Type","Garden","Yield","Tolerance","Franchise"];
         case "Inventory Count":
-            return ["Location", "Count Group", "Description", "Date", "Item No", "Sub Location", "Storage Location", 
+            return ["Location", "Count Group", "Description", "Date", "Item No", "Storage Location", "Storage Unit", 
                 "Physical Count", "UOM", "Lot No", "Pallets", "Qty Per Pallet", "Count by Lots", "Count by Pallets", "Recount"];
         case "Item Pricing":
             return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "Pricing Method",
                 "Amount/Percent", "Retail Price", "MSRP"];
         case "Item Location":
-            return ["Item No","Location","POS Description","Vendor Id","Costing Method","Sub Location","Storage Location",
+            return ["Item No","Location","POS Description","Vendor Id","Costing Method","Storage Location","Storage Unit",
                 "Sale UOM","Purchase UOM","Family","Class","Product Code","Passport Fuel ID 1","Passport Fuel ID 2","Passport Fuel ID 3",
                 "Tax Flag 1","Tax Flag 2","Tax Flag 3","Tax Flag 4","Promotional Item","Promotion Item","Deposit Required","Deposit PLU",
                 "Bottle Deposit No:","Saleable","Quantity Required","Scale Item","Food Stampable","Returnable","Pre Priced",
