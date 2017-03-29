@@ -5170,6 +5170,7 @@
     <Build Include="dbo\Tables\tblPRDepartmentShift.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessACHPayments.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdatePricebookItem.sql" />
+    <Build Include="dbo\Views\vyuICCommodityLookUp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
