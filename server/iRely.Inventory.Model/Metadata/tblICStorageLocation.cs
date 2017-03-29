@@ -49,23 +49,143 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitPerFoot { get; set; }
         public decimal? dblResidualUnit { get; set; }
 
-        private string _subLocationName;
+        private string _storageUnitType;
         [NotMapped]
-        public string strSubLocationName
+        public string strStorageUnitType
         {
             get
             {
-                if (string.IsNullOrEmpty(_subLocationName))
-                    if (tblSMCompanyLocationSubLocation != null)
-                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                if (string.IsNullOrEmpty(_storageUnitType))
+                    if (vyuICGetStorageLocation != null)
+                        return vyuICGetStorageLocation.strStorageUnitType;
                     else
                         return null;
                 else
-                    return _subLocationName;
+                    return _storageUnitType;
             }
             set
             {
-                _subLocationName = value;
+                _storageUnitType = value;
+            }
+        }
+
+        private string _location;
+        [NotMapped]
+        public string strLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_location))
+                    if (vyuICGetStorageLocation != null)
+                        return vyuICGetStorageLocation.strLocationName;
+                    else
+                        return null;
+                else
+                    return _location;
+            }
+            set
+            {
+                _location = value;
+            }
+        }
+
+        private string _subLocation;
+        [NotMapped]
+        public string strSubLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocation))
+                    if (vyuICGetStorageLocation != null)
+                        return vyuICGetStorageLocation.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocation;
+            }
+            set
+            {
+                _subLocation = value;
+            }
+        }
+
+        private string _parentUnit;
+        [NotMapped]
+        public string strParentUnit
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_parentUnit))
+                    if (vyuICGetStorageLocation != null)
+                        return vyuICGetStorageLocation.strParentStorageLocationName;
+                    else
+                        return null;
+                else
+                    return _parentUnit;
+            }
+            set
+            {
+                _parentUnit = value;
+            }
+        }
+
+        private string _restrictionType;
+        [NotMapped]
+        public string strRestrictionType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_restrictionType))
+                    if (vyuICGetStorageLocation != null)
+                        return vyuICGetStorageLocation.strRestrictionCode;
+                    else
+                        return null;
+                else
+                    return _restrictionType;
+            }
+            set
+            {
+                _restrictionType = value;
+            }
+        }
+
+        private string _batchSizeUOM;
+        [NotMapped]
+        public string strBatchSizeUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_batchSizeUOM))
+                    if (vyuICGetStorageLocation != null)
+                        return vyuICGetStorageLocation.strBatchSizeUOM;
+                    else
+                        return null;
+                else
+                    return _batchSizeUOM;
+            }
+            set
+            {
+                _batchSizeUOM = value;
+            }
+        }
+
+        private string _itemNo;
+        [NotMapped]
+        public string strItemNo
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemNo))
+                    if (vyuICGetStorageLocation != null)
+                        return vyuICGetStorageLocation.strItemNo;
+                    else
+                        return null;
+                else
+                    return _itemNo;
+            }
+            set
+            {
+                _itemNo = value;
             }
         }
 
@@ -75,6 +195,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICStorageLocationSku> tblICStorageLocationSkus { get; set; }
         public ICollection<tblICStorageLocationContainer> tblICStorageLocationContainers { get; set; }
         public ICollection<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
+        public vyuICGetStorageLocation vyuICGetStorageLocation { get; set; }
     }
 
     public class tblICStorageLocationCategory : BaseEntity
@@ -451,6 +572,10 @@ namespace iRely.Inventory.Model
         public decimal? dblEffectiveDepth { get; set; }
         public decimal? dblUnitPerFoot { get; set; }
         public decimal? dblResidualUnit { get; set; }
+        public int? intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strBatchSizeUOM { get; set; }
+        public tblICStorageLocation tblICStorageLocation { get; set; }
     }
 
 }

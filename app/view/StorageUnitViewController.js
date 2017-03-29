@@ -24,7 +24,8 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                 title: 'Storage Location - {current.strName}'
             },
             cboItem: {
-                value: '{current.intItemId}',
+                value: '{current.strItemNo}',
+                origValueField: 'intItemId',
                 store: '{items}',
                 defaultFilters: [
                     {
@@ -43,15 +44,20 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             txtName: '{current.strName}',
             txtDescription: '{current.strDescription}',
             cboUnitType: {
-                value: '{current.intStorageUnitTypeId}',
+                value: '{current.strStorageUnitType}',
+                origValueField: 'intStorageUnitTypeId',
                 store: '{storageUnitType}'
             },
             cboLocation: {
-                value: '{current.intLocationId}',
+                value: '{current.strLocation}',
+                origValueField: 'intCompanyLocationId',
+                origUpdateField: 'intLocationId',
                 store: '{location}'
             },
             cboSubLocation: {
-                value: '{current.intSubLocationId}',
+                value: '{current.strSubLocation}',
+                origValueField: 'intCompanyLocationSubLocationId',
+                origUpdateField: 'intSubLocationId',
                 store: '{subLocation}',
                 defaultFilters: [{
                     column: 'intCompanyLocationId',
@@ -59,7 +65,9 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                 }]
             },
             cboParentUnit: {
-                value: '{current.intParentStorageLocationId}',
+                value: '{current.strParentUnit}',
+                origValueField: 'intStorageLocationId',
+                origUpdateField: 'intParentStorageLocationId',
                 store: '{parentUnit}',
                 defaultFilters: [{
                     column: 'intStorageLocationId',
@@ -68,14 +76,17 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                 }]
             },
             cboRestrictionType: {
-                value: '{current.intRestrictionId}',
+                value: '{current.strRestrictionType}',
+                origValueField: 'intRestrictionId',
                 store: '{restriction}'
             },
             txtAisle: '{current.strUnitGroup}',
             txtMinBatchSize: '{current.dblMinBatchSize}',
             txtBatchSize: '{current.dblBatchSize}',
             cboBatchSizeUom: {
-                value: '{current.intBatchSizeUOMId}',
+                value: '{current.strBatchSizeUOM}',
+                origValueField: 'intUnitMeasureId',
+                origUpdateField: 'intBatchSizeUOMId',
                 store: '{batchSizeUOM}'
             },
 
@@ -159,7 +170,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
-            include: 'tblICStorageLocationCategories.tblICCategory, ' +
+            include: 'vyuICGetStorageLocation, tblICStorageLocationCategories.tblICCategory, ' +
                 'tblICStorageLocationMeasurements.tblICMeasurement, ' +
                 'tblICStorageLocationMeasurements.tblICReadingPoint, ' +
                 'tblICStorageLocationSkus.tblICItem, ' +

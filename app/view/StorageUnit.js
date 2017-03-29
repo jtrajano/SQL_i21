@@ -198,7 +198,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                             fieldLabel: 'Storage Unit Type',
                                             labelWidth: 110,
                                             displayField: 'strStorageUnitType',
-                                            valueField: 'intStorageUnitTypeId'
+                                            valueField: 'strStorageUnitType'
                                         },
                                         {
                                             xtype: 'gridcombobox',
@@ -234,7 +234,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                             labelWidth: 110,
                                             readOnly: false,
                                             displayField: 'strLocationName',
-                                            valueField: 'intCompanyLocationId'
+                                            valueField: 'strLocationName'
                                         },
                                         {
                                             xtype: 'gridcombobox',
@@ -270,7 +270,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                             labelWidth: 110,
                                             readOnly: false,
                                             displayField: 'strSubLocationName',
-                                            valueField: 'intCompanyLocationSubLocationId'
+                                            valueField: 'strSubLocationName'
                                         },
                                         {
                                             xtype: 'gridcombobox',
@@ -298,7 +298,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                             fieldLabel: 'Parent Unit',
                                             labelWidth: 110,
                                             displayField: 'strName',
-                                            valueField: 'intStorageLocationId'
+                                            valueField: 'strName'
                                         },
                                         {
                                             xtype: 'gridcombobox',
@@ -326,7 +326,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                             fieldLabel: 'Restriction Type',
                                             labelWidth: 110,
                                             displayField: 'strInternalCode',
-                                            valueField: 'intRestrictionId'
+                                            valueField: 'strInternalCode'
                                         },
                                         {
                                             xtype: 'textfield',
@@ -376,7 +376,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                             fieldLabel: 'Batch Size UOM',
                                             labelWidth: 110,
                                             displayField: 'strUnitMeasure',
-                                            valueField: 'intUnitMeasureId'
+                                            valueField: 'strUnitMeasure'
                                         },
                                         {
                                             xtype: 'panel',
@@ -549,7 +549,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     fieldLabel: 'Item',
                                                     labelWidth: 105,
                                                     displayField: 'strItemNo',
-                                                    valueField: 'intItemId'
+                                                    valueField: 'strItemNo'
                                                 },
                                                 {
                                                     xtype: 'numberfield',

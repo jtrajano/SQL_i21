@@ -51,6 +51,8 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
                 .WithMany(p => p.tblICStorageLocations)
                 .HasForeignKey(p => p.intSubLocationId);
+            this.HasOptional(p => p.vyuICGetStorageLocation)
+                .WithRequired(p => p.tblICStorageLocation);
         }
     }
 
@@ -342,6 +344,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
             this.Property(t => t.dblResidualUnit).HasColumnName("dblResidualUnit").HasPrecision(18, 6);
             this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strBatchSizeUOM).HasColumnName("strBatchSizeUOM");
         }
     }
 }
