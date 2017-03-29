@@ -6436,18 +6436,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (!row.dummy) {
                         //If there is Gross, check if the value is equivalent to Received Quantity
                         if (row.get('intWeightUOMId') !== null) {
-                            var receiptItemQty = row.get('dblOpenReceive');
-                            var receiptUOMCF = row.get('dblItemUOMConvFactor');
-                            var weightUOMCF = row.get('dblWeightUOMConvFactor');
+                            // var receiptItemQty = row.get('dblOpenReceive');
+                            // var receiptUOMCF = row.get('dblItemUOMConvFactor');
+                            // var weightUOMCF = row.get('dblWeightUOMConvFactor');
 
-                            if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
-                            if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
-                            if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
+                            // if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
+                            // if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
+                            // if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
 
                             //var totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF;
-                            var totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
+                            //var totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
 
-                            if (row.get('dblGross') !== totalGross) {
+                            var dblGross = row.get('dblGross');
+                            var dblNet = row.get('dblNet');
+
+                            dblGross = Ext.isNumeric(dblGross) ? dblGross : 0.00;   
+                            dblNet = Ext.isNumeric(dblNet) ? dblNet : 0.00;                            
+
+                            if (dblGross < dblNet) {
                                 ReceivedGrossDiscrepancyItems = ReceivedGrossDiscrepancyItems + row.get('strItemNo') + '<br/>'
                             }
                         }
@@ -6460,7 +6466,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 iRely.Functions.showCustomDialog(
                     'question', 
                     'yesno', 
-                    'Received and Gross quantities are not equal for the following item/s: <br/> <br/>' + ReceivedGrossDiscrepancyItems + '<br/>. Do you want to continue?', 
+                    'The Gross is less than Net on the following item/s: <br/> <br/>' + ReceivedGrossDiscrepancyItems + '<br/>. Do you want to continue?', 
                     buttonAction
                 );
             }
