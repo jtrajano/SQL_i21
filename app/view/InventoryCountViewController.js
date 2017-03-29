@@ -50,25 +50,32 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
 
             cboLocation: {
-                value: '{current.intLocationId}',
+                value: '{current.strLocation}',
+                origValueField: 'intCompanyLocationId',
+                origUpdateField: 'intLocationId',
                 store: '{location}'
             },
             cboCategory: {
-                value: '{current.intCategoryId}',
+                value: '{current.strCategory}',
+                origValueField: 'intCategoryId',
                 store: '{category}'
             },
             cboCommodity: {
-                value: '{current.intCommodityId}',
+                value: '{current.strCommodity}',
+                origValueField: 'intCommodityId',
                 store: '{commodity}'
             },
             cboCountGroup: {
-                value: '{current.intCountGroupId}',
+                value: '{current.strCountGroup}',
+                origValueField: 'intCountGroupId',
                 store: '{countGroup}'
             },
             dtpCountDate: '{current.dtmCountDate}',
             txtCountNumber: '{current.strCountNo}',
             cboSubLocation: {
-                value: '{current.intSubLocationId}',
+                value: '{current.strSubLocation}',
+                origValueField: 'intCompanyLocationSubLocationId',
+                origUpdateField: 'intSubLocationId',
                 store: '{subLocation}',
                 defaultFilters: [
                     {
@@ -84,7 +91,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 ]
             },
             cboStorageLocation: {
-                value: '{current.intStorageLocationId}',
+                value: '{current.strStorageLocation}',
+                origValueField: 'intStorageLocationId',
                 store: '{storageLocation}',
                 defaultFilters: [
                     {
@@ -344,7 +352,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 window: win
             }),
             createTransaction: Ext.bind(me.createTransaction, me),
-            include: 'tblICInventoryCountDetails.vyuICGetInventoryCountDetail',
+            include: 'vyuICGetInventoryCount, tblICInventoryCountDetails.vyuICGetInventoryCountDetail',
             onSaveClick: me.saveAndPokeGrid(win, grdPhysicalCount),
             createRecord: me.createRecord,
             binding: me.config.binding,

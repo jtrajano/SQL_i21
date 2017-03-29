@@ -62,12 +62,16 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 readOnly: '{current.ysnPosted}'
             },
             cboFromLocation: {
-                value: '{current.intFromLocationId}',
+                value: '{current.strFromLocation}',
+                origValueField: 'intCompanyLocationId',
+                origUpdateField: 'intFromLocationId',
                 store: '{fromLocation}',
                 readOnly: '{current.ysnPosted}'
             },
             cboToLocation: {
-                value: '{current.intToLocationId}',
+                value: '{current.strToLocation}',
+                origValueField: 'intCompanyLocationId',
+                origUpdateField: 'intToLocationId',
                 store: '{toLocation}',
                 readOnly: '{current.ysnPosted}'
             },
@@ -76,7 +80,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 readOnly: '{current.ysnPosted}'
             },
             cboStatus: {
-                value: '{current.intStatusId}',
+                value: '{current.strStatus}',
+                origValueField: 'intStatusId',
                 store: '{status}',
                 readOnly: '{current.ysnPosted}'
             },
@@ -294,7 +299,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
-            include: 'tblICInventoryTransferDetails.vyuICGetInventoryTransferDetail',
+            include: 'vyuICGetInventoryTransfer, tblICInventoryTransferDetails.vyuICGetInventoryTransferDetail',
             onSaveClick: me.saveAndPokeGrid(win, grdInventoryTransfer),
             createRecord : me.createRecord,
             binding: me.config.binding,

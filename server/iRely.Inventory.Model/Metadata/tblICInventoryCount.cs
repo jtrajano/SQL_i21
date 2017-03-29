@@ -42,7 +42,128 @@ namespace iRely.Inventory.Model
         public int? intImportFlagInternal { get; set; }
         public int? intSort { get; set; }
 
+        private string _location;
+        [NotMapped]
+        public string strLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_location))
+                    if (vyuICGetInventoryCount != null)
+                        return vyuICGetInventoryCount.strLocationName;
+                    else
+                        return null;
+                else
+                    return _location;
+            }
+            set
+            {
+                _location = value;
+            }
+        }
+
+        private string _subLocation;
+        [NotMapped]
+        public string strSubLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocation))
+                    if (vyuICGetInventoryCount != null)
+                        return vyuICGetInventoryCount.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocation;
+            }
+            set
+            {
+                _subLocation = value;
+            }
+        }
+
+        private string _storageLocation;
+        [NotMapped]
+        public string strStorageLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_storageLocation))
+                    if (vyuICGetInventoryCount != null)
+                        return vyuICGetInventoryCount.strStorageLocationName;
+                    else
+                        return null;
+                else
+                    return _storageLocation;
+            }
+            set
+            {
+                _storageLocation = value;
+            }
+        }
+
+        private string _category;
+        [NotMapped]
+        public string strCategory
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_category))
+                    if (vyuICGetInventoryCount != null)
+                        return vyuICGetInventoryCount.strCategory;
+                    else
+                        return null;
+                else
+                    return _category;
+            }
+            set
+            {
+                _category = value;
+            }
+        }
+
+        private string _commodity;
+        [NotMapped]
+        public string strCommodity
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_commodity))
+                    if (vyuICGetInventoryCount != null)
+                        return vyuICGetInventoryCount.strCommodity;
+                    else
+                        return null;
+                else
+                    return _commodity;
+            }
+            set
+            {
+                _commodity = value;
+            }
+        }
+
+        private string _countGroup;
+        [NotMapped]
+        public string strCountGroup
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_countGroup))
+                    if (vyuICGetInventoryCount != null)
+                        return vyuICGetInventoryCount.strCountGroup;
+                    else
+                        return null;
+                else
+                    return _countGroup;
+            }
+            set
+            {
+                _countGroup = value;
+            }
+        }
+
         public ICollection<tblICInventoryCountDetail> tblICInventoryCountDetails { get; set; }
+        public vyuICGetInventoryCount vyuICGetInventoryCount { get; set; }
     }
 
     public class tblICInventoryCountDetail : BaseEntity
@@ -374,6 +495,7 @@ namespace iRely.Inventory.Model
         public int? intStatus { get; set; }
         public string strStatus { get; set; }
         public int? intSort { get; set; }
+        public tblICInventoryCount tblICInventoryCount { get; set; }
     }
 
     public class vyuICGetInventoryCountDetail

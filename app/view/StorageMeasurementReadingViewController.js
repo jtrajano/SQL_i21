@@ -10,7 +10,9 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
                 title: 'Storage Measurement Reading - {current.strReadingNo}'
             },
             cboLocation: {
-                value: '{current.intLocationId}',
+                value: '{current.strLocation}',
+                origValueField: 'intCompanyLocationId',
+                origUpdateField: 'intLocationId',
                 store: '{location}'
             },
             dtmDate: '{current.dtmDate}',
@@ -93,7 +95,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
-            include: 'tblICStorageMeasurementReadingConversions.vyuICGetStorageMeasurementReadingConversion',
+            include: 'tblSMCompanyLocation, tblICStorageMeasurementReadingConversions.vyuICGetStorageMeasurementReadingConversion',
             binding: me.config.binding,
             createRecord : me.createRecord,
             details: [

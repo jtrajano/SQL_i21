@@ -1366,7 +1366,7 @@
                                                                 "layout|margins": null,
                                                                 "margin": "0 5 0 0",
                                                                 "name": null,
-                                                                "valueField": "intEntityShipViaId",
+                                                                "valueField": "strShipVia",
                                                                 "width": null
                                                             },
                                                             "name": "MyComboBox10",

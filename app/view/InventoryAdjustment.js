@@ -213,7 +213,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 fieldLabel: 'Location',
                                                                 labelWidth: 70,
                                                                 displayField: 'strLocationName',
-                                                                valueField: 'intCompanyLocationId'
+                                                                valueField: 'strLocationName'
                                                             },
                                                             {
                                                                 xtype: 'datefield',

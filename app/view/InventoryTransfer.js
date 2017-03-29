@@ -318,7 +318,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 fieldLabel: 'From Location',
                                                                 labelWidth: 110,
                                                                 displayField: 'strLocationName',
-                                                                valueField: 'intCompanyLocationId'
+                                                                valueField: 'strLocationName'
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -347,7 +347,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 fieldLabel: 'To Location',
                                                                 labelWidth: 110,
                                                                 displayField: 'strLocationName',
-                                                                valueField: 'intCompanyLocationId'
+                                                                valueField: 'strLocationName'
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
@@ -375,7 +375,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 fieldLabel: 'Status',
                                                                 labelWidth: 110,
                                                                 displayField: 'strStatus',
-                                                                valueField: 'intStatusId'
+                                                                valueField: 'strStatus'
                                                             },
                                                             {
                                                                 xtype: 'textfield',

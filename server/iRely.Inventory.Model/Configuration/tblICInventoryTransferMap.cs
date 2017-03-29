@@ -74,6 +74,8 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.ToLocation)
                 .WithMany(p => p.ToInventoryTransfers)
                 .HasForeignKey(p => p.intToLocationId);
+            this.HasOptional(p => p.vyuICGetInventoryTransfer)
+                .WithRequired(p => p.tblICInventoryTransfer);
         }
     }
 

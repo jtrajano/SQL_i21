@@ -224,8 +224,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     fieldLabel: 'Location',
                                                     labelWidth: 85,
                                                     displayField: 'strLocationName',
-                                                    valueField: 'intCompanyLocationId',
-                                                    enableDrillDown: true
+                                                    valueField: 'strLocationName'
                                                 },
                                                 {
                                                     xtype: 'gridcombobox',
@@ -252,8 +251,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     fieldLabel: 'Category',
                                                     labelWidth: 85,
                                                     displayField: 'strCategoryCode',
-                                                    valueField: 'intCategoryId',
-                                                    enableDrillDown: true
+                                                    valueField: 'strCategoryCode'
                                                 },
                                                 {
                                                     xtype: 'gridcombobox',
@@ -280,8 +278,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     fieldLabel: 'Commodity',
                                                     labelWidth: 85,
                                                     displayField: 'strCommodityCode',
-                                                    valueField: 'intCommodityId',
-                                                    enableDrillDown: true
+                                                    valueField: 'strCommodityCode'
                                                 },
                                                 {
                                                     xtype: 'gridcombobox',
@@ -338,8 +335,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     fieldLabel: 'Count Group',
                                                     labelWidth: 85,
                                                     displayField: 'strCountGroup',
-                                                    valueField: 'intCountGroupId',
-                                                    enableDrillDown: true
+                                                    valueField: 'strCountGroup'
                                                 },
                                                 {
                                                     xtype: 'datefield',
@@ -399,8 +395,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     itemId: 'cboSubLocation',
                                                     fieldLabel: 'Sub Location',
                                                     displayField: 'strSubLocationName',
-                                                    valueField: 'intCompanyLocationSubLocationId',
-                                                    enableDrillDown: true
+                                                    valueField: 'strSubLocationName'
                                                 },
                                                 {
                                                     xtype: 'gridcombobox',
@@ -426,8 +421,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     itemId: 'cboStorageLocation',
                                                     fieldLabel: 'Storage Location',
                                                     displayField: 'strName',
-                                                    valueField: 'intStorageLocationId',
-                                                    enableDrillDown: true
+                                                    valueField: 'strName'
                                                 },
                                                 {
                                                     xtype: 'textfield',

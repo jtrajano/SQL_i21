@@ -41,6 +41,8 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICInventoryCountDetails)
                 .WithRequired(p => p.tblICInventoryCount)
                 .HasForeignKey(p => p.intInventoryCountId);
+            this.HasOptional(p => p.vyuICGetInventoryCount)
+                .WithRequired(p => p.tblICInventoryCount);
         }
     }
 

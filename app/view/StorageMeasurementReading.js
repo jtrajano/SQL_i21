@@ -173,7 +173,7 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                         fieldLabel: 'Location',
                                                         labelWidth: 55,
                                                         displayField: 'strLocationName',
-                                                        valueField: 'intCompanyLocationId'
+                                                        valueField: 'strLocationName'
                                                     },
                                                     {
                                                         xtype: 'datefield',

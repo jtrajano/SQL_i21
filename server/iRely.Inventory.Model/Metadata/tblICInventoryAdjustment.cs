@@ -31,7 +31,28 @@ namespace iRely.Inventory.Model
         public int? intSourceId { get; set; }
         public int? intSourceTransactionTypeId { get; set; }
 
+        private string _location;
+        [NotMapped]
+        public string strLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_location))
+                    if (vyuICGetInventoryAdjustment != null)
+                        return vyuICGetInventoryAdjustment.strLocationName;
+                    else
+                        return null;
+                else
+                    return _location;
+            }
+            set
+            {
+                _location = value;
+            }
+        }
+
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
+        public vyuICGetInventoryAdjustment vyuICGetInventoryAdjustment { get; set; }
     }
 
     public class vyuICGetInventoryAdjustment
@@ -52,6 +73,7 @@ namespace iRely.Inventory.Model
         public DateTime? dtmUnpostedDate { get; set; }
         public int? intSourceId { get; set; }
         public int? intSourceTransactionTypeId { get; set; }
+        public tblICInventoryAdjustment tblICInventoryAdjustment { get; set; }
     }
 
     public class tblICInventoryAdjustmentDetail : BaseEntity

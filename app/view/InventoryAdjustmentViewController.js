@@ -39,7 +39,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 disabled: '{current.ysnPosted}'
             },
             cboLocation: {
-                value: '{current.intLocationId}',
+                value: '{current.strLocation}',
+                origValueField: 'intCompanyLocationId',
+                origUpdateField: 'intLocationId',
                 store: '{location}',
                 readOnly: '{current.ysnPosted}'
             },
@@ -467,7 +469,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
-            include: 'tblICInventoryAdjustmentDetails.vyuICGetInventoryAdjustmentDetail',
+            include: 'vyuICGetInventoryAdjustment, tblICInventoryAdjustmentDetails.vyuICGetInventoryAdjustmentDetail',
             onSaveClick: me.saveAndPokeGrid(win, grdInventoryAdjustment),
             createRecord: me.createRecord,
             validateRecord: me.validateRecord,

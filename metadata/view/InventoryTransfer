@@ -690,7 +690,7 @@
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "name": null,
-                                                        "valueField": "intCompanyLocationId",
+                                                        "valueField": "strLocationName",
                                                         "width": null
                                                     },
                                                     "name": "MyComboBox18",
@@ -761,7 +761,7 @@
                                                         "layout|margins": null,
                                                         "margin": null,
                                                         "name": null,
-                                                        "valueField": "intCompanyLocationId",
+                                                        "valueField": "strLocationName",
                                                         "width": null
                                                     },
                                                     "name": "MyComboBox20",
@@ -841,7 +841,7 @@
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "name": null,
-                                                        "valueField": "intStatusId",
+                                                        "valueField": "strStatus",
                                                         "width": null
                                                     },
                                                     "name": "MyComboBox9",
@@ -1183,7 +1183,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter19",
+                                                    "name": "filter13",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2353,7 +2353,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging11",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

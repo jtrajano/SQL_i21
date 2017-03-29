@@ -22,6 +22,26 @@ namespace iRely.Inventory.Model
         public string strReadingNo { get; set; }
         public int? intSort { get; set; }
 
+        private string _location;
+        [NotMapped]
+        public string strLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_location))
+                    if (tblSMCompanyLocation != null)
+                        return tblSMCompanyLocation.strLocationName;
+                    else
+                        return null;
+                else
+                    return _location;
+            }
+            set
+            {
+                _location = value;
+            }
+        }
+
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public ICollection<tblICStorageMeasurementReadingConversion> tblICStorageMeasurementReadingConversions { get; set; }
     }

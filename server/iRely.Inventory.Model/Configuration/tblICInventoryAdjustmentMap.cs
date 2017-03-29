@@ -29,6 +29,8 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICInventoryAdjustmentDetails)
                 .WithRequired(p => p.tblICInventoryAdjustment)
                 .HasForeignKey(p => p.intInventoryAdjustmentId);
+            this.HasOptional(p => p.vyuICGetInventoryAdjustment)
+                .WithRequired(p => p.tblICInventoryAdjustment);
         }
     }
 

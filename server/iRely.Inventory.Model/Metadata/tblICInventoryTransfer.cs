@@ -38,6 +38,67 @@ namespace iRely.Inventory.Model
         public tblSMCompanyLocation ToLocation { get; set; }
         public tblICStatus tblICStatus { get; set; }
         public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
+        public vyuICGetInventoryTransfer vyuICGetInventoryTransfer { get; set; }
+
+        private string _fromLocation;
+        [NotMapped]
+        public string strFromLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_fromLocation))
+                    if (vyuICGetInventoryTransfer != null)
+                        return vyuICGetInventoryTransfer.strFromLocation;
+                    else
+                        return null;
+                else
+                    return _fromLocation;
+            }
+            set
+            {
+                _fromLocation = value;
+            }
+        }
+
+        private string _toLocation;
+        [NotMapped]
+        public string strToLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_toLocation))
+                    if (vyuICGetInventoryTransfer != null)
+                        return vyuICGetInventoryTransfer.strToLocation;
+                    else
+                        return null;
+                else
+                    return _toLocation;
+            }
+            set
+            {
+                _toLocation = value;
+            }
+        }
+
+        private string _status;
+        [NotMapped]
+        public string strStatus
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_status))
+                    if (vyuICGetInventoryTransfer != null)
+                        return vyuICGetInventoryTransfer.strStatus;
+                    else
+                        return null;
+                else
+                    return _status;
+            }
+            set
+            {
+                _status = value;
+            }
+        }
     }
 
     public class vyuICGetInventoryTransfer
@@ -62,6 +123,8 @@ namespace iRely.Inventory.Model
         public int? strUser { get; set; }
         public string strName { get; set; }
         public int? intSort { get; set; }
+
+        public tblICInventoryTransfer tblICInventoryTransfer { get; set; }
     }
 
     public class tblICInventoryTransferDetail : BaseEntity
