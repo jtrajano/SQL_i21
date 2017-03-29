@@ -45,7 +45,7 @@ Ext.define('Inventory.search.StorageMeasurementReading', {
             width: 100
         },
         {
-            text: 'Storage Locations',
+            text: 'Storage Units',
             itemId: 'btnStorageLocation',
             clickHandler: 'onStorageLocationClick',
             width: 110

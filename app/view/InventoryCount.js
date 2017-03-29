@@ -370,7 +370,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         {
                                                             dataIndex: 'intCompanyLocationSubLocationId',
                                                             dataType: 'numeric',
-                                                            text: 'Sub Location Id',
+                                                            text: 'Storage Location Id',
                                                             hidden: true
                                                         },
                                                         {
@@ -382,7 +382,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         {
                                                             dataIndex: 'strSubLocationName',
                                                             dataType: 'string',
-                                                            text: 'Sub Location Name',
+                                                            text: 'Storage Location Name',
                                                             flex: 1
                                                         },
                                                         {
@@ -393,7 +393,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         }
                                                     ],
                                                     itemId: 'cboSubLocation',
-                                                    fieldLabel: 'Sub Location',
+                                                    fieldLabel: 'Storage Location',
                                                     displayField: 'strSubLocationName',
                                                     valueField: 'strSubLocationName'
                                                 },
@@ -408,7 +408,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         {
                                                             dataIndex: 'strName',
                                                             dataType: 'string',
-                                                            text: 'Storage Location',
+                                                            text: 'Storage Unit',
                                                             flex: 1
                                                         },
                                                         {
@@ -419,7 +419,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         }
                                                     ],
                                                     itemId: 'cboStorageLocation',
-                                                    fieldLabel: 'Storage Location',
+                                                    fieldLabel: 'Storage Unit',
                                                     displayField: 'strName',
                                                     valueField: 'strName'
                                                 },
@@ -663,7 +663,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                             xtype: 'gridcolumn',
                                             itemId: 'colSubLocation',
                                             dataIndex: 'string',
-                                            text: 'Sub Location',
+                                            text: 'Storage Location',
                                             editor: {
                                                 xtype: 'gridcombobox',
                                                 columns: [
@@ -682,25 +682,25 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     {
                                                         dataIndex: 'intSubLocationId',
                                                         dataType: 'numeric',
-                                                        text: 'Sub Location Id',
+                                                        text: 'Storage Location Id',
                                                         hidden: true
                                                     },
                                                     {
                                                         dataIndex: 'strSubLocationName',
                                                         dataType: 'string',
-                                                        text: 'Sub Location',
+                                                        text: 'Storage Location',
                                                         flex: 1
                                                     },
                                                     {
                                                         dataIndex: 'intStorageLocationId',
                                                         dataType: 'numeric',
-                                                        text: 'Storage Location Id',
+                                                        text: 'Storage Unit Id',
                                                         hidden: true
                                                     },
                                                     {
                                                         dataIndex: 'strStorageLocationName',
                                                         dataType: 'string',
-                                                        text: 'Storage Location',
+                                                        text: 'Storage Unit',
                                                         flex: 1
                                                     },
                                                     {
@@ -731,7 +731,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                             xtype: 'gridcolumn',
                                             itemId: 'colStorageLocation',
                                             dataIndex: 'string',
-                                            text: 'Storage Location',
+                                            text: 'Storage Unit',
                                             editor: {
                                                 xtype: 'gridcombobox',
                                                 columns: [
@@ -750,19 +750,19 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     {
                                                         dataIndex: 'intSubLocationId',
                                                         dataType: 'numeric',
-                                                        text: 'Sub Location Id',
+                                                        text: 'Storage Location Id',
                                                         hidden: true
                                                     },
                                                     {
                                                         dataIndex: 'intStorageLocationId',
                                                         dataType: 'numeric',
-                                                        text: 'Storage Location Id',
+                                                        text: 'Storage Unit Id',
                                                         hidden: true
                                                     },
                                                     {
                                                         dataIndex: 'strStorageLocationName',
                                                         dataType: 'string',
-                                                        text: 'Storage Location',
+                                                        text: 'Storage Unit',
                                                         flex: 1
                                                     },
                                                     {

@@ -1489,14 +1489,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 itemId: 'colSubLocation',
                                                                                 width: 90,
                                                                                 dataIndex: 'strDescription',
-                                                                                text: 'Sub Location',
+                                                                                text: 'Storage Location',
                                                                                 editor: {
                                                                                     xtype: 'gridcombobox',
                                                                                     columns: [
                                                                                         {
                                                                                             dataIndex: 'intCompanyLocationSubLocationId',
                                                                                             dataType: 'numeric',
-                                                                                            text: 'Sub Location Id',
+                                                                                            text: 'Storage Location Id',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
@@ -1508,7 +1508,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         {
                                                                                             dataIndex: 'strSubLocationName',
                                                                                             dataType: 'string',
-                                                                                            text: 'Sub Location Name',
+                                                                                            text: 'Storage Location Name',
                                                                                             flex: 1
                                                                                         },
                                                                                         {
@@ -1528,7 +1528,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 itemId: 'colStorageLocation',
                                                                                 width: 120,
                                                                                 dataIndex: 'strStorageLocationName',
-                                                                                text: 'Storage Location',
+                                                                                text: 'Storage Unit',
                                                                                 editor: {
                                                                                     xtype: 'gridcombobox',
                                                                                     columns: [

@@ -278,7 +278,6 @@ Ext.define('Inventory.view.ItemLocation', {
                                                             flex: 1,
                                                             itemId: 'cboCostingMethod',
                                                             fieldLabel: 'Costing Method',
-                                                            labelWidth: 95,
                                                             displayField: 'strDescription',
                                                             valueField: 'intCostingMethodId'
                                                         },
@@ -296,7 +295,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                         {
                                                                             dataIndex: 'intCompanyLocationSubLocationId',
                                                                             dataType: 'numeric',
-                                                                            text: 'Sub Location Id',
+                                                                            text: 'Storage Location Id',
                                                                             hidden: true
                                                                         },
                                                                         {
@@ -308,7 +307,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                         {
                                                                             dataIndex: 'strSubLocationName',
                                                                             dataType: 'string',
-                                                                            text: 'Sub Location Name',
+                                                                            text: 'Storage Location Name',
                                                                             flex: 1
                                                                         },
                                                                         {
@@ -320,8 +319,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                     ],
                                                                     flex: 1,
                                                                     itemId: 'cboSubLocation',
-                                                                    fieldLabel: 'Sub Location',
-                                                                    labelWidth: 95,
+                                                                    fieldLabel: 'Storage Location',
                                                                     displayField: 'strSubLocationName',
                                                                     valueField: 'intCompanyLocationSubLocationId'
                                                                 },
@@ -331,13 +329,13 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                         {
                                                                             dataIndex: 'intStorageLocationId',
                                                                             dataType: 'numeric',
-                                                                            text: 'Storage Location Id',
+                                                                            text: 'Storage Unit Id',
                                                                             hidden: true
                                                                         },
                                                                         {
                                                                             dataIndex: 'strName',
                                                                             dataType: 'string',
-                                                                            text: 'Storage Location',
+                                                                            text: 'Storage Unit',
                                                                             flex: 1
                                                                         },
                                                                         {
@@ -351,7 +349,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                     flex: 1,
                                                                     itemId: 'cboStorageLocation',
                                                                     margin: '0 0 0 5',
-                                                                    fieldLabel: 'Storage Location',
+                                                                    fieldLabel: 'Storage Unit',
                                                                     labelWidth: 98,
                                                                     displayField: 'strName',
                                                                     valueField: 'intStorageLocationId'
@@ -390,7 +388,6 @@ Ext.define('Inventory.view.ItemLocation', {
                                                             flex: 1,
                                                             itemId: 'cboReceiveUom',
                                                             fieldLabel: 'Purchase UOM',
-                                                            labelWidth: 95,
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'intItemUOMId'
                                                         }

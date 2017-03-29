@@ -39,7 +39,7 @@ Ext.define('Inventory.view.StorageUnit', {
     width: 931,
     layout: 'fit',
     collapsible: true,
-    title: 'Storage Location',
+    title: 'Storage Unit',
     maximizable: true,
 
     items: [
@@ -242,7 +242,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 {
                                                     dataIndex: 'intCompanyLocationSubLocationId',
                                                     dataType: 'numeric',
-                                                    text: 'Sub Location Id',
+                                                    text: 'Storage Location Id',
                                                     hidden: true
                                                 },
                                                 {
@@ -254,7 +254,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 {
                                                     dataIndex: 'strSubLocationName',
                                                     dataType: 'string',
-                                                    text: 'Sub Location Name',
+                                                    text: 'Storage Location Name',
                                                     flex: 1
                                                 },
                                                 {
@@ -266,7 +266,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                             ],
                                             enableDrillDown: true,
                                             itemId: 'cboSubLocation',
-                                            fieldLabel: 'Sub Location',
+                                            fieldLabel: 'Storage Location',
                                             labelWidth: 110,
                                             readOnly: false,
                                             displayField: 'strSubLocationName',

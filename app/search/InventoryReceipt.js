@@ -131,8 +131,8 @@ Ext.define('Inventory.search.InventoryReceipt', {
                 { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string' },
 
                 { dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string' },
-                { dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string' },
-                { dataIndex: 'strStorageLocationName', text: 'Storage Location', flex: 1, dataType: 'string' },
+                { dataIndex: 'strSubLocationName', text: 'Storage Location', flex: 1, dataType: 'string' },
+                { dataIndex: 'strStorageLocationName', text: 'Storage Unit', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string' },
                 { dataIndex: 'strUnitMeasure', text: 'Lot UOM', flex: 1, dataType: 'string' },
                 { xtype: 'numbercolumn', dataIndex: 'dblQuantity', text: 'Lot Qty', flex: 1, dataType: 'float' },

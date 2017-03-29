@@ -527,7 +527,7 @@
                             "userConfig": {
                                 "dataIndex": "strStorageLocationName",
                                 "itemId": "colStorageLocationName",
-                                "text": "Storage Location",
+                                "text": "Storage Unit",
                                 "width": 100
                             },
                             "name": "MyColumn19",

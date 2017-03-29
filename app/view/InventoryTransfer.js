@@ -662,7 +662,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         itemId: 'colFromSubLocation',
                                                         width: 110,
                                                         dataIndex: 'strFromSubLocation',
-                                                        text: 'From Sub Location',
+                                                        text: 'From Storage Location',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -681,25 +681,25 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 {
                                                                     dataIndex: 'intSubLocationId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Sub Location Id',
+                                                                    text: 'Storage Location Id',
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Sub Location',
+                                                                    text: 'Storage Location',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     dataIndex: 'intStorageLocationId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Storage Location Id',
+                                                                    text: 'Storage Unit Id',
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strStorageLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Storage Location',
+                                                                    text: 'Storage Unit',
                                                                     flex: 1
                                                                 },
                                                                 {
@@ -735,11 +735,11 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         headerDrillDownClick: 'onStorageHeaderClick',
-                                                        headerDrillDownText: 'Open Storage',
+                                                        headerDrillDownText: 'Open Storage Unit',
                                                         itemId: 'colFromStorage',
                                                         width: 88,
                                                         dataIndex: 'strFromStorage',
-                                                        text: 'From Storage',
+                                                        text: 'From Storage Unit',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -758,25 +758,25 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 {
                                                                     dataIndex: 'intSubLocationId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Sub Location Id',
+                                                                    text: 'Storage Location Id',
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'intStorageLocationId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Storage Location Id',
+                                                                    text: 'Storage Unit Id',
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Sub Location',
+                                                                    text: 'Storage Location',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     dataIndex: 'strStorageLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Storage Location',
+                                                                    text: 'Storage Unit',
                                                                     flex: 1
                                                                 },
                                                                 {
@@ -940,14 +940,14 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         itemId: 'colToSubLocation',
                                                         width: 96,
                                                         dataIndex: 'strToSubLocation',
-                                                        text: 'To Sub Location',
+                                                        text: 'To Storage Location',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
                                                                     dataIndex: 'intCompanyLocationSubLocationId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Sub Location Id',
+                                                                    text: 'Storage Location Id',
                                                                     hidden: true
                                                                 },
                                                                 {
@@ -959,7 +959,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Sub Location',
+                                                                    text: 'Storage Location',
                                                                     flex: 1
                                                                 },
                                                                 {
@@ -979,7 +979,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         itemId: 'colToStorage',
                                                         width: 88,
                                                         dataIndex: 'strToStorage',
-                                                        text: 'To Storage',
+                                                        text: 'To Storage Unit',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -992,7 +992,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 {
                                                                     dataIndex: 'strName',
                                                                     dataType: 'string',
-                                                                    text: 'Storage Location',
+                                                                    text: 'Storage Unit',
                                                                     flex: 1
                                                                 },
                                                                 {
@@ -1004,14 +1004,14 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 {
                                                                     dataIndex: 'intSubLocationId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Sub Locationn Id',
+                                                                    text: 'Storage Locationn Id',
                                                                     flex: 1,
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Sub Location Name',
+                                                                    text: 'Storage Location Name',
                                                                     flex: 1,
                                                                     hidden: true
                                                                 }

@@ -93,8 +93,8 @@ Ext.define('Inventory.search.InventoryShipment', {
                 { dataIndex: 'strUnitMeasure', text: 'Ship UOM', flex: 1, dataType: 'string', hidden: true },
 
                 { dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string' },
-                { dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string' },
-                { dataIndex: 'strStorageLocationName', text: 'Storage Location', flex: 1, dataType: 'string' },
+                { dataIndex: 'strSubLocationName', text: 'Storage Location', flex: 1, dataType: 'string' },
+                { dataIndex: 'strStorageLocationName', text: 'Storage Unit', flex: 1, dataType: 'string' },
                 { dataIndex: 'strLotUOM', text: 'Lot UOM', flex: 1, dataType: 'string' },
                 { xtype: 'numbercolumn', dataIndex: 'dblLotQty', text: 'Lot Qty', flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', dataIndex: 'dblGrossWeight', text: 'Gross Wgt', flex: 1, dataType: 'float' },
@@ -156,7 +156,7 @@ Ext.define('Inventory.search.InventoryShipment', {
             width: 100
         },
         {
-            text: 'Storage Locations',
+            text: 'Storage Units',
             itemId: 'btnStorageLocation',
             clickHandler: 'onStorageLocationClick',
             width: 110

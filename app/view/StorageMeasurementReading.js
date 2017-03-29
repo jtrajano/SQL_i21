@@ -321,7 +321,7 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colStorageLocation',
                                                         width: 120,
-                                                        text: 'Storage Location',
+                                                        text: 'Storage Unit',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -333,18 +333,19 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                                 {
                                                                     dataIndex: 'strName',
                                                                     dataType: 'string',
-                                                                    text: 'Storage Location',
+                                                                    text: 'Storage Unit',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     dataIndex: 'intSubLocationId',
                                                                     dataType: 'numeric',
+                                                                    text: 'Storage Location Id',
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Sub Location',
+                                                                    text: 'Storage Location',
                                                                     flex: 1
                                                                 },
                                                                 {
@@ -369,7 +370,7 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colSubLocation',
                                                         width: 120,
-                                                        text: 'Sub Location'
+                                                        text: 'Storage Location'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',

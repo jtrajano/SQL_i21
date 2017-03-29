@@ -126,7 +126,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            itemId: 'btnRecap',
+                            itemId: 'btnPostPreview',
                             ui: 'i21-button-toolbar-small',
                             text: 'Post Preview'
                         },
@@ -179,8 +179,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                                 {
                                                     xtype: 'datefield',
                                                     itemId: 'dtmBuildDate',
-                                                    fieldLabel: 'Build Date',
-                                                    labelWidth: 85
+                                                    fieldLabel: 'Build Date'
                                                 },
                                                 {
                                                     xtype: 'gridcombobox',
@@ -206,7 +205,6 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                                     ],
                                                     itemId: 'cboLocation',
                                                     fieldLabel: 'Location',
-                                                    labelWidth: 85,
                                                     displayField: 'strLocationName',
                                                     valueField: 'intCompanyLocationId'
                                                 },
@@ -216,7 +214,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                                         {
                                                             dataIndex: 'intCompanyLocationSubLocationId',
                                                             dataType: 'numeric',
-                                                            text: 'Sub Location Id',
+                                                            text: 'Storage Location Id',
                                                             hidden: true
                                                         },
                                                         {
@@ -228,7 +226,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                                         {
                                                             dataIndex: 'strSubLocationName',
                                                             dataType: 'string',
-                                                            text: 'Sub Location Name',
+                                                            text: 'Storage Location Name',
                                                             flex: 1
                                                         },
                                                         {
@@ -239,8 +237,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                                         }
                                                     ],
                                                     itemId: 'cboSubLocation',
-                                                    fieldLabel: 'Sub Location',
-                                                    labelWidth: 85,
+                                                    fieldLabel: 'Storage Location',
                                                     displayField: 'strSubLocationName',
                                                     valueField: 'intCompanyLocationSubLocationId'
                                                 }
@@ -378,8 +375,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                 {
                                     xtype: 'textfield',
                                     itemId: 'txtDescription',
-                                    fieldLabel: 'Description',
-                                    labelWidth: 85
+                                    fieldLabel: 'Description'
                                 },
                                 {
                                     xtype: 'gridpanel',

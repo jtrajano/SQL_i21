@@ -241,7 +241,7 @@ Ext.define('Inventory.view.LotDetailHistory', {
                             itemId: 'colStorageLocationName',
                             width: 100,
                             dataIndex: 'strStorageLocationName',
-                            text: 'Storage Location'
+                            text: 'Storage Unit'
                         },
                         {
                             xtype: 'gridcolumn',

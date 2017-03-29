@@ -17,8 +17,8 @@ Ext.define('Inventory.search.InventoryCount', {
                 { dataIndex: 'strCommodity', text: 'Commodity', flex: 1, dataType: 'string' },
                 { dataIndex: 'strCountGroup', text: 'Count Group', flex: 1, dataType: 'string' },
                 { dataIndex: 'dtmCountDate', text: 'Count Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
-                { dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string' },
-                { dataIndex: 'strStorageLocationName', text: 'Storage Location', flex: 1, dataType: 'string' },
+                { dataIndex: 'strSubLocationName', text: 'Storage Location', flex: 1, dataType: 'string' },
+                { dataIndex: 'strStorageLocationName', text: 'Storage Unit', flex: 1, dataType: 'string' },
                 { dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string' }
             ]
         }
