@@ -5922,7 +5922,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
         var origLocation = current.get('strLocationName');
         var origLocationId = current.get('intLocationId');
-        var newLocation =  record.get('strLocationName');
+        var newLocationId =  record.get('intCompanyLocationId');
         var me = this;
         var grdInventoryReceiptCount = 0;
 
@@ -5935,7 +5935,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
 
-            if (origLocation !== newLocation) {
+            if (origLocationId !== newLocationId) {
                 var buttonAction = function (button) {
                     if (button === 'yes') {
                         //Remove all Sub and Storage Locations Receipt Grid                   
