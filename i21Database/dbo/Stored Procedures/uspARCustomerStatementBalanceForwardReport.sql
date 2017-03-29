@@ -666,3 +666,4 @@ BEGIN
 					@temp_cf_table) CFReportTable ON STATEMENTREPORT.intInvoiceId = CFReportTable.intInvoiceId
 	WHERE CUSTOMER.strStatementFormat = 'Balance Forward'
 	AND STATEMENTREPORT.intInvoiceId IN (SELECT intInvoiceId FROM @temp_cf_table)
+END
