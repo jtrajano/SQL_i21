@@ -1017,8 +1017,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         })
     },
 
-    orgValueLocation: '',
-
     onGridAfterLayout: function (grid) {
         "use strict";
 
@@ -1404,84 +1402,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         if (isHidden === false) {
             this.showAddOrders(win);
-        }
-    },
-
-    onLocationSelect: function (combo, records, eOpts) {
-        var win = combo.up('window');
-        var current = win.viewModel.data.current;
-        var me = this;
-        var grdInventoryReceiptCount = 0;
-
-        if (current) {
-            if (current.tblICInventoryReceiptItems()) {
-                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (row) {
-                    if (!row.dummy) {
-                        grdInventoryReceiptCount++;
-                    }
-                });
-            }
-
-            if (Inventory.view.InventoryReceiptViewController.orgValueLocation !== records[0].get('strLocationName')) {
-                var buttonAction = function (button) {
-                    if (button === 'yes') {
-                        //Remove all Sub and Storage Locations Receipt Grid                   
-                        var receiptItems = current['tblICInventoryReceiptItems'](),
-                            receiptItemRecords = receiptItems ? receiptItems.getRange() : [];
-
-                        var i = receiptItemRecords.length - 1;
-
-                        for (; i >= 0; i--) {
-                            if (!receiptItemRecords[i].dummy) {
-                                receiptItemRecords[i].set('intStorageLocationId', null);
-                                receiptItemRecords[i].set('strStorageLocationName', null);
-                                receiptItemRecords[i].set('intSubLocationId', null);
-                                receiptItemRecords[i].set('strSubLocationName', null);
-                            }
-
-                            //Remove all Storage Locations in Lot Grid
-                            var currentReceiptItem = receiptItemRecords[i];
-                            var receiptItemLots = currentReceiptItem['tblICInventoryReceiptItemLots']();
-                            if (receiptItemLots) {
-                                var receiptItemLotRecords = receiptItemLots ? receiptItemLots.getRange() : [];
-                                var li = receiptItemLotRecords.length - 1;
-
-                                for (; li >= 0; li--) {
-                                    if (!receiptItemLotRecords[li].dummy)
-                                        receiptItemLotRecords[li].set('intStorageLocationId', null);
-                                    receiptItemLotRecords[li].set('strStorageLocation', null);
-                                }
-                            }
-
-                        }
-
-                        var valFOBPoint = current.get('strFobPoint').trim();
-
-                        //Calculate Item Taxes
-                        if (current.tblICInventoryReceiptItems()) {
-                            Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
-                                if (!item.dummy) {
-                                    //Assign Tax Group Id from Location FOB Point is Destination
-                                    if (valFOBPoint.toLowerCase() === 'destination') {
-                                        item.set('intTaxGroupId', records[0].get('intTaxGroupId'));
-                                        item.set('strTaxGroup', records[0].get('strTaxGroup'));
-                                    }
-
-                                    win.viewModel.data.currentReceiptItem = item;
-                                    me.calculateItemTaxes();
-                                }
-                            });
-                        }
-                    }
-                    else {
-                        current.set('strLocationName', Inventory.view.InventoryReceiptViewController.orgValueLocation);
-                    }
-                };
-
-                if (grdInventoryReceiptCount > 0) {
-                    iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Location will clear ALL Sub Locations and Storage Locations. Do you want to continue?', buttonAction);
-                }
-            }
         }
     },
 
@@ -6000,8 +5920,83 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onLocationBeforeSelect: function (combo, record, index, eOpts) {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
+        var origLocation = current.get('strLocationName');
+        var origLocationId = current.get('intLocationId');
+        var newLocation =  record.get('strLocationName');
+        var me = this;
+        var grdInventoryReceiptCount = 0;
 
-        Inventory.view.InventoryReceiptViewController.orgValueLocation = current.get('strLocationName');
+        if (current) {
+            if (current.tblICInventoryReceiptItems()) {
+                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (row) {
+                    if (!row.dummy) {
+                        grdInventoryReceiptCount++;
+                    }
+                });
+            }
+
+            if (origLocation !== newLocation) {
+                var buttonAction = function (button) {
+                    if (button === 'yes') {
+                        //Remove all Sub and Storage Locations Receipt Grid                   
+                        var receiptItems = current['tblICInventoryReceiptItems'](),
+                            receiptItemRecords = receiptItems ? receiptItems.getRange() : [];
+
+                        var i = receiptItemRecords.length - 1;
+
+                        for (; i >= 0; i--) {
+                            if (!receiptItemRecords[i].dummy) {
+                                receiptItemRecords[i].set('intStorageLocationId', null);
+                                receiptItemRecords[i].set('strStorageLocationName', null);
+                                receiptItemRecords[i].set('intSubLocationId', null);
+                                receiptItemRecords[i].set('strSubLocationName', null);
+                            }
+
+                            //Remove all Storage Locations in Lot Grid
+                            var currentReceiptItem = receiptItemRecords[i];
+                            var receiptItemLots = currentReceiptItem['tblICInventoryReceiptItemLots']();
+                            if (receiptItemLots) {
+                                var receiptItemLotRecords = receiptItemLots ? receiptItemLots.getRange() : [];
+                                var li = receiptItemLotRecords.length - 1;
+
+                                for (; li >= 0; li--) {
+                                    if (!receiptItemLotRecords[li].dummy)
+                                        receiptItemLotRecords[li].set('intStorageLocationId', null);
+                                    receiptItemLotRecords[li].set('strStorageLocation', null);
+                                }
+                            }
+
+                        }
+
+                        var valFOBPoint = current.get('strFobPoint').trim();
+
+                        //Calculate Item Taxes
+                        if (current.tblICInventoryReceiptItems()) {
+                            Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
+                                if (!item.dummy) {
+                                    //Assign Tax Group Id from Location FOB Point is Destination
+                                    if (valFOBPoint.toLowerCase() === 'destination') {
+                                        item.set('intTaxGroupId', current.get('intTaxGroupId'));
+                                        item.set('strTaxGroup', current.get('strTaxGroup'));
+                                    }
+
+                                    win.viewModel.data.currentReceiptItem = item;
+                                    me.calculateItemTaxes();
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        current.set('strLocationName', origLocation);
+                        current.set('intLocationId', origLocationId);
+                    }
+                };
+
+                if (grdInventoryReceiptCount > 0) {
+                    iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Location will clear ALL Sub Locations and Storage Locations. Do you want to continue?', buttonAction);
+                }
+            }
+        }
     },
     
     doPostPreview: function(win, cfg){
@@ -6629,8 +6624,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboLocation": {
                 drilldown: this.onLocationDrilldown,
-                beforeselect: this.onLocationBeforeSelect,
-                select: this.onLocationSelect
+                beforeselect: this.onLocationBeforeSelect
             },
             "#cboCurrency": {
                 drilldown: this.onCurrencyDrilldown,
