@@ -96,7 +96,7 @@ AS
 					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
 					'Unpriced' AS strStatus,
 					CAST(0 AS INT) AS intLotsFixed,
-					SUM(CD.dblNoOfLots) AS dblBalanceNoOfLots,
+					CH.dblNoOfLots AS dblBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
 					CAST(NULL AS NUMERIC(18, 6)) AS dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
