@@ -5148,7 +5148,6 @@
     <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
     <Build Include="dbo\Tables\tblARSearchStatementCustomer.sql" />
-    <Build Include="dbo\Stored Procedures\uspARGetStatementsCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdatePricebookItem.sql" />
   </ItemGroup>
   <ItemGroup>
