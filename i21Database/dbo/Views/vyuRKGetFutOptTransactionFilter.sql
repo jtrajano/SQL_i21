@@ -1,8 +1,8 @@
 ﻿CREATE VIEW vyuRKGetFutOptTransactionFilter
 AS
-SELECT DISTINCT convert(int,row_number() OVER(ORDER BY fm.intFutureMarketId)) intRowNum, fm.intFutureMarketId,strFutMarketName,
+SELECT DISTINCT convert(int,row_number() OVER(ORDER BY fm.intFutureMarketId)) intRowNum, fm.intFutureMarketId,fm.strFutMarketName,
 c.intCommodityId,c.strCommodityCode,
-intCurrencyID,strCurrency
+cur.intCurrencyID, cur.strCurrency
 FROM tblRKFutureMarket fm 
 JOIN tblRKCommodityMarketMapping cmm on fm.intFutureMarketId=cmm.intFutureMarketId
 JOIN tblICCommodity c on c.intCommodityId=cmm.intCommodityId
