@@ -319,7 +319,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[intCostCurrencyId]  				= RE.intCurrencyId
 		,[intChargeId]						= IC.intItemId
 		,[intForexRateTypeId]				= RE.intForexRateTypeId
-		,[dblForexRate]						= dblForexRate
+		,[dblForexRate]						= RE.dblForexRate
 		,[ysnInventoryCost]					= 0
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
@@ -486,7 +486,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								LEFT JOIN tblLGLoadCost LoadCost
 									ON LoadCost.intLoadId = LoadDetail.intLoadId
 								WHERE LoadCost.intItemId != @intFreightItemId
-								AND LoadCost.dblRate != 0;
+								AND LoadCost.dblRate != 0
 							END
 						ELSE
 							BEGIN
@@ -544,7 +544,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								WHERE ContractCost.intItemId != @intFreightItemId
 								AND RE.intContractDetailId = @intLoadContractId
 								AND ContractCost.intItemId != @intFreightItemId
-								AND ContractCost.dblRate != 0;
+								AND ContractCost.dblRate != 0
 							END
 					END
 				ELSE IF ISNULL(@intFreightItemId,0) != 0 AND ISNULL(@intHaulerId,0) = 0 AND @ysnDeductFreightFarmer = 1
@@ -662,7 +662,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									ON LoadCost.intLoadId = LoadDetail.intLoadId
 								WHERE LoadCost.intItemId = @intFreightItemId
 								AND LoadDetail.intPContractDetailId = @intLoadContractId
-								AND LoadCost.dblRate != 0;
+								AND LoadCost.dblRate != 0
 
 								INSERT INTO @OtherCharges
 								(
@@ -717,7 +717,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									ON LoadCost.intLoadId = LoadDetail.intLoadId
 								WHERE LoadCost.intItemId != @intFreightItemId
 								AND LoadDetail.intPContractDetailId = @intLoadContractId
-								AND LoadCost.dblRate != 0;
+								AND LoadCost.dblRate != 0
 							END
 						ELSE
 							BEGIN
@@ -774,7 +774,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								ON RE.intContractDetailId = ContractCost.intContractDetailId
 								WHERE ContractCost.intItemId = @intFreightItemId
 								AND RE.intContractDetailId = @intLoadContractId
-								AND ContractCost.dblRate != 0;
+								AND ContractCost.dblRate != 0
 
 								INSERT INTO @OtherCharges
 								(
@@ -829,7 +829,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								ON RE.intContractDetailId = ContractCost.intContractDetailId
 								WHERE ContractCost.intItemId != @intFreightItemId
 								AND RE.intContractDetailId = @intLoadContractId
-								AND ContractCost.dblRate != 0;
+								AND ContractCost.dblRate != 0
 							END
 					END
 				ELSE
@@ -891,7 +891,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									ON LoadCost.intLoadId = LoadDetail.intLoadId
 								WHERE LoadCost.intItemId = @intFreightItemId
 								AND LoadDetail.intPContractDetailId = @intLoadContractId
-								AND LoadCost.dblRate != 0;
+								AND LoadCost.dblRate != 0
 
 								INSERT INTO @OtherCharges
 								(
@@ -948,7 +948,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									ON LoadCost.intLoadId = LoadDetail.intLoadId
 								WHERE LoadCost.intItemId != @intFreightItemId
 								AND LoadDetail.intPContractDetailId = @intLoadContractId
-								AND LoadCost.dblRate != 0;
+								AND LoadCost.dblRate != 0
 							END
 						ELSE
 							BEGIN
@@ -1005,7 +1005,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								ON RE.intContractDetailId = ContractCost.intContractDetailId
 								WHERE ContractCost.intItemId = @intFreightItemId
 								AND RE.intContractDetailId = @intLoadContractId
-								AND ContractCost.dblRate != 0;
+								AND ContractCost.dblRate != 0
 
 								INSERT INTO @OtherCharges
 								(
@@ -1060,7 +1060,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								ON RE.intContractDetailId = ContractCost.intContractDetailId
 								WHERE ContractCost.intItemId != @intFreightItemId
 								AND RE.intContractDetailId = @intLoadContractId
-								AND ContractCost.dblRate != 0;
+								AND ContractCost.dblRate != 0
 							END
 					END
 			END
@@ -1310,7 +1310,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[ysnPrice]							= ContractCost.ysnPrice
 						FROM tblCTContractCost ContractCost
 						LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
-						WHERE ContractCost.intItemId = @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0;
+						WHERE ContractCost.intItemId = @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0
 					END
 				INSERT INTO @OtherCharges
 				(
@@ -1371,7 +1371,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 				ON RE.intContractDetailId = ContractCost.intContractDetailId
 				WHERE ContractCost.intItemId != @intFreightItemId
 				AND RE.intContractDetailId IS NOT NULL
-				AND ContractCost.dblRate != 0;
+				AND ContractCost.dblRate != 0
 			END
 	END
 
