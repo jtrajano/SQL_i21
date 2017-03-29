@@ -49,7 +49,86 @@ namespace iRely.Inventory.Model
         public bool? ysnAllowLoadContracts { get; set; }
         public decimal? dblMaxUnder { get; set; }
         public decimal? dblMaxOver { get; set; }
-        
+
+        private string _futureMarketName;
+        [NotMapped]
+        public string strFutMarketName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_futureMarketName))
+                    if (vyuICCommodityLookUp != null)
+                        return vyuICCommodityLookUp.strFutMarketName;
+                    else
+                        return null;
+                else
+                    return _futureMarketName;
+            }
+            set
+            {
+                _futureMarketName = value;
+            }
+        }
+
+        private string _scheduleId;
+        [NotMapped]
+        public string strScheduleId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_scheduleId))
+                    if (vyuICCommodityLookUp != null)
+                        return vyuICCommodityLookUp.strScheduleId;
+                    else
+                        return null;
+                else
+                    return _scheduleId;
+            }
+            set
+            {
+                _scheduleId = value;
+            }
+        }
+
+        private string _discountId;
+        [NotMapped]
+        public string strDiscountId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_discountId))
+                    if (vyuICCommodityLookUp != null)
+                        return vyuICCommodityLookUp.strDiscountId;
+                    else
+                        return null;
+                else
+                    return _discountId;
+            }
+            set
+            {
+                _discountId = value;
+            }
+        }
+
+        private string _storageType;
+        [NotMapped]
+        public string strStorageTypeCode
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_storageType))
+                    if (vyuICCommodityLookUp != null)
+                        return vyuICCommodityLookUp.strStorageTypeCode;
+                    else
+                        return null;
+                else
+                    return _storageType;
+            }
+            set
+            {
+                _storageType = value;
+            }
+        }
         public ICollection<tblICItem> tblICItems { get; set; }
         public ICollection<tblICCommodityGroup> tblICCommodityGroups { get; set; }
         public ICollection<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }
@@ -65,6 +144,7 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
         public ICollection<tblICDocument> tblICDocuments { get; set; }
+        public vyuICCommodityLookUp vyuICCommodityLookUp { get; set; }
 
     }
 
@@ -331,4 +411,13 @@ namespace iRely.Inventory.Model
         public string strUnitMeasure { get; set; }
     }
 
+    public class vyuICCommodityLookUp
+    {
+        public int intCommodityId { get; set; }
+        public string strFutMarketName { get; set; }
+        public string strScheduleId { get; set; }
+        public string strDiscountId { get; set; }
+        public string strStorageTypeCode { get; set; }
+        public tblICCommodity tblICCommodity { get; set; }
+    }
 }

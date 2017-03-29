@@ -219,7 +219,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 fieldLabel: 'Default Future Market',
                                                                 labelWidth: 140,
                                                                 displayField: 'strFutMarketName',
-                                                                valueField: 'intFutureMarketId'
+                                                                valueField: 'strFutMarketName'
                                                             },
                                                             {
                                                                 xtype: 'container',
@@ -409,7 +409,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 fieldLabel: 'Default Schedule Store',
                                                                 labelWidth: 140,
                                                                 displayField: 'strScheduleId',
-                                                                valueField: 'intStorageScheduleRuleId'
+                                                                valueField: 'strScheduleId'
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -436,7 +436,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 fieldLabel: 'Discount',
                                                                 labelWidth: 140,
                                                                 displayField: 'strDiscountId',
-                                                                valueField: 'intDiscountId'
+                                                                valueField: 'strDiscountId'
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -463,7 +463,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 fieldLabel: 'Scale Auto Dist Default',
                                                                 labelWidth: 140,
                                                                 displayField: 'strStorageTypeCode',
-                                                                valueField: 'intStorageScheduleTypeId'
+                                                                valueField: 'strStorageTypeCode'
                                                             },
                                                             {
                                                                 xtype: 'container',

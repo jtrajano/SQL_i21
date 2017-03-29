@@ -67,6 +67,9 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICCommoditySeasons)
                 .WithRequired(p => p.tblICCommodity)
                 .HasForeignKey(p => p.intCommodityId);
+
+            this.HasOptional(p => p.vyuICCommodityLookUp)
+               .WithRequired(p => p.tblICCommodity);
         }
     }
 
@@ -239,5 +242,20 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICCommodityLookUpMap : EntityTypeConfiguration<vyuICCommodityLookUp>
+    {
+        public vyuICCommodityLookUpMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intCommodityId);
 
+            // Table & Column Mappings
+            this.ToTable("vyuICCommodityLookUp");
+            this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
+            this.Property(t => t.strFutMarketName).HasColumnName("strFutMarketName");
+            this.Property(t => t.strScheduleId).HasColumnName("strScheduleId");
+            this.Property(t => t.strDiscountId).HasColumnName("strDiscountId");
+            this.Property(t => t.strStorageTypeCode).HasColumnName("strStorageTypeCode");
+        }
+    }
 }
