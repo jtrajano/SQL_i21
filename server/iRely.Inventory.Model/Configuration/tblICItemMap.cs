@@ -244,6 +244,9 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICItemMotorFuelTaxes)
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);
+
+            this.HasOptional(p => p.vyuICGetCompactItem)
+                .WithRequired(p => p.tblICItem);
         }
     }
 
@@ -291,7 +294,18 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnBasisContract).HasColumnName("ysnBasisContract");
             this.Property(t => t.intTonnageTaxUOMId).HasColumnName("intTonnageTaxUOMId");
             this.Property(t => t.strTonnageTaxUOM).HasColumnName("strTonnageTaxUOM");
-
+            this.Property(t => t.strFuelCategory).HasColumnName("strFuelCategory");
+            this.Property(t => t.strMedicationTag).HasColumnName("strMedicationTag");
+            this.Property(t => t.strIngredientTag).HasColumnName("strIngredientTag");
+            this.Property(t => t.strPhysicalItem).HasColumnName("strPhysicalItem");
+            this.Property(t => t.strPatronageCategory).HasColumnName("strPatronageCategory");
+            this.Property(t => t.strPatronageDirect).HasColumnName("strPatronageDirect");
+            this.Property(t => t.strOrigin).HasColumnName("strOrigin");
+            this.Property(t => t.strProductType).HasColumnName("strProductType");
+            this.Property(t => t.strRegion).HasColumnName("strRegion");
+            this.Property(t => t.strSeason).HasColumnName("strSeason");
+            this.Property(t => t.strClass).HasColumnName("strClass");
+            this.Property(t => t.strProductLine).HasColumnName("strProductLine");
         }
     }
 

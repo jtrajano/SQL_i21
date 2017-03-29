@@ -31,12 +31,14 @@ Ext.define('Inventory.view.ItemViewController', {
                 readOnly: '{HideDisableForComment}'
             },
             cboManufacturer: {
-                value: '{current.intManufacturerId}',
+                value: '{current.strManufacturer}',
+                origValueField: 'intManufacturerId',
                 store: '{manufacturer}',
                 readOnly: '{HideDisableForComment}'
             },
             cboBrand: {
-                value: '{current.intBrandId}',
+                value: '{current.strBrand}',
+                origValueField: 'intBrandId',
                 store: '{brand}',
                 readOnly: '{HideDisableForComment}'
             },
@@ -46,7 +48,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 readOnly: '{readOnlyForDiscountType}'
             },
             cboCategory: {
-                value: '{current.intCategoryId}',
+                value: '{current.strCategory}',
+                origValueField: 'intCategoryId',
                 store: '{itemCategory}',
                 defaultFilters: [{
                     column: 'strInventoryType',
@@ -57,7 +60,8 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             cboCommodity: {
                 readOnly: '{readOnlyCommodity}',
-                value: '{current.intCommodityId}',
+                origValueField: 'intCommodityId',
+                value: '{current.strCommodityCode}',
                 store: '{commodity}'
             },
             cboLotTracking: {
@@ -321,7 +325,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 store: '{rinRequires}'
             },
             cboFuelCategory: {
-                value: '{current.intRINFuelTypeId}',
+                value: '{current.strFuelCategory}',
+                origValueField: 'intRinFuelCategoryId',
+                origUpdateField: 'intRINFuelTypeId',
                 store: '{fuelCategory}'
             },
             chkListBundleSeparately: {
@@ -345,16 +351,22 @@ Ext.define('Inventory.view.ItemViewController', {
             txtMixOrder: '{current.dblMixOrder}',
             chkHandAddIngredients: '{current.ysnHandAddIngredient}',
             cboMedicationTag: {
-                value: '{current.intMedicationTag}',
+                value: '{current.strMedicationTag}',
+                origValueField: 'intTagId',
+                origUpdateField: 'intMedicationTag',
                 store: '{medicationTag}'
             },
             cboIngredientTag: {
-                value: '{current.intIngredientTag}',
+                value: '{current.strIngredientTag}',
+                origValueField: 'intTagId',
+                origUpdateField: 'intIngredientTag',
                 store: '{ingredientTag}'
             },
             txtVolumeRebateGroup: '{current.strVolumeRebateGroup}',
             cboPhysicalItem: {
-                value: '{current.intPhysicalItem}',
+                value: '{current.strPhysicalItem}',
+                origUpdateField: 'intPhysicalItem',
+                origValueField: 'intItemId',
                 store: '{physicalItem}'
             },
             chkExtendOnPickTicket: '{current.ysnExtendPickTicket}',
@@ -642,11 +654,14 @@ Ext.define('Inventory.view.ItemViewController', {
             },
 
             cboPatronage: {
-                value: '{current.intPatronageCategoryId}',
+                value: '{current.strPatronageCategory}',
+                origValueField: 'intPatronageCategoryId',
                 store: '{patronage}'
             },
             cboPatronageDirect: {
-                value: '{current.intPatronageCategoryDirectId}',
+                value: '{current.strPatronageDirect}',
+                origValueField: 'intPatronageCategoryId',
+                origUpdateField: 'intPatronageCategoryDirectId',
                 store: '{directSale}'
             },
 
@@ -879,11 +894,15 @@ Ext.define('Inventory.view.ItemViewController', {
             //-------------//
             txtGaShrinkFactor: '{current.dblGAShrinkFactor}',
             cboOrigin: {
-                value: '{current.intOriginId}',
+                value: '{current.strOrigin}',
+                origUpdateField: 'intOriginId',
+                origValueField: 'intCommodityAttributeId',
                 store: '{originAttribute}'
             },
             cboProductType: {
-                value: '{current.intProductTypeId}',
+                value: '{current.strProductType}',
+                origValueField: 'intCommodityAttributeId',
+                origUpdateField: 'intProductTypeId',
                 store: '{productTypeAttribute}',
                 defaultFilters: [{
                     column: 'intCommodityId',
@@ -891,7 +910,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 }]
             },
             cboRegion: {
-                value: '{current.intRegionId}',
+                value: '{current.strRegion}',
+                origUpdateField: 'intRegionId',
+                origValueField: 'intCommodityAttributeId',
                 store: '{regionAttribute}',
                 defaultFilters: [{
                     column: 'intCommodityId',
@@ -899,7 +920,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 }]
             },
             cboSeason: {
-                value: '{current.intSeasonId}',
+                value: '{current.strSeason}',
+                origValueField: 'intCommodityAttributeId',
+                origUpdateField: 'intSeasonId',
                 store: '{seasonAttribute}',
                 defaultFilters: [{
                     column: 'intCommodityId',
@@ -907,7 +930,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 }]
             },
             cboClass: {
-                value: '{current.intClassVarietyId}',
+                value: '{current.strClass}',
+                origValueField: 'intCommodityAttributeId',
+                origUpdateField: 'intClassVarietyId',
                 store: '{classAttribute}',
                 defaultFilters: [{
                     column: 'intCommodityId',
@@ -915,7 +940,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 }]
             },
             cboProductLine: {
-                value: '{current.intProductLineId}',
+                value: '{current.strProductLine}',
+                origValueField: 'intCommodityProductLineId',
+                origUpdateField: 'intProductLineId',
                 store: '{productLineAttribute}',
                 defaultFilters: [{
                     column: 'intCommodityId',
@@ -1165,6 +1192,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 type: 'Inventory.Item',
                 window: win
             }),
+            include: 'vyuICGetCompactItem',
             details: [
                 {
                     key: 'tblICItemUOMs',

@@ -163,8 +163,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_strM2MComputation))
-                    if (tblICM2MComputation != null)
-                        return tblICM2MComputation.strM2MComputation;
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strM2MComputation;
                     else
                         return null;
                 else
@@ -183,8 +183,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_manufacturer))
-                    if (tblICManufacturer != null)
-                        return tblICManufacturer.strManufacturer;
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strManufacturer;
                     else
                         return null;
                 else
@@ -195,6 +195,27 @@ namespace iRely.Inventory.Model
                 _manufacturer = value;
             }
         }
+
+        private string _category;
+        [NotMapped]
+        public string strCategory
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_category))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strCategory;
+                    else
+                        return null;
+                else
+                    return _category;
+            }
+            set
+            {
+                _category = value;
+            }
+        }
+
         private string _brand;
         [NotMapped]
         public string strBrand
@@ -202,8 +223,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_brand))
-                    if (tblICBrand != null)
-                        return tblICBrand.strBrandCode;
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strBrandCode;
                     else
                         return null;
                 else
@@ -221,8 +242,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_commodityCode))
-                    if (tblICCommodity != null)
-                        return tblICCommodity.strCommodityCode;
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strCommodity;
                     else
                         return null;
                 else
@@ -233,6 +254,260 @@ namespace iRely.Inventory.Model
                 _commodityCode = value;
             }
         }
+
+        private string _fuelCategory;
+        
+        [NotMapped]
+        public string strFuelCategory
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_fuelCategory))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strFuelCategory;
+                    else
+                        return null;
+                else
+                    return _fuelCategory;
+            }
+            set
+            {
+                _fuelCategory = value;
+            }
+        }
+
+        private string _medicationTag;
+        
+        [NotMapped]
+        public string strMedicationTag
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_medicationTag))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strMedicationTag;
+                    else
+                        return null;
+                else
+                    return _medicationTag;
+            }
+            set
+            {
+                _medicationTag = value;
+            }
+        }
+
+        private string _ingredientTag;
+        
+        [NotMapped]
+        public string strIngredientTag
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_ingredientTag))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strIngredientTag;
+                    else
+                        return null;
+                else
+                    return _ingredientTag;
+            }
+            set
+            {
+                _ingredientTag = value;
+            }
+        }
+
+        private string _physicalItem;
+        
+        [NotMapped]
+        public string strPhysicalItem
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_physicalItem))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strPhysicalItem;
+                    else
+                        return null;
+                else
+                    return _physicalItem;
+            }
+            set
+            {
+                _physicalItem = value;
+            }
+        }
+
+        private string _patronageCategory;
+        
+        [NotMapped]
+        public string strPatronageCategory
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_patronageCategory))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strPatronageCategory;
+                    else
+                        return null;
+                else
+                    return _patronageCategory;
+            }
+            set
+            {
+                _patronageCategory = value;
+            }
+        }
+
+        private string _patronageDirect;
+       
+        [NotMapped]
+        public string strPatronageDirect
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_patronageDirect))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strPatronageDirect;
+                    else
+                        return null;
+                else
+                    return _patronageDirect;
+            }
+            set
+            {
+                _patronageDirect = value;
+            }
+        }
+
+        private string _origin;
+        
+        [NotMapped]
+        public string strOrigin
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_origin))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strOrigin;
+                    else
+                        return null;
+                else
+                    return _origin;
+            }
+            set
+            {
+                _origin = value;
+            }
+        }
+
+        private string _productType;
+        
+        [NotMapped]
+        public string strProductType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_productType))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strProductType;
+                    else
+                        return null;
+                else
+                    return _productType;
+            }
+            set
+            {
+                _productType = value;
+            }
+        }
+
+        private string _region;
+        
+        [NotMapped]
+        public string strRegion
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_region))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strRegion;
+                    else
+                        return null;
+                else
+                    return _region;
+            }
+            set
+            {
+                _region = value;
+            }
+        }
+
+        private string _season;
+        
+        [NotMapped]
+        public string strSeason
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_season))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strSeason;
+                    else
+                        return null;
+                else
+                    return _season;
+            }
+            set
+            {
+                _season = value;
+            }
+        }
+
+        private string _class;
+        
+        [NotMapped]
+        public string strClass
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_class))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strClass;
+                    else
+                        return null;
+                else
+                    return _class;
+            }
+            set
+            {
+                _class = value;
+            }
+        }
+
+        private string _productLine;
+
+        [NotMapped]
+        public string strProductLine
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_productLine))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strProductLine;
+                    else
+                        return null;
+                else
+                    return _productLine;
+            }
+            set
+            {
+                _productLine = value;
+            }
+        }
+
+        public vyuICGetCompactItem vyuICGetCompactItem { get; set; }
 
         public tblICManufacturer tblICManufacturer { get; set; }
         public tblICM2MComputation tblICM2MComputation { get; set; }
@@ -311,6 +586,20 @@ namespace iRely.Inventory.Model
         public int? intTonnageTaxUOMId { get; set; }
         public string strTonnageTaxUOM { get; set; }
 
+        public string strFuelCategory { get; set; }
+        public string strMedicationTag { get; set; }
+        public string strIngredientTag { get; set; }
+        public string strPhysicalItem { get; set; }
+        public string strPatronageCategory { get; set; }
+        public string strPatronageDirect { get; set; }
+        public string strOrigin { get; set; }
+        public string strProductType { get; set; }
+        public string strRegion { get; set; }
+        public string strSeason { get; set; }
+        public string strClass { get; set; }
+        public string strProductLine { get; set; }
+
+        public tblICItem tblICItem { get; set; }
     }
 
     public class vyuICGetItemCommodity
