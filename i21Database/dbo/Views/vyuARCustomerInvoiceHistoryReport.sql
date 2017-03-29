@@ -53,6 +53,6 @@ FROM tblARInvoice I
 				INNER JOIN tblARInvoice PCI
 					ON PC.intPrepaymentId = PCI.intInvoiceId AND PC.ysnApplied = 1) PAYMENTS ON PAYMENTS.intInvoiceId = I.intInvoiceId
 	LEFT JOIN tblSMPaymentMethod PM ON PAYMENTS.intPaymentMethodId = PM.intPaymentMethodID
-	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
+	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.[intEntityId] = CC.[intEntityId] AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.[intEntityId]
 WHERE I.ysnPosted = 1
   AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments', 'Undeposited Funds'))

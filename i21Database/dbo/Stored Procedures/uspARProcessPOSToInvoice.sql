@@ -184,8 +184,8 @@ SELECT
 
 FROM tblARPOS POS 
 INNER JOIN tblARPOSDetail POSDetail ON POS.intPOSId = POSDetail.intPOSId
-JOIN tblARCustomer Cus on Cus.intEntityCustomerId = POS.intEntityCustomerId
-JOIN tblEMEntityLocation Loc on Loc.intEntityId = Cus.intEntityCustomerId and Loc.ysnDefaultLocation = 1
+JOIN tblARCustomer Cus on Cus.[intEntityId] = POS.intEntityCustomerId
+JOIN tblEMEntityLocation Loc on Loc.intEntityId = Cus.[intEntityId] and Loc.ysnDefaultLocation = 1
 Where POS.intPOSId = @intPOSId
 
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 

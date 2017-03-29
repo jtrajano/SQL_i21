@@ -5,7 +5,7 @@ GO
 UPDATE
 	tblARCustomer
 SET
-	intBillToId = (SELECT TOP 1 intEntityLocationId FROM [tblEMEntityLocation] WHERE ysnDefaultLocation = 1 AND intEntityId = tblARCustomer.intEntityCustomerId)
+	intBillToId = (SELECT TOP 1 intEntityLocationId FROM [tblEMEntityLocation] WHERE ysnDefaultLocation = 1 AND intEntityId = tblARCustomer.[intEntityId])
 WHERE
 	intBillToId IS NULL
 
@@ -20,7 +20,7 @@ GO
 UPDATE
 	tblARCustomer
 SET
-	intShipToId = (SELECT TOP 1 intEntityLocationId FROM [tblEMEntityLocation] WHERE ysnDefaultLocation = 1 AND intEntityId = tblARCustomer.intEntityCustomerId)
+	intShipToId = (SELECT TOP 1 intEntityLocationId FROM [tblEMEntityLocation] WHERE ysnDefaultLocation = 1 AND intEntityId = tblARCustomer.[intEntityId])
 WHERE
 	intShipToId IS NULL
 

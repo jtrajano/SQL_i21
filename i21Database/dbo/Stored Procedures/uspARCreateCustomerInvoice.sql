@@ -222,7 +222,7 @@ IF  @TransactionType = 'Customer Prepayment' AND NOT EXISTS (SELECT NULL FROM vy
 	END
 
 	
-IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId)
+IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @EntityCustomerId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120025, 16, 1);
@@ -230,7 +230,7 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @Entity
 		RETURN 0;
 	END
 
-IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId AND ysnActive = 1)
+IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @EntityCustomerId AND ysnActive = 1)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120026, 16, 1);
@@ -387,7 +387,7 @@ BEGIN TRY
 	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= @TransactionType
 		,[strType]						= @Type
-		,[intEntityCustomerId]			= C.[intEntityCustomerId]
+		,[intEntityCustomerId]			= C.[intEntityId]
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId
 		,[intCurrencyId]				= @DefaultCurrency
@@ -416,7 +416,7 @@ BEGIN TRY
 		,[strBOLNumber]					= @BOLNumber
 		,[strDeliverPickup]				= @DeliverPickUp
 		,[strComments]					= CASE WHEN (@Comment IS NULL OR @Comment = '') THEN (SELECT TOP 1 strMessage FROM tblSMDocumentMaintenanceMessage WHERE intDocumentMaintenanceId = @DocumentMaintenanceId AND strHeaderFooter NOT IN ('Footer')) ELSE @Comment END
-		,[strFooterComments]			= dbo.fnARGetFooterComment(@CompanyLocationId, C.intEntityCustomerId, 'Invoice Footer')
+		,[strFooterComments]			= dbo.fnARGetFooterComment(@CompanyLocationId, C.[intEntityId], 'Invoice Footer')
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
 		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
@@ -471,7 +471,7 @@ BEGIN TRY
 						WHERE
 							ysnDefaultLocation = 1
 					) EL
-						ON C.[intEntityCustomerId] = EL.[intEntityId]
+						ON C.[intEntityId] = EL.[intEntityId]
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] SL
 			ON ISNULL(@ShipToLocationId, 0) <> 0
@@ -486,7 +486,7 @@ BEGIN TRY
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] BL1
 			ON C.intBillToId = BL1.intEntityLocationId	
-	WHERE C.[intEntityCustomerId] = @EntityCustomerId
+	WHERE C.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()
 	

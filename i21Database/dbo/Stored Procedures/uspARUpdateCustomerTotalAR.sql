@@ -84,7 +84,7 @@ IF EXISTS(SELECT NULL FROM @customerTable)
 				           , @arBalance = ISNULL(dblARBalance, 0.000000) 
 				FROM @customerTable ORDER BY intEntityCustomerId
 
-				UPDATE tblARCustomer SET dblARBalance = @arBalance WHERE intEntityCustomerId = @entityCustomerId 
+				UPDATE tblARCustomer SET dblARBalance = @arBalance WHERE [intEntityId] = @entityCustomerId 
 
 				DELETE FROM @customerTable WHERE intEntityCustomerId = @entityCustomerId
 			END

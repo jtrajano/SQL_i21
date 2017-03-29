@@ -13,7 +13,7 @@ FROM
 	tblSOSalesOrder SO
 INNER JOIN
 	tblARCustomer C
-		ON SO.intEntityCustomerId = C.intEntityCustomerId 
+		ON SO.intEntityCustomerId = C.[intEntityId] 
 WHERE
 	intSalesOrderId = SO.intSalesOrderId 
 	AND (intShipToLocationId IS NULL OR intShipToLocationId = 0)
@@ -33,7 +33,7 @@ FROM
 	tblSOSalesOrder SO
 INNER JOIN
 	tblARCustomer C
-		ON SO.intEntityCustomerId = C.intEntityCustomerId 
+		ON SO.intEntityCustomerId = C.[intEntityId] 
 WHERE
 	intSalesOrderId = SO.intSalesOrderId 
 	AND (intBillToLocationId IS NULL OR intBillToLocationId = 0)
@@ -53,7 +53,7 @@ FROM
 	tblARInvoice I
 INNER JOIN
 	tblARCustomer C
-		ON I.intEntityCustomerId = C.intEntityCustomerId 
+		ON I.intEntityCustomerId = C.[intEntityId] 
 WHERE
 	intInvoiceId = I.intInvoiceId 
 	AND (intShipToLocationId IS NULL OR intShipToLocationId = 0)
@@ -73,7 +73,7 @@ FROM
 	tblARInvoice I
 INNER JOIN
 	tblARCustomer C
-		ON I.intEntityCustomerId = C.intEntityCustomerId 
+		ON I.intEntityCustomerId = C.[intEntityId] 
 WHERE
 	intInvoiceId = I.intInvoiceId 
 	AND (intBillToLocationId IS NULL OR intBillToLocationId = 0)

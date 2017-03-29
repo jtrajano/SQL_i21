@@ -424,7 +424,7 @@ BEGIN
 
 			FROM tblPATCustomerStock CS
 			INNER JOIN tblARCustomer ARC
-				ON ARC.intEntityCustomerId = CS.intCustomerPatronId
+				ON ARC.[intEntityId] = CS.intCustomerPatronId
 			CROSS JOIN (SELECT intSalesAccount FROM tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId) SADef
 			WHERE CS.intCustomerStockId = @intCustomerStockId
 

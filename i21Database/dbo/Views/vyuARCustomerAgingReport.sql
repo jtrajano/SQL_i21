@@ -3,7 +3,7 @@ AS
 SELECT A.strCustomerName
 	 , A.strEntityNo
      , A.intEntityCustomerId
-	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
+	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE [intEntityId] = A.intEntityCustomerId)
 	 , dblTotalAR			= SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
 	 , dblTotalARDiscount	= SUM(B.dblTotalDue) - SUM(B.dblDiscountTerm) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
 	 , dblFuture			= 0.000000
@@ -45,8 +45,8 @@ FROM
 	, dblAvailableCredit	= 0	
 	, dblPrepayments		= 0
 FROM tblARInvoice I
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
-	INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId    
 WHERE I.ysnPosted = 1
   AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -80,8 +80,8 @@ SELECT dtmPostDate			= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
 	 , dblPrepayments		= 0
 FROM tblARInvoice I
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
-	INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
 	LEFT JOIN (
@@ -128,8 +128,8 @@ SELECT dtmPostDate			= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 	 , dblAvailableCredit	= 0
 	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
 FROM tblARInvoice I
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
-	INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
 	LEFT JOIN (
@@ -183,8 +183,8 @@ FROM tblARPayment P
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) > GETDATE()
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
 				AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
-    INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
-    INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
+    INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
+    INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId    
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()  
@@ -229,8 +229,8 @@ SELECT I.dtmPostDate
 	 , dblAvailableCredit	= 0 
 	 , dblPrepayments		= 0
 FROM tblARInvoice I 
-	 INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId 
-	 INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId    
+	 INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId 
+	 INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]    
 	 INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	 LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) <= GETDATE()) ON I.intInvoiceId = PD.intInvoiceId
 	 LEFT JOIN (tblAPPaymentDetail APPD INNER JOIN tblAPPayment APP ON APPD.intPaymentId = APP.intPaymentId AND APP.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), APP.dtmDatePaid ))) <= GETDATE()) ON I.intInvoiceId = APPD.intInvoiceId
@@ -287,7 +287,7 @@ FROM
 	  , dblPrepayments		= 0
 	  , dblDiscountTerm		= dbo.fnARComputeDiscountForEarlyPayment(GETDATE(), I.intInvoiceId)
 FROM tblARInvoice I
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId    
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Invoice', 'Debit Memo')
@@ -308,7 +308,7 @@ SELECT I.intInvoiceId
 	  , dblPrepayments		= 0
 	  , dblDiscountTerm     = 0
 FROM tblARInvoice I
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) AS dblPayment
@@ -342,7 +342,7 @@ SELECT I.intInvoiceId
 	  , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
 	  , dblDiscountTerm     = 0
 FROM tblARInvoice I
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) AS dblPayment
@@ -383,7 +383,7 @@ FROM tblARPayment P
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) > GETDATE()
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
 				AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
-    INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
+    INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId    
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
   						      
@@ -415,7 +415,7 @@ SELECT I.intInvoiceId
   , dblPrepayments			= 0
   , dblDiscountTerm			= 0
 FROM tblARInvoice I 
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId    
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()) ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN (tblAPPaymentDetail APPD INNER JOIN tblAPPayment APP ON APPD.intPaymentId = APP.intPaymentId AND APP.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), APP.dtmDatePaid ))) <= GETDATE()) ON I.intInvoiceId = APPD.intInvoiceId

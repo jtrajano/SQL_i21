@@ -476,7 +476,7 @@ FROM @temp_statement_table AS STATEMENTREPORT
 INNER JOIN @temp_aging_table AS AGINGREPORT
 	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN tblARCustomer CUSTOMER 
-	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.[intEntityId]
 WHERE CUSTOMER.strStatementFormat = 'Balance Forward'
 AND STATEMENTREPORT.intInvoiceId NOT IN (SELECT intInvoiceId FROM @temp_cf_table)
 
@@ -524,7 +524,7 @@ FROM @temp_statement_table AS STATEMENTREPORT
 INNER JOIN @temp_aging_table AS AGINGREPORT
 	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN tblARCustomer CUSTOMER 
-	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.[intEntityId]
 INNER JOIN (SELECT 
 				intInvoiceId
 				, strInvoiceNumber

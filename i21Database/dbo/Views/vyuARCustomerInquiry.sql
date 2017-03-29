@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerInquiry]
 AS 
-SELECT C.intEntityCustomerId
+SELECT C.[intEntityId]
 	 , strCustomerName				= C.strName
 	 , CI.strTerm
 	 , C.strCustomerNumber
@@ -41,4 +41,4 @@ SELECT C.intEntityCustomerId
 	 , dtmBudgetMonth				= CI.dtmBudgetMonth
 FROM vyuARCustomer C
 LEFT JOIN vyuARCustomerInquiryReport CI
-	ON C.intEntityCustomerId = CI.intEntityCustomerId
+	ON C.[intEntityId] = CI.intEntityCustomerId

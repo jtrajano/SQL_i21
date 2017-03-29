@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARBillableHoursForImport]
 	AS 
 SELECT
-	C.[intEntityCustomerId]
+	C.[intEntityId]
 	,C.[strCustomerNumber]
 	,E.[strName]
 	,T.[intTicketId]
@@ -38,10 +38,10 @@ INNER JOIN
 		ON HW.[intTicketId] = T.[intTicketId]
 INNER JOIN
 	tblARCustomer C
-		ON T.[intCustomerId] = C.[intEntityCustomerId]
+		ON T.[intCustomerId] = C.[intEntityId]
 INNER JOIN
 	tblEMEntity E
-		ON C.[intEntityCustomerId] = E.[intEntityId]	
+		ON C.[intEntityId] = E.[intEntityId]	
 LEFT JOIN
 	tblEMEntityLocation EML
 		ON E.[intEntityId] = EML.[intEntityId]

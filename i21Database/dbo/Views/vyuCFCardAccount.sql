@@ -17,7 +17,7 @@ SELECT   A.intAccountId, A.intCustomerId, A.intDiscountDays, A.intDiscountSchedu
                          N.intPPDistributionSite, N.strPPFileImportType, N.ysnRejectExportCard, N.strRejectPath, N.strParticipant, N.strCFNFileVersion, N.ysnPassOnSSTFromRemotes, 
                          N.ysnExemptFETOnRemotes, N.ysnExemptSETOnRemotes, N.ysnExemptLCOnRemotes, N.strExemptLCCode, N.intImportMapperId, N.strLinkNetwork, 
                          N.intConcurrencyId AS EXPR9, D.intDepartmentId AS EXPR10, D.intAccountId AS EXPR11, D.strDepartment, D.strDepartmentDescription, D.intConcurrencyId AS EXPR12, 
-                         Cus.intEntityId, Cus.intEntityCustomerId, Cus.strName, Cus.strCustomerNumber, Cus.strType, Cus.strPhone, Cus.strAddress, Cus.strCity, Cus.strState, Cus.strZipCode, 
+                         Cus.[intEntityId], Cus.strName, Cus.strCustomerNumber, Cus.strType, Cus.strPhone, Cus.strAddress, Cus.strCity, Cus.strState, Cus.strZipCode, 
                          Cus.ysnActive AS EXPR13, Cus.intSalespersonId AS EXPR14, Cus.intCurrencyId, Cus.intTermsId, Cus.intShipViaId, Cus.strShipToLocationName, Cus.strShipToAddress, 
                          Cus.strShipToCity, Cus.strShipToState, Cus.strShipToZipCode, Cus.strShipToCountry, Cus.strBillToLocationName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState,
                           Cus.strBillToZipCode, Cus.strBillToCountry, I.strInvoiceCycle, arCustCon.strEmailDistributionOption, arCustCon.strEmail
@@ -25,7 +25,7 @@ FROM         dbo.tblCFAccount AS A LEFT OUTER JOIN
                          dbo.tblCFCard AS C ON A.intAccountId = C.intAccountId LEFT OUTER JOIN
                          dbo.tblCFNetwork AS N ON N.intNetworkId = C.intNetworkId LEFT OUTER JOIN
                          dbo.tblCFDepartment AS D ON D.intDepartmentId = C.intDepartmentId INNER JOIN
-                         dbo.vyuCFCustomerEntity AS Cus ON A.intCustomerId = Cus.intEntityCustomerId INNER JOIN
+                         dbo.vyuCFCustomerEntity AS Cus ON A.intCustomerId = Cus.[intEntityId] INNER JOIN
                          dbo.tblCFInvoiceCycle AS I ON I.intInvoiceCycleId = A.intInvoiceCycle INNER JOIN
                          dbo.vyuARCustomerContacts AS arCustCon ON A.intCustomerId = arCustCon.intCustomerEntityId
 GO

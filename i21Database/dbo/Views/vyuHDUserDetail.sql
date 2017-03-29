@@ -34,8 +34,8 @@
 
 		select
 			strCustomer = cus.strCustomerNumber
-			,intCustomerId = cus.[intEntityCustomerId]
-			,strCompanyName = (select top 1 strName from tblEMEntity where intEntityId = cus.[intEntityCustomerId])
+			,intCustomerId = cus.[intEntityId]
+			,strCompanyName = (select top 1 strName from tblEMEntity where intEntityId = cus.[intEntityId])
 			,strFullName = ec.strEmail
 			,strPhone = ec.strPhone
 			,strMobile = ec.strMobile
@@ -55,10 +55,10 @@
 			,imgPhoto = ec.imgPhoto
 			,intConcurrencyId = 1
 			,strFullName2 = ec.strName
-			,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = cus.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
+			,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = cus.[intEntityId] and et.strType in ('Customer','Prospect'))
 		from
 			tblEMEntity ec
-			inner join tblARCustomer cus on cus.[intEntityCustomerId] = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])
+			inner join tblARCustomer cus on cus.[intEntityId] = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])
 		
 		union all
 

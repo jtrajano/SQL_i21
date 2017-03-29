@@ -137,9 +137,9 @@ BEGIN
 		tblARCustomerSpecialPrice SP
 	INNER JOIN
 		tblARCustomer C
-			ON SP.intEntityCustomerId = C.intEntityCustomerId
+			ON SP.intEntityCustomerId = C.[intEntityId]
 	WHERE
-		C.intEntityCustomerId = @CustomerId
+		C.[intEntityId] = @CustomerId
 		AND ((CAST(@TransactionDate AS DATE) BETWEEN CAST(SP.dtmBeginDate AS DATE) AND CAST(ISNULL(SP.dtmEndDate, GETDATE()) AS DATE)) OR (CAST(@TransactionDate AS DATE) >= CAST(SP.dtmBeginDate AS DATE) AND SP.dtmEndDate IS NULL))
 		AND ((@LocationId IS NOT NULL) OR (@LocationId IS NULL AND SP.strPriceBasis IN ('F', 'R', 'L', 'O')))
 		AND ISNULL(SP.intCurrencyId, @FunctionalCurrencyId) = @SpecialPricingCurrencyId 
@@ -461,7 +461,7 @@ BEGIN
 			,CG.strGroupName
 			,CGD.ysnSpecialPricing 
 			,CGD.intEntityId
-			,C.intEntityCustomerId 
+			,C.[intEntityId] 
 			,C.strPricing
 			,C.ysnSpecialPriceGroup
 		FROM 
@@ -471,9 +471,9 @@ BEGIN
 				ON CG.intCustomerGroupId = CGD.intCustomerGroupId
 		INNER JOIN
 			tblARCustomer C
-				ON CGD.intEntityId = C.intEntityCustomerId					
+				ON CGD.intEntityId = C.[intEntityId]					
 		WHERE
-			C.intEntityCustomerId = @CustomerId
+			C.[intEntityId] = @CustomerId
 			AND CGD.ysnSpecialPricing = 1
 						
 		INSERT INTO @SpecialGroupPricing (

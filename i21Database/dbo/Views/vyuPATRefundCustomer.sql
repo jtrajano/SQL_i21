@@ -28,7 +28,7 @@ SELECT	RC.intRefundCustomerId,
 	INNER JOIN tblEMEntity E
 		ON E.intEntityId = RC.intCustomerId
 	INNER JOIN tblARCustomer C
-		ON C.intEntityCustomerId = RC.intCustomerId
+		ON C.[intEntityId] = RC.intCustomerId
 	INNER JOIN tblAPVendor APV
 		ON APV.[intEntityId] = RC.intCustomerId
 	LEFT OUTER JOIN tblSMTaxCode TC

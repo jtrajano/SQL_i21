@@ -38,7 +38,7 @@ BEGIN
 	IF @IsCustomerSiteTaxable IS NULL
 		BEGIN
 			--Customer
-			IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1) AND @DisregardExemptionSetup <> 1
+			IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1) AND @DisregardExemptionSetup <> 1
 				SET @TaxCodeExemption = 'Customer is tax exempted; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
 		
 			IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0

@@ -10,6 +10,6 @@
 	[ysnShowLocation]						BIT         NULL,
 	[intConcurrencyId]						INT         CONSTRAINT [DF_tblARCustomerRackQuoteHeader_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblARCustomerRackQuoteHeader] PRIMARY KEY CLUSTERED ([intCustomerRackQuoteHeaderId] ASC),
-	CONSTRAINT [FK_tblARCustomerRackQuoteHeader_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblARCustomerRackQuoteHeader_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]) ON DELETE CASCADE
 	
 )

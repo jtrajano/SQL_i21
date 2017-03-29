@@ -32,7 +32,7 @@ SET ANSI_WARNINGS OFF
 				INNER JOIN tblAPBillDetail ABD
 						ON ABD.intBillId = AB.intBillId
 				INNER JOIN tblARCustomer ARC
-						ON ARC.intEntityCustomerId = AB.intEntityVendorId AND ARC.strStockStatus != ''
+						ON ARC.[intEntityId] = AB.intEntityVendorId AND ARC.strStockStatus != ''
 				INNER JOIN tblICItem IC
 						ON IC.intItemId = ABD.intItemId
 				INNER JOIN (SELECT	dblUnitQty = CASE WHEN dblUnitQty <= 0 THEN 1 ELSE dblUnitQty END,
@@ -93,7 +93,7 @@ SET ANSI_WARNINGS OFF
 	BEGIN TRANSACTION
 
 	UPDATE tblARCustomer SET dtmLastActivityDate = GETDATE() 
-	WHERE intEntityCustomerId IN (SELECT intCustomerPatronId FROM #tempPatronageVolumes)
+	WHERE [intEntityId] IN (SELECT intCustomerPatronId FROM #tempPatronageVolumes)
 
 	BEGIN TRY
 	MERGE tblPATCustomerVolume AS PAT

@@ -1455,7 +1455,7 @@ IF @post = 1
 				ON A.intPaymentMethodId = PM.intPaymentMethodID
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
@@ -1499,7 +1499,7 @@ IF @post = 1
 			tblARPayment A 
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@AROverpayment P
 				ON A.intPaymentId = P.intPaymentId
@@ -1545,7 +1545,7 @@ IF @post = 1
 			tblARPayment A
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			tblSMCompanyLocation SMCL
 				ON A.intLocationId = SMCL.intCompanyLocationId 
@@ -1598,7 +1598,7 @@ IF @post = 1
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
@@ -1664,7 +1664,7 @@ IF @post = 1
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
@@ -1740,7 +1740,7 @@ IF @post = 1
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN 
 			tblARCustomer C 
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
@@ -1807,7 +1807,7 @@ IF @post = 1
 				ON B.intPaymentId = A.intPaymentId
 		INNER JOIN 
 			tblARCustomer C 
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			tblARInvoice I
 				ON B.intInvoiceId = I.intInvoiceId
@@ -1877,7 +1877,7 @@ IF @post = 1
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
@@ -1943,7 +1943,7 @@ IF @post = 1
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityId]
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId

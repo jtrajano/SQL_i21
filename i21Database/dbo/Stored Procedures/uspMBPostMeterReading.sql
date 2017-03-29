@@ -182,7 +182,7 @@ BEGIN
 		,[intMeterReadingId]					= @TransactionId
 	FROM vyuMBGetMeterReadingDetail MRDetail
 	LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
-	LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = MRDetail.intEntityCustomerId
+	LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = MRDetail.intEntityCustomerId
 	LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = MRDetail.intEntityLocationId AND MRDetail.intEntityCustomerId = EntityLocation.intEntityId
 	WHERE MRDetail.intMeterReadingId = @TransactionId
 	GROUP BY MRDetail.intMeterReadingId

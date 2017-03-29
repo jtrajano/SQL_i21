@@ -47,7 +47,7 @@ LEFT OUTER JOIN (SELECT intRefundId,
 LEFT OUTER JOIN tblGLFiscalYear F
 	ON F.intFiscalYearId = R.intFiscalYearId
 LEFT OUTER JOIN tblARCustomer C
-	ON C.intEntityCustomerId = RC.intCustomerId
+	ON C.[intEntityId] = RC.intCustomerId
 LEFT OUTER JOIN tblAPVendor APV
 	ON APV.[intEntityId] = RC.intCustomerId
 GROUP BY R.intRefundId,

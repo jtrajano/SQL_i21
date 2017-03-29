@@ -252,7 +252,7 @@
 																	else 'FALSE'
 																  end)
 
-					,@intCashCustomerID							= (SELECT intEntityCustomerId 
+					,@intCashCustomerID							= (SELECT [intEntityId] 
 																   FROM tblARCustomer 
 																   WHERE strCustomerNumber = RTRIM(LTRIM(cfloc_ar_cash_cus_no))
 																   COLLATE Latin1_General_CI_AS)

@@ -79,7 +79,7 @@ INNER JOIN (
 		,dblCreditLimit = ISNULL(CI.dblCreditLimit,0.0)
 	FROM tblEMEntity Ent
 	INNER JOIN tblARCustomer Cus 
-		ON Ent.intEntityId = Cus.intEntityCustomerId
+		ON Ent.intEntityId = Cus.[intEntityId]
 	LEFT JOIN [vyuARCustomerInquiryReport] CI
 		ON Ent.intEntityId = CI.intEntityCustomerId) I
 	ON B.intCustomerNumber = I.intEntityId

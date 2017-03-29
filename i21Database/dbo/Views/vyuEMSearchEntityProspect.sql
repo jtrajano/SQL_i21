@@ -18,7 +18,7 @@ SELECT
         join [tblEMEntityType] b
             on b.intEntityId = a.intEntityId and b.strType IN ('Prospect', 'Customer')
         join tblARCustomer c
-            on c.intEntityCustomerId= a.intEntityId
+            on c.[intEntityId]= a.intEntityId
         left join [tblEMEntityLocation] e  
             on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
         left join [tblEMEntityToContact] f  

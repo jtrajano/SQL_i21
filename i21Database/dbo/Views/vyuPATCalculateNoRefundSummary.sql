@@ -33,7 +33,7 @@ WITH ComPref AS(
 				WHERE B.intCustomerPatronId = B.intCustomerPatronId AND B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0
 		) Total
 		INNER JOIN tblARCustomer AC
-			ON AC.intEntityCustomerId = Total.intCustomerId
+			ON AC.[intEntityId] = Total.intCustomerId
 		INNER JOIN tblEMEntity ENT
 			ON ENT.intEntityId = Total.intCustomerId
 )

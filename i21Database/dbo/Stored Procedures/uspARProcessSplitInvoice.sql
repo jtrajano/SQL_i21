@@ -55,7 +55,7 @@ BEGIN
 					     , @newBillToId = intBillToId
 						 , @newTermId	= intTermsId 
 					FROM vyuARCustomerSearch 
-					WHERE intEntityCustomerId = @newCustomerId
+					WHERE [intEntityId] = @newCustomerId
 
 					UPDATE tblARInvoice
 					SET intShipToLocationId	= @newShipToId
@@ -80,7 +80,7 @@ BEGIN
 		 , @newBillToId = intBillToId
 		 , @newTermId	= intTermsId 
 	FROM vyuARCustomerSearch 
-	WHERE intEntityCustomerId = @intSplitEntityId
+	WHERE [intEntityId] = @intSplitEntityId
 
 	UPDATE tblARInvoice 
 	SET ysnSplitted			= 1

@@ -30,7 +30,7 @@ AS
 										AND C.ysnDefaultContact		=	1
 	JOIN	tblEMEntity				T	ON	T.intEntityId			=	C.intEntityContactId	LEFT 
 	JOIN	tblAPVendor				V	ON	V.[intEntityId]		=	E.intEntityId			LEFT
-	JOIN	tblARCustomer			U	ON	U.intEntityCustomerId	=	E.intEntityId			LEFT
+	JOIN	tblARCustomer			U	ON	U.[intEntityId]	=	E.intEntityId			LEFT
 	JOIN	(
 				SELECT	EY.intEntityId 
 				FROM	tblEMEntity			EY

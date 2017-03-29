@@ -18,8 +18,8 @@ SELECT DISTINCT
     , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
     , strCompanyAddress		= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
 FROM tblARInvoice I
-	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) 
-		ON I.intEntityCustomerId = C.intEntityCustomerId
+	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.[intEntityId] = CC.[intEntityId] AND ysnDefaultContact = 1) 
+		ON I.intEntityCustomerId = C.[intEntityId]
 	INNER JOIN tblSMCompanyLocation L ON I.intCompanyLocationId = L.intCompanyLocationId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1
 	LEFT JOIN (
@@ -51,8 +51,8 @@ SELECT DISTINCT
     , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
     , strCompanyAddress		= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
 FROM tblARInvoice I
-	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) 
-		ON I.intEntityCustomerId = C.intEntityCustomerId
+	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.[intEntityId] = CC.[intEntityId] AND ysnDefaultContact = 1) 
+		ON I.intEntityCustomerId = C.[intEntityId]
 	INNER JOIN tblSMCompanyLocation L ON I.intCompanyLocationId = L.intCompanyLocationId
 	INNER JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1
 	LEFT JOIN (

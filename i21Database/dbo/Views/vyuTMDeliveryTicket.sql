@@ -65,9 +65,9 @@ INNER JOIN tblTMCustomer B
 INNER JOIN tblEMEntity Ent
 	ON B.intCustomerNumber = Ent.intEntityId
 INNER JOIN tblARCustomer Cus 
-	ON Ent.intEntityId = Cus.intEntityCustomerId
+	ON Ent.intEntityId = Cus.[intEntityId]
 INNER JOIN tblEMEntityToContact CustToCon 
-	ON Cus.intEntityCustomerId = CustToCon.intEntityId 
+	ON Cus.[intEntityId] = CustToCon.intEntityId 
 		and CustToCon.ysnDefaultContact = 1
 INNER JOIN tblEMEntity Con 
 	ON CustToCon.intEntityContactId = Con.intEntityId

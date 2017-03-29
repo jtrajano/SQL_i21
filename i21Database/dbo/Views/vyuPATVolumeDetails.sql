@@ -20,7 +20,7 @@ INNER JOIN tblPATPatronageCategory PC
 INNER JOIN tblGLFiscalYear FY
 		ON FY.intFiscalYearId = CV.intFiscalYear
 INNER JOIN tblARCustomer AR
-		ON AR.intEntityCustomerId = CV.intCustomerPatronId
+		ON AR.[intEntityId] = CV.intCustomerPatronId
 LEFT JOIN tblSMTaxCode TC
 		ON TC.intTaxCodeId = AR.intTaxCodeId
 		GROUP BY	CV.intCustomerPatronId,

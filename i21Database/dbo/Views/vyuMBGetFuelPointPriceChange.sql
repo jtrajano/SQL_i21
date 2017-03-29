@@ -10,5 +10,5 @@ SELECT FPPriceChange.intFuelPointPriceChangeId
 	, FPPriceChange.dtmDate
 	, FPPriceChange.intSort
 FROM tblMBFuelPointPriceChange FPPriceChange
-LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = FPPriceChange.intEntityCustomerId
+LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = FPPriceChange.intEntityCustomerId
 LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = FPPriceChange.intEntityLocationId

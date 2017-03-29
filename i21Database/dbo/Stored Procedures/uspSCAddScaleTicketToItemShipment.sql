@@ -115,7 +115,7 @@ BEGIN
 		,intEntityCustomerId		= @intEntityId
 		,intCurrencyId				= SC.intCurrencyId
 		,intShipFromLocationId		= SC.intProcessingLocationId
-		,intShipToLocationId		= (select top 1 intShipToId from tblARCustomer where intEntityCustomerId = @intEntityId)
+		,intShipToLocationId		= (select top 1 intShipToId from tblARCustomer where [intEntityId] = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intFreightTermId			= 1
 		,strBOLNumber				= SC.strTicketNumber

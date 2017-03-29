@@ -52,11 +52,11 @@ AS
 	INNER JOIN tblEMEntity C
 		ON B.intCustomerNumber = C.intEntityId
 	INNER JOIN tblARCustomer D
-		ON C.intEntityId = D.intEntityCustomerId
+		ON C.intEntityId = D.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation E
 		ON A.intLocationId = E.intCompanyLocationId
 	INNER JOIN [tblEMEntityToContact] F
-		ON D.intEntityCustomerId = F.intEntityId 
+		ON D.[intEntityId] = F.intEntityId 
 			and F.ysnDefaultContact = 1
 	INNER JOIN tblEMEntity G 
 		ON F.intEntityContactId = G.intEntityId

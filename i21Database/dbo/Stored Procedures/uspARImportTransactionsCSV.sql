@@ -180,7 +180,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		ELSE IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 			BEGIN
 				SELECT 
-					  @EntityCustomerId				= C.intEntityCustomerId
+					  @EntityCustomerId				= C.[intEntityId]
 					, @CustomerNumber				= C.strCustomerNumber
 					, @Date							= ILD.dtmDate
 					, @PostDate						= NULL
@@ -223,9 +223,9 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 				LEFT JOIN
 					(tblARCustomer C
 						INNER JOIN tblEMEntity EC
-							ON C.intEntityCustomerId = EC.intEntityId
+							ON C.[intEntityId] = EC.intEntityId
 						INNER JOIN tblEMEntityLocation EL
-							ON C.intEntityCustomerId = EL.intEntityId
+							ON C.[intEntityId] = EL.intEntityId
 							AND EL.ysnDefaultLocation = 1)
 						ON ILD.strCustomerNumber = EC.strEntityNo
 				LEFT JOIN
@@ -326,7 +326,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Term Code provided does not exists. '
 		ELSE IF @TermId = 0 AND @IsTank = 0
 			BEGIN
-				SELECT TOP 1 @TermId = intTermsId FROM [tblARCustomer] WHERE intEntityCustomerId = @EntityCustomerId  
+				SELECT TOP 1 @TermId = intTermsId FROM [tblARCustomer] WHERE [intEntityId] = @EntityCustomerId  
 				IF ISNULL(@TermId, 0) = 0
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The customer provided doesn''t have default terms. '				
 			END
@@ -344,7 +344,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		IF @EntitySalespersonId IS NULL
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Salesperson provided does not exists. '
 		ELSE IF @EntitySalespersonId = 0
-			SELECT TOP 1 @EntitySalespersonId = intSalespersonId FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId
+			SELECT TOP 1 @EntitySalespersonId = intSalespersonId FROM tblARCustomer WHERE [intEntityId] = @EntityCustomerId
 
 		IF @TaxGroupId IS NULL
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 
@@ -379,7 +379,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item''s location costing method should be either FIFO or LIFO.'
 			END
 
-		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE intEntityCustomerId = @EntityCustomerId
+		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE [intEntityId] = @EntityCustomerId
 
 		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1
 			BEGIN TRY

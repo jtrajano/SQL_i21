@@ -24,5 +24,5 @@ SELECT A.intDocumentMaintenanceId
 	 , CL.strLocationName
 FROM tblSMDocumentMaintenance A 
 INNER JOIN tblSMDocumentMaintenanceMessage B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
-LEFT JOIN vyuARCustomer C ON A.intEntityCustomerId = C.intEntityCustomerId
+LEFT JOIN vyuARCustomer C ON A.intEntityCustomerId = C.[intEntityId]
 LEFT JOIN tblSMCompanyLocation CL ON A.intCompanyLocationId = CL.intCompanyLocationId

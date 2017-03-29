@@ -16,7 +16,7 @@ BEGIN
 						FROM
 							tblARCustomer
 						WHERE
-							[intEntityCustomerId] = @EntityCustomerId
+							[intEntityId] = @EntityCustomerId
 						)
 				    )		
 END

@@ -3,7 +3,7 @@
 	
 
 SELECT 
-	 C.intEntityCustomerId
+	 C.[intEntityId]
 	,C.strCustomerNumber 
 	,C.ysnApplySalesTax
 	,L.intEntityLocationId
@@ -19,7 +19,7 @@ FROM
 	[tblEMEntityLocation] L
 INNER JOIN
 	tblARCustomer C
-		ON L.intEntityId = C.intEntityCustomerId 
+		ON L.intEntityId = C.[intEntityId] 
 		AND L.intEntityLocationId = C.intDefaultLocationId
 INNER JOIN
 	tblSMTaxGroup G

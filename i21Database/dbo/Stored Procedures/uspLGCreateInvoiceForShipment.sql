@@ -163,7 +163,7 @@ DECLARE
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	INNER JOIN [tblARCustomer] ARC ON LD.intCustomerEntityId = ARC.[intEntityCustomerId]
+	INNER JOIN [tblARCustomer] ARC ON LD.intCustomerEntityId = ARC.[intEntityId]
 	WHERE L.intLoadId = @intLoadId
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable		

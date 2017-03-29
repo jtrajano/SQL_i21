@@ -76,7 +76,7 @@ BEGIN
 		[tblEMEntityLocation] ShipToLocation 
 			ON Customer.intShipToId = ShipToLocation.intEntityLocationId
 	WHERE 
-		Customer.intEntityCustomerId = @CustomerId
+		Customer.[intEntityId] = @CustomerId
 		
 	SELECT
 		@VendorShipFromLocationId = ISNULL(@VendorLocationId,ISNULL(ShipFromLocation.intEntityLocationId, EntityLocation.intEntityLocationId))

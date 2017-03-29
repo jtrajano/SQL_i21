@@ -26,7 +26,7 @@
 		join tblEMEntityType b
 			on a.intEntityId = b.intEntityId and b.strType = 'Customer'
 	INNER JOIN tblARCustomer G
-	ON b.intEntityId = G.intEntityCustomerId
+	ON b.intEntityId = G.[intEntityId]
 		join tblEMEntityLocation c
 			on a.intEntityId = c.intEntityId and c.ysnDefaultLocation = 1
 		join tblEMEntityToContact d

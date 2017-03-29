@@ -8,12 +8,12 @@ DECLARE @tmpstrStatementFormat NVARCHAR(50)
 SET @tmpstrStatementFormat = @strStatementFormat
 
 SELECT 
-	ARC.intEntityCustomerId,
+	ARC.[intEntityId],
 	ARC.strCustomerNumber,
 	strCustomerName		=	EM.strName 
 FROM
 	(SELECT 
-		intEntityCustomerId, 
+		[intEntityId], 
 		strCustomerNumber 
 	 FROM 
 		tblARCustomer
@@ -24,4 +24,4 @@ INNER JOIN
 		intEntityId, 
 		strName 
 	 FROM 
-		tblEMEntity) EM ON ARC.intEntityCustomerId = EM.intEntityId
+		tblEMEntity) EM ON ARC.[intEntityId] = EM.intEntityId

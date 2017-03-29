@@ -5,6 +5,6 @@
     [intAccountStatusId]					INT NOT NULL,	
 	[intConcurrencyId]						INT             CONSTRAINT [DF_tblARCustomerAccountStatus_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblARCustomerAccountStatus] PRIMARY KEY CLUSTERED ([intCustomerAccountStatusId] ASC),
-    CONSTRAINT [FK_tblARCustomerAccountStatus_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblARCustomerAccountStatus_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARCustomerAccountStatus_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
 )

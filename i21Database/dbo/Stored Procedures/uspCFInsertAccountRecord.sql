@@ -131,7 +131,7 @@ BEGIN
 	--			      DUPLICATE ACCOUNT NUMBER			   --
 	---------------------------------------------------------
 	--Customer
-	SELECT @intCustomerId = intEntityCustomerId 
+	SELECT @intCustomerId = [intEntityId] 
 	FROM tblARCustomer 
 	WHERE strCustomerNumber = @strCustomerId
 	

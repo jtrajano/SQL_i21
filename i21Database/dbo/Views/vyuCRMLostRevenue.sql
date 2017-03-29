@@ -83,7 +83,7 @@
 			and tblEMEntity.intEntityId = tblSOSalesOrder.intEntityCustomerId
 			and tblEMEntityToContact.intEntityId = tblEMEntity.intEntityId
 			and tblEMEntityToContact.ysnDefaultContact = 1
-			and tblARCustomer.intEntityCustomerId = tblEMEntity.intEntityId
+			and tblARCustomer.[intEntityId] = tblEMEntity.intEntityId
 		group by
 			tblSOSalesOrder.intEntityCustomerId
 			,tblEMEntity.strName
@@ -142,7 +142,7 @@ select
 			where
 				b.intContractHeaderId = a.intContractHeaderId
 				and c.intEntityId = b.intEntityId
-				and f.intEntityCustomerId = c.intEntityId
+				and f.[intEntityId] = c.intEntityId
 			group by
 				c.intEntityId
 				,c.strName

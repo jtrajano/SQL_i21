@@ -14,6 +14,6 @@
 	[strInfoPulled]				NVARCHAR(50)  COLLATE Latin1_General_CI_AS,
     [intConcurrencyId]            INT CONSTRAINT [DF_tblARCustomerProductVersion_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomerProductVersion] PRIMARY KEY CLUSTERED ([intCustomerProductVersionId] ASC),
-	CONSTRAINT [FK_tblARCustomerProductVersion_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblARCustomerProductVersion_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]) ON DELETE CASCADE,
 );
 

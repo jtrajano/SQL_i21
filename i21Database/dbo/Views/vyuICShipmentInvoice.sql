@@ -39,8 +39,8 @@ SELECT
 FROM tblICInventoryShipment s
 	 LEFT JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
 	 LEFT JOIN tblICItem i ON i.intItemId = si.intItemId
-	 LEFT JOIN tblARCustomer c ON c.intEntityCustomerId = s.intEntityCustomerId
-	 LEFT JOIN tblEMEntity e ON e.intEntityId = c.intEntityCustomerId
+	 LEFT JOIN tblARCustomer c ON c.[intEntityId] = s.intEntityCustomerId
+	 LEFT JOIN tblEMEntity e ON e.intEntityId = c.[intEntityId]
 	 LEFT JOIN [tblEMEntityLocation] l ON l.intEntityLocationId = s.intShipToLocationId
 	 LEFT JOIN tblARInvoiceDetail ivd on si.intInventoryShipmentItemId = ivd.intInventoryShipmentItemId
 		AND ivd.intItemId = si.intItemId

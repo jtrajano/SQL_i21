@@ -91,8 +91,8 @@ FROM tblSMTaxCode TC
 	LEFT OUTER JOIN (SELECT intInvoiceDetailId, intTaxCodeId, strCalculationMethod, dblRate, dblAdjustedTax, dblTax FROM tblARInvoiceDetailTax) IDT ON TC.intTaxCodeId = IDT.intTaxCodeId 
 	INNER JOIN (SELECT intInvoiceId, intInvoiceDetailId FROM tblARInvoiceDetail) ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	INNER JOIN (SELECT intInvoiceId, strInvoiceNumber, dtmDate, intEntityCustomerId, ysnPosted, intCurrencyId, dblTax, strTransactionType, dblInvoiceTotal, ysnPaid FROM tblARInvoice) I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnPosted = 1
-	INNER JOIN (SELECT intEntityCustomerId, strCustomerNumber FROM tblARCustomer) C ON I.intEntityCustomerId = C.intEntityCustomerId
-	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
+	INNER JOIN (SELECT [intEntityId], strCustomerNumber FROM tblARCustomer) C ON I.intEntityCustomerId = C.[intEntityId]
+	INNER JOIN tblEMEntity E ON C.[intEntityId] = E.intEntityId
 	LEFT OUTER JOIN 
 		(SELECT intCurrencyID, 
 				strCurrency, 

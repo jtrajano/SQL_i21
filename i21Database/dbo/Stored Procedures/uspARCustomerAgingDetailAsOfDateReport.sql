@@ -36,7 +36,7 @@ FROM
      , A.intInvoiceId	 
 	 , A.strBOLNumber
 	 , A.intEntityCustomerId
-	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
+	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE [intEntityId] = A.intEntityCustomerId)
 	 , dblTotalAR			= B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments
 	 , dblFuture			= 0.000000
 	 , dbl0Days				= B.dbl0Days
@@ -494,7 +494,7 @@ SELECT DISTINCT
   , dblAvailableCredit	= 0
   , dblPrepayments		= 0
 FROM tblARInvoice I 
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId    
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId	
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal) ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN (tblAPPaymentDetail APPD INNER JOIN tblAPPayment APP ON APPD.intPaymentId = APP.intPaymentId AND APP.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), APP.dtmDatePaid ))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal) ON I.intInvoiceId = APPD.intInvoiceId	
@@ -527,8 +527,8 @@ AND A.intPaymentId		 = B.intPaymentId
 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 
-INNER JOIN vyuARCustomer C ON AGING.intEntityCustomerId = C.intEntityCustomerId
-INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
+INNER JOIN vyuARCustomer C ON AGING.intEntityCustomerId = C.[intEntityId]
+INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]
 LEFT JOIN tblARInvoice INVOICE ON AGING.intInvoiceId = INVOICE.intInvoiceId
 LEFT JOIN (
 		(SELECT SUM(PD.dblPayment) + SUM(PD.dblDiscount) - SUM(PD.dblInterest) AS dblPayment

@@ -717,6 +717,6 @@ SET ANSI_WARNINGS OFF
 	SET ARC.dtmLastActivityDate = CASE WHEN ISNULL(tempCV.dtmLastActivityDate, '') = '' OR ARC.dtmLastActivityDate < tempCV.dtmLastActivityDate THEN tempCV.dtmLastActivityDate ELSE ARC.dtmLastActivityDate END
 	FROM tblARCustomer AS ARC
 	INNER JOIN @customerVolumeTable tempCV
-		ON tempCV.intCustomerPatronId = ARC.intEntityCustomerId
+		ON tempCV.intCustomerPatronId = ARC.[intEntityId]
 	------------------- END - UPDATE LAST ACTIVITY DATE ----------------------------
 END

@@ -885,14 +885,14 @@ BEGIN
 		, strCompanyAddress		= @strCompanyAddress
 		, strCompanyPhone		= @strCompanyPhone
 		, strCustomerAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, Cus.strName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, NULL, NULL)
-								  + CHAR(13) + (SELECT ISNULL(strAccountNumber,'') FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
-		, strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
+								  + CHAR(13) + (SELECT ISNULL(strAccountNumber,'') FROM tblARCustomer WHERE [intEntityId] = SC.intEntityCustomerId)
+		, strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WHERE [intEntityId] = SC.intEntityCustomerId)
 	FROM
 		@SelectedCustomer SC
 	INNER JOIN 
 		(
 			SELECT 
-				intEntityCustomerId, 
+				[intEntityId], 
 				strBillToAddress, 
 				strBillToCity, 
 				strBillToCountry, 
@@ -904,7 +904,7 @@ BEGIN
 			FROM 
 			(
 			SELECT 
-				ARC.intEntityCustomerId
+				ARC.[intEntityId]
 				, strCustomerNumber					= ISNULL(ARC.strCustomerNumber, EME.strEntityNo)
 				, EME.strName
 				, BillToLoc.strBillToAddress
@@ -917,7 +917,7 @@ BEGIN
 				, ARC.strTerm
 			FROM 
 				(SELECT 
-					intEntityCustomerId, 
+					[intEntityId], 
 					strCustomerNumber, 
 					intBillToId,
 					intTermsId,
@@ -938,7 +938,7 @@ BEGIN
 								strName								 
 							FROM 
 								tblEMEntity
-							) EME ON ARC.intEntityCustomerId = EME.intEntityId
+							) EME ON ARC.[intEntityId] = EME.intEntityId
 				LEFT JOIN (
 							SELECT 
 								Loc.intEntityId, 
@@ -954,7 +954,7 @@ BEGIN
 										FROM 
 											tblSMTerm) SMT ON Loc.intTermsId = SMT.intTermID
 							WHERE Loc.ysnDefaultLocation = 1
-							) EMEL ON ARC.intEntityCustomerId = EMEL.intEntityId
+							) EMEL ON ARC.[intEntityId] = EMEL.intEntityId
 				LEFT JOIN (
 							SELECT 
 								intEntityId, 
@@ -967,8 +967,8 @@ BEGIN
 								strBillToZipCode		= strZipCode
 							FROM 
 								tblEMEntityLocation
-							) BillToLoc ON ARC.intEntityCustomerId = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
+							) BillToLoc ON ARC.[intEntityId] = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
 			) Cus
-		) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
+		) Cus ON SC.intEntityCustomerId = Cus.[intEntityId] 
 
 END

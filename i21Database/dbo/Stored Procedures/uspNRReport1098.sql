@@ -8,7 +8,7 @@ BEGIN
 							, strCountry nvarchar(100))
 							
 	INSERT INTO @tbl 
-	SELECT  Cus.[intEntityCustomerId]
+	SELECT  Cus.[intEntityId]
 	,Cus.strCustomerNumber
 	,Entity.strName
 	,Loc.strAddress
@@ -18,7 +18,7 @@ BEGIN
 	,Loc.strZipCode 
 	,Loc.strCountry
 	FROM tblEMEntity as Entity
-	INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
+	INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 	INNER JOIN tblARCustomerToContact as CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
 	LEFT JOIN tblEMEntityContact as Con ON CusToCon.[intEntityContactId] = Con.[intEntityContactId]
 	LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId

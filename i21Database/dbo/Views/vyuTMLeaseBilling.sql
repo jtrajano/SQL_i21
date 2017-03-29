@@ -107,7 +107,7 @@ LEFT JOIN tblTMDeviceType L
 LEFT JOIN tblICItem M
 	ON G.intItemId = M.intItemId
 INNER JOIN tblARCustomer O
-	ON O.intEntityCustomerId = F.intEntityId
+	ON O.[intEntityId] = F.intEntityId
 LEFT JOIN tblSMTaxGroup P
 	ON C.intLeaseTaxGroupId = P.intTaxGroupId
 LEFT JOIN vyuTMSiteDeliveryHistoryTotal HH

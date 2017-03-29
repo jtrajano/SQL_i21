@@ -98,7 +98,7 @@ LEFT JOIN (tblARInvoiceDetail ID
 	LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblMFRecipe MFR ON ID.intRecipeId = MFR.intRecipeId) ON INV.intInvoiceId = ID.intInvoiceId	
 INNER JOIN (tblARCustomer C 
-	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = INV.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON C.[intEntityId] = E.intEntityId) ON C.[intEntityId] = INV.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLocationId
 LEFT JOIN tblSMCurrency CUR ON INV.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 

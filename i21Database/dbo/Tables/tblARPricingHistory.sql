@@ -17,7 +17,7 @@
 	[intEntityId]					INT												NOT NULL,
 	[intConcurrencyId]				INT												NOT NULL	CONSTRAINT [DF_tblARPricingHistory_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARPricingHistory_intPricingId] PRIMARY KEY CLUSTERED ([intPricingHistoryId] ASC),
-    CONSTRAINT [FK_tblARPricingHistory_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+    CONSTRAINT [FK_tblARPricingHistory_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
     CONSTRAINT [FK_tblARPricingHistory_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES tblICItem([intItemId]),
 	CONSTRAINT [FK_tblARPricingHistory_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId])
 )

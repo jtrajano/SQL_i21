@@ -8,7 +8,7 @@
 	,name			= a.strName
 	,website		= a.strWebsite
 	,type			= case when e.[intEntityId] is not null then 'vendor,' else '' end + 
-						case when f.intEntityCustomerId is not null then 'customer,' else '' end + 
+						case when f.[intEntityId] is not null then 'customer,' else '' end + 
 						case when g.intEntitySalespersonId is not null then 'salesperson,' else '' end
 	--Contact
 	,con_name		= c.strName
@@ -63,7 +63,7 @@
 	left join tblAPVendor e
 		on e.[intEntityId] = a.intEntityId
 	left join tblARCustomer f
-		on f.intEntityCustomerId = a.intEntityId
+		on f.[intEntityId] = a.intEntityId
 	left join tblARSalesperson g
 		on g.intEntitySalespersonId = a.intEntityId
 	left join tblSMTerm h

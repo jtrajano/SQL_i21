@@ -105,10 +105,10 @@ INNER JOIN
 		AND (dbo.fnIsStockTrackingItem(I.[intItemId]) = 0 OR ISNULL(I.strLotTracking, 'No') = 'No')
 INNER JOIN
 	tblARCustomer C
-		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
+		ON SO.[intEntityCustomerId] = C.[intEntityId] 
 INNER JOIN
 	tblEMEntity E
-		ON C.[intEntityCustomerId] = E.[intEntityId]
+		ON C.[intEntityId] = E.[intEntityId]
 LEFT OUTER JOIN 
 	vyuARCustomerContract ARCR	
 		ON SOD.[intContractHeaderId] = ARCR.[intContractHeaderId]
@@ -261,10 +261,10 @@ INNER JOIN
 		AND SOD.strItemDescription <> ''
 INNER JOIN
 	tblARCustomer C
-		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
+		ON SO.[intEntityCustomerId] = C.[intEntityId] 
 INNER JOIN
 	tblEMEntity E
-		ON C.[intEntityCustomerId] = E.[intEntityId] 
+		ON C.[intEntityId] = E.[intEntityId] 
 LEFT OUTER JOIN 
 	vyuARCustomerContract ARCC	
 		ON SOD.[intContractHeaderId] = ARCC.[intContractHeaderId]
@@ -414,14 +414,14 @@ INNER JOIN
 		ON SO.[intSalesOrderId] = SOD.[intSalesOrderId]
 INNER JOIN
 	tblARCustomer C
-		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
+		ON SO.[intEntityCustomerId] = C.[intEntityId] 
 LEFT OUTER JOIN 
 	vyuARCustomerContract ARCC	
 		ON SOD.[intContractHeaderId] = ARCC.[intContractHeaderId]
 		AND SOD.[intContractDetailId] = ARCC.[intContractDetailId]
 INNER JOIN
 	tblEMEntity E
-		ON C.[intEntityCustomerId] = E.[intEntityId]
+		ON C.[intEntityId] = E.[intEntityId]
 LEFT JOIN
 	tblEMEntity ESP
 		ON SO.[intEntitySalespersonId] = ESP.[intEntityId] 
@@ -746,7 +746,7 @@ LEFT OUTER JOIN
 		ON ICISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
 INNER JOIN
 	tblARCustomer ARC
-		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+		ON ICIS.[intEntityCustomerId] = ARC.[intEntityId]
 INNER JOIN
 	tblICItem ICI
 		ON ICISI.[intItemId] = ICI.[intItemId]
@@ -770,7 +770,7 @@ LEFT JOIN
 		ON ICUM3.[intUnitMeasureId] = ICIU2.[intUnitMeasureId]					
 INNER JOIN
 	tblEMEntity EME
-		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+		ON ARC.[intEntityId] = EME.[intEntityId]
 LEFT OUTER JOIN
 	tblICStorageLocation ICSL
 		ON ICISI.[intStorageLocationId] = ICSL.[intStorageLocationId]				
@@ -901,7 +901,7 @@ LEFT OUTER JOIN
 		ON ICISC.[intContractId] = ARCC.[intContractHeaderId]
 INNER JOIN
 	tblARCustomer ARC
-		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+		ON ICIS.[intEntityCustomerId] = ARC.[intEntityId]
 INNER JOIN
 	tblICItem ICI
 		ON ICISC.[intChargeId] = ICI.[intItemId]
@@ -913,7 +913,7 @@ LEFT JOIN
 		ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]		
 INNER JOIN
 	tblEMEntity EME
-		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+		ON ARC.[intEntityId] = EME.[intEntityId]
 LEFT OUTER JOIN
 	tblARInvoiceDetail ARID
 		ON ICISC.intInventoryShipmentChargeId = ARID.[intInventoryShipmentChargeId]
@@ -1032,10 +1032,10 @@ INNER JOIN
 		ON ARSID.[intShipmentId] = LGS.[intShipmentId]
 INNER JOIN
 	tblARCustomer C
-		ON LGS.[intCustomerEntityId] = C.[intEntityCustomerId] 
+		ON LGS.[intCustomerEntityId] = C.[intEntityId] 
 INNER JOIN
 	tblEMEntity E
-		ON C.[intEntityCustomerId]  = E.[intEntityId]
+		ON C.[intEntityId]  = E.[intEntityId]
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON LGS.[intCompanyLocationId] = CL.[intCompanyLocationId]
@@ -1172,10 +1172,10 @@ INNER JOIN
 		ON MFG.[intItemId] = I.[intItemId]
 INNER JOIN
 	tblARCustomer C
-		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
+		ON SO.[intEntityCustomerId] = C.[intEntityId] 
 INNER JOIN
 	tblEMEntity E
-		ON C.[intEntityCustomerId] = E.[intEntityId]
+		ON C.[intEntityId] = E.[intEntityId]
 LEFT JOIN
 	tblEMEntity ESP
 		ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
@@ -1333,7 +1333,7 @@ LEFT OUTER JOIN
 		ON ICISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
 INNER JOIN
 	tblARCustomer ARC
-		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+		ON ICIS.[intEntityCustomerId] = ARC.[intEntityId]
 INNER JOIN
 	tblICItem ICI
 		ON MFG.[intItemId] = ICI.[intItemId]
@@ -1345,7 +1345,7 @@ LEFT JOIN
 		ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]		
 INNER JOIN
 	tblEMEntity EME
-		ON ARC.[intEntityCustomerId] = EME.[intEntityId]			
+		ON ARC.[intEntityId] = EME.[intEntityId]			
 LEFT OUTER JOIN
 	tblARInvoiceDetail ARID
 		ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
@@ -1462,7 +1462,7 @@ SELECT [strTransactionType]				= 'Load Schedule'
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId  = LD.intLoadId
 JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-INNER JOIN tblARCustomer ARC ON LD.intCustomerEntityId = ARC.intEntityCustomerId
+INNER JOIN tblARCustomer ARC ON LD.intCustomerEntityId = ARC.[intEntityId]
 INNER JOIN tblICItem ICI ON LD.intItemId = ICI.intItemId
 LEFT JOIN tblICLot LO ON LO.intLotId = LDL.intLotId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LO.intStorageLocationId
@@ -1473,7 +1473,7 @@ LEFT JOIN tblICItemUOM ICIU1 ON LD.intItemUOMId = ICIU1.intItemUOMId
 LEFT JOIN tblICUnitMeasure ICUM1 ON ICIU1.intUnitMeasureId = ICUM1.intUnitMeasureId
 LEFT JOIN tblICItemUOM ICUM3 ON LD.intWeightItemUOMId = ICUM3.intItemUOMId
 LEFT JOIN tblICUnitMeasure ICIU2 ON ICUM3.intUnitMeasureId = ICIU2.intUnitMeasureId
-INNER JOIN tblEMEntity EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+INNER JOIN tblEMEntity EME ON ARC.[intEntityId] = EME.[intEntityId]
 LEFT OUTER JOIN tblARInvoiceDetail ARID ON LDL.intLoadDetailId = ARID.[intLoadDetailId]
 LEFT OUTER JOIN [tblSMCompanyLocation] SMCL ON LD.intSCompanyLocationId = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN tblSMCurrency SMC ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID] 

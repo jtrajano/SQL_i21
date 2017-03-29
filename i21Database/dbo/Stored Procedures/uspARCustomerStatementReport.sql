@@ -473,5 +473,5 @@ AS MAINREPORT
 INNER JOIN @temp_aging_table AS AGINGREPORT
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN tblARCustomer CUSTOMER 
-	ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+	ON MAINREPORT.intEntityCustomerId = CUSTOMER.[intEntityId]
 WHERE (ISNULL(CUSTOMER.strStatementFormat, '') = '' OR CUSTOMER.strStatementFormat = @strStatementFormat)

@@ -109,10 +109,10 @@ SELECT [intPaymentId]
               tblARPayment ARP
           INNER JOIN
               tblARCustomer ARC
-                  ON ARP.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+                  ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
           INNER JOIN
               tblEMEntity EME
-                  ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+                  ON ARC.[intEntityId] = EME.[intEntityId]
           LEFT OUTER JOIN
               (
               SELECT
@@ -131,7 +131,7 @@ SELECT [intPaymentId]
               WHERE
                   ysnDefaultLocation = 1
               ) EMEL
-              ON ARC.[intEntityCustomerId] = EMEL.[intEntityId]
+              ON ARC.[intEntityId] = EMEL.[intEntityId]
           LEFT OUTER JOIN
               [tblEMEntityLocation] EMEL1
                   ON ARC.[intBillToId] = EME.[intEntityId]
@@ -217,10 +217,10 @@ SELECT [intPaymentId]
               tblARPayment ARP
           INNER JOIN
               tblARCustomer ARC
-                  ON ARP.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+                  ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
           INNER JOIN
               tblEMEntity EME
-                  ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+                  ON ARC.[intEntityId] = EME.[intEntityId]
           LEFT OUTER JOIN
               (
               SELECT
@@ -239,7 +239,7 @@ SELECT [intPaymentId]
               WHERE
                   ysnDefaultLocation = 1
               ) EMEL
-              ON ARC.[intEntityCustomerId] = EMEL.[intEntityId]
+              ON ARC.[intEntityId] = EMEL.[intEntityId]
           LEFT OUTER JOIN
               [tblEMEntityLocation] EMEL1
                   ON ARC.[intBillToId] = EME.[intEntityId]

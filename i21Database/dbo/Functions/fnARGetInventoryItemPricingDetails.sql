@@ -175,7 +175,7 @@ BEGIN
 
 		DECLARE @PriceLevel AS NVARCHAR(100)
 		SELECT TOP 1 @PriceLevel = strPricingLevelName FROM tblSMCompanyLocationPricingLevel WHERE intCompanyLocationPricingLevelId = @PricingLevelId
-		IF EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @CustomerId)
+		IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @CustomerId)
 			BEGIN
 				SELECT TOP 1 
 					@Price			= @UOMQuantity * PL.dblUnitPrice
@@ -227,13 +227,13 @@ BEGIN
 			AND EMEL.ysnDefaultLocation = 1
 	INNER JOIN
 		tblARCustomer ARC
-			ON EMEL.intEntityId = ARC.intEntityCustomerId 
+			ON EMEL.intEntityId = ARC.[intEntityId] 
 			AND SMPL.intCompanyLocationPricingLevelId  = ARC.intCompanyLocationPricingLevelId			
 	INNER JOIN vyuICGetItemStock VIS
 			ON ICPL.intItemId = VIS.intItemId
 			AND ICPL.intItemLocationId = VIS.intItemLocationId											
 	WHERE
-		ARC.intEntityCustomerId = @CustomerId
+		ARC.[intEntityId] = @CustomerId
 		AND ICPL.intItemId = @ItemId
 		AND ICPL.intItemLocationId = @ItemLocationId
 		AND ICPL.intItemUnitMeasureId = @ItemUOMId

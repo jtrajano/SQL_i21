@@ -164,7 +164,7 @@ BEGIN
 		tblARInvoice A
 	LEFT JOIN 
 		tblARCustomer C
-			ON A.[intEntityCustomerId] = C.intEntityCustomerId 			
+			ON A.[intEntityCustomerId] = C.[intEntityId] 			
 	WHERE
 		A.intInvoiceId = @InvoiceId 
 
@@ -257,7 +257,7 @@ BEGIN
 		tblARInvoice A
 	LEFT JOIN 
 		tblARCustomer C
-			ON A.[intEntityCustomerId] = C.intEntityCustomerId 		
+			ON A.[intEntityCustomerId] = C.[intEntityId] 		
 	LEFT OUTER	JOIN
 		(
 			SELECT 
@@ -615,7 +615,7 @@ BEGIN
 				ON A.intInvoiceId = B.intInvoiceId
 		LEFT JOIN 
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+				ON A.[intEntityCustomerId] = C.[intEntityId]		
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON B.intItemId = IST.intItemId 
@@ -715,7 +715,7 @@ BEGIN
 				ON A.intInvoiceId = B.intInvoiceId
 		LEFT JOIN 
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+				ON A.[intEntityCustomerId] = C.[intEntityId]		
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON B.intItemId = IST.intItemId 
@@ -813,7 +813,7 @@ BEGIN
 				ON B.intItemId = I.intItemId 				
 		LEFT JOIN 
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+				ON A.[intEntityCustomerId] = C.[intEntityId]		
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON B.intItemId = IST.intItemId 
@@ -910,7 +910,7 @@ BEGIN
 				ON B.intItemId = I.intItemId 				
 		LEFT JOIN 
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+				ON A.[intEntityCustomerId] = C.[intEntityId]		
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON B.intItemId = IST.intItemId 
@@ -1007,7 +1007,7 @@ BEGIN
 				ON B.intItemId = I.intItemId 				
 		LEFT JOIN 
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+				ON A.[intEntityCustomerId] = C.[intEntityId]		
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON B.intItemId = IST.intItemId 
@@ -1101,7 +1101,7 @@ BEGIN
 				ON B.intItemId = I.intItemId 				
 		LEFT JOIN 
 			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+				ON A.[intEntityCustomerId] = C.[intEntityId]		
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON B.intItemId = IST.intItemId 
@@ -1376,7 +1376,7 @@ END
 			ON D.intInvoiceId = A.intInvoiceId
 	INNER JOIN
 		tblARCustomer C
-			ON A.intEntityCustomerId = C.intEntityCustomerId			
+			ON A.intEntityCustomerId = C.[intEntityId]			
 	LEFT OUTER JOIN
 		tblSMTaxCode TC
 			ON DT.intTaxCodeId = TC.intTaxCodeId
@@ -1433,7 +1433,7 @@ END
 			ON D.intInvoiceId = A.intInvoiceId
 	INNER JOIN
 		tblARCustomer C
-			ON A.intEntityCustomerId = C.intEntityCustomerId			
+			ON A.intEntityCustomerId = C.[intEntityId]			
 	LEFT OUTER JOIN
 		tblSMTaxCode TC
 			ON DT.intTaxCodeId = TC.intTaxCodeId

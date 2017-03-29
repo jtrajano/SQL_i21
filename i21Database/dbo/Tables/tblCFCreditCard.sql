@@ -14,7 +14,7 @@
     [dtmLastModified]       DATETIME       NULL,
     [intConcurrencyId]      INT            CONSTRAINT [DF_tblCFCreditCard_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFCreditCard] PRIMARY KEY CLUSTERED ([intCreditCardId] ASC),
-    CONSTRAINT [FK_tblCFCreditCard_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+    CONSTRAINT [FK_tblCFCreditCard_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
     CONSTRAINT [FK_tblCFCreditCard_tblCFSiteLocation] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId])
 );
 

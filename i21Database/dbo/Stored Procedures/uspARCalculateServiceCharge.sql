@@ -79,14 +79,14 @@ AS
 	IF (@customerIds = '')
 		BEGIN
 			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
-			SELECT E.intEntityCustomerId, C.intServiceChargeId FROM vyuARCustomerSearch E
-				INNER JOIN tblARCustomer C ON E.intEntityCustomerId = C.intEntityCustomerId
+			SELECT E.[intEntityId], C.intServiceChargeId FROM vyuARCustomerSearch E
+				INNER JOIN tblARCustomer C ON E.[intEntityId] = C.[intEntityId]
 				WHERE E.ysnActive = 1 AND ISNULL(C.intServiceChargeId, 0) <> 0
 		END
 	ELSE
 		BEGIN
 			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId)
-			SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
+			SELECT [intEntityId], intServiceChargeId FROM tblARCustomer WHERE [intEntityId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
 		END
 
 	--GET SELECTED STATUS CODES
@@ -147,7 +147,7 @@ AS
 						 									SC.dblPercentage
 						 							END
 							FROM tblARInvoice I
-								INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
+								INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.[intEntityId]
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
 								LEFT JOIN (SELECT PD.intInvoiceId
 												, dblAmountPaid = SUM(ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblInterest, @zeroDecimal))
@@ -182,7 +182,7 @@ AS
 
 							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl91Days) + SUM(dblCredits) + SUM(dblPrepayments) FROM @temp_aging_table WHERE intEntityCustomerId = @entityId							
 							SELECT TOP 1 @dblMinimumSC = dblMinimumCharge FROM tblARCustomer C 
-								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId WHERE C.intEntityCustomerId = @entityId
+								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId WHERE C.[intEntityId] = @entityId
 			
 							IF ISNULL(@dblTotalAR, 0) > 0
 								BEGIN
@@ -204,7 +204,7 @@ AS
 																			SC.dblPercentage
 						 											END
 									FROM @temp_aging_table AGING
-										INNER JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.intEntityCustomerId
+										INNER JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.[intEntityId]
 										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId										
 									WHERE AGING.intEntityCustomerId = @entityId
 								END					
@@ -234,7 +234,7 @@ AS
 								 							dblPercentage
 								 					END
 							FROM tblARCustomerBudget CB
-								INNER JOIN tblARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId	
+								INNER JOIN tblARCustomer C ON CB.intEntityCustomerId = C.[intEntityId]	
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
 								INNER JOIN [tblEMEntityLocation] EL ON CB.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1	
 							WHERE CB.intEntityCustomerId = @entityId

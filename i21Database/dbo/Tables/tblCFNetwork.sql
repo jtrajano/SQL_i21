@@ -49,7 +49,7 @@
     [intConcurrencyId]                 INT             CONSTRAINT [DF_tblCFNetwork_intConcurrencyId] DEFAULT ((1)) NULL,
     [strDownloadFileName]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblCFNetwork] PRIMARY KEY CLUSTERED ([intNetworkId] ASC),
-    CONSTRAINT [FK_tblCFNetwork_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+    CONSTRAINT [FK_tblCFNetwork_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
     CONSTRAINT [FK_tblCFNetwork_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
     CONSTRAINT [FK_tblCFNetwork_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId])
 );

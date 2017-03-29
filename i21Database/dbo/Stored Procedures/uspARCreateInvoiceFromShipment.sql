@@ -76,7 +76,7 @@ FROM
 	[tblICInventoryShipment] ICIS
 INNER JOIN
 	[tblARCustomer] ARC
-		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
+		ON ICIS.[intEntityCustomerId] = ARC.[intEntityId] 
 LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON SO.strSalesOrderNumber = @strReferenceNumber

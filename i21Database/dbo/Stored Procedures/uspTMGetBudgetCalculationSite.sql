@@ -110,7 +110,7 @@ BEGIN
 	LEFT JOIN vyuTMSiteDeliveryHistoryTotal J
 		ON A.intSiteID = J.intSiteId AND (J.intCurrentSeasonYear - 2) = J.intSeasonYear
 	LEFT JOIN tblARCustomer K
-		ON C.intEntityId = K.intEntityCustomerId
+		ON C.intEntityId = K.[intEntityId]
 
 
 	IF OBJECT_ID('tempdb..#tmpStage2') IS NOT NULL 

@@ -39,7 +39,7 @@ FROM tblARInvoice I
 	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 	INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
 	INNER JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-	INNER JOIN (tblARCustomer C INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = I.intEntityCustomerId
+	INNER JOIN (tblARCustomer C INNER JOIN tblEMEntity E ON C.[intEntityId] = E.intEntityId) ON C.[intEntityId] = I.intEntityCustomerId
 	LEFT JOIN tblICCategory ICC ON ICI.intCategoryId = ICC.intCategoryId
 	LEFT JOIN tblICManufacturer ICM ON ICI.intManufacturerId = ICM.intManufacturerId
 	LEFT JOIN vyuARItemUOM UOM ON ID.intItemUOMId = UOM.intItemUOMId

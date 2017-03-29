@@ -48,11 +48,11 @@ BEGIN
                                 )
           
             -- Get customer related details and information              
-            SELECT @strPayee = strCustomerNumber, @intEntityId = C.intEntityCustomerId      , @strAddress = Loc.strAddress
+            SELECT @strPayee = strCustomerNumber, @intEntityId = C.[intEntityId]      , @strAddress = Loc.strAddress
             , @strCity = Loc.strCity , @strCountry = strCountry   , @strState = Loc.strState , @strZipCode = Loc.strZipCode  
             , @strNoteType = N.strNoteType
             From dbo.tblNRNote N
-            JOIN dbo.tblARCustomer C On N.intCustomerId = C.intEntityCustomerId
+            JOIN dbo.tblARCustomer C On N.intCustomerId = C.[intEntityId]
             --INNER JOIN tblARCustomerToContact as CusToCon ON C.intDefaultContactId = CusToCon.intARCustomerToContactId
             --LEFT JOIN tblEMEntityContact as Con ON CusToCon.intContactId = Con.intContactId
             LEFT JOIN [tblEMEntityLocation] as Loc ON C.intDefaultLocationId = Loc.intEntityLocationId

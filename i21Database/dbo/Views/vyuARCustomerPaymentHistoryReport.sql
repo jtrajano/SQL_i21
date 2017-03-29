@@ -90,8 +90,8 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1 AND I.strTransactionType = 'Customer Prepayment'
 ) AS PAYMENT1
 
-INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) 
-		ON PAYMENT1.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.[intEntityId] = CC.[intEntityId] AND ysnDefaultContact = 1) 
+		ON PAYMENT1.intEntityCustomerId = C.[intEntityId]
 LEFT JOIN tblSMPaymentMethod PM
 		ON PAYMENT1.intPaymentMethodId = PM.intPaymentMethodID
  

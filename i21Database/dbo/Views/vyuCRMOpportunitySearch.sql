@@ -83,7 +83,7 @@
 					)
 					,strSalesPerson = (select top 1 e.strName from tblEMEntity e where e.intEntityId = proj.intInternalSalesPerson)
 					,proj.strDescription
-					,strCustomerName = (select top 1 strName from tblEMEntity where intEntityId = cus.[intEntityCustomerId])
+					,strCustomerName = (select top 1 strName from tblEMEntity where intEntityId = cus.[intEntityId])
 					,strContactName = (select top 1 strName from tblEMEntity where intEntityId = con.[intEntityId])
 					,strType = (select top 1 strType from tblHDTicketType where intTicketTypeId = typ.intTypeId)
 					,strGoLive = CONVERT(nvarchar(10),proj.dtmGoLive,101)
@@ -94,7 +94,7 @@
 					,strProjectManager = (select top 1 e.strName from tblEMEntity e where e.intEntityId = proj.intInternalProjectManager)
 					,strProjectType = 'CRM'
 					,proj.intCustomerContactId
-					,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = cus.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
+					,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = cus.[intEntityId] and et.strType in ('Customer','Prospect'))
 					,proj.dtmCreated
 					,proj.intCustomerId
 					,proj.dtmClose
@@ -110,7 +110,7 @@
 					,strEntityLocation = enloc.strLocationName
 				from
 					tblCRMOpportunity proj
-					left outer join tblARCustomer cus on cus.[intEntityCustomerId] = proj.intCustomerId
+					left outer join tblARCustomer cus on cus.[intEntityId] = proj.intCustomerId
 					left outer join tblEMEntity con on con.[intEntityId] = proj.intCustomerContactId
 					left outer join tblCRMType typ on typ.intTypeId = proj.intTypeId
 					left outer join [tblCRMSalesPipeStatus] pipe on pipe.intSalesPipeStatusId = proj.intSalesPipeStatusId

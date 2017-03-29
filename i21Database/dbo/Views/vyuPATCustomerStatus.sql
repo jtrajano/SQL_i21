@@ -1,10 +1,10 @@
 ﻿CREATE VIEW [dbo].[vyuPATCustomerStatus]
 		AS 
-	SELECT ARC.intEntityCustomerId,
+	SELECT ARC.[intEntityId],
 		   ENT.strName,
 		   ARC.strStockStatus,
 		   ARC.dtmLastActivityDate,
 		   ARC.intConcurrencyId
 	  FROM tblARCustomer ARC
 INNER JOIN tblEMEntity ENT
-		ON ENT.intEntityId = ARC.intEntityCustomerId
+		ON ENT.intEntityId = ARC.[intEntityId]

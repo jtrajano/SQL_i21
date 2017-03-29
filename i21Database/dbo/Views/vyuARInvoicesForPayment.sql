@@ -108,16 +108,16 @@ FROM
 		INNER JOIN
 			(SELECT 
 				strCustomerNumber,
-				intEntityCustomerId,
+				[intEntityId],
 				intPaymentMethodId
 			 FROM 
-				dbo.tblARCustomer) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
+				dbo.tblARCustomer) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityId] 
 		INNER JOIN
 			(SELECT	
 				intEntityId,
 				strName
 			 FROM
-				dbo.tblEMEntity) AS CE ON ARC.[intEntityCustomerId] = CE.intEntityId 
+				dbo.tblEMEntity) AS CE ON ARC.[intEntityId] = CE.intEntityId 
 		LEFT OUTER JOIN
 			(SELECT 
 				intPaymentMethodID,

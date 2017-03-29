@@ -427,14 +427,14 @@ AND A.dblPrepayments	 = B.dblPrepayments
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0
 
 GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId) AS AGING
-INNER JOIN vyuARCustomer C ON AGING.intEntityCustomerId = C.intEntityCustomerId
-INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
+INNER JOIN vyuARCustomer C ON AGING.intEntityCustomerId = C.[intEntityId]
+INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]
 LEFT JOIN tblARInvoice INVOICE ON AGING.intInvoiceId = INVOICE.intInvoiceId
 LEFT JOIN tblEMEntityLocation SHIPTOLOCATION ON INVOICE.intShipToLocationId = SHIPTOLOCATION.intEntityLocationId AND INVOICE.intEntityCustomerId = SHIPTOLOCATION.intEntityId
 LEFT JOIN tblEMEntityLocation BILLTOLOCATION ON INVOICE.intBillToLocationId = BILLTOLOCATION.intEntityLocationId AND INVOICE.intEntityCustomerId = BILLTOLOCATION.intEntityId
 LEFT JOIN tblEMEntityLocation DEFAULTLOCATION ON AGING.intEntityCustomerId = DEFAULTLOCATION.intEntityId AND DEFAULTLOCATION.ysnDefaultLocation = 1
-LEFT JOIN tblEMEntityLocation DEFAULTSHIPTO ON C.intShipToId = DEFAULTSHIPTO.intEntityLocationId AND C.intEntityCustomerId = DEFAULTSHIPTO.intEntityId
-LEFT JOIN tblEMEntityLocation DEFAULTBILLTO ON C.intBillToId = DEFAULTBILLTO.intEntityLocationId AND C.intEntityCustomerId = DEFAULTBILLTO.intEntityId
+LEFT JOIN tblEMEntityLocation DEFAULTSHIPTO ON C.intShipToId = DEFAULTSHIPTO.intEntityLocationId AND C.[intEntityId] = DEFAULTSHIPTO.intEntityId
+LEFT JOIN tblEMEntityLocation DEFAULTBILLTO ON C.intBillToId = DEFAULTBILLTO.intEntityLocationId AND C.[intEntityId] = DEFAULTBILLTO.intEntityId
 LEFT JOIN
 	(SELECT intCurrencyID
 		  , strCurrency

@@ -30,7 +30,7 @@ SELECT A.strInvoiceNumber
 	 , A.strBOLNumber
 	 , A.intEntityCustomerId
 	 , A.strCustomerNumber
-	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
+	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE [intEntityId] = A.intEntityCustomerId)
 	 , dblTotalAR			= B.dblTotalDue - B.dblAvailableCredit
 	 , dblFuture			= 0.000000
 	 , dbl0Days				= B.dbl0Days
@@ -80,8 +80,8 @@ FROM
 	, I.ysnPosted
 	, dblAvailableCredit = 0
 FROM tblARInvoice I
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
-	INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest) AS dblPayment
@@ -129,8 +129,8 @@ SELECT dtmDate				= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 	 , I.ysnPosted
 	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
 FROM tblARInvoice I
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
-	INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	LEFT JOIN (
@@ -186,8 +186,8 @@ FROM tblARPayment P
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) > @dtmDateToLocal
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
 				AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
-    INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
-    INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
+    INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
+    INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest) AS dblPayment
@@ -233,8 +233,8 @@ SELECT DISTINCT
      , ysnPosted			= ISNULL(I.ysnPosted, 1)
 	 , dblAvailableCredit	= 0 
 FROM tblARInvoice I 
-	 INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId 
-	 INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId    
+	 INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId 
+	 INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]    
 	 INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	 LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal) ON I.intInvoiceId = PD.intInvoiceId
 	 LEFT JOIN (tblAPPaymentDetail APPD INNER JOIN tblAPPayment APP ON APPD.intPaymentId = APP.intPaymentId AND APP.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), APP.dtmDatePaid ))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal) ON I.intInvoiceId = APPD.intInvoiceId
@@ -302,7 +302,7 @@ FROM
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit	= 0
 FROM tblARInvoice I
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId    
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest) AS dblPayment
 			  , intInvoiceId 
@@ -334,7 +334,7 @@ SELECT I.strInvoiceNumber
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
 FROM tblARInvoice I
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) AS dblPayment
@@ -374,7 +374,7 @@ FROM tblARPayment P
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) > @dtmDateToLocal
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
 				AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
-    INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+    INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest) AS dblPayment
 			  , intInvoiceId 
@@ -404,7 +404,7 @@ SELECT DISTINCT
   , I.intEntityCustomerId
   , dblAvailableCredit	= 0
 FROM tblARInvoice I 
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
+	INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId    
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId	
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal) ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN (tblAPPaymentDetail APPD INNER JOIN tblAPPayment APP ON APPD.intPaymentId = APP.intPaymentId AND APP.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), APP.dtmDatePaid ))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal) ON I.intInvoiceId = APPD.intInvoiceId

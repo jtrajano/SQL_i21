@@ -188,7 +188,7 @@ LEFT OUTER JOIN
 		ON D.intShipmentId = E.intShipmentId
 LEFT OUTER JOIN
 	tblARCustomer F
-		ON D.intCustomerEntityId = F.intEntityCustomerId 
+		ON D.intCustomerEntityId = F.[intEntityId] 
 LEFT OUTER JOIN
 		(	SELECT 
 				 [intEntityLocationId]
@@ -206,7 +206,7 @@ LEFT OUTER JOIN
 			WHERE
 				ysnDefaultLocation = 1
 		) EL
-			ON F.[intEntityCustomerId] = EL.[intEntityId]
+			ON F.[intEntityId] = EL.[intEntityId]
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] SL1
 			ON F.intShipToId = SL1.intEntityLocationId

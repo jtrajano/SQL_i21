@@ -33,10 +33,10 @@ INNER JOIN
 		ON ARID.intInvoiceId = ARI.intInvoiceId
 INNER JOIN
 	tblARCustomer ARC
-		ON ARI.intEntityCustomerId = ARC.intEntityCustomerId	
+		ON ARI.intEntityCustomerId = ARC.[intEntityId]	
 INNER JOIN 
 	tblEMEntity EME
-		ON ARC.intEntityCustomerId = EME.intEntityId
+		ON ARC.[intEntityId] = EME.intEntityId
 LEFT JOIN
 	tblEMEntityLocation EMEL
 		ON ARI.intShipToLocationId = EMEL.intEntityLocationId

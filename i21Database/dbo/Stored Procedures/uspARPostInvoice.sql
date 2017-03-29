@@ -678,7 +678,7 @@ END CATCH
 						ON PID.intInvoiceId = ARI.intInvoiceId				
 				INNER JOIN
 					dbo.tblARCustomer ARC
-						ON ARI.intEntityCustomerId = ARC.intEntityCustomerId 
+						ON ARI.intEntityCustomerId = ARC.[intEntityId] 
 				WHERE
 					ARC.ysnActive = 0
 					
@@ -1204,7 +1204,7 @@ END CATCH
 						ON D.intInvoiceId = A.intInvoiceId
 				INNER JOIN
 					tblARCustomer C
-						ON A.intEntityCustomerId = C.intEntityCustomerId
+						ON A.intEntityCustomerId = C.[intEntityId]
 				INNER JOIN 
 					@PostInvoiceData	P
 						ON A.intInvoiceId = P.intInvoiceId				
@@ -1244,7 +1244,7 @@ END CATCH
 						AND A.intCompanyLocationId = IST.intLocationId 
 				INNER JOIN
 					tblARCustomer C
-						ON A.intEntityCustomerId = C.intEntityCustomerId					
+						ON A.intEntityCustomerId = C.[intEntityId]					
 				INNER JOIN 
 					@PostInvoiceData	P
 						ON A.intInvoiceId = P.intInvoiceId				
@@ -1298,7 +1298,7 @@ END CATCH
 						AND A.intCompanyLocationId = IST.intLocationId 
 				INNER JOIN
 					tblARCustomer C
-						ON A.intEntityCustomerId = C.intEntityCustomerId					
+						ON A.intEntityCustomerId = C.[intEntityId]					
 				INNER JOIN 
 					@PostInvoiceData	P
 						ON A.intInvoiceId = P.intInvoiceId				
@@ -1592,7 +1592,7 @@ END CATCH
 						ON ARI.intInvoiceId = PID.intInvoiceId
 				INNER JOIN
 					tblARCustomer ARC
-						ON ARI.intEntityCustomerId = ARC.intEntityCustomerId 
+						ON ARI.intEntityCustomerId = ARC.[intEntityId] 
 				LEFT OUTER JOIN
 					tblTMSite TMS
 						ON ARID.intSiteId = TMS.intSiteID
@@ -2230,7 +2230,7 @@ IF @post = 1
 				tblARInvoice A
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId
+					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId	
@@ -2308,7 +2308,7 @@ IF @post = 1
 					AND ARI1.strTransactionType = 'Credit Memo' 
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId
+					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2356,7 +2356,7 @@ IF @post = 1
 				tblARInvoice A
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId
+					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2437,7 +2437,7 @@ IF @post = 1
 					AND ARI1.strTransactionType <> 'Credit Memo' 
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId
+					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2486,7 +2486,7 @@ IF @post = 1
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+					ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId 	
@@ -2629,7 +2629,7 @@ IF @post = 1
 					ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+					ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId 
@@ -2767,7 +2767,7 @@ IF @post = 1
 					ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+					ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2902,7 +2902,7 @@ IF @post = 1
 					ON B.intItemId = I.intItemId 				
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
+					ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -2968,7 +2968,7 @@ IF @post = 1
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
+					ON A.[intEntityCustomerId] = C.[intEntityId]			
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -3037,7 +3037,7 @@ IF @post = 1
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
+					ON A.[intEntityCustomerId] = C.[intEntityId]			
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -3102,7 +3102,7 @@ IF @post = 1
 				tblARInvoice A 
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId	
+					ON A.[intEntityCustomerId] = C.[intEntityId]	
 			INNER JOIN
 				tblSMCompanyLocation L
 					ON A.intCompanyLocationId = L.intCompanyLocationId	
@@ -3181,7 +3181,7 @@ IF @post = 1
 					ON D.intInvoiceId = A.intInvoiceId
 			INNER JOIN
 				tblARCustomer C
-					ON A.intEntityCustomerId = C.intEntityCustomerId
+					ON A.intEntityCustomerId = C.[intEntityId]
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId				
@@ -3247,7 +3247,7 @@ IF @post = 1
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
 				tblARCustomer C
-					ON A.intEntityCustomerId = C.intEntityCustomerId
+					ON A.intEntityCustomerId = C.[intEntityId]
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
@@ -3496,7 +3496,7 @@ IF @post = 1
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
 				tblARCustomer C
-					ON A.intEntityCustomerId = C.intEntityCustomerId					
+					ON A.intEntityCustomerId = C.[intEntityId]					
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId				
@@ -3580,7 +3580,7 @@ IF @post = 1
 					AND A.intCompanyLocationId = IST.intLocationId 
 			INNER JOIN
 				tblARCustomer C
-					ON A.intEntityCustomerId = C.intEntityCustomerId					
+					ON A.intEntityCustomerId = C.[intEntityId]					
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId				

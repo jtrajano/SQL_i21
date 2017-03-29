@@ -37,8 +37,8 @@ SELECT TOP 100 PERCENT QD.intQuoteDetailId
 FROM tblTRQuoteHeader QH
 CROSS APPLY (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
 LEFT JOIN tblTRQuoteDetail QD ON QD.intQuoteHeaderId = QH.intQuoteHeaderId
-LEFT JOIN vyuARCustomerSearch AR ON QH.intEntityCustomerId = AR.intEntityCustomerId
-LEFT JOIN tblARCustomerRackQuoteHeader CustomerTransports ON CustomerTransports.intEntityCustomerId = AR.intEntityCustomerId
+LEFT JOIN vyuARCustomerSearch AR ON QH.intEntityCustomerId = AR.[intEntityId]
+LEFT JOIN tblARCustomerRackQuoteHeader CustomerTransports ON CustomerTransports.intEntityCustomerId = AR.[intEntityId]
 LEFT JOIN vyuEMSalesperson SP ON SP.intEntitySalespersonId = AR.intSalespersonId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = QD.intShipToLocationId
 	AND EL.intEntityId = QH.intEntityCustomerId

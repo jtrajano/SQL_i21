@@ -69,8 +69,8 @@ FROM (
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
-	JOIN tblARCustomer ARC ON LC.intVendorId = ARC.intEntityCustomerId
-	JOIN tblEMEntity EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+	JOIN tblARCustomer ARC ON LC.intVendorId = ARC.[intEntityId]
+	JOIN tblEMEntity EME ON ARC.[intEntityId] = EME.[intEntityId]
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN [tblSMCompanyLocation] SMCL ON LD.intSCompanyLocationId = SMCL.[intCompanyLocationId]

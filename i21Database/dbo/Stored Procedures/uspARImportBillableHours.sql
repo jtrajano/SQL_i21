@@ -34,11 +34,11 @@ IF (@HoursWorkedIDs IS NOT NULL)
 BEGIN
 	IF(@HoursWorkedIDs = 'all')
 	BEGIN
-		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId], [intEntityCustomerId], [intTicketId] FROM vyuARBillableHoursForImport
+		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId], [intEntityId], [intTicketId] FROM vyuARBillableHoursForImport
 	END
 	ELSE
 	BEGIN
-		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId], [intEntityCustomerId], [intTicketId] FROM vyuARBillableHoursForImport WHERE [intTicketHoursWorkedId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@HoursWorkedIDs))
+		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId], [intEntityId], [intTicketId] FROM vyuARBillableHoursForImport WHERE [intTicketHoursWorkedId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@HoursWorkedIDs))
 	END
 END
 
@@ -51,7 +51,7 @@ SELECT
 FROM
 	@TicketHoursWorked THW
 INNER JOIN
-	(SELECT intEntityCustomerId, intTermsId FROM tblARCustomer) ARC ON THW.intEntityCustomerId = ARC.intEntityCustomerId 
+	(SELECT [intEntityId], intTermsId FROM tblARCustomer) ARC ON THW.intEntityCustomerId = ARC.[intEntityId] 
 WHERE ARC.intTermsId IS NULL
 
 
@@ -66,7 +66,7 @@ DECLARE @NewlyCreatedInvoices AS TABLE (intInvoiceId INT)
 
 INSERT INTO @NewInvoices
 SELECT DISTINCT
-	V.[intEntityCustomerId]
+	V.[intEntityId]
 	,ISNULL(V.[intCompanyLocationId], @CompanyLocationId)
 FROM
 	vyuARBillableHoursForImport V
@@ -75,9 +75,9 @@ INNER JOIN
 		ON V.[intTicketId] = HW.[intTicketId]
 INNER JOIN
 	tblARCustomer C
-		ON V.[intEntityCustomerId] = C.[intEntityCustomerId]		
+		ON V.[intEntityId] = C.[intEntityId]		
 GROUP BY
-	V.[intEntityCustomerId]
+	V.[intEntityId]
 	,ISNULL(V.[intCompanyLocationId], @CompanyLocationId)
 
 WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
@@ -156,7 +156,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 				ON V.[intItemId] = Acct.[intItemId]
 					AND V.[intCompanyLocationId] = Acct.[intLocationId]
 		WHERE
-			V.intEntityCustomerId = @EntityCustomerId
+			V.[intEntityId] = @EntityCustomerId
 			AND ISNULL(V.intCompanyLocationId,@CompanyLocationId) = @ComLocationId
 		
 		EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @NewInvoiceId

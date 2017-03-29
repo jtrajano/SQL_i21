@@ -1282,7 +1282,7 @@ BEGIN TRY
 							WHERE
 								ysnDefaultLocation = 1
 						) EL
-							ON C.[intEntityCustomerId] = EL.[intEntityId]
+							ON C.[intEntityId] = EL.[intEntityId]
 		LEFT OUTER JOIN
 			[tblEMEntityLocation] SL
 				ON ISNULL(@ShipToLocationId, 0) <> 0
@@ -1299,7 +1299,7 @@ BEGIN TRY
 				ON C.intShipToId = BL1.intEntityLocationId		
 		WHERE
 			[tblARInvoice].[intInvoiceId] = @ExistingInvoiceId
-			AND C.[intEntityCustomerId] = @EntityCustomerId
+			AND C.[intEntityId] = @EntityCustomerId
 			AND ISNULL(@UpdateAvailableDiscount, 0) = 0
 
 

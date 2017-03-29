@@ -60,7 +60,7 @@ set @dblInvoiceSurchargeRate =0;
 	           		       @dblMinimumUnits = CF.dblMinimumUnits,
 						   @intTariffType   = AR.intEntityTariffTypeId
 	          from tblARCustomerFreightXRef CF 
-			       join tblARCustomer AR on AR.intEntityCustomerId = CF.intEntityCustomerId
+			       join tblARCustomer AR on AR.[intEntityId] = CF.intEntityCustomerId
 	                   where CF.intEntityCustomerId = @intEntityCustomerId 
 	      	   	         and CF.strZipCode = @strZipCode
 	           			     and CF.intCategoryId = @intCategoryid

@@ -5,7 +5,7 @@ SELECT
 	,strSalesOrderNumber	= SO.strSalesOrderNumber
 	,strCustomerName		= NTT.strName
 	,strCustomerNumber		= CUS.strCustomerNumber 
-	,intEntityCustomerId	= CUS.intEntityCustomerId
+	,intEntityCustomerId	= CUS.[intEntityId]
 	,strTransactionType		= SO.strTransactionType
 	,strType				= ISNULL(SO.strType, 'Standard')
 	,strOrderStatus			= SO.strOrderStatus
@@ -72,15 +72,15 @@ FROM
 			,intEntityCustomerId
 	 FROM dbo.tblSOSalesOrder) AS SO 
 LEFT OUTER JOIN
-	(SELECT intEntityCustomerId
+	(SELECT [intEntityId]
 			,strCustomerNumber
 	 FROM 
-		dbo.tblARCustomer) AS CUS ON SO.[intEntityCustomerId] = CUS.[intEntityCustomerId] 
+		dbo.tblARCustomer) AS CUS ON SO.[intEntityCustomerId] = CUS.[intEntityId] 
 LEFT OUTER JOIN
 	(SELECT intEntityId,
 			strName,
 			strEntityNo
-	 FROM dbo.tblEMEntity) AS NTT ON CUS.[intEntityCustomerId] = NTT.intEntityId 
+	 FROM dbo.tblEMEntity) AS NTT ON CUS.[intEntityId] = NTT.intEntityId 
 LEFT OUTER JOIN
 	(SELECT intTermID,
 			strTerm

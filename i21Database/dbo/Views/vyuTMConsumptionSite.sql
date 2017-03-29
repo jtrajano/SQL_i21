@@ -38,7 +38,7 @@ AS
 		,strCustomerCountry = H.strCountry
 		,strCustomerTermCode = J.strTermCode
 		,ysnCustomerApplyPrepaidTax = D.ysnApplyPrepaidTax
-		,intCustomerEntityId = D.intEntityCustomerId
+		,intCustomerEntityId = D.[intEntityId]
 		,dblCustomerBalance = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0) 
 		,dblCustomerLastYearSales = CI.dblLastYearSales
 		,strCustomerAccountStatusCode = K.strAccountStatusCode
@@ -111,9 +111,9 @@ AS
 	INNER JOIN tblEMEntity C
 		ON B.intCustomerNumber = C.intEntityId
 	INNER JOIN tblARCustomer D
-		ON C.intEntityId = D.intEntityCustomerId
+		ON C.intEntityId = D.[intEntityId]
 	INNER JOIN [tblEMEntityToContact] F
-		ON D.intEntityCustomerId = F.intEntityId 
+		ON D.[intEntityId] = F.intEntityId 
 			AND F.ysnDefaultContact = 1
 	INNER JOIN tblEMEntity G 
 		ON F.intEntityContactId = G.intEntityId

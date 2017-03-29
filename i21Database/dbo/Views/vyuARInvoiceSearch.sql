@@ -5,7 +5,7 @@ SELECT
 	,strInvoiceNumber				= I.strInvoiceNumber
 	,strCustomerName				= CE.strName
 	,strCustomerNumber				= C.strCustomerNumber
-	,intEntityCustomerId			= C.intEntityCustomerId
+	,intEntityCustomerId			= C.[intEntityId]
 	,strTransactionType				= I.strTransactionType
 	,strType						= ISNULL(I.strType, 'Standard')
 	,strPONumber					= I.strPONumber
@@ -143,10 +143,10 @@ FROM
 	 FROM
 	  dbo.tblARInvoice) AS I 
 INNER JOIN
-	(SELECT intEntityCustomerId,
+	(SELECT [intEntityId],
 			strCustomerNumber
 	 FROM 
-		dbo.tblARCustomer) AS C ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
+		dbo.tblARCustomer) AS C ON I.[intEntityCustomerId] = C.[intEntityId] 
 LEFT JOIN tblEMEntity EC 
 		on I.intEntityContactId = EC.intEntityId
 --OUTER APPLY
@@ -170,7 +170,7 @@ INNER JOIN
 	(SELECT intEntityId,
 			strName
 	 FROM 
-		dbo.tblEMEntity) AS CE ON C.[intEntityCustomerId] = CE.intEntityId 
+		dbo.tblEMEntity) AS CE ON C.[intEntityId] = CE.intEntityId 
 LEFT OUTER JOIN
 	(SELECT intTermID,
 			strTerm

@@ -116,7 +116,7 @@ WHERE SO.ysnProcessed = 1) AS A
 	LEFT JOIN tblGLAccount GA ON A.intItemAccountId = GA.intAccountId
 	INNER JOIN tblSMCompanyLocation L ON A.intCompanyLocationId = L.intCompanyLocationId
 	INNER JOIN (tblARCustomer C 
-		INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON A.intEntityCustomerId = C.intEntityCustomerId
+		INNER JOIN tblEMEntity E ON C.[intEntityId] = E.intEntityId) ON A.intEntityCustomerId = C.[intEntityId]
 	LEFT JOIN (tblARSalesperson SP 
 		INNER JOIN tblEMEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON A.intEntitySalespersonId = SP.intEntitySalespersonId	
 	LEFT JOIN (tblICItem IC 

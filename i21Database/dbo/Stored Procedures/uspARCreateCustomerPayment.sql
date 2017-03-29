@@ -48,14 +48,14 @@ SELECT @DateOnly = CAST(GETDATE() AS DATE)
 SELECT @TransactionType = strTransactionType FROM tblARInvoice WHERE intInvoiceId = @InvoiceId
 
 	
-IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId)
+IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @EntityCustomerId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120025, 16, 1);
 		RETURN 0;
 	END
 
-IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND ysnActive = 1)
+IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @EntityCustomerId AND ysnActive = 1)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120026, 16, 1);
@@ -147,7 +147,7 @@ BEGIN TRY
 		,[intWriteOffAccountId]
 		,[intConcurrencyId])
 	SELECT
-		 [intEntityCustomerId]			= ARC.[intEntityCustomerId]
+		 [intEntityCustomerId]			= ARC.[intEntityId]
 		,[intCurrencyId]				= ISNULL(@CurrencyId, ISNULL(ARC.[intCurrencyId], @DefaultCurrency))	
 		,[dtmDatePaid]					= @DatePaid
 		,[intAccountId]					= @AccountId
@@ -169,7 +169,7 @@ BEGIN TRY
 		,[intConcurrencyId]				= 0		
 	FROM	
 		tblARCustomer ARC	
-	WHERE ARC.[intEntityCustomerId] = @EntityCustomerId
+	WHERE ARC.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()
 	

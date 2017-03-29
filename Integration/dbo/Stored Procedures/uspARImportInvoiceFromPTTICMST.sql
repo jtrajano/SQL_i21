@@ -89,7 +89,7 @@ USING
 (
 SELECT
 	[strInvoiceOriginId] = pttic_ivc_no,
-	[intEntityCustomerId] = Cus.intEntityCustomerId,
+	[intEntityCustomerId] = Cus.intEntityId,
 	[dtmDate] = (CASE WHEN ISDATE(pttic_rev_dt) = 1 THEN CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),
 	[dtmDueDate] = (CASE WHEN ISDATE(pttic_rev_dt) = 1 THEN DATEADD(day,Term.intBalanceDue,CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112)) ELSE GETDATE() END),
 	[dtmPostDate] = (CASE WHEN ISDATE(pttic_rev_dt) = 1 THEN CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),

@@ -198,7 +198,7 @@ BEGIN
 			,[intMeterReadingId]					= @intRecordKey
 		FROM vyuMBGetMeterReadingDetail MRDetail
 		LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
-		LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = MRDetail.intEntityCustomerId
+		LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = MRDetail.intEntityCustomerId
 		WHERE MRDetail.intMeterReadingId = @intRecordKey
 		GROUP BY MRDetail.intMeterReadingId
 			, MRDetail.strTransactionId

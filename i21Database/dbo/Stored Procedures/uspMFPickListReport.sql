@@ -300,7 +300,7 @@ End
 Else
 Begin --Sales Order Pick List
 	Select TOP 1 @ysnShowCostInSalesOrderPickList=ISNULL(ysnPrintPriceOnPrintTicket,0),@ysnIncludeEntityName=ISNULL(ysnIncludeEntityName,0) From tblARCustomer 
-	Where intEntityCustomerId=(Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
+	Where [intEntityId]=(Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
 
 	Select TOP 1 @intPickListId=ISNULL(intPickListId,0),@dblBatchSize=ISNULL(dblBatchSize,0) From tblMFPickList Where intSalesOrderId=@intSalesOrderId
 
@@ -318,7 +318,7 @@ Begin --Sales Order Pick List
 
 	Select @intLocationId=intCompanyLocationId,@strSONo=strSalesOrderNumber From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId
 
-	Select @strCustomerName=ISNULL(strName,'') From vyuARCustomer Where intEntityCustomerId=(Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
+	Select @strCustomerName=ISNULL(strName,'') From vyuARCustomer Where [intEntityId]=(Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
 
 	Select @strShipTo= ISNULL(RTRIM(CASE WHEN @ysnIncludeEntityName=1 THEN @strCustomerName + CHAR(13) ELSE '' END),'') 
 					 + ISNULL(RTRIM(so.strShipToLocationName),'') + CHAR(13)
@@ -413,7 +413,7 @@ Begin --Sales Order Pick List
 			Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
 			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 			Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
-			Join vyuARCustomer c on so.intEntityCustomerId=c.intEntityCustomerId
+			Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
 			Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
 			Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
 			Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
@@ -483,7 +483,7 @@ Begin --Sales Order Pick List
 			Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
 			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 			Join tblSOSalesOrder so on sd.intSalesOrderId=so.intSalesOrderId
-			Join vyuARCustomer c on so.intEntityCustomerId=c.intEntityCustomerId
+			Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
 			Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
 			Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
 			Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
@@ -669,7 +669,7 @@ Begin --Sales Order Pick List
 						Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
 						Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 						Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
-						Join vyuARCustomer c on so.intEntityCustomerId=c.intEntityCustomerId
+						Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
 						Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
 						Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
 						Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
@@ -741,7 +741,7 @@ Begin --Sales Order Pick List
 						Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
 						Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 						Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
-						Join vyuARCustomer c on so.intEntityCustomerId=c.intEntityCustomerId
+						Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
 						Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
 						Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
 						Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId

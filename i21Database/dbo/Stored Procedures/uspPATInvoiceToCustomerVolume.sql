@@ -20,7 +20,7 @@ BEGIN
 			
 
 		-- GET STOCK STATUS
-		SET @strStockStatus = (SELECT strStockStatus FROM tblARCustomer where intEntityCustomerId = @intEntityCustomerId)
+		SET @strStockStatus = (SELECT strStockStatus FROM tblARCustomer where [intEntityId] = @intEntityCustomerId)
 	
 		IF(@strStockStatus = '' OR @strStockStatus IS NULL)
 		BEGIN -- NOT ELIGIBLE FOR PATRONAGE
@@ -73,7 +73,7 @@ BEGIN
 		BEGIN
 			
 			UPDATE tblARCustomer SET dtmLastActivityDate = GETDATE() 
-				WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM #tempItem)
+				WHERE [intEntityId] IN (SELECT intEntityCustomerId FROM #tempItem)
 			
 			MERGE tblPATCustomerVolume AS PAT
 			USING #tempItem AS B

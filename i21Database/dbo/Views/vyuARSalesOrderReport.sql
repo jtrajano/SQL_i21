@@ -90,7 +90,7 @@ LEFT JOIN (tblSOSalesOrderDetail SD
 	LEFT JOIN tblCTContractDetail CD ON SD.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblMFRecipe MFR ON SD.intRecipeId = MFR.intRecipeId) ON SO.intSalesOrderId = SD.intSalesOrderId
 LEFT JOIN (tblARCustomer C 
-	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON C.[intEntityId] = E.intEntityId) ON C.[intEntityId] = SO.intEntityCustomerId
 LEFT JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId
 LEFT JOIN tblSMCurrency CUR ON SO.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 

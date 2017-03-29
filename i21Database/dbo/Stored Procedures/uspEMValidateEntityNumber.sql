@@ -22,7 +22,7 @@ BEGIN
 		GOTO ExitHere
 	END
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblARCustomer where strCustomerNumber = @Identification AND intEntityCustomerId != @EntityId)
+	IF EXISTS(SELECT TOP 1 1 FROM tblARCustomer where strCustomerNumber = @Identification AND [intEntityId] != @EntityId)
 	BEGIN
 		Set @Message = 'Entity No already exists as Customer'
 		GOTO ExitHere

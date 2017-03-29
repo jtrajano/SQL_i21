@@ -10,7 +10,7 @@
 	[intEntityCustomerLocationId]	INT	NULL,
 	[intConcurrencyId]	INT	DEFAULT(0) NOT NULL,
 	CONSTRAINT [PK_dbo_tblARSpecialTax] PRIMARY KEY CLUSTERED ([intARSpecialTaxId] ASC),
-	CONSTRAINT FK_tblARSpecialTax_tblARCustomer FOREIGN KEY ([intEntityCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]),
+	CONSTRAINT FK_tblARSpecialTax_tblARCustomer FOREIGN KEY ([intEntityCustomerId]) REFERENCES [tblARCustomer]([intEntityId]),
 	CONSTRAINT FK_tblARSpecialTax_tblAPVendor FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]),
 	CONSTRAINT FK_tblARSpecialTax_tbltblICItem FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT FK_tblARSpecialTax_tblICCategory FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),

@@ -115,7 +115,7 @@ SELECT intCompanyLocationId		=	@intCompanyLocationId
  	, strCustomerName			=	Cus.strName
 	, strCustomerAddress		=	[dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, Cus.strName, NULL)
 	, strCustomerPhone			=	EnPhoneNo.strPhone 
-	, strAccountNumber			=	(SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = Cus.intEntityCustomerId) 
+	, strAccountNumber			=	(SELECT strAccountNumber FROM tblARCustomer WHERE [intEntityId] = Cus.[intEntityId]) 
 	, intInvoiceId				=	Aging.intInvoiceId	
 	, strInvoiceNumber			=	Aging.strInvoiceNumber		 
 	, strBOLNumber				=	Aging.strBOLNumber
@@ -154,7 +154,7 @@ FROM
 	)  Aging
 INNER JOIN (
 			SELECT 
-				ARC.intEntityCustomerId
+				ARC.[intEntityId]
 				, strCustomerNumber					= ISNULL(ARC.strCustomerNumber, EME.strEntityNo)
 				, EME.strName
 				, BillToLoc.strBillToAddress
@@ -167,7 +167,7 @@ INNER JOIN (
 				, ARC.strTerm
 			FROM 
 				(SELECT 
-					intEntityCustomerId, 
+					[intEntityId], 
 					strCustomerNumber, 
 					intBillToId,		
 					ARC.intTermsId,
@@ -187,7 +187,7 @@ INNER JOIN (
 								strName								 
 							FROM 
 								tblEMEntity
-							) EME ON ARC.intEntityCustomerId = EME.intEntityId
+							) EME ON ARC.[intEntityId] = EME.intEntityId
 				LEFT JOIN (
 							SELECT 
 								Loc.intEntityId, 
@@ -203,7 +203,7 @@ INNER JOIN (
 										FROM 
 											tblSMTerm) SMT ON Loc.intTermsId = SMT.intTermID
 							WHERE ysnDefaultLocation = 1
-							) EMEL ON ARC.intEntityCustomerId = EMEL.intEntityId
+							) EMEL ON ARC.[intEntityId] = EMEL.intEntityId
 				LEFT JOIN (
 							SELECT 
 								intEntityId, 
@@ -216,8 +216,8 @@ INNER JOIN (
 								strBillToZipCode		= strZipCode
 							FROM 
 								tblEMEntityLocation
-							) BillToLoc ON ARC.intEntityCustomerId = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
-			) Cus ON Aging.intEntityCustomerId = Cus.intEntityCustomerId
+							) BillToLoc ON ARC.[intEntityId] = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
+			) Cus ON Aging.intEntityCustomerId = Cus.[intEntityId]
 INNER JOIN (
 			SELECT 
 				intEntityId
@@ -290,27 +290,27 @@ BEGIN
 	FROM 
 		tblARCollectionOverdue ARCO
 	INNER JOIN (SELECT 
-					intEntityCustomerId
+					Cus.[intEntityId]
 				FROM 
 					(SELECT
-						intEntityCustomerId
+						EME.[intEntityId]
 					FROM 
 						(SELECT 
 							intEntityId 
 						FROM 
 							tblEMEntity) EME
 						INNER JOIN (SELECT 
-										ARC.intEntityCustomerId									 
+										ARC.[intEntityId]									 
 									FROM 
 										tblARCustomer ARC
 									INNER JOIN (SELECT 
 													intEntityCustomerId
 												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
+													tblARCollectionOverdue) ARCO ON ARC.[intEntityId] = ARCO.intEntityCustomerId
 									WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
+			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
 	WHERE 
 		(ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 
@@ -340,12 +340,12 @@ BEGIN
 	FROM 
 		tblARCollectionOverdue ARCO
 	INNER JOIN (SELECT 
-					intEntityCustomerId
+					Cus.[intEntityId]
 					, strCustomerNumber
 					, strCustomerName 
 				FROM 
 					(SELECT
-						intEntityCustomerId,
+						EME.[intEntityId],
 						strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
 						strCustomerName
 					 FROM 
@@ -356,18 +356,18 @@ BEGIN
 						FROM 
 							tblEMEntity) EME
 						INNER JOIN (SELECT 
-										ARC.intEntityCustomerId
+										ARC.[intEntityId]
 										, ARC.strCustomerNumber
 									FROM 
 										tblARCustomer ARC
 									INNER JOIN (SELECT 
 													intEntityCustomerId 
 												FROM 
-													@temp_availablecustomer_table) TempCustomer ON ARC.intEntityCustomerId = TempCustomer.intEntityCustomerId
+													@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
 									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
+			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
 	WHERE 
 		(ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 	ORDER BY 
@@ -386,27 +386,27 @@ BEGIN
 	FROM 
 		tblARCollectionOverdue ARCO
 	INNER JOIN (SELECT 
-					intEntityCustomerId
+					Cus.[intEntityId]
 				FROM 
 					(SELECT
-						intEntityCustomerId
+						EME.[intEntityId]
 					 FROM 
 						(SELECT 
 							intEntityId
 						FROM 
 							tblEMEntity) EME
 						INNER JOIN (SELECT 
-										ARC.intEntityCustomerId									 
+										ARC.[intEntityId]									 
 									FROM 
 										tblARCustomer ARC
 									INNER JOIN (SELECT 
 													intEntityCustomerId
 												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
+													tblARCollectionOverdue) ARCO ON ARC.[intEntityId] = ARCO.intEntityCustomerId
 									 WHERE
-										ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+										ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
+			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
 	WHERE 
 		(ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 
@@ -436,12 +436,12 @@ BEGIN
 	FROM 
 		tblARCollectionOverdue ARCO
 	INNER JOIN (SELECT 
-					intEntityCustomerId
+					Cus.[intEntityId]
 					, strCustomerNumber
 					, strCustomerName 
 				FROM 
 					(SELECT
-						intEntityCustomerId,
+						EME.[intEntityId],
 						strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
 						strCustomerName
 					 FROM 
@@ -452,18 +452,18 @@ BEGIN
 						FROM 
 							tblEMEntity) EME
 						INNER JOIN (SELECT 
-										ARC.intEntityCustomerId
+										ARC.[intEntityId]
 										, ARC.strCustomerNumber
 									FROM 
 										tblARCustomer ARC
 									INNER JOIN (SELECT 
 													intEntityCustomerId 
 												FROM 
-													@temp_availablecustomer_table) TempCustomer ON ARC.intEntityCustomerId = TempCustomer.intEntityCustomerId
+													@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
 									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
+			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
 	WHERE 
 		(ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 	ORDER BY 
@@ -482,27 +482,27 @@ BEGIN
 	FROM 
 		tblARCollectionOverdue ARCO
 	INNER JOIN (SELECT 
-					intEntityCustomerId
+					Cus.[intEntityId]
 				FROM 
 					(SELECT
-						intEntityCustomerId
+						EME.[intEntityId]
 					 FROM 
 						(SELECT 
 							intEntityId
 						FROM 
 							tblEMEntity) EME
 						INNER JOIN (SELECT 
-										ARC.intEntityCustomerId									 
+										ARC.[intEntityId]									 
 									FROM 
 										tblARCustomer ARC
 									INNER JOIN (SELECT 
 													intEntityCustomerId
 												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
+													tblARCollectionOverdue) ARCO ON ARC.[intEntityId] = ARCO.intEntityCustomerId
 									 WHERE
-										ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+										ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
+			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
 	WHERE 
 		(ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 
@@ -532,12 +532,12 @@ BEGIN
 	FROM 
 		tblARCollectionOverdue ARCO
 	INNER JOIN (SELECT 
-					intEntityCustomerId
+					Cus.[intEntityId]
 					, strCustomerNumber
 					, strCustomerName 
 				FROM 
 					(SELECT
-						intEntityCustomerId,
+						EME.[intEntityId],
 						strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
 						strCustomerName
 					 FROM 
@@ -548,18 +548,18 @@ BEGIN
 						FROM 
 							tblEMEntity) EME
 						INNER JOIN (SELECT 
-									ARC.intEntityCustomerId
+									ARC.[intEntityId]
 										, ARC.strCustomerNumber
 									FROM 
 										tblARCustomer ARC
 									INNER JOIN (SELECT 
 													intEntityCustomerId 
 												FROM 
-													@temp_availablecustomer_table) TempCustomer ON ARC.intEntityCustomerId = TempCustomer.intEntityCustomerId
+													@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
 									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 					) Cus
-			) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
+			) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
 	WHERE 
 		(ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 	ORDER BY 
@@ -578,27 +578,27 @@ BEGIN
 	FROM 
 		tblARCollectionOverdue ARCO
 	INNER JOIN (SELECT 
-					intEntityCustomerId
+					Cus.[intEntityId]
 				FROM 
 					(SELECT
-						intEntityCustomerId
+						EME.[intEntityId]
 					 FROM 
 						(SELECT 
 							intEntityId
 						FROM 
 							tblEMEntity) EME
 						INNER JOIN (SELECT 
-										ARC.intEntityCustomerId									 
+										ARC.[intEntityId]									 
 									FROM 
 										tblARCustomer ARC
 									INNER JOIN (SELECT 
 													intEntityCustomerId
 												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
+													tblARCollectionOverdue) ARCO ON ARC.[intEntityId] = ARCO.intEntityCustomerId
 									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 					) Cus
-			  ) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
+			  ) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
 	WHERE 
 		(ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 
@@ -628,12 +628,12 @@ BEGIN
 	FROM 
 		tblARCollectionOverdue ARCO
 	INNER JOIN (SELECT 
-					intEntityCustomerId
+					Cus.[intEntityId]
 					, strCustomerNumber
 					, strCustomerName 
 				FROM 
 					(SELECT
-						intEntityCustomerId,
+						EME.[intEntityId],
 						strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
 						strCustomerName
 					 FROM 
@@ -644,18 +644,18 @@ BEGIN
 						FROM 
 							tblEMEntity) EME
 						INNER JOIN (SELECT 
-										ARC.intEntityCustomerId
+										ARC.[intEntityId]
 										, ARC.strCustomerNumber
 									FROM 
 										tblARCustomer ARC
 									INNER JOIN (SELECT 
 													intEntityCustomerId 
 												FROM 
-													@temp_availablecustomer_table) TempCustomer ON ARC.intEntityCustomerId = TempCustomer.intEntityCustomerId
+													@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
 									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 					) Cus
-			  ) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
+			  ) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
 	WHERE 
 		(ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
 	ORDER BY 
@@ -674,27 +674,27 @@ BEGIN
 	FROM 
 		tblARCollectionOverdue ARCO
 	INNER JOIN (SELECT 
-					intEntityCustomerId
+					Cus.[intEntityId]
 				FROM 
 					(SELECT
-						intEntityCustomerId
+						EME.[intEntityId]
 					 FROM 
 						(SELECT 
 							intEntityId
 						FROM 
 							tblEMEntity) EME
 						INNER JOIN (SELECT 
-										ARC.intEntityCustomerId									 
+										ARC.[intEntityId]									 
 									FROM 
 										tblARCustomer ARC
 									INNER JOIN (SELECT 
 													intEntityCustomerId
 												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
+													tblARCollectionOverdue) ARCO ON ARC.[intEntityId] = ARCO.intEntityCustomerId
 									 WHERE
-										ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+										ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 					) Cus						
-				) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
+				) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
 	WHERE 
 		(ISNULL(dbl121DaysSum,0) <> 0)
 
@@ -724,12 +724,12 @@ BEGIN
 	FROM 
 		tblARCollectionOverdue ARCO
 	INNER JOIN (SELECT 
-					intEntityCustomerId
+					Cus.[intEntityId]
 					, strCustomerNumber
 					, strCustomerName 
 				FROM 
 					(SELECT
-						intEntityCustomerId,
+						EME.[intEntityId],
 						strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
 						strCustomerName
 					 FROM 
@@ -740,18 +740,18 @@ BEGIN
 						FROM 
 							tblEMEntity) EME
 						INNER JOIN (SELECT 
-										ARC.intEntityCustomerId
+										ARC.[intEntityId]
 										, ARC.strCustomerNumber
 									FROM 
 										tblARCustomer ARC
 									INNER JOIN (SELECT 
 													intEntityCustomerId 
 												FROM 
-													@temp_availablecustomer_table) TempCustomer ON ARC.intEntityCustomerId = TempCustomer.intEntityCustomerId
+													@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
 									 WHERE
-										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 					) Cus						
-				) ARC ON ARCO.intEntityCustomerId = ARC.intEntityCustomerId
+				) ARC ON ARCO.intEntityCustomerId = ARC.[intEntityId]
 	WHERE 
 		(ISNULL(dbl121DaysSum,0) <> 0)
 	ORDER BY 
@@ -766,21 +766,21 @@ BEGIN
 		intEntityCustomerId
 	)
 	SELECT 
-		intEntityCustomerId
+		Cus.[intEntityId]
 	FROM 
 		(SELECT
-			intEntityCustomerId
+			EME.[intEntityId]
 		 FROM 
 			(SELECT 
 				intEntityId
 			FROM 
 				tblEMEntity) EME
 			INNER JOIN (SELECT 
-							ARC.intEntityCustomerId									 
+							ARC.[intEntityId]									 
 						FROM 
 							tblARCustomer ARC
 			            WHERE
-							dblCreditLimit = 0 AND ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+							dblCreditLimit = 0 AND ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 		) Cus
 
 	DELETE 
@@ -803,12 +803,12 @@ BEGIN
 
 	SET NOCOUNT ON;
 	SELECT 
-		intEntityCustomerId
+		Cus.[intEntityId]
 		, strCustomerNumber
 		, strCustomerName 
 	FROM 
 		(SELECT
-			intEntityCustomerId,
+			EME.[intEntityId],
 			strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
 			strCustomerName
 		 FROM 
@@ -819,16 +819,16 @@ BEGIN
 			FROM 
 				tblEMEntity) EME
 			INNER JOIN (SELECT 
-							ARC.intEntityCustomerId
+							ARC.[intEntityId]
 							, ARC.strCustomerNumber
 						FROM 
 							tblARCustomer ARC
 						INNER JOIN (SELECT 
 										intEntityCustomerId 
 									FROM 
-										@temp_availablecustomer_table) TempCustomer ON ARC.intEntityCustomerId = TempCustomer.intEntityCustomerId
+										@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
 						 WHERE
-							ARC.dblCreditLimit = 0 AND ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+							ARC.dblCreditLimit = 0 AND ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 		) Cus
 	ORDER BY 
 		strCustomerName
@@ -842,21 +842,21 @@ BEGIN
 	(
 		intEntityCustomerId
 	)
-	SELECT intEntityCustomerId
+	SELECT Cus.[intEntityId]
 	FROM 
 		(SELECT
-			intEntityCustomerId
+			EME.[intEntityId]
 		 FROM 
 			(SELECT 
 				intEntityId
 			FROM 
 				tblEMEntity) EME
 			INNER JOIN (SELECT 
-							ARC.intEntityCustomerId									 
+							ARC.[intEntityId]									 
 						FROM 
 							tblARCustomer ARC
 						 WHERE
-							ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+							ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 		) Cus
 			
 	DELETE 
@@ -878,12 +878,12 @@ BEGIN
 										@temp_availablecustomer_table)
 
 	SET NOCOUNT ON;
-	SELECT intEntityCustomerId
+	SELECT Cus.[intEntityId]
 		, strCustomerNumber
 		, strCustomerName 
 	FROM 
 		(SELECT
-			intEntityCustomerId,
+			EME.[intEntityId],
 			strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
 			strCustomerName
 		 FROM 
@@ -894,16 +894,16 @@ BEGIN
 			FROM 
 				tblEMEntity) EME
 			INNER JOIN (SELECT 
-							ARC.intEntityCustomerId
+							ARC.[intEntityId]
 							, ARC.strCustomerNumber
 						FROM 
 							tblARCustomer ARC
 						INNER JOIN (SELECT 
 										intEntityCustomerId 
 									FROM 
-										@temp_availablecustomer_table) TempCustomer ON ARC.intEntityCustomerId = TempCustomer.intEntityCustomerId
+										@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
 						 WHERE
-							ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+							ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 		) Cus		
 	ORDER BY 
 		strCustomerName
@@ -917,22 +917,22 @@ BEGIN
 		intEntityCustomerId
 	)
 	SELECT 
-		intEntityCustomerId
+		Cus.[intEntityId]
 	FROM 
 		(SELECT
-			intEntityCustomerId
+			EME.[intEntityId]
 		 FROM 
 			(SELECT 
 				intEntityId
 			FROM 
 				tblEMEntity) EME
 			INNER JOIN (SELECT 
-							ARC.intEntityCustomerId									 
+							ARC.[intEntityId]									 
 						FROM 
 							tblARCustomer ARC
 						 
 						 WHERE
-							ARC.dblCreditLimit > 0 AND ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+							ARC.dblCreditLimit > 0 AND ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 		) Cus	
 
 	DELETE 
@@ -955,12 +955,12 @@ BEGIN
 
 	SET NOCOUNT ON;
 	SELECT 
-		intEntityCustomerId
+		Cus.[intEntityId]
 		, strCustomerNumber				 
 		, strCustomerName 
 	FROM 
 		(SELECT
-			intEntityCustomerId,
+			EME.[intEntityId],
 			strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
 			strCustomerName
 		 FROM 
@@ -971,16 +971,16 @@ BEGIN
 			FROM 
 				tblEMEntity) EME
 			INNER JOIN (SELECT 
-							ARC.intEntityCustomerId
+							ARC.[intEntityId]
 							, ARC.strCustomerNumber
 						FROM 
 							tblARCustomer ARC
 						INNER JOIN (SELECT 
 										intEntityCustomerId 
 									FROM 
-										@temp_availablecustomer_table) TempCustomer ON ARC.intEntityCustomerId = TempCustomer.intEntityCustomerId
+										@temp_availablecustomer_table) TempCustomer ON ARC.[intEntityId] = TempCustomer.intEntityCustomerId
 						WHERE
-						ARC.dblCreditLimit > 0 AND ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+						ARC.dblCreditLimit > 0 AND ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.[intEntityId]
 		) Cus	
 	ORDER BY 
 		strCustomerName

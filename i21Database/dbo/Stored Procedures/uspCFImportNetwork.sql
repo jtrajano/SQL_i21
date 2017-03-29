@@ -128,11 +128,11 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 					,@intErrorBatchNumber				  =	ISNULL(cfnet_error_batch_no,0)
 					,@intPPhostId						  =	ISNULL(cfnet_pp_host_id,0)
 					,@intPPDistributionSite				  =	ISNULL(cfnet_pp_sub_dist_site,0)
-					,@intCustomerId						  =	(SELECT intEntityCustomerId 
+					,@intCustomerId						  =	(SELECT [intEntityId] 
 															FROM tblARCustomer 
 															WHERE strCustomerNumber = LTRIM(RTRIM(cfnet_ar_cus_no)) COLLATE Latin1_General_CI_AS)
 
-					,@intCACustomerId					  =	(SELECT intEntityCustomerId 
+					,@intCACustomerId					  =	(SELECT [intEntityId] 
 															FROM tblARCustomer 
 															WHERE strCustomerNumber = LTRIM(RTRIM(cfnet_ca_ar_cus_no)) COLLATE Latin1_General_CI_AS)
 

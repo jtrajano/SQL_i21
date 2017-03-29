@@ -205,7 +205,7 @@ SELECT Shipment.intInventoryShipmentId
 		,US.strUserName AS strStagingOrderCreatedBy
 FROM tblICInventoryShipment Shipment
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Shipment.intShipFromLocationId
-LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = Shipment.intEntityCustomerId
+LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = Shipment.intEntityCustomerId
 LEFT JOIN [tblEMEntityLocation] ShipToLocation ON ShipToLocation.intEntityLocationId = Shipment.intShipToLocationId
 LEFT JOIN tblSMCompanyLocation ShipToCompanyLocation ON ShipToCompanyLocation.intCompanyLocationId = Shipment.intShipToCompanyLocationId
 LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityShipViaId = Shipment.intShipViaId

@@ -14,7 +14,7 @@ SELECT	NEWID() as id,
 		dblEquityRefund = SUM(RefMerge.dblRefundAmount - (RefMerge.dblRefundAmount * (RT.dblCashPayout/100)))
 	FROM tblPATRefundCustomer RR
 	INNER JOIN tblARCustomer AC
-		ON AC.intEntityCustomerId = RR.intCustomerId
+		ON AC.[intEntityId] = RR.intCustomerId
 	INNER JOIN tblEMEntity ENT
 		ON ENT.intEntityId = RR.intCustomerId
 	INNER JOIN tblPATRefundRate RT

@@ -8,5 +8,5 @@ Join tblICItem i on sd.intItemId=i.intItemId
 Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Join tblSMCompanyLocation cl on sh.intCompanyLocationId=cl.intCompanyLocationId
-Left Join vyuARCustomer c on sh.intEntityCustomerId=c.intEntityCustomerId 
+Left Join vyuARCustomer c on sh.intEntityCustomerId=c.[intEntityId] 
 Where sh.strOrderStatus NOT IN ('Closed','Cancelled','Short Closed')

@@ -6,7 +6,7 @@ UPDATE
 	tblARInvoice
 SET
 	tblARInvoice.intEntitySalespersonId = (	SELECT TOP 1 intSalespersonId FROM tblARCustomer 
-											WHERE	tblARCustomer.intEntityCustomerId = tblARInvoice.intEntityCustomerId
+											WHERE	tblARCustomer.[intEntityId] = tblARInvoice.intEntityCustomerId
 													AND tblARCustomer.intSalespersonId IN (SELECT DISTINCT intEntitySalespersonId FROM tblARSalesperson))
 WHERE
 	tblARInvoice.intEntitySalespersonId NOT IN (SELECT DISTINCT intEntitySalespersonId FROM tblARSalesperson)
@@ -22,7 +22,7 @@ UPDATE
 	tblSOSalesOrder
 SET
 	tblSOSalesOrder.intEntitySalespersonId = (	SELECT TOP 1 intSalespersonId FROM tblARCustomer 
-												WHERE	tblARCustomer.intEntityCustomerId = tblSOSalesOrder.intEntityCustomerId
+												WHERE	tblARCustomer.[intEntityId] = tblSOSalesOrder.intEntityCustomerId
 														AND tblARCustomer.intSalespersonId IN (SELECT DISTINCT intEntitySalespersonId FROM tblARSalesperson))
 WHERE
 	tblSOSalesOrder.intEntitySalespersonId NOT IN (SELECT DISTINCT intEntitySalespersonId FROM tblARSalesperson)

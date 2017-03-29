@@ -109,7 +109,7 @@ DECLARE
 
 
 SELECT TOP 1
-	 @EntityCustomerId					= ARC.[intEntityCustomerId]
+	 @EntityCustomerId					= ARC.[intEntityId]
 	,@CompanyLocationId					= ARP.[intLocationId]
 	,@CurrencyId						= ARP.[intCurrencyId]
 	,@TermId							= NULL
@@ -197,7 +197,7 @@ FROM
 	[tblARPayment] ARP
 INNER JOIN
 	[tblARCustomer] ARC
-		ON ARP.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+		ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
 WHERE 
 	ARP.[intPaymentId] = @PaymentId
 

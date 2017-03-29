@@ -20,7 +20,7 @@
     [strDirections]       NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]    INT            NOT NULL,
     CONSTRAINT [PK_tblARCustomerFarm] PRIMARY KEY CLUSTERED ([intFarmFieldId] ASC),
-	CONSTRAINT [FK_tblARCustomerFarm_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+	CONSTRAINT [FK_tblARCustomerFarm_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
 	CONSTRAINT [UKstrFarmNumber_strFieldNumber] UNIQUE NONCLUSTERED ([strFarmNumber] ASC, [strFieldNumber] ASC)	
 );
 

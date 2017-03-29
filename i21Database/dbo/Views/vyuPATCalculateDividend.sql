@@ -13,7 +13,7 @@ INNER JOIN tblPATCustomerStock CS
 INNER JOIN tblEMEntity ENT
 	ON ENT.intEntityId = CS.intCustomerPatronId
 INNER JOIN tblARCustomer ARC
-	ON ARC.intEntityCustomerId = ENT.intEntityId
+	ON ARC.[intEntityId] = ENT.intEntityId
 INNER JOIN tblAPVendor APV
 	ON APV.[intEntityId] = CS.intCustomerPatronId
 LEFT JOIN tblSMTaxCode TC

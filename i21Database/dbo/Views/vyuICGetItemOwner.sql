@@ -11,6 +11,6 @@ FROM	tblICItem i
 		INNER JOIN tblICItemOwner o
 			ON i.intItemId = o.intItemId
 		INNER JOIN tblARCustomer c
-			ON c.intEntityCustomerId = o.intOwnerId		
+			ON c.[intEntityId] = o.intOwnerId		
 		INNER JOIN tblEMEntity e
-			ON e.intEntityId = c.intEntityCustomerId
+			ON e.intEntityId = c.[intEntityId]

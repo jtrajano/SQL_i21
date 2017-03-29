@@ -58,10 +58,10 @@ INNER JOIN
 	FROM 
 		tblEMEntity) E ON P.intEntityCustomerId = E.intEntityId
 LEFT OUTER JOIN 
-	(SELECT intEntityCustomerId, 
+	(SELECT [intEntityId], 
 			strCustomerNumber 
 	 FROM 
-		tblARCustomer) C ON E.intEntityId = C.intEntityCustomerId
+		tblARCustomer) C ON E.intEntityId = C.[intEntityId]
 LEFT OUTER JOIN 
 	(SELECT intBankAccountId, 
 			strBankAccountNo 

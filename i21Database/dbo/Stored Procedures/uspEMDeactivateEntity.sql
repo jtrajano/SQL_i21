@@ -10,7 +10,7 @@ AS
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Customer')
 	BEGIN	
-		UPDATE tblARCustomer SET ysnActive= 0 WHERE intEntityCustomerId = @Id
+		UPDATE tblARCustomer SET ysnActive= 0 WHERE [intEntityId] = @Id
 	END	
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Salesperson')
