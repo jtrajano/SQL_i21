@@ -28,7 +28,7 @@ SELECT 'Payable' AS strTransactionType,
        strNotes AS strReference,
        NULL AS intCompanyLocationId
 FROM tblAPPayment
-WHERE ysnPosted = 0
+WHERE (ysnPosted = 0 AND strPaymentInfo NOT LIKE 'Voided%')
 UNION ALL
 SELECT 'Debit Memo' AS strTransactionType,
        intBillId,
