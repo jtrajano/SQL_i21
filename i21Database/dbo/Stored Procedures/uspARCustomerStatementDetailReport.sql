@@ -163,9 +163,12 @@ BEGIN
 	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
 	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
 	
-	IF (@fieldname = 'strName' OR @fieldname = 'strCustomerName' )
-		SET @filter = REPLACE (@filter, '|^|', ''',''')
-		SET @filter = REPLACE (@filter, ''',''''', '''')
+		IF (@fieldname = 'strName' OR @fieldname = 'strCustomerName' )
+			SET @filter = REPLACE (@filter, '|^|', ''',''')
+			SET @filter = REPLACE (@filter, ''',''''', '''')
+			SET @filter = REPLACE (@filter, '=', 'IN (')
+			SET @filter = @filter + ')'
+			SET @filter = REPLACE (@filter, '))', ')')
 
 	DELETE FROM @temp_xml_table WHERE id = @id
 
