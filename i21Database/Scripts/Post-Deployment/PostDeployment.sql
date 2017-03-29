@@ -365,7 +365,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\10_Checkout_Commander_Translog.sql
 
 -- Motor Fuel Tax
-:r .\TF\DefaultData\_TaxAuthority.sql
+--:r .\TF\DefaultData\_TaxAuthority.sql
 --:r .\TF\DefaultData\_Frequency.sql
 --:r .\TF\DefaultData\_ReportingComponent.sql
 --:r .\TF\DefaultData\_ProductCode.sql
