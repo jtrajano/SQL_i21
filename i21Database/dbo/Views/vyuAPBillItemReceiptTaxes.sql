@@ -26,7 +26,7 @@ SELECT
 FROM tblICInventoryReceiptItemTax A
 INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
-WHERE C.strReceiptType IN ('Direct','Purchase Contract')
+WHERE C.strReceiptType IN ('Direct','Purchase Contract','Inventory Return')
 UNION ALL
 --PURCHASE ORDER ITEM RECEIPT
 SELECT
