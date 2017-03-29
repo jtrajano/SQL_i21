@@ -89,7 +89,7 @@ Declare @tblContainer AS Table
 	dblNetWt NUMERIC(38,20),
 	strWeightUOM NVARCHAR(50),
 	strRowState NVARCHAR(50),
-	intConcurrencyId INT
+	ysnNewContainer BIT
 )
 
 Declare @tblOutput AS Table
@@ -134,6 +134,17 @@ Begin
 
 	--Validation
 	Update tblLGLoadStg Set strMessage=NULL  Where intLoadStgId=@intLoadStgId --message should be null not empty(used in loadstg sps as null)
+
+	--Do not send instruction if advice is created
+	If @strTransactionType='Shipping Instructions'
+	Begin
+		If Exists (Select 1 From tblLGLoadStg Where strShippingInstructionNumber=@strLoadNumber AND strTransactionType='Shipment' AND intLoadStgId<@intLoadStgId)
+		Begin
+			Update tblLGLoadStg Set strMessage='System will not send shipping instruction once advice is created.'  Where intLoadStgId=@intLoadStgId
+			GOTO NEXT_SHIPMENT			
+		End
+	End
+
 	If ISNULL(@strLoadNumber,'')=''
 	Begin
 		Update tblLGLoadStg Set strMessage='Load/Shipping Instruction Number is empty.'  Where intLoadStgId=@intLoadStgId
@@ -376,8 +387,8 @@ Begin
 
 					Delete From @tblContainer
 
-					Insert Into @tblContainer(strExternalContainerId,strContainerNo,dblNetWt,strWeightUOM,strRowState,intConcurrencyId)
-					Select lc.strExternalContainerId,lc.strContainerNo,lc.dblNetWt,lc.strWeightUOM,lc.strRowState,c.intConcurrencyId
+					Insert Into @tblContainer(strExternalContainerId,strContainerNo,dblNetWt,strWeightUOM,strRowState,ysnNewContainer)
+					Select lc.strExternalContainerId,lc.strContainerNo,lc.dblNetWt,lc.strWeightUOM,lc.strRowState,c.ysnNewContainer
 					From tblLGLoadContainerStg lc
 					Left Join tblLGLoadContainer c on lc.intLoadContainerId=c.intLoadContainerId
 					Left Join tblLGLoadDetailContainerLink cl on lc.intLoadContainerId=cl.intLoadContainerId
@@ -420,7 +431,7 @@ Begin
 							+ '</E1EDL19>'
 
 							+
-							Case When lc.intConcurrencyId=1 THEN --New Container
+							Case When ISNULL(lc.ysnNewContainer,0)=1 THEN --New Container
 							'<E1EDL19 SEGMENT="1">'
 							+ '<QUALF>'  +  'BAS' + '</QUALF>' 
 							+ '</E1EDL19>'
@@ -449,7 +460,7 @@ Begin
 	End --Loop Detail End
 
 	--For Tea
-	If UPPER(@strCommodityCode)='TEA' AND Exists (Select intConcurrencyId From tblLGLoadContainer Where intLoadId=@intLoadId AND intConcurrencyId<=1) 
+	If UPPER(@strCommodityCode)='TEA' AND Exists (Select 1 From tblLGLoadContainer Where intLoadId=@intLoadId AND ISNULL(ysnNewContainer,0)=1) 
 	Begin
 			Set @strContainerXml=''
 			Set @intNoOfContainer=1
@@ -458,7 +469,7 @@ Begin
 
 			Insert Into @tblContainer(intLoadContainerId,strContainerNo,strContainerSizeCode)
 			Select DISTINCT c.intLoadContainerId,c.strContainerNo,c.strContainerSizeCode
-			From tblLGLoadContainerStg c Where c.intLoadStgId=@intMinHeader
+			From tblLGLoadContainerStg c Where c.intLoadStgId=@intMinHeader AND UPPER(c.strRowState)<>'DELETE'
 
 			--Validation
 			If Exists (Select 1 From @tblContainer Where ISNULL(strContainerNo,'')='')
@@ -466,7 +477,7 @@ Begin
 				Update tblLGLoadStg Set strMessage='Container No is empty.'  Where intLoadStgId=@intLoadStgId
 				GOTO NEXT_SHIPMENT
 			End
-			If Exists (Select 1 From @tblContainer Where ISNULL(@strContainerSizeCode,'')='')
+			If Exists (Select 1 From @tblContainer Where ISNULL(strContainerSizeCode,'')='')
 			Begin
 				Update tblLGLoadStg Set strMessage='Container Size is empty.'  Where intLoadStgId=@intLoadStgId
 				GOTO NEXT_SHIPMENT

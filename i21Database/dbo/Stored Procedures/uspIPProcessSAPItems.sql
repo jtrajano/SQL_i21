@@ -96,10 +96,10 @@ Begin
 		End
 
 	If @ysnDeleted=1
-		Delete From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo AND strContractItemName=@strDescription
+		Delete From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo
 	Else
 	Begin
-		If Not Exists (Select 1 From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo AND strContractItemName=@strDescription) --Add
+		If Not Exists (Select 1 From tblICItemContract Where intItemId=@intItemId AND strContractItemNo=@strItemNo) --Add
 		Begin
 			Insert Into tblICItemContract(intItemId,strContractItemNo,strContractItemName,intItemLocationId)
 			Select @intItemId,@strItemNo,@strDescription,intItemLocationId 
@@ -107,7 +107,7 @@ Begin
 		End
 		Else
 		Begin --Update
-			Update tblICItemContract Set strContractItemName=@strDescription Where intItemId=@intItemId AND strContractItemNo=@strItemNo AND strContractItemName=@strDescription
+			Update tblICItemContract Set strContractItemName=@strDescription Where intItemId=@intItemId AND strContractItemNo=@strItemNo
 		End
 	End
 	GOTO MOVE_TO_ARCHIVE

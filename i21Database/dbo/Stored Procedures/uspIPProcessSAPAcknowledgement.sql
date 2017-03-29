@@ -211,7 +211,7 @@ Begin
 
 		If @strStatus IN (52,53) --Success
 			Begin
-				Update tblLGLoadContainer Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+				Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
 
 				Update tblLGLoad  Set strExternalShipmentNumber=@strParam,intConcurrencyId=intConcurrencyId+1
 				Where intLoadId=@intLoadId
@@ -280,7 +280,7 @@ Begin
 
 		If @strStatus IN (52,53) --Success
 		Begin
-			Update tblLGLoadContainer Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+			Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
 			Update tblLGLoad Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
 
 			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success'
