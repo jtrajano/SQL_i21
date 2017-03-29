@@ -73,6 +73,7 @@ BEGIN
 
 	UNION ALL
 
+	--SO shipped
 	SELECT
 		[intItemId]					=	ARID.[intItemId]
 		,[intItemLocationId]		=	ICGIS.[intItemLocationId]
@@ -93,18 +94,18 @@ BEGIN
 		,[intSubLocationId]			=	SOTD.[intSubLocationId]
 		,[intStorageLocationId]		=	SOTD.[intStorageLocationId]
 	FROM 
-		tblARInvoiceDetail ARID
+		(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intSalesOrderDetailId], [dblPrice], [dblQtyShipped], [intInventoryShipmentItemId], [dblQtyOrdered] FROM tblARInvoiceDetail WITH(NOLOCK)) ARID
 	INNER JOIN
-		tblARInvoice ARI
+		(SELECT [intInvoiceId], [strInvoiceNumber], [intCurrencyId], [dtmDate], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice  WITH(NOLOCK)) ARI
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 	INNER JOIN
-		tblSOSalesOrderDetail SOTD
+		(SELECT [intSalesOrderDetailId], [intItemId], [intSubLocationId], [intItemUOMId], [intStorageLocationId], [dblQtyOrdered] FROM tblSOSalesOrderDetail WITH(NOLOCK)) SOTD
 			ON ARID.[intSalesOrderDetailId] = SOTD.[intSalesOrderDetailId] 
 	INNER JOIN
-		tblICItemUOM ICIUOM 
+		(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH(NOLOCK)) ICIUOM 
 			ON ICIUOM.[intItemUOMId] = SOTD.[intItemUOMId]	
 	LEFT OUTER JOIN
-		vyuICGetItemStock ICGIS
+		(SELECT [intLocationId], [intItemId], [dblLastCost], [intItemLocationId] FROM vyuICGetItemStock WITH(NOLOCK)) ICGIS
 			ON SOTD.[intItemId] = ICGIS.[intItemId] 
 			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
 	WHERE [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
@@ -136,18 +137,18 @@ BEGIN
 		,[intSubLocationId]			=	SOTD.[intSubLocationId]
 		,[intStorageLocationId]		=	SOTD.[intStorageLocationId]
 	FROM 
-		tblARInvoiceDetailComponent ARIDC
+		(SELECT [intComponentItemId], [intItemUOMId], [dblQuantity], [dblUnitQuantity], [intInvoiceDetailId] FROM tblARInvoiceDetailComponent WITH (NOLOCK)) ARIDC
 	INNER JOIN 
-		tblARInvoiceDetail ARID
+		(SELECT [intInvoiceId], [intInvoiceDetailId], [intSalesOrderDetailId], [dblPrice], [intInventoryShipmentItemId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 			ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
 	INNER JOIN
-		tblARInvoice ARI
+		(SELECT [intInvoiceId], [dtmDate], [intCurrencyId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 	INNER JOIN
-		tblSOSalesOrderDetail SOTD
+		(SELECT [intSalesOrderDetailId], [intSubLocationId], [intStorageLocationId], [dblQtyOrdered] FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOTD
 			ON ARID.[intSalesOrderDetailId] = SOTD.[intSalesOrderDetailId] 
 	LEFT OUTER JOIN
-		vyuICGetItemStock ICGIS
+		(SELECT [intItemId], [intLocationId], [intItemLocationId], [dblLastCost] FROM vyuICGetItemStock WITH (NOLOCK)) ICGIS
 			ON ARIDC.[intComponentItemId] = ICGIS.[intItemId] 
 			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
 	WHERE [dbo].[fnIsStockTrackingItem](ARIDC.[intComponentItemId]) = 1

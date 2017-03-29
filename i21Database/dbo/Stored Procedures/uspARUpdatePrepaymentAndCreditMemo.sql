@@ -17,34 +17,37 @@ SET @ZeroDecimal = 0.000000
 		 ARI.dblPayment		= ARI.dblPayment + ((CASE WHEN @Post = 0 THEN -1 ELSE 1 END) * ARPAC.[dblAppliedInvoiceDetailAmount])
 		,ARI.dblAmountDue	= ARI.dblInvoiceTotal - (ARI.dblPayment + ((CASE WHEN @Post = 0 THEN -1 ELSE 1 END) * ARPAC.[dblAppliedInvoiceDetailAmount]))
 	FROM
-		tblARInvoice ARI
+		(SELECT intInvoiceId, dblPayment, dblAmountDue, dblInvoiceTotal FROM tblARInvoice WITH (NOLOCK)) ARI
 	INNER JOIN						
-		tblARPrepaidAndCredit ARPAC
+		(SELECT intPrepaymentId, [intInvoiceId], [dblAppliedInvoiceDetailAmount], [ysnApplied] FROM tblARPrepaidAndCredit WITH (NOLOCK)) ARPAC
 			ON ARI.intInvoiceId = ARPAC.intPrepaymentId
 	INNER JOIN
-		tblARInvoice ARI1
+		(SELECT [intInvoiceId] FROM tblARInvoice WITH (NOLOCK)) ARI1
 			ON ARPAC.[intInvoiceId] = ARI1.[intInvoiceId] 
-	WHERE
-		ARI1.intInvoiceId = @TransactionId
-		AND ISNULL(ARPAC.[ysnApplied],0) = 1
-		AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+     WHERE
+         ARI1.intInvoiceId = @TransactionId
+         AND ISNULL(ARPAC.[ysnApplied],0) = 1
+         AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+						
 	
 
 	UPDATE ARI
 	SET
 		 ARI.ysnPaid	= (CASE WHEN (ARI.dblAmountDue) = 0 THEN 1 ELSE 0 END)
 	FROM
-		tblARInvoice ARI
+		(SELECT intInvoiceId, dblAmountDue, ysnPaid FROM tblARInvoice WITH (NOLOCK)) ARI
 	INNER JOIN						
-		tblARPrepaidAndCredit ARPAC
+		(SELECT [intInvoiceId], intPrepaymentId, [ysnApplied], [dblAppliedInvoiceDetailAmount] FROM tblARPrepaidAndCredit WITH (NOLOCK)) ARPAC
 			ON ARI.intInvoiceId = ARPAC.intPrepaymentId
 	INNER JOIN
-		tblARInvoice ARI1
-			ON ARPAC.[intInvoiceId] = ARI1.[intInvoiceId] 
-	WHERE
-		ARI1.intInvoiceId = @TransactionId
-		AND ISNULL(ARPAC.[ysnApplied],0) = 1
-		AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+		(SELECT [intInvoiceId] FROM tblARInvoice WITH (NOLOCK)) ARI1
+			ON ARPAC.[intInvoiceId] = ARI1.[intInvoiceId]  
+    WHERE
+         ARI1.intInvoiceId = @TransactionId
+         AND ISNULL(ARPAC.[ysnApplied],0) = 1
+         AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+
+		 
 
 END
 

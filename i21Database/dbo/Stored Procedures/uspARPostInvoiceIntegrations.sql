@@ -16,61 +16,14 @@ DECLARE @UserEntityID INT
 		,@ForDelete BIT = 0
 --THIS IS A HICCUP		
 
-SET @UserEntityID = ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId),@userId) 
+SET @UserEntityID = ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WITH (NOLOCK) WHERE intEntityUserSecurityId = @userId),@userId) 
 SELECT @actionType = CASE WHEN @post = 1 THEN 'Posted'  ELSE 'Unposted' END 
 SELECT @ForDelete = CASE WHEN @post = 1 THEN 0 ELSE 1 END
 
 -- Get the details from the invoice 
 BEGIN 
 	DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
-	INSERT INTO @ItemsFromInvoice 
-	--(
-	--	-- Header
-	--	 [intInvoiceId]
-	--	,[strInvoiceNumber]
-	--	,[intEntityCustomerId]
-	--	,[dtmDate]
-	--	,[intCurrencyId]
-	--	,[intCompanyLocationId]
-	--	,[intDistributionHeaderId]
-
-	--	-- Detail 
-	--	,[intInvoiceDetailId]
-	--	,[intItemId]
-	--	,[strItemNo]
-	--	,[strItemDescription]
-	--	,[intSCInvoiceId]
-	--	,[strSCInvoiceNumber]
-	--	,[intItemUOMId]
-	--	,[dblQtyOrdered]
-	--	,[dblQtyShipped]
-	--	,[dblDiscount]
-	--	,[dblPrice]
-	--	,[dblTotalTax]
-	--	,[dblTotal]
-	--	,[intServiceChargeAccountId]
-	--	,[intInventoryShipmentItemId]
-	--	,[intSalesOrderDetailId]
-	--	,[intShipmentPurchaseSalesContractId]	
-	--	,[intSiteId]
-	--	,[strBillingBy]
-	--	,[dblPercentFull]
-	--	,[dblNewMeterReading]
-	--	,[dblPreviousMeterReading]
-	--	,[dblConversionFactor]
-	--	,[intPerformerId]
-	--	,[intContractHeaderId]
-	--	,[strContractNumber]
-	--	,[strMaintenanceType]
-	--	,[strFrequency]
-	--	,[dtmMaintenanceDate]
-	--	,[dblMaintenanceAmount]
-	--	,[dblLicenseAmount]
-	--	,[intContractDetailId]
-	--	,[intTicketId]
-	--	,[ysnLeaseBilling]
-
-	--)
+	INSERT INTO @ItemsFromInvoice 	
 	EXEC dbo.[uspARGetItemsFromInvoice]
 			@intInvoiceId = @TransactionId
 
@@ -90,13 +43,13 @@ UPDATE ARID
 SET
 	ARID.dblContractBalance = CTCD.dblBalance
 FROM
-	dbo.tblARInvoiceDetail ARID
+	(SELECT intInvoiceId, dblContractBalance, intContractDetailId FROM dbo.tblARInvoiceDetail WITH (NOLOCK) ) ARID
 INNER JOIN
-	dbo.tblCTContractDetail  CTCD
+	(SELECT intContractDetailId, dblBalance FROM dbo.tblCTContractDetail WITH (NOLOCK))  CTCD
 	ON ARID.intContractDetailId = CTCD.intContractDetailId
 WHERE 
-	ARID.dblContractBalance <> CTCD.dblBalance
-	AND ARID.intInvoiceId = @TransactionId
+	ARID.intInvoiceId = @TransactionId
+	AND ARID.dblContractBalance <> CTCD.dblBalance
 
 --Committed QUatities
 EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId, 1
@@ -117,7 +70,7 @@ SELECT TOP 1
 	@EntityCustomerId	= intEntityCustomerId
 	,@LoadId			= intLoadId
 FROM
-	tblARInvoice
+	tblARInvoice WITH (NOLOCK)
 WHERE
 	intInvoiceId = @TransactionId
 

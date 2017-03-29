@@ -30,7 +30,6 @@ BEGIN
 	,[intTransactionTypeId]						--INT NOT NULL											-- The transaction type. Source table for the types are found in tblICInventoryTransactionType	
 	,[intOwnershipTypeId]						--INT NULL DEFAULT 1	-- Ownership type of the item.  
 	)
-	
 	SELECT
 		 [intItemId]			= ARID.[intItemId]
 		,[intItemLocationId]	= ICGIS.[intItemLocationId]
@@ -44,15 +43,16 @@ BEGIN
 		,[intTransactionTypeId]	= @TransactionTypeId
 		,[intOwnershipTypeId]	= 1
 	FROM 
-		tblARInvoiceDetail ARID
+		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped] 
+		 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 	INNER JOIN
-		tblARInvoice ARI
+		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 	INNER JOIN
-		tblICItemUOM ICIUOM 
+		(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM 
 			ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
 	LEFT OUTER JOIN
-		vyuICGetItemStock ICGIS
+		(SELECT [intItemId], [intLocationId], [intItemLocationId] FROM vyuICGetItemStock WITH (NOLOCK)) ICGIS
 			ON ARID.[intItemId] = ICGIS.[intItemId] 
 			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
 	WHERE [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
@@ -66,7 +66,7 @@ BEGIN
 		dblQty = dblQty * (CASE WHEN @Negate = 1 THEN -1 ELSE 1 END)			
 
 	EXEC [uspICIncreaseReservedQty] 
-		 @ItemsToIncreaseReserve		= @items		 
+		 @ItemsToIncreaseReserve		= @items
 	 
 END
 
