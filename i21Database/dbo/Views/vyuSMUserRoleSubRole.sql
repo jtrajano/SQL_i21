@@ -3,7 +3,7 @@ AS
 SELECT DISTINCT intUserRoleID, intSubRoleId, strName, strDescription, strMenu, strMenuPermission, strForm, strRoleType, ysnAdmin
 FROM
 (
-	SELECT intUserRoleID,
+	SELECT UserRole.intUserRoleID,
 	SubRole.intUserRoleId as intSubRoleId,
 	strName,
 	strDescription,
@@ -15,7 +15,7 @@ FROM
 	INNER JOIN tblSMUserRoleSubRole SubRole ON UserRole.intUserRoleID = SubRole.intUserRoleId
 	UNION ALL
 	SELECT SubRole.intUserRoleId,
-	intUserRoleID as intSubRoleId,
+	UserRole.intUserRoleID as intSubRoleId,
 	strName,
 	strDescription,
 	strMenu,
@@ -26,7 +26,7 @@ FROM
 	INNER JOIN tblSMUserRoleSubRole SubRole ON UserRole.intUserRoleID = SubRole.intSubRoleId
 	UNION ALL
 	SELECT 
-	intUserRoleID as intSubRoleId,
+	UserRole.intUserRoleID as intSubRoleId,
 	SubRole.intSubRoleId,
 	strName,
 	strDescription,
