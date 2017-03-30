@@ -58,7 +58,8 @@ END
 
 BEGIN TRANSACTION
 INSERT INTO @EntriesForInvoice(
-	 [strSourceTransaction]
+	 [strTransactionType]
+	,[strSourceTransaction]
 	,[intSourceId]
 	,[strSourceId]
 	,[intInvoiceId]
@@ -139,7 +140,11 @@ INSERT INTO @EntriesForInvoice(
 	,[dblItemTermDiscount]
 )
 SELECT
-	 [strSourceTransaction]					= 'CF Tran'
+	 [strTransactionType]					= (case
+												when (cfTrans.dblQuantity < 0 OR cfTransPrice.dblCalculatedAmount < 0)  then 'Credit Memo'
+												else 'Invoice'
+											  end)
+	,[strSourceTransaction]					= 'CF Tran'
 	,[intSourceId]							= cfTrans.intTransactionId
 	,[strSourceId]							= cfTrans.strTransactionId
 	,[intInvoiceId]							= @InvoiceId --NULL Value will create new invoice
@@ -186,10 +191,10 @@ SELECT
 	,[ysnInventory]							= 1
 	,[strItemDescription]					= cfSiteItem.strDescription 
 	,[intItemUOMId]							= cfSiteItem.intIssueUOMId
-	,[dblQtyOrdered]						= cfTrans.dblQuantity
-	,[dblQtyShipped]						= cfTrans.dblQuantity 
+	,[dblQtyOrdered]						= ABS(cfTrans.dblQuantity)
+	,[dblQtyShipped]						= ABS(cfTrans.dblQuantity)
 	,[dblDiscount]							= 0
-	,[dblPrice]								= cfTransPrice.dblCalculatedAmount
+	,[dblPrice]								= ABS(cfTransPrice.dblCalculatedAmount)
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= ''
     ,[strFrequency]							= ''
@@ -306,8 +311,8 @@ DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 	,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
 	,[dblRate]					= cfTransactionTax.dblTaxRate
 	,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
-	,[dblTax]					= cfTransactionTax.dblTaxCalculatedAmount
-	,[dblAdjustedTax]			= cfTransactionTax.dblTaxCalculatedAmount--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
+	,[dblTax]					= ABS(cfTransactionTax.dblTaxCalculatedAmount)
+	,[dblAdjustedTax]			= ABS(cfTransactionTax.dblTaxCalculatedAmount)--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
 	,[ysnTaxAdjusted]			= 0
 	,[ysnSeparateOnInvoice]		= 0 
 	,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
