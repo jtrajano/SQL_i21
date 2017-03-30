@@ -64,6 +64,7 @@ namespace iRely.Inventory.Model
         public bool? ysnRecount { get; set; }
         public int? intEntityUserSecurityId { get; set; }
         public int? intSort { get; set; }
+        public string strAutoCreatedLotNumber { get; set; }
 
         private string _itemNo;
         [NotMapped]
@@ -410,7 +411,7 @@ namespace iRely.Inventory.Model
         public int? intEntityUserSecurityId { get; set; }
         public string strUserName { get; set; }
         public int? intSort { get; set; }
-
+        
         public tblICInventoryCountDetail tblICInventoryCountDetail { get; set; }
     }
 

@@ -170,7 +170,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                             },
                             {
                                 xtype: 'menuitem',
-                                itemId: 'mnuImportInventoryCount',
+                                itemId: 'mnuImportInventoryCountDetails',
                                 text: 'Inventory Count'
                             }
                         ]
@@ -1040,7 +1040,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                     items: [
                         {
                             xtype: 'container',
-                            itemId: 'cntImportInventoryCount',
+                            itemId: 'cntImportInventoryCountDetails',
                             margin: '0 0 5 0',
                             layout: {
                                 type: 'hbox',

@@ -287,7 +287,7 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         lu = GetLookUpId<tblICLot>(
                             context,
-                            m => m.strLotNumber == value,
+                            m => m.strLotNumber == value.Trim(),
                             e => e.intLotId);
                         if (lu != null)
                         {
@@ -296,15 +296,26 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         else
                         {
+                            fh.ysnCountByLots = true;
+                            fc.strAutoCreatedLotNumber = value.Trim();
                             dr.Messages.Add(new ImportDataMessage()
                             {
                                 Column = header,
                                 Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Status = STAT_INNER_COL_SKIP,
-                                Message = string.Format("Invalid Lot Number: {0}.", value)
+                                Type = TYPE_INNER_WARN,
+                                Status = STAT_INNER_AUTO,
+                                Message = string.Format("Lot '{0}' will be auto-created because it does not exists.", value)
                             });
                             dr.Info = INFO_WARN;
+                            //dr.Messages.Add(new ImportDataMessage()
+                            //{
+                            //    Column = header,
+                            //    Row = row,
+                            //    Type = TYPE_INNER_ERROR,
+                            //    Status = STAT_INNER_COL_SKIP,
+                            //    Message = string.Format("Invalid Lot Number: {0}.", value)
+                            //});
+                            //dr.Info = INFO_WARN;
                         }
                         break;
                     case "sub location":
