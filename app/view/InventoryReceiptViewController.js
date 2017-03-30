@@ -5798,7 +5798,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     //Compute Tare Weight for the Excess Lot
                     excessTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
                     //Subtract 1 from lastQty because the excess lot will be added later
-                    lastQty = lastQty - 1;
+                    if (excessTareWeight > 0) {
+                        lastQty = lastQty - 1;
+                    }
                 }
                 //Just add tare if the last replicated lot is equal to 1
                 addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
