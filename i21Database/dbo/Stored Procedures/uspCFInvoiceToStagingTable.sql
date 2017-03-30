@@ -19,6 +19,7 @@ BEGIN
 	DELETE FROM tblCFInvoiceSummaryTempTable
 	DELETE FROM tblCFInvoiceDiscountTempTable
 	DELETE FROM tblCFInvoiceStagingTable
+	DELETE FROM tblCFInvoiceFeeStagingTable
 	------------------------------------------
 
 BEGIN TRY
@@ -33,6 +34,7 @@ BEGIN TRY
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam
 	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam	=	@xmlParam
+	EXEC "dbo"."uspCFInvoiceReportFee"		@xmlParam	=	@xmlParam
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
 	-----------------------------------------------------------
@@ -278,6 +280,12 @@ BEGIN TRY
 	INNER JOIN tblCFInvoiceDiscountTempTable AS cfInvRptDcnt
 	ON cfInvRpt.intTransactionId = cfInvRptDcnt.intTransactionId
 
+	SELECT DISTINCT 
+	 intAccountId
+	,intCustomerId
+	,strCustomerName
+	FROM tblCFInvoiceStagingTable
+
 	IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
 
 END TRY 
@@ -295,6 +303,7 @@ BEGIN CATCH
 	DELETE FROM tblCFInvoiceSummaryTempTable
 	DELETE FROM tblCFInvoiceDiscountTempTable
 	DELETE FROM tblCFInvoiceStagingTable
+	DELETE FROM tblCFInvoiceFeeStagingTable
 	------------------------------------------
 
 END CATCH

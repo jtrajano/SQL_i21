@@ -5140,6 +5140,7 @@
     <Build Include="dbo\Tables\tblCFInvoiceReportTempTable.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceDiscountTempTable.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceToStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceFeeStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

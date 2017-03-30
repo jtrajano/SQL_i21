@@ -212,7 +212,7 @@ BEGIN
 			,intTransactionId
 		FROM vyuCFInvoiceReportSummary ' + @whereClause)
 
-		SELECT  * FROM tblCFInvoiceSummaryTempTable
+		--SELECT  * FROM tblCFInvoiceSummaryTempTable
 		---EXEC('SELECT * FROM vyuCFInvoiceReportSummary ' + @whereClause)
 	END
     

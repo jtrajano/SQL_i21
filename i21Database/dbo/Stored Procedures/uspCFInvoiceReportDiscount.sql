@@ -872,7 +872,7 @@ BEGIN
 	    FROM ##tblCFInvoiceDiscount' + @endWhereClause) 
 
 		--EXEC('SELECT * FROM ##tblCFInvoiceDiscount ' + @endWhereClause) 
-		SELECT * FROM tblCFInvoiceDiscountTempTable
+		--SELECT * FROM tblCFInvoiceDiscountTempTable
 		-------------SELECT MAIN TABLE FOR OUTPUT---------------
 
 		-------------DROP TEMPORARY TABLES---------------

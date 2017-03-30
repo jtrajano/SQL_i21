@@ -534,7 +534,7 @@ BEGIN
 		ON main.intAccountId = sub.intSubAccountId 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 
-		SELECT * FROM tblCFInvoiceReportTempTable
+		--SELECT * FROM tblCFInvoiceReportTempTable
 
 	END
     

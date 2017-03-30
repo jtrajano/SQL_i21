@@ -913,30 +913,65 @@ BEGIN
 			----------------------------------
 
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------
-			SELECT 
-			 intFeeLoopId			
-			,intAccountId			
-			,strCalculationType	
-			,dblFeeRate			
-			,intTransactionId		
-			,dtmTransactionDate	
-			,dtmStartDate			
-			,dtmEndDate			
-			,dblQuantity			
-			,intCardId				
-			,dblFeeAmount			
-			,strFeeDescription		
-			,strFee				
-			,strInvoiceFormat		
-			,strInvoiceReportNumber
-			,intCustomerId			
-			,intTermID				
-			,intSalesPersonId		
-			,dtmInvoiceDate
-			,dblFeeTotalAmount = (SELECT ROUND(SUM(dblFeeAmount),2) FROM ##tblCFInvoiceFeeOutput) 
-			,intItemId
-			,intARLocationId
-			FROM ##tblCFInvoiceFeeOutput
+			INSERT INTO tblCFInvoiceFeeStagingTable
+			(
+				 intFeeLoopId			
+				,intAccountId			
+				,intTransactionId		
+				,intCardId				
+				,intCustomerId			
+				,intTermID				
+				,intSalesPersonId		
+				,intItemId				
+				,intARLocationId		
+				,dblFeeRate				
+				,dblQuantity			
+				,dblFeeAmount			
+				,dblFeeTotalAmount 		
+				,strFeeDescription		
+				,strFee					
+				,strInvoiceFormat		
+				,strInvoiceReportNumber	
+				,strCalculationType		
+				,dtmTransactionDate		
+				,dtmInvoiceDate			
+				,dtmStartDate			
+				,dtmEndDate				
+			)
+			SELECT
+			 tbl1.intFeeLoopId			
+			,tbl1.intAccountId			
+			,tbl1.intTransactionId		
+			,tbl1.intCardId				
+			,tbl1.intCustomerId			
+			,tbl1.intTermID				
+			,tbl1.intSalesPersonId		
+			,tbl1.intItemId				
+			,tbl1.intARLocationId		
+			,tbl1.dblFeeRate				
+			,tbl1.dblQuantity			
+			,tbl1.dblFeeAmount			
+			,tbl2.dblFeeTotalAmount 
+			,tbl1.strFeeDescription		
+			,tbl1.strFee					
+			,tbl1.strInvoiceFormat		
+			,tbl1.strInvoiceReportNumber	
+			,tbl1.strCalculationType		
+			,tbl1.dtmTransactionDate		
+			,tbl1.dtmInvoiceDate			
+			,tbl1.dtmStartDate			
+			,tbl1.dtmEndDate
+			FROM ##tblCFInvoiceFeeOutput AS tbl1
+			inner join 
+			(
+			SELECT dblFeeTotalAmount = (SELECT ROUND(SUM(dblFeeAmount),2))  , intAccountId
+			FROM ##tblCFInvoiceFeeOutput 
+			GROUP BY intAccountId	
+			,intAccountId	
+			) AS tbl2
+			ON tbl1.intAccountId = tbl2.intAccountId
+
+			--SELECT * FROM tblCFInvoiceFeeStagingTable
 					
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------
 
