@@ -1,19 +1,34 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetDefaultData]
-	@strType			NVARCHAR(50),
-	@intItemId			INT = NULL,
-	@intSubLocationId	INT = NULL,
-	@intPlannedMonth	INT = NULL,
-	@intYear			INT = NULL,
-	@intMarketId		INT = NULL
+	@strType				NVARCHAR(50),
+	@intItemId				INT = NULL,
+	@intSubLocationId		INT = NULL,
+	@intPlannedMonth		INT = NULL,
+	@intYear				INT = NULL,
+	@intMarketId			INT = NULL,
+	@intLocationId			INT = NULL,
+	@intCommodityId			INT = NULL,
+	@intStorageLocationId	INT = NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId	INT,
-			@intCommodityId		INT,
 			@intFutureMarketId	INT,
 			@intFutureMonthId	INT,
-			@strFutureMonthYear NVARCHAR(100)
+			@strFutureMonthYear NVARCHAR(100),
+			@strSubLocationName NVARCHAR(100),
+			@strStorageLocation NVARCHAR(100)
 
 	DECLARE @intVendorId INT, @strCity NVARCHAR(100),@intCityId INT, @ysnPort BIT, @ysnRegion BIT
+
+	DECLARE @Item TABLE
+	(
+		intItemId				INT,
+		strItemNo				NVARCHAR(100),
+		intPurchasingGroupId	INT,
+		strOrigin				NVARCHAR(100),
+		intProductTypeId		INT,
+		intSubLocationId		INT,
+		intStorageLocationId	INT
+	)
 
 	IF @strType = 'FutureMarket'
 	BEGIN
@@ -87,4 +102,49 @@ BEGIN
 		END
 		SELECT @intFutureMonthId AS intFutureMonthId, @strFutureMonthYear AS strFutureMonth
 	END
+
+	IF @strType = 'Item'
+	BEGIN
+		SELECT @strSubLocationName = strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSubLocationId 
+		SELECT @strStorageLocation = strName FROM tblICStorageLocation WHERE intStorageLocationId = @intStorageLocationId 
+
+		IF ISNULL(@intItemId,0) > 0
+		BEGIN 
+			IF EXISTS(SELECT * FROM vyuCTInventoryItem WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId AND intItemId = @intItemId)
+			BEGIN
+				INSERT INTO @Item
+				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null  FROM vyuCTInventoryItem WHERE intItemId = @intItemId
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @Item
+				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null  FROM vyuCTInventoryItem 
+				WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId
+				ORDER BY intItemId ASC
+			END
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @Item
+			SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null FROM vyuCTInventoryItem 
+			WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId
+			ORDER BY intItemId ASC
+		END
+
+		SELECT	@intItemId = intItemId FROM @Item
+		SELECT	@intSubLocationId = NULL,@intStorageLocationId = NULL
+		
+		SELECT	@intSubLocationId = SL.intSubLocationId 
+		FROM	tblICItemSubLocation SL 
+		JOIN	tblICItemLocation	 IL ON IL.intItemLocationId = SL.intItemLocationId
+		JOIN	tblSMCompanyLocationSubLocation LO ON LO.intCompanyLocationSubLocationId = SL.intSubLocationId
+		WHERE	IL.intItemId = @intItemid AND IL.intLocationId = @intLocationId AND LO.strSubLocationName = @strSubLocationName
+
+		SELECT @intStorageLocationId = intStorageLocationId FROM tblICStorageLocation WHERE intSubLocationId = @intSubLocationId AND strName = @strStorageLocation
+
+		UPDATE @Item SET intSubLocationId = @intSubLocationId,intStorageLocationId = @intStorageLocationId 
+
+		SELECT * FROM @Item
+	END
+
 END
