@@ -358,7 +358,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\9_Checkout_Radiant_MSM.sql
 
 -- Motor Fuel Tax
-:r .\TF\DefaultData\_TaxAuthority.sql
+--:r .\TF\DefaultData\_TaxAuthority.sql
 --:r .\TF\DefaultData\_Frequency.sql
 --:r .\TF\DefaultData\_ReportingComponent.sql
 --:r .\TF\DefaultData\_ProductCode.sql
