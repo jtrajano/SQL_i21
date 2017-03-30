@@ -63,8 +63,7 @@ END
 				where intTransactionId = @strRecord
 		
 				INSERT INTO @EntriesForInvoice(
-					 [strTransactionType]
-					,[strSourceTransaction]
+					 [strSourceTransaction]
 					,[intSourceId]
 					,[strSourceId]
 					,[intInvoiceId]
@@ -143,11 +142,7 @@ END
 					,[strType]	
 				)
 				SELECT
-					[strTransactionType]		= (case
-												when (cfTrans.dblQuantity < 0 OR cfTransPrice.dblCalculatedAmount < 0)  then 'Credit Memo'
-												else 'Invoice'
-											  end)
-					,[strSourceTransaction]					= 'CF Tran'
+					 [strSourceTransaction]					= 'CF Tran'
 					,[intSourceId]							= cfTrans.intTransactionId
 					,[strSourceId]							= cfTrans.strTransactionId
 					,[intInvoiceId]							= cfTrans.intInvoiceId --NULL Value will create new invoice
@@ -191,10 +186,10 @@ END
 					,[ysnInventory]							= 1
 					,[strItemDescription]					= cfSiteItem.strDescription 
 					,[intItemUOMId]							= cfSiteItem.intIssueUOMId
-					,[dblQtyOrdered]						= ABS(cfTrans.dblQuantity)
-					,[dblQtyShipped]						= ABS(cfTrans.dblQuantity) 
+					,[dblQtyOrdered]						= cfTrans.dblQuantity
+					,[dblQtyShipped]						= cfTrans.dblQuantity 
 					,[dblDiscount]							= 0
-					,[dblPrice]								= ABS(cfTransPrice.dblCalculatedAmount)
+					,[dblPrice]								= cfTransPrice.dblCalculatedAmount
 					,[ysnRefreshPrice]						= 0
 					,[strMaintenanceType]					= ''
 					,[strFrequency]							= ''
@@ -303,8 +298,8 @@ END
 					,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
 					,[dblRate]					= cfTransactionTax.dblTaxRate
 					,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
-					,[dblTax]					= ABS(cfTransactionTax.dblTaxCalculatedAmount)
-					,[dblAdjustedTax]			= ABS(cfTransactionTax.dblTaxCalculatedAmount)--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
+					,[dblTax]					= cfTransactionTax.dblTaxCalculatedAmount
+					,[dblAdjustedTax]			= cfTransactionTax.dblTaxCalculatedAmount--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
 					,[ysnTaxAdjusted]			= 0
 					,[ysnSeparateOnInvoice]		= 0 
 					,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
@@ -316,3 +311,167 @@ END
 					INNER JOIN tblCFTransactionTax cfTransactionTax
 					ON cfTransaction.intTransactionId = cfTransactionTax.intTransactionId
 					INNER JOIN tblSMTaxCode  cfTaxCode
+					ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
+					--INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
+					--ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
+					WHERE cfTransaction.intTransactionId = @strRecord
+
+			--	END
+
+				DELETE FROM #tmpTransactionId WHERE RecordKey = @intRecordKey
+			
+			END
+
+	DROP TABLE #tmpTransactionId
+
+	--Select * from @EntriesForInvoice
+	--return
+	
+	BEGIN TRANSACTION
+
+	--select * from @TaxDetails
+
+	EXEC [dbo].[uspARProcessInvoices]
+	@InvoiceEntries	= @EntriesForInvoice
+	,@LineItemTaxEntries = @TaxDetails
+	,@UserId					= @UserId
+	,@GroupingOption			= 11
+	,@RaiseError				= 1
+	,@ErrorMessage				= @ErrorMessage OUTPUT
+	,@CreatedIvoices			= @CreatedIvoices OUTPUT
+	,@UpdatedIvoices			= @UpdatedIvoices OUTPUT
+	,@BatchIdForNewPost			= @BatchId OUTPUT
+	,@BatchIdForExistingPost	= @BatchId OUTPUT
+	,@BatchIdForNewPostRecap	= @BatchId OUTPUT
+	,@BatchIdForExistingRecap	= @BatchId OUTPUT
+
+
+	DECLARE @intCreatedRecordKey INT
+	DECLARE @intCreatedInvoiceId INT
+	SET @SuccessfulCount = 0;
+
+	IF (@ErrorMessage IS NULL)
+	BEGIN
+		IF (@ErrorMessage IS NULL AND @CreatedIvoices IS NOT NULL)
+			BEGIN
+
+				IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
+				BEGIN
+					SELECT * INTO #tmpCreatedInvoice
+					FROM [fnCFSplitString](@CreatedIvoices,',') 
+
+					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+					FROM #tmpCreatedInvoice
+
+
+					WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice ))
+					BEGIN
+						SELECT @intCreatedRecordKey = RecordKey FROM #tmpCreatedInvoice
+						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
+				
+						UPDATE tblCFTransaction 
+						SET ysnPosted = 1, intInvoiceId = @intCreatedInvoiceId
+						WHERE intTransactionId = (SELECT intTransactionId 
+													FROM tblARInvoice 
+													WHERE intInvoiceId = @intCreatedInvoiceId)
+				
+						DELETE FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
+
+					END
+
+					DROP TABLE #tmpCreatedInvoice
+				END 
+				ELSE IF (@Recap = 1)
+				BEGIN
+					SELECT * INTO #tmpCreatedInvoice2
+					FROM [fnCFSplitString](@CreatedIvoices,',') 
+
+					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+					FROM #tmpCreatedInvoice2
+
+
+					WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice2 ))
+					BEGIN
+						SELECT @intCreatedRecordKey = RecordKey FROM #tmpCreatedInvoice2
+						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpCreatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
+				
+						UPDATE tblCFTransaction 
+						SET intInvoiceId = @intCreatedInvoiceId
+						WHERE intTransactionId = (SELECT intTransactionId 
+													FROM tblARInvoice 
+													WHERE intInvoiceId = @intCreatedInvoiceId)
+				
+						DELETE FROM #tmpCreatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
+
+					END
+
+					DROP TABLE #tmpCreatedInvoice2
+				END
+			
+			END
+
+			IF (@ErrorMessage IS NULL AND @UpdatedIvoices IS NOT NULL)
+			BEGIN
+			
+				IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
+				BEGIN
+					SELECT * INTO #tmpUpdatedInvoice
+					FROM [fnCFSplitString](@UpdatedIvoices,',') 
+
+					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+					FROM #tmpUpdatedInvoice
+
+
+					WHILE (EXISTS(SELECT 1 FROM #tmpUpdatedInvoice ))
+					BEGIN
+						SELECT @intCreatedRecordKey = RecordKey FROM #tmpUpdatedInvoice
+						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpUpdatedInvoice WHERE RecordKey = @intCreatedRecordKey
+				
+						UPDATE tblCFTransaction 
+						SET ysnPosted = 1, intInvoiceId = @intCreatedInvoiceId
+						WHERE intTransactionId = (SELECT intTransactionId 
+													FROM tblARInvoice 
+													WHERE intInvoiceId = @intCreatedInvoiceId)
+				
+						DELETE FROM #tmpUpdatedInvoice WHERE RecordKey = @intCreatedRecordKey
+
+					END
+
+					DROP TABLE #tmpUpdatedInvoice
+				END
+				IF (@Recap = 1)
+				BEGIN
+					SELECT * INTO #tmpUpdatedInvoice2
+					FROM [fnCFSplitString](@UpdatedIvoices,',') 
+
+					SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
+					FROM #tmpUpdatedInvoice2
+
+
+					WHILE (EXISTS(SELECT 1 FROM #tmpUpdatedInvoice2 ))
+					BEGIN
+						SELECT @intCreatedRecordKey = RecordKey FROM #tmpUpdatedInvoice2
+						SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM #tmpUpdatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
+				
+						UPDATE tblCFTransaction 
+						SET intInvoiceId = @intCreatedInvoiceId
+						WHERE intTransactionId = (SELECT intTransactionId 
+													FROM tblARInvoice 
+													WHERE intInvoiceId = @intCreatedInvoiceId)
+				
+						DELETE FROM #tmpUpdatedInvoice2 WHERE RecordKey = @intCreatedRecordKey
+
+					END
+
+					DROP TABLE #tmpUpdatedInvoice2
+				END
+			
+			END
+
+			COMMIT TRANSACTION
+		END
+	ELSE
+		BEGIN
+			--COMMIT TRANSACTION
+			ROLLBACK TRANSACTION
+		END
