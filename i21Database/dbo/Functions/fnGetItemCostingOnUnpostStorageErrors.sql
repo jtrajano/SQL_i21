@@ -31,7 +31,7 @@ RETURN (
 										FROM	dbo.tblSMCompanyLocationSubLocation
 										WHERE	intCompanyLocationSubLocationId = @intSubLocationId
 									)
-									, '(Blank Sub Location)'
+									, '(Blank Storage Location)'
 								)
 								,ISNULL(
 									(
@@ -39,7 +39,7 @@ RETURN (
 										FROM	dbo.tblICStorageLocation
 										WHERE	intStorageLocationId = @intStorageLocationId
 									)
-									, '(Blank Storage Location)'
+									, '(Blank Storage Unit)'
 								)
 							)
 				,intErrorCode = 80003
@@ -76,7 +76,7 @@ RETURN (
 										FROM	dbo.tblSMCompanyLocationSubLocation
 										WHERE	intCompanyLocationSubLocationId = @intSubLocationId
 									)
-									, '(Blank Sub Location)'
+									, '(Blank Storage Location)'
 								)
 								,ISNULL(
 									(
@@ -84,7 +84,7 @@ RETURN (
 										FROM	dbo.tblICStorageLocation
 										WHERE	intStorageLocationId = @intStorageLocationId
 									)
-									, '(Blank Storage Location)'
+									, '(Blank Storage Unit)'
 								)
 							)
 				,intErrorCode = 80003
