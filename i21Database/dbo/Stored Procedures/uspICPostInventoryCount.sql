@@ -258,7 +258,6 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]		
-				,[strRateType]		
 		)
 		EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 			@strBatchId
@@ -308,7 +307,6 @@ BEGIN
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]
-			,[strRateType]
 	)
 	EXEC	@intReturnValue = dbo.uspICUnpostCosting
 			@intTransactionId
@@ -332,7 +330,7 @@ IF	@ysnRecap = 1
 BEGIN 
 
 	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspGLPostRecapOld 
+	EXEC dbo.uspGLPostRecap 
 			@GLEntries
 			,@intTransactionId
 			,@strTransactionId
