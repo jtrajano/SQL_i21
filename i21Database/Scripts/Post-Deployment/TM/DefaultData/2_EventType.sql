@@ -33,7 +33,7 @@ BEGIN
 	SET @intEventId = 23
 	SET @strEventType = 'Event-' + RIGHT('000' + CAST(@intEventId AS NVARCHAR(3)),3)
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMEventType WHERE strEventType = @strEventType AND ysnDefault = 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMEventType WHERE strDefaultEventType = 'Event-023' AND ysnDefault = 1)
 	BEGIN
 		WHILE EXISTS(SELECT TOP 1 1 FROM tblTMEventType WHERE strEventType = @strEventType)
 		BEGIN
