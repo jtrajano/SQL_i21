@@ -28,6 +28,46 @@ FROM tblICInventoryCountDetail cd
 		AND s.intLocationId = c.intLocationId
 WHERE c.intImportFlagInternal = 1
 
+-- Auto-create Lot
+DECLARE @Lots ItemLotTableType
+
+INSERT INTO @Lots(
+	  intItemId
+	, intItemLocationId
+	, intItemUOMId
+	, strLotNumber
+	, intSubLocationId
+	, intStorageLocationId
+	, dblQty
+	, intLotStatusId
+	, intDetailId
+)
+SELECT 
+	  intItemId				= d.intItemId
+	, intItemLocationId		= d.intItemLocationId
+	, intItemUOMId			= d.intItemUOMId
+	, strLotNumber			= d.strAutoCreatedLotNumber
+	, intSubLocationId		= d.intSubLocationId
+	, intStorageeLocationId	= d.intStorageLocationId
+	, dblQty				= d.dblSystemCount
+	, intLotStatusId		= 1
+	, intDetailId			= d.intInventoryCountDetailId
+FROM tblICInventoryCountDetail d
+	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = d.intInventoryCountId
+WHERE c.intImportFlagInternal = 1
+
+EXEC dbo.uspICCreateUpdateLotNumber @Lots, 1, 1, 0
+
+UPDATE id
+SET id.intLotId = il.intLotId
+FROM tblICInventoryCountDetail id
+	INNER JOIN tblICInventoryCount ic ON ic.intInventoryCountId = id.intInventoryCountId
+	INNER JOIN tblICLot il ON il.intItemId = id.intItemId
+		AND il.intItemLocationId = id.intItemLocationId
+		AND il.intItemUOMId = id.intItemUOMId
+WHERE ic.intImportFlagInternal = 1
+
+-- Reset Count Flag
 UPDATE ic
 SET ic.intImportFlagInternal = NULL
 FROM tblICInventoryCount ic

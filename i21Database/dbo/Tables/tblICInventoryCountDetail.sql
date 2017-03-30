@@ -9,6 +9,7 @@
     [intLotId] INT NULL, 
     [dblSystemCount] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
     [dblLastCost] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
+	[strAutoCreatedLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strCountLine] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblPallets] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [dblQtyPerPallet] NUMERIC(38, 20) NULL DEFAULT ((0)), 

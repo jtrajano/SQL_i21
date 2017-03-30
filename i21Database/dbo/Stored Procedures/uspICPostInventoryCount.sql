@@ -115,6 +115,21 @@ BEGIN
 	END  
 END   
 
+-- Validate Lot Number for Lot-tracked items
+DECLARE @ItemNo NVARCHAR(50)
+
+SELECT TOP 1 @ItemNo = Item.strItemNo
+FROM tblICInventoryCount IC 
+	LEFT JOIN tblICInventoryCountDetail ICDetail ON ICDetail.intInventoryCountId = IC.intInventoryCountId
+	LEFT JOIN tblICItem Item ON Item.intItemId = ICDetail.intItemId
+WHERE IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICDetail.intLotId IS NULL OR ICDetail.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ICDetail.intItemId))
+
+IF @ItemNo IS NOT NULL
+	BEGIN
+		-- Lot Number is invalid or missing for item {Item No.}
+		RAISERROR(80130, 11, 1, @ItemNo)  
+		GOTO Post_Exit  
+	END
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
 IF @@ERROR <> 0 GOTO Post_Exit    
@@ -149,7 +164,7 @@ BEGIN
 			,dblExchangeRate  
 			,intTransactionId  
 			,intTransactionDetailId  
-			,strTransactionId  
+			,strTransactionId   
 			,intTransactionTypeId  
 			,intLotId 
 			,intSubLocationId
@@ -242,7 +257,8 @@ BEGIN
 				,[dblCreditForeign]	
 				,[dblCreditReport]	
 				,[dblReportingRate]	
-				,[dblForeignRate]				
+				,[dblForeignRate]		
+				,[strRateType]		
 		)
 		EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 			@strBatchId
@@ -292,6 +308,7 @@ BEGIN
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]
+			,[strRateType]
 	)
 	EXEC	@intReturnValue = dbo.uspICUnpostCosting
 			@intTransactionId
@@ -314,26 +331,13 @@ END
 IF	@ysnRecap = 1	
 BEGIN 
 
-	IF @ysnGLEntriesRequired=0
-		BEGIN
-			ROLLBACK TRAN @TransactionName
-			COMMIT TRAN @TransactionName
-
-			-- 'Recap is not applicable for this type of transaction.'
-			RAISERROR(80025, 11, 1)  
-			GOTO Post_Exit  
-		END
-
-	 ELSE
-		BEGIN
-			ROLLBACK TRAN @TransactionName
-			EXEC dbo.uspGLPostRecap 
-					@GLEntries
-					,@intTransactionId
-					,@strTransactionId
-					,'IC'
-			COMMIT TRAN @TransactionName
-		END
+	ROLLBACK TRAN @TransactionName
+	EXEC dbo.uspGLPostRecapOld 
+			@GLEntries
+			,@intTransactionId
+			,@strTransactionId
+			,'IC'
+	COMMIT TRAN @TransactionName
 END 
 
 --------------------------------------------------------------------------------------------  
@@ -359,6 +363,36 @@ BEGIN
 
 	COMMIT TRAN @TransactionName
 END 
+
+-- Update Status & Inventory Lock
+IF EXISTS (SELECT 1 FROM dbo.tblICInventoryCount WHERE intInventoryCountId = @intTransactionId AND ysnPosted=1)
+    BEGIN
+        UPDATE dbo.tblICInventoryCount 
+        SET intStatus = 4 --Closed
+        WHERE intInventoryCountId=@intTransactionId
+
+		--Unlock Inventory
+		UPDATE il SET il.ysnLockedInventory = 0
+		FROM tblICItemLocation il
+			INNER JOIN tblICInventoryCount ic ON ic.intLocationId = il.intLocationId
+			INNER JOIN tblICInventoryCountDetail icd ON icd.intInventoryCountId = ic.intInventoryCountId
+				AND il.intItemId = icd.intItemId
+		WHERE ic.intInventoryCountId = @intTransactionId
+	END
+ELSE
+	BEGIN
+		UPDATE dbo.tblICInventoryCount 
+        SET intStatus = 3 --InventoryLocked
+        WHERE intInventoryCountId=@intTransactionId
+
+		--Lock Inventory
+		UPDATE il SET il.ysnLockedInventory = 1
+		FROM tblICItemLocation il
+			INNER JOIN tblICInventoryCount ic ON ic.intLocationId = il.intLocationId
+			INNER JOIN tblICInventoryCountDetail icd ON icd.intInventoryCountId = ic.intInventoryCountId
+				AND il.intItemId = icd.intItemId
+		WHERE ic.intInventoryCountId = @intTransactionId
+	END
 
 -- Create an Audit Log
 IF @ysnRecap = 0 
