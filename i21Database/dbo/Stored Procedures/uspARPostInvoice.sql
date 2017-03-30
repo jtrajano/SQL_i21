@@ -4217,8 +4217,8 @@ IF @post = 0
 				,dblCredit						= GLD.dblDebit
 				,dblDebitUnit					= GLD.dblCreditUnit
 				,dblCreditUnit					= GLD.dblDebitUnit
-				,dblDebitForeign				= GLD.dblDebitForeign
-				,dblCreditForeign				= GLD.dblCreditForeign				
+				,dblDebitForeign				= GLD.dblCreditForeign
+				,dblCreditForeign				= GLD.dblDebitForeign				
 				,GLD.strDescription
 				,GLD.strCode
 				,GLD.strReference
