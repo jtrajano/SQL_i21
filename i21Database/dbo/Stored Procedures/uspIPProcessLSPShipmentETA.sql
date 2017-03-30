@@ -19,7 +19,8 @@ Declare @intMinRowNo int,
 		@dtmOldETA DATETIME,
 		@strJson NVARCHAR(MAX),
 		@intEntityId INT,
-		@strGMT NVARCHAR(50)
+		@strGMT NVARCHAR(50),
+		@strLoadNumber NVARCHAR(100)
 
 Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage
 
@@ -32,7 +33,9 @@ Begin
 		Select @strDeliveryNo=strDeliveryNo,@dtmETA=dtmETA,@strPartnerNo=strPartnerNo
 		From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
 
-		Select @strDeliveryNo AS strInfo1,ISNULL(CONVERT(VARCHAR(10),@dtmETA,121),'') AS strInfo2
+		Select @strLoadNumber=strLoadNumber From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo AND intShipmentType=1
+
+		Select @strDeliveryNo + ' / ' + ISNULL(@strLoadNumber,'') AS strInfo1,ISNULL(CONVERT(VARCHAR(10),@dtmETA,121),'') AS strInfo2
 
 		If NOT EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 			RaisError('Invalid LSP Partner',16,1)

@@ -89,7 +89,9 @@ Declare @tblContainer AS Table
 	dblNetWt NUMERIC(38,20),
 	strWeightUOM NVARCHAR(50),
 	strRowState NVARCHAR(50),
-	ysnNewContainer BIT
+	ysnNewContainer BIT,
+	strSubLocation NVARCHAR(100),
+	strStorageLocation NVARCHAR(100)
 )
 
 Declare @tblOutput AS Table
@@ -138,7 +140,8 @@ Begin
 	--Do not send instruction if advice is created
 	If @strTransactionType='Shipping Instructions'
 	Begin
-		If Exists (Select 1 From tblLGLoadStg Where strShippingInstructionNumber=@strLoadNumber AND strTransactionType='Shipment' AND intLoadStgId<@intLoadStgId)
+		If Exists (Select 1 From tblLGLoadStg sl Join tblLGLoad l on sl.intLoadId=l.intLoadId 
+					Where strShippingInstructionNumber=@strLoadNumber AND strTransactionType='Shipment' AND intLoadStgId<@intLoadStgId AND ISNULL(l.ysnCancelled,0)=0)
 		Begin
 			Update tblLGLoadStg Set strMessage='System will not send shipping instruction once advice is created.'  Where intLoadStgId=@intLoadStgId
 			GOTO NEXT_SHIPMENT			
@@ -280,6 +283,10 @@ Begin
 
 	Set @strItemXml=''
 
+	--For Tea Update/existing container, do not send Items
+	If UPPER(@strCommodityCode)='TEA' AND Exists (Select 1 From tblLGLoadContainer Where intLoadId=@intLoadId AND ISNULL(ysnNewContainer,0)=0) 
+		GOTO END_TAG
+
 	Select @intMinDetail=Min(intRowNo) From @tblDetail
 
 	While(@intMinDetail is not null) --Loop Detail
@@ -327,6 +334,8 @@ Begin
 
 			--update strExternalShipmentItemNumber if null
 			Update tblLGLoadDetail Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@intLoadDetailId AND ISNULL(strExternalShipmentItemNumber,'')=''
+			Update tblLGLoadDetailStg Set strExternalShipmentItemNumber=@strDeliveryItemNo 
+			Where intLoadStgId=@intLoadStgId AND intLoadDetailId=@intLoadDetailId AND ISNULL(strExternalShipmentItemNumber,'')=''
 
 			Set @strItemXml += '<E1EDL24 SEGMENT="1">'
 			Set @strItemXml += '<POSNR>'  +  ISNULL(@strDeliveryItemNo,'') + '</POSNR>' 
@@ -387,8 +396,8 @@ Begin
 
 					Delete From @tblContainer
 
-					Insert Into @tblContainer(strExternalContainerId,strContainerNo,dblNetWt,strWeightUOM,strRowState,ysnNewContainer)
-					Select lc.strExternalContainerId,lc.strContainerNo,lc.dblNetWt,lc.strWeightUOM,lc.strRowState,c.ysnNewContainer
+					Insert Into @tblContainer(strExternalContainerId,strContainerNo,dblNetWt,strWeightUOM,strRowState,ysnNewContainer,strSubLocation,strStorageLocation)
+					Select lc.strExternalContainerId,lc.strContainerNo,lc.dblNetWt,lc.strWeightUOM,lc.strRowState,c.ysnNewContainer,lc.strSubLocation,lc.strStorageLocation
 					From tblLGLoadContainerStg lc
 					Left Join tblLGLoadContainer c on lc.intLoadContainerId=c.intLoadContainerId
 					Left Join tblLGLoadDetailContainerLink cl on lc.intLoadContainerId=cl.intLoadContainerId
@@ -418,8 +427,8 @@ Begin
 							+ '<E1EDL24 SEGMENT="1">'
 							+ '<POSNR>' + ISNULL(CONVERT(VARCHAR,lc.strExternalContainerId),'') + '</POSNR>' 
 							+ '<MATNR>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</MATNR>' 
-							+ '<WERKS>'  +  CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN ISNULL(@strSubLocation,'')  ELSE '' END + '</WERKS>' 
-							+ '<LGORT>'  +  ISNULL(@strStorageLocation,'') + '</LGORT>' 
+							+ '<WERKS>'  +  CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN ISNULL(lc.strSubLocation,'')  ELSE '' END + '</WERKS>' 
+							+ '<LGORT>'  +  ISNULL(lc.strStorageLocation,'') + '</LGORT>' 
 							+ '<CHARG>'  +  ISNULL(lc.strContainerNo,'') + '</CHARG>' 
 							+ '<KDMAT>'  +  ISNULL(@str10Zeros + @strItemNo,'') + '</KDMAT>' 
 							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),lc.dblNetWt)),'') + '</LFIMG>' 
@@ -499,9 +508,7 @@ Begin
 					Set @strContainerItemXml=''
 					Select @strContainerItemXml=@strContainerItemXml
 					+ '<E1EDL44 SEGMENT="1">'
-					--+ '<VBELN>'  +  ISNULL(@strExternalDeliveryNumber,'') + '</VBELN>' 
-					+ '<POSNR>'  +  CASE WHEN ISNULL(ld.strExternalShipmentItemNumber,'')='' THEN ISNULL(CONVERT(VARCHAR,(10 * @intNoOfContainer * ROW_NUMBER() OVER(ORDER BY cl.intLoadDetailContainerLinkId ASC))),'')
-					ELSE ISNULL(ld.strExternalShipmentItemNumber,'') END + '</POSNR>'
+					+ '<POSNR>'  +  ISNULL(ld.strExternalShipmentItemNumber,'') + '</POSNR>'
 					+ '<VEMNG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),cl.dblQuantity)),'') + '</VEMNG>'
 					+ '<VEMEH>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(ld.strUnitOfMeasure,'')) + '</VEMEH>'
 					+ '</E1EDL44>'			 
@@ -512,19 +519,9 @@ Begin
 					Set @strContainerXml += '</E1EDL37>'
 
 					--Update the POSNR in container link table
-					Update t Set t.strExternalContainerId=t1.intRowNo
-					From tblLGLoadDetailContainerLink t Join
-					(
-					Select cl.intLoadDetailContainerLinkId,CASE WHEN ISNULL(ld.strExternalShipmentItemNumber,'')='' THEN ISNULL(CONVERT(VARCHAR,(10 * @intNoOfContainer * ROW_NUMBER() OVER(ORDER BY cl.intLoadDetailContainerLinkId ASC))),'')
-					ELSE ISNULL(ld.strExternalShipmentItemNumber,'') END intRowNo
-					From tblLGLoadDetailContainerLink cl Join tblLGLoadDetailStg ld on cl.intLoadDetailId=ld.intLoadDetailId 
-					Where cl.intLoadContainerId=@intLoadContainerId
-					) t1 on t.intLoadDetailContainerLinkId=t1.intLoadDetailContainerLinkId
-
-					--Get the total items so that POSNR value will sequence to next number for the new Container
-					Select @intNoOfContainer= COUNT(cl.intLoadDetailContainerLinkId) + 1
+					Update cl Set cl.strExternalContainerId=ld.strExternalShipmentItemNumber 
 					From tblLGLoadDetailContainerLink cl Join tblLGLoadDetailStg ld on cl.intLoadDetailId=ld.intLoadDetailId
-					Where intLoadContainerId=@intLoadContainerId
+					Where intLoadContainerId=@intLoadContainerId AND ld.intLoadStgId=@intLoadStgId AND cl.intLoadId=@intLoadId
 
 				Select @intMinContainer=Min(intRowNo) From @tblContainer Where intRowNo>@intMinContainer
 			End --Loop Container End
