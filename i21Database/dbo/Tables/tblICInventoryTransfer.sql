@@ -26,7 +26,7 @@
     CONSTRAINT [FK_tblICInventoryTransfer_FromLocation] FOREIGN KEY ([intFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_ToLocation] FOREIGN KEY ([intToLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblICUnitMeasure] FOREIGN KEY ([intFreightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-    CONSTRAINT [FK_tblICInventoryTransfer_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityShipViaId]), 
+    CONSTRAINT [FK_tblICInventoryTransfer_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_EntityCreator] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblICStatus] FOREIGN KEY ([intStatusId]) REFERENCES [tblICStatus]([intStatusId]) 
 )

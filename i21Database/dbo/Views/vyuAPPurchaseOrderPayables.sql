@@ -156,7 +156,7 @@ FROM tblPOPurchase A
 	--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
-	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
+	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityId]
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 	LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) 
 			ON G1.intEntityId = D1.[intEntityId] AND B.intItemId = G2.intItemId AND B.intContractDetailId = G2.intContractDetailId
@@ -229,7 +229,7 @@ FROM tblPOPurchase A
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 		INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intShipToId
 		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
-		LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
+		LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityId]
 		LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitOfMeasureId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId

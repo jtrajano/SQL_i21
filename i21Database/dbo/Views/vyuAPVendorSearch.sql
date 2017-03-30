@@ -82,7 +82,7 @@ SELECT
 	left join tblSMCurrency ab
 		on ab.intCurrencyID = a.intCurrencyId
 	left join tblSMShipVia ac
-		on ac.intEntityShipViaId = e.intShipViaId
+		on ac.[intEntityId] = e.intShipViaId
 	left join tblEMEntityLocation ad
 		on ad.intEntityLocationId = a.intBillToId
 	left join tblEMEntityLocation ae

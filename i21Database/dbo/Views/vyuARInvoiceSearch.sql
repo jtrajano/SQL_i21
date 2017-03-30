@@ -187,10 +187,10 @@ LEFT OUTER JOIN
 	 FROM 
 		dbo.tblSMPaymentMethod) AS P ON I.intPaymentMethodId = P.intPaymentMethodID
 LEFT OUTER JOIN
-	(SELECT intEntityShipViaId,
+	(SELECT [intEntityId],
 			strShipVia
 	 FROM 
-		dbo.tblSMShipVia) AS SV ON I.intShipViaId = SV.[intEntityShipViaId]
+		dbo.tblSMShipVia) AS SV ON I.intShipViaId = SV.[intEntityId]
 LEFT OUTER JOIN
 	(SELECT intEntityId,
 			strName

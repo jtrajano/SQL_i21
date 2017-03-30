@@ -1209,11 +1209,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 															END
 						,[intCostUOMId]						= ContractCost.intItemUOMId
 						,[intOtherChargeEntityVendorId]		= CASE 
-																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.[intEntityId] = RE.intShipViaId) = 'Vendor' THEN 
 																	RE.intEntityVendorId
-																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.[intEntityId] = RE.intShipViaId) = 'Internal' THEN 
 																	NULL
-																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.[intEntityId] = RE.intShipViaId) = 'Other' THEN 
 																	RE.intShipViaId
 															  END
 						,[dblAmount]						= CASE

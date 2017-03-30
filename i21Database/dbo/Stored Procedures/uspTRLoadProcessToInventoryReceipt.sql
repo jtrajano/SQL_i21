@@ -248,7 +248,7 @@ END
 															1
 												END
     FROM	@ReceiptStagingTable RE 
-	        LEFT JOIN tblSMShipVia SM on SM.intEntityShipViaId = RE.intShipViaId
+	        LEFT JOIN tblSMShipVia SM on SM.[intEntityId] = RE.intShipViaId
 			LEFT JOIN (select TT.intLoadHeaderId, TT.strTransaction, RR.intLoadReceiptId from tblTRLoadHeader TT
 					                                                 join tblTRLoadReceipt RR on TT.intLoadHeaderId = RR.intLoadHeaderId
 					                                                 where RR.strOrigin = 'Terminal'
@@ -301,7 +301,7 @@ END
 															1
 												END
     FROM	@ReceiptStagingTable RE 
-	LEFT JOIN tblSMShipVia SM on SM.intEntityShipViaId = RE.intShipViaId
+	LEFT JOIN tblSMShipVia SM on SM.[intEntityId] = RE.intShipViaId
 	LEFT JOIN (select TT.intLoadHeaderId, RR.intLoadReceiptId, TT.strTransaction from tblTRLoadHeader TT
 					                                                 join tblTRLoadReceipt RR on TT.intLoadHeaderId = RR.intLoadHeaderId
 					                                                 where RR.strOrigin = 'Terminal') LTE on LTE.intLoadReceiptId = RE.intSourceId

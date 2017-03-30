@@ -28,7 +28,7 @@ FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor
 	LEFT JOIN tblEMEntityLocation ShipFrom
 		ON ShipFrom.intEntityLocationId = Receipt.intShipFromId
 	LEFT JOIN tblSMShipVia ShipVia
-		ON ShipVia.intEntityShipViaId = Receipt.intShipViaId
+		ON ShipVia.[intEntityId] = Receipt.intShipViaId
 
 	--LEFT JOIN tblSMCompanyLocation Transferor 
 	--	ON Transferor.intCompanyLocationId = Receipt.intTransferorId

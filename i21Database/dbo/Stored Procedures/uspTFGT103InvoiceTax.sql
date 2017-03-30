@@ -163,8 +163,8 @@ BEGIN TRY
 		INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
 		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter
-		INNER JOIN tblSMShipVia ON tblEMEntity_Transporter.intEntityId = tblSMShipVia.intEntityShipViaId
-			ON tblARInvoice.intShipViaId = tblSMShipVia.intEntityShipViaId
+		INNER JOIN tblSMShipVia ON tblEMEntity_Transporter.intEntityId = tblSMShipVia.[intEntityId]
+			ON tblARInvoice.intShipViaId = tblSMShipVia.[intEntityId]
 		FULL OUTER JOIN tblARAccountStatus ON tblARCustomer.intAccountStatusId = tblARAccountStatus.intAccountStatusId
 		CROSS JOIN tblSMCompanySetup
 		WHERE tblTFReportingComponent.intReportingComponentId = @RCId
@@ -324,8 +324,8 @@ BEGIN TRY
 			INNER JOIN tblTRLoadHeader ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
 				AND tblTRLoadDistributionHeader.intCompanyLocationId = tblICInventoryTransfer.intToLocationId
-			INNER JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityShipViaId
-			INNER JOIN tblEMEntity ON tblSMShipVia.intEntityShipViaId = tblEMEntity.intEntityId
+			INNER JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.[intEntityId]
+			INNER JOIN tblEMEntity ON tblSMShipVia.[intEntityId] = tblEMEntity.intEntityId
 			INNER JOIN tblAPVendor ON tblTRLoadReceipt.intTerminalId = tblAPVendor.[intEntityId]
 			INNER JOIN tblEMEntity AS EntityAPVendor ON tblAPVendor.[intEntityId] = EntityAPVendor.intEntityId
 			INNER JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId

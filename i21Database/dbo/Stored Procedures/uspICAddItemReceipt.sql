@@ -242,7 +242,7 @@ BEGIN
 		WHERE RawHeaderData.intId = @intId
 
 
-		IF @valueShipViaId > 0 AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMShipVia WHERE intEntityShipViaId = @valueShipViaId)
+		IF @valueShipViaId > 0 AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMShipVia WHERE [intEntityId] = @valueShipViaId)
 			BEGIN
 				DECLARE @valueShipViaIdStr NVARCHAR(50)
 				SET @valueShipViaIdStr = CAST(@valueShipViaId AS NVARCHAR(50))
@@ -935,9 +935,9 @@ BEGIN
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
 		FROM	@OtherCharges RawData LEFT JOIN tblSMShipVia shipVia 
-					ON shipVia.intEntityShipViaId = RawData.intShipViaId
+					ON shipVia.[intEntityId] = RawData.intShipViaId
 		WHERE	RawData.intShipViaId IS NOT NULL 
-				AND shipVia.intEntityShipViaId IS NULL 
+				AND shipVia.[intEntityId] IS NULL 
 
 		IF @valueChargeId IS NOT NULL
 		BEGIN
@@ -1649,7 +1649,7 @@ BEGIN
 
 						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
 						FROM @LotEntries ItemLot
-						WHERE ItemLot.intShipViaId > 0 AND ItemLot.intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)
+						WHERE ItemLot.intShipViaId > 0 AND ItemLot.intShipViaId NOT IN (SELECT [intEntityId] FROM tblSMShipVia)
 
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN

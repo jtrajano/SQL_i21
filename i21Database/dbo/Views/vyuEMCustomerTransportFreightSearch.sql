@@ -30,4 +30,4 @@
 			left join tblICCategory category
 				on category.intCategoryId = xref.intCategoryId
 			left join tblSMShipVia ship_via
-				on xref.intShipViaId = ship_via.intEntityShipViaId
+				on xref.intShipViaId = ship_via.[intEntityId]

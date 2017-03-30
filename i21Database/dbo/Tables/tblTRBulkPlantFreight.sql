@@ -13,7 +13,7 @@
     [intConcurrencyId]  INT             NOT NULL,
     CONSTRAINT [PK_tblTRBulkPlantFreight] PRIMARY KEY CLUSTERED ([intBulkPlantFreightId] ASC),
 	CONSTRAINT [FK_tblTRBulkPlantFreight_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
-	CONSTRAINT [FK_tblTRBulkPlantFreight_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityShipViaId]),		
+	CONSTRAINT [FK_tblTRBulkPlantFreight_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityId]),		
 	CONSTRAINT [FK_tblTRBulkPlantFreight_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
 	CONSTRAINT [UK_tblTRBulkPlantFreight_reference_columns] UNIQUE NONCLUSTERED ([strZipCode] ASC, [intCategoryId] ASC,[intCompanyLocationId] ASC),		
 	CONSTRAINT [FK_tblTRBulkPlantFreight_tblEMEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEMEntityTariffType] ([intEntityTariffTypeId])
