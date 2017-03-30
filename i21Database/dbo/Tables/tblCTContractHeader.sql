@@ -74,7 +74,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intProducerId] FOREIGN KEY ([intProducerId]) REFERENCES tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intEntityId_intEntityContactId] FOREIGN KEY ([intEntityContactId]) REFERENCES tblEMEntity ([intEntityId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblARSalesperson_intSalespersonId] FOREIGN KEY([intSalespersonId])REFERENCES [tblARSalesperson] ([intEntitySalespersonId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblARSalesperson_intSalespersonId] FOREIGN KEY([intSalespersonId])REFERENCES [tblARSalesperson] ([intEntityId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTContractText_intContractTextId] FOREIGN KEY([intContractTextId])REFERENCES [tblCTContractText] ([intContractTextId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTCropYear_intCropYearId] FOREIGN KEY([intCropYearId])REFERENCES [tblCTCropYear] ([intCropYearId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTWeightGrade_intWeightGradeId_intGradeId] FOREIGN KEY([intGradeId])REFERENCES [tblCTWeightGrade] ([intWeightGradeId]),

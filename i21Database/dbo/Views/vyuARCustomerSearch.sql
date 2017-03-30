@@ -55,6 +55,6 @@ LEFT JOIN tblEMEntity as Con ON CusToCon.[intEntityContactId] = Con.[intEntityId
 LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.[intEntityId] = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
 LEFT JOIN [tblEMEntityLocation] as ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId
 LEFT JOIN [tblEMEntityLocation] as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
-LEFT JOIN tblARSalesperson S ON Cus.intSalespersonId = S.intEntitySalespersonId
-LEFT JOIN tblEMEntity T on S.intEntitySalespersonId = T.intEntityId
+LEFT JOIN tblARSalesperson S ON Cus.intSalespersonId = S.[intEntityId]
+LEFT JOIN tblEMEntity T on S.[intEntityId] = T.intEntityId
 LEFT JOIN tblSMTaxGroup Tax ON Loc.intTaxGroupId = Tax.intTaxGroupId

@@ -5,4 +5,4 @@
 CONSTRAINT [PK_tblETExportFilterDriver] PRIMARY KEY CLUSTERED 
 (
 	[intExportFilterDriverId] ASC
-),CONSTRAINT [FK_tblETExportFilterDriver_tblARSalesperson] FOREIGN KEY ([intEntitySalesPersonId]) REFERENCES [tblARSalesperson]([intEntitySalespersonId]) ON DELETE CASCADE)
+),CONSTRAINT [FK_tblETExportFilterDriver_tblARSalesperson] FOREIGN KEY ([intEntitySalesPersonId]) REFERENCES [tblARSalesperson]([intEntityId]) ON DELETE CASCADE)

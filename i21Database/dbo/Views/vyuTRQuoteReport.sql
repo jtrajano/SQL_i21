@@ -39,7 +39,7 @@ CROSS APPLY (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
 LEFT JOIN tblTRQuoteDetail QD ON QD.intQuoteHeaderId = QH.intQuoteHeaderId
 LEFT JOIN vyuARCustomerSearch AR ON QH.intEntityCustomerId = AR.[intEntityId]
 LEFT JOIN tblARCustomerRackQuoteHeader CustomerTransports ON CustomerTransports.intEntityCustomerId = AR.[intEntityId]
-LEFT JOIN vyuEMSalesperson SP ON SP.intEntitySalespersonId = AR.intSalespersonId
+LEFT JOIN vyuEMSalesperson SP ON SP.[intEntityId] = AR.intSalespersonId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = QD.intShipToLocationId
 	AND EL.intEntityId = QH.intEntityCustomerId
 LEFT JOIN tblICItem IC ON IC.intItemId = QD.intItemId

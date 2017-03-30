@@ -58,8 +58,8 @@ so as
 			,tblCRMOpportunity.strOpportunityStatus
 		from
 			tblCRMOpportunity
-			left outer join tblARSalesperson on tblARSalesperson.intEntitySalespersonId = tblCRMOpportunity.intInternalSalesPerson
-			left outer join tblEMEntity on tblEMEntity.intEntityId = tblARSalesperson.intEntitySalespersonId
+			left outer join tblARSalesperson on tblARSalesperson.[intEntityId] = tblCRMOpportunity.intInternalSalesPerson
+			left outer join tblEMEntity on tblEMEntity.intEntityId = tblARSalesperson.[intEntityId]
 			left outer join tblCRMOpportunityQuote on tblCRMOpportunityQuote.intOpportunityId = tblCRMOpportunity.intOpportunityId
 		where
 			tblCRMOpportunity.intInternalSalesPerson is not null 

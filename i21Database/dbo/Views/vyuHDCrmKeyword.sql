@@ -18,7 +18,7 @@
 			,ysnActive = (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end)
 		from
 			tblEMEntity
-			left outer join tblARSalesperson on tblARSalesperson.intEntitySalespersonId = tblEMEntity.intEntityId
+			left outer join tblARSalesperson on tblARSalesperson.[intEntityId] = tblEMEntity.intEntityId
 
 		union all
 
@@ -31,7 +31,7 @@
 			,ysnActive = (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end)
 		from
 			tblEMEntity
-			left outer join tblARSalesperson on tblARSalesperson.intEntitySalespersonId = tblEMEntity.intEntityId
+			left outer join tblARSalesperson on tblARSalesperson.[intEntityId] = tblEMEntity.intEntityId
 
 		union all
 
@@ -44,7 +44,7 @@
 			,ysnActive = (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end)
 		from
 			tblEMEntity
-			left outer join tblARSalesperson on tblARSalesperson.intEntitySalespersonId = tblEMEntity.intEntityId
+			left outer join tblARSalesperson on tblARSalesperson.[intEntityId] = tblEMEntity.intEntityId
 
 		union all
 
@@ -54,7 +54,7 @@
 			,strDescription = 'Sales Person Phone Number'
 			,strCurrentValue = tblEMEntity.strPhone
 			,imgCurrentValue = null
-			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
+			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.[intEntityId] = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
 		from
 			tblEMEntity
 
@@ -66,7 +66,7 @@
 			,strDescription = 'Sales Person Mobile Number'
 			,strCurrentValue = tblEMEntity.strMobile
 			,imgCurrentValue = null
-			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
+			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.[intEntityId] = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
 		from
 			tblEMEntity
 
@@ -78,7 +78,7 @@
 			,strDescription = 'Sales Person Email Address'
 			,strCurrentValue = tblEMEntity.strEmail
 			,imgCurrentValue = null
-			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
+			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.[intEntityId] = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
 		from
 			tblEMEntity
 
@@ -90,7 +90,7 @@
 			,strDescription = 'Company Logo'
 			,strCurrentValue = ''
 			,imgCurrentValue = (select top 1 tblSMCompanySetup.imgCompanyLogo from tblSMCompanySetup)
-			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
+			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.[intEntityId] = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
 		from
 			tblEMEntity
 
@@ -102,7 +102,7 @@
 			,strDescription = 'Sales Person Company Address'
 			,strCurrentValue = (select top 1 tblSMCompanySetup.strAddress + '<br>' + tblSMCompanySetup.strCity + ', ' + tblSMCompanySetup.strState + ' ' + tblSMCompanySetup.strZip from tblSMCompanySetup)
 			,imgCurrentValue = null
-			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
+			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.[intEntityId] = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
 		from
 			tblEMEntity
 

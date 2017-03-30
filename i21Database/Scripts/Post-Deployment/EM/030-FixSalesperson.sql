@@ -7,10 +7,10 @@ BEGIN
 	)
 
 	insert into @SalesPersons
-	select intEntityId from tblARSalesperson a
+	select a.intEntityId from tblARSalesperson a
 		join tblEMEntity b
-			on a.intEntitySalespersonId = b.intEntityId	
-		where intEntitySalespersonId not in (select intEntityId from tblEMEntityToContact)
+			on a.[intEntityId] = b.intEntityId	
+		where a.[intEntityId] not in (select intEntityId from tblEMEntityToContact)
 
 	declare @Name nvarchar(100)
 	declare @Email nvarchar(100)

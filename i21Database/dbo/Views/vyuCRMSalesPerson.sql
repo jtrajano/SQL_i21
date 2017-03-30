@@ -13,7 +13,7 @@
 			,strSalesPersonType = 'Sales Rep Entity'
 	from tblARSalesperson, tblEMEntity
 	where
-		tblEMEntity.intEntityId = tblARSalesperson.intEntitySalespersonId
+		tblEMEntity.intEntityId = tblARSalesperson.[intEntityId]
 
 	/*
 	union all

@@ -6496,4 +6496,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntityId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="82849677-f2ed-4048-bce7-4df5eae157d7" ChangeDateTime="03/30/2017 09:36:16">
+    <Property Name="ElementName" Value="[dbo].[tblARSalesperson].[intEntitySalespersonId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARSalesperson]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityId]" />
+  </Operation>
 </Operations>

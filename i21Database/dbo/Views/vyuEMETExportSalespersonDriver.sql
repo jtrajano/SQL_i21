@@ -13,11 +13,11 @@ select
 	'' as Authority2
 	from tblARSalesperson a
 	join tblEMEntityLocation b
-		on a.intEntitySalespersonId = b.intEntityId
+		on a.[intEntityId] = b.intEntityId
 	join tblEMEntity c
-		on a.intEntitySalespersonId = c.intEntityId
+		on a.[intEntityId] = c.intEntityId
 	join tblETExportFilterDriver d
-		on a.intEntitySalespersonId = d.intEntitySalesPersonId
+		on a.[intEntityId] = d.intEntitySalesPersonId
 	where a.strType = 'Driver'
 
 

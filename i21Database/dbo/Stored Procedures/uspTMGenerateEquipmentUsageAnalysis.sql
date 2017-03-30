@@ -128,7 +128,7 @@ WHERE SO.ysnProcessed = 1) AS A
 	INNER JOIN (tblARCustomer C 
 		INNER JOIN tblEMEntity E ON C.[intEntityId] = E.intEntityId) ON A.intEntityCustomerId = C.[intEntityId]
 	LEFT JOIN (tblARSalesperson SP 
-		INNER JOIN tblEMEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON A.intEntitySalespersonId = SP.intEntitySalespersonId	
+		INNER JOIN tblEMEntity ESP ON SP.[intEntityId] = ESP.intEntityId) ON A.intEntitySalespersonId = SP.[intEntityId]	
 	LEFT JOIN (tblICItem IC 
 		LEFT JOIN tblICManufacturer ICM ON IC.intManufacturerId = ICM.intManufacturerId
 		LEFT JOIN tblICCommodity ICC ON IC.intCommodityId = ICC.intCommodityId

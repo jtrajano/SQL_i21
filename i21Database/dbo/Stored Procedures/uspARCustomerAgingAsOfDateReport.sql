@@ -91,7 +91,7 @@ FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
     INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId 
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -144,7 +144,7 @@ FROM tblARInvoice I
 			FROM tblARPrepaidAndCredit WHERE ysnApplied = 1
 			GROUP BY intPrepaymentId)
 		) PC ON I.intInvoiceId = PC.intPrepaymentId	
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -198,7 +198,7 @@ FROM tblARInvoice I
 			FROM tblARPrepaidAndCredit WHERE ysnApplied = 1
 			GROUP BY intPrepaymentId)
 		) PC ON I.intInvoiceId = PC.intPrepaymentId	
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -247,7 +247,7 @@ FROM tblARPayment P
     INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
     INNER JOIN tblEMEntity E ON E.intEntityId = C.[intEntityId]
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
@@ -310,7 +310,7 @@ FROM tblARInvoice I
 				WHERE ysnApplied = 1
 				GROUP BY PC.intInvoiceId, PC.intPrepaymentId, I.strInvoiceNumber)
 			) PC ON I.intInvoiceId = PC.intInvoiceId
-        LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+        LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 		LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -391,7 +391,7 @@ FROM
 	  , dblPrepayments		= 0
 FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -430,7 +430,7 @@ FROM tblARInvoice I
 			FROM tblARPrepaidAndCredit WHERE ysnApplied = 1
 			GROUP BY intPrepaymentId)
 		) PC ON I.intInvoiceId = PC.intPrepaymentId
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -469,7 +469,7 @@ FROM tblARInvoice I
 			FROM tblARPrepaidAndCredit WHERE ysnApplied = 1
 			GROUP BY intPrepaymentId)
 		) PC ON I.intInvoiceId = PC.intPrepaymentId
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -503,7 +503,7 @@ FROM tblARPayment P
 				AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 				AND ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo')) OR (@ysnIncludeCreditsLocal = 1))
     INNER JOIN tblARCustomer C ON C.[intEntityId] = I.intEntityCustomerId
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal   
@@ -552,7 +552,7 @@ FROM tblARInvoice I
 			WHERE ysnApplied = 1
 			GROUP BY PC.intInvoiceId, PC.intPrepaymentId, I.strInvoiceNumber)
 		) PC ON I.intInvoiceId = PC.intInvoiceId
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.ysnPosted  = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))

@@ -102,7 +102,7 @@ INNER JOIN (tblARCustomer C
 INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLocationId
 LEFT JOIN tblSMCurrency CUR ON INV.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 
-	INNER JOIN tblEMEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON INV.intEntitySalespersonId = SP.intEntitySalespersonId
+	INNER JOIN tblEMEntity ESP ON SP.[intEntityId] = ESP.intEntityId) ON INV.intEntitySalespersonId = SP.[intEntityId]
 LEFT JOIN (tblSMShipVia SV 
 	INNER JOIN tblEMEntity ESV ON SV.[intEntityId] = ESV.intEntityId) ON INV.intShipViaId = SV.[intEntityId]
 INNER JOIN tblSMTerm T ON INV.intTermId = T.intTermID

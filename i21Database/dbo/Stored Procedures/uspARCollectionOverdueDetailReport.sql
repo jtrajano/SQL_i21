@@ -89,7 +89,7 @@ FROM tblARInvoice I
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= @dtmDateToLocal
 			GROUP BY intInvoiceId)
 		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId    
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]    
 WHERE I.ysnPosted = 1
   AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
   AND I.strTransactionType IN ('Invoice', 'Debit Memo')
@@ -139,7 +139,7 @@ FROM tblARInvoice I
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 			GROUP BY PD.intInvoiceId) 
 		) PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
@@ -195,7 +195,7 @@ FROM tblARPayment P
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= @dtmDateToLocal
 			GROUP BY intInvoiceId)
 		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
@@ -250,7 +250,7 @@ FROM tblARInvoice I
 			FROM tblAPPaymentDetail PD INNER JOIN tblAPPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= @dtmDateToLocal
 			GROUP BY intInvoiceId)
 		) TOTALSETTLEMENT ON I.intInvoiceId = TOTALSETTLEMENT.intInvoiceId
-	 LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	 LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal 
@@ -309,7 +309,7 @@ FROM tblARInvoice I
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= @dtmDateToLocal
 			GROUP BY intInvoiceId)
 		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Invoice', 'Debit Memo')
@@ -342,7 +342,7 @@ FROM tblARInvoice I
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 			GROUP BY PD.intInvoiceId) 
 		) PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
@@ -381,7 +381,7 @@ FROM tblARPayment P
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= @dtmDateToLocal
 			GROUP BY intInvoiceId)
 		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE P.ysnPosted = 1
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
   AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
@@ -420,7 +420,7 @@ FROM tblARInvoice I
 			FROM tblAPPaymentDetail PD INNER JOIN tblAPPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= @dtmDateToLocal
 			GROUP BY intInvoiceId)
 		) TOTALSETTLEMENT ON I.intInvoiceId = TOTALSETTLEMENT.intInvoiceId
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId	
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]	
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal 

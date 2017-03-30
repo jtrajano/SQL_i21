@@ -341,7 +341,7 @@ BEGIN
 				,vwcus_bill_to = ''''  
 				,vwcus_contact = SUBSTRING((Con.strName),1,20) 
 				,vwcus_comments = SUBSTRING(Con.strInternalNotes,1,30) 
-				,vwcus_slsmn_id = (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntitySalespersonId = Cus.intSalespersonId)
+				,vwcus_slsmn_id = (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntityId = Cus.intSalespersonId)
 				,vwcus_terms_cd = Loc.intTermsId
 				,vwcus_prc_lvl = CAST(0 AS INT)
 				,vwcus_stmt_fmt =	CASE WHEN Cus.strStatementFormat = ''Open Item'' THEN ''O''

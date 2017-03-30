@@ -106,7 +106,7 @@
 	CONSTRAINT [FK_tblARInvoice_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]),
 	CONSTRAINT [FK_tblARInvoice_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]),
 	CONSTRAINT [FK_tblARInvoice_tblSCTruckDriverReference_intTruckDriverReferenceId] FOREIGN KEY ([intTruckDriverReferenceId]) REFERENCES [tblSCTruckDriverReference]([intTruckDriverReferenceId]),
-	CONSTRAINT [FK_tblARInvoice_tblARSalesperson_intTruckDriverId] FOREIGN KEY ([intTruckDriverId]) REFERENCES [tblARSalesperson]([intEntitySalespersonId])
+	CONSTRAINT [FK_tblARInvoice_tblARSalesperson_intTruckDriverId] FOREIGN KEY ([intTruckDriverId]) REFERENCES [tblARSalesperson]([intEntityId])
 );
 
 

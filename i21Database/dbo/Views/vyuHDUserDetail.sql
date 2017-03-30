@@ -84,8 +84,8 @@
 			,ysni21User = 1
 			,imgPhoto = ec.imgPhoto
 			,intConcurrencyId = 1
-			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = sp.intEntitySalespersonId and ysnDefaultContact = 1)
+			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = sp.[intEntityId] and ysnDefaultContact = 1)
 			,strEntityType = 'Agent'
 		from
 			tblEMEntity ec
-			inner join tblARSalesperson sp on sp.intEntitySalespersonId = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])
+			inner join tblARSalesperson sp on sp.[intEntityId] = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])

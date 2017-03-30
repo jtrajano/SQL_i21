@@ -23,14 +23,14 @@
 		,intId = etc.intEntityContactId
 		,strFullName = en.strName
 		,strEmail = en.strEmail
-		,intEntityId = us.intEntitySalespersonId
+		,intEntityId = us.[intEntityId]
 		,ysnDisabled = (case when convert(bit, us.ysnActive) = 0 then convert(bit, 1) else convert(bit, 0) end),
 		strPhone = en.strPhone,
 		strMobile = en.strMobile
 	from
 		tblARSalesperson us, [tblEMEntityToContact] etc, tblEMEntity en, [tblEMEntityCredential] ec
 	where
-		us.intEntitySalespersonId is not null
-		and etc.intEntityId = us.intEntitySalespersonId
+		us.[intEntityId] is not null
+		and etc.intEntityId = us.[intEntityId]
 		and en.intEntityId = etc.intEntityContactId
 		and ec.intEntityId = etc.intEntityContactId

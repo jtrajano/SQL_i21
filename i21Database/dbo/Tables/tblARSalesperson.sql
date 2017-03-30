@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblARSalesperson] (
-    [intEntitySalespersonId]             INT             NOT NULL,
+    [intEntityId]             INT             NOT NULL,
     --[intSalespersonId]        INT             IDENTITY (1, 1) NOT NULL,
     [strSalespersonId]        NVARCHAR (3)    COLLATE Latin1_General_CI_AS NULL,
     [dtmBirthDate]            DATETIME        NULL,
@@ -29,10 +29,10 @@
     [strTextMessage]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [intAttachmentSignatureId]          INT             NULL,	
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblARSalesperson_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_tblARSalesperson_intEntityId] PRIMARY KEY CLUSTERED ([intEntitySalespersonId] ASC),
+    CONSTRAINT [PK_tblARSalesperson_intEntityId] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_tblARSalesperson_tblSMAttachment_intTerritoryId] FOREIGN KEY ([intAttachmentSignatureId]) REFERENCES [dbo].[tblSMAttachment] ([intAttachmentId]),
     CONSTRAINT [FK_tblARSalesperson_tblARTerritory_intTerritoryId] FOREIGN KEY ([intTerritoryId]) REFERENCES [dbo].[tblARTerritory] ([intTerritoryId]),
-    CONSTRAINT [FK_tblARSalesperson_tblEMEntity_intEntityId] FOREIGN KEY ([intEntitySalespersonId]) REFERENCES [dbo].tblEMEntity ([intEntityId])  ON DELETE CASCADE
+    CONSTRAINT [FK_tblARSalesperson_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])  ON DELETE CASCADE
     --CONSTRAINT [UQ_tblARSalesperson_intSalespersonId] UNIQUE NONCLUSTERED ([intSalespersonId] ASC),
     --CONSTRAINT [UQ_tblARSalesperson_strSalespersonId] UNIQUE NONCLUSTERED ([strSalespersonId] ASC)
 
