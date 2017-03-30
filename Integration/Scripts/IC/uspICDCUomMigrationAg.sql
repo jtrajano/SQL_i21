@@ -22,7 +22,7 @@ SET ANSI_WARNINGS OFF
 insert into tblICUnitMeasure (strUnitMeasure)
 select distinct upper(rtrim(agitm_un_desc)) UnitMeasure
 from agitmmst
-where upper(rtrim(agitm_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS not in (select strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS from tblICUnitMeasure)
+where upper(rtrim(agitm_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS not in (select upper(strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS from tblICUnitMeasure)
 
 
 --import all packing description with pack per unit greater than 1. These are pack units and have a different stock unit.
@@ -30,7 +30,8 @@ where upper(rtrim(agitm_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS not in (s
 insert into tblICUnitMeasure (strUnitMeasure)
 select distinct upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) UnitMeasure
 from agitmmst
-where upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) COLLATE SQL_Latin1_General_CP1_CS_AS not in (select strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS from tblICUnitMeasure)
+where upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) COLLATE SQL_Latin1_General_CP1_CS_AS not in 
+(select upper(strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS from tblICUnitMeasure)
 and agitm_un_per_pak > 1
 
 --update the unit type for the imported uoms
