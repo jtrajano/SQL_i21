@@ -178,15 +178,7 @@ BEGIN
 			RAISERROR('Cannot create Voucher with 0.00 amount.', 16, 1);
 			--GOTO DONE			 									       
 		END
-
-	SELECT @totalReceiptDetails = COUNT(*) FROM #tmpReceiptDetailData ReceiptItem WHERE ReceiptItem.intInventoryReceiptId = @receiptId
-	
-	WHILE @totalReceiptDetails != @counter2
-	BEGIN	
-
-		SET @counter2 = @counter2 + 1;
-		SELECT TOP(1) @receiptDetailId = intInventoryReceiptItemId FROM #tmpReceiptDetailData WHERE intInventoryReceiptId = @receiptId
-		-- Get the producer id. 
+	-- Get the producer id. 
 		BEGIN 
 			DECLARE @intProducerId AS INT 	
 
@@ -363,6 +355,15 @@ BEGIN
 			SET @generatedBillId = SCOPE_IDENTITY()
 		END 
 		END
+
+	SELECT @totalReceiptDetails = COUNT(*) FROM #tmpReceiptDetailData ReceiptItem WHERE ReceiptItem.intInventoryReceiptId = @receiptId
+	
+	WHILE @totalReceiptDetails != @counter2
+	BEGIN	
+
+		SET @counter2 = @counter2 + 1;
+		SELECT TOP(1) @receiptDetailId = intInventoryReceiptItemId FROM #tmpReceiptDetailData WHERE intInventoryReceiptId = @receiptId
+		
 
 		INSERT INTO tblAPBillDetail(
 			[intBillId],
