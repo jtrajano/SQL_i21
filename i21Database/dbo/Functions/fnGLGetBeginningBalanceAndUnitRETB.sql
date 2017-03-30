@@ -13,7 +13,6 @@ beginBalanceUnit NUMERIC(18,6)
 
 AS
 BEGIN
-	IF EXISTS(SELECT TOP 1 1 FROM tblGLAccount A JOIN tblGLFiscalYear B ON A.intAccountId = B.intRetainAccount WHERE A.strAccountId = @strAccountId)
 	BEGIN
 		IF @intGLDetailId = -1
 		BEGIN
