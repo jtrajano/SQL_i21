@@ -19,8 +19,8 @@ if(_url.indexOf('version=TF') < 1) {
         defaultTimeout: 300000,
         waitForTimeout: 300000,
         maintainViewportSize: true,
-        viewportHeight: 890,
-        viewportWidth: 1160,
+        viewportHeight: 1100,
+        viewportWidth: 1800,
         preload: [
             functionalTest
         ]
@@ -84,8 +84,8 @@ if(_url.indexOf('version=TF') < 1) {
                     ]
                 },
                 {
-                    url: 'SmokeTesting/ICAddTransactions.js?v='+version,
-                    title: 'ICAddTransactions',
+                    url: 'SmokeTesting/ICAddTransactions1.js?v='+version,
+                    title: 'ICAddTransactions1',
                     preload: [
                         functionalTest,
                         commonIC,
@@ -93,8 +93,8 @@ if(_url.indexOf('version=TF') < 1) {
                     ]
                 },
                 {
-                    url: 'SmokeTesting/ICSmokeTests.js?v='+version,
-                    title: 'ICSmokeTests',
+                    url: 'SmokeTesting/ICAddTransactions2.js?v='+version,
+                    title: 'ICAddTransactions2',
                     preload: [
                         functionalTest,
                         commonIC,
@@ -764,8 +764,8 @@ else{
         pauseBetweenTests: 1000,
         defaultTimeout: 300000,
         waitForTimeout: 300000,
-        viewportHeight: 890,
-        viewportWidth: 1160,
+        viewportHeight: 1100,
+        viewportWidth: 1800,
         maintainViewportSize: true,
         autoRun: true,
         viewDOM: true,
