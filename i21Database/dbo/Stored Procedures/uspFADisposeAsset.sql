@@ -3,6 +3,7 @@ CREATE PROCEDURE [dbo].[uspFADisposeAsset]
 	@ysnPost			AS BIT				= 0,
 	@ysnRecap			AS BIT				= 0,
 	@strBatchId			AS NVARCHAR(100)	= '',
+	@strTransactionId	AS NVARCHAR(100)	= '',
 	@intEntityId		AS INT				= 1,
 	@successfulCount	AS INT				= 0 OUTPUT
 	
@@ -37,7 +38,7 @@ IF ISNULL(@ysnPost, 0) = 0
 		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))
 			BEGIN
 				SET @Param = (SELECT strAssetId FROM tblFAFixedAsset WHERE intAssetId IN (SELECT intAssetId FROM #AssetID))
-				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId,@Param, 0, 'AM', NULL, @intEntityId, @intCount	OUT
+				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId,@Param, 0, 'AMDIS', NULL, @intEntityId, @intCount	OUT
 				SET @successfulCount = @intCount
 				
 				IF(@intCount > 0)
@@ -101,11 +102,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			
 		)
 		SELECT 
-			 [strTransactionId]		= A.[strAssetId]
+			 [strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= A.[intAccumulatedAccountId]
 			,[strDescription]		= A.[strAssetDescription]
-			,[strReference]			= ''
+			,[strReference]			= A.[strAssetId]
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
 			,[dblDebit]				= A.[dblCost]
 			,[dblCredit]			= 0
@@ -126,11 +127,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'AM' --FA
+			,[strCode]				= 'AMDIS'
 								
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]		= A.[intAssetId]			
-			,[strTransactionType]	= 'Fixed Assets'
+			,[strTransactionType]	= 'Disposition'
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 		
@@ -173,11 +174,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			
 		)
 		SELECT 
-			 [strTransactionId]		= A.[strAssetId]
+			 [strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= A.[intAccumulatedAccountId]
 			,[strDescription]		= A.[strAssetDescription]
-			,[strReference]			= ''
+			,[strReference]			= A.[strAssetId]
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.[dblCost]
@@ -198,11 +199,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'AM' --FA
+			,[strCode]				= 'AMDIS'
 								
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]		= A.[intAssetId]			
-			,[strTransactionType]	= 'Fixed Assets'
+			,[strTransactionType]	= 'Disposition'
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 		
