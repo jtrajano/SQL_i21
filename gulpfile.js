@@ -1,5 +1,5 @@
 var source = './app';
-var destination = '../../../artifacts/17.2/Inventory/debug/app';
+var destination = '../../../artifacts/17.1/Inventory/debug/app';
 
 var gulp = require('gulp');
 var prettify = require('gulp-js-prettify');

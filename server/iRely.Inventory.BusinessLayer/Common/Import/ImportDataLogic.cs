@@ -24,6 +24,7 @@ namespace iRely.Inventory.BusinessLayer
         public const string STAT_INNER_COL_SKIP = "This optional field is ignored.";
         public const string REC_SKIP = "Record skipped";
         public const string STAT_INNER_DEF = "Set to default value";
+        public const string STAT_INNER_AUTO = "Auto-created";
 
         public const string STAT_INNER_SUCCESS = "Success";
         public const string TYPE_INNER_WARN = "Warning";

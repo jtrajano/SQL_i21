@@ -152,8 +152,11 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 type = "ItemContracts";
                 break;
             case "btnImportInventoryCount":
-                type = "InventoryCount";
+                type = "InventoryCountDetails";
                 break;
+            // case "btnImportInventoryCountDetails":
+            //     type = "InventoryCountDetails";
+            //     break;
             case "btnImportItemPricing":
                 type = "ItemPricing";
                 break;
@@ -458,9 +461,8 @@ function getTemplateColumns(name) {
         case "Contract Items":
             return ["Item No","Location","Contract Name","Origin","Grade","Grade Type","Garden","Yield","Tolerance","Franchise"];
         case "Inventory Count":
-            return ["Location","Category","Commodity","Count Group","Count Date","Sub Location","Storage Location","Description",
-                "Include Zero on Hand","Include on Hand","Scanned Count Entry","Count by Lots","Count by Pallets","Recount Mismatch",
-                "External","Recount","Reference Count No"];
+            return ["Location", "Count Group", "Description", "Date", "Item No", "Sub Location", "Storage Location", 
+                "Physical Count", "UOM", "Lot No", "Pallets", "Qty Per Pallet", "Count by Lots", "Count by Pallets", "Recount"];
         case "Item Pricing":
             return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "Pricing Method",
                 "Amount/Percent", "Retail Price", "MSRP"];

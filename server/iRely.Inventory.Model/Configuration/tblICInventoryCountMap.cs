@@ -72,6 +72,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnRecount).HasColumnName("ysnRecount");
             this.Property(t => t.intEntityUserSecurityId).HasColumnName("intEntityUserSecurityId");
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.strAutoCreatedLotNumber).HasColumnName("strAutoCreatedLotNumber");
 
             this.HasOptional(p => p.vyuICGetInventoryCountDetail)
                 .WithRequired(p => p.tblICInventoryCountDetail);

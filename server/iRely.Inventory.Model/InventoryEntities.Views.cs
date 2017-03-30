@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets6dc00f520d2091ccd954ac811b8923f3e8db4b866de43bbdd38f2da1732e1306))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets26bebfb87704414054ba7098868fae21b33e49fe9f4c01ef1ad508432afafa37))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets6dc00f520d2091ccd954ac811b8923f3e8db4b866de43bbdd38f2da1732e1306 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets26bebfb87704414054ba7098868fae21b33e49fe9f4c01ef1ad508432afafa37 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "6dc00f520d2091ccd954ac811b8923f3e8db4b866de43bbdd38f2da1732e1306"; }
+            get { return "26bebfb87704414054ba7098868fae21b33e49fe9f4c01ef1ad508432afafa37"; }
         }
 
         /// <summary>
@@ -15371,7 +15371,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCountDetail
-        [CodeFirstDatabaseSchema.tblICInventoryCountDetail](T1.tblICInventoryCountDetail_intInventoryCountDetailId, T1.tblICInventoryCountDetail_intInventoryCountId, T1.tblICInventoryCountDetail_intItemId, T1.tblICInventoryCountDetail_intItemLocationId, T1.tblICInventoryCountDetail_intSubLocationId, T1.tblICInventoryCountDetail_intStorageLocationId, T1.tblICInventoryCountDetail_intLotId, T1.tblICInventoryCountDetail_dblSystemCount, T1.tblICInventoryCountDetail_dblLastCost, T1.tblICInventoryCountDetail_strCountLine, T1.tblICInventoryCountDetail_dblPallets, T1.tblICInventoryCountDetail_dblQtyPerPallet, T1.tblICInventoryCountDetail_dblPhysicalCount, T1.tblICInventoryCountDetail_intItemUOMId, T1.tblICInventoryCountDetail_ysnRecount, T1.tblICInventoryCountDetail_intEntityUserSecurityId, T1.tblICInventoryCountDetail_intSort, T1.tblICInventoryCountDetail_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryCountDetail](T1.tblICInventoryCountDetail_intInventoryCountDetailId, T1.tblICInventoryCountDetail_intInventoryCountId, T1.tblICInventoryCountDetail_intItemId, T1.tblICInventoryCountDetail_intItemLocationId, T1.tblICInventoryCountDetail_intSubLocationId, T1.tblICInventoryCountDetail_intStorageLocationId, T1.tblICInventoryCountDetail_intLotId, T1.tblICInventoryCountDetail_dblSystemCount, T1.tblICInventoryCountDetail_dblLastCost, T1.tblICInventoryCountDetail_strCountLine, T1.tblICInventoryCountDetail_dblPallets, T1.tblICInventoryCountDetail_dblQtyPerPallet, T1.tblICInventoryCountDetail_dblPhysicalCount, T1.tblICInventoryCountDetail_intItemUOMId, T1.tblICInventoryCountDetail_ysnRecount, T1.tblICInventoryCountDetail_intEntityUserSecurityId, T1.tblICInventoryCountDetail_intSort, T1.tblICInventoryCountDetail_strAutoCreatedLotNumber, T1.tblICInventoryCountDetail_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryCountDetailId AS tblICInventoryCountDetail_intInventoryCountDetailId, 
@@ -15391,6 +15391,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnRecount AS tblICInventoryCountDetail_ysnRecount, 
             T.intEntityUserSecurityId AS tblICInventoryCountDetail_intEntityUserSecurityId, 
             T.intSort AS tblICInventoryCountDetail_intSort, 
+            T.strAutoCreatedLotNumber AS tblICInventoryCountDetail_strAutoCreatedLotNumber, 
             T.intConcurrencyId AS tblICInventoryCountDetail_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICInventoryCountDetails AS T
@@ -15539,7 +15540,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCountDetails
-        [iRely.Inventory.Model.tblICInventoryCountDetail](T1.tblICInventoryCountDetail_intInventoryCountDetailId, T1.tblICInventoryCountDetail_intInventoryCountId, T1.tblICInventoryCountDetail_intItemId, T1.tblICInventoryCountDetail_intItemLocationId, T1.tblICInventoryCountDetail_intSubLocationId, T1.tblICInventoryCountDetail_intStorageLocationId, T1.tblICInventoryCountDetail_intLotId, T1.tblICInventoryCountDetail_dblSystemCount, T1.tblICInventoryCountDetail_dblLastCost, T1.tblICInventoryCountDetail_strCountLine, T1.tblICInventoryCountDetail_dblPallets, T1.tblICInventoryCountDetail_dblQtyPerPallet, T1.tblICInventoryCountDetail_dblPhysicalCount, T1.tblICInventoryCountDetail_intItemUOMId, T1.tblICInventoryCountDetail_ysnRecount, T1.tblICInventoryCountDetail_intEntityUserSecurityId, T1.tblICInventoryCountDetail_intSort, T1.tblICInventoryCountDetail_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryCountDetail](T1.tblICInventoryCountDetail_intInventoryCountDetailId, T1.tblICInventoryCountDetail_intInventoryCountId, T1.tblICInventoryCountDetail_intItemId, T1.tblICInventoryCountDetail_intItemLocationId, T1.tblICInventoryCountDetail_intSubLocationId, T1.tblICInventoryCountDetail_intStorageLocationId, T1.tblICInventoryCountDetail_intLotId, T1.tblICInventoryCountDetail_dblSystemCount, T1.tblICInventoryCountDetail_dblLastCost, T1.tblICInventoryCountDetail_strCountLine, T1.tblICInventoryCountDetail_dblPallets, T1.tblICInventoryCountDetail_dblQtyPerPallet, T1.tblICInventoryCountDetail_dblPhysicalCount, T1.tblICInventoryCountDetail_intItemUOMId, T1.tblICInventoryCountDetail_ysnRecount, T1.tblICInventoryCountDetail_intEntityUserSecurityId, T1.tblICInventoryCountDetail_intSort, T1.tblICInventoryCountDetail_strAutoCreatedLotNumber, T1.tblICInventoryCountDetail_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryCountDetailId AS tblICInventoryCountDetail_intInventoryCountDetailId, 
@@ -15559,6 +15560,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnRecount AS tblICInventoryCountDetail_ysnRecount, 
             T.intEntityUserSecurityId AS tblICInventoryCountDetail_intEntityUserSecurityId, 
             T.intSort AS tblICInventoryCountDetail_intSort, 
+            T.strAutoCreatedLotNumber AS tblICInventoryCountDetail_strAutoCreatedLotNumber, 
             T.intConcurrencyId AS tblICInventoryCountDetail_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICInventoryCountDetail AS T
