@@ -5151,6 +5151,7 @@
     <Build Include="dbo\Stored Procedures\uspSTUpdatePricebookItem.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\28_UpdateBaseAmounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
