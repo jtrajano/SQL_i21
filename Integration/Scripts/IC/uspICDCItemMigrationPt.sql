@@ -360,6 +360,8 @@ union
 select pt3cf_prc3 prclvl, 3 srt from ptctlmst where pt3cf_prc3 is not null
 ) as prc 
 join tblSMCompanyLocation CL on 1 = 1
+where CL.[intCompanyLocationId] not in (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+where [strPricingLevelName] COLLATE Latin1_General_CI_AS = prclvl COLLATE Latin1_General_CI_AS)
 --on CL.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = prc.agloc_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS
 order by CL.intCompanyLocationId, srt
 

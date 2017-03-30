@@ -22,6 +22,8 @@ SET ANSI_WARNINGS OFF
 insert into tblSMCompanyLocationSubLocation
 (intCompanyLocationId, strSubLocationName, strSubLocationDescription, strClassification, intConcurrencyId)
 select intCompanyLocationId, strLocationName, strLocationName strDescription, 'Inventory' strClassification, 1 Concurrencyid
-from tblSMCompanyLocation
+from tblSMCompanyLocation L 
+join agitmmst os on os.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = L.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
+where agitm_binloc is not null
 
 

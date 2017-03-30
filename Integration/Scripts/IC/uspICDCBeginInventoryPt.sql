@@ -163,8 +163,6 @@ BEGIN
 			,dtmDate
 			,SUM(ISNULL(dblDebit,0)) as dblDebit
 			,SUM(ISNULL(dblCredit,0)) as dblCredit
-			,SUM(ISNULL(dblDebitForeign,0)) as dblDebitForeign
-			,SUM(ISNULL(dblCreditForeign,0)) as dblCreditForeign
 			,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
 			,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
 			,strCode
