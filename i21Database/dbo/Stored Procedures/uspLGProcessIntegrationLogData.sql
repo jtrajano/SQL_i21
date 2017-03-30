@@ -417,7 +417,25 @@ INSERTDATE:
 
 		IF (@strShipmentType = 'Shipment' AND ISNULL(@ysnContainerAddedAlready,0) = 0)
 		BEGIN
-			INSERT INTO tblLGLoadContainerStg
+			INSERT INTO tblLGLoadContainerStg(
+					 intLoadStgId
+					,intLoadId
+					,intLoadContainerId
+					,strContainerNo
+					,strContainerSizeCode
+					,strPackagingMaterialType
+					,strExternalPONumber
+					,strSeq
+					,dblContainerQty
+					,strContainerUOM
+					,dblNetWt
+					,dblGrossWt
+					,strWeightUOM
+					,strExternalContainerId
+					,strSubLocation
+					,strStorageLocation
+					,strRowState
+					,dtmFeedCreated)
 			SELECT *
 			FROM (
 				SELECT @intLoadStdId intLoadStdId
@@ -442,6 +460,21 @@ INSERTDATE:
 					,LC.dblGrossWt
 					,LUM.strUnitMeasure strWeightUnitMeasure
 					,NULL strExternalContainerId
+					,CASE 
+						WHEN ISNULL(CLSL.strSubLocationName, '') = ''
+							THEN LDCLSL.strSubLocationName
+						ELSE CLSL.strSubLocationName
+						END strSubLocationName
+					,CASE 
+						WHEN ISNULL(SL.strName, '') = ''
+							THEN (
+									SELECT SL.strName AS strStorageLocationName
+									FROM tblCTContractDetail CD
+									JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+									WHERE CD.intContractDetailId = LD.intPContractDetailId
+									)
+						ELSE SL.strName
+						END strStorageLocationName		
 					,'Modified' strRowState
 					,GETDATE() dtmFeedCreated
 				FROM tblLGLoadContainer LC
@@ -449,6 +482,13 @@ INSERTDATE:
 				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
 				JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intWeightUnitMeasureId
 				LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+				LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+				LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+				LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+				LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
+				LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+				LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
+				LEFT JOIN tblSMCompanyLocationSubLocation LDCLSL ON LDCLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
 				--LEFT JOIN tblLGLoadContainerLog LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId AND LDCL.intLoadLogId = (SELECT MIN(intLoadLogId) FROM tblLGLoadLog)
 				WHERE LC.intLoadId = @intLoadId
 	
@@ -468,6 +508,8 @@ INSERTDATE:
 					,dblGrossWt
 					,strWeightUOM
 					,strExternalContainerId
+					,strSubLocation
+					,strStorageLocation
 					,'Delete' Collate Latin1_General_CI_AS
 					,GETDATE()
 				FROM tblLGLoadContainerLog
