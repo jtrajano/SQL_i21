@@ -138,7 +138,7 @@ BEGIN
 		FROM	tblICItemSubLocation SL 
 		JOIN	tblICItemLocation	 IL ON IL.intItemLocationId = SL.intItemLocationId
 		JOIN	tblSMCompanyLocationSubLocation LO ON LO.intCompanyLocationSubLocationId = SL.intSubLocationId
-		WHERE	IL.intItemId = @intItemid AND IL.intLocationId = @intLocationId AND LO.strSubLocationName = @strSubLocationName
+		WHERE	IL.intItemId = @intItemId AND IL.intLocationId = @intLocationId AND LO.strSubLocationName = @strSubLocationName
 
 		SELECT @intStorageLocationId = intStorageLocationId FROM tblICStorageLocation WHERE intSubLocationId = @intSubLocationId AND strName = @strStorageLocation
 
