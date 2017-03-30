@@ -29,6 +29,7 @@ UPDATE
 SET
 	 [dblBaseTax]				= T.[dblBaseTotalTax]
 	,[dblBaseInvoiceSubtotal]	= T.[dblBaseTotal]
+	,[dblBasePayment]			= [dblPayment]
 FROM
 	(
 		SELECT 
