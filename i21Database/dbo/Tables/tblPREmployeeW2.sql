@@ -30,7 +30,7 @@
 	[dblTaxableLocal] NUMERIC(18, 6) NULL DEFAULT ((0)),
 	[dblLocalTax] NUMERIC(18, 6) NULL DEFAULT ((0)),
     [intConcurrencyId] INT NULL DEFAULT ((1)),
-	CONSTRAINT [FK_tblPREmployeeW2_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPREmployeeW2_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityId]) ON DELETE CASCADE,
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

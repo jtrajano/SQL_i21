@@ -108,7 +108,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			INNER JOIN tblPREmployeeEarning EE 
 				ON TC.intEmployeeEarningId = EE.intEmployeeEarningId
 			INNER JOIN tblPREmployee EMP
-				ON EMP.intEntityEmployeeId = EE.intEntityEmployeeId
+				ON EMP.[intEntityId] = EE.intEntityEmployeeId
 			LEFT JOIN tblPREmployeeEarning EL
 				ON EE.intEmployeeEarningLinkId = EL.intTypeEarningId
 				AND EE.intEntityEmployeeId = EL.intEntityEmployeeId

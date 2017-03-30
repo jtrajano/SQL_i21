@@ -53,7 +53,7 @@ BEGIN
 			,intTypeEarningId
 			,intDepartmentId = (SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = tblPREmployeeEarning.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
 			,intWorkersCompensationId = CASE WHEN (strCalculationType IN ('Hourly Rate', 'Overtime', 'Fixed Amount')) 
-											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE intEntityEmployeeId = tblPREmployeeEarning.intEntityEmployeeId) 
+											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE [intEntityId] = tblPREmployeeEarning.intEntityEmployeeId) 
 											ELSE NULL END
 			,strCalculationType
 			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblDefaultHours END					

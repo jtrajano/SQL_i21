@@ -17,7 +17,7 @@
     [intSort]              INT             NULL,
     [intConcurrencyId]     INT             CONSTRAINT [DF__tblPREmpl__intCo__7CBD838B] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblPREmployeeTimeOff] PRIMARY KEY CLUSTERED ([intEmployeeTimeOffId] ASC),
-    CONSTRAINT [FK_tblPREmployeeTimeOff_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPREmployeeTimeOff_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPREmployeeTimeOff_tblPRTypeTimeOff] FOREIGN KEY ([intTypeTimeOffId]) REFERENCES [dbo].[tblPRTypeTimeOff] ([intTypeTimeOffId])
 );
 

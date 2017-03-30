@@ -17,7 +17,7 @@
 			join [tblEMEntityType] b
 				on b.intEntityId = a.intEntityId and b.strType = 'Employee'		
 			join tblPREmployee c
-				on c.intEntityEmployeeId = a.intEntityId
+				on c.[intEntityId] = a.intEntityId
 			join tblPREmployeeEarning d
 				on d.intEntityEmployeeId = a.intEntityId
 			join tblPRTypeEarning e

@@ -19,7 +19,7 @@
     [intConcurrencyId]			INT             DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblPREmployeeEarning] PRIMARY KEY CLUSTERED ([intEmployeeEarningId] ASC),
     CONSTRAINT [FK_tblPREmployeeEarning_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    CONSTRAINT [FK_tblPREmployeeEarning_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPREmployeeEarning_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPREmployeeEarning_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [dbo].[tblPRTypeEarning] ([intTypeEarningId]),
 	CONSTRAINT [FK_tblPREmployeeEarning_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [dbo].[tblPRPayGroup] ([intPayGroupId])
 );

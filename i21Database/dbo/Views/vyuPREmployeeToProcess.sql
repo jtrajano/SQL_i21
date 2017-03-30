@@ -57,7 +57,7 @@ FROM
 			INNER JOIN tblPRPayGroupDetail PGD
 				ON PG2.intPayGroupId = PGD.intPayGroupId
 			INNER JOIN tblPREmployee EMP
-				ON PGD.intEntityEmployeeId = EMP.intEntityEmployeeId
+				ON PGD.intEntityEmployeeId = EMP.[intEntityId]
 		WHERE
 			EMP.ysnActive = 1
 		GROUP BY

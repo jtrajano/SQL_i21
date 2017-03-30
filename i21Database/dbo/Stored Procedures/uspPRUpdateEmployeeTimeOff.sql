@@ -5,11 +5,11 @@ AS
 BEGIN
 
 	--Get Employees with specified Time Off
-	SELECT E.intEntityEmployeeId, DATEDIFF(YEAR, ISNULL(E.dtmDateHired, GETDATE()), GETDATE()) intYearsOfService
+	SELECT E.[intEntityId], DATEDIFF(YEAR, ISNULL(E.dtmDateHired, GETDATE()), GETDATE()) intYearsOfService
 	INTO #tmpEmployees
 	FROM tblPREmployee E LEFT JOIN tblPREmployeeTimeOff T
-	ON E.intEntityEmployeeId = T.intEntityEmployeeId
-	WHERE E.intEntityEmployeeId = ISNULL(@intEntityEmployeeId, E.intEntityEmployeeId)
+	ON E.[intEntityId] = T.intEntityEmployeeId
+	WHERE E.[intEntityId] = ISNULL(@intEntityEmployeeId, E.[intEntityId])
 		 AND T.intTypeTimeOffId = @intTypeTimeOffId
 
 	DECLARE @intEmployeeId INT
@@ -19,7 +19,7 @@ BEGIN
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEmployees)
 	BEGIN
 		SELECT TOP 1 
-			@intEmployeeId = intEntityEmployeeId
+			@intEmployeeId = [intEntityId]
 			,@intYearsOfService = intYearsOfService 
 		FROM #tmpEmployees 
 
@@ -55,7 +55,7 @@ BEGIN
 		WHERE tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
 			AND tblPREmployeeTimeOff.intTypeTimeOffId = @intTypeTimeOffId
 
-		DELETE FROM #tmpEmployees WHERE intEntityEmployeeId = @intEmployeeId
+		DELETE FROM #tmpEmployees WHERE [intEntityId] = @intEmployeeId
 	END
 
 END

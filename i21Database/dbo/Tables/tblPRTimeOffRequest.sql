@@ -21,7 +21,7 @@
 	[intLastModifiedUserId] INT NOT NULL,
 	[dtmLastModified] DATETIME NOT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT ((1)),
-	CONSTRAINT [FK_tblPRTimeOffRequest_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]),
+	CONSTRAINT [FK_tblPRTimeOffRequest_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityId]),
 	CONSTRAINT [FK_tblPRTimeOffRequest_tblPRTypeTimeOff] FOREIGN KEY ([intTypeTimeOffId]) REFERENCES [dbo].[tblPRTypeTimeOff] ([intTypeTimeOffId]),
 	CONSTRAINT [FK_tblPRTimeOffRequest_tblPREmployeeTimeOff] FOREIGN KEY ([intEntityEmployeeId],[intTypeTimeOffId]) REFERENCES [dbo].[tblPREmployeeTimeOff] ([intEntityEmployeeId],[intTypeTimeOffId]),
 	CONSTRAINT [FK_tblPRTimeOffRequest_tblPRDepartment] FOREIGN KEY ([intDepartmentId]) REFERENCES [dbo].[tblPRDepartment] ([intDepartmentId]),

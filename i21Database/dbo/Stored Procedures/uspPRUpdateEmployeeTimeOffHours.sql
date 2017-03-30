@@ -7,7 +7,7 @@ BEGIN
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployees')) DROP TABLE #tmpEmployees
 
 	--Get Employees with specified Time Off
-	SELECT E.intEntityEmployeeId
+	SELECT E.[intEntityId]
 		  ,dtmLastAward = CASE WHEN (ISNULL(T.dtmEligible, E.dtmDateHired) > ISNULL(T.dtmLastAward, E.dtmDateHired)) THEN 
 								ISNULL(T.dtmEligible, E.dtmDateHired)
 							ELSE
@@ -42,8 +42,8 @@ BEGIN
 		,strAwardPeriod
 	INTO #tmpEmployees
 	FROM tblPREmployee E LEFT JOIN tblPREmployeeTimeOff T
-		ON E.intEntityEmployeeId = T.intEntityEmployeeId
-	WHERE E.intEntityEmployeeId = ISNULL(@intEntityEmployeeId, E.intEntityEmployeeId)
+		ON E.[intEntityId] = T.intEntityEmployeeId
+	WHERE E.[intEntityId] = ISNULL(@intEntityEmployeeId, E.[intEntityId])
 		 AND T.intTypeTimeOffId = @intTypeTimeOffId
 
 	--Clean-up Next Award Date
@@ -76,7 +76,7 @@ BEGIN
 													ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId 
 														AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
 												WHERE P.ysnPosted = 1
-													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityEmployeeId
+													  AND P.intEntityEmployeeId = #tmpEmployees.[intEntityId]
 													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= GETDATE() 
 													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
 								ELSE 0
@@ -94,7 +94,7 @@ BEGIN
 													ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId 
 														AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
 												WHERE P.ysnPosted = 1
-													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityEmployeeId
+													  AND P.intEntityEmployeeId = #tmpEmployees.[intEntityId]
 													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward 
 													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
 								WHEN (strPeriod = 'Day') THEN 
@@ -118,7 +118,7 @@ BEGIN
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEmployees)
 	BEGIN
 		SELECT TOP 1 
-			@intEmployeeId = intEntityEmployeeId
+			@intEmployeeId = [intEntityId]
 		FROM #tmpEmployees 
 		
 		--Update Accrued Hours
@@ -126,7 +126,7 @@ BEGIN
 			SET dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour') THEN T.dblAccruedHours ELSE 0 END
 		FROM
 		#tmpEmployees T
-		WHERE T.intEntityEmployeeId = @intEmployeeId
+		WHERE T.[intEntityId] = @intEmployeeId
 				AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
 				AND intTypeTimeOffId = @intTypeTimeOffId
 
@@ -143,7 +143,7 @@ BEGIN
 										ELSE dblHoursUsed END
 									END
 		FROM #tmpEmployees T
-		WHERE T.intEntityEmployeeId = @intEmployeeId
+		WHERE T.[intEntityId] = @intEmployeeId
 			AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
 			AND intTypeTimeOffId = @intTypeTimeOffId
 
@@ -158,12 +158,12 @@ BEGIN
 				,dtmLastAward = T.dtmNextAward
 		FROM
 		#tmpEmployees T
-		WHERE T.intEntityEmployeeId = @intEmployeeId
+		WHERE T.[intEntityId] = @intEmployeeId
 				AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
 				AND intTypeTimeOffId = @intTypeTimeOffId 
 				AND T.dtmNextAward <= CAST(GETDATE() AS DATE)
 
-		DELETE FROM #tmpEmployees WHERE intEntityEmployeeId = @intEmployeeId
+		DELETE FROM #tmpEmployees WHERE [intEntityId] = @intEmployeeId
 	END
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployees')) DROP TABLE #tmpEmployees

@@ -25,7 +25,7 @@ AS
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Employee')
 	BEGIN	
-		UPDATE tblPREmployee SET ysnActive= 0 WHERE intEntityEmployeeId = @Id
+		UPDATE tblPREmployee SET ysnActive= 0 WHERE [intEntityId] = @Id
 	END	
 
 	UPDATE a set a.ysnActive = 0

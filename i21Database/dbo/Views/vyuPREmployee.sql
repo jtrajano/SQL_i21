@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuPREmployee]
 AS
 SELECT
-Emp.intEntityEmployeeId,
+Emp.[intEntityId],
 Emp.strEmployeeId,
 Emp.strLastName,
 Emp.strFirstName,
@@ -19,10 +19,10 @@ Loc.strCountry,
 Emp.ysnActive,
 Emp.strPayPeriod
 FROM dbo.tblPREmployee AS Emp
-INNER JOIN dbo.tblEMEntity AS Ent ON Ent.intEntityId = Emp.[intEntityEmployeeId]
+INNER JOIN dbo.tblEMEntity AS Ent ON Ent.intEntityId = Emp.[intEntityId]
 LEFT JOIN 
 (SELECT A.intEntityId, A.ysnDefaultContact, B.strPhone, B.strTitle FROM dbo.[tblEMEntityToContact] A 
 	LEFT JOIN tblEMEntity B ON A.intEntityContactId = B.intEntityId) AS Con 
 	ON Con.intEntityId = Ent.intEntityId AND Con.ysnDefaultContact = 1
-LEFT JOIN dbo.[tblEMEntityLocation] AS Loc ON Loc.intEntityId = Emp.[intEntityEmployeeId] AND Loc.ysnDefaultLocation = 1
+LEFT JOIN dbo.[tblEMEntityLocation] AS Loc ON Loc.intEntityId = Emp.[intEntityId] AND Loc.ysnDefaultLocation = 1
 LEFT JOIN dbo.tblSMUserSecurity AS Sec ON Sec.intEntityUserSecurityId = Ent.intEntityId

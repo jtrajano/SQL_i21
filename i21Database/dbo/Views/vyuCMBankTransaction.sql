@@ -39,7 +39,7 @@ strEntityNo = ISNULL((
 strSocialSecurity = ISNULL((
 		SELECT Emp.strSocialSecurity FROM 
 		tblPRPaycheck PayCheck  INNER JOIN
-		tblPREmployee Emp ON PayCheck.intEntityEmployeeId = Emp.intEntityEmployeeId
+		tblPREmployee Emp ON PayCheck.intEntityEmployeeId = Emp.[intEntityId]
 		WHERE PayCheck.strPaycheckId = tblCMBankTransaction.strTransactionId 
 ),'')
 FROM tblCMBankTransaction

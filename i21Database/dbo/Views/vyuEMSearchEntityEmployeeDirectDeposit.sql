@@ -22,7 +22,7 @@
 			join [tblEMEntityType] b
 				on b.intEntityId = a.intEntityId and b.strType = 'Employee'
 			join tblPREmployee c
-				on a.intEntityId = c.intEntityEmployeeId
+				on a.intEntityId = c.[intEntityId]
 			join tblEMEntityEFTInformation d
 				on d.intEntityId = a.intEntityId
 		

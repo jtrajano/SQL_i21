@@ -175,11 +175,11 @@ FROM
 		FROM 
 			tblPREmployee 
 			LEFT JOIN tblEMEntity
-				ON tblPREmployee.intEntityEmployeeId = tblEMEntity.intEntityId
+				ON tblPREmployee.[intEntityId] = tblEMEntity.intEntityId
 			LEFT JOIN tblEMEntityLocation
-				ON tblPREmployee.intEntityEmployeeId = tblEMEntityLocation.intEntityId
+				ON tblPREmployee.[intEntityId] = tblEMEntityLocation.intEntityId
 				AND tblEMEntityLocation.ysnDefaultLocation = 1) [tblPREmployeeInfo] 
-		ON [tblPRPaycheck].[intEntityEmployeeId] = [tblPREmployeeInfo].[intEntityEmployeeId]
+		ON [tblPRPaycheck].[intEntityEmployeeId] = [tblPREmployeeInfo].[intEntityId]
 	LEFT JOIN (
 		SELECT
 			tblPRPaycheck.[intEntityEmployeeId],

@@ -30,8 +30,8 @@ FROM
 	INNER JOIN tblPREmployeeEarning EE ON EE.intEmployeeEarningId = PE.intEmployeeEarningId
 	INNER JOIN tblPRTypeEarning TE ON TE.intTypeEarningId = PE.intTypeEarningId 
 	INNER JOIN tblPRPaycheck PC ON PC.intPaycheckId = PE.intPaycheckId
-	INNER JOIN tblPREmployee EMP ON PC.intEntityEmployeeId = EMP.intEntityEmployeeId
-	INNER JOIN tblEMEntity ENT ON EMP.intEntityEmployeeId = ENT.intEntityId
+	INNER JOIN tblPREmployee EMP ON PC.intEntityEmployeeId = EMP.[intEntityId]
+	INNER JOIN tblEMEntity ENT ON EMP.[intEntityId] = ENT.intEntityId
 	INNER JOIN tblPRWorkersCompensation WC ON PE.intWorkersCompensationId = WC.intWorkersCompensationId
 	LEFT JOIN tblPRDepartment DEP ON DEP.intDepartmentId = PE.intEmployeeDepartmentId 
 WHERE 
