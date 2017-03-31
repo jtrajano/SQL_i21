@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspLGCreateVoucherForWeightClaims
 	 @intWeightClaimId INT
 	,@intEntityUserSecurityId INT
-	,@intBillId INT OUTPUT
+	,@strBillId NVARCHAR(100) = '' OUTPUT
 AS
 BEGIN TRY
 	DECLARE @strErrorMessage NVARCHAR(4000);
@@ -22,6 +22,7 @@ BEGIN TRY
 	DECLARE @dblNetWeight NUMERIC(18,6)
 	DECLARE @dblTotalForBill NUMERIC(18,6)
 	DECLARE @dblAmountDueForBill NUMERIC(18,6)
+	DECLARE @intBillId INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intWeightClaimRecordId INT Identity(1, 1)
@@ -288,6 +289,8 @@ BEGIN TRY
 
 		DELETE
 		FROM @VoucherDetailClaim
+
+		SET @strBillId = @strBillId + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
 
 		SELECT @intMinRecord = MIN(intRecordId)
 		FROM @distinctVendor
