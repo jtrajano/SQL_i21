@@ -32,7 +32,7 @@ BEGIN TRY
 			intPurchasingGroupId,	intApprovedById,		dtmApproved,
 			strOrigin,				dblNetWeight,			intNetWeightUOMId,
 			intItemContractId,		strApprovalType,		strVendorLotID,
-			dblNoOfLots
+			dblNoOfLots,			intCertificationId
 	)
 	OUTPUT	inserted.intApprovedContractId INTO @SCOPE_IDENTITY
 	SELECT	CD.intContractHeaderId,
@@ -68,7 +68,8 @@ BEGIN TRY
 			CD.intItemContractId,
 			@strScreenName,
 			CD.strVendorLotID,
-			CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 1 THEN CH.dblNoOfLots  ELSE CD.dblNoOfLots END
+			CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 1 THEN CH.dblNoOfLots  ELSE CD.dblNoOfLots END,
+			CF.intCertificationId
 
 	FROM	tblCTContractDetail		CD 
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
@@ -77,7 +78,16 @@ BEGIN TRY
 	JOIN	tblICItemUOM			WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId	LEFT
 	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId			
 										AND	CA.strType					=	'Origin'				LEFT
-	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		
+	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID			LEFT
+	JOIN	(
+					SELECT * FROM 
+					(
+						SELECT	ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intContractCertificationId ASC) intRowNum,
+								intContractDetailId,intCertificationId
+						FROM	tblCTContractCertification
+					) t
+					WHERE intRowNum = 1
+			) CF ON CF.intContractDetailId  =	CD.intContractDetailId
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractDetailId	=	CASE WHEN @intContractDetailId IS NULL THEN CD.intContractDetailId ELSE @intContractDetailId END
 	AND		CD.intContractStatusId	<> 2
