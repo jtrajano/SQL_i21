@@ -3660,9 +3660,9 @@ IF @post = 1
 			SELECT 
 				 intItemId					= Detail.intItemId  
 				,intItemLocationId			= IST.intItemLocationId
-				,intItemUOMId				= Detail.intItemUOMId  
+				,intItemUOMId				= CASE WHEN ISNULL(LGL.intLotId,0) = 0 THEN Detail.intItemUOMId ELSE ISNULL(Detail.intItemWeightUOMId, Detail.intItemUOMId)  END
 				,dtmDate					= Header.dtmShipDate
-				,dblQty						= (Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
+				,dblQty						= ((CASE WHEN ISNULL(LGL.intLotId,0) = 0 OR ISNULL(Detail.intItemWeightUOMId,0) = 0 THEN Detail.dblQtyShipped ELSE Detail.dblShipmentNetWt END) * (CASE WHEN Header.strTransactionType IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
 				,dblUOMQty					= ItemUOM.dblUnitQty
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
