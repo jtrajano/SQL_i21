@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateCommitted]
-	@InvoiceId		INT
+	 @InvoiceId		INT
 	,@Negate		BIT	= 0
 	,@UserId		INT = NULL
 	,@FromPosting	BIT = 0     
@@ -78,7 +78,7 @@ BEGIN
 		,[intItemLocationId]		=	ICGIS.[intItemLocationId]
 		,[intItemUOMId]				=	SOTD.[intItemUOMId]
 		,[dtmDate]					=	ARI.[dtmDate]
-		,[dblQty]					=	SOTD.[dblQtyOrdered]										
+		,[dblQty]					=	ARID.[dblQtyShipped]	
 		,[dblUOMQty]				=	ICIUOM.[dblUnitQty]
 		,[dblCost]					=	ICGIS.[dblLastCost]
 		,[dblValue]					=	0
@@ -112,6 +112,7 @@ BEGIN
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 
 		AND ISNULL(ARID.[intSalesOrderDetailId], 0) <> 0
+		AND @FromPosting = 1
 
 	UNION ALL
 	--SO shipped > ordered		--Component

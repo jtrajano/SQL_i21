@@ -65,10 +65,8 @@ BEGIN
 	SET
 		dblQty = dblQty * (CASE WHEN @Negate = 1 THEN -1 ELSE 1 END)			
 
-	EXEC [uspICCreateStockReservation] 
-		 @ItemsToReserve		= @items
-		 ,@intTransactionId		= @InvoiceId
-		 ,@intTransactionTypeId	= @TransactionTypeId
+	EXEC [uspICIncreaseReservedQty] 
+		 @ItemsToIncreaseReserve		= @items		 
 	 
 END
 
