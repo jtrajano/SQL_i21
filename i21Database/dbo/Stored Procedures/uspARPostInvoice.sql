@@ -1787,9 +1787,10 @@ END CATCH
 							ON ARI.intInvoiceId = PID.intInvoiceId
 					INNER JOIN
 						agivcmst OI
-							ON ARI.strInvoiceOriginId COLLATE Latin1_General_CI_AS = OI.agivc_ivc_no COLLATE Latin1_General_CI_AS
-					WHERE  
-						ARI.ysnPosted = 1
+							ON ARI.strInvoiceOriginId COLLATE Latin1_General_CI_AS = OI.agivc_ivc_no COLLATE Latin1_General_CI_AS							
+					WHERE   ARI.ysnPosted = 1
+						AND ARI.ysnImportedAsPosted = 1 
+						AND ARI.ysnImportedFromOrigin = 1
 				END
 
 				IF @IsPT = 1
@@ -1809,8 +1810,9 @@ END CATCH
 					INNER JOIN
 						ptivcmst OI
 							ON ARI.strInvoiceOriginId COLLATE Latin1_General_CI_AS = OI.ptivc_invc_no COLLATE Latin1_General_CI_AS
-					WHERE  
-						ARI.ysnPosted = 1
+					WHERE   ARI.ysnPosted = 1
+						AND ARI.ysnImportedAsPosted = 1 
+						AND ARI.ysnImportedFromOrigin = 1
 				END
 
 				--If ysnAllowUserSelfPost is True in User Role
