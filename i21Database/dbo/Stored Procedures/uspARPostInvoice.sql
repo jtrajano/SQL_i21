@@ -3119,7 +3119,7 @@ IF @post = 1
 			SELECT			
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
-				,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
+				,intAccountId				= ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId), SMCL.intProfitCenter),ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId))
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 
 													CASE WHEN DT.dblBaseAdjustedTax < 0 THEN ABS(DT.dblBaseAdjustedTax) ELSE 0 END 
 											  ELSE 
@@ -3184,6 +3184,9 @@ IF @post = 1
 			INNER JOIN
 				tblARCustomer C
 					ON A.intEntityCustomerId = C.intEntityCustomerId
+			INNER JOIN
+				tblSMCompanyLocation SMCL
+					ON A.intCompanyLocationId = SMCL.intCompanyLocationId 
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId				
