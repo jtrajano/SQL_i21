@@ -1001,6 +1001,7 @@ BEGIN
 		,@dblPriceIndexRate				= dblPriceIndexRate	
 		,@dtmPriceIndexDate				= dtmPriceIndexDate	
 		,@ysnDuplicate					= ysnDuplicate
+		,@ysnInvalid					= ysnInvalid
 		FROM ##tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)

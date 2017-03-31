@@ -25,11 +25,23 @@ DECLARE @ysnRemoteTransaction INT
 DECLARE @strItemTermDiscountBy NVARCHAR(MAX)
 
 DECLARE @companyConfigTermId	INT = NULL
+DECLARE @invalid				BIT = 0
 
 SELECT TOP 1 @companyConfigTermId = intTermsCode FROM tblCFCompanyPreference
 IF(ISNULL(@companyConfigTermId,0) = 0)
 BEGIN
 	SET @ErrorMessage = 'Term code is required.'
+	SET @CreatedIvoices = NULL
+	SET @UpdatedIvoices = NULL
+
+	RETURN
+END
+
+
+SELECT TOP 1 @invalid = ysnInvalid FROM tblCFTransaction where intTransactionId = @TransactionId
+IF(@invalid = 1)
+BEGIN
+	SET @ErrorMessage = 'Unable to post invalid transaction'
 	SET @CreatedIvoices = NULL
 	SET @UpdatedIvoices = NULL
 
