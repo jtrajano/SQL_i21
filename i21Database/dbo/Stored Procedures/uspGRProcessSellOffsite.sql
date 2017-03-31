@@ -132,7 +132,7 @@ BEGIN TRY
 
 	SELECT @UserName = strUserName
 	FROM tblSMUserSecurity
-	WHERE intEntityUserSecurityId = @UserKey --Another Hiccup
+	WHERE [intEntityId] = @UserKey --Another Hiccup
 
 	INSERT INTO #SellStorage 
 	(
@@ -570,7 +570,7 @@ BEGIN TRY
 	
 	--CREATING INVOICE
 	    SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROM tblSMCompanyPreference
-		SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey), @UserKey)			
+		SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey), @UserKey)			
 		SET @intCurrencyId = ISNULL((SELECT intCurrencyId FROM tblAPVendor WHERE [intEntityId] = @intSaleEntityId), @intDefaultCurrencyId)
 		SELECT @intTermId = intTermsId FROM tblEMEntityLocation WHERE intEntityId = @intSaleEntityId
 
@@ -762,7 +762,7 @@ BEGIN TRY
 				,[dtmHistoryDate]=GetDATE()
 				,[dblPaidAmount]=ARD.dblPrice							
 				,[strType]='Generated Invoice'
-				,[strUserName]=(SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey)
+				,[strUserName]=(SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
 				 FROM tblARInvoice AR
 				 JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
 				 WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)

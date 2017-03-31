@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSMUserSecurity] (
     --[intEntityUserSecurityId] INT            IDENTITY (1, 1) NOT NULL,
-	[intEntityUserSecurityId]		INT NOT NULL,
+	[intEntityId]		INT NOT NULL,
     [intUserRoleID]					INT NULL,
 	[intCompanyLocationId]			INT NULL,
 	[intSecurityPolicyId]			INT NULL,
@@ -34,10 +34,10 @@
     [intConcurrencyId]				INT	DEFAULT (1) NOT NULL,
 	[intEntityIdOld]				INT NULL,
 	[intUserSecurityIdOld]			INT NULL,
-    CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([intEntityUserSecurityId] ASC),
+    CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_UserSecurity_tblSMSecurityPolicy] FOREIGN KEY ([intSecurityPolicyId]) REFERENCES [dbo].[tblSMSecurityPolicy] ([intSecurityPolicyId]),
     CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]),
-	CONSTRAINT [FK_UserSecurity_Entity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_UserSecurity_Entity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_UserSecurity_CompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]), 
     CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName]) --this use in an sp named uspEMMergeEntity, any change in name should also be applied there MCG 
 );
@@ -60,7 +60,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMUserSecurity',
     @level2type = N'COLUMN',
-    @level2name = N'intEntityUserSecurityId'
+    @level2name = N'intEntityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'User Role Id',

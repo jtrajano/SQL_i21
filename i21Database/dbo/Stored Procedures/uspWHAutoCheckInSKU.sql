@@ -57,7 +57,7 @@ BEGIN TRANSACTION
 	INNER JOIN tblICItem m ON m.intItemId = li.intItemId
 	WHERE li.intOrderHeaderId = @intOrderHeaderId
 	
-	SELECT @intUserId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	SELECT @intUserId = [intEntityId] FROM tblSMUserSecurity WHERE strUserName = @strUserName
 	SELECT @intStorageLocationId = intStorageLocationId FROM tblICStorageLocation WHERE strName = @strUnitName
 	SELECT @strBOLNo = strBOLNo FROM tblWHOrderHeader WHERE intOrderHeaderId = @intOrderHeaderId
 	

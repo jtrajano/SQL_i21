@@ -67,7 +67,7 @@ DECLARE @intStartingNumberId INT
 DECLARE @intAPAccount INT = NULL
 SELECT @intAPAccount = intAPAccount FROM tblSMCompanyLocation 
 WHERE intCompanyLocationId = (SELECT TOP 1 intCompanyLocationId 
-								FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @intUserId)
+								FROM tblSMUserSecurity WHERE [intEntityId] = @intUserId)
 
 IF (@intAPAccount IS NULL)
 BEGIN

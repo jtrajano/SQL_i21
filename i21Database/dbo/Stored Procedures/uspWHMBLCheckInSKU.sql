@@ -81,7 +81,7 @@ BEGIN TRY
 	-- SELECT  @strJulianDateLotCodeValidation = SettingValue FROM dbo.iMake_AppSettingValue AV    
 	--JOIN dbo.iMake_AppSetting S ON S.SettingKey = AV.SettingKey    
 	--WHERE S.SettingName = 'JulianDateLotCcodeValidation'    
-	SELECT @intUserId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	SELECT @intUserId = [intEntityId] FROM tblSMUserSecurity WHERE strUserName = @strUserName
 	
 	IF EXISTS (
 			SELECT m.intItemId

@@ -21,8 +21,8 @@ SELECT W.intWorkOrderId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON W.intStatusId = WS.intStatusId
 	AND W.intOrderHeaderId IS NOT NULL and W.intStatusId <> 13 and W.intManufacturingProcessId IS NULL
-JOIN dbo.tblSMUserSecurity US ON US.intEntityUserSecurityId = W.intCreatedUserId
-JOIN dbo.tblSMUserSecurity US1 ON US1.intEntityUserSecurityId = W.intLastModifiedUserId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = W.intCreatedUserId
+JOIN dbo.tblSMUserSecurity US1 ON US1.[intEntityId] = W.intLastModifiedUserId
 LEFT JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = W.intOrderHeaderId
 LEFT JOIN dbo.tblWHOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
 

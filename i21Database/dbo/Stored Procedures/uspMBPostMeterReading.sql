@@ -18,7 +18,7 @@ SET ANSI_WARNINGS OFF
 BEGIN
 
 	DECLARE @UserEntityId INT
-	SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId), @UserId)
+	SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), @UserId)
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 

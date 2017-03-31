@@ -41,7 +41,7 @@ SELECT W.intWorkOrderId
 	,CT.intContainerTypeId
 	,CT.strDisplayMember AS strContainerType
 	,WI.dtmLastModified
-	,US.[intEntityUserSecurityId]
+	,US.[intEntityId]
 	,US.strUserName
 	,'STAGE' AS strTransactionName
 	,NULL AS dblReadingQty
@@ -94,7 +94,7 @@ JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WI.intStorageLocat
 JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
-JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = WI.intLastModifiedUserId
 Left JOIN tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
 WHERE WI.ysnConsumptionReversed = 0
 
@@ -141,7 +141,7 @@ SELECT W.intWorkOrderId
 	,CT.intContainerTypeId
 	,CT.strDisplayMember AS strContainerType
 	,WI.dtmLastModified
-	,US.[intEntityUserSecurityId]
+	,US.[intEntityId]
 	,US.strUserName
 	,'CONSUME' AS strTransactionName
 	,NULL AS dblReadingQty
@@ -195,7 +195,7 @@ JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WI.intStorageLocat
 LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
-JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = WI.intLastModifiedUserId
 Left JOIN dbo.tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
 UNION
 
@@ -240,7 +240,7 @@ SELECT W.intWorkOrderId
 	,CT.intContainerTypeId
 	,CT.strDisplayMember AS strContainerType
 	,WI.dtmLastModified
-	,US.[intEntityUserSecurityId]
+	,US.[intEntityId]
 	,US.strUserName
 	,'STAGE REVERSAL' AS strTransactionName
 	,NULL AS dblReadingQty
@@ -293,7 +293,7 @@ JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WI.intStorageLocat
 JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
-JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = WI.intLastModifiedUserId
 Left JOIN dbo.tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
 WHERE WI.ysnConsumptionReversed = 1
 
@@ -340,7 +340,7 @@ SELECT W.intWorkOrderId
 	,CT.intContainerTypeId
 	,CT.strDisplayMember AS strContainerType
 	,WP.dtmLastModified
-	,US.[intEntityUserSecurityId]
+	,US.[intEntityId]
 	,US.strUserName
 	,'PRODUCE' AS strTransactionName
 	,NULL AS dblReadingQty
@@ -393,7 +393,7 @@ JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WP.intStorageLocat
 LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
-JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = WP.intLastModifiedUserId
 Left JOIN dbo.tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
 LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = WP.intSpecialPalletLotId
 WHERE WP.ysnProductionReversed = 0
@@ -441,7 +441,7 @@ SELECT W.intWorkOrderId
 	,CT.intContainerTypeId
 	,CT.strDisplayMember AS strContainerType
 	,WP.dtmLastModified
-	,US.[intEntityUserSecurityId]
+	,US.[intEntityId]
 	,US.strUserName
 	,'PRODUCE REVERSAL' AS TransactionName
 	,NULL AS dblReadingQty
@@ -494,7 +494,7 @@ JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WP.intStorageLocat
 LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
-JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = WP.intLastModifiedUserId
 Left JOIN dbo.tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
 LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = WP.intSpecialPalletLotId
 WHERE WP.ysnProductionReversed = 1

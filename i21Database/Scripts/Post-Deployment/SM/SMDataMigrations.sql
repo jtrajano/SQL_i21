@@ -139,8 +139,8 @@ GO
 	BEGIN
 
 	Declare @userId INT
-	SELECT @userId = [intEntityUserSecurityId] FROM (  
-		SELECT ROW_NUMBER() OVER(ORDER BY [intEntityUserSecurityId] ASC) AS 'ROWID', *
+	SELECT @userId = [intEntityId] FROM (  
+		SELECT ROW_NUMBER() OVER(ORDER BY [intEntityId] ASC) AS 'ROWID', *
 		FROM [dbo].[tblSMUserSecurity]
 	) a
 	WHERE ROWID = @currentRow
@@ -155,7 +155,7 @@ GO
 
 	PRINT N'DELETE INVALID USER PREFERENCES'
 	DELETE FROM tblSMUserPreference 
-	WHERE intEntityUserSecurityId NOT IN (SELECT intEntityUserSecurityId FROM tblSMUserSecurity)
+	WHERE intEntityUserSecurityId NOT IN (SELECT [intEntityId] FROM tblSMUserSecurity)
 
 GO
 --	-- INSERT DEFAULT LOCATION

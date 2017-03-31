@@ -97,7 +97,7 @@ FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
 JOIN tblICLotStatus ls ON ls.intLotStatusId = l.intLotStatusId
-LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = l.intCreatedUserId
+LEFT JOIN tblSMUserSecurity us ON us.[intEntityId] = l.intCreatedUserId
 JOIN tblICItemUOM ium ON ium.intItemUOMId = l.intItemUOMId
 JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
 LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId

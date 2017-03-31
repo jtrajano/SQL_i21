@@ -131,7 +131,7 @@ BEGIN TRY
 			WHERE u.intStorageLocationId = @intToLocationId
 			
 		--Get the User Id 
-			SELECT @intUserSecurityId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName = @strUserName--this is a hiccup
+			SELECT @intUserSecurityId = [intEntityId] FROM tblSMUserSecurity WHERE strUserName = @strUserName--this is a hiccup
 			
 			IF @intStorageLocationId = 0                                                 
 			BEGIN                                                

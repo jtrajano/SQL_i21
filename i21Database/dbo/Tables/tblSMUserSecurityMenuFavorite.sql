@@ -7,7 +7,7 @@
     [intSort] INT NULL DEFAULT (1), 
 	[intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMasterMenu] FOREIGN KEY ([intMenuId]) REFERENCES [tblSMMasterMenu]([intMenuID]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) ON DELETE CASCADE
 )
 

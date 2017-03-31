@@ -10,5 +10,5 @@
 			,tblEMEntityCredential b
 			,tblEMEntity c
 		where
-			b.intEntityId = a.intEntityUserSecurityId
+			b.intEntityId = a.[intEntityId]
 			and c.intEntityId = b.intEntityId

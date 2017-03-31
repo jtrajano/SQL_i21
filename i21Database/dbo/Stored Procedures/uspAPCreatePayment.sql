@@ -81,7 +81,7 @@ BEGIN
 
 	IF @location IS NULL
 	BEGIN
-		SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId)
+		SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId)
 		IF @location IS NULL
 		BEGIN
 			RAISERROR('Location setup is missing.', 16, 1);
@@ -164,7 +164,7 @@ BEGIN
 			,@withholdPercent = B.dblWithholdPercent
 		 FROM tblSMUserSecurity A 
 		INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
-				WHERE A.[intEntityUserSecurityId] = @userId
+				WHERE A.[intEntityId] = @userId
 		IF (@withHoldAccount IS NULL)
 		BEGIN
 			RAISERROR('This vendor enables withholding but there is no setup of withhold account.',16,1);

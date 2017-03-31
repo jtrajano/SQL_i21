@@ -70,7 +70,7 @@ FROM tblICInventoryReceipt Receipt
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = Receipt.intCurrencyId
 	LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Receipt.intFreightTermId
 	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.[intEntityId] = Receipt.intShipViaId
-	LEFT JOIN tblSMUserSecurity Receiver ON Receiver.intEntityUserSecurityId = Receipt.intReceiverId
+	LEFT JOIN tblSMUserSecurity Receiver ON Receiver.[intEntityId] = Receipt.intReceiverId
 	LEFT JOIN vyuEMEntity Entity ON Entity.intEntityId = Receipt.intEntityId AND Entity.strType = 'User'
 	LEFT JOIN [tblEMEntityLocation] ShipFrom ON ShipFrom.intEntityLocationId = Receipt.intShipFromId
 	LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Receipt.intTaxGroupId

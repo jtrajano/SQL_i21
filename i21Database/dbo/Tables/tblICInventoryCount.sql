@@ -34,5 +34,5 @@
     CONSTRAINT [FK_tblICInventoryCount_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
     CONSTRAINT [FK_tblICInventoryCount_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
     CONSTRAINT [FK_tblICInventoryCount_tblICInventoryCount] FOREIGN KEY ([intRecountReferenceId]) REFERENCES [tblICInventoryCount]([intInventoryCountId]), 
-    CONSTRAINT [FK_tblICInventoryCount_tblSMUserSecurity] FOREIGN KEY ([intEntityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) 
+    CONSTRAINT [FK_tblICInventoryCount_tblSMUserSecurity] FOREIGN KEY ([intEntityId]) REFERENCES [tblSMUserSecurity]([intEntityId]) 
 )

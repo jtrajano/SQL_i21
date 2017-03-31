@@ -27,5 +27,5 @@
     CONSTRAINT [FK_tblICInventoryCountDetail_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
     CONSTRAINT [FK_tblICInventoryCountDetail_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
     CONSTRAINT [FK_tblICInventoryCountDetail_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
-    CONSTRAINT [FK_tblICInventoryCountDetail_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) 
+    CONSTRAINT [FK_tblICInventoryCountDetail_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId]) 
 )

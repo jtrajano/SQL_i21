@@ -49,7 +49,7 @@ BEGIN
 	
 	-- Get Note Transaction user Id, trans amount
 	Select * from dbo.tblSMUserSecurity Where strUserName like '%ADMIN%'
-	SELECT @intUserId = [intEntityUserSecurityId], @EntityId = [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity Where strUserName = 'SSIADMIN'              
+	SELECT @intUserId = [intEntityId], @EntityId = [intEntityId] FROM dbo.tblSMUserSecurity Where strUserName = 'SSIADMIN'              
 
 	--Get Journal Id
 	--	SET @strJournalId = 'F' + RIGHT('00' + CAST(DATEPART(MM,GETDATE()) as NVARCHAR(2)),2) + RIGHT('00' + CAST(DATEPART(DD,GETDATE()) as NVARCHAR(2)),2)

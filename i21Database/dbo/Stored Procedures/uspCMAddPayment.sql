@@ -121,7 +121,7 @@ SELECT	strTransactionId			= @strTransactionId
 		,dtmDateReconciled			= NULL
 		,intEntityId				= @intUserId
 		,intCreatedUserId			= @intUserId
-		,intCompanyLocationId		= (SELECT TOP 1 intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @intUserId)
+		,intCompanyLocationId		= (SELECT TOP 1 intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @intUserId)
 		,dtmCreated					= GETDATE()
 		,intLastModifiedUserId		= @intUserId
 		,dtmLastModified			= GETDATE()

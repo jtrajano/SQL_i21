@@ -43,9 +43,9 @@ Begin
 			RaisError('Invalid Delivery No.',16,1)
 
 		If Exists (Select 1 From tblSMUserSecurity Where strUserName='irelyadmin')
-			Select TOP 1 @intUserId=intEntityUserSecurityId From tblSMUserSecurity Where strUserName='irelyadmin'
+			Select TOP 1 @intUserId=[intEntityId] From tblSMUserSecurity Where strUserName='irelyadmin'
 		Else
-			Select TOP 1 @intUserId=intEntityUserSecurityId From tblSMUserSecurity
+			Select TOP 1 @intUserId=[intEntityId] From tblSMUserSecurity
 
 		Select @intLoadId=intLoadId From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo AND intShipmentType=1
 		If ISNULL(@intLoadId,0)=0

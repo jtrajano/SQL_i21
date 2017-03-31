@@ -28,9 +28,9 @@ DECLARE @IVTable TABLE
 
 BEGIN TRY
 
-SELECT	TOP 1 @intEntityUserSecurityId = [intEntityUserSecurityId] 
+SELECT	TOP 1 @intEntityUserSecurityId = [intEntityId] 
 		FROM	dbo.tblSMUserSecurity 
-		WHERE	[intEntityUserSecurityId] = @intUserId
+		WHERE	[intEntityId] = @intUserId
 
 INSERT INTO @IVTable
 SELECT intTransactionId,intInvoiceId  from tblARInvoice INV

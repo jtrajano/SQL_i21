@@ -13,7 +13,7 @@ IF ISNULL(@RaiseError,0) = 0
 
 
 DECLARE @UserEntityId INT
-SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId),@UserId)
+SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId)
 
 --BEGIN TRY
 --EXEC [dbo].[uspARPostInvoice]

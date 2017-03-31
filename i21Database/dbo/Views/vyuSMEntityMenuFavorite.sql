@@ -19,9 +19,9 @@ Favorite.intConcurrencyId
 FROM tblSMEntityMenuFavorite Favorite
 INNER JOIN
 (
-	SELECT DISTINCT ISNULL(UserLocationRole.intEntityId, UserSecurity.intEntityUserSecurityId) AS intEntityUserSecurityId, ISNULL(UserLocationRole.intUserRoleId, UserSecurity.intUserRoleID) AS intUserRoleId, UserLocationRole.intCompanyLocationId AS intCompanyLocationId 
+	SELECT DISTINCT ISNULL(UserLocationRole.intEntityId, UserSecurity.[intEntityId]) AS intEntityUserSecurityId, ISNULL(UserLocationRole.intUserRoleId, UserSecurity.intUserRoleID) AS intUserRoleId, UserLocationRole.intCompanyLocationId AS intCompanyLocationId 
 	FROM tblSMUserSecurity UserSecurity 
-	LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission UserLocationRole ON UserLocationRole.intEntityId = UserSecurity.intEntityUserSecurityId
+	LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission UserLocationRole ON UserLocationRole.intEntityId = UserSecurity.[intEntityId]
 	UNION ALL
 	SELECT intEntityContactId AS intEntityUserSecurityId, intEntityRoleId AS intUserRoleId, NULL AS intCompanyLocationId FROM tblEMEntityToContact WHERE intEntityRoleId IS NOT NULL
 ) UserSecurityCompanyLocationRolePermission ON Favorite.intEntityId = UserSecurityCompanyLocationRolePermission.intEntityUserSecurityId --AND ISNULL(UserSecurityCompanyLocationRolePermission.intCompanyLocationId, 0) = ISNULL(Favorite.intCompanyLocationId, 0)

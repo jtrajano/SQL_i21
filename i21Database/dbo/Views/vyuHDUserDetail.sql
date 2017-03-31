@@ -11,18 +11,18 @@
 			,strLocation = us.strLocation
 			,strSLAPlan = ''
 			,strReplyDue = ''
-			,intUserId = us.[intEntityUserSecurityId]
-			,intEntityId = us.[intEntityUserSecurityId]
+			,intUserId = us.[intEntityId]
+			,intEntityId = us.[intEntityId]
 			,ur.strName
 			,us.strUserName
 			,us.strFirstName
 			,us.strMiddleName
 			,us.strLastName
-			,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from vyuEMEntityContact where intEntityId = us.[intEntityUserSecurityId] and ysnDefaultContact = 1)
+			,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
 			,ysni21User = 1
-			,imgPhoto = (select top 1 imgPhoto from vyuEMEntityContact where intEntityId = us.[intEntityUserSecurityId] and ysnDefaultContact = 1)
+			,imgPhoto = (select top 1 imgPhoto from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
 			,intConcurrencyId = 1
-			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = us.[intEntityUserSecurityId] and ysnDefaultContact = 1)
+			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
 			,strEntityType = 'Agent'
 		from
 			tblSMUserSecurity us,

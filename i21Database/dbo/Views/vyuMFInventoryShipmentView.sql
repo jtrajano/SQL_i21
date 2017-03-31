@@ -212,5 +212,5 @@ LEFT JOIN tblSMShipVia ShipVia ON ShipVia.[intEntityId] = Shipment.intShipViaId
 LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipment.intFreightTermId
 LEFT JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId
 LEFT JOIN tblMFOrderHeader OH ON OH.strReferenceNo = Shipment.strShipmentNumber
-LEFT JOIN tblSMUserSecurity US ON US.intEntityUserSecurityId = OH.intCreatedById
+LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = OH.intCreatedById
 WHERE Shipment.ysnPosted = 0

@@ -185,9 +185,9 @@ _PostOrUnPost:
 		FROM	tblICInventoryTransfer 
 		WHERE	intInventoryTransferId = @TransferId
 
-		SELECT	TOP 1 @intEntityId = [intEntityUserSecurityId] 
+		SELECT	TOP 1 @intEntityId = [intEntityId] 
 		FROM	dbo.tblSMUserSecurity 
-		WHERE	[intEntityUserSecurityId] = @intUserId
+		WHERE	[intEntityId] = @intUserId
 		if @ysnRecap = 0
 		BEGIN
 	    	EXEC dbo.uspICPostInventoryTransfer @ysnPostOrUnPost, 0, @strTransactionId, @intEntityId;			

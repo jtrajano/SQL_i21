@@ -81,7 +81,7 @@ BEGIN
    SET @intCompanyLocationId = NULL
 END;	
 
-SELECT @EntityId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @intUserId;
+SELECT @EntityId = [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @intUserId;
 
 DISABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
 

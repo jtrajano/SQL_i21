@@ -5,7 +5,7 @@ DECLARE @intDefaultLocationId INT
 
 SELECT @intDefaultLocationId = intCompanyLocationId
 FROM tblSMUserSecurity
-WHERE intEntityUserSecurityId = @intEntityUserSecurityId
+WHERE [intEntityId] = @intEntityUserSecurityId
 
 SELECT
 	CAST(item.strItemNo AS NVARCHAR(16)) code

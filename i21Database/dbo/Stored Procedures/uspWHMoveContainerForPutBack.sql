@@ -99,7 +99,7 @@ BEGIN TRY
 		WHERE u.strName = @strStorageLocationName
 
 		--Get the User Id     
-		SELECT @intUserSecurityId = intEntityUserSecurityId
+		SELECT @intUserSecurityId = [intEntityId]
 		FROM tblSMUserSecurity
 		WHERE strUserName = @strUserName
 

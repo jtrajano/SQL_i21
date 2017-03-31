@@ -248,6 +248,6 @@ LEFT JOIN vyuLGNotifyParties NP ON NP.intEntityId = LOAD.intDocPresentationId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = LOAD.intInsuranceCurrencyId
 LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = LOAD.intContainerTypeId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = LOAD.intEquipmentTypeId
-LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId] = LOAD.intDispatcherId
+LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = LOAD.intDispatcherId
 LEFT JOIN tblCTPosition P ON LOAD.intPositionId = P.intPositionId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = LOAD.intGenerateLoadId

@@ -46,4 +46,4 @@ FROM tblICInventoryCountDetail InvCountDetail
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = InvCountDetail.intLotId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InvCountDetail.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-	LEFT JOIN tblSMUserSecurity UserSecurity ON UserSecurity.intEntityUserSecurityId = InvCountDetail.intEntityUserSecurityId
+	LEFT JOIN tblSMUserSecurity UserSecurity ON UserSecurity.[intEntityId] = InvCountDetail.intEntityUserSecurityId

@@ -20,7 +20,7 @@ AS
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'User')
 	BEGIN	
-		UPDATE tblSMUserSecurity SET ysnDisabled = 1 WHERE intEntityUserSecurityId = @Id
+		UPDATE tblSMUserSecurity SET ysnDisabled = 1 WHERE [intEntityId] = @Id
 	END	
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Employee')

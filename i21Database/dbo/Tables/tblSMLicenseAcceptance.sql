@@ -5,7 +5,7 @@
     [strEULAVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [dtmDateAccepted] DATE NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [FK_tblSMLicenseAcceptance_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])  ON DELETE CASCADE
+    CONSTRAINT [FK_tblSMLicenseAcceptance_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId])  ON DELETE CASCADE
 )
 
 GO

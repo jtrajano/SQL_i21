@@ -22,7 +22,7 @@ SELECT
         join [tblEMEntityType] b
             on b.intEntityId = a.intEntityId and b.strType = 'User'
         join tblSMUserSecurity c
-            on c.intEntityUserSecurityId= a.intEntityId
+            on c.[intEntityId]= a.intEntityId
         left join [tblEMEntityLocation] e  
             on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
         left join [tblEMEntityToContact] f  
@@ -37,5 +37,5 @@ SELECT
 			on g.intEntityId = j.intEntityId
 		outer apply 
 		(
-			SELECT TOP 1 dtmDate FROM tblSMUserLogin u WHERE u.intEntityId = c.intEntityUserSecurityId ORDER BY dtmDate DESC
+			SELECT TOP 1 dtmDate FROM tblSMUserLogin u WHERE u.intEntityId = c.[intEntityId] ORDER BY dtmDate DESC
 		) u

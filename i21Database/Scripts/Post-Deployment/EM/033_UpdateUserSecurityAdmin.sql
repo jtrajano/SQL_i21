@@ -6,7 +6,7 @@ BEGIN
 	update a set a.ysnAdmin = 1
 		from tblSMUserSecurity a
 			join vyuEMUserAdmin b
-				on a.intEntityUserSecurityId = b.intEntityUserSecurityId
+				on a.[intEntityId] = b.[intEntityId]
 
 
 

@@ -16,7 +16,7 @@ DECLARE @UserEntityID INT
 		,@ForDelete BIT = 0
 --THIS IS A HICCUP		
 
-SET @UserEntityID = ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId),@userId) 
+SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @userId),@userId) 
 SELECT @actionType = CASE WHEN @post = 1 THEN 'Posted'  ELSE 'Unposted' END 
 SELECT @ForDelete = CASE WHEN @post = 1 THEN 0 ELSE 1 END
 

@@ -20,7 +20,7 @@ SELECT
 	vEntityContact.Vendor,
 	vEntityContact.Employee,
 	vEntityContact.Salesperson,
-	CASE WHEN ISNULL(UserSecurity.intEntityUserSecurityId, 0) = 0 THEN 0 ELSE vEntityContact.[User] END [User],
+	CASE WHEN ISNULL(UserSecurity.[intEntityId], 0) = 0 THEN 0 ELSE vEntityContact.[User] END [User],
 	vEntityContact.FuturesBroker,
 	vEntityContact.ForwardingAgent,
 	vEntityContact.Terminal,
@@ -41,6 +41,6 @@ FROM tblEMEntityCredential AS EntityCredential
 			END
 		)
 	LEFT JOIN tblSMUserSecurity UserSecurity 
-		ON EntityCredential.intEntityId = UserSecurity.intEntityUserSecurityId
+		ON EntityCredential.intEntityId = UserSecurity.[intEntityId]
 	LEFT JOIN tblSMSecurityPolicy SecurityPolicy
 		ON UserSecurity.intSecurityPolicyId = SecurityPolicy.intSecurityPolicyId 

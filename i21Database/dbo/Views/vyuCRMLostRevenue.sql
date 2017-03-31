@@ -93,7 +93,7 @@
 			and tblSOSalesOrderDetail.intSalesOrderId = tblSOSalesOrder.intSalesOrderId
 			and tblICItem.intItemId = tblSOSalesOrderDetail.intItemId
 			and tblEMEntity.intEntityId = tblSOSalesOrder.intEntityCustomerId
-			and tblARCustomer.intEntityCustomerId = tblEMEntity.intEntityId
+			and tblARCustomer.intEntityId = tblEMEntity.intEntityId
 		group by
 			tblSOSalesOrder.intEntityCustomerId
 			,tblEMEntity.strName
@@ -165,7 +165,7 @@
 				and g.intCommodityId = b.intCommodityId
 				and h.intItemId = a.intItemId
 				and c.intEntityId = b.intEntityId
-				and f.intEntityCustomerId = c.intEntityId
+				and f.intEntityId = c.intEntityId
 			group by
 				c.intEntityId
 				,c.strName

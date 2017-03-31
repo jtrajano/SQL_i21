@@ -32,7 +32,7 @@ BEGIN
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = W.intCreatedUserId
+	JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = W.intCreatedUserId
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
 	LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 	LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
@@ -74,7 +74,7 @@ BEGIN
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = W.intCreatedUserId
+	JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = W.intCreatedUserId
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
 	LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 	LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId

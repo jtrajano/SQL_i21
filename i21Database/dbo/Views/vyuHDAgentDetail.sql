@@ -2,19 +2,19 @@
 	AS
 	select
 		strName = ec.strUserName,
-		intId = us.[intEntityUserSecurityId],
+		intId = us.[intEntityId],
 		strFullName = en.strName,
 		strEmail = en.strEmail,
-		intEntityId = us.[intEntityUserSecurityId],
+		intEntityId = us.[intEntityId],
 		ysnDisabled = us.ysnDisabled,
 		strPhone = en.strPhone,
 		strMobile = en.strMobile
 	from
 		tblSMUserSecurity us
-		inner join vyuEMEntityContact en on en.intEntityId = us.[intEntityUserSecurityId] and en.ysnDefaultContact = 1
-		inner join [tblEMEntityCredential] ec on ec.intEntityId = us.[intEntityUserSecurityId]
+		inner join vyuEMEntityContact en on en.intEntityId = us.[intEntityId] and en.ysnDefaultContact = 1
+		inner join [tblEMEntityCredential] ec on ec.intEntityId = us.[intEntityId]
 	where
-		us.[intEntityUserSecurityId] is not null
+		us.[intEntityId] is not null
 
 	union all
 

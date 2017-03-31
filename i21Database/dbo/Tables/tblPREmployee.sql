@@ -45,7 +45,7 @@
 	CONSTRAINT [FK_tblPREmployee_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId]),
 	CONSTRAINT [FK_tblPREmployee_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [tblPRWorkersCompensation]([intWorkersCompensationId]),
-	CONSTRAINT [FK_tblPREmployee_tblSMuserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])
+	CONSTRAINT [FK_tblPREmployee_tblSMuserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId])
 ) ON [PRIMARY]
 GO
 

@@ -13,5 +13,5 @@
 	CONSTRAINT [PK_tblLGReservation] PRIMARY KEY ([intReservationId]), 
 	CONSTRAINT [FK_tblLGReservation_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
 	CONSTRAINT [FK_tblLGReservation_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-	CONSTRAINT [FK_tblLGReservation_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])
+	CONSTRAINT [FK_tblLGReservation_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId])
 )

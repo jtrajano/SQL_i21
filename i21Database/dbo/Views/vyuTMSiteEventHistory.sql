@@ -159,6 +159,6 @@ AS
 		ON D.intPerformerID = Z.intEntityId	
 	----End Getting Event Performer
 	LEFT JOIN tblSMUserSecurity AB
-		ON D.intUserID = AB.[intEntityUserSecurityId]
+		ON D.intUserID = AB.[intEntityId]
 		
 GO

@@ -21,6 +21,6 @@ FROM
 	FROM tblSMForBatchPosting
 ) ForBatchPosting
 LEFT JOIN tblEMEntity Entity ON ForBatchPosting.intEntityVendorId = Entity.intEntityId
-INNER JOIN tblSMUserSecurity UserSecurity ON ForBatchPosting.intEntityId = UserSecurity.intEntityUserSecurityId
+INNER JOIN tblSMUserSecurity UserSecurity ON ForBatchPosting.intEntityId = UserSecurity.[intEntityId]
 GO
 

@@ -144,7 +144,7 @@ BEGIN
 	LEFT JOIN tblICStorageLocation sl1 ON sl1.intStorageLocationId = iad.intNewStorageLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation clsl2 ON clsl2.intCompanyLocationSubLocationId = iad.intSubLocationId
 	LEFT JOIN tblICStorageLocation sl2 ON sl2.intStorageLocationId = iad.intStorageLocationId
-	LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedEntityId
+	LEFT JOIN tblSMUserSecurity us ON us.[intEntityId] = ilt.intCreatedEntityId
 	LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
 	LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 	WHERE l.intLotId = @intLotId
@@ -277,7 +277,7 @@ BEGIN
 		LEFT JOIN tblICStorageLocation sl1 ON sl1.intStorageLocationId = iad.intNewStorageLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation clsl2 ON clsl2.intCompanyLocationSubLocationId = iad.intSubLocationId
 		LEFT JOIN tblICStorageLocation sl2 ON sl2.intStorageLocationId = iad.intStorageLocationId
-		LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedEntityId
+		LEFT JOIN tblSMUserSecurity us ON us.[intEntityId] = ilt.intCreatedEntityId
 		LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
 		LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 		WHERE l.intLotId = @intLotId1
@@ -353,7 +353,7 @@ BEGIN
 	LEFT JOIN tblICStorageLocation sl1 ON sl1.intStorageLocationId = iad.intStorageLocationId
 	LEFT JOIN tblICLotStatus ls ON ls.intLotStatusId = iad.intLotStatusId
 	LEFT JOIN tblICLotStatus ls1 ON ls1.intLotStatusId = iad.intNewLotStatusId
-	LEFT JOIN tblSMUserSecurity us ON us.intEntityUserSecurityId = ia.intEntityId
+	LEFT JOIN tblSMUserSecurity us ON us.[intEntityId] = ia.intEntityId
 	WHERE l.intLotId = @intLotId
 		AND (
 			(

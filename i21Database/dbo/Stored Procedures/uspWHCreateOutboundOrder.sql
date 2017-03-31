@@ -60,7 +60,7 @@ BEGIN TRY
 	--======================================
 	-- NOT SURE ABOUT THIS PART OF THE CODE.
 	--======================================
-	SELECT @intLastUpdateById = intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName = @strLastUpdateBy
+	SELECT @intLastUpdateById = [intEntityId] FROM tblSMUserSecurity WHERE strUserName = @strLastUpdateBy
 
 	INSERT INTO tblWHOrderHeader (
 		   intOrderStatusId, 

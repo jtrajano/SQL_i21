@@ -218,11 +218,11 @@ BEGIN TRY
 
 					SELECT @intApproveRejectUserRoleID = intUserRoleID
 					FROM tblSMUserSecurity
-					WHERE intEntityUserSecurityId = @intApproveRejectUserId
+					WHERE [intEntityId] = @intApproveRejectUserId
 
 					SELECT @intUserRoleID = intUserRoleID
 					FROM tblSMUserSecurity
-					WHERE intEntityUserSecurityId = @intLastModifiedUserId
+					WHERE [intEntityId] = @intLastModifiedUserId
 
 					IF @intApproveRejectUserRoleID <> @intUserRoleID
 					BEGIN

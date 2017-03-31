@@ -53,7 +53,7 @@ AS
 	LEFT JOIN tblEMEntity G
 		ON A.intDriverID = G.intEntityId
 	LEFT JOIN tblSMUserSecurity H
-		ON A.intUserID = H.[intEntityUserSecurityId]
+		ON A.intUserID = H.[intEntityId]
 	LEFT JOIN tblSMCompanyLocation I
 		ON B.intLocationId = I.intCompanyLocationId
 	LEFT JOIN vyuARCustomerInquiryReport K

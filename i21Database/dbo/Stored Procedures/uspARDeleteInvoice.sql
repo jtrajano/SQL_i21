@@ -14,7 +14,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 	DECLARE @UserEntityID INT
-	SET @UserEntityID = ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @UserId),@UserId) 
+	SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId) 
 		
 	IF(EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId AND ISNULL(ysnPosted,0) = 1))
 		RAISERROR(120036, 16, 1);		

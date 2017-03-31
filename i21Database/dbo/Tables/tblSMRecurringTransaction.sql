@@ -25,7 +25,7 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblSMRecurringTransaction] PRIMARY KEY ([intRecurringId]), 
     CONSTRAINT [AK_tblSMRecurringTransaction_strTransactionNumber] UNIQUE ([strTransactionNumber], [intTransactionId]), 
-    CONSTRAINT [FK_tblSMRecurringTransaction_tblSMUserSecurity] FOREIGN KEY ([intUserId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) 
+    CONSTRAINT [FK_tblSMRecurringTransaction_tblSMUserSecurity] FOREIGN KEY ([intUserId]) REFERENCES [tblSMUserSecurity]([intEntityId]) 
 )
 
 GO

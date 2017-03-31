@@ -13,7 +13,7 @@
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblMBMeterReading] PRIMARY KEY ([intMeterReadingId]), 
     CONSTRAINT [AK_tblMBMeterReading_strTransactionId] UNIQUE ([strTransactionId]), 
-    CONSTRAINT [FK_tblMBMeterReading_tblSMUserSecurity] FOREIGN KEY ([intEntityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]), 
+    CONSTRAINT [FK_tblMBMeterReading_tblSMUserSecurity] FOREIGN KEY ([intEntityId]) REFERENCES [tblSMUserSecurity]([intEntityId]), 
     CONSTRAINT [FK_tblMBMeterReading_tblMBMeterAccount] FOREIGN KEY ([intMeterAccountId]) REFERENCES [tblMBMeterAccount]([intMeterAccountId]), 
     CONSTRAINT [FK_tblMBMeterReading_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId])
 )

@@ -24,5 +24,5 @@
 	CONSTRAINT [FK_tblLGPickLotDetail_tblICUnitMeasure_intSaleUnitMeasureId] FOREIGN KEY ([intSaleUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	CONSTRAINT [FK_tblLGPickLotDetail_tblICUnitMeasure_intLotUnitMeasureId] FOREIGN KEY ([intLotUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	CONSTRAINT [FK_tblLGPickLotDetail_tblICUnitMeasure_intWeightUnitMeasureId] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-    CONSTRAINT [FK_tblLGPickLotDetail_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])
+    CONSTRAINT [FK_tblLGPickLotDetail_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId])
 )

@@ -28,6 +28,6 @@ BEGIN
 	JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
 	JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 	LEFT JOIN tblICLotStatus ls ON ls.intLotStatusId = l.intLotStatusId
-	LEFT JOIN tblSMUserSecurity us ON us.intEntityUserSecurityId = l.intCreatedUserId
+	LEFT JOIN tblSMUserSecurity us ON us.[intEntityId] = l.intCreatedUserId
 	WHERE l.intLotId = @intLotKey
 END
