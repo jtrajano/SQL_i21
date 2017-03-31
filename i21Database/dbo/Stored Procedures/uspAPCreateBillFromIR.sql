@@ -192,12 +192,10 @@ BEGIN
 						on rtnItem.intOrderId = ct.intContractHeaderId
 					INNER JOIN tblCTContractDetail ctd
 						ON ct.intContractHeaderId = ctd.intContractHeaderId AND rtnItem.intLineNo = ctd.intContractDetailId
-			WHERE	rtn.intInventoryReceiptId = @receiptId AND rtnItem.intInventoryReceiptItemId = @receiptDetailId
+			WHERE	rtn.intInventoryReceiptId = @receiptId
 					AND r.strReceiptType = 'Purchase Contract'
 					AND rtn.strReceiptType = 'Inventory Return'
 					AND ctd.ysnClaimsToProducer = 1
-					--AND ct.ysnClaimsToProducer = 1 
-					--AND ct.intProducerId IS NOT NULL 
 					AND rtnItem.intOrderId IS NOT NULL 
 		END 
 
@@ -210,8 +208,125 @@ BEGIN
 		BEGIN
 
 			EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
+			--process the inventory receipt/inventory return to voucher/debit memo. 
+			IF @intProducerId IS NULL
+			BEGIN
+				INSERT INTO tblAPBill(
+				[intEntityVendorId],
+				[strVendorOrderNumber], 
+				[intTermsId], 
+				[intShipViaId],
+				[intShipFromId],
+				[intShipToId],
+				[dtmDate], 
+				[dtmDateCreated], 
+				[dtmBillDate],
+				[dtmDueDate], 
+				[intCurrencyId],
+				[intAccountId], 
+				[strBillId],
+				[strReference], 
+				[dblTotal], 
+				[dblAmountDue],
+				[intEntityId],
+				[ysnPosted],
+				[ysnPaid],
+				[intTransactionType],
+				[dblDiscount],
+				[dblWithheld],
+				[intStoreLocationId],
+				[intPayToAddressId],
+				[intSubCurrencyCents]
+		
+			)
+			OUTPUT inserted.intBillId, @receiptId, @intProducerId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId, intEntityVendorId)
+			SELECT
+				[intEntityVendorId]		=	A.intEntityVendorId,
+				[strVendorOrderNumber] 	=	A.strVendorRefNo,
+				[intTermsId] 			=	ISNULL(Terms.intTermsId,(SELECT TOP 1 intTermID FROM tblSMTerm WHERE LOWER(strTerm) = 'due on receipt')),
+				[intShipViaId]			=	A.intShipViaId,
+				[intShipFromId]			=	NULLIF(A.intShipFromId,0),
+				[intShipToId]			=	A.intLocationId,
+				[dtmDate] 				=	GETDATE(),
+				[dtmDateCreated] 		=	GETDATE(),
+				[dtmBillDate] 			=	GETDATE(),
+				[dtmDueDate] 			=	GETDATE(),
+				[intCurrencyId]			=	ISNULL(A.intCurrencyId,CAST((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') AS INT)),
+				[intAccountId] 			=	@APAccount,
+				[strBillId]				=	@generatedBillRecordId,
+				[strReference] 			=	A.strBillOfLading,
+				[dblTotal] 				=	@totalReceiptAmount,
+				[dblAmountDue]			=	@totalReceiptAmount,
+				[intEntityId]			=	@userId,
+				[ysnPosted]				=	0,
+				[ysnPaid]				=	0,
+				[intTransactionType]	=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END, -- CASE WHEN @receiptAmount > 0 THEN 1 ELSE 3 END,
+				[dblDiscount]			=	0,
+				[dblWithheld]			=	0,
+				[intStoreLocationId]	=	A.intLocationId,
+				[intPayToAddressId]		=	A.intShipFromId,
+				[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,1)
+			FROM #tmpReceiptData A
+			OUTER APPLY 
+			(
+				SELECT 
+					C.intTermsId
+				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
+				WHERE B.intEntityVendorId = A.intEntityVendorId
+			) Terms
+			WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
 
-			IF @intProducerId IS NOT NULL
+			SET @generatedBillId = SCOPE_IDENTITY()
+			END
+		END
+
+	SELECT @totalReceiptDetails = COUNT(*) FROM #tmpReceiptDetailData ReceiptItem WHERE ReceiptItem.intInventoryReceiptId = @receiptId
+	
+	WHILE @totalReceiptDetails != @counter2
+	BEGIN	
+
+		SET @counter2 = @counter2 + 1;
+		SELECT TOP(1) @receiptDetailId = intInventoryReceiptItemId FROM #tmpReceiptDetailData WHERE intInventoryReceiptId = @receiptId
+		
+		-- Get the producer id. 
+		BEGIN 
+			SELECT	TOP 1 
+					@intProducerId = ctd.intProducerId--ct.intProducerId 
+			FROM	#tmpReceiptData rtn INNER JOIN tblICInventoryReceipt r
+						on r.intInventoryReceiptId = rtn.intSourceInventoryReceiptId
+					INNER JOIN #tmpReceiptDetailData rtnItem
+						on rtnItem.intInventoryReceiptId = rtn.intInventoryReceiptId
+					INNER JOIN tblCTContractHeader ct
+						on rtnItem.intOrderId = ct.intContractHeaderId
+					INNER JOIN tblCTContractDetail ctd
+						ON ct.intContractHeaderId = ctd.intContractHeaderId AND rtnItem.intLineNo = ctd.intContractDetailId
+			WHERE	rtn.intInventoryReceiptId = @receiptId AND rtnItem.intInventoryReceiptItemId = @receiptDetailId
+					AND r.strReceiptType = 'Purchase Contract'
+					AND rtn.strReceiptType = 'Inventory Return'
+					AND ctd.ysnClaimsToProducer = 1
+					AND rtnItem.intOrderId IS NOT NULL 
+		END
+		
+		----GET THE TOTAL IR AMOUNT PER RECEIPT ITEM
+		SELECT @totalLineItem =   SUM(A.dblLineTotal) + ISNULL(SUM(dblTax),0)
+		FROM #tmpReceiptDetailData A 
+		WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptItemId = @receiptDetailId 
+		
+		SET @totalReceiptAmount = @totalLineItem;
+
+		IF @intProducerId IS NOT NULL 
+		BEGIN
+			-- Check if the inventory return needs to use the producer as the vendor for the debit memo. 
+			-- make sure we already have voucher created for that producer
+
+			SET @generatedBillId = (SELECT TOP 1 intBillId FROM #tmpReceiptBillIds WHERE intEntityVendorId = @intProducerId)
+		END
+		IF @generatedBillId IS NULL
+		BEGIN
+
+			EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
+			--process the inventory inventory return to debit memo with producer consideration.
+			IF @intProducerId IS NOT NULL 
 			BEGIN
 				INSERT INTO tblAPBill(
 					[intEntityVendorId],
@@ -283,88 +398,8 @@ BEGIN
 
 				SET @generatedBillId = SCOPE_IDENTITY()
 			END
-
-			-- Otherwise, process the inventory receipt/inventory return to voucher/debit memo. 
-			ELSE 
-			BEGIN			
-			INSERT INTO tblAPBill(
-				[intEntityVendorId],
-				[strVendorOrderNumber], 
-				[intTermsId], 
-				[intShipViaId],
-				[intShipFromId],
-				[intShipToId],
-				[dtmDate], 
-				[dtmDateCreated], 
-				[dtmBillDate],
-				[dtmDueDate], 
-				[intCurrencyId],
-				[intAccountId], 
-				[strBillId],
-				[strReference], 
-				[dblTotal], 
-				[dblAmountDue],
-				[intEntityId],
-				[ysnPosted],
-				[ysnPaid],
-				[intTransactionType],
-				[dblDiscount],
-				[dblWithheld],
-				[intStoreLocationId],
-				[intPayToAddressId],
-				[intSubCurrencyCents]
-		
-			)
-			OUTPUT inserted.intBillId, @receiptId, @intProducerId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId, intEntityVendorId)
-			SELECT
-				[intEntityVendorId]		=	A.intEntityVendorId,
-				[strVendorOrderNumber] 	=	A.strVendorRefNo,
-				[intTermsId] 			=	ISNULL(Terms.intTermsId,(SELECT TOP 1 intTermID FROM tblSMTerm WHERE LOWER(strTerm) = 'due on receipt')),
-				[intShipViaId]			=	A.intShipViaId,
-				[intShipFromId]			=	NULLIF(A.intShipFromId,0),
-				[intShipToId]			=	A.intLocationId,
-				[dtmDate] 				=	GETDATE(),
-				[dtmDateCreated] 		=	GETDATE(),
-				[dtmBillDate] 			=	GETDATE(),
-				[dtmDueDate] 			=	GETDATE(),
-				[intCurrencyId]			=	ISNULL(A.intCurrencyId,CAST((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') AS INT)),
-				[intAccountId] 			=	@APAccount,
-				[strBillId]				=	@generatedBillRecordId,
-				[strReference] 			=	A.strBillOfLading,
-				[dblTotal] 				=	A.dblInvoiceAmount,
-				[dblAmountDue]			=	A.dblInvoiceAmount,
-				[intEntityId]			=	@userId,
-				[ysnPosted]				=	0,
-				[ysnPaid]				=	0,
-				[intTransactionType]	=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END, -- CASE WHEN @receiptAmount > 0 THEN 1 ELSE 3 END,
-				[dblDiscount]			=	0,
-				[dblWithheld]			=	0,
-				[intStoreLocationId]	=	A.intLocationId,
-				[intPayToAddressId]		=	A.intShipFromId,
-				[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,1)
-			FROM #tmpReceiptData A
-			OUTER APPLY 
-			(
-				SELECT 
-					C.intTermsId
-				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
-				WHERE B.intEntityVendorId = A.intEntityVendorId
-			) Terms
-			WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
-
-			SET @generatedBillId = SCOPE_IDENTITY()
-		END 
 		END
-
-	SELECT @totalReceiptDetails = COUNT(*) FROM #tmpReceiptDetailData ReceiptItem WHERE ReceiptItem.intInventoryReceiptId = @receiptId
-	
-	WHILE @totalReceiptDetails != @counter2
-	BEGIN	
-
-		SET @counter2 = @counter2 + 1;
-		SELECT TOP(1) @receiptDetailId = intInventoryReceiptItemId FROM #tmpReceiptDetailData WHERE intInventoryReceiptId = @receiptId
-		
-
+        
 		INSERT INTO tblAPBillDetail(
 			[intBillId],
 			[intItemId],
