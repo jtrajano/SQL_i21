@@ -817,7 +817,7 @@ BEGIN
 	IF @contractTermId > 0
 	BEGIN
 		UPDATE Voucher
-			SET Voucher.intTermsId = @contractTermId, Voucher.dtmDueDate = (SELECT DATEADD(DD, @balanceDue, @receipttDate) )
+			SET Voucher.intTermsId = @contractTermId, Voucher.dtmDueDate = ISNULL(dbo.fnGetDueDateBasedOnTerm(@receipttDate, @contractTermId), Voucher.dtmDueDate)
 		FROM tblAPBill Voucher
 		WHERE Voucher.intBillId = @currentVoucher
 	END
