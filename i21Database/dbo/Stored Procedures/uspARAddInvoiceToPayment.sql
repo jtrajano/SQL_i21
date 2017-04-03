@@ -186,12 +186,16 @@ BEGIN TRY
 	
 	SET @NewId = SCOPE_IDENTITY()
 	
-	UPDATE tblARPayment
+	UPDATE P
 	SET
-		 [dblAmountPaid]		= (@PaymentTotal + @Payment)
-		,[dblUnappliedAmount]	= (@AmountPaid + @Payment) - (@PaymentTotal + @Payment)
+		 P.[dblAmountPaid]		= (@PaymentTotal + @Payment)
+		,P.[dblUnappliedAmount]	= (@AmountPaid + @Payment) - (PD.dblPayment + @Payment)
+	FROM tblARPayment P
+	INNER JOIN (SELECT intPaymentId, SUM(dblPayment) AS dblPayment FROM tblARPaymentDetail GROUP BY intPaymentId) PD
+		ON P.[intPaymentId] = PD.[intPaymentId]
 	WHERE
-		[intPaymentId] = @PaymentId
+		P.[intPaymentId] = @PaymentId
+
 	
 END TRY
 BEGIN CATCH
