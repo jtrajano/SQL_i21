@@ -8,11 +8,27 @@ BEGIN TRY
 	DECLARE @intLoadLogId INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @dtmCurrentETAPOD DATETIME
+	DECLARE @dtmCurrentPlannedAvailabilityDate DATETIME
 	DECLARE @dtmMaxETAPOD DATETIME
 	DECLARE @dtmCurrentETSPOL DATETIME
 	DECLARE @dtmMaxETSPOL DATETIME
 	DECLARE @strETAPODReasonCode NVARCHAR(MAX)
 	DECLARE @strETSPOLReasonCode NVARCHAR(MAX)
+	DECLARE @ysnPOETAFeedToERP BIT
+	DECLARE @intMinLoadDetailRecordId INT
+	DECLARE @intLoadDetailId INT
+	DECLARE @intContractDetailId INT
+	DECLARE @intContractHeaderId INT
+	DECLARE @dtmPlannedAvailabilityDate DATETIME
+	DECLARE @intApprovedById INT
+
+	DECLARE @tblLoadDetail TABLE
+			(intDetailRecordId INT Identity(1, 1),
+			 intLoadId INT, 
+			 intLoadDetailId INT, 
+			 intContractDetailId INT,
+			 intContractHeaderId INT,
+			 dtmPlannedAvailabilityDate DATETIME)
 
 	SELECT @dtmCurrentETAPOD = dtmETAPOD,
 		   @dtmCurrentETSPOL = dtmETSPOL,
@@ -22,6 +38,26 @@ BEGIN TRY
 	LEFT JOIN tblLGReasonCode PODRC ON PODRC.intReasonCodeId = L.intETAPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode POLRC ON POLRC.intReasonCodeId = L.intETSPOLReasonCodeId
 	WHERE intLoadId = @intLoadId
+	
+	SELECT @ysnPOETAFeedToERP = ysnPOETAFeedToERP
+	FROM tblLGCompanyPreference
+	
+	INSERT INTO @tblLoadDetail (
+		intLoadId
+		,intLoadDetailId
+		,intContractDetailId
+		,intContractHeaderId
+		,dtmPlannedAvailabilityDate)
+	SELECT L.intLoadId
+		,LD.intLoadDetailId
+		,CD.intContractDetailId
+		,CH.intContractHeaderId
+		,CD.dtmPlannedAvailabilityDate
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	WHERE L.intLoadId = @intLoadId
 
 	IF EXISTS(SELECT 1 FROM tblLGLoadStg WHERE ISNULL(strFeedStatus,'') = '' AND intLoadId = @intLoadId AND strRowState = 'Added')
 	BEGIN
@@ -606,6 +642,57 @@ BEGIN TRY
 					,@strETSPOLReasonCode					
 					,GETDATE()
 					,1
+			END
+		END
+	END
+
+
+	IF (ISNULL(@ysnPOETAFeedToERP,0) = 1)
+	BEGIN
+		IF (@intShipmentType = 2 AND @dtmCurrentETAPOD IS NOT NULL AND @strRowState <> 'Delete')
+		BEGIN
+			SELECT @intMinLoadDetailRecordId  = MIN(intDetailRecordId) FROM @tblLoadDetail
+
+			IF (ISNULL(@intMinLoadDetailRecordId,0)>0)
+			BEGIN
+				SET @intLoadDetailId = NULL
+				SET @intContractDetailId = NULL
+				SET @intContractHeaderId = NULL
+				SET @dtmPlannedAvailabilityDate = NULL
+				SET @intApprovedById = NULL
+
+				SELECT @intLoadDetailId = intLoadDetailId,
+						@intContractDetailId = intContractDetailId,
+						@intContractHeaderId = intContractHeaderId,
+						@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate
+				FROM @tblLoadDetail WHERE intDetailRecordId = @intMinLoadDetailRecordId
+
+				SELECT TOP 1 @intApprovedById = intApprovedById
+				FROM tblCTApprovedContract
+				WHERE intContractDetailId = @intContractDetailId
+				ORDER BY 1 DESC
+
+				SELECT @dtmCurrentPlannedAvailabilityDate = dtmPlannedAvailabilityDate
+				FROM tblCTContractDetail
+				WHERE intContractDetailId = @intContractDetailId
+
+				UPDATE tblLGLoad SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD WHERE intLoadId = @intLoadId
+
+				IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadShippingInstructionId = @intLoadId)
+				BEGIN
+					IF ((@dtmCurrentETAPOD IS NOT NULL) AND (@dtmCurrentETAPOD <> @dtmCurrentPlannedAvailabilityDate))
+					BEGIN
+						UPDATE tblCTContractDetail SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD  WHERE intContractDetailId = @intContractDetailId 
+
+						EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId,
+													@intApprovedById =  @intApprovedById, 
+													@intContractDetailId = @intContractDetailId
+					END
+				END
+
+				SELECT @intMinLoadDetailRecordId = MIN(intDetailRecordId)
+				FROM @tblLoadDetail
+				WHERE intDetailRecordId > @intMinLoadDetailRecordId
 			END
 		END
 	END
