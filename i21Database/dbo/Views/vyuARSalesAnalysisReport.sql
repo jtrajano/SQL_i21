@@ -25,21 +25,21 @@ SELECT
 										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 										ELSE ISNULL(SAR.dblQtyOrdered, 0)
 									END
-	 , dblMargin				= (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+	 , dblMargin				= (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0) - ISNULL(SAR.dblDiscountAmount, 0)) * 
 									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 										ELSE ISNULL(SAR.dblQtyOrdered, 0)
 									END
-	 , dblMarginPercentage		= CASE WHEN (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+	 , dblMarginPercentage		= CASE WHEN (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0) - ISNULL(SAR.dblDiscountAmount, 0)) * 
 											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 												THEN ISNULL(SAR.dblQtyShipped, 0)
 												ELSE ISNULL(SAR.dblQtyOrdered, 0)
 											END > 0 AND ISNULL(SAR.dblLineTotal, 0) > 0
-									THEN ((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+									THEN ((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0) - ISNULL(SAR.dblDiscountAmount, 0)) * 
 											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 												THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 												ELSE ISNULL(SAR.dblQtyOrdered, 0)
-											END / ISNULL(SAR.dblLineTotal, 0)) * 100 
+											END / (ISNULL(SAR.dblLineTotal, 0) + ISNULL(SAR.dblDiscountAmount, 0))) * 100 
 									ELSE 0 
 								  END
 	 , dblPrice					= ISNULL(SAR.dblPrice, 0)
@@ -101,6 +101,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 											ELSE ISNULL(NONSO.dblCost, 0)
 										END)
 	  , dblPrice					= ARID.dblPrice
+	  , dblDiscountAmount			= ARID.dblPrice * (ISNULL(ARID.dblDiscount, 0) / 100)
 	  ,	dblTax						= ARID.dblTotalTax
 	  , dblLineTotal				= ARID.dblTotal
 	  , dblTotal					= ARI.dblInvoiceTotal			
@@ -230,6 +231,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 											ELSE 0.000000
 										END)
 	 , dblPrice						= SOD.dblPrice
+	 , dblDiscountAmount			= SOD.dblPrice * (ISNULL(SOD.dblDiscount, 0) / 100)
 	 , dblTax						= SOD.dblTotalTax
 	 , dblLineTotal					= SOD.dblTotal
 	 , dblTotal						= SO.dblSalesOrderTotal
@@ -377,7 +379,8 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 												THEN LOTTED.dblCost
 											ELSE 0.000000
 										END)
-	  , dblPrice					= ARID.dblLicenseAmount 
+	  , dblPrice					= ARID.dblLicenseAmount
+	  , dblDiscountAmount			= ARID.dblLicenseAmount * (ISNULL(ARID.dblDiscount, 0) / 100)
 	  ,	dblTax						= ARID.dblTotalTax
 	  , dblLineTotal				= ARID.dblQtyShipped * ARID.dblLicenseAmount
 	  , dblTotal					= ARI.dblInvoiceTotal			
@@ -508,6 +511,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 											ELSE 0.000000
 										END)
 	 , dblPrice						= SOD.dblLicenseAmount
+	 , dblDiscountAmount			= SOD.dblLicenseAmount * (ISNULL(SOD.dblDiscount, 0) / 100)
 	 , dblTax						= SOD.dblTotalTax
 	 , dblLineTotal					= SOD.dblQtyOrdered * SOD.dblLicenseAmount
 	 , dblTotal						= SO.dblSalesOrderTotal
@@ -655,7 +659,8 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 												THEN LOTTED.dblCost
 											ELSE 0.000000
 										END)
-	  , dblPrice					= ARID.dblMaintenanceAmount  
+	  , dblPrice					= ARID.dblMaintenanceAmount
+	  , dblDiscountAmount			= ARID.dblMaintenanceAmount * (ISNULL(ARID.dblDiscount, 0) / 100)
 	  ,	dblTax						= ARID.dblTotalTax
 	  , dblLineTotal				= ARID.dblQtyShipped * ARID.dblMaintenanceAmount
 	  , dblTotal					= ARI.dblInvoiceTotal			
@@ -786,6 +791,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 											ELSE 0.000000
 										END)
 	 , dblPrice						= SOD.dblMaintenanceAmount
+	 , dblDiscountAmount			= SOD.dblMaintenanceAmount * (ISNULL(SOD.dblDiscount, 0) / 100)
 	 , dblTax						= SOD.dblTotalTax
 	 , dblLineTotal					= SOD.dblQtyOrdered * SOD.dblMaintenanceAmount
 	 , dblTotal						= SO.dblSalesOrderTotal
@@ -934,6 +940,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 											ELSE ISNULL(NONSO.dblCost, 0)
 										END)
 	  , dblPrice					= ARID.dblPrice
+	  , dblDiscountAmount			= ARID.dblPrice * (ISNULL(ARID.dblDiscount, 0) / 100)
 	  ,	dblTax						= ARID.dblTotalTax
 	  , dblLineTotal				= ARID.dblTotal
 	  , dblTotal					= ARI.dblInvoiceTotal			
