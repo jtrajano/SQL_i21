@@ -91,11 +91,11 @@ BEGIN
 		BEGIN
 			IF (@strWhereClause = '')
 			BEGIN
-				SET @strWhereClause = ' WHERE D.intTermsId IN (' + @strTermIds + ') '
+				SET @strWhereClause = ' WHERE (ISNULL(G.intDeliveryTermID,D.intTermsId)) IN (' + @strTermIds + ') '
 			END
 			ELSE
 			BEGIN
-				SET @strWhereClause = @strWhereClause + ' AND D.intTermsId IN (' + @strTermIds + ') '
+				SET @strWhereClause = @strWhereClause + ' AND (ISNULL(G.intDeliveryTermID,D.intTermsId)) IN (' + @strTermIds + ') '
 			END
 		END
 
