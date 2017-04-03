@@ -109,7 +109,6 @@ AS
 
 		FROM	Header CH
 		WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus='Submitted')
-		AND		CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE strERPPONumber IS NULL)
 		AND		CH.intContractHeaderId	NOT IN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intContractStatusId = 2)
 		UNION ALL
 
