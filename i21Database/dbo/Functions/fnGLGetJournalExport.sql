@@ -42,7 +42,7 @@ BEGIN
 		CROSS APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)tsp
 	WHERE intJournalId = @intJournalId
 	RETURN
-END
+
 	INSERT INTO @tbl
 	SELECT 
 		A.strAccountId 
