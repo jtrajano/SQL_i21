@@ -111,11 +111,26 @@ EXEC dbo.[uspARUpdateInTransit] @TransactionId, @post, 0
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId, @ForDelete
 
 DECLARE	@EntityCustomerId INT
+		,@LoadId INT
 
-SELECT TOP 1 @EntityCustomerId = intEntityCustomerId FROM tblARInvoice WHERE intInvoiceId = @TransactionId
+SELECT TOP 1 
+	@EntityCustomerId	= intEntityCustomerId
+	,@LoadId			= intLoadId
+FROM
+	tblARInvoice
+WHERE
+	intInvoiceId = @TransactionId
 
 --Update Total AR
 EXEC dbo.[uspARUpdateCustomerTotalAR] @InvoiceId = @TransactionId, @CustomerId = @EntityCustomerId
+
+
+--Update LG - Load Shipment
+EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost]
+	@InvoiceId	= @TransactionId
+	,@Post		= @post
+	,@LoadId	= @LoadId
+	,@UserId	= @userId
 
 --Patronage
 DECLARE	@successfulCount INT
