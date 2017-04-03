@@ -100,6 +100,6 @@ FROM tblICItemLocation ItemLocation
 	LEFT JOIN tblSTPromotionItemList MixMatch ON MixMatch.intPromoItemListId = ItemLocation.intMixMatchId
 	LEFT JOIN vyuICGetItemUOM DepositPLU ON DepositPLU.intItemUOMId = ItemLocation.intDepositPLUId
 	LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = ItemLocation.intFreightMethodId
-	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityShipViaId = ItemLocation.intShipViaId
+	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.[intEntityId] = ItemLocation.intShipViaId
 	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = ItemLocation.intCountGroupId
 	LEFT JOIN tblSTRadiantItemTypeCode ItemTypeCode ON ItemTypeCode.intRadiantItemTypeCodeId = ItemLocation.intItemTypeCode

@@ -73,7 +73,7 @@ BEGIN
             
             SET @strTransactionId =  @strType + CAST(@intNoteTransId as nvarchar(50))
                         
-            SELECT @intCreatedUserId = [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity Where [intEntityUserSecurityId] = @intEntityId
+            SELECT @intCreatedUserId = [intEntityId] FROM dbo.tblSMUserSecurity Where [intEntityId] = @intEntityId
             
             SET @strAmountInWords = dbo.fnConvertNumberToWord(@dblAmount)
 

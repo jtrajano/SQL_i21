@@ -17,7 +17,7 @@ DECLARE @UserEntityID	INT
 		,@ZeroDecimal	NUMERIC(18, 6)
 		
 SET @ZeroDecimal = 0.000000	
-SET @UserEntityID = ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId),@userId) 
+SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @userId),@userId) 
 SET @ActionType = CASE WHEN @post = 1 THEN 'Post Settlement' ELSE 'UnPost Settlement' END
 
 

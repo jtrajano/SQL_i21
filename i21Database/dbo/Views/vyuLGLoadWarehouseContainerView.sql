@@ -65,5 +65,5 @@ LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureI
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
-LEFT JOIN tblSMUserSecurity US ON US.intEntityUserSecurityId = L.intDispatcherId
+LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = L.intDispatcherId
 WHERE L.intShipmentType = 1

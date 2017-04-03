@@ -130,7 +130,7 @@ BEGIN TRY
 		,ISNULL(@strPropertyName4,'') AS strPropertyName4
 		,@strPropertyValue4 AS strPropertyValue4
 	FROM dbo.tblICLot AS L
-	JOIN dbo.tblSMUserSecurity US ON L.intCreatedEntityId = US.intEntityUserSecurityId
+	JOIN dbo.tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 	JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
 	JOIN dbo.tblMFWorkOrderProducedLot AS WP ON L.intLotId = WP.intLotId 
 	AND WP.intWorkOrderProducedLotId =(Select MAX(WP1.intWorkOrderProducedLotId) From tblMFWorkOrderProducedLot  WP1 Where L.intLotId = WP1.intLotId )

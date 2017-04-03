@@ -13,7 +13,7 @@
 			,strSalesPersonType = 'Sales Rep Entity'
 	from tblARSalesperson, tblEMEntity
 	where
-		tblEMEntity.intEntityId = tblARSalesperson.intEntitySalespersonId
+		tblEMEntity.intEntityId = tblARSalesperson.[intEntityId]
 
 	union all
 
@@ -30,5 +30,5 @@
 			,strSalesPersonType = 'Sales Rep Contact'
 	from tblARSalesperson, tblEMEntity e, tblEMEntityToContact
 	where
-		tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+		tblEMEntityToContact.intEntityId = tblARSalesperson.[intEntityId]
 		and e.intEntityId = tblEMEntityToContact.intEntityContactId

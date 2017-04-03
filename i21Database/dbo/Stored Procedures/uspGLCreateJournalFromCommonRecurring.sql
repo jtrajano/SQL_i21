@@ -17,7 +17,7 @@ BEGIN
 	BEGIN TRY
 		BEGIN TRANSACTION
 			EXEC dbo.uspSMGetStartingNumber  2,@smID OUTPUT,NULL
-			SELECT TOP 1 @entityid =[intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId
+			SELECT TOP 1 @entityid =[intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @userId
 			INSERT INTO tblGLJournal(strDescription,intCurrencyId,dtmDate,dtmReverseDate,strJournalId,strJournalType,strTransactionType,strSourceType,intEntityId,ysnPosted,strRecurringStatus)
 			SELECT strDescription,intCurrencyId,@journalDate,dtmReverseDate,@smID,'Recurring Journal','General Journal','GJ',@entityid,0,'Locked' FROM tblGLJournal
 			WHERE intJournalId = @journalId

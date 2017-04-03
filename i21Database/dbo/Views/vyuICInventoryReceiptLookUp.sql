@@ -24,11 +24,11 @@ FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor
 	LEFT JOIN tblSMCompanyLocation FromLocation 
 		ON FromLocation.intCompanyLocationId = Receipt.intTransferorId
 	LEFT JOIN tblSMUserSecurity UserSecurity
-		ON UserSecurity.intEntityUserSecurityId = Receipt.intReceiverId
+		ON UserSecurity.[intEntityId] = Receipt.intReceiverId
 	LEFT JOIN tblEMEntityLocation ShipFrom
 		ON ShipFrom.intEntityLocationId = Receipt.intShipFromId
 	LEFT JOIN tblSMShipVia ShipVia
-		ON ShipVia.intEntityShipViaId = Receipt.intShipViaId
+		ON ShipVia.[intEntityId] = Receipt.intShipViaId
 
 	--LEFT JOIN tblSMCompanyLocation Transferor 
 	--	ON Transferor.intCompanyLocationId = Receipt.intTransferorId

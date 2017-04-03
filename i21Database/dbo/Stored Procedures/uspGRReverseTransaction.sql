@@ -23,7 +23,7 @@ BEGIN TRY
 	SELECT @intStorageHistoryId = intStorageHistoryId,@intEntityUserSecurityId=intEntityUserSecurityId
 	FROM OPENXML(@idoc, 'root', 2) WITH (intStorageHistoryId INT,intEntityUserSecurityId INT)
 
-	SELECT @StrUserName=strUserName FROM tblSMUserSecurity Where intEntityUserSecurityId=@intEntityUserSecurityId
+	SELECT @StrUserName=strUserName FROM tblSMUserSecurity Where [intEntityId]=@intEntityUserSecurityId
 	
 	SELECT @intCustomerStorageId = intCustomerStorageId 
 		,@intTransactionTypeId = intTransactionTypeId

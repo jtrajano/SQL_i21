@@ -60,8 +60,8 @@
 					,tblHDProject.strProjectStatus
 				from
 					tblHDProject
-					left outer join tblARSalesperson on tblARSalesperson.intEntitySalespersonId = tblHDProject.intInternalSalesPerson
-					left outer join tblEMEntity on tblEMEntity.intEntityId = tblARSalesperson.intEntitySalespersonId
+					left outer join tblARSalesperson on tblARSalesperson.[intEntityId] = tblHDProject.intInternalSalesPerson
+					left outer join tblEMEntity on tblEMEntity.intEntityId = tblARSalesperson.[intEntityId]
 					left outer join tblHDOpportunityQuote on tblHDOpportunityQuote.intProjectId = tblHDProject.intProjectId
 				where
 					tblHDProject.strType = 'CRM'

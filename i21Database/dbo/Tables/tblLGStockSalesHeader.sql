@@ -25,5 +25,5 @@
 	CONSTRAINT [FK_tblLGStockSalesHeader_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]),
 	CONSTRAINT [FK_tblLGStockSalesHeader_tblLGAllocationHeader_intAllocationHeaderId] FOREIGN KEY ([intAllocationHeaderId]) REFERENCES [tblLGAllocationHeader]([intAllocationHeaderId]),
 	CONSTRAINT [FK_tblLGStockSalesHeader_tblLGPickLotHeader_intPickLotHeaderId] FOREIGN KEY ([intPickLotHeaderId]) REFERENCES [tblLGPickLotHeader]([intPickLotHeaderId]),
-    CONSTRAINT [FK_tblLGStockSalesHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])
+    CONSTRAINT [FK_tblLGStockSalesHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId])
 )

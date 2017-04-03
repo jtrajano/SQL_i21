@@ -72,7 +72,7 @@ DECLARE @UserEntityID				INT
 		,@DeferredRevenueAccountId	INT
 		,@AllowOtherUserToPost		BIT
 
-SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId),@userId)
+SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM dbo.tblSMUserSecurity WHERE [intEntityId] = @userId),@userId)
 SET @DiscountAccountId = (SELECT TOP 1 [intDiscountAccountId] FROM dbo.tblARCompanyPreference WHERE ISNULL([intDiscountAccountId],0) <> 0)
 SET @DeferredRevenueAccountId = (SELECT TOP 1 [intDeferredRevenueAccountId] FROM dbo.tblARCompanyPreference WHERE ISNULL([intDeferredRevenueAccountId],0) <> 0)
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserEntityID)

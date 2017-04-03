@@ -15,5 +15,7 @@
 	[dblGrossWt] NUMERIC(18,6), 
 	[strWeightUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 	[strExternalContainerId] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+	[strSubLocation] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+	[strStorageLocation] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[strRowState] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 )

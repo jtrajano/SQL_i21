@@ -76,7 +76,7 @@ BEGIN
 
 		IF @location IS NULL
 		BEGIN
-			SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId) --USER USER LOCATION
+			SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId) --USER USER LOCATION
 		END
 
 		SELECT @intGLBankAccountId = A.intCashAccount 

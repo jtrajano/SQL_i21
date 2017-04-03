@@ -204,7 +204,25 @@ BEGIN TRY
 
 		IF (@intShipmentType = 1)
 		BEGIN
-			INSERT INTO tblLGLoadContainerStg
+			INSERT INTO tblLGLoadContainerStg(
+				 intLoadStgId
+				,intLoadId
+				,intLoadContainerId
+				,strContainerNo
+				,strContainerSizeCode
+				,strPackagingMaterialType
+				,strExternalPONumber
+				,strSeq
+				,dblContainerQty
+				,strContainerUOM
+				,dblNetWt
+				,dblGrossWt
+				,strWeightUOM
+				,strExternalContainerId
+				,strSubLocation
+				,strStorageLocation
+				,strRowState
+				,dtmFeedCreated)
 			SELECT @intLoadStgId
 				,@intLoadId
 				,LC.intLoadContainerId
@@ -227,12 +245,33 @@ BEGIN TRY
 				,LC.dblGrossWt
 				,LC.strWeightUnitMeasure
 				,LDCL.strExternalContainerId
-				,@strRowState
+				,CASE 
+					WHEN ISNULL(CLSL.strSubLocationName, '') = ''
+						THEN LDCLSL.strSubLocationName
+					ELSE CLSL.strSubLocationName
+					END
+				,CASE 
+					WHEN ISNULL(SL.strName, '') = ''
+						THEN (
+								SELECT SL.strName AS strStorageLocationName
+								FROM tblCTContractDetail CD
+								JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+								WHERE CD.intContractDetailId = LD.intPContractDetailId
+								)
+					ELSE SL.strName
+					END
+				,'Addded'
 				,GETDATE()
 			FROM vyuLGLoadContainerView LC
 			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
 			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+			LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+			LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
+			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
+			LEFT JOIN tblSMCompanyLocationSubLocation LDCLSL ON LDCLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
 			WHERE LC.intLoadId = @intLoadId
 			ORDER BY LC.intLoadContainerId
 		END
@@ -406,7 +445,24 @@ BEGIN TRY
 
 		IF (@intShipmentType = 1)
 		BEGIN
-			INSERT INTO tblLGLoadContainerLog
+			INSERT INTO tblLGLoadContainerLog(
+				 intLoadLogId
+				,intLoadId
+				,intLoadContainerId
+				,strContainerNo
+				,strContainerSizeCode
+				,strPackagingMaterialType
+				,strExternalPONumber
+				,strSeq
+				,dblContainerQty
+				,strContainerUOM
+				,dblNetWt
+				,dblGrossWt
+				,strWeightUOM
+				,strExternalContainerId
+				,strSubLocation
+				,strStorageLocation
+				,strRowState)
 			SELECT @intLoadLogId
 				,@intLoadId
 				,LC.intLoadContainerId
@@ -429,6 +485,21 @@ BEGIN TRY
 				,LC.dblGrossWt
 				,LUM.strUnitMeasure strWeightUnitMeasure
 				,LDCL.strExternalContainerId
+				,CASE 
+					WHEN ISNULL(CLSL.strSubLocationName, '') = ''
+						THEN LDCLSL.strSubLocationName
+					ELSE CLSL.strSubLocationName
+					END
+				,CASE 
+					WHEN ISNULL(SL.strName, '') = ''
+						THEN (
+								SELECT SL.strName AS strStorageLocationName
+								FROM tblCTContractDetail CD
+								JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+								WHERE CD.intContractDetailId = LD.intPContractDetailId
+								)
+					ELSE SL.strName
+					END strStorageLocationName
 				,''
 			FROM tblLGLoadContainer LC
 			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
@@ -436,6 +507,12 @@ BEGIN TRY
 			JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intWeightUnitMeasureId
 			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+			LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+			LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
+			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
+			LEFT JOIN tblSMCompanyLocationSubLocation LDCLSL ON LDCLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
 			WHERE LC.intLoadId = @intLoadId
 			ORDER BY LC.intLoadContainerId
 		END

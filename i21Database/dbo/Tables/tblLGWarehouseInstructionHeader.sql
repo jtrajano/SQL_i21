@@ -23,6 +23,6 @@
 	-- THIS IS THE ORIGINAL BEFORE THE MERGE PLEASE CHECK
 --    CONSTRAINT [FK_tblLGWarehouseInstructionHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID]),
     CONSTRAINT [FK_tblLGWarehouseInstructionHeader_tblLGWarehouseRateMatrixHeader_intWarehouseRateMatrixHeaderId] FOREIGN KEY ([intWarehouseRateMatrixHeaderId]) REFERENCES [tblLGWarehouseRateMatrixHeader]([intWarehouseRateMatrixHeaderId]),
-    CONSTRAINT [FK_tblLGWarehouseInstructionHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]),
+    CONSTRAINT [FK_tblLGWarehouseInstructionHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId]),
 	CONSTRAINT [FK_tblLGWarehouseInstructionHeader_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId])
 )

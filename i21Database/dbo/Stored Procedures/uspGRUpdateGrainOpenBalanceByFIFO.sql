@@ -72,7 +72,7 @@ BEGIN TRY
 	
 	SELECT @strUserName=strUserName
 	FROM tblSMUserSecurity
-	WHERE [intEntityUserSecurityId] = @intUserId
+	WHERE [intEntityId] = @intUserId
 
 	SELECT @dblAvailableGrainOpenBalance = SUM(dblOpenBalance)
 	FROM vyuGRGetStorageTransferTicket

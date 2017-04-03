@@ -235,7 +235,7 @@ BEGIN TRY
 
 	SELECT @UserName = strUserName
 	FROM tblSMUserSecurity
-	WHERE [intEntityUserSecurityId] = @UserKey
+	WHERE [intEntityId] = @UserKey
 	
 	IF EXISTS(
 					SELECT 1 FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId

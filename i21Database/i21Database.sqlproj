@@ -5171,6 +5171,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessACHPayments.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdatePricebookItem.sql" />
     <Build Include="dbo\Views\vyuICCommodityLookUp.sql" />
+    <Build Include="dbo\Views\vyuCTItemCertification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

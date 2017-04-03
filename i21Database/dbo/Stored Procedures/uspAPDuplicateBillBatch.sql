@@ -30,7 +30,7 @@ END
 
 EXEC uspSMGetStartingNumber 7, @generatedBillBatchRecordId OUT
 
-SET @shipToId = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId)
+SET @shipToId = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @userId)
 IF (@shipToId IS NULL)
 BEGIN
 	SET @shipToId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation)

@@ -10,7 +10,7 @@ DECLARE @intLocationId AS INT
 
 SELECT TOP 1 @intLocationId = intCompanyLocationId
 FROM tblSMUserSecurity
-WHERE [intEntityUserSecurityId] = @UserId
+WHERE [intEntityId] = @UserId
 
 RETURN @intLocationId
 		

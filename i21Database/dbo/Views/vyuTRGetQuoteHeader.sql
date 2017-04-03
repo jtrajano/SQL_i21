@@ -23,5 +23,5 @@ SELECT QuoteHeader.intQuoteHeaderId
 	, dblQuoteTotal = CONVERT(DECIMAL, 0.000000) 
 FROM tblTRQuoteHeader QuoteHeader
 LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = QuoteHeader.intEntityCustomerId
-LEFT JOIN vyuEMSalesperson SalesPerson ON SalesPerson.intEntitySalespersonId = Customer.intSalespersonId
+LEFT JOIN vyuEMSalesperson SalesPerson ON SalesPerson.[intEntityId] = Customer.intSalespersonId
 LEFT JOIN vyuARCustomerAgingReport AgingReport ON AgingReport.intEntityCustomerId = Customer.[intEntityId]

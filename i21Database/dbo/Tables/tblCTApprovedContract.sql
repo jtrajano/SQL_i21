@@ -34,6 +34,7 @@
 	[intStorageLocationId] INT,
 	[intPurchasingGroupId] INT,
 	[strVendorLotID] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intCertificationId] INT,
 
 	[strApprovalType]	NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 

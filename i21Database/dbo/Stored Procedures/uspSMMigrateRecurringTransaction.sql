@@ -195,7 +195,7 @@ BEGIN
 			INTO #tmp
 			FROM dbo.tblGLJournalRecurring main
 			INNER JOIN dbo.tblGLJournal b ON main.intJournalId = b.intJournalId
-			LEFT JOIN dbo.tblSMUserSecurity sec ON CAST(case when ISNUMERIC(main.strUserMode) = 0 THEN '0' ELSE main.strUserMode END AS INT) = sec.[intEntityUserSecurityId]
+			LEFT JOIN dbo.tblSMUserSecurity sec ON CAST(case when ISNUMERIC(main.strUserMode) = 0 THEN '0' ELSE main.strUserMode END AS INT) = sec.[intEntityId]
 			WHERE (1=1)
 			-- removed to include all recurring with or without history
 			-- AND main.strJournalRecurringId IN (SELECT DISTINCT strJournalRecurringId FROM dbo.tblGLRecurringHistory)

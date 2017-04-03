@@ -58,9 +58,9 @@ BEGIN
 	INNER JOIN tblSMCompanyLocation F
 		ON B.intCompanyLocationId = F.intCompanyLocationId
 	LEFT JOIN vyuEMSalesperson G
-		ON B.intEntitySalespersonId = G.intEntitySalespersonId
+		ON B.intEntitySalespersonId = G.[intEntityId]
 	LEFT JOIN vyuEMSalesperson H
-		ON A.intPerformerId = H.intEntitySalespersonId
+		ON A.intPerformerId = H.[intEntityId]
 	
 END
 GO

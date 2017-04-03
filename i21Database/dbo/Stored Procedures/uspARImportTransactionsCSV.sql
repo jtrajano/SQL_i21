@@ -102,7 +102,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@ShipDate						= D.dtmDate		
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
 					,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])				
-					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN (SELECT TOP 1 intEntitySalespersonId FROM tblARSalesperson WHERE intEntityId = CONVERT(INT, D.strSalespersonNumber)) END
+					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN (SELECT TOP 1 [intEntityId] FROM tblARSalesperson WHERE intEntityId = CONVERT(INT, D.strSalespersonNumber)) END
 					,@TransactionType				= 'Invoice'
 					,@Type							= 'Tank Delivery'
 					,@Comment						= D.strTransactionNumber
@@ -187,7 +187,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @ShipDate						= ILD.dtmShipDate
 					, @CompanyLocationId			= CL.intCompanyLocationId
 					, @EntityId						= ISNULL(@UserEntityId, IL.intEntityId)
-					, @EntitySalespersonId			= SP.intEntitySalespersonId
+					, @EntitySalespersonId			= SP.[intEntityId]
 					, @TermId						= C.intTermsId
 					, @DueDate						= dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, C.intTermsId)
 					, @TransactionType				= ILD.strTransactionType
@@ -234,7 +234,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 				LEFT JOIN
 					(tblARSalesperson SP 
 						INNER JOIN tblEMEntity ESP
-							ON SP.intEntitySalespersonId = ESP.intEntityId)
+							ON SP.[intEntityId] = ESP.intEntityId)
 						ON ILD.strSalespersonNumber = ESP.strEntityNo
 				LEFT JOIN
 					tblICItem ICI
@@ -271,7 +271,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
 					,@EntityId						= ISNULL(@UserEntityId, H.intEntityId)
 					,@TermId						= CASE WHEN ISNULL(D.strTerms, '') <> '' THEN (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = D.strTerms) ELSE 0 END
-					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 intEntitySalespersonId FROM tblARSalesperson SP INNER JOIN tblEMEntity E ON SP.intEntitySalespersonId = E.intEntityId WHERE E.strEntityNo = D.strSalespersonNumber) ELSE 0 END
+					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 SP.[intEntityId] FROM tblARSalesperson SP INNER JOIN tblEMEntity E ON SP.[intEntityId] = E.intEntityId WHERE E.strEntityNo = D.strSalespersonNumber) ELSE 0 END
 					,@DueDate						= D.dtmDueDate		
 					,@ShipDate						= D.dtmShipDate
 					,@PostDate						= D.dtmPostDate 
@@ -282,7 +282,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@PONumber						= D.strPONumber
 					,@BOLNumber						= D.strBOLNumber
 					,@FreightTermId					= CASE WHEN ISNULL(D.strFreightTerm, '') <> '' THEN (SELECT TOP 1 intFreightTermId FROM tblSMFreightTerms WHERE strFreightTerm = D.strFreightTerm) ELSE 0 END
-					,@ShipViaId						= CASE WHEN ISNULL(D.strShipVia, '') <> '' THEN (SELECT TOP 1 intEntityShipViaId FROM tblSMShipVia WHERE strShipVia = D.strShipVia)	ELSE 0 END
+					,@ShipViaId						= CASE WHEN ISNULL(D.strShipVia, '') <> '' THEN (SELECT TOP 1 [intEntityId] FROM tblSMShipVia WHERE strShipVia = D.strShipVia)	ELSE 0 END
 					,@DiscountAmount				= ISNULL(D.dblDiscount, @ZeroDecimal)
 					,@DiscountPercentage			= (CASE WHEN ISNULL(D.dblDiscount, @ZeroDecimal) > 0 
 															THEN (1 - ((ABS(D.dblTotal) - ISNULL(D.dblDiscount, @ZeroDecimal)) / ABS(D.dblTotal))) * 100

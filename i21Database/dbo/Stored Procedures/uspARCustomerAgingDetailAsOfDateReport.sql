@@ -84,7 +84,7 @@ FROM
 	, dblAvailableCredit = 0
 	, dblPrepayments     = 0
 FROM tblARInvoice I
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId    
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]    
 WHERE I.ysnPosted = 1
   AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
   AND I.strTransactionType IN ('Invoice', 'Debit Memo')
@@ -134,7 +134,7 @@ FROM tblARInvoice I
 			FROM tblARPrepaidAndCredit WHERE ysnApplied = 1
 			GROUP BY intPrepaymentId)
 		) PC ON I.intInvoiceId = PC.intPrepaymentId	
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
@@ -185,7 +185,7 @@ FROM tblARInvoice I
 			FROM tblARPrepaidAndCredit WHERE ysnApplied = 1
 			GROUP BY intPrepaymentId)
 		) PC ON I.intInvoiceId = PC.intPrepaymentId	
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType = 'Customer Prepayment'
@@ -230,7 +230,7 @@ FROM tblARPayment P
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) > @dtmDateToLocal
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
 				AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')  
@@ -291,7 +291,7 @@ FROM tblARInvoice I
 			WHERE ysnApplied = 1
 			GROUP BY PC.intInvoiceId, PC.intPrepaymentId, I.strInvoiceNumber)
 		) PC ON I.intInvoiceId = PC.intInvoiceId
-	 LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	 LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal 
@@ -343,7 +343,7 @@ FROM
 	  , dblAvailableCredit	= 0
 	  , dblPrepayments		= 0
 FROM tblARInvoice I
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Invoice', 'Debit Memo')
@@ -382,7 +382,7 @@ FROM tblARInvoice I
 			FROM tblARPrepaidAndCredit WHERE ysnApplied = 1
 			GROUP BY intPrepaymentId)
 		) PC ON I.intInvoiceId = PC.intPrepaymentId
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
@@ -422,7 +422,7 @@ FROM tblARInvoice I
 			FROM tblARPrepaidAndCredit WHERE ysnApplied = 1
 			GROUP BY intPrepaymentId)
 		) PC ON I.intInvoiceId = PC.intPrepaymentId
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType = 'Customer Prepayment'
@@ -456,7 +456,7 @@ FROM tblARPayment P
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) > @dtmDateToLocal
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
 				AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]
 WHERE P.ysnPosted = 1
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    
   AND (@strSalespersonLocal IS NULL OR ES.strName LIKE '%'+@strSalespersonLocal+'%')
@@ -508,7 +508,7 @@ FROM tblARInvoice I
 			WHERE ysnApplied = 1
 			GROUP BY PC.intInvoiceId, PC.intPrepaymentId, I.strInvoiceNumber)
 		) PC ON I.intInvoiceId = PC.intInvoiceId
-	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId	
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.[intEntityId] = ES.intEntityId) ON I.intEntitySalespersonId = SP.[intEntityId]	
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal 

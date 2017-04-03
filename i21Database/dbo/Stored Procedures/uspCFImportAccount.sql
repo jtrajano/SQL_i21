@@ -251,7 +251,7 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 											  FROM tblCFDiscountSchedule 
 											  WHERE strDiscountSchedule = RTRIM(LTRIM(cfact_dsc_schd)) COLLATE Latin1_General_CI_AS),
 
-					@intSalesPersonId = (SELECT TOP 1 intEntitySalespersonId 
+					@intSalesPersonId = (SELECT TOP 1 [intEntityId] 
 										 FROM tblARSalesperson 
 										 WHERE strSalespersonId = RTRIM(LTRIM(cfact_sls_id)) COLLATE Latin1_General_CI_AS),
 

@@ -19,7 +19,7 @@ BEGIN
 		  , @errorMsg				NVARCHAR(500)
 
 	SET @ZeroDecimal	= 0.000000
-	SET @EntityId		= ISNULL((SELECT TOP 1 [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId), 0)
+	SET @EntityId		= ISNULL((SELECT TOP 1 [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), 0)
 	SET @InvoiceDate	= ISNULL(@InvoiceDate, CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), GETDATE()))))
 
 	IF ISNULL(@SplitDetailId, 0) > 0 

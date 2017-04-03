@@ -415,8 +415,8 @@ Begin --Sales Order Pick List
 			Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
 			Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
 			Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
-			Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
-			Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
+			Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.[intEntityId]
+			Left Join tblSMShipVia sv on so.intShipViaId=sv.[intEntityId]
 			Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
 			Left Join tblSMTerm tm on so.intTermId=tm.intTermID
 			Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
@@ -485,8 +485,8 @@ Begin --Sales Order Pick List
 			Join tblSOSalesOrder so on sd.intSalesOrderId=so.intSalesOrderId
 			Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
 			Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
-			Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
-			Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
+			Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.[intEntityId]
+			Left Join tblSMShipVia sv on so.intShipViaId=sv.[intEntityId]
 			Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
 			Left Join tblSMTerm tm on so.intTermId=tm.intTermID
 			WHERE so.intSalesOrderId=@intSalesOrderId
@@ -671,8 +671,8 @@ Begin --Sales Order Pick List
 						Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
 						Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
 						Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
-						Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
-						Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
+						Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.[intEntityId]
+						Left Join tblSMShipVia sv on so.intShipViaId=sv.[intEntityId]
 						Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
 						Left Join tblSMTerm tm on so.intTermId=tm.intTermID
 						Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
@@ -743,8 +743,8 @@ Begin --Sales Order Pick List
 						Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
 						Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
 						Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
-						Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
-						Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
+						Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.[intEntityId]
+						Left Join tblSMShipVia sv on so.intShipViaId=sv.[intEntityId]
 						Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
 						Left Join tblSMTerm tm on so.intTermId=tm.intTermID
 						Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId

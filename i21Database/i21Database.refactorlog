@@ -6489,4 +6489,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntityId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="5bb83c78-052e-4837-90b3-dac124176c33" ChangeDateTime="03/30/2017 08:36:56">
+    <Property Name="ElementName" Value="[dbo].[tblSMShipVia].[intEntityShipViaId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMShipVia]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="82849677-f2ed-4048-bce7-4df5eae157d7" ChangeDateTime="03/30/2017 09:36:16">
+    <Property Name="ElementName" Value="[dbo].[tblARSalesperson].[intEntitySalespersonId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARSalesperson]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="36a9a1ea-bd36-48f9-910b-079f51aa28f1" ChangeDateTime="03/31/2017 08:46:20">
+    <Property Name="ElementName" Value="[dbo].[tblSMUserSecurity].[intEntityUserSecurityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMUserSecurity]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityId]" />
+  </Operation>
 </Operations>

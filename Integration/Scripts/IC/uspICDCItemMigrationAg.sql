@@ -300,6 +300,8 @@ select agloc_loc_no,agloc_prc4_desc prclvl, 4 srt from aglocmst where agloc_prc4
 union
 select agloc_loc_no,agloc_prc5_desc prclvl, 5 srt from aglocmst where agloc_prc5_desc is not null
 ) as prc join tblSMCompanyLocation CL on CL.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = prc.agloc_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS
+where CL.[intCompanyLocationId] not in (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
+where [strPricingLevelName] COLLATE Latin1_General_CI_AS = prclvl COLLATE Latin1_General_CI_AS)
 order by CL.intCompanyLocationId, srt
 
 --------------------------------------------------------------------------------------------------------------

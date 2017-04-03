@@ -7,7 +7,7 @@ Emp.strLastName,
 Emp.strFirstName,
 Emp.strNameSuffix,
 Emp.strMiddleName,
-Sec.intEntityUserSecurityId,
+--Sec.[intEntityId],
 Emp.intRank,
 strPhone = CASE WHEN (Ent.strPhone <> '') THEN Ent.strPhone ELSE Con.strPhone END,
 strTitle = CASE WHEN (Ent.strTitle <> '') THEN Ent.strTitle ELSE Con.strTitle END,
@@ -25,4 +25,4 @@ LEFT JOIN
 	LEFT JOIN tblEMEntity B ON A.intEntityContactId = B.intEntityId) AS Con 
 	ON Con.intEntityId = Ent.intEntityId AND Con.ysnDefaultContact = 1
 LEFT JOIN dbo.[tblEMEntityLocation] AS Loc ON Loc.intEntityId = Emp.[intEntityId] AND Loc.ysnDefaultLocation = 1
-LEFT JOIN dbo.tblSMUserSecurity AS Sec ON Sec.intEntityUserSecurityId = Ent.intEntityId
+LEFT JOIN dbo.tblSMUserSecurity AS Sec ON Sec.[intEntityId] = Ent.intEntityId

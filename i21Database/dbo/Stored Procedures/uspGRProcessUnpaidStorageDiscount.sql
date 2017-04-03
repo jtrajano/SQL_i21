@@ -125,7 +125,7 @@ BEGIN TRY
 
 		IF @dblTotalDiscountUnpaid > 0
 		BEGIN
-			SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey), @UserKey)						
+			SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey), @UserKey)						
 			SET @intCurrencyId = ISNULL((SELECT intCurrencyId FROM tblAPVendor WHERE [intEntityId] = @EntityId), @intDefaultCurrencyId)
 
 			SELECT @intTermId = intTermsId
@@ -327,7 +327,7 @@ BEGIN TRY
 					,[dtmHistoryDate] = GetDATE()
 					,[dblPaidAmount] = ARD.dblPrice
 					,[strType] = 'Generated Invoice'
-					,[strUserName] = (SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey)
+					,[strUserName] = (SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
 				FROM tblARInvoice AR
 				JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
 				WHERE AR.intInvoiceId = CONVERT(INT, @CreatedIvoices)
@@ -437,7 +437,7 @@ BEGIN TRY
 						,[dtmHistoryDate] = GetDATE()
 						,[dblPaidAmount] =CASE WHEN dblDiscountUnpaid <0 THEN -dblDiscountUnpaid ELSE dblDiscountUnpaid END
 						,[strType] = 'Generated Bill'
-						,[strUserName] = (SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey)
+						,[strUserName] = (SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
 					FROM @BillDiscounts WHERE intEntityId = @EntityId AND intCompanyLocationId = @LocationId AND IsProcessed = 0
 					
 					

@@ -107,7 +107,7 @@ LEFT OUTER JOIN
 	 FROM 
 		dbo.tblEMEntity) AS OE ON SO.intOrderedById = OE.intEntityId 
 LEFT OUTER JOIN
-	((SELECT intEntitySalespersonId 
+	((SELECT [intEntityId] 
 				, strSalespersonId				
 	  FROM 
 		dbo.tblARSalesperson) AS SP 
@@ -115,7 +115,7 @@ LEFT OUTER JOIN
 		(SELECT intEntityId 
 				,strName
 		 FROM 
-			tblEMEntity) ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.intEntitySalespersonId
+			tblEMEntity) ESP ON SP.[intEntityId] = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.[intEntityId]
 LEFT OUTER JOIN 
 	(SELECT intCurrencyID, 
 			strCurrency, 

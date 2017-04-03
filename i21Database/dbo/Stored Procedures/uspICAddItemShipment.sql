@@ -224,9 +224,9 @@ SELECT	intOrderType
 FROM @ItemLots
 
 -- Get the entity id
-SELECT	@intEntityId = intEntityUserSecurityId
+SELECT	@intEntityId = [intEntityId]
 FROM	dbo.tblSMUserSecurity 
-WHERE	intEntityUserSecurityId = @intUserId
+WHERE	[intEntityId] = @intUserId
 
 -- Get the functional currency and default Forex Rate Type Id 
 BEGIN 

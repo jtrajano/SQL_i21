@@ -18,7 +18,7 @@
 	union all
 	select
 		strId = NEWID()
-		,intEntityCustomerId = us.[intEntityUserSecurityId]
+		,intEntityCustomerId = us.[intEntityId]
 		,strCustomerNumber = 'INTERNALUSER'
 		,intEntityContactId = con.intEntityId
 		,con.strName
@@ -27,6 +27,6 @@
 		,strEntityType = 'Agent'
 	from
 		tblSMUserSecurity us
-		left outer join vyuEMEntityContact con on con.intEntityId = us.[intEntityUserSecurityId] and con.ysnDefaultContact = 1
+		left outer join vyuEMEntityContact con on con.intEntityId = us.[intEntityId] and con.ysnDefaultContact = 1
 		--left outer join tblEMEntity con on con.intEntityId = us.[intEntityUserSecurityId]
 	where us.ysnDisabled <> 1

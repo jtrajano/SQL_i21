@@ -30,8 +30,8 @@ ELSE
 		--USE COMPANY PREFERENCE
 		SELECT  F.strEmail FROM dbo.tblAPCompanyPreference A 
 		INNER JOIN tblSMApprovalListUserSecurity B ON A.intApprovalListId = B.intApprovalListId
-		INNER JOIN tblSMUserSecurity E ON E.intEntityUserSecurityId = B.intEntityUserSecurityId 
-		INNER JOIN tblEMEntity F ON E.intEntityUserSecurityId = F.intEntityId
+		INNER JOIN tblSMUserSecurity E ON E.[intEntityId] = B.intEntityUserSecurityId 
+		INNER JOIN tblEMEntity F ON E.[intEntityId] = F.intEntityId
 	END
 
 

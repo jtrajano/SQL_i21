@@ -327,7 +327,7 @@ BEGIN TRY
 
 	SELECT @strUserName = strUserName
 	FROM dbo.tblSMUserSecurity
-	WHERE intEntityUserSecurityId = @intUserId
+	WHERE [intEntityId] = @intUserId
 
 	IF @intOrderHeaderId > 0
 	BEGIN
@@ -738,7 +738,7 @@ BEGIN TRY
 
 	SELECT @strUserName = strUserName
 	FROM tblSMUserSecurity
-	WHERE intEntityUserSecurityId = @intUserId
+	WHERE [intEntityId] = @intUserId
 
 	WHILE @intNoOfPallet > 0
 	BEGIN

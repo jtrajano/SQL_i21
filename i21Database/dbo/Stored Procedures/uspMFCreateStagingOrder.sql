@@ -21,7 +21,7 @@ BEGIN TRY
 	SELECT @strLastUpdateBy = strLastUpdateBy
 	FROM @OrderHeaderInformation
 
-	SELECT @intLastUpdateById = intEntityUserSecurityId
+	SELECT @intLastUpdateById = [intEntityId]
 	FROM tblSMUserSecurity
 	WHERE strUserName = @strLastUpdateBy
 

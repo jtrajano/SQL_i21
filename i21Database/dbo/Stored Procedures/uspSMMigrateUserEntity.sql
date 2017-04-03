@@ -11,7 +11,7 @@ SET ANSI_WARNINGS ON
 BEGIN
 
 	/* Fix user security data that shares one entity */
-	UPDATE tblSMUserSecurity SET [intEntityUserSecurityId] = NULL WHERE strUserName NOT IN (SELECT strUserName FROM [tblEMEntityCredential])
+	UPDATE tblSMUserSecurity SET [intEntityId] = NULL WHERE strUserName NOT IN (SELECT strUserName FROM [tblEMEntityCredential])
 
 	DECLARE @UserName NVARCHAR(100)
 	DECLARE @FullName NVARCHAR(100)
@@ -23,7 +23,7 @@ BEGIN
 	SELECT strUserName, strFullName, strEmail, strPassword, strPhone
 	INTO #tmpUsers
 	FROM tblSMUserSecurity
-	WHERE ISNULL([intEntityUserSecurityId], 0) <= 0
+	WHERE ISNULL([intEntityId], 0) <= 0
 	--WHERE ysnDisabled = 0
 	--AND ISNULL(intEntityId, 0) <= 0
 
@@ -49,9 +49,9 @@ BEGIN
 		--END
 		
 		UPDATE tblSMUserSecurity
-		SET [intEntityUserSecurityId] = @NewId
+		SET [intEntityId] = @NewId
 		WHERE strUserName = @UserName
-		AND ISNULL([intEntityUserSecurityId], 0) = 0
+		AND ISNULL([intEntityId], 0) = 0
 		
 		IF NOT EXISTS(SELECT * FROM [tblEMEntityCredential] WHERE intEntityId = @NewId)
 		BEGIN

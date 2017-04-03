@@ -38,7 +38,7 @@ BEGIN TRY
 
 	SELECT @strUserName = strUserName
 	FROM tblSMUserSecurity
-	WHERE intEntityUserSecurityId = @intUserId
+	WHERE [intEntityId] = @intUserId
 
 	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
 		,@intItemId = NULL

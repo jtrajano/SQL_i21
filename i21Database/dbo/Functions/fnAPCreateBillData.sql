@@ -101,7 +101,7 @@ BEGIN
 	IF ISNULL(@userId, 0) > 0
 	SELECT TOP 1 
 		@shipTo = (CASE WHEN ISNULL(@shipToId,0) > 0 THEN @shipToId ELSE intCompanyLocationId END)
-	FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId
+	FROM tblSMUserSecurity WHERE [intEntityId] = @userId
 
 	SELECT 
 		@term = ISNULL((CASE WHEN ISNULL(@termId,0) > 0 THEN @termId ELSE B.intTermsId END),

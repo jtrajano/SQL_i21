@@ -27,5 +27,5 @@
 	CONSTRAINT [FK_tblTRQuoteDetail_tblEMEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblTRQuoteDetail_tblARCustomerSpecialPrice_intSpecialPriceId] FOREIGN KEY ([intSpecialPriceId]) REFERENCES [dbo].[tblARCustomerSpecialPrice] ([intSpecialPriceId]), 
     CONSTRAINT [FK_tblTRQuoteDetail_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId]), 
-    CONSTRAINT [FK_tblTRQuoteDetail_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityShipViaId])
+    CONSTRAINT [FK_tblTRQuoteDetail_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityId])
 )

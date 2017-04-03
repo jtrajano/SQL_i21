@@ -189,8 +189,8 @@ BEGIN TRY
 					, tblSMCompanySetup.strStateTaxID
 					, tblSMCompanySetup.strFederalTaxID
 				FROM tblEMEntity AS Transporter
-				INNER JOIN tblSMShipVia ON Transporter.intEntityId = tblSMShipVia.intEntityShipViaId
-				INNER JOIN tblARInvoice ON tblSMShipVia.intEntityShipViaId = tblARInvoice.intShipViaId
+				INNER JOIN tblSMShipVia ON Transporter.intEntityId = tblSMShipVia.[intEntityId]
+				INNER JOIN tblARInvoice ON tblSMShipVia.[intEntityId] = tblARInvoice.intShipViaId
 				INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
 				INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId
 				INNER JOIN tblICItemMotorFuelTax ON tblARInvoiceDetail.intItemId = tblICItemMotorFuelTax.intItemId
@@ -321,8 +321,8 @@ BEGIN TRY
 					, tblSMCompanySetup.strStateTaxID
 					, tblSMCompanySetup.strFederalTaxID
 				FROM tblEMEntity AS tblEMEntity_Transporter
-				INNER JOIN tblSMShipVia ON tblEMEntity_Transporter.intEntityId = tblSMShipVia.intEntityShipViaId
-				INNER JOIN tblARInvoice ON tblSMShipVia.intEntityShipViaId = tblARInvoice.intShipViaId
+				INNER JOIN tblSMShipVia ON tblEMEntity_Transporter.intEntityId = tblSMShipVia.[intEntityId]
+				INNER JOIN tblARInvoice ON tblSMShipVia.[intEntityId] = tblARInvoice.intShipViaId
 				INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
 				INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId			
 				FULL OUTER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intItemId = tblARInvoiceDetail.intItemId
@@ -502,8 +502,8 @@ BEGIN TRY
 				INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId 
 					AND tblICInventoryTransfer.intToLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 				INNER JOIN tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
-				INNER JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityShipViaId 
-				INNER JOIN tblEMEntity ON tblSMShipVia.intEntityShipViaId = tblEMEntity.intEntityId 
+				INNER JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.[intEntityId] 
+				INNER JOIN tblEMEntity ON tblSMShipVia.[intEntityId] = tblEMEntity.intEntityId 
 				INNER JOIN tblAPVendor ON tblTRLoadReceipt.intTerminalId = tblAPVendor.[intEntityId] 
 				INNER JOIN tblEMEntity AS EntityAPVendor ON tblAPVendor.[intEntityId] = EntityAPVendor.intEntityId 
 				INNER JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 

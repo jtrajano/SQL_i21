@@ -22,7 +22,7 @@ BEGIN
 	FROM dbo.tblMFWorkOrder W
 	JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 	JOIN dbo.tblMFWorkOrderInputLot WL ON WL.intWorkOrderId = W.intWorkOrderId
-	JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = W.intCreatedUserId
+	JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = W.intCreatedUserId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WL.intItemUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = WL.intItemIssuedUOMId

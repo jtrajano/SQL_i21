@@ -56,7 +56,7 @@ SELECT
 	,[strStorageLocationName]			= SL.[strName]
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
-	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
+	,[intEntityShipViaId]				= S.[intEntityId] 
 	,[strShipVia]						= S.[strShipVia]
 	,[strTicketNumber]					= NULL
 	,[strCustomerReference]				= NULL
@@ -121,7 +121,7 @@ LEFT OUTER JOIN
 		ON SO.[intTermId] = T.[intTermID] 
 LEFT OUTER JOIN
 	tblSMShipVia S
-		ON SO.[intShipViaId] = S.[intEntityShipViaId] 
+		ON SO.[intShipViaId] = S.[intEntityId] 
 LEFT OUTER JOIN
 	tblICStorageLocation SL
 		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
@@ -214,7 +214,7 @@ SELECT
 	,[strStorageLocationName]			= SL.[strName]
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
-	,[intEntityShipViaId]				= S.[intEntityShipViaId]
+	,[intEntityShipViaId]				= S.[intEntityId]
 	,[strShipVia]						= S.[strShipVia]
 	,[strTicketNumber]					= NULL
 	,[strCustomerReference]				= NULL
@@ -277,7 +277,7 @@ LEFT OUTER JOIN
 		ON SO.[intTermId] = T.[intTermID] 
 LEFT OUTER JOIN
 	tblSMShipVia S
-		ON SO.[intShipViaId] = S.[intEntityShipViaId] 
+		ON SO.[intShipViaId] = S.[intEntityId] 
 LEFT OUTER JOIN
 	tblICStorageLocation SL
 		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
@@ -369,7 +369,7 @@ SELECT
 	,[strStorageLocationName]			= SL.[strName]
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
-	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
+	,[intEntityShipViaId]				= S.[intEntityId] 
 	,[strShipVia]						= S.[strShipVia]
 	,[strTicketNumber]					= SCT.[strTicketNumber]
 	,[strCustomerReference]				= SCT.[strCustomerReference]
@@ -430,7 +430,7 @@ LEFT OUTER JOIN
 		ON SO.[intTermId] = T.[intTermID] 
 LEFT OUTER JOIN
 	tblSMShipVia S
-		ON SO.[intShipViaId] = S.[intEntityShipViaId]
+		ON SO.[intShipViaId] = S.[intEntityId]
 INNER JOIN
 	tblICItem I
 		ON SOD.[intItemId] = I.[intItemId]
@@ -1125,7 +1125,7 @@ SELECT
 	,[strStorageLocationName]			= ''
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
-	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
+	,[intEntityShipViaId]				= S.[intEntityId] 
 	,[strShipVia]						= S.[strShipVia]
 	,[strTicketNumber]					= NULL
 	,[strCustomerReference]				= NULL
@@ -1184,7 +1184,7 @@ LEFT OUTER JOIN
 		ON SO.[intTermId] = T.[intTermID] 
 LEFT OUTER JOIN
 	tblSMShipVia S
-		ON SO.[intShipViaId] = S.[intEntityShipViaId] 
+		ON SO.[intShipViaId] = S.[intEntityId] 
 LEFT JOIN
 	tblICItemUOM IU
 		ON MFG.[intItemUOMId] = IU.[intItemUOMId]

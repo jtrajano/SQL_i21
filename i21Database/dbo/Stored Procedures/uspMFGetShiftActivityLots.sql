@@ -45,7 +45,7 @@ BEGIN
 		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 		JOIN dbo.tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
-		JOIN dbo.tblSMUserSecurity US ON US.intEntityUserSecurityId = L.intCreatedEntityId
+		JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = L.intCreatedEntityId
 	END
 	ELSE
 	BEGIN -- UnAllocated Lots
@@ -68,6 +68,6 @@ BEGIN
 		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 		JOIN dbo.tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
-		JOIN dbo.tblSMUserSecurity US ON US.intEntityUserSecurityId = L.intCreatedEntityId
+		JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = L.intCreatedEntityId
 	END
 END

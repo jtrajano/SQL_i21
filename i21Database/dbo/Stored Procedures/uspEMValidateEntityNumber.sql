@@ -28,7 +28,7 @@ BEGIN
 		GOTO ExitHere
 	END
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblARSalesperson where strSalespersonId = @Identification AND intEntitySalespersonId != @EntityId)
+	IF EXISTS(SELECT TOP 1 1 FROM tblARSalesperson where strSalespersonId = @Identification AND [intEntityId] != @EntityId)
 	BEGIN
 		Set @Message = 'Entity No already exists as Salesperson'
 		GOTO ExitHere

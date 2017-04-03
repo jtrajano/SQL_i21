@@ -31,7 +31,7 @@ BEGIN
 	
 	SELECT	@strUserName			=	strUserName
 	FROM	tblSMUserSecurity 
-	WHERE	intEntityUserSecurityId	=	@intUserId
+	WHERE	[intEntityId]	=	@intUserId
 	
 	IF	@strScreenName IN ('Inventory Receipt', 'Receipt Return')
 	BEGIN

@@ -71,7 +71,7 @@ DECLARE @ErrMsg                    NVARCHAR(MAX),
 BEGIN TRY
 
 	SELECT @strUserName = US.strUserName FROM tblSMUserSecurity US
-	WHERE US.[intEntityUserSecurityId] = @intUserId
+	WHERE US.[intEntityId] = @intUserId
 	
 	SELECT @intContractHeaderId=intContractHeaderId FROM vyuCTContractDetailView Where intContractDetailId=@intDPContractId
 	

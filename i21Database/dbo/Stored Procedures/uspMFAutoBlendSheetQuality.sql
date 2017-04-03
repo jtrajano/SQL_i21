@@ -530,7 +530,7 @@ BEGIN TRY
 				,L.intWeightUOMId
 				,L.intItemUOMId
 			FROM tblICLot L
-			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityUserSecurityId]
+			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
@@ -1169,7 +1169,7 @@ BEGIN TRY
 				,L.intWeightUOMId
 				,L.intItemUOMId
 			FROM tblICLot L
-			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityUserSecurityId]
+			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId

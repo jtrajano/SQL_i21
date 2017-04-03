@@ -5,7 +5,7 @@
 			UPDATE dbo.tblSMRecurringTransaction
 			SET strResponsibleUser = CASE WHEN LEN(LTRIM(RTRIM(strResponsibleUser))) = 0 THEN strFullName ELSE strResponsibleUser END
 			FROM dbo.tblSMRecurringTransaction
-			INNER JOIN dbo.tblSMUserSecurity ON  dbo.tblSMRecurringTransaction.intUserId = dbo.tblSMUserSecurity.intEntityUserSecurityId
+			INNER JOIN dbo.tblSMUserSecurity ON  dbo.tblSMRecurringTransaction.intUserId = dbo.tblSMUserSecurity.intEntityId
 		')
 	END
 GO

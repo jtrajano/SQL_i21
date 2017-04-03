@@ -30,7 +30,7 @@ BEGIN TRY
 	FROM tblWHOrderHeader
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
-	SELECT @intUserSecurityId = intEntityUserSecurityId --this is a hiccup
+	SELECT @intUserSecurityId = [intEntityId] --this is a hiccup
 	FROM tblSMUserSecurity
 	WHERE strUserName = @strUserName
 

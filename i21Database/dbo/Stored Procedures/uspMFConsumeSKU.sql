@@ -44,7 +44,7 @@ BEGIN
 
 	SELECT @strUserName = strUserName
 	FROM dbo.tblSMUserSecurity
-	WHERE intEntityUserSecurityId = @intUserId
+	WHERE [intEntityId] = @intUserId
 
 	--SELECT @intStagingLocationId = intStorageLocationId
 	--FROM dbo.tblICStorageLocation

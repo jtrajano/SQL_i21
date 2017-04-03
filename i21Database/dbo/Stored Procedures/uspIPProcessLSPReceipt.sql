@@ -36,8 +36,6 @@ Begin
 		Select @strDeliveryNo=strDeliveryNo,@dtmReceiptDate=dtmReceiptDate,@strPartnerNo=strPartnerNo
 		From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 
-		Select @strDeliveryNo AS strInfo1,'' AS strInfo2
-
 		If NOT EXISTS (Select 1 From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 			RaisError('Invalid LSP Partner',16,1)
 
@@ -45,9 +43,9 @@ Begin
 			RaisError('Invalid Delivery No.',16,1)
 
 		If Exists (Select 1 From tblSMUserSecurity Where strUserName='irelyadmin')
-			Select TOP 1 @intUserId=intEntityUserSecurityId From tblSMUserSecurity Where strUserName='irelyadmin'
+			Select TOP 1 @intUserId=[intEntityId] From tblSMUserSecurity Where strUserName='irelyadmin'
 		Else
-			Select TOP 1 @intUserId=intEntityUserSecurityId From tblSMUserSecurity
+			Select TOP 1 @intUserId=[intEntityId] From tblSMUserSecurity
 
 		Select @intLoadId=intLoadId From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo AND intShipmentType=1
 		If ISNULL(@intLoadId,0)=0
@@ -164,6 +162,8 @@ Begin
 
 		Delete From tblIPReceiptStage Where intStageReceiptId=@intMinRowNo
 	END CATCH
+
+	Select @strDeliveryNo AS strInfo1,@strReceiptNo AS strInfo2
 
 	Select @intMinRowNo=Min(intStageReceiptId) From tblIPReceiptStage Where intStageReceiptId>@intMinRowNo
 End

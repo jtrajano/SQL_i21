@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuEMSalesperson]
 as
 select 
-	b.intEntitySalespersonId,
+	b.[intEntityId],
 	strSalespersonId = case when b.strSalespersonId = '' then a.strEntityNo else b.strSalespersonId end ,
 	a.strName as strSalespersonName,
 	a.strName,
@@ -31,7 +31,7 @@ select
 	b.strTextMessage
 from tblEMEntity a
 	join tblARSalesperson b on
-		a.intEntityId = b.intEntitySalespersonId
+		a.intEntityId = b.[intEntityId]
 	left join [tblEMEntityToContact] c
 		on a.intEntityId = c.intEntityId	
 			and c.ysnDefaultContact = 1

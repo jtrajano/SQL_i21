@@ -11,18 +11,18 @@
 			,strLocation = us.strLocation
 			,strSLAPlan = ''
 			,strReplyDue = ''
-			,intUserId = us.[intEntityUserSecurityId]
-			,intEntityId = us.[intEntityUserSecurityId]
+			,intUserId = us.[intEntityId]
+			,intEntityId = us.[intEntityId]
 			,ur.strName
 			,us.strUserName
 			,us.strFirstName
 			,us.strMiddleName
 			,us.strLastName
-			,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from vyuEMEntityContact where intEntityId = us.[intEntityUserSecurityId] and ysnDefaultContact = 1)
+			,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
 			,ysni21User = 1
-			,imgPhoto = (select top 1 imgPhoto from vyuEMEntityContact where intEntityId = us.[intEntityUserSecurityId] and ysnDefaultContact = 1)
+			,imgPhoto = (select top 1 imgPhoto from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
 			,intConcurrencyId = 1
-			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = us.[intEntityUserSecurityId] and ysnDefaultContact = 1)
+			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
 			,strEntityType = 'Agent'
 		from
 			tblSMUserSecurity us,
@@ -84,8 +84,8 @@
 			,ysni21User = 1
 			,imgPhoto = ec.imgPhoto
 			,intConcurrencyId = 1
-			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = sp.intEntitySalespersonId and ysnDefaultContact = 1)
+			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = sp.[intEntityId] and ysnDefaultContact = 1)
 			,strEntityType = 'Agent'
 		from
 			tblEMEntity ec
-			inner join tblARSalesperson sp on sp.intEntitySalespersonId = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])
+			inner join tblARSalesperson sp on sp.[intEntityId] = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])

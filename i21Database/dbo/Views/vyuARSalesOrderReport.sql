@@ -94,9 +94,9 @@ LEFT JOIN (tblARCustomer C
 LEFT JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId
 LEFT JOIN tblSMCurrency CUR ON SO.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 
-	INNER JOIN tblEMEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.intEntitySalespersonId
+	INNER JOIN tblEMEntity ESP ON SP.[intEntityId] = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.[intEntityId]
 LEFT JOIN (tblSMShipVia SV
-	INNER JOIN tblEMEntity ESV ON SV.intEntityShipViaId = ESV.intEntityId) ON SO.intShipViaId = SV.intEntityShipViaId
+	INNER JOIN tblEMEntity ESV ON SV.[intEntityId] = ESV.intEntityId) ON SO.intShipViaId = SV.[intEntityId]
 LEFT JOIN tblSMTerm T ON SO.intTermId = T.intTermID
 LEFT JOIN tblEMEntity EOB ON SO.intOrderedById = EOB.intEntityId
 LEFT JOIN tblSMFreightTerms FT ON SO.intFreightTermId = FT.intFreightTermId

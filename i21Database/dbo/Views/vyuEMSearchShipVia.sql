@@ -2,7 +2,7 @@
 	AS 
 
 	select 
-	A.intEntityShipViaId,
+	A.[intEntityId],
 	A.strShipVia,
 	A.strShippingService,
 	B.strName,
@@ -21,11 +21,11 @@
 	from 
 		tblSMShipVia A
 			JOIN tblEMEntity B
-				on A.intEntityShipViaId = B.intEntityId
+				on A.[intEntityId] = B.intEntityId
 			JOIN [tblEMEntityToContact] C
 				on C.intEntityId = B.intEntityId and C.ysnDefaultContact = 1
 			JOIN tblEMEntity D
 				ON C.intEntityContactId = D.intEntityId
 			JOIN [tblEMEntityLocation] E	
-				ON E.intEntityId = A.intEntityShipViaId
+				ON E.intEntityId = A.[intEntityId]
 					AND E.ysnDefaultLocation = 1

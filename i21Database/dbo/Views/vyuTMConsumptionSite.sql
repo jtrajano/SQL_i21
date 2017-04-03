@@ -121,7 +121,7 @@ AS
 		ON C.intEntityId = H.intEntityId 
 			AND H.ysnDefaultLocation = 1
 	LEFT JOIN tblARSalesperson I
-		ON D.intSalespersonId = I.intEntitySalespersonId
+		ON D.intSalespersonId = I.[intEntityId]
 	LEFT JOIN [vyuARCustomerInquiryReport] CI
 		ON C.intEntityId = CI.intEntityCustomerId
 	LEFT JOIN tblSMTerm J

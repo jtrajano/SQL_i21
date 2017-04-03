@@ -92,7 +92,7 @@ LEFT JOIN tblSMCompanyLocationSubLocation SB ON SB.intCompanyLocationSubLocation
 LEFT JOIN tblICStorageLocation SLoc ON SLoc.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CSeq.intContractStatusId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
-LEFT JOIN tblSMShipVia SV ON SV.[intEntityShipViaId] = CD.intShipViaId
+LEFT JOIN tblSMShipVia SV ON SV.[intEntityId] = CD.intShipViaId
 LEFT JOIN tblEMEntity SL ON SL.intEntityId = CD.intShippingLineId
 LEFT JOIN tblEMEntity Shp ON Shp.intEntityId = CD.intShipperId
 LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId

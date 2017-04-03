@@ -45,7 +45,7 @@ BEGIN TRY
 	--WHERE s.SettingName = 'AllowCreateSKU/tblWHContainer'
 	--	AND FactoryKey = IsNULL(@intCompanyLocationId, 0)
 	
-	SELECT @intUserId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	SELECT @intUserId = [intEntityId] FROM tblSMUserSecurity WHERE strUserName = @strUserName
 	SELECT @intItemId = intItemId FROM tblWHSKU WHERE intSKUId = @intSKUId
 	
 	SET @strAllowPutAwayUnitTypes = 'WH_FG_Storage,WH_RM_Storage'

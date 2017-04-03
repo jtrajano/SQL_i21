@@ -7,10 +7,10 @@ SELECT
 	, strTransactionType = 'Inventory Adjustment'
 	, dtmDate = dtmAdjustmentDate
 	, strDescription
-	, intEntityId
+	, Adjustment.intEntityId
 	, strUserName
 FROM tblICInventoryAdjustment Adjustment
-LEFT JOIN tblSMUserSecurity [User] ON [User].intEntityUserSecurityId = Adjustment.intEntityId
+LEFT JOIN tblSMUserSecurity [User] ON [User].[intEntityId] = Adjustment.intEntityId
 WHERE ISNULL(ysnPosted, 0) = 0
 
 UNION ALL
@@ -20,10 +20,10 @@ SELECT
 	, strTransactionType = 'Inventory Receipt'
 	, dtmDate = dtmReceiptDate
 	, strDescription = strReceiptNumber
-	, intEntityId
+	, Receipt.intEntityId
 	, strUserName
 FROM tblICInventoryReceipt Receipt
-LEFT JOIN tblSMUserSecurity [User] ON [User].intEntityUserSecurityId = Receipt.intEntityId
+LEFT JOIN tblSMUserSecurity [User] ON [User].[intEntityId] = Receipt.intEntityId
 WHERE ISNULL(ysnPosted, 0) = 0
 
 UNION ALL
@@ -33,10 +33,10 @@ SELECT
 	, strTransactionType = 'Inventory Shipment'
 	, dtmDate = dtmShipDate
 	, strDescription = strShipmentNumber
-	, intEntityId
+	, Shipment.intEntityId
 	, strUserName
 FROM tblICInventoryShipment Shipment
-LEFT JOIN tblSMUserSecurity [User] ON [User].intEntityUserSecurityId = Shipment.intEntityId
+LEFT JOIN tblSMUserSecurity [User] ON [User].[intEntityId] = Shipment.intEntityId
 WHERE ISNULL(ysnPosted, 0) = 0
 
 UNION ALL
@@ -46,8 +46,8 @@ SELECT
 	, strTransactionType = 'Inventory Transfer'
 	, dtmDate = dtmTransferDate
 	, strDescription
-	, intEntityId
+	, Transfer.intEntityId
 	, strUserName
 FROM tblICInventoryTransfer Transfer
-LEFT JOIN tblSMUserSecurity [User] ON [User].intEntityUserSecurityId = Transfer.intEntityId
+LEFT JOIN tblSMUserSecurity [User] ON [User].[intEntityId] = Transfer.intEntityId
 WHERE ISNULL(ysnPosted, 0) = 0

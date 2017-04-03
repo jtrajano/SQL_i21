@@ -54,9 +54,9 @@ FROM
 	LEFT JOIN tblEMEntity EM 
 		ON EM.intEntityId = TC.intEntityEmployeeId
 	LEFT JOIN tblSMUserSecurity USA
-		ON USA.intEntityUserSecurityId = TC.intApprovedUserId
+		ON USA.[intEntityId] = TC.intApprovedUserId
 	LEFT JOIN tblSMUserSecurity USP
-		ON USP.intEntityUserSecurityId = TC.intProcessedUserId
+		ON USP.[intEntityId] = TC.intProcessedUserId
 	LEFT JOIN tblPRPaycheck PC
 		ON TC.intPaycheckId = PC.intPaycheckId
 	LEFT JOIN tblPRPayGroupDetail PGD

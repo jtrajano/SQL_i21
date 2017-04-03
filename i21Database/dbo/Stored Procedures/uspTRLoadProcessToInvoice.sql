@@ -21,7 +21,7 @@ DECLARE @UpdatedInvoices NVARCHAR(MAX)
 BEGIN TRY
 
 	DECLARE @UserEntityId INT
-	SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId), @intUserId)
+	SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @intUserId), @intUserId)
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 	DECLARE @intFreightItemId	INT

@@ -336,7 +336,7 @@ BEGIN TRY
 
 		SELECT @strUserName = strUserName
 		FROM dbo.tblSMUserSecurity
-		WHERE intEntityUserSecurityId = @intUserId
+		WHERE [intEntityId] = @intUserId
 
 		SELECT @intOwnerId = IO.intOwnerId
 		FROM dbo.tblICItemOwner IO

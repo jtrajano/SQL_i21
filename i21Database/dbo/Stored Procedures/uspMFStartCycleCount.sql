@@ -95,7 +95,7 @@ BEGIN TRY
 
 		SELECT @strUserName = strUserName
 		FROM dbo.tblSMUserSecurity
-		WHERE [intEntityUserSecurityId] = @intUserSecurityID
+		WHERE [intEntityId] = @intUserSecurityID
 
 		RAISERROR (
 				51109

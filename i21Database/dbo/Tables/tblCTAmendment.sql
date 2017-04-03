@@ -8,6 +8,7 @@
 	ysnGrade BIT,
 	ysnPosition BIT,
 	ysnWeight BIT,
+	ysnINCOTerm BIT,
 
 	ysnStatus BIT,
 	ysnStartDate BIT,

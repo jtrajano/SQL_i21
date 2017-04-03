@@ -131,7 +131,7 @@ as	select tblSCTicket.intTicketId, (CASE WHEN
 	vyuEMSearchShipVia.strName as strHaulerName
   from tblSCTicket tblSCTicket
   left join tblEMEntity tblEMEntity on tblEMEntity.intEntityId = tblSCTicket.intEntityId
-  left join vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityShipViaId = tblSCTicket.intHaulerId
+  left join vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.[intEntityId] = tblSCTicket.intHaulerId
   left join tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = tblSCTicket.intSplitId
   left join tblSCScaleSetup tblSCScaleSetup on tblSCScaleSetup.intScaleSetupId = tblSCTicket.intScaleSetupId
   left join tblSMCompanyLocation tblSMCompanyLocation on tblSMCompanyLocation.intCompanyLocationId = tblSCTicket.intProcessingLocationId

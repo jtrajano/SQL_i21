@@ -119,6 +119,6 @@ BEGIN
 	LEFT JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 	LEFT JOIN tblICStorageLocation FSL ON FSL.intStorageLocationId = T.intFromStorageLocationId
 	LEFT JOIN tblICStorageLocation TSL ON TSL.intStorageLocationId = T.intToStorageLocationId
-	LEFT JOIN tblSMUserSecurity US ON US.intEntityUserSecurityId = T.intAssigneeId
+	LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = T.intAssigneeId
 	WHERE OH.intOrderHeaderId = @intOrderHeaderId
 END

@@ -23,6 +23,6 @@
     CONSTRAINT [PK_tblLGWarehouseInstructionDetail] PRIMARY KEY ([intWarehouseInstructionDetailId]),
     CONSTRAINT [FK_tblLGWarehouseInstructionDetail_tblLGWarehouseInstructionHeader_intWarehouseInstructionHeaderId] FOREIGN KEY ([intWarehouseInstructionHeaderId]) REFERENCES [tblLGWarehouseInstructionHeader]([intWarehouseInstructionHeaderId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblLGWarehouseInstructionDetail_tblICCommodityUnitMeasure_intCommodityUnitMeasureId] FOREIGN KEY ([intCommodityUnitMeasureId]) REFERENCES [tblICCommodityUnitMeasure]([intCommodityUnitMeasureId]),
-    CONSTRAINT [FK_tblLGWarehouseInstructionDetail_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]),
+    CONSTRAINT [FK_tblLGWarehouseInstructionDetail_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId]),
 	CONSTRAINT [FK_tblLGWarehouseInstructionDetail_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )

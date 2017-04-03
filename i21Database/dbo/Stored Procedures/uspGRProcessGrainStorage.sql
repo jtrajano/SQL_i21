@@ -229,7 +229,7 @@ BEGIN TRY
 			
 			SELECT @StorageChargeItemDescription=strDescription FROM tblICItem Where intItemId=@intStorageChargeItemId
 			
-			SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey), @UserKey)
+			SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey), @UserKey)
 			
 			SET @intCurrencyId = ISNULL((SELECT intCurrencyId FROM tblAPVendor WHERE [intEntityId] = @EntityId), @intDefaultCurrencyId)
 
@@ -442,7 +442,7 @@ BEGIN TRY
 							,[dtmHistoryDate]=GetDATE()
 							,[dblPaidAmount]=ARD.dblPrice							
 							,[strType]='Generated Invoice'
-							,[strUserName]=(SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey)
+							,[strUserName]=(SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
 							 FROM tblARInvoice AR
 							 JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
 							 WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)

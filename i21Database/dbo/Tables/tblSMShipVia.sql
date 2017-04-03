@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblSMShipVia] (
-    [intEntityShipViaId]       INT            NOT NULL,
+    [intEntityId]       INT            NOT NULL,
 	[strShipViaOriginKey]      NVARCHAR (10) COLLATE Latin1_General_CI_AS  NULL,
     [strShipVia]         NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strShippingService] NVARCHAR (250) COLLATE Latin1_General_CI_AS NOT NULL,
@@ -17,9 +17,9 @@
     [ysnActive]          BIT            DEFAULT ((1)) NOT NULL,
     [intSort]            INT            NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [PK_tblSMShipVia] PRIMARY KEY CLUSTERED ([intEntityShipViaId] ASC), 
+    CONSTRAINT [PK_tblSMShipVia] PRIMARY KEY CLUSTERED ([intEntityId] ASC), 
     CONSTRAINT [AK_tblSMShipVia_strShipVia] UNIQUE ([strShipVia]),
-	CONSTRAINT [FK_dbo_tblSMShipVia_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityShipViaId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_dbo_tblSMShipVia_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 
 );
 
@@ -32,7 +32,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMShipVia',
     @level2type = N'COLUMN',
-    @level2name = N'intEntityShipViaId'
+    @level2name = N'intEntityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Ship Via Name',

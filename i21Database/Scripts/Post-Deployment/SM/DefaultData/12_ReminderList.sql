@@ -539,9 +539,9 @@ GO
 														DATEDIFF(MINUTE, dtmLockedDate, GETUTCDATE()) < (SELECT TOP 1 intLockedRecordExpiration FROM tblSMCompanyPreference) AND 
 														(intLockedBy = {0} OR 
 														EXISTS 
-															(SELECT intEntityUserSecurityId 
+															(SELECT intEntityId 
 																FROM tblSMUserSecurity 
-																WHERE intEntityUserSecurityId = {0} AND ysnAdmin = 1))',
+																WHERE intEntityId = {0} AND ysnAdmin = 1))',
 					[strNamespace]		=        N'GlobalComponentEngine.view.LockedRecord',
 					[intSort]			=        1
 		END
@@ -554,9 +554,9 @@ GO
 									DATEDIFF(MINUTE, dtmLockedDate, GETUTCDATE()) < (SELECT TOP 1 intLockedRecordExpiration FROM tblSMCompanyPreference) AND 
 									(intLockedBy = {0} OR 
 									EXISTS 
-										(SELECT intEntityUserSecurityId 
+										(SELECT intEntityId 
 											FROM tblSMUserSecurity 
-											WHERE intEntityUserSecurityId = {0} AND ysnAdmin = 1))'
+											WHERE intEntityId = {0} AND ysnAdmin = 1))'
 			WHERE [strReminder] = N'Unlock' AND [strType] = N'Transaction'
 		END
 GO
