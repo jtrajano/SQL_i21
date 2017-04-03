@@ -74,7 +74,7 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 2
+			AND L.intShipmentType = 2 AND L.intShipmentStatus <> 10
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -117,7 +117,7 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 1
+			AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -158,7 +158,7 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 1
+			AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -200,7 +200,7 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 1
+			AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10
 		JOIN tblLGWeightClaim WC ON L.intLoadId = WC.intLoadId
 		JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
@@ -240,7 +240,7 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 1
+			AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -277,7 +277,7 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 1
+			AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
