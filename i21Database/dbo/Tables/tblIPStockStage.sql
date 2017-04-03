@@ -7,6 +7,7 @@
 	[dblInspectionQuantity] NUMERIC(38,20),
 	[dblBlockedQuantity] NUMERIC(38,20),
 	[dblUnrestrictedQuantity] NUMERIC(38,20),
+	[dblInTransitQuantity] NUMERIC(38,20),
 	[dblQuantity] NUMERIC(38,20),
 	[strImportStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strErrorMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,

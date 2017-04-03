@@ -253,7 +253,7 @@ Begin
 	--Shipment Delete
 	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')=''
 	Begin
-		If @strRefNo like 'LSI-%'
+		If @strRefNo like 'LSI-%' OR @strRefNo like 'LS-%'
 			Set @strDeliveryType='U'
 	End
 
