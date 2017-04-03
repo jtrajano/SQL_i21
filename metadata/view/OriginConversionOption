@@ -418,7 +418,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "itemId": "mnuImportInventoryCount",
+                                        "itemId": "mnuImportInventoryCountDetails",
                                         "text": "Inventory Count"
                                     },
                                     "name": "MyMenuItem17",
@@ -2118,7 +2118,7 @@
                             "userConfig": {
                                 "container|align": "middle",
                                 "container|padding": "",
-                                "itemId": "cntImportInventoryCount",
+                                "itemId": "cntImportInventoryCountDetails",
                                 "layout": "hbox",
                                 "margin": "0 0 5 0"
                             },

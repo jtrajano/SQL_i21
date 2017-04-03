@@ -26,7 +26,9 @@ Ext.define('Inventory.view.CommodityViewController', {
             txtDescription: '{current.strDescription}',
             chkExchangeTraded: '{current.ysnExchangeTraded}',
             cboFutureMarket: {
-                value: '{current.intFutureMarketId}',
+                origValueField: 'intFutureMarketId',
+                origUpdateField: 'intFutureMarketId',
+                value: '{current.strFutMarketName}',
                 store: '{futureMarket}',
                 readOnly: '{!current.ysnExchangeTraded}'
             },
@@ -55,7 +57,9 @@ Ext.define('Inventory.view.CommodityViewController', {
             dtmCropEndDateNew: '{current.dtmCropEndDateNew}',
             txtEdiCode: '{current.strEDICode}',
             cboDefaultScheduleStore: {
-                value: '{current.intScheduleStoreId}',
+                origValueField: 'intStorageScheduleRuleId',
+                origUpdateField: 'intScheduleStoreId',
+                value: '{current.strScheduleId}',
                 store: '{scheduleStore}',
                 defaultFilters: [{
                     column: 'intCommodity',
@@ -64,11 +68,15 @@ Ext.define('Inventory.view.CommodityViewController', {
                 }]
             },
             cboDefaultScheduleDiscount: {
-                value: '{current.intScheduleDiscountId}',
+                origValueField: 'intDiscountId',
+                origUpdateField: 'intScheduleDiscountId',
+                value: '{current.strDiscountId}',
                 store: '{scheduleDiscount}'
             },
             cboScaleAutoDistDefault: {
-                value: '{current.intScaleAutoDistId}',
+                origValueField: 'intStorageScheduleTypeId',
+                origUpdateField: 'intScaleAutoDistId',
+                value: '{current.strStorageTypeCode}',
                 store: '{autoScaleDist}'
             },
 
@@ -198,7 +206,8 @@ Ext.define('Inventory.view.CommodityViewController', {
                 'tblICCommodityProductTypes, ' +
                 'tblICCommodityRegions, ' +
                 'tblICCommoditySeasons, ' +
-                'tblICCommodityGroups',
+                'tblICCommodityGroups, ' +
+                'vyuICCommodityLookUp',
             binding: me.config.binding,
             details: [
                 {
