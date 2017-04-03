@@ -6510,4 +6510,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntityId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b1ba48bd-56a6-4451-8b18-fd3af15f5665" ChangeDateTime="04/03/2017 09:01:28">
+    <Property Name="ElementName" Value="[dbo].[tblARLead].[intEntityLeadId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARLead]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityId]" />
+  </Operation>
 </Operations>
