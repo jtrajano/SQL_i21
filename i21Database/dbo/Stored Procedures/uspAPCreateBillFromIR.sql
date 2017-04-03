@@ -30,6 +30,9 @@ DECLARE @totalLineItem DECIMAL(18,6);
 DECLARE @totalCharges DECIMAL(18,6);
 DECLARE @receiptType INT;
 DECLARE @contractTermId INT;
+DECLARE @balanceDue INT;
+DECLARE @receipttDate DATETIME;
+
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -794,21 +797,27 @@ BEGIN
 
 	--UPDATE Term of Voucher base on Contract term AP-3450
 	SELECT	TOP 1 
-			@contractTermId = ContractTerm.intTermId
+			@contractTermId = ContractTerm.intTermId,
+			@balanceDue = (SELECT intBalanceDue FROM dbo.tblSMTerm WHERE intTermID = ContractTerm.intTermId),
+			@receipttDate = ContractTerm.dtmReceiptDate
 	FROM	tblAPBill Voucher
 	CROSS APPLY (
 		SELECT TOP 1
-			ct.intTermId
+			ct.intTermId, r.dtmReceiptDate
 		FROM tblAPBillDetail VoucherDetail
 		INNER JOIN tblCTContractHeader ct
 			ON VoucherDetail.intContractHeaderId = ct.intContractHeaderId
+		LEFT JOIN dbo.tblICInventoryReceiptItem ri
+			ON ri.intInventoryReceiptItemId = VoucherDetail.intInventoryReceiptItemId
+		LEFT JOIN dbo.tblICInventoryReceipt r
+			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 		WHERE VoucherDetail.intBillId = @currentVoucher
 	) ContractTerm
 
 	IF @contractTermId > 0
 	BEGIN
 		UPDATE Voucher
-			SET Voucher.intTermsId = @contractTermId
+			SET Voucher.intTermsId = @contractTermId, Voucher.dtmDueDate = (SELECT DATEADD(DD, @balanceDue, @receipttDate) )
 		FROM tblAPBill Voucher
 		WHERE Voucher.intBillId = @currentVoucher
 	END
