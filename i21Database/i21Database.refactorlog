@@ -6517,4 +6517,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntityId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="20837be0-43b4-4161-9583-fb99a89f3b45" ChangeDateTime="04/03/2017 09:39:20">
+    <Property Name="ElementName" Value="[dbo].[tblVTVeterinary].[intEntityVeterinaryId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblVTVeterinary]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityId]" />
+  </Operation>
 </Operations>
