@@ -73,7 +73,7 @@ BEGIN
 			LEFT JOIN tblEMEntity J
 				ON B.intEnteredByID = J.intEntityId
 			LEFT JOIN tblSMUserSecurity K
-				ON J.intEntityId = K.intEntityUserSecurityId
+				ON J.intEntityId = K.intEntityId
 			LEFT JOIN vwitmmst L
 				ON A.intProduct = L.A4GLIdentity
 			
@@ -129,7 +129,7 @@ BEGIN
 			LEFT JOIN tblEMEntity J
 				ON B.intEnteredByID = J.intEntityId
 			LEFT JOIN tblSMUserSecurity K
-				ON J.intEntityId = K.intEntityUserSecurityId
+				ON J.intEntityId = K.intEntityId
 			LEFT JOIN tblICItem L
 				ON A.intProduct = L.intItemId
 			

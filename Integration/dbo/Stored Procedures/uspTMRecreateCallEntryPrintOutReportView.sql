@@ -168,7 +168,7 @@ BEGIN
 				LEFT JOIN vwlclmst K 
 					ON C.intTaxStateID = K.A4GLIdentity 
 				LEFT JOIN tblSMUserSecurity N
-					ON F.intUserID = N.intEntityUserSecurityId
+					ON F.intUserID = N.intEntityId
 				LEFT JOIN tblTMFillMethod O
 					ON C.intFillMethodId = O.intFillMethodId
 				LEFT JOIN tblTMRoute P
@@ -302,7 +302,7 @@ BEGIN
 				LEFT JOIN tblSMTaxGroup K 
 					ON C.intTaxStateID = K.intTaxGroupId 
 				LEFT JOIN tblSMUserSecurity N
-					ON F.intUserID = N.intEntityUserSecurityId
+					ON F.intUserID = N.intEntityId
 				LEFT JOIN tblTMFillMethod O
 					ON C.intFillMethodId = O.intFillMethodId
 				LEFT JOIN tblTMRoute P

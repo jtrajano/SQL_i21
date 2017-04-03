@@ -75,7 +75,7 @@ BEGIN
 			SELECT
 					'Direct'--[strReceiptType]
 					,0--[intSourceType]
-					,(select intEntityVendorId from tblAPVendor where strVendorId = Vnd.strVendorPayToId)
+					,(select intEntityId from tblAPVendor where strVendorId = Vnd.strVendorPayToId)
 					,NULL--[intTransferorId]
 					,(SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber  COLLATE Latin1_General_CI_AS = PHS.ptphs_hdr_loc_no COLLATE Latin1_General_CI_AS)--[intLocationId]
 					,PHS.ptphs_ord_no --[strReceiptNumber]
@@ -85,7 +85,7 @@ BEGIN
 					,0--[intBlanketRelease]
 					,PHS.ptphs_vnd_ivc_no--[strVendorRefNo]
 					,PHS.ptphs_bill_lading--[strBillOfLading]
-					,(SELECT intEntityShipViaId FROM tblSMShipVia WHERE strShipViaOriginKey  COLLATE Latin1_General_CI_AS = PHS.ptphs_carrier COLLATE Latin1_General_CI_AS)--[intShipViaId]
+					,(SELECT intEntityId FROM tblSMShipVia WHERE strShipViaOriginKey  COLLATE Latin1_General_CI_AS = PHS.ptphs_carrier COLLATE Latin1_General_CI_AS)--[intShipViaId]
 					,Vnd.intDefaultLocationId--[intShipFromId]
 					,@UserId--[intReceiverId]
 					,''--[strVessel]

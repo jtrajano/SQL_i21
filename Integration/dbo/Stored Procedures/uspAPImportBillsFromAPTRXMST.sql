@@ -79,7 +79,7 @@ BEGIN
 
 			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
 					INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
-			WHERE intEntityUserSecurityId = @UserId
+			WHERE intEntityId = @UserId
 
 			IF OBJECT_ID(''tempdb..#tmpaptrxmstimport'') IS NOT NULL DROP TABLE #tmpaptrxmstimport
 
@@ -107,11 +107,11 @@ BEGIN
 			MERGE INTO tblAPBill AS destination
 			USING (
 				SELECT
-					[intEntityVendorId]			=	D.intEntityVendorId,
+					[intEntityVendorId]			=	D.intEntityId,
 					[strVendorOrderNumber] 		=	(CASE WHEN DuplicateData.strVendorOrderNumber IS NOT NULL THEN dbo.fnTrim(A.aptrx_ivc_no) + ''-DUP'' + CAST(A.A4GLIdentity AS NVARCHAR(MAX)) ELSE A.aptrx_ivc_no END),
 					[strVendorOrderNumberOrig] 	=	A.aptrx_ivc_no,
 					[intTermsId] 				=	ISNULL((SELECT TOP 1 intTermsId FROM tblEMEntityLocation
-															WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor
+															WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
 																WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 					[dtmDate] 					=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 					[dtmDateCreated] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -124,7 +124,7 @@ BEGIN
 														ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
 					[dblAmountDue]				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt 
 														ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
-					[intEntityId]				=	ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
+					[intEntityId]				=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
 					[ysnPosted]					=	0,
 					[ysnPaid]					=	0,
 					[intTransactionType]		=	CASE WHEN A.aptrx_trans_type = ''I'' AND A.aptrx_orig_amt > 0 THEN 1
@@ -146,10 +146,10 @@ BEGIN
 					INNER JOIN tblAPVendor D
 						ON A.aptrx_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 					LEFT JOIN tblEMEntityLocation loc
-						ON D.intEntityVendorId = loc.intEntityId AND loc.ysnDefaultLocation = 1
+						ON D.intEntityId = loc.intEntityId AND loc.ysnDefaultLocation = 1
 					OUTER APPLY (
 						SELECT strVendorOrderNumber, strVendorId FROM tblAPBill F --CHECK ONLY FOR DUPLICATE IF IT IS EXISTS IN i21 BILLS
-							INNER JOIN tblAPVendor G ON F.intEntityVendorId = G.intEntityVendorId
+							INNER JOIN tblAPVendor G ON F.intEntityVendorId = G.intEntityId
 						WHERE dbo.fnTrim(A.aptrx_ivc_no) = dbo.fnTrim(F.strVendorOrderNumber) COLLATE Latin1_General_CS_AS
 						AND dbo.fnTrim(A.aptrx_vnd_no) = dbo.fnTrim(G.strVendorId) COLLATE Latin1_General_CS_AS
 					) DuplicateData
@@ -234,7 +234,7 @@ BEGIN
 				INNER JOIN #InsertedUnpostedBill A2
 					ON A.intBillId  = A2.intBillId
 				INNER JOIN tblAPVendor B
-					ON A.intEntityVendorId = B.intEntityVendorId
+					ON A.intEntityVendorId = B.intEntityId
 				INNER JOIN (#tmpaptrxmstimport C2 INNER JOIN apeglmst C 
 								ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 								AND C2.aptrx_vnd_no = C.apegl_vnd_no)
@@ -285,7 +285,7 @@ BEGIN
 					INNER JOIN #InsertedUnpostedBill A2
 						ON A.intBillId  = A2.intBillId
 					INNER JOIN tblAPVendor B
-						ON A.intEntityVendorId = B.intEntityVendorId
+						ON A.intEntityVendorId = B.intEntityId
 					INNER JOIN (#tmpaptrxmstimport C2 INNER JOIN #tmpapeglmstimport C 
 									ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 									AND C2.aptrx_vnd_no = C.apegl_vnd_no)

@@ -113,7 +113,7 @@ BEGIN
 
 		INSERT INTO [tblSMShipVia]
 		(
-		[intEntityShipViaId]
+		[intEntityId]
 		,[strShipViaOriginKey]
 		,[strShipVia]
 		,[strShippingService]
@@ -196,14 +196,14 @@ BEGIN
 				   ,[intEntityTariffTypeId]
 				   ,[intConcurrencyId])
 
-		SELECT SHP.intEntityShipViaId
+		SELECT SHP.intEntityId
 			  ,CMR.trcmr_class
 			  ,CONVERT(DATE, CAST(20170101 AS CHAR(12)), 112)
 			  ,TRT.intEntityTariffTypeId,1 
 		FROM trcmrmst CMR
 		INNER JOIN tblSMShipVia SHP ON SHP.strShipViaOriginKey COLLATE SQL_Latin1_General_CP1_CS_AS = CMR.trcmr_carrier COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN [tblEMEntityTariffType] TRT ON TRT.strTariffType = ''DEFAULT''
-		WHERE SHP.intEntityShipViaId = @EntityId
+		WHERE SHP.intEntityId = @EntityId
 		
 		INSERT INTO @ImportShipViaTariff
 				   ([intEntityTariffId]
@@ -244,7 +244,7 @@ BEGIN
 				   ,1
 				   FROM trcmrmst CRM
 			INNER JOIN tblSMShipVia SHP ON SHP.strShipViaOriginKey COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_carrier COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityShipViaId
+			INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityId
 			AND TAR.strDescription COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_class  COLLATE SQL_Latin1_General_CP1_CS_AS
 			WHERE trcmr_fuel_surchrg1 <> 0 AND TAR.intEntityTariffId = @EntityTariffId
 
@@ -259,7 +259,7 @@ BEGIN
 				   ,1
 				   FROM trcmrmst CRM
 			INNER JOIN tblSMShipVia SHP ON SHP.strShipViaOriginKey COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_carrier COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityShipViaId
+			INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityId
 			AND TAR.strDescription COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_class  COLLATE SQL_Latin1_General_CP1_CS_AS
 			WHERE trcmr_fuel_surchrg2 <> 0 AND TAR.intEntityTariffId = @EntityTariffId
 
@@ -274,7 +274,7 @@ BEGIN
 				   ,1
 				   FROM trcmrmst CRM
 			INNER JOIN tblSMShipVia SHP ON SHP.strShipViaOriginKey COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_carrier COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityShipViaId
+			INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityId
 			AND TAR.strDescription COLLATE SQL_Latin1_General_CP1_CS_AS = CRM.trcmr_class  COLLATE SQL_Latin1_General_CP1_CS_AS
 			WHERE trcmr_fuel_surchrg3 <> 0 AND TAR.intEntityTariffId = @EntityTariffId
 			
@@ -298,7 +298,7 @@ BEGIN
 				   ,1	 
 			FROM trcdtmst MDT
 			INNER JOIN tblSMShipVia SHP ON SHP.strShipViaOriginKey COLLATE SQL_Latin1_General_CP1_CS_AS = MDT.trcdt_carrier COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityShipViaId
+			INNER JOIN tblEMEntityTariff TAR ON TAR.intEntityId = SHP.intEntityId
 			AND TAR.strDescription COLLATE SQL_Latin1_General_CP1_CS_AS = MDT.trcdt_class  COLLATE SQL_Latin1_General_CP1_CS_AS
 			WHERE TAR.intEntityTariffId = @EntityTariffId
 		

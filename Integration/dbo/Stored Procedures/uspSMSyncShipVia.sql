@@ -32,7 +32,7 @@ IF @ToOrigin = 1
 			strShipViaOriginKey = 
 				(CASE WHEN EXISTS(SELECT null FROM [sscarmst] WHERE [sscar_name] COLLATE Latin1_General_CI_AS = [strShipVia])
 					THEN (SELECT TOP 1 [sscar_key] FROM [sscarmst] WHERE [sscar_name] COLLATE Latin1_General_CI_AS = [strShipVia])
-					ELSE REPLICATE(''0'',10 - LEN(RTRIM(LTRIM(CAST(intEntityShipViaId as nvarchar(20)))))) + CAST(intEntityShipViaId as nvarchar(20))
+					ELSE REPLICATE(''0'',10 - LEN(RTRIM(LTRIM(CAST(intEntityId as nvarchar(20)))))) + CAST(intEntityId as nvarchar(20))
 				END)
 		WHERE 
 			strShipViaOriginKey IS NULL
@@ -56,7 +56,7 @@ ELSE
 			INSERT INTO @RecordsToProcess(strShipViaOriginKey)
 			SELECT SV.[strShipViaOriginKey]
 			FROM fnGetRowsFromDelimitedValues(@ShipViaIds) T
-			INNER JOIN tblSMShipVia SV ON T.[intID] = SV.[intEntityShipViaId]
+			INNER JOIN tblSMShipVia SV ON T.[intID] = SV.[intEntityId]
 		ELSE
 			INSERT INTO @RecordsToProcess(strShipViaOriginKey)
 			SELECT SV.[sscar_key]
@@ -129,7 +129,7 @@ IF(@ToOrigin = 1)
 		FROM
 			tblSMShipVia P
 		Join tblEMEntityLocation EntityLocation
-			on P.intEntityShipViaId = EntityLocation.intEntityId and ysnDefaultLocation = 1
+			on P.intEntityId = EntityLocation.intEntityId and ysnDefaultLocation = 1
 		INNER JOIN
 			@RecordsToAdd A
 				ON P.[strShipViaOriginKey] = A.[strShipViaOriginKey] COLLATE Latin1_General_CI_AS 			
@@ -169,7 +169,7 @@ IF(@ToOrigin = 1)
 		FROM
 			tblSMShipVia P
 			Join tblEMEntityLocation EntityLocation
-				on P.intEntityShipViaId = EntityLocation.intEntityId  and ysnDefaultLocation = 1
+				on P.intEntityId = EntityLocation.intEntityId  and ysnDefaultLocation = 1
 		INNER JOIN
 			@RecordsToUpdate A
 				ON P.[strShipViaOriginKey] = A.[strShipViaOriginKey] COLLATE Latin1_General_CI_AS 				

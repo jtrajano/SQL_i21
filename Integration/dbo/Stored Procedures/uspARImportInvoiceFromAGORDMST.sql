@@ -61,7 +61,7 @@ SELECT
 	@shipToAttention	= A.strAddress
 FROM tblSMCompanyLocation A
 	INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
-WHERE intEntityUserSecurityId = @UserId
+WHERE intEntityId = @UserId
 
 --GET DEFAULT TERM TO USE
 SELECT TOP 1 @defaultTermId = intTermID FROM tblSMTerm WHERE strTerm = 'Due on Receipt'
@@ -89,13 +89,13 @@ USING
 (
 SELECT
 	[strInvoiceOriginId] = agord_ivc_no,
-	[intEntityCustomerId] = Cus.intEntityCustomerId,
+	[intEntityCustomerId] = Cus.intEntityId,
 	[dtmDate] = (CASE WHEN ISDATE(agord_ord_rev_dt) = 1 THEN CONVERT(DATE, CAST(agord_ord_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),
 	[dtmDueDate] = (CASE WHEN ISDATE(agord_ord_rev_dt) = 1 THEN DATEADD(day,Term.intBalanceDue,CONVERT(DATE, CAST(agord_ord_rev_dt AS CHAR(12)), 112)) ELSE GETDATE() END),
 	[dtmPostDate] = (CASE WHEN ISDATE(agord_ord_rev_dt) = 1 THEN CONVERT(DATE, CAST(agord_ord_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),
 	[intCurrencyId] = @defaultCurrencyId,
 	[intCompanyLocationId] = (SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber  COLLATE Latin1_General_CI_AS = agord_loc_no COLLATE Latin1_General_CI_AS),
-	[intEntitySalespersonId] = Salesperson.intEntitySalespersonId,
+	[intEntitySalespersonId] = Salesperson.intEntityId,
 	[dtmShipDate] = NULL,
 	[intShipViaId] = NULL,
 	[strPONumber] = agord_po_no,
@@ -343,7 +343,7 @@ INNER JOIN #tmpInvoice B ON A.intId = B.intBackupId
 			LEFT OUTER JOIN
 				tblEMEntityLocation S
 					ON C.intShipToId = S.intEntityLocationId 													
-			INNER JOIN tblARInvoice IVC on IVC.intEntityCustomerId = C.intEntityCustomerId		
+			INNER JOIN tblARInvoice IVC on IVC.intEntityCustomerId = C.intEntityId		
 			WHERE
 				intInvoiceId > @maxInvoiceId
 

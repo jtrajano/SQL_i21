@@ -36,7 +36,7 @@ BEGIN
 	GOTO INSERTLOG;
 END
 
-IF(NOT EXISTS(SELECT 1 FROM tblSMUserSecurity A WHERE A.intEntityUserSecurityId = @UserId))
+IF(NOT EXISTS(SELECT 1 FROM tblSMUserSecurity A WHERE A.intEntityId = @UserId))
 BEGIN
 	INSERT INTO @log
 	SELECT 'Invalid user provided.'
@@ -46,7 +46,7 @@ END
 DECLARE @userLocation INT;
 SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
 		INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
-WHERE intEntityUserSecurityId = @UserId
+WHERE intEntityId = @UserId
 
 IF(@userLocation IS NULL OR @userLocation <= 0)
 BEGIN
@@ -176,7 +176,7 @@ CROSS APPLY (
 	SELECT 
 		B.intBillId
 	FROM tblAPBill B
-	INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.intEntityVendorId
+	INNER JOIN tblAPVendor C ON B.intEntityId = C.intEntityId
 	WHERE B.strVendorOrderNumber COLLATE Latin1_General_CS_AS = A.aptrx_ivc_no
 	AND C.strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no
 ) Vouchers
@@ -192,7 +192,7 @@ CROSS APPLY (
 	SELECT 
 		B.intBillId
 	FROM tblAPBill B
-	INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.intEntityVendorId
+	INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.intEntityId
 	WHERE B.strVendorOrderNumber COLLATE Latin1_General_CS_AS = A.apivc_ivc_no
 	AND C.strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no
 ) Vouchers

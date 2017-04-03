@@ -92,7 +92,7 @@ BEGIN
 			LEFT JOIN tblTMClock M
 				ON A.intClockID = M.intClockID
 			LEFT JOIN tblSMUserSecurity P
-				ON J.intUserID = P.intEntityUserSecurityId
+				ON J.intUserID = P.intEntityId
 			LEFT JOIN (
 				SELECT 
 					AA.intSiteID
@@ -221,7 +221,7 @@ BEGIN
 			LEFT JOIN tblTMClock M
 				ON A.intClockID = M.intClockID
 			LEFT JOIN tblSMUserSecurity P
-				ON J.intUserID = P.intEntityUserSecurityId
+				ON J.intUserID = P.intEntityId
 			LEFT JOIN (
 				SELECT 
 					AA.intSiteID

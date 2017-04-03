@@ -145,7 +145,7 @@ AND A.apivc_pay_ind IS NULL AND A.apivc_chk_no IS NOT NULL AND A.apivc_trans_typ
 AND EXISTS (
 	SELECT 1
 	FROM tblAPBill B
-	INNER JOIN tblAPVendor B2 ON B.intEntityVendorId = B2.intEntityVendorId
+	INNER JOIN tblAPVendor B2 ON B.intEntityVendorId = B2.intEntityId
 	INNER JOIN tblAPapivcmst C ON B.intBillId = C.intBillId
 	INNER JOIN apivcmst D ON B.strVendorOrderNumber = D.apivc_ivc_no COLLATE SQL_Latin1_General_CP1_CS_AS
 	AND B2.strVendorId = D.apivc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -172,7 +172,7 @@ INNER JOIN tblAPapivcmst A2 ON A.apivc_ivc_no = A2.apivc_ivc_no AND A.apivc_vnd_
 AND EXISTS(
 	SELECT 1
 	FROM tblAPBill B
-	INNER JOIN tblAPVendor B2 ON B.intEntityVendorId = B2.intEntityVendorId
+	INNER JOIN tblAPVendor B2 ON B.intEntityVendorId = B2.intEntityId
 	WHERE B.ysnOrigin = 1 AND B.ysnPosted = 1 AND B.dblPayment > 0
 	AND B.strVendorOrderNumber = A2.apivc_ivc_no COLLATE SQL_Latin1_General_CP1_CS_AS
 	AND B2.strVendorId = A2.apivc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -197,7 +197,7 @@ INNER JOIN tmp_apivcmstImport2 A2 ON A.apivc_ivc_no = A2.apivc_ivc_no AND A.apiv
 AND EXISTS(
 	SELECT 1
 	FROM tblAPBill B
-	INNER JOIN tblAPVendor B2 ON B.intEntityVendorId = B2.intEntityVendorId
+	INNER JOIN tblAPVendor B2 ON B.intEntityVendorId = B2.intEntityId
 	WHERE B.ysnOrigin = 1 AND B.ysnPosted = 1 AND B.dblPayment > 0
 	AND B.strVendorOrderNumber = A.apivc_ivc_no COLLATE SQL_Latin1_General_CP1_CS_AS
 	AND B2.strVendorId = A.apivc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -320,7 +320,7 @@ AS (
 									WHEN E.apchk_chk_amt = 0 THEN @debitmemosandpayments
 								END,
 	[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = D.intBankAccountId), @defaultCurrencyId),
-	[intEntityVendorId]		= B.intEntityVendorId,
+	[intEntityVendorId]		= B.intEntityId,
 	[strPaymentInfo]		= A.apivc_chk_no,
 	[strNotes]				= NULL,
 	[dtmDatePaid]			= CASE WHEN ISDATE(A.apivc_chk_rev_dt) = 1 
@@ -366,7 +366,7 @@ SELECT
 									WHEN ISNULL(E.apchk_chk_amt, A.apivc_net_amt) = 0 THEN @debitmemosandpayments
 								END,
 	[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = D.intBankAccountId), @defaultCurrencyId),
-	[intEntityVendorId]		= B.intEntityVendorId,
+	[intEntityVendorId]		= B.intEntityId,
 	[strPaymentInfo]		= A.apivc_chk_no,
 	[strNotes]				= NULL,
 	[dtmDatePaid]			= CASE WHEN ISDATE(A.apivc_chk_rev_dt) = 1 
@@ -563,15 +563,15 @@ WHERE DetailCount.intCount = 1
 --UPDATE Bank Transaction
 UPDATE tblCMBankTransaction
 SET strTransactionId = B.strPaymentRecordNum,
-	intPayeeId = C.intEntityVendorId
+	intPayeeId = C.intEntityId
 FROM tblCMBankTransaction A
 INNER JOIN tblAPPayment B
 	ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
 	AND A.dtmDate = B.dtmDatePaid
 	AND A.intBankAccountId = B.intBankAccountId
 	AND A.strReferenceNo = B.strPaymentInfo
-INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityVendorId = D.intEntityId)
-	ON B.intEntityVendorId = C.intEntityVendorId 
+INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityId = D.intEntityId)
+	ON B.intEntityVendorId = C.intEntityId 
 	--AND A.strPayee = D.strName
 WHERE A.strSourceSystem IN ('AP','CW')
 AND A.strTransactionId <> B.strPaymentRecordNum
@@ -581,7 +581,7 @@ FROM tblAPBill A
 WHERE EXISTS(
 	SELECT B.intBillId
 	FROM tblAPBill B
-	INNER JOIN tblAPVendor B2 ON B.intEntityVendorId = B2.intEntityVendorId
+	INNER JOIN tblAPVendor B2 ON B.intEntityVendorId = B2.intEntityId
 	LEFT JOIN apivcmst B3 ON B.strVendorOrderNumber = B3.apivc_ivc_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		AND B2.strVendorId = B3.apivc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 	WHERE B.ysnOrigin = 1 AND B.ysnPosted = 1 AND B.dblPayment > 0 
@@ -598,7 +598,7 @@ B3.apivc_trans_type,
 B3.apivc_status_ind,
 B.*
 FROM tblAPBill B
-INNER JOIN tblAPVendor B2 ON B.intEntityVendorId = B2.intEntityVendorId
+INNER JOIN tblAPVendor B2 ON B.intEntityVendorId = B2.intEntityId
 LEFT JOIN apivcmst B3 ON B.strVendorOrderNumber = B3.apivc_ivc_no COLLATE SQL_Latin1_General_CP1_CS_AS
 	AND B2.strVendorId = B3.apivc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 WHERE B.ysnOrigin = 1 AND B.ysnPosted = 1 AND B.dblPayment > 0 

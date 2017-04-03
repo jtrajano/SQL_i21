@@ -84,7 +84,7 @@ BEGIN
 			LEFT JOIN vwslsmst G
 				ON A.intDriverID = G.A4GLIdentity
 			LEFT JOIN tblSMUserSecurity H
-				ON A.intUserID = H.intEntityUserSecurityId
+				ON A.intUserID = H.intEntityId
 			LEFT JOIN vwlocmst I
 				ON B.intLocationId = I.A4GLIdentity
 			LEFT JOIN tblSMCompanyLocation J
@@ -151,7 +151,7 @@ BEGIN
 			LEFT JOIN tblEMEntity G
 				ON A.intDriverID = G.intEntityId
 			LEFT JOIN tblSMUserSecurity H
-				ON A.intUserID = H.intEntityUserSecurityId
+				ON A.intUserID = H.intEntityId
 			LEFT JOIN tblSMCompanyLocation I
 				ON B.intLocationId = I.intCompanyLocationId
 			LEFT JOIN vyuARCustomerInquiryReport K

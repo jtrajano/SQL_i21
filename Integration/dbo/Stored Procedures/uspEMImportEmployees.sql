@@ -71,7 +71,7 @@ BEGIN
 		INNER JOIN tblPREmployee B
 			ON prempmst.premp_emp COLLATE Latin1_General_CI_AS = SUBSTRING(B.strEmployeeId, 1, 10) COLLATE Latin1_General_CI_AS
 		INNER JOIN tblEMEntity A
-			ON A.intEntityId = B.intEntityEmployeeId
+			ON A.intEntityId = B.intEntityId
 		INNER JOIN tblEMEntityLocation C
 			ON A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
 		INNER JOIN tblEMEntityToContact G
@@ -162,7 +162,7 @@ BEGIN
 		FROM
 			tblEMEntity A
 		INNER JOIN tblPREmployee B
-			ON A.intEntityId = B.intEntityEmployeeId		
+			ON A.intEntityId = B.intEntityId		
 		INNER JOIN tblEMEntityLocation C
 			ON A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
 		INNER JOIN tblEMEntityToContact G
@@ -361,7 +361,7 @@ BEGIN
 		end
 		else
 		begin
-			select top 1  @EntityId = intEntityUserSecurityId from tblSMUserSecurity  where strEmployeeOriginId = @originEmployee
+			select top 1  @EntityId = intEntityId from tblSMUserSecurity  where strEmployeeOriginId = @originEmployee
 		end
 		if not exists(select top 1 1 from tblEMEntityType where intEntityId = @EntityId)
 		begin
@@ -370,7 +370,7 @@ BEGIN
 			VALUES (@EntityId, ''Employee'', 0)
 		end
 		
-		insert into tblPREmployee(intEntityEmployeeId, strEmployeeId, strWorkPhone, intRank, dtmOriginalDateHired, dtmDateHired,	dtmBirthDate,	strGender,	strMaritalStatus,	strSpouse,	strEthnicity,	strEEOCCode,	strSocialSecurity,   	dtmTerminated,	strTerminatedReason,	strEmergencyContact,	strEmergencyPhone,	strEmergencyPhone2,	strPayPeriod,	dtmReviewDate,	dtmNextReview,	ysnRetirementPlan,	dblRegularHours,	dtmLastModified, strFirstName, strMiddleName, strLastName, strNameSuffix, strType)
+		insert into tblPREmployee(intEntityId, strEmployeeId, strWorkPhone, intRank, dtmOriginalDateHired, dtmDateHired,	dtmBirthDate,	strGender,	strMaritalStatus,	strSpouse,	strEthnicity,	strEEOCCode,	strSocialSecurity,   	dtmTerminated,	strTerminatedReason,	strEmergencyContact,	strEmergencyPhone,	strEmergencyPhone2,	strPayPeriod,	dtmReviewDate,	dtmNextReview,	ysnRetirementPlan,	dblRegularHours,	dtmLastModified, strFirstName, strMiddleName, strLastName, strNameSuffix, strType)
 		values(@EntityId, @originEmployee, @strPhone, 1,@dtmOrigHireDate, @dtmLastHireDate,		 @dtmBirthDate,	 @strSex,	@strMaritalStatus,	@strSpouse, @strEthnicity,	 @strEEOCCode,	 @strSocialSecurity,  @dtmTerminated, @strTerminatedReason, @strEmergencyContact, @strEmergencyPhone,	  @strEmergencyPhone2, @strPayPeriod, @dtmReviewDate,	 @dtmNextReview,	 @ysnRetirementPlan,  @dblRegularHours,	 @dtmLastModified, @strFirstName, @strMiddleName, @strLastName, @strSuffix, @strType)
 		 
 		

@@ -43,7 +43,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 					on C.intEntityContactId = F.intEntityId
 				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
-				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
+				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
 				LEFT JOIN tblEMEntityPhoneNumber P ON P.intEntityId = F.intEntityId
 				WHERE S.strSalespersonId = @SalespersonId AND agsls_slsmn_id = UPPER(@SalespersonId)
 		END
@@ -85,7 +85,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 					on C.intEntityContactId = F.intEntityId
 				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
-				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
+				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
 				LEFT JOIN tblEMEntityPhoneNumber P ON P.intEntityId = F.intEntityId
 				WHERE S.strSalespersonId = @SalespersonId
 	
@@ -184,7 +184,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 			
 			--INSERT Salesperson
 			INSERT INTO [dbo].[tblARSalesperson]
-			   ([intEntitySalespersonId]
+			   ([intEntityId]
 			   ,[strSalespersonId]
 			   ,[strType]
 			   ,[strPhone]
@@ -301,7 +301,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 					on C.intEntityContactId = F.intEntityId
 				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
-				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
+				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
 				LEFT JOIN tblEMEntityPhoneNumber P ON P.intEntityId = F.intEntityId
 				WHERE S.strSalespersonId = @SalespersonId AND ptsls_slsmn_id = UPPER(@SalespersonId)
 		END
@@ -343,7 +343,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 					on C.intEntityContactId = F.intEntityId
 				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
-				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
+				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
 				LEFT JOIN tblEMEntityPhoneNumber P ON P.intEntityId = F.intEntityId
 				WHERE S.strSalespersonId = @SalespersonId
 	
@@ -438,7 +438,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 		
 			--INSERT Salesperson
 			INSERT INTO [dbo].[tblARSalesperson]
-			   ([intEntitySalespersonId]
+			   ([intEntityId]
 			   ,[strSalespersonId]
 			   ,[strType]
 			   ,[strPhone]

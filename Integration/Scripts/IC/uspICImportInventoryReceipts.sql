@@ -29,9 +29,9 @@ BEGIN
 	DECLARE @EntityId INT
 
 	SELECT  TOP 1 
-			@EntityId = intEntityUserSecurityId 
+			@EntityId = intEntityId 
 	FROM	tblSMUserSecurity 
-	WHERE	intEntityUserSecurityId = @UserId
+	WHERE	intEntityId = @UserId
 
 	DECLARE @ysnAG BIT = 0
     DECLARE @ysnPT BIT = 0

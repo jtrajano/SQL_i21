@@ -84,7 +84,7 @@ BEGIN
 		INNER JOIN tblAPVendor B
 			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = SUBSTRING(B.strVendorId, 1, 10) COLLATE Latin1_General_CI_AS
 		INNER JOIN tblEMEntity A
-			ON A.intEntityId = B.intEntityVendorId
+			ON A.intEntityId = B.intEntityId
 		INNER JOIN tblEMEntityLocation C
 			ON A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
 		INNER JOIN tblEMEntityToContact G
@@ -167,7 +167,7 @@ BEGIN
 		FROM
 			tblEMEntity A
 		INNER JOIN tblAPVendor B
-			ON A.intEntityId = B.intEntityVendorId
+			ON A.intEntityId = B.intEntityId
 		INNER JOIN tblEMEntityLocation C		
 			ON  A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
 		INNER JOIN tblEMEntityToContact G
@@ -525,7 +525,7 @@ BEGIN
 		DECLARE @EntityLocationId INT
 		SET @EntityLocationId = SCOPE_IDENTITY()
 
-		INSERT [dbo].[tblAPVendor]	([intEntityVendorId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intTaxCodeId], [intGLAccountExpenseId], [intVendorType], [strVendorId], [strVendorAccountNum], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnWithholding], [dblCreditLimit], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dtmCreated], [strTaxState], [intBillToId], [intShipFromId], [intTermsId])
+		INSERT [dbo].[tblAPVendor]	([intEntityId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intTaxCodeId], [intGLAccountExpenseId], [intVendorType], [strVendorId], [strVendorAccountNum], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnWithholding], [dblCreditLimit], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dtmCreated], [strTaxState], [intBillToId], [intShipFromId], [intTermsId])
 		VALUES						(@EntityId, @EntityLocationId, @EntityContactId, @intCurrencyId, @strVendorPayToId, ISNULL(@intPaymentMethodId,0), @intVendorTaxCodeId, @intGLAccountExpenseId, @intVendorType, @originVendor, @strVendorAccountNum, @ysnPymtCtrlActive, ISNULL(@ysnPymtCtrlAlwaysDiscount,0), ISNULL(@ysnPymtCtrlEFTActive,0), @ysnPymtCtrlHold, @ysnWithholding, @dblCreditLimit, @intCreatedUserId, @intLastModifiedUserId, @dtmLastModified, @dtmCreated, @strTaxState, @EntityLocationId, @EntityLocationId, @intTermsId)
 
 		DECLARE @VendorIdentityId INT
@@ -627,15 +627,15 @@ BEGIN
 	 where ssvnd_vnd_no = @originVendor and ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to AND ETYP.strType = ''Vendor''
 
 	 -- Enable ysnTransportTerminal for the Vendors with Transport Terminal
-	  UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityVendorId
+	  UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityId
       WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trhstmst
 	  INNER JOIN ssvndmst on ssvnd_vnd_no = trhst_pur_vnd_no)
 	  
-	  UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityVendorId
+	  UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityId
 	  WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trvprmst
 	  INNER JOIN ssvndmst on ssvnd_vnd_no = trvpr_vnd_no)
 
-	  UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityVendorId
+	  UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityId
 	  WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trprcmst
 	  INNER JOIN ssvndmst on ssvnd_vnd_no = trprc_vnd_no)
 

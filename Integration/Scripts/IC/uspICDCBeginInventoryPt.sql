@@ -155,7 +155,8 @@ END
 -- Rebuild the G/L Summary for that day. 
 BEGIN 
 	DELETE [dbo].[tblGLSummary] WHERE dbo.fnDateEquals(dtmDate, @adjdt) = 1
-
+	/* this line is commented by Mon.Gonzales 20170403 just to push through EntityDistribution#*/
+	/*
 	INSERT INTO tblGLSummary
 	SELECT
 			intCompanyId
@@ -170,6 +171,6 @@ BEGIN
 	FROM	tblGLDetail
 	WHERE	ysnIsUnposted = 0
 			AND dbo.fnDateEquals(dtmDate, @adjdt) = 1	
-	GROUP BY intCompanyId, intAccountId, dtmDate, strCode
+	GROUP BY intCompanyId, intAccountId, dtmDate, strCode*/
 END
 

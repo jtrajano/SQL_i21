@@ -39,7 +39,7 @@ BEGIN
 		DECLARE @userLocation INT;
 		SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
 				INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
-		WHERE intEntityUserSecurityId = @UserId
+		WHERE intEntityId = @UserId
 
 		IF(@userLocation IS NULL OR @userLocation <= 0)
 		BEGIN

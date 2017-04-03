@@ -91,7 +91,7 @@ BEGIN
 
 			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
 					INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
-			WHERE intEntityUserSecurityId = @UserId
+			WHERE intEntityId = @UserId
 
 			--removed first the constraint
 			ALTER TABLE tblAPBill DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
@@ -99,12 +99,12 @@ BEGIN
 			MERGE INTO tblAPBill AS destination
 			USING (
 				SELECT
-					[intEntityVendorId]		=	D.intEntityVendorId, 
+					[intEntityVendorId]		=	D.intEntityId, 
 					[strVendorOrderNumber] 	=	(CASE WHEN DuplicateData.apivc_ivc_no IS NOT NULL
 														THEN dbo.fnTrim(A.apivc_ivc_no) + ''-DUP'' 
 														ELSE A.apivc_ivc_no END),
 					[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEMEntityLocation 
-													WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor 
+													WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
 														WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 					[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) END,
 					[dtmDateCreated] 		=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -124,7 +124,7 @@ BEGIN
 														CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
 															ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END
 													END,
-					[intEntityId]			=	ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.apivc_user_id)),@UserId),
+					[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.apivc_user_id)),@UserId),
 					[ysnPosted]				=	1,
 					[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
 					[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' AND A.apivc_orig_amt > 0 THEN 1
@@ -146,12 +146,12 @@ BEGIN
 					INNER JOIN tblAPVendor D
 						ON A.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 					LEFT JOIN tblEMEntityLocation loc
-						ON D.intEntityVendorId = loc.intEntityId AND loc.ysnDefaultLocation = 1
+						ON D.intEntityId = loc.intEntityId AND loc.ysnDefaultLocation = 1
 					OUTER APPLY (
 						SELECT E.* FROM apivcmst E
 						WHERE EXISTS(
 							SELECT 1 FROM tblAPBill F
-							INNER JOIN tblAPVendor G ON F.intEntityVendorId = G.intEntityVendorId
+							INNER JOIN tblAPVendor G ON F.intEntityVendorId = G.intEntityId
 							WHERE E.apivc_ivc_no = F.strVendorOrderNumber COLLATE Latin1_General_CS_AS
 							AND E.apivc_vnd_no = G.strVendorId COLLATE Latin1_General_CS_AS
 						)
@@ -290,7 +290,7 @@ BEGIN
 					[A4GLIdentity]			=	C.[A4GLIdentity]
 				FROM tblAPBill A
 				INNER JOIN tblAPVendor B
-					ON A.intEntityVendorId = B.intEntityVendorId
+					ON A.intEntityVendorId = B.intEntityId
 				INNER JOIN (apivcmst C2 INNER JOIN aphglmst C 
 							ON C2.apivc_ivc_no = C.aphgl_ivc_no 
 							AND C2.apivc_vnd_no = C.aphgl_vnd_no)
@@ -611,7 +611,7 @@ BEGIN
 				AND A.apchk_cbk_no = B.apivc_cbk_no
 			--AND A.apchk_trx_ind <> ''O'' 
 			AND A.apchk_chk_amt <> 0
-				INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intEntityVendorId = D.intEntityVendorId)
+				INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intEntityVendorId = D.intEntityId)
 					ON B.apivc_ivc_no = C.strVendorOrderNumber COLLATE Latin1_General_CS_AS
 					AND B.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 			)
@@ -664,7 +664,7 @@ BEGIN
 
 				SELECT TOP(1)
 					@bankAccount = C.intBankAccountId,
-					@intEntityVendorId = B.intEntityVendorId,
+					@intEntityVendorId = B.intEntityId,
 					@paymentInfo = A.strCheckNo,
 					@payment = A.dblAmount,
 					@datePaid = A.dtmDate,
@@ -702,15 +702,15 @@ BEGIN
 			--UPDATE strTransactionId from tblCMBankTransaction
 			UPDATE tblCMBankTransaction
 			SET strTransactionId = B.strPaymentRecordNum,
-				intPayeeId = C.intEntityVendorId
+				intPayeeId = C.intEntityId
 			FROM tblCMBankTransaction A
 			INNER JOIN tblAPPayment B
 				ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
 				AND A.dtmDate = B.dtmDatePaid
 				AND A.intBankAccountId = B.intBankAccountId
 				AND A.strReferenceNo = B.strPaymentInfo
-			INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityVendorId = D.intEntityId)
-				ON B.intEntityVendorId = C.intEntityVendorId 
+			INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityId = D.intEntityId)
+				ON B.intEntityVendorId = C.intEntityId 
 				--AND A.strPayee = D.strName
 			WHERE A.strSourceSystem IN (''AP'',''CW'')
 			AND A.strTransactionId <> B.strPaymentRecordNum
