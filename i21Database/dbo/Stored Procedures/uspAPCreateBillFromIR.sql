@@ -740,7 +740,34 @@ BEGIN
 	SELECT @shipFrom = intShipFromId, @shipTo = intShipToId FROM tblAPBill
 	EXEC uspAPBillUpdateAddressInfo @generatedBillId, @shipFrom, @shipTo
 
-	DELETE FROM #tmpReceiptIds WHERE intInventoryReceiptId = @receiptId
+	--UPDATE Term of Voucher base on Contract term AP-3450
+	SELECT	TOP 1 
+			@contractTermId = ContractTerm.intTermId,
+			@balanceDue = (SELECT intBalanceDue FROM dbo.tblSMTerm WHERE intTermID = ContractTerm.intTermId),
+			@receipttDate = ContractTerm.dtmReceiptDate
+	FROM	tblAPBill Voucher
+	CROSS APPLY (
+		SELECT TOP 1
+			ct.intTermId, r.dtmReceiptDate
+		FROM tblAPBillDetail VoucherDetail
+		INNER JOIN tblCTContractHeader ct
+			ON VoucherDetail.intContractHeaderId = ct.intContractHeaderId
+		LEFT JOIN dbo.tblICInventoryReceiptItem ri
+			ON ri.intInventoryReceiptItemId = VoucherDetail.intInventoryReceiptItemId
+		LEFT JOIN dbo.tblICInventoryReceipt r
+			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+		WHERE VoucherDetail.intBillId = @currentVoucher
+	) ContractTerm
+
+	IF @contractTermId > 0
+	BEGIN
+		UPDATE Voucher
+			SET Voucher.intTermsId = @contractTermId, Voucher.dtmDueDate = ISNULL(dbo.fnGetDueDateBasedOnTerm(@receipttDate, @contractTermId), Voucher.dtmDueDate)
+		FROM tblAPBill Voucher
+		WHERE Voucher.intBillId = @currentVoucher
+	END
+
+	DELETE FROM #tmpVouchersCreated WHERE intBillId = @currentVoucher
 END
 
 ALTER TABLE tblAPBill
