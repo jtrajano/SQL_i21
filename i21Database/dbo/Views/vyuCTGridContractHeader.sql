@@ -17,7 +17,8 @@ AS
 			strTerm,
 			strINCOLocationType,
 			strCommodityUOM,
-			ysnPrepaid
+			ysnPrepaid,
+			strContractBasis
 
 	FROM	tblCTContractHeader				CH
 	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
