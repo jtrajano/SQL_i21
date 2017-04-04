@@ -178,6 +178,7 @@ BEGIN TRY
 	WHERE intItemId = @intItemId
 		AND intManufacturingProcessId = @intManufacturingProcessId
 		AND intStatusId = 10
+		AND intCountStatusId = 10
 		AND (
 			CASE 
 				WHEN intPlannedShiftId IS NOT NULL
@@ -301,7 +302,8 @@ BEGIN TRY
 						)
 					)
 				AND intCountStatusId = 10
-				AND intStatusId = 10
+				AND intStatusId <> 13
+
 				AND (
 					CASE 
 						WHEN intPlannedShiftId IS NOT NULL
@@ -344,8 +346,8 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND intCountStatusId = 10
-			AND intStatusId = 10
+			AND intCountStatusId =10
+			AND intStatusId <> 13
 			AND (
 				CASE 
 					WHEN intPlannedShiftId IS NOT NULL
