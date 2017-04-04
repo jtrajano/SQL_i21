@@ -29,6 +29,18 @@ FROM tblICInventoryCountDetail cd
 WHERE c.intImportFlagInternal = 1
 
 -- Auto-create Lot
+-- Create the temp table 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#GeneratedLotItems')) 
+BEGIN 
+	CREATE TABLE #GeneratedLotItems (
+		intLotId INT
+		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+		,intDetailId INT 
+		,intParentLotId INT
+		,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	)
+END
+
 DECLARE @Lots ItemLotTableType
 
 INSERT INTO @Lots(
@@ -55,17 +67,22 @@ SELECT
 FROM tblICInventoryCountDetail d
 	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = d.intInventoryCountId
 WHERE c.intImportFlagInternal = 1
+	AND d.intItemUOMId IS NOT NULL
+	AND d.intItemLocationId IS NOT NULL
+	AND d.intItemId IS NOT NULL
 
-EXEC dbo.uspICCreateUpdateLotNumber @Lots, 1, 1, 0
+IF EXISTS(SELECT * FROM @Lots)
+BEGIN
+	EXEC dbo.uspICCreateUpdateLotNumber @Lots, 1, 1, 0
+	
+	UPDATE	countDetail
+	SET	intLotId = LotNumbers.intLotId
+	FROM tblICInventoryCountDetail countDetail
+		INNER JOIN #GeneratedLotItems LotNumbers ON countDetail.intInventoryCountDetailId = LotNumbers.intDetailId
+		INNER JOIN tblICItem Item ON Item.intItemId = countDetail.intItemId
+			AND Item.strLotTracking <> 'No'
 
-UPDATE id
-SET id.intLotId = il.intLotId
-FROM tblICInventoryCountDetail id
-	INNER JOIN tblICInventoryCount ic ON ic.intInventoryCountId = id.intInventoryCountId
-	INNER JOIN tblICLot il ON il.intItemId = id.intItemId
-		AND il.intItemLocationId = id.intItemLocationId
-		AND il.intItemUOMId = id.intItemUOMId
-WHERE ic.intImportFlagInternal = 1
+END
 
 -- Reset Count Flag
 UPDATE ic
