@@ -5155,6 +5155,7 @@
     <Build Include="dbo\Views\vyuCTItemCertification.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLoadShipmentOnInvoicePost.sql" />
     <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
+    <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
