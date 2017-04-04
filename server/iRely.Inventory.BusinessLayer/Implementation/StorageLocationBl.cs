@@ -75,7 +75,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetSubLocationBins(GetParameter param)
+        public async Task<SearchResult> SearchSubLocationBins(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetSubLocationBins>()
                 .Filter(param, true);

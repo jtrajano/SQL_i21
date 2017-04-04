@@ -82,7 +82,7 @@ Ext.define('Inventory.search.StockDetail', {
                 }
             ],
             chart: {
-                url: '../Inventory/api/StorageLocation/GetSubLocationBins',
+                url: '../Inventory/api/StorageLocation/SearchSubLocationBins',
                 type: 'serial',
                 /*startDuration: 1,
                 startEffect: 'elastic',*/

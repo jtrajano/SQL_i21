@@ -4,7 +4,7 @@ Ext.define('Inventory.search.LotDetail', {
     searchConfigs: [
         {
            title: 'Lot Detail',
-            url: '../Inventory/api/Lot/GetLots',
+            url: '../Inventory/api/Lot/SearchLots',
             columns: [
                 { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                 { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string' },
