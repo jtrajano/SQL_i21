@@ -168,7 +168,7 @@ BEGIN TRY
 
 			TP.strContractType + ' Contract:- ' + CH.strContractNumber AS strCaption,
 			@strCompanyName + ' - '+TP.strContractType+' Contract' AS strTeaCaption,
-
+			TP.strContractType + ' Order:- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL END AS strPurchaseOrder,
 			CH.dtmContractDate,
 			'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition.' strAssociation,
 			CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END AS strBuyerRefNo,
@@ -259,6 +259,7 @@ BEGIN TRY
 			@strAmendedColumns strAmendedColumns
 
 	FROM	tblCTContractHeader CH
+	JOIN	tblICCommodity		CM	ON	CM.intCommodityId		=	CH.intCommodityId
 	JOIN	tblCTContractType	TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
 	JOIN	vyuCTEntity			EY	ON	EY.intEntityId			=	CH.intEntityId	AND
 										EY.strEntityType		=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
@@ -293,7 +294,8 @@ BEGIN TRY
 							MA.strFutMarketName,
 							CD.strPackingDescription				AS strPackingDescription,
 							CL.strContractCompanyName				AS strContractCompanyName,
-						    CL.strContractPrintSignOff              AS strContractPrintSignOff
+						    CL.strContractPrintSignOff              AS strContractPrintSignOff,
+							CD.strERPPONumber
 
 				FROM		tblCTContractDetail		CD
 				JOIN		tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
