@@ -28,6 +28,15 @@ FROM tblICInventoryCountDetail cd
 		AND s.intLocationId = c.intLocationId
 WHERE c.intImportFlagInternal = 1
 
+-- Cleanup
+DELETE d
+FROM tblICInventoryCountDetail d
+	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = d.intInventoryCountId
+WHERE c.intImportFlagInternal = 1
+	AND (d.intItemUOMId IS NULL
+	OR d.intItemLocationId IS NULL
+	OR d.intItemId IS NULL)
+
 -- Auto-create Lot
 -- Create the temp table 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#GeneratedLotItems')) 
