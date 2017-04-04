@@ -728,8 +728,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         quantityField: true,
                                                                         itemId: 'txtShiftNumber',
                                                                         fieldLabel: 'Shift Number',
-                                                                        labelWidth: 95,
+                                                                        labelWidth: 120,
                                                                         hideTrigger: true
+                                                                    },
+                                                                    {
+                                                                        xtype: 'datefield',
+                                                                        itemId: 'dtmWhse',
+                                                                        fieldLabel: 'Last Free Whse Date',
+                                                                        labelWidth: 120
                                                                     }
                                                                 ]
                                                             }

@@ -57,6 +57,7 @@ namespace iRely.Inventory.Model
         public int? intEntityId { get; set; }
         public bool? ysnOrigin { get; set; }
         public string strWarehouseRefNo { get; set; }
+        public DateTime? dtmLastFreeWhseDate { get; set; }
 
         private string _vendorName;
         [NotMapped]

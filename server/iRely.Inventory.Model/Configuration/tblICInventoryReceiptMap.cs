@@ -50,6 +50,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.ysnOrigin).HasColumnName("ysnOrigin");
             this.Property(t => t.strWarehouseRefNo).HasColumnName("strWarehouseRefNo");
+            this.Property(t => t.dtmLastFreeWhseDate).HasColumnName("dtmLastFreeWhseDate");
 
             this.HasOptional(p => p.vyuICInventoryReceiptLookUp)
                 .WithRequired(p => p.tblICInventoryReceipt);

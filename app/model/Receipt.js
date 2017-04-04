@@ -55,7 +55,8 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'intCreatedUserId', type: 'int', allowNull: true },
         { name: 'intEntityId', type: 'int', allowNull: true },
         { name: 'dblClaimableWt', type: 'float' },
-        { name: 'strWarehouseRefNo', type: 'string' }
+        { name: 'strWarehouseRefNo', type: 'string' },
+        { name: 'dtmLastFreeWhseDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' }
     ],
 
     validators: [

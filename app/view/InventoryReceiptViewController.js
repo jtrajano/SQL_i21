@@ -12,6 +12,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             bind: {
                 title: '{receiptTitle}'
             },
+            dtmWhse: '{current.dtmLastFreeWhseDate}',
             btnSave: {
                 disabled: '{isOriginOrPosted}'
             },
