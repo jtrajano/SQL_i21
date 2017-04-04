@@ -68,6 +68,7 @@ FROM
 		strContractNumber		=	ContractHeader.strContractNumber
 		,strMiscDescription		=	CASE WHEN WC2Details.intContractDetailId > 0
 												AND ContractDetail.intItemContractId > 0
+												AND WC2Details.intContractCostId IS NULL
 										THEN ItemContract.strContractItemName
 										ELSE ISNULL(Item.strDescription,'')
 									END
@@ -117,6 +118,7 @@ FROM
 		strContractNumber		=	ContractHeader.strContractNumber
 		,strMiscDescription		=	CASE WHEN DMDetails.intContractDetailId > 0
 												AND ContractDetail.intItemContractId > 0
+												AND DMDetails.intContractCostId IS NULL
 										THEN ItemContract.strContractItemName
 										ELSE ISNULL(Item.strDescription,'')
 									END
@@ -226,6 +228,7 @@ FROM
 		strContractNumber		=	ContractHeader.strContractNumber
 		,strMiscDescription		=	CASE WHEN DMDetails.intContractDetailId > 0
 												AND ContractDetail.intItemContractId > 0
+												AND DMDetails.intContractCostId IS NULL
 										THEN ItemContract.strContractItemName
 										ELSE ISNULL(Item.strDescription,'')
 									END
