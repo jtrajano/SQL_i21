@@ -16,7 +16,8 @@ Ext.define('Inventory.controller.Inventory', {
         'GlobalComponentEngine.view.AuditLogTree',
         'GlobalComponentEngine.view.AdvanceSearchGrid',
         'iRely.container.ImageContainer',
-        'iRely.grid.Manager'
+        'iRely.grid.Manager',
+        'GeneralLedger.controls.AccountComboBox'
     ],
     singleton: true,
 

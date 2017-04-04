@@ -38,7 +38,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 700,
+    height: 834,
     hidden: false,
     minHeight: 700,
     minWidth: 1100,
@@ -205,6 +205,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                 items: [
                                     {
                                         xtype: 'panel',
+                                        height: 700,
                                         itemId: 'pgeDetails',
                                         bodyPadding: 5,
                                         title: 'Details',
@@ -747,23 +748,19 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                             {
                                                 xtype: 'container',
                                                 flex: 1,
-                                                layout: {
-                                                    type: 'vbox',
-                                                    align: 'stretch'
-                                                },
+                                                height: 527,
+                                                layout: 'border',
                                                 items: [
                                                     {
                                                         xtype: 'container',
-                                                        flex: 1,
-                                                        width: 100,
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
+                                                        flex: 3.5,
+                                                        region: 'center',
+                                                        layout: 'border',
                                                         items: [
                                                             {
                                                                 xtype: 'container',
                                                                 flex: 3,
+                                                                region: 'center',
                                                                 layout: {
                                                                     type: 'vbox',
                                                                     align: 'stretch'
@@ -773,6 +770,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         xtype: 'frmadvancesearchgrid',
                                                                         flex: 1,
                                                                         reference: 'grdInventoryReceipt',
+                                                                        height: 335,
                                                                         itemId: 'grdInventoryReceipt',
                                                                         margin: '7 0 0 0',
                                                                         columnLines: true,
@@ -1124,7 +1122,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 itemId: 'colOrderUOM',
                                                                                 width: 100,
                                                                                 dataIndex: 'strDescription',
-                                                                                text: 'Ordered UOM'
+                                                                                text: 'Order UOM'
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1141,10 +1139,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 xtype: 'numbercolumn',
                                                                                 dataType: 'numeric',
                                                                                 itemId: 'colQtyOrdered',
-                                                                                width: 75,
+                                                                                width: 87,
                                                                                 align: 'right',
                                                                                 dataIndex: 'dblQtyOrdered',
-                                                                                text: 'Ordered',
+                                                                                text: 'Order Quantity',
                                                                                 format: '0,000.##'
                                                                             },
                                                                             {
@@ -1154,7 +1152,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 100,
                                                                                 align: 'right',
                                                                                 dataIndex: 'dblQtyOrdered',
-                                                                                text: 'Received so far',
+                                                                                text: 'Received to date',
                                                                                 format: '0,000.##'
                                                                             },
                                                                             {
@@ -1165,7 +1163,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 200,
                                                                                 align: 'right',
                                                                                 dataIndex: 'dblOpenReceive',
-                                                                                text: 'Qty to Receive',
+                                                                                text: 'Quantity Received',
                                                                                 editor: {
                                                                                     xtype: 'griduomfield',
                                                                                     valueField: 'intUnitMeasureId',
@@ -1688,9 +1686,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'container',
                                                                 flex: 2,
+                                                                region: 'south',
+                                                                split: true,
+                                                                height: 150,
                                                                 hidden: true,
                                                                 itemId: 'pnlLotTracking',
-                                                                width: 100,
                                                                 autoDestroy: false,
                                                                 layout: {
                                                                     type: 'hbox',
@@ -2297,71 +2297,125 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         }
                                                                     }
                                                                 ]
-                                                            },
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        flex: 1,
+                                                        region: 'east',
+                                                        split: true,
+                                                        padding: '8 0 0 4',
+                                                        width: 150,
+                                                        layout: 'fit',
+                                                        bodyPadding: 8,
+                                                        collapseDirection: 'right',
+                                                        collapsed: false,
+                                                        collapsible: true,
+                                                        hideCollapseTool: true,
+                                                        title: 'Summary',
+                                                        titleCollapse: true,
+                                                        items: [
                                                             {
-                                                                xtype: 'panel',
-                                                                border: false,
-                                                                maxHeight: 30,
-                                                                width: 100,
+                                                                xtype: 'container',
+                                                                height: 289,
                                                                 layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'middle',
-                                                                    pack: 'end',
-                                                                    padding: 5
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'numberfield',
-                                                                        flex: 1,
-                                                                        itemId: 'txtSubTotal',
-                                                                        fieldLabel: 'Sub Total',
-                                                                        labelWidth: 60,
-                                                                        readOnly: true
+                                                                        xtype: 'container',
+                                                                        margin: '0 10 20 0',
+                                                                        width: 191,
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                itemId: 'txtGrossWgt',
+                                                                                fieldLabel: 'Gross Wgt.',
+                                                                                readOnly: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                itemId: 'txtLotGrossWgt',
+                                                                                fieldLabel: 'Lot Gross Wgt.',
+                                                                                readOnly: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                itemId: 'txtGrossDiff',
+                                                                                fieldLabel: 'Gross Diff',
+                                                                                readOnly: true
+                                                                            }
+                                                                        ]
                                                                     },
                                                                     {
-                                                                        xtype: 'numberfield',
-                                                                        flex: 1,
-                                                                        itemId: 'txtTax',
-                                                                        padding: '0 0 0 5',
-                                                                        fieldLabel: 'Tax',
-                                                                        labelWidth: 35,
-                                                                        readOnly: true
+                                                                        xtype: 'container',
+                                                                        margin: '0 10 20 0',
+                                                                        width: 250,
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                itemId: 'txtNetWgt',
+                                                                                fieldLabel: 'Net Wgt.',
+                                                                                readOnly: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                itemId: 'txtLotNetWgt',
+                                                                                fieldLabel: 'Lot Net Wgt.',
+                                                                                readOnly: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                itemId: 'txtNetDiff',
+                                                                                fieldLabel: 'Net Diff',
+                                                                                readOnly: true
+                                                                            }
+                                                                        ]
                                                                     },
                                                                     {
-                                                                        xtype: 'numberfield',
-                                                                        flex: 1,
-                                                                        itemId: 'txtCharges',
-                                                                        padding: '0 0 0 5',
-                                                                        fieldLabel: 'Charges',
-                                                                        labelWidth: 50,
-                                                                        readOnly: true
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numberfield',
-                                                                        flex: 1,
-                                                                        itemId: 'txtGrossWgt',
-                                                                        padding: '0 0 0 5',
-                                                                        fieldLabel: 'Gross Wgt.',
-                                                                        labelWidth: 65,
-                                                                        readOnly: true
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numberfield',
-                                                                        flex: 1,
-                                                                        itemId: 'txtNetWgt',
-                                                                        padding: '0 0 0 5',
-                                                                        fieldLabel: 'Net Wgt.',
-                                                                        labelWidth: 60,
-                                                                        readOnly: true
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numberfield',
-                                                                        flex: 1,
-                                                                        itemId: 'txtTotal',
-                                                                        padding: '0 0 0 5',
-                                                                        fieldLabel: 'Total',
-                                                                        labelWidth: 40,
-                                                                        readOnly: true
+                                                                        xtype: 'container',
+                                                                        margin: '0 10 20 0',
+                                                                        width: 250,
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                itemId: 'txtSubTotal',
+                                                                                fieldLabel: 'Sub Total',
+                                                                                readOnly: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                itemId: 'txtTax',
+                                                                                fieldLabel: 'Tax',
+                                                                                readOnly: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                itemId: 'txtCharges',
+                                                                                fieldLabel: 'Charges',
+                                                                                readOnly: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                itemId: 'txtTotal',
+                                                                                fieldLabel: 'Total',
+                                                                                readOnly: true
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 ]
                                                             }

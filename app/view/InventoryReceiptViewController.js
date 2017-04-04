@@ -2224,40 +2224,53 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     showSummaryTotals: function (win) {
-        var current = win.viewModel.data.current;
-        var txtSubTotal = win.down('#txtSubTotal');
-        var txtTax = win.down('#txtTax');
-        var txtGrossWgt = win.down('#txtGrossWgt');
-        var txtNetWgt = win.down('#txtNetWgt');
-        var txtTotal = win.down('#txtTotal');
+        var current = win.viewModel.data.current,
+            txtSubTotal = win.down('#txtSubTotal'),
+            txtTax = win.down('#txtTax'),
+            txtGrossWgt = win.down('#txtGrossWgt'),
+            txtNetWgt = win.down('#txtNetWgt'),
+            txtTotal = win.down('#txtTotal'),
+            txtGrossDiff = win.down('#txtGrossDiff'),
+            txtNetDiff = win.down('#txtNetDiff'),
+            txtLotNetWgt = win.down('#txtLotNetWgt'),
+            txtLotGrossWgt = win.down('#txtLotGrossWgt'),
 
-        var totalAmount = 0;
-        var totalTax = 0;
-        var totalGross = 0;
-        var totalNet = 0;
+        line = { amount: 0, tax: 0, gross: 0, net: 0, lot: { gross: 0, net: 0 } };
+        
         if (current) {
             var items = current.tblICInventoryReceiptItems();
             if (items) {
                 Ext.Array.each(items.data.items, function (item) {
                     if (!item.dummy) {
-                        totalAmount += item.get('dblLineTotal');
-                        totalTax += item.get('dblTax');
-                        totalGross += item.get('dblGross');
-                        totalNet += item.get('dblNet');
+                        line.amount += item.get('dblLineTotal');
+                        line.tax += item.get('dblTax');
+                        line.gross += item.get('dblGross');
+                        line.net += item.get('dblNet');
+                        if(item.tblICInventoryReceiptItemLots()) {
+                            _.each(item.tblICInventoryReceiptItemLots().data.items, function(lot) {
+                                line.lot.gross += lot.get('dblGrossWeight');
+                                line.lot.net += lot.get('dblNetWeight');
+                            });
+                        }
                     }
                 });
             }
         }
+
         var totalCharges = this.calculateOtherCharges(win);
         var totalChargesTax = this.calculateOtherChargesTax(win);
-        totalTax = totalTax + totalChargesTax;
-        var grandTotal = totalAmount + totalCharges + totalTax;
+        line.tax = line.tax + totalChargesTax;
+        var total = line.amount + totalCharges + line.tax;
 
-        if (txtSubTotal) {txtSubTotal.setValue(totalAmount);}
-        if (txtTax) {txtTax.setValue(totalTax);}
-        if (txtGrossWgt) {txtGrossWgt.setValue(totalGross);}
-        if (txtNetWgt) {txtNetWgt.setValue(totalNet);}
-        if (txtTotal) {txtTotal.setValue(grandTotal);}
+        if (txtSubTotal) {txtSubTotal.setValue(line.amount);}
+        if (txtTax) {txtTax.setValue(line.tax);}
+        if (txtGrossWgt) {txtGrossWgt.setValue(line.gross);}
+        if (txtNetWgt) {txtNetWgt.setValue(line.net);}
+        if (txtTotal) {txtTotal.setValue(total);}
+        if (txtLotGrossWgt) {txtLotGrossWgt.setValue(line.lot.gross);}
+        if (txtLotNetWgt) {txtLotNetWgt.setValue(line.lot.net);}
+        if (txtGrossDiff) {txtGrossDiff.setValue(line.gross - line.lot.gross);}
+        if (txtNetDiff) {txtNetDiff.setValue(line.net - line.lot.net);}
     },
 
     getTaxableAmount: function (quantity, price, currentItemTax, itemTaxes) {
