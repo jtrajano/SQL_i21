@@ -18,6 +18,7 @@ SELECT
 						+ ' Hour' + CASE WHEN (dblRequest > 0) THEN 's ' ELSE ' ' END + TOFF.strTimeOff
 	,REQ.strReason
 	,REQ.strAddress
+	,REQ.intConcurrencyId
 FROM 
 	tblPRTimeOffRequest REQ
 	LEFT JOIN tblEMEntity ENT ON REQ.intEntityEmployeeId = ENT.intEntityId
