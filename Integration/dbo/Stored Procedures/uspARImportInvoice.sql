@@ -169,6 +169,12 @@ BEGIN
 					OR
 					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			    )
+
+			UPDATE  IVC SET ysnPaid = 0 FROM tblARInvoice IVC
+			INNER JOIN agcrdmst CRD ON CRD.agcrd_ref_no COLLATE SQL_Latin1_General_CP1_CS_AS = IVC.strInvoiceOriginId COLLATE SQL_Latin1_General_CP1_CS_AS
+			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = CRD.agcrd_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+			WHERE intInvoiceId > @maxInvoiceId AND strTransactionType = 'Credit Memo' AND (CRD.agcrd_amt - CRD.agcrd_amt_used) > 0				
+
 		 End 
 			--================================================
 			--     Insert into tblARInvoice --PT INVOICES--
@@ -264,6 +270,11 @@ BEGIN
 					OR
 					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 			    )
+				
+			UPDATE  IVC SET ysnPaid = 0 FROM tblARInvoice IVC
+			INNER JOIN ptcrdmst CRD ON CRD.ptcrd_invc_no COLLATE SQL_Latin1_General_CP1_CS_AS = IVC.strInvoiceOriginId COLLATE SQL_Latin1_General_CP1_CS_AS
+			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = CRD.ptcrd_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+			WHERE intInvoiceId > @maxInvoiceId AND strTransactionType = 'Credit Memo' AND (CRD.ptcrd_amt - CRD.ptcrd_amt_used) > 0				
 		 End
 
 			
