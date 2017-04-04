@@ -22,7 +22,7 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
-        public async Task<SearchResult> GetItemStockUOMView(GetParameter param)
+        public async Task<SearchResult> SearchItemStockUOMs(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStockUOM>()
                 .Filter(param, true);
@@ -36,7 +36,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
         
-        public async Task<SearchResult> GetItemStockUOMViewTotals(GetParameter param)
+        public async Task<SearchResult> SearchItemStockUOMViewTotals(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStockUOMTotals>()
                 .Filter(param, true);
@@ -64,7 +64,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetItemStockUOMForAdjustmentView(GetParameter param)
+        public async Task<SearchResult> SearchItemStockUOMForAdjustment(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStockUOMForAdjustment>()
                         .Filter(param, true);

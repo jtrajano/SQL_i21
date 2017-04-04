@@ -722,7 +722,7 @@ namespace iRely.Inventory.BusinessLayer
 
         }
 
-        public async Task<SearchResult> GetReceiptVouchers(GetParameter param)
+        public async Task<SearchResult> SearchReceiptVouchers(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetInventoryReceiptVoucher>()
                 .Filter(param, true);

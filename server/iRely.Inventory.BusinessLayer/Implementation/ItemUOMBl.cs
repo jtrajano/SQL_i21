@@ -55,7 +55,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetWeightUOMs(GetParameter param)
+        public async Task<SearchResult> SearchWeightUOMs(GetParameter param)
         {
             var query = (
                     from ItemUOM in _db.GetQuery<tblICItemUOM>()
@@ -85,7 +85,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetWeightVolumeUOMs(GetParameter param)
+        public async Task<SearchResult> SearchWeightVolumeUOMs(GetParameter param)
         {
             var query = (
                     from ItemUOM in _db.GetQuery<tblICItemUOM>()
@@ -115,7 +115,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetUOMs(GetParameter param)
+        public async Task<SearchResult> SearchUOMs(GetParameter param)
         {
             var query = _db.GetQuery<vyuICItemUOM>()
                 .Filter(param, true);

@@ -811,7 +811,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/GetAssemblyComponents'
+                    read: '../Inventory/api/Item/SearchAssemblyComponents'
                 },
                 reader: {
                     type: 'json',

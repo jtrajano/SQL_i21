@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedRegionAttribute', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/CommodityAttribute/GetRegionAttributes'
+                    read: '../Inventory/api/CommodityAttribute/SearchRegionAttributes'
                 },
                 reader: {
                     type: 'json',

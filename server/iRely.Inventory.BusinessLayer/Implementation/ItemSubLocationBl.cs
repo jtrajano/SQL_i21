@@ -19,7 +19,7 @@ namespace iRely.Inventory.BusinessLayer
 
         }
 
-        public async Task<SearchResult> GetItemSubLocations(GetParameter param)
+        public async Task<SearchResult> SearchItemSubLocations(GetParameter param)
         {
             var query = _db.GetQuery<vyuICItemSubLocations>()
                 .Filter(param, true);

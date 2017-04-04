@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedItemOwner', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/GetItemOwner'
+                    read: '../Inventory/api/Item/SearchItemOwner'
                 },
                 reader: {
                     type: 'json',

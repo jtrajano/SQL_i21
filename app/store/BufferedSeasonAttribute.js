@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedSeasonAttribute', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/CommodityAttribute/GetSeasonAttributes'
+                    read: '../Inventory/api/CommodityAttribute/SearchSeasonAttributes'
                 },
                 reader: {
                     type: 'json',

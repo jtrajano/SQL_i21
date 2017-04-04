@@ -196,7 +196,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetCompactItems(GetParameter param)
+        public async Task<SearchResult> SearchCompactItems(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetCompactItem>()
                 .Filter(param, true);
@@ -215,7 +215,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetAssemblyComponents(GetParameter param)
+        public async Task<SearchResult> SearchAssemblyComponents(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetCompactItem>()
                 .Where(p => p.strType == "Inventory" || p.strType == "Raw Material" || p.strType == "Finished Good")
@@ -235,7 +235,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetItemStocks(GetParameter param)
+        public async Task<SearchResult> SearchItemStocks(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStock>()
                 .Where(
@@ -259,7 +259,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetStockTrackingItems(GetParameter param)
+        public async Task<SearchResult> SearchStockTrackingItems(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStock>()
                 .Where(
@@ -288,7 +288,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetItemStockDetails(GetParameter param)
+        public async Task<SearchResult> SearchItemStockDetails(GetParameter param)
         {
             bool excludePhasedOutZeroStockItem = false;
             var el = param.filter.Where(p => p.c == "excludePhasedOutZeroStockItem").Select(p => p.v);
@@ -361,7 +361,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetAssemblyItems(GetParameter param)
+        public async Task<SearchResult> SearchAssemblyItems(GetParameter param)
         {
             var query = _db.GetQuery<tblICItem>()
                     .Where(p => p.strType == "Assembly/Blend" && p.strLotTracking == "No")
@@ -381,7 +381,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetBundleComponents(GetParameter param)
+        public async Task<SearchResult> SearchBundleComponents(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetBundleItem>()
                     .Filter(param, true);
@@ -400,7 +400,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetOtherCharges(GetParameter param)
+        public async Task<SearchResult> SearchOtherCharges(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetOtherCharges>()
                     .Filter(param, true);
@@ -419,7 +419,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetItemCommodities(GetParameter param)
+        public async Task<SearchResult> SearchItemCommodities(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemCommodity>()
                     .Filter(param, true);
@@ -438,7 +438,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetItemUPCs(GetParameter param)
+        public async Task<SearchResult> SearchItemUPCs(GetParameter param)
         {
             var query = _db.GetQuery<tblICItemUOM>()
                     .Include(p => p.tblICUnitMeasure)
@@ -629,7 +629,7 @@ namespace iRely.Inventory.BusinessLayer
         //}
 
 
-        public async Task<SearchResult> GetInventoryValuation(GetParameter param)
+        public async Task<SearchResult> SearchInventoryValuation(GetParameter param)
         {
             // Setup the default sort. 
             List<SearchSort> addDefaultSortList = new List<SearchSort>();
@@ -885,7 +885,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetInventoryValuationSummary(GetParameter param)
+        public async Task<SearchResult> SearchInventoryValuationSummary(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetInventoryValuationSummary>()
                         .Filter(param, true);                              
@@ -1065,7 +1065,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetItemOwner(GetParameter param)
+        public async Task<SearchResult> SearchItemOwner(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemOwner>()
                 .Filter(param, false);
@@ -1085,7 +1085,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetItemSubLocations(GetParameter param)
+        public async Task<SearchResult> SearchItemSubLocations(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemSubLocations>()
                 .Filter(param, true);

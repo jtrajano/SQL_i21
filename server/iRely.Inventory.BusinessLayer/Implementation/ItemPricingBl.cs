@@ -22,7 +22,7 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
-        public async Task<SearchResult> GetItemPricingViews(GetParameter param)
+        public async Task<SearchResult> SearchItemPricingViews(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemPricing>()
                 .Filter(param, true);
@@ -36,7 +36,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetItemStockPricingViews(GetParameter param)
+        public async Task<SearchResult> SearchItemStockPricingViews(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemPricing>()
                 .Filter(param, true)

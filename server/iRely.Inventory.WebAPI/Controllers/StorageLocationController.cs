@@ -23,10 +23,10 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("GetStorageBins")]
-        public async Task<HttpResponseMessage> GetStorageBins(GetParameter param)
+        [ActionName("SearchStorageBins")]
+        public async Task<HttpResponseMessage> SearchStorageBins(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetStorageBins(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchStorageBins(param));
         }
 
         [HttpGet]
@@ -37,17 +37,17 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("GetSubLocationBinDetails")]
-        public async Task<HttpResponseMessage> GetSubLocationBinDetails(GetParameter param)
+        [ActionName("SearchSubLocationBinDetails")]
+        public async Task<HttpResponseMessage> SearchSubLocationBinDetails(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetSubLocationBinDetails(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchSubLocationBinDetails(param));
         }
 
         [HttpGet]
-        [ActionName("GetStorageBinDetails")]
-        public async Task<HttpResponseMessage> GetStorageBinDetails(GetParameter param)
+        [ActionName("SearchStorageBinDetails")]
+        public async Task<HttpResponseMessage> SearchStorageBinDetails(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetStorageBinDetails(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchStorageBinDetails(param));
         }
 
         [HttpGet]

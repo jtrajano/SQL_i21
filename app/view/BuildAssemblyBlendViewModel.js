@@ -19,7 +19,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewModel', {
                 },
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/GetAssemblyItems'
+                    read: '../Inventory/api/Item/SearchAssemblyItems'
                 },
                 reader: {
                     type: 'json',

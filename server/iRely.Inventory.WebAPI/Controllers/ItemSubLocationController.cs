@@ -23,10 +23,10 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("GetItemSubLocations")]
-        public async Task<HttpResponseMessage> GetItemSubLocations(GetParameter param)
+        [ActionName("SearchItemSubLocations")]
+        public async Task<HttpResponseMessage> SearchItemSubLocations(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemSubLocations(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemSubLocations(param));
         }
     }
 }

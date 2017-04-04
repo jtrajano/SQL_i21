@@ -389,7 +389,7 @@ namespace iRely.Inventory.BusinessLayer
             //}
         }
 
-        public async Task<SearchResult> ShipmentInvoice(GetParameter param)
+        public async Task<SearchResult> SearchShipmentInvoice(GetParameter param)
         {
             var query = _db.GetQuery<vyuICShipmentInvoice>()
                 .Filter(param, true);

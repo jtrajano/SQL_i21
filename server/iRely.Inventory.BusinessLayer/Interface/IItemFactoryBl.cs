@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IItemFactoryBl : IBusinessLayer<tblICItemFactory>
     {
-        Task<SearchResult> GetItemFactoryManufacturingCells(GetParameter param);
+        Task<SearchResult> SearchItemFactoryManufacturingCells(GetParameter param);
         
     }
 

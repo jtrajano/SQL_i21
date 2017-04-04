@@ -45,7 +45,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetItemFactoryManufacturingCells(GetParameter param)
+        public async Task<SearchResult> SearchItemFactoryManufacturingCells(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemFactoryManufacturingCell>()
                            .Filter(param, true);

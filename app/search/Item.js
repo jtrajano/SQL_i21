@@ -27,7 +27,7 @@ Ext.define('Inventory.search.Item', {
         {
             title: 'Locations',
             api: {
-                read: '../Inventory/api/ItemLocation/GetItemLocationViews'
+                read: '../Inventory/api/ItemLocation/SearchItemLocationViews'
             },
             columns: [
 
@@ -128,7 +128,7 @@ Ext.define('Inventory.search.Item', {
         {
             title: 'Pricing',
             api: {
-                read: '../Inventory/api/ItemPricing/GetItemStockPricingViews'
+                read: '../Inventory/api/ItemPricing/SearchItemStockPricingViews'
             },
             columns: [
                 { dataIndex: 'intPricingKey', text: 'Pricing Key', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true },
@@ -162,7 +162,7 @@ Ext.define('Inventory.search.Item', {
         {
             title: 'Item UOM',
             api: {
-                read: '../Inventory/api/ItemUOM/GetUOMs'
+                read: '../Inventory/api/ItemUOM/SearchUOMs'
             },
             columns: [
                 { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width: 100, flex: 1, dataType: 'numeric', hidden: true },

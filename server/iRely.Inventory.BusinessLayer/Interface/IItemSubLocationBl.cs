@@ -11,6 +11,6 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IItemSubLocationBl : IBusinessLayer<tblICItemSubLocation>
     {
-        Task<SearchResult> GetItemSubLocations(GetParameter param);
+        Task<SearchResult> SearchItemSubLocations(GetParameter param);
     }
 }

@@ -135,7 +135,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetItemStockSummary(GetParameter param)
+        public async Task<SearchResult> SearchItemStockSummary(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStockSummary>()
                     .Filter(param, true);

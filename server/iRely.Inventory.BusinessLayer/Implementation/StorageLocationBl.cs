@@ -61,7 +61,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetStorageBins(GetParameter param)
+        public async Task<SearchResult> SearchStorageBins(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetStorageBins>()
                 .Filter(param, true);
@@ -99,7 +99,7 @@ namespace iRely.Inventory.BusinessLayer
             public int intSubLocationId { get; set; }
         }
 
-        public async Task<SearchResult> GetSubLocationBinDetails(GetParameter param)
+        public async Task<SearchResult> SearchSubLocationBinDetails(GetParameter param)
         {
             int subLocationId = 0;
             if (param.chartinfo != null)
@@ -143,7 +143,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetStorageBinDetails(GetParameter param)
+        public async Task<SearchResult> SearchStorageBinDetails(GetParameter param)
         {
             int storageLocationId = 0;
             if (param.chartinfo != null)

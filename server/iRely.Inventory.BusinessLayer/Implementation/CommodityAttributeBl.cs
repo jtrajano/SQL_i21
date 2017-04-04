@@ -27,7 +27,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetOriginAttributes(GetParameter param)
+        public async Task<SearchResult> SearchOriginAttributes(GetParameter param)
         {
             var query = _db.GetQuery<tblICCommodityOrigin>()
                 .Filter(param, true);
@@ -46,7 +46,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetProductTypeAttributes(GetParameter param)
+        public async Task<SearchResult> SearchProductTypeAttributes(GetParameter param)
         {
             var query = _db.GetQuery<tblICCommodityProductType>()
                 .Filter(param, true);
@@ -65,7 +65,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetRegionAttributes(GetParameter param)
+        public async Task<SearchResult> SearchRegionAttributes(GetParameter param)
         {
             var query = _db.GetQuery<tblICCommodityRegion>()
                 .Filter(param, true);
@@ -84,7 +84,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetSeasonAttributes(GetParameter param)
+        public async Task<SearchResult> SearchSeasonAttributes(GetParameter param)
         {
             var query = _db.GetQuery<tblICCommoditySeason>()
                 .Filter(param, true);
@@ -103,7 +103,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetClassAttributes(GetParameter param)
+        public async Task<SearchResult> SearchClassAttributes(GetParameter param)
         {
             var query = _db.GetQuery<tblICCommodityClassVariant>()
                 .Filter(param, true);
@@ -122,7 +122,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetProductLineAttributes(GetParameter param)
+        public async Task<SearchResult> SearchProductLineAttributes(GetParameter param)
         {
             var query = _db.GetQuery<tblICCommodityProductLine>()
                 .Filter(param, true);
@@ -141,7 +141,7 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetGradeAttributes(GetParameter param)
+        public async Task<SearchResult> SearchGradeAttributes(GetParameter param)
         {
             var query = _db.GetQuery<tblICCommodityGrade>()
                 .Filter(param, true);

@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IUnitMeasureBl : IBusinessLayer<tblICUnitMeasure>
     {
-        Task<SearchResult> GetPackedUOMs(GetParameter param);
+        Task<SearchResult> SearchPackedUOMs(GetParameter param);
         Task<SearchResult> GetAreaLengthUOM(GetParameter param);
         Task<SearchResult> GetQuantityVolumeWeightPackedAreaUOM(GetParameter param);
         Task<SearchResult> GetTimeUOM(GetParameter param);

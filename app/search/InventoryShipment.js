@@ -105,7 +105,7 @@ Ext.define('Inventory.search.InventoryShipment', {
         {
             title: 'Invoices',
             api: {
-                read: '../Inventory/api/InventoryShipment/ShipmentInvoice'
+                read: '../Inventory/api/InventoryShipment/SearchShipmentInvoice'
             },
             columns: [
                 { dataIndex: 'intInventoryShipmentItemId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
