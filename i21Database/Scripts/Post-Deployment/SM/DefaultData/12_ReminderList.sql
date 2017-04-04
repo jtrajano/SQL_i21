@@ -335,10 +335,22 @@ GO
                                                 FROM tblSMApproval 
                                                 WHERE    ysnCurrent = 1 AND 
                                                         strStatus IN (''Rejected'') AND 
-                                                        intSubmittedById= {0}',
+                                                        {0} = {0}',
                 [strNamespace]      =        N'i21.view.Approval?activeTab=Rejected',
                 [intSort]           =        15
     END
+	ELSE
+		BEGIN
+			UPDATE [tblSMReminderList]
+			SET	[strQuery] = N'    SELECT 
+										intTransactionId 
+									FROM tblSMApproval 
+									WHERE    ysnCurrent = 1 AND 
+											strStatus IN (''Rejected'') AND 
+											{0} = {0}'
+			WHERE [strReminder] = N'Rejected' AND [strType] = N'Transaction' 
+		END
+
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Activity' AND [strType] = N'Reminder')
     BEGIN
