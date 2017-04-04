@@ -290,7 +290,7 @@ BEGIN TRY
 		DELETE
 		FROM @VoucherDetailClaim
 
-		SET @strBillId = @strBillId + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
+		SET @strBillId = ISNULL(@strBillId,'') + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
 
 		SELECT @intMinRecord = MIN(intRecordId)
 		FROM @distinctVendor
