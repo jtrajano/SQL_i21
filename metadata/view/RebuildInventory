@@ -15,6 +15,7 @@
         "margin": "",
         "maxHeight": null,
         "minHeight": 220,
+        "minWidth": 438,
         "modal": true,
         "padding": null,
         "reference": null,

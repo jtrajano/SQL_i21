@@ -10,6 +10,8 @@
         "designer|userClassName": "ImportLogMessageBox",
         "height": 375,
         "layout": "fit",
+        "minHeight": 375,
+        "minWidth": 672,
         "modal": true,
         "title": "Log Messages",
         "width": 672

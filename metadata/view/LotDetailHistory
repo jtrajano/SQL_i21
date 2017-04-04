@@ -11,6 +11,8 @@
         "height": 502,
         "layout": "fit",
         "maximizable": true,
+        "minHeight": 502,
+        "minWidth": 800,
         "minimizable": true,
         "title": "Lot History",
         "width": 800

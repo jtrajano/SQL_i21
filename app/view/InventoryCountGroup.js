@@ -29,7 +29,8 @@ Ext.define('Inventory.view.InventoryCountGroup', {
 
     height: 359,
     hidden: false,
-    minHeight: 350,
+    minHeight: 359,
+    minWidth: 473,
     width: 473,
     layout: 'fit',
     collapsible: true,
