@@ -226,7 +226,7 @@ BEGIN
 	JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId=@IntCommodityId AND Stg.dblQuantity >0
     WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)=@strNeedPlan
 	)t
-    ORDER BY 1, 2
+    ORDER BY  [intYearKey],[intMonthKey]
 
   SELECT TOP 1
   @FirstMonth = [strColumnName]
