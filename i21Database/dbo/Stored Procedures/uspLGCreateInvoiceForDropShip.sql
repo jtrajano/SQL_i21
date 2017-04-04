@@ -185,7 +185,7 @@ BEGIN
 		,[intOrderUOMId]						= CD.[intOrderUOMId] 
 		,[dblQtyOrdered]						= CD.[dblOrderQuantity] 
 		,[intItemUOMId]							= CD.[intItemUOMId] 
-		,[dblQtyShipped]						= CD.[dblShipQuantity] 
+		,[dblQtyShipped]						= LD.[dblQuantity]
 		,[dblDiscount]							= 0 
 		,[dblItemWeight]						= [dbo].[fnCalculateQtyBetweenUOM](LD.[intWeightItemUOMId], ISNULL(CD.[intItemUOMId],LD.[intItemUOMId]), 1) 
 		,[intItemWeightUOMId]					= CD.[intItemWeightUOMId]
