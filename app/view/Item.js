@@ -42,6 +42,8 @@ Ext.define('Inventory.view.Item', {
 
     height: 650,
     hidden: false,
+    minHeight: 650,
+    minWidth: 935,
     width: 935,
     layout: 'fit',
     collapsible: true,

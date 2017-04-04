@@ -15,8 +15,8 @@
         "icon": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
-        "minWidth": null,
+        "minHeight": 778,
+        "minWidth": 1048,
         "minimizable": null,
         "reference": null,
         "title": "Inventory Count",
@@ -451,7 +451,7 @@
                                                         "labelWidth": 85,
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strLocationName"
+                                                        "valueField": "intCompanyLocationId"
                                                     },
                                                     "name": "MyComboBox81",
                                                     "configAlternates": {
@@ -502,7 +502,7 @@
                                                         "labelWidth": 85,
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strCategoryCode"
+                                                        "valueField": "intCategoryId"
                                                     },
                                                     "name": "MyComboBox83",
                                                     "configAlternates": {
@@ -553,7 +553,7 @@
                                                         "labelWidth": 85,
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strCommodityCode"
+                                                        "valueField": "intCommodityId"
                                                     },
                                                     "name": "MyComboBox84",
                                                     "configAlternates": {
@@ -634,7 +634,7 @@
                                                         "labelWidth": 85,
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strCountGroup"
+                                                        "valueField": "intCountGroupId"
                                                     },
                                                     "name": "MyComboBox85",
                                                     "configAlternates": {
@@ -730,7 +730,7 @@
                                                             "\t{",
                                                             "\t\tdataIndex: 'intCompanyLocationSubLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Storage Location Id',",
+                                                            "\t\ttext: 'Sub Location Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",
@@ -742,7 +742,7 @@
                                                             "\t{",
                                                             "\t\tdataIndex: 'strSubLocationName',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Storage Location Name',",
+                                                            "\t\ttext: 'Sub Location Name',",
                                                             "\t\tflex: 1",
                                                             "\t},",
                                                             "\t{",
@@ -755,11 +755,11 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strSubLocationName",
-                                                        "fieldLabel": "Storage Location",
+                                                        "fieldLabel": "Sub Location",
                                                         "itemId": "cboSubLocation",
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strSubLocationName"
+                                                        "valueField": "intCompanyLocationSubLocationId"
                                                     },
                                                     "name": "MyComboBox82",
                                                     "configAlternates": {
@@ -792,7 +792,7 @@
                                                             "\t{",
                                                             "\t\tdataIndex: 'strName',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Storage Unit',",
+                                                            "\t\ttext: 'Storage Location',",
                                                             "\t\tflex: 1",
                                                             "\t},",
                                                             "\t{",
@@ -805,11 +805,11 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strName",
-                                                        "fieldLabel": "Storage Unit",
+                                                        "fieldLabel": "Storage Location",
                                                         "itemId": "cboStorageLocation",
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "valueField": "strName"
+                                                        "valueField": "intStorageLocationId"
                                                     },
                                                     "name": "MyComboBox",
                                                     "configAlternates": {
@@ -1211,7 +1211,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter122",
+                                                    "name": "filter140",
                                                     "designerId": "8725b495-60b5-4fac-b7b6-11f36b61fc8d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1363,7 +1363,7 @@
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colSubLocation",
-                                                "text": "Storage Location"
+                                                "text": "Sub Location"
                                             },
                                             "name": "MyColumn10",
                                             "designerId": "bb2f66a4-5d8e-4b4b-a5fd-e8ac9a7510e5",
@@ -1393,25 +1393,25 @@
                                                             "    {",
                                                             "\t\tdataIndex: 'intSubLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Storage Location Id',",
+                                                            "\t\ttext: 'Sub Location Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strSubLocationName',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Storage Location',",
+                                                            "\t\ttext: 'Sub Location',",
                                                             "\t\tflex: 1",
                                                             "\t},    ",
                                                             "\t{",
                                                             "\t\tdataIndex: 'intStorageLocationId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Storage Unit Id',",
+                                                            "\t\ttext: 'Storage Location Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strStorageLocationName',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Storage Unit',",
+                                                            "\t\ttext: 'Storage Location',",
                                                             "\t\tflex: 1",
                                                             "\t},    ",
                                                             "\t{",
@@ -1465,7 +1465,7 @@
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colStorageLocation",
-                                                "text": "Storage Unit"
+                                                "text": "Storage Location"
                                             },
                                             "name": "MyColumn",
                                             "designerId": "701caf49-e88d-40a5-9890-980259adc2c1",
@@ -1495,19 +1495,19 @@
                                                             "{",
                                                             "dataIndex: 'intSubLocationId',",
                                                             "dataType: 'numeric',",
-                                                            "text: 'Storage Location Id',",
+                                                            "text: 'Sub Location Id',",
                                                             "hidden: true",
                                                             "},",
                                                             "{",
                                                             "dataIndex: 'intStorageLocationId',",
                                                             "dataType: 'numeric',",
-                                                            "text: 'Storage Unit Id',",
+                                                            "text: 'Storage Location Id',",
                                                             "hidden: true",
                                                             "},",
                                                             "{",
                                                             "dataIndex: 'strStorageLocationName',",
                                                             "dataType: 'string',",
-                                                            "text: 'Storage Unit',",
+                                                            "text: 'Storage Location',",
                                                             "flex: 1",
                                                             "},  ",
                                                             "{",

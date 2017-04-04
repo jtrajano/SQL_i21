@@ -29,6 +29,7 @@ Ext.define('Inventory.view.RebuildInventory', {
     hidden: false,
     margin: '',
     minHeight: 220,
+    minWidth: 438,
     width: 438,
     layout: 'fit',
     title: 'Rebuild Inventory',

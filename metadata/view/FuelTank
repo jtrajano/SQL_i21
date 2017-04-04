@@ -15,8 +15,8 @@
         "icon": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
-        "minWidth": null,
+        "minHeight": 621,
+        "minWidth": 852,
         "minimizable": null,
         "reference": null,
         "title": "Fuel Tank",
@@ -238,7 +238,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter119",
+                                                    "name": "filter138",
                                                     "designerId": "2fae70be-eb75-4432-8b9e-f69f8ff60559",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -405,7 +405,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar13",
+                    "name": "statusbar12",
                     "designerId": "f1d262d7-d497-4c2d-84fb-fd762dfd64d2",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }
