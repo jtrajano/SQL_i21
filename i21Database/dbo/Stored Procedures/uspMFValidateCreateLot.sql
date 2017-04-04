@@ -65,6 +65,7 @@ BEGIN TRY
 		,@dtmStartedDate DATETIME
 		,@intControlPointId INT
 		,@intSampleTypeId INT
+		,@ysnAddQtyOnExistingLot bit
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -80,6 +81,19 @@ BEGIN TRY
 				,1
 				)
 	END
+
+	Select @ysnAddQtyOnExistingLot=ysnAddQtyOnExistingLot
+	from tblMFCompanyPreference 
+
+	If @ysnAddQtyOnExistingLot=0 and exists(Select *from tblICLot Where strLotNumber =@strLotNumber )
+	Begin
+		RAISERROR (
+				90030
+				,11
+				,1
+				)
+	End
+
 
 	IF @dblQuantity <> @dblUnitCount
 		AND @intItemUOMId = @intItemUnitCountUOMId

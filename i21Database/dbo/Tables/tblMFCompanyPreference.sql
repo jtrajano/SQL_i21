@@ -35,5 +35,6 @@
 	strLotTextInReport NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intBondStatusId int,
 	ysnSetExpiryDateByParentLot bit,
+    ysnAddQtyOnExistingLot BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnAddQtyOnExistingLot] DEFAULT 1, 
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
