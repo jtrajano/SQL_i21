@@ -65,4 +65,6 @@
 	[dblTrpAmt] decimal(18, 2) NULL,
 	[intStoreId] int NOT NULL,
 	[intCheckoutId] int NOT NULL,
+	[ysnSubmitted] bit NOT NULL,
+	[intConcurrencyId] int NOT NULL,
 )

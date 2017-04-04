@@ -1,4 +1,4 @@
-﻿ CREATE PROCEDURE [dbo].[uspSTGenerateCSV]
+﻿CREATE PROCEDURE [dbo].[uspSTGenerateCSV]
 @intVendorId int,
 @strStoreIdList NVARCHAR(MAX),
 @dtmBeginningDate datetime,
@@ -53,7 +53,7 @@ BEGIN
 	WHILE(@intStoreIdMin <= @intStoreIdMax)
 	BEGIN
 
-		IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId = @intStoreIdMin AND CAST(dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(dtmClosedTime as DATE) <= @dtmEndingDate)
+		IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId = @intStoreIdMin AND CAST(dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(dtmClosedTime as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
 		BEGIN
 			--START Insert data from tblSTstgRebatesPMMorris
 			IF(@strTableName = 'tblSTstgRebatesPMMorris')
@@ -164,7 +164,7 @@ BEGIN
 							, CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlLineTot ELSE 0 END as dblFinalSalesPrice
 						FROM tblSTTranslogRebates TR
 						JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-						WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate
+						WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate AND ysnSubmitted = 0
 				) x
 			END
 			--END Insert data from tblSTstgRebatesPMMorris
@@ -254,10 +254,12 @@ BEGIN
 							, 0 as dblManufacturerDiscountAmount
 						FROM tblSTTranslogRebates TR
 						JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-						WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate
+						WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate AND ysnSubmitted = 0
 				) x
 			END
 			--END Insert data from tblSTstgRebatesRJReynolds
+
+			--Mark
 		END
 			
 		PRINT @intStoreIdMin
@@ -530,7 +532,25 @@ BEGIN
 			END
 			--END tblSTstgRebatesRJReynolds
 
-		SET @strStatusMsg = 'Success'
+			--START mark ysnSubmitted = 1 (mark as submitted)
+			SELECT @intStoreIdMin = MIN(intStoreId), @intStoreIdMax = MAX(intStoreId)
+			FROM @tblStoreIdList
+
+			WHILE(@intStoreIdMin <= @intStoreIdMax)
+			BEGIN
+
+				UPDATE tblSTTranslogRebates
+				SET ysnSubmitted = 1
+				WHERE intStoreId = @intStoreIdMin 
+				AND CAST(dtmOpenedTime as DATE) >= @dtmBeginningDate 
+				AND CAST(dtmClosedTime as DATE) <= @dtmEndingDate 
+				AND ysnSubmitted = 0
+
+				SET @intStoreIdMin = @intStoreIdMin + 1
+			END 
+			--END mark ysnSubmitted = 1 (mark as submitted)
+
+			SET @strStatusMsg = 'Success'
 	END
 
 	ELSE IF(@CreateCSV = 0)
@@ -542,5 +562,4 @@ BEGIN
 	SET @SQL = 'DELETE FROM ' + @strTableName
 	EXEC sp_executesql @SQL
 
-	--EXEC XMLDB.dbo.PrintString @strCSV
 END
