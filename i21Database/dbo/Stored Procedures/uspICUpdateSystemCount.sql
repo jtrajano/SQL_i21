@@ -67,11 +67,14 @@ SELECT
 FROM tblICInventoryCountDetail d
 	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = d.intInventoryCountId
 WHERE c.intImportFlagInternal = 1
+	AND d.intItemUOMId IS NOT NULL
+	AND d.intItemLocationId IS NOT NULL
+	AND d.intItemId IS NOT NULL
 
 IF EXISTS(SELECT * FROM @Lots)
 BEGIN
 	EXEC dbo.uspICCreateUpdateLotNumber @Lots, 1, 1, 0
-
+	
 	UPDATE	countDetail
 	SET	intLotId = LotNumbers.intLotId
 	FROM tblICInventoryCountDetail countDetail
