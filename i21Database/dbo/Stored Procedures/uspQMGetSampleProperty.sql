@@ -105,6 +105,7 @@ BEGIN
 			,@intShiftId INT
 			,@strLotCode1 NVARCHAR(50)
 			,@strScreenSize nvarchar(50)
+			,@strCCPSize nvarchar(50)
 
 		SELECT @dtmPlannedDate = dtmPlannedDate
 			,@intPlannedShiftId = intPlannedShiftId
@@ -118,6 +119,7 @@ BEGIN
 		SELECT @strItemNo = strItemNo
 			,@strScreenSize = strWeightControlCode
 			,@strTargetWeight = Convert(numeric(18,0),dblBlendWeight)
+			,@strCCPSize = strExternalGroup
 		FROM tblICItem
 		WHERE intItemId = @intItemId
 
@@ -130,12 +132,35 @@ BEGIN
 		
 		SELECT @strLotCode1 = ''
 
-		SELECT @intShiftId = MIN(intShiftId)
-		FROM dbo.tblMFShift
+		--SELECT @intShiftId = MIN(intShiftId)
+		--FROM dbo.tblMFShift
 
-		WHILE @intShiftId IS NOT NULL
-		BEGIN
-			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+		--WHILE @intShiftId IS NOT NULL
+		--BEGIN
+		--	EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+		--		,@intItemId = @intItemId
+		--		,@intManufacturingId = NULL
+		--		,@intSubLocationId = @intSubLocationId
+		--		,@intLocationId = @intLocationId
+		--		,@intOrderTypeId = NULL
+		--		,@intBlendRequirementId = NULL
+		--		,@intPatternCode = 78
+		--		,@ysnProposed = 0
+		--		,@strPatternString = @strLotCode OUTPUT
+		--		,@intShiftId = @intShiftId
+		--		,@dtmDate = @dtmPlannedDate
+
+		--	SELECT @strLotCode1 = @strLotCode1 + @strLotCode + ', '
+
+		--	SELECT @intShiftId = MIN(intShiftId)
+		--	FROM dbo.tblMFShift
+		--	WHERE intShiftId > @intShiftId
+		--END
+
+		--IF @strLotCode1 <> ''
+		--	SELECT @strLotCode = Left(@strLotCode1, len(@strLotCode1) - 1)
+
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
 				,@intItemId = @intItemId
 				,@intManufacturingId = NULL
 				,@intSubLocationId = @intSubLocationId
@@ -145,18 +170,8 @@ BEGIN
 				,@intPatternCode = 78
 				,@ysnProposed = 0
 				,@strPatternString = @strLotCode OUTPUT
-				,@intShiftId = @intShiftId
+				,@intShiftId = @intPlannedShiftId
 				,@dtmDate = @dtmPlannedDate
-
-			SELECT @strLotCode1 = @strLotCode1 + @strLotCode + ', '
-
-			SELECT @intShiftId = MIN(intShiftId)
-			FROM dbo.tblMFShift
-			WHERE intShiftId > @intShiftId
-		END
-
-		IF @strLotCode1 <> ''
-			SELECT @strLotCode = Left(@strLotCode1, len(@strLotCode1) - 1)
 
 		SELECT @strPackagingCategory = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
