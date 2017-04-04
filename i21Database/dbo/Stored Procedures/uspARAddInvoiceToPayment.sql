@@ -189,7 +189,7 @@ BEGIN TRY
 	UPDATE P
 	SET
 		 P.[dblAmountPaid]		= (@PaymentTotal + @Payment)
-		,P.[dblUnappliedAmount]	= (@AmountPaid + @Payment) - (PD.dblPayment + @Payment)
+		,P.[dblUnappliedAmount]	= (@PaymentTotal + @Payment) - (PD.dblPayment)
 	FROM tblARPayment P
 	INNER JOIN (SELECT intPaymentId, SUM(dblPayment) AS dblPayment FROM tblARPaymentDetail GROUP BY intPaymentId) PD
 		ON P.[intPaymentId] = PD.[intPaymentId]
