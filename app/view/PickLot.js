@@ -32,6 +32,8 @@ Ext.define('Inventory.view.PickLot', {
 
     height: 519,
     hidden: false,
+    minHeight: 519,
+    minWidth: 867,
     width: 867,
     layout: 'fit',
     collapsible: true,

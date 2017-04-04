@@ -23,10 +23,10 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("GetLots")]
-        public async Task<HttpResponseMessage> GetLots(GetParameter param)
+        [ActionName("SearchLots")]
+        public async Task<HttpResponseMessage> SearchLots(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await bl.GetLots(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await bl.SearchLots(param));
         }
     }
 }

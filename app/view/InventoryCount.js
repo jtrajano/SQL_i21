@@ -38,6 +38,8 @@ Ext.define('Inventory.view.InventoryCount', {
 
     height: 778,
     hidden: false,
+    minHeight: 778,
+    minWidth: 1048,
     width: 1048,
     layout: 'fit',
     collapsible: true,

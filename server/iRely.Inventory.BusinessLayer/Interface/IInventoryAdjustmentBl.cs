@@ -12,7 +12,7 @@ namespace iRely.Inventory.BusinessLayer
     public interface IInventoryAdjustmentBl : IBusinessLayer<tblICInventoryAdjustment>
     {
         SaveResult PostTransaction(Common.Posting_RequestModel Adjustment, bool isRecap);
-        Task<SearchResult> GetPostedLots(GetParameter param);
+        Task<SearchResult> SearchPostedLots(GetParameter param);
         Task<SearchResult> SearchAdjustmentDetails(GetParameter param);
     }
 }

@@ -116,10 +116,10 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("ShipmentInvoice")]
-        public async Task<HttpResponseMessage> ShipmentInvoice(GetParameter param)
+        [ActionName("SearchShipmentInvoice")]
+        public async Task<HttpResponseMessage> SearchShipmentInvoice(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.ShipmentInvoice(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchShipmentInvoice(param));
         }
 
         [HttpGet]

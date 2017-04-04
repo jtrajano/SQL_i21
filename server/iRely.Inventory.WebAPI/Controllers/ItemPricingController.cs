@@ -23,17 +23,17 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("GetItemPricingViews")]
-        public async Task<HttpResponseMessage> GetItemPricingViews(GetParameter param)
+        [ActionName("SearchItemPricingViews")]
+        public async Task<HttpResponseMessage> SearchItemPricingViews(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemPricingViews(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemPricingViews(param));
         }
 
         [HttpGet]
-        [ActionName("GetItemStockPricingViews")]
-        public async Task<HttpResponseMessage> GetItemStockPricingViews(GetParameter param)
+        [ActionName("SearchItemStockPricingViews")]
+        public async Task<HttpResponseMessage> SearchItemStockPricingViews(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStockPricingViews(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemStockPricingViews(param));
         }
     }
 

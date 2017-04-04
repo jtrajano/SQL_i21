@@ -19,7 +19,7 @@ namespace iRely.Inventory.BusinessLayer
             _db.ContextManager.Database.CommandTimeout = 180000;
         }
 
-        public async Task<SearchResult> GetLots(GetParameter param)
+        public async Task<SearchResult> SearchLots(GetParameter param)
         {
             //var query = _db.GetQuery<tblICInventoryReceiptItemLot>()
             //    .Include(p => p.tblICInventoryReceiptItem.vyuICInventoryReceiptItemLookUp)

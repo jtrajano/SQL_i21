@@ -153,7 +153,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
         {
             title: 'Vouchers',
             api: {
-                read: '../Inventory/api/InventoryReceipt/GetReceiptVouchers'
+                read: '../Inventory/api/InventoryReceipt/SearchReceiptVouchers'
             },
             columns: [
                 { dataIndex: 'intInventoryReceiptId', text: 'Inventory Receipt Id', flex: 1, dataType: 'numeric', key: true, hidden: true },
@@ -242,7 +242,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
 
                 if (grdSearch && grdSearch.length > 0) {
                     grdSearch.forEach(function (grid) {
-                        if (grid && grid.url == '../Inventory/api/InventoryReceipt/GetReceiptVouchers') {
+                        if (grid && grid.url == '../Inventory/api/InventoryReceipt/SearchReceiptVouchers') {
                             var store = grid ? grid.getStore() : null;
                             if (store) {
                                 store.reload({

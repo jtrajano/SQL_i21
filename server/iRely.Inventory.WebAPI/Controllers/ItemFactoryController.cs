@@ -23,10 +23,10 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("GetItemFactoryManufacturingCells")]
-        public async Task<HttpResponseMessage> GetItemFactoryManufacturingCells(GetParameter param)
+        [ActionName("SearchItemFactoryManufacturingCells")]
+        public async Task<HttpResponseMessage> SearchItemFactoryManufacturingCells(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemFactoryManufacturingCells(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemFactoryManufacturingCells(param));
         }
 
     }

@@ -38,6 +38,8 @@ Ext.define('Inventory.view.CertificationProgram', {
 
     height: 551,
     hidden: false,
+    minHeight: 551,
+    minWidth: 660,
     width: 660,
     layout: 'fit',
     collapsible: true,

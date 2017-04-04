@@ -23,7 +23,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchReceiptItemView(GetParameter param);
         Task<SearchResult> SearchReceiptItemLots(GetParameter param);
         Task<SearchResult> GetAddOrders(GetParameter param, int VendorId, string ReceiptType, int SourceType, int CurrencyId);
-        Task<SearchResult> GetReceiptVouchers(GetParameter param);
+        Task<SearchResult> SearchReceiptVouchers(GetParameter param);
         SaveResult UpdateReceiptInspection(int receiptId);
         SaveResult GetTaxGroupId(int receiptId, out int? taxGroup, out string taxGroupName);
         Task<SearchResult> GetChargeTaxDetails(GetParameter param, int ChargeId, int ReceiptId);

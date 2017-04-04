@@ -36,7 +36,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetItemLocationViews(GetParameter param)
+        public async Task<SearchResult> SearchItemLocationViews(GetParameter param)
         {
             var query = (
                 from ItemLocation in _db.GetQuery<vyuICGetItemLocation>()

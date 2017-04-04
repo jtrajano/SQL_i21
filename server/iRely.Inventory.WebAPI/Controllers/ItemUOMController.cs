@@ -23,21 +23,21 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetWeightUOMs(GetParameter param)
+        public async Task<HttpResponseMessage> SearchWeightUOMs(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetWeightUOMs(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchWeightUOMs(param));
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetWeightVolumeUOMs(GetParameter param)
+        public async Task<HttpResponseMessage> SearchWeightVolumeUOMs(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetWeightVolumeUOMs(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchWeightVolumeUOMs(param));
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetUOMs(GetParameter param)
+        public async Task<HttpResponseMessage> SearchUOMs(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetUOMs(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchUOMs(param));
         }
     }
 }

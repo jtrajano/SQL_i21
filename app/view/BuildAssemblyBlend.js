@@ -36,6 +36,8 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
 
     height: 625,
     hidden: false,
+    minHeight: 625,
+    minWidth: 765,
     width: 765,
     layout: 'fit',
     collapsible: true,

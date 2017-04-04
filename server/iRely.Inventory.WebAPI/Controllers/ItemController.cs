@@ -23,38 +23,38 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("GetCompactItems")]
-        public async Task<HttpResponseMessage> GetCompactItems(GetParameter param)
+        [ActionName("SearchCompactItems")]
+        public async Task<HttpResponseMessage> SearchCompactItems(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetCompactItems(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchCompactItems(param));
         }
 
         [HttpGet]
-        [ActionName("GetAssemblyComponents")]
-        public async Task<HttpResponseMessage> GetAssemblyComponents(GetParameter param)
+        [ActionName("SearchAssemblyComponents")]
+        public async Task<HttpResponseMessage> SearchAssemblyComponents(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetAssemblyComponents(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchAssemblyComponents(param));
         }
 
         [HttpGet]
-        [ActionName("GetBundleComponents")]
-        public async Task<HttpResponseMessage> GetBundleComponents(GetParameter param)
+        [ActionName("SearchBundleComponents")]
+        public async Task<HttpResponseMessage> SearchBundleComponents(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetBundleComponents(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchBundleComponents(param));
         }
 
         [HttpGet]
-        [ActionName("GetItemStocks")]
-        public async Task<HttpResponseMessage> GetItemStocks(GetParameter param)
+        [ActionName("SearchItemStocks ")]
+        public async Task<HttpResponseMessage> SearchItemStocks(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStocks(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemStocks(param));
         }
 
         [HttpGet]
-        [ActionName("GetItemStockDetails")]
-        public async Task<HttpResponseMessage> GetItemStockDetails(GetParameter param)
+        [ActionName("SearchItemStockDetails")]
+        public async Task<HttpResponseMessage> SearchItemStockDetails(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStockDetails(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemStockDetails(param));
         }
 
         [HttpGet]
@@ -65,52 +65,52 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("GetAssemblyItems")]
-        public async Task<HttpResponseMessage> GetAssemblyItems(GetParameter param)
+        [ActionName("SearchAssemblyItems")]
+        public async Task<HttpResponseMessage> SearchAssemblyItems(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetAssemblyItems(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchAssemblyItems(param));
         }
 
         [HttpGet]
-        [ActionName("GetItemUPCs")]
-        public async Task<HttpResponseMessage> GetItemUPCs(GetParameter param)
+        [ActionName("SearchItemUPCs")]
+        public async Task<HttpResponseMessage> SearchItemUPCs(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemUPCs(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemUPCs(param));
         }
 
         [HttpGet]
-        [ActionName("GetInventoryValuation")]
-        public async Task<HttpResponseMessage> GetInventoryValuation(GetParameter param)
+        [ActionName("SearchInventoryValuation")]
+        public async Task<HttpResponseMessage> SearchInventoryValuation(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetInventoryValuation(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchInventoryValuation(param));
         }
 
         [HttpGet]
-        [ActionName("GetInventoryValuationSummary")]
-        public async Task<HttpResponseMessage> GetInventoryValuationSummary(GetParameter param)
+        [ActionName("SearchInventoryValuationSummary")]
+        public async Task<HttpResponseMessage> SearchInventoryValuationSummary(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetInventoryValuationSummary(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchInventoryValuationSummary(param));
         }
 
         [HttpGet]
-        [ActionName("GetOtherCharges")]
-        public async Task<HttpResponseMessage> GetOtherCharges(GetParameter param)
+        [ActionName("SearchOtherCharges")]
+        public async Task<HttpResponseMessage> SearchOtherCharges(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetOtherCharges(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchOtherCharges(param));
         }
 
         [HttpGet]
-        [ActionName("GetItemCommodities")]
-        public async Task<HttpResponseMessage> GetItemCommodities(GetParameter param)
+        [ActionName("SearchItemCommodities")]
+        public async Task<HttpResponseMessage> SearchItemCommodities(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemCommodities(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemCommodities(param));
         }
 
         [HttpGet]
-        [ActionName("GetStockTrackingItems")]
-        public async Task<HttpResponseMessage> GetStockTrackingItems(GetParameter param)
+        [ActionName("SearchStockTrackingItems")]
+        public async Task<HttpResponseMessage> SearchStockTrackingItems(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetStockTrackingItems(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchStockTrackingItems(param));
         }
 
         [HttpGet]
@@ -210,17 +210,17 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("GetItemOwner")]
-        public async Task<HttpResponseMessage> GetItemOwner(GetParameter param)
+        [ActionName("SearchItemOwner")]
+        public async Task<HttpResponseMessage> SearchItemOwner(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemOwner(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemOwner(param));
         }
 
         [HttpGet]
-        [ActionName("GetItemSubLocations")]
-        public async Task<HttpResponseMessage> GetItemSubLocations(GetParameter param)
+        [ActionName("SearchItemSubLocations")]
+        public async Task<HttpResponseMessage> SearchItemSubLocations(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemSubLocations(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemSubLocations(param));
         }
 
     }

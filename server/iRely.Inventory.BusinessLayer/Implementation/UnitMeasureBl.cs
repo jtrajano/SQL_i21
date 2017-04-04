@@ -46,7 +46,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetPackedUOMs(GetParameter param)
+        public async Task<SearchResult> SearchPackedUOMs(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetPackedUOM>()
                 .Where(p => p.strUnitType == "Packed")

@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IItemLocationBl : IBusinessLayer<tblICItemLocation>
     {
-        Task<SearchResult> GetItemLocationViews(GetParameter param);
+        Task<SearchResult> SearchItemLocationViews(GetParameter param);
         SaveResult CheckCostingMethod(int ItemId, int ItemLocationId, int CostingMethod);
     }
 }

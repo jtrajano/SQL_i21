@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedOtherCharges', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/GetOtherCharges'
+                    read: '../Inventory/api/Item/SearchOtherCharges'
                 },
                 reader: {
                     type: 'json',

@@ -23,45 +23,45 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetClassAttributes(GetParameter param)
+        public async Task<HttpResponseMessage> SearchClassAttributes(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetClassAttributes(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchClassAttributes(param));
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetGradeAttributes(GetParameter param)
+        public async Task<HttpResponseMessage> SearchGradeAttributes(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetGradeAttributes(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchGradeAttributes(param));
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetOriginAttributes(GetParameter param)
+        public async Task<HttpResponseMessage> SearchOriginAttributes(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetOriginAttributes(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchOriginAttributes(param));
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetProductLineAttributes(GetParameter param)
+        public async Task<HttpResponseMessage> SearchProductLineAttributes(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetProductLineAttributes(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchProductLineAttributes(param));
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetProductTypeAttributes(GetParameter param)
+        public async Task<HttpResponseMessage> SearchProductTypeAttributes(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetProductTypeAttributes(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchProductTypeAttributes(param));
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetRegionAttributes(GetParameter param)
+        public async Task<HttpResponseMessage> SearchRegionAttributes(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetRegionAttributes(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchRegionAttributes(param));
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetSeasonAttributes(GetParameter param)
+        public async Task<HttpResponseMessage> SearchSeasonAttributes(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetSeasonAttributes(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchSeasonAttributes(param));
         }
 
         

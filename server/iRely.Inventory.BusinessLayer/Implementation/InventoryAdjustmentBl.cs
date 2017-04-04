@@ -230,7 +230,7 @@ namespace iRely.Inventory.BusinessLayer
             return updateResult;
         }
 
-        public async Task<SearchResult> GetPostedLots(GetParameter param)
+        public async Task<SearchResult> SearchPostedLots(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetPostedLot>()
                            .Filter(param, true);

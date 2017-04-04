@@ -11,12 +11,12 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface ICommodityAttributeBl : IBusinessLayer<tblICCommodityAttribute>
     {
-        Task<SearchResult> GetOriginAttributes(GetParameter param);
-        Task<SearchResult> GetProductTypeAttributes(GetParameter param);
-        Task<SearchResult> GetRegionAttributes(GetParameter param);
-        Task<SearchResult> GetSeasonAttributes(GetParameter param);
-        Task<SearchResult> GetClassAttributes(GetParameter param);
-        Task<SearchResult> GetProductLineAttributes(GetParameter param);
-        Task<SearchResult> GetGradeAttributes(GetParameter param);
+        Task<SearchResult> SearchOriginAttributes(GetParameter param);
+        Task<SearchResult> SearchProductTypeAttributes(GetParameter param);
+        Task<SearchResult> SearchRegionAttributes(GetParameter param);
+        Task<SearchResult> SearchSeasonAttributes(GetParameter param);
+        Task<SearchResult> SearchClassAttributes(GetParameter param);
+        Task<SearchResult> SearchProductLineAttributes(GetParameter param);
+        Task<SearchResult> SearchGradeAttributes(GetParameter param);
     }
 }

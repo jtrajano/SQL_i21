@@ -16,7 +16,7 @@
         "icon": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
+        "minHeight": 700,
         "minWidth": 1100,
         "minimizable": null,
         "mixins": null,

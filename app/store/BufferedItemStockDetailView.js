@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedItemStockDetailView', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/GetItemStockDetails'
+                    read: '../Inventory/api/Item/SearchItemStockDetails'
                 },
                 reader: {
                     type: 'json',

@@ -39,7 +39,8 @@ Ext.define('Inventory.view.Category', {
 
     height: 543,
     hidden: false,
-    minHeight: 530,
+    minHeight: 543,
+    minWidth: 860,
     width: 860,
     layout: 'fit',
     collapsible: true,

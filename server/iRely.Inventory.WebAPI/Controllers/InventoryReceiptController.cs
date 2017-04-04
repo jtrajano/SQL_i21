@@ -273,10 +273,10 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("GetReceiptVouchers")]
-        public async Task<HttpResponseMessage> GetReceiptVouchers(GetParameter param)
+        [ActionName("SearchReceiptVouchers")]
+        public async Task<HttpResponseMessage> SearchReceiptVouchers(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetReceiptVouchers(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchReceiptVouchers(param));
         }
 
         [HttpGet]

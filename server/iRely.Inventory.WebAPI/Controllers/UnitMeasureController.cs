@@ -23,9 +23,9 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetPackedUOMs(GetParameter param)
+        public async Task<HttpResponseMessage> SearchPackedUOMs(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetPackedUOMs(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchPackedUOMs(param));
         }
 
         [HttpGet]

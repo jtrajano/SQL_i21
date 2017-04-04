@@ -34,6 +34,8 @@ Ext.define('Inventory.view.FuelTaxClass', {
 
     height: 525,
     hidden: false,
+    minHeight: 525,
+    minWidth: 487,
     width: 487,
     layout: 'fit',
     collapsible: true,

@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedBundleComponent', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/GetBundleComponents'
+                    read: '../Inventory/api/Item/SearchBundleComponents'
                 },
                 reader: {
                     type: 'json',

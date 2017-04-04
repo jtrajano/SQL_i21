@@ -23,9 +23,9 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetItemStockUOMs(GetParameter param)
+        public async Task<HttpResponseMessage> SearchItemStockUOMs(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStockUOMView(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemStockUOMs(param));
         }
 
 
@@ -36,15 +36,15 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetItemStockUOMViewTotals(GetParameter param)
+        public async Task<HttpResponseMessage> SearchItemStockUOMViewTotals(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStockUOMViewTotals(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemStockUOMViewTotals(param));
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetItemStockUOMForAdjustment(GetParameter param)
+        public async Task<HttpResponseMessage> SearchItemStockUOMForAdjustment(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStockUOMForAdjustmentView(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemStockUOMForAdjustment(param));
         }
     }
 }

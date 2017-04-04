@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ItemSubLocation', {
                         },
                         proxy: {
                             api: {
-                                read: '../Inventory/api/ItemSubLocation/GetItemSubLocations',
+                                read: '../Inventory/api/ItemSubLocation/SearchItemSubLocations',
                             },
                             type: 'rest',
                             reader: {

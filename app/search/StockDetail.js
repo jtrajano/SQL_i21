@@ -5,7 +5,7 @@ Ext.define('Inventory.search.StockDetail', {
     searchConfigs: [
         {
             title: 'Search Locations YTD',
-            url: '../Inventory/api/Item/GetItemStocks',
+            url: '../Inventory/api/Item/SearchItemStocks',
             groupedOnLoad: true,
             columns: [
                 { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
@@ -44,7 +44,7 @@ Ext.define('Inventory.search.StockDetail', {
             enableDblClick: false,
             title: 'Storage Locations YTD',
             api: {
-                read: '../Inventory/api/StorageLocation/GetSubLocationBinDetails'
+                read: '../Inventory/api/StorageLocation/SearchSubLocationBinDetails'
             },
             columns: [
                 { dataIndex: 'intItemId', text: 'Item Id', width: 100, flex: 1, hidden: true, key: true },
@@ -82,7 +82,7 @@ Ext.define('Inventory.search.StockDetail', {
                 }
             ],
             chart: {
-                url: '../Inventory/api/StorageLocation/GetSubLocationBins',
+                url: '../Inventory/api/StorageLocation/SearchSubLocationBins',
                 type: 'serial',
                 /*startDuration: 1,
                 startEffect: 'elastic',*/
@@ -166,7 +166,7 @@ Ext.define('Inventory.search.StockDetail', {
                                 proxy: {
                                     type: 'rest',
                                     api: {
-                                        read: '../Inventory/api/StorageLocation/GetSubLocationBinDetails'
+                                        read: '../Inventory/api/StorageLocation/SearchSubLocationBinDetails'
                                     },
                                     reader: {
                                         type: 'json',
@@ -190,7 +190,7 @@ Ext.define('Inventory.search.StockDetail', {
                                 proxy: {
                                     type: 'rest',
                                     api: {
-                                        read: '../Inventory/api/StorageLocation/GetStorageBins'
+                                        read: '../Inventory/api/StorageLocation/SearchStorageBins'
                                     },
                                     reader: {
                                         type: 'json',
@@ -287,7 +287,7 @@ Ext.define('Inventory.search.StockDetail', {
             enableDblClick: false,
             title: 'Storage Units YTD',
             api: {
-                read: '../Inventory/api/StorageLocation/GetStorageBinDetails'
+                read: '../Inventory/api/StorageLocation/SearchStorageBinDetails'
             },
             columns: [
                 { dataIndex: 'intItemId', text: 'Item Id', width: 100, flex: 1, hidden: true, key: true },
@@ -325,7 +325,7 @@ Ext.define('Inventory.search.StockDetail', {
                 }
             ],
             chart: {
-                url: '../Inventory/api/StorageLocation/GetStorageBins',
+                url: '../Inventory/api/StorageLocation/SearchStorageBins',
                 type: 'serial',
                 /*startDuration: 1,
                 startEffect: 'elastic',*/
@@ -409,7 +409,7 @@ Ext.define('Inventory.search.StockDetail', {
                                 proxy: {
                                     type: 'rest',
                                     api: {
-                                        read: '../Inventory/api/StorageLocation/GetStorageBinDetails'
+                                        read: '../Inventory/api/StorageLocation/SearchStorageBinDetails'
                                     },
                                     reader: {
                                         type: 'json',
@@ -433,7 +433,7 @@ Ext.define('Inventory.search.StockDetail', {
                                 proxy: {
                                     type: 'rest',
                                     api: {
-                                        read: '../Inventory/api/StorageLocation/GetStorageBins'
+                                        read: '../Inventory/api/StorageLocation/SearchStorageBins'
                                     },
                                     reader: {
                                         type: 'json',

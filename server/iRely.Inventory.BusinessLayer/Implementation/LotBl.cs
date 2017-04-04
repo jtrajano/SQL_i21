@@ -21,7 +21,7 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
 
-        public async Task<SearchResult> GetLots(GetParameter param)
+        public async Task<SearchResult> SearchLots(GetParameter param)
         {
             var query = _db.GetQuery<vyuICItemLot>()
                 .Filter(param, true);

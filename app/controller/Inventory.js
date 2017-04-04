@@ -533,7 +533,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strReceiptNumber',
                 displayTitle: 'Inventory Receipt Vouchers',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/InventoryReceipt/GetReceiptVouchers',
+                url: '../Inventory/api/InventoryReceipt/SearchReceiptVouchers',
                 fields: [
                     {name: 'intInventoryReceiptId', type: 'int'},
                     {name: 'strReceiptNumber', type: 'string'},
@@ -622,7 +622,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strItemNo',
                 displayTitle: 'Item Locations',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/ItemLocation/GetItemLocationViews',
+                url: '../Inventory/api/ItemLocation/SearchItemLocationViews',
                 fields: [
                     {name: 'intItemId', type: 'int'},
                     {name: 'strItemNo', type: 'string'},
@@ -634,7 +634,7 @@ Ext.define('Inventory.controller.Inventory', {
                 displayField: 'strItemNo',
                 displayTitle: 'Item Pricing',
                 screenIcon: 'maintenance',
-                url: '../Inventory/api/ItemPricing/GetItemPricingViews',
+                url: '../Inventory/api/ItemPricing/SearchItemPricingViews',
                 fields: [
                     {name: 'intItemId', type: 'int'},
                     {name: 'strItemNo', type: 'string'}

@@ -11,8 +11,8 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IItemPricingBl : IBusinessLayer<tblICItemPricing>
     {
-        Task<SearchResult> GetItemPricingViews(GetParameter param);
-        Task<SearchResult> GetItemStockPricingViews(GetParameter param);
+        Task<SearchResult> SearchItemPricingViews(GetParameter param);
+        Task<SearchResult> SearchItemStockPricingViews(GetParameter param);
     }
 
     public interface IItemPricingLevelBl : IBusinessLayer<tblICItemPricingLevel>

@@ -12,6 +12,8 @@
         "height": 594,
         "layout": "fit",
         "maximizable": true,
+        "minHeight": 594,
+        "minWidth": 715,
         "title": "Copy Item Location",
         "width": 715
     },
