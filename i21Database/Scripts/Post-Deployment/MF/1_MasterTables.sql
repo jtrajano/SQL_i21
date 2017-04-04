@@ -2435,3 +2435,7 @@ UPDATE tblMFCompanyPreference
 SET ysnSetExpiryDateByParentLot = 1
 WHERE ysnSetExpiryDateByParentLot IS NULL
 GO
+UPDATE tblMFCompanyPreference
+SET ysnAddQtyOnExistingLot = 1
+WHERE ysnAddQtyOnExistingLot IS NULL
+GO
