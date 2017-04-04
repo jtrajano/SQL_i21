@@ -156,7 +156,17 @@ END
 BEGIN 
 	DELETE [dbo].[tblGLSummary] WHERE dbo.fnDateEquals(dtmDate, @adjdt) = 1
 
-	INSERT INTO tblGLSummary
+	INSERT INTO tblGLSummary (
+		intCompanyId
+		,intAccountId
+		,dtmDate
+		,dblDebit 
+		,dblCredit
+		,dblDebitUnit 
+		,dblCreditUnit 
+		,strCode
+		,intConcurrencyId 
+	)
 	SELECT
 			intCompanyId
 			,intAccountId
