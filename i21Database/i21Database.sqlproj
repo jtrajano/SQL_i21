@@ -5154,6 +5154,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\28_UpdateBaseAmounts.sql" />
     <Build Include="dbo\Views\vyuCTItemCertification.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLoadShipmentOnInvoicePost.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
