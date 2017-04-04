@@ -28,7 +28,11 @@ DECLARE @receiptAmount DECIMAL(18,6);
 DECLARE @totalReceiptAmount DECIMAL(18,6);
 DECLARE @totalLineItem DECIMAL(18,6);
 DECLARE @totalCharges DECIMAL(18,6);
-DECLARE @receiptType INT
+DECLARE @receiptType INT;
+DECLARE @contractTermId INT;
+DECLARE @balanceDue INT;
+DECLARE @receipttDate DATETIME;
+
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -726,18 +730,34 @@ BEGIN
 	--LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	WHERE A.intInventoryReceiptId = @receiptId
 
-	UPDATE A
-		SET --A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId) AP-2116
-		A.dblTax = (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
-	FROM tblAPBill A
-	WHERE intBillId = @generatedBillId
+	DELETE FROM #tmpReceiptIds WHERE intInventoryReceiptId = @receiptId  
+END
+
+--UPDATE VOUCHER DATA
+DECLARE @totalCreatedVouchers INT = (SELECT COUNT(*) FROM #tmpReceiptBillIds);
+DECLARE @voucherCount INT = 0;
+DECLARE @currentVoucher INT;
+
+IF OBJECT_ID(N'tempdb..#tmpVouchersCreated') IS NOT NULL DROP TABLE #tmpVouchersCreated
+SELECT * INTO #tmpVouchersCreated FROM #tmpReceiptBillIds
+
+WHILE @voucherCount != @totalCreatedVouchers
+BEGIN
+	SET @voucherCount = @voucherCount + 1;
+	SELECT TOP(1) @currentVoucher = intBillId FROM #tmpVouchersCreated
 
 	UPDATE A
-		SET A.dblSubtotal = dblTotal - (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @generatedBillId) --AP-3180 Update the subtotal when posting directly from Scale
+	SET --A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId) AP-2116
+	A.dblTax = (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
 	FROM tblAPBill A
-	WHERE intBillId = @generatedBillId
+	WHERE intBillId = @currentVoucher
 
-	SELECT @shipFrom = intShipFromId, @shipTo = intShipToId FROM tblAPBill
+	UPDATE A
+		SET A.dblSubtotal = dblTotal - (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @currentVoucher) --AP-3180 Update the subtotal when posting directly from Scale
+	FROM tblAPBill A
+	WHERE intBillId = @currentVoucher
+	
+	SELECT @shipFrom = intShipFromId, @shipTo = intShipToId FROM tblAPBill WHERE intBillId = @currentVoucher
 	EXEC uspAPBillUpdateAddressInfo @generatedBillId, @shipFrom, @shipTo
 
 	--UPDATE Term of Voucher base on Contract term AP-3450
