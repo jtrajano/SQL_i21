@@ -5258,6 +5258,7 @@
     <Build Include="dbo\Views\vyuEMEntityGroupApproverUsage.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteChargePerItemOnReceiptSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteChargePerItemOnShipmentSave.sql" />
+    <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

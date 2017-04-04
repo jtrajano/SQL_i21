@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerInquiry]
 AS 
-SELECT intEntityCustomerId			= C.intEntityId
+SELECT C.intEntityId
 	 , strCustomerName				= E.strName
 	 , CI.strTerm
 	 , C.strCustomerNumber
