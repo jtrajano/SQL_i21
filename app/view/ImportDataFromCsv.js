@@ -28,8 +28,6 @@ Ext.define('Inventory.view.ImportDataFromCsv', {
 
     autoShow: true,
     height: 221,
-    minHeight: 221,
-    minWidth: 535,
     width: 535,
     layout: 'fit',
     collapsible: true,

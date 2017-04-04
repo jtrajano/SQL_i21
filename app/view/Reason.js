@@ -34,8 +34,6 @@ Ext.define('Inventory.view.Reason', {
 
     height: 335,
     hidden: false,
-    minHeight: 335,
-    minWidth: 520,
     width: 520,
     layout: 'fit',
     collapsible: true,

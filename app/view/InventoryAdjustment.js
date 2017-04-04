@@ -37,8 +37,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
 
     height: 698,
     hidden: false,
-    minHeight: 698,
-    minWidth: 950,
     width: 950,
     layout: 'fit',
     collapsible: true,

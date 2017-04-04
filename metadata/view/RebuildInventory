@@ -15,7 +15,6 @@
         "margin": "",
         "maxHeight": null,
         "minHeight": 220,
-        "minWidth": 438,
         "modal": true,
         "padding": null,
         "reference": null,
@@ -309,7 +308,7 @@
                         "layout|region": "east",
                         "width": 150
                     },
-                    "name": "statusbar11",
+                    "name": "statusbar1",
                     "designerId": "f99cbb97-f355-4a7a-9435-98f19e7193ee",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

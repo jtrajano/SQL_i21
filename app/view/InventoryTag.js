@@ -29,8 +29,6 @@ Ext.define('Inventory.view.InventoryTag', {
 
     height: 525,
     hidden: false,
-    minHeight: 525,
-    minWidth: 600,
     width: 600,
     layout: 'fit',
     collapsible: true,

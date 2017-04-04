@@ -15,8 +15,8 @@
         "icon": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 635,
-        "minWidth": 1000,
+        "minHeight": null,
+        "minWidth": null,
         "minimizable": null,
         "mixins": null,
         "reference": null,
@@ -405,7 +405,7 @@
                                                         "itemId": "cboFutureMarket",
                                                         "labelWidth": 140,
                                                         "layout|flex": 1,
-                                                        "valueField": "intFutureMarketId"
+                                                        "valueField": "strFutMarketName"
                                                     },
                                                     "name": "MyComboBox11",
                                                     "configAlternates": {
@@ -825,7 +825,7 @@
                                                         "itemId": "cboDefaultScheduleStore",
                                                         "labelWidth": 140,
                                                         "layout|flex": null,
-                                                        "valueField": "intStorageScheduleRuleId"
+                                                        "valueField": "strScheduleId"
                                                     },
                                                     "name": "MyComboBox2",
                                                     "configAlternates": {
@@ -877,7 +877,7 @@
                                                         "labelWidth": 140,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "valueField": "intDiscountId"
+                                                        "valueField": "strDiscountId"
                                                     },
                                                     "name": "MyComboBox7",
                                                     "configAlternates": {
@@ -929,7 +929,7 @@
                                                         "labelWidth": 140,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "valueField": "intStorageScheduleTypeId"
+                                                        "valueField": "strStorageTypeCode"
                                                     },
                                                     "name": "MyComboBox53",
                                                     "configAlternates": {
@@ -1126,7 +1126,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter132",
+                                                            "name": "filter11",
                                                             "designerId": "cfe7d6a1-9373-4396-b427-061b4323a19b",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -2923,7 +2923,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter133",
+                                                    "name": "filter12",
                                                     "designerId": "eba518f5-6e1c-4310-b412-16897ab2e39e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3337,7 +3337,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter134",
+                                                    "name": "filter13",
                                                     "designerId": "e9ad3d80-e267-4067-aa45-29a3069f9395",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3614,7 +3614,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter135",
+                                                    "name": "filter14",
                                                     "designerId": "d3a363a5-85c8-4ee8-97e8-07576d381b52",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3887,7 +3887,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter136",
+                                                    "name": "filter15",
                                                     "designerId": "27709837-db86-47ab-a575-7586b5b5aef3",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4113,7 +4113,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging16",
+                    "name": "statusbarpaging1",
                     "designerId": "fca9ca25-ac5c-43f8-9dd2-ce604fae6ecb",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

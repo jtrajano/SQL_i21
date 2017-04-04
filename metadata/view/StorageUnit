@@ -15,12 +15,12 @@
         "icon": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 572,
-        "minWidth": 931,
+        "minHeight": null,
+        "minWidth": null,
         "minimizable": null,
         "reference": null,
         "tabIndex": null,
-        "title": "Storage Location",
+        "title": "Storage Unit",
         "width": 931
     },
     "name": "FuelTaxClass2",
@@ -375,7 +375,7 @@
                                                 "layout|margins": null,
                                                 "margin": null,
                                                 "name": null,
-                                                "valueField": "intStorageUnitTypeId"
+                                                "valueField": "strStorageUnitType"
                                             },
                                             "name": "MyComboBox23",
                                             "configAlternates": {
@@ -443,7 +443,7 @@
                                                 "margin": null,
                                                 "name": null,
                                                 "readOnly": false,
-                                                "valueField": "intCompanyLocationId"
+                                                "valueField": "strLocationName"
                                             },
                                             "name": "MyComboBox26",
                                             "configAlternates": {
@@ -477,7 +477,7 @@
                                                     "\t{",
                                                     "\t\tdataIndex: 'intCompanyLocationSubLocationId',",
                                                     "\t\tdataType: 'numeric',",
-                                                    "\t\ttext: 'Sub Location Id',",
+                                                    "\t\ttext: 'Storage Location Id',",
                                                     "\t\thidden: true",
                                                     "\t},",
                                                     "\t{",
@@ -489,7 +489,7 @@
                                                     "\t{",
                                                     "\t\tdataIndex: 'strSubLocationName',",
                                                     "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'Sub Location Name',",
+                                                    "\t\ttext: 'Storage Location Name',",
                                                     "\t\tflex: 1",
                                                     "\t},",
                                                     "\t{",
@@ -503,7 +503,7 @@
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strSubLocationName",
                                                 "enableDrillDown": true,
-                                                "fieldLabel": "Sub Location",
+                                                "fieldLabel": "Storage Location",
                                                 "itemId": "cboSubLocation",
                                                 "labelWidth": 110,
                                                 "layout|flex": null,
@@ -511,7 +511,7 @@
                                                 "margin": null,
                                                 "name": null,
                                                 "readOnly": false,
-                                                "valueField": "intCompanyLocationSubLocationId"
+                                                "valueField": "strSubLocationName"
                                             },
                                             "name": "MyComboBox21",
                                             "configAlternates": {
@@ -571,7 +571,7 @@
                                                 "layout|margins": null,
                                                 "margin": null,
                                                 "name": null,
-                                                "valueField": "intStorageLocationId"
+                                                "valueField": "strName"
                                             },
                                             "name": "MyComboBox30",
                                             "configAlternates": {
@@ -625,7 +625,7 @@
                                                 "layout|margins": null,
                                                 "margin": null,
                                                 "name": null,
-                                                "valueField": "intRestrictionId"
+                                                "valueField": "strInternalCode"
                                             },
                                             "name": "MyComboBox31",
                                             "configAlternates": {
@@ -758,7 +758,7 @@
                                                 "layout|margins": null,
                                                 "margin": null,
                                                 "name": null,
-                                                "valueField": "intUnitMeasureId"
+                                                "valueField": "strUnitMeasure"
                                             },
                                             "name": "MyComboBox32",
                                             "configAlternates": {
@@ -1098,7 +1098,7 @@
                                                         "layout|margins": null,
                                                         "margin": null,
                                                         "name": null,
-                                                        "valueField": "intItemId"
+                                                        "valueField": "strItemNo"
                                                     },
                                                     "name": "MyComboBox16",
                                                     "configAlternates": {
@@ -1498,7 +1498,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter11",
                                                     "designerId": "44f4490e-5a9c-40bb-beaf-26df2f659502",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1776,7 +1776,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter16",
+                                                    "name": "filter12",
                                                     "designerId": "22931607-4134-4630-a48a-1fe5916ccd67",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1974,7 +1974,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter13",
                                                     "designerId": "e4e6a664-7884-4ddd-8995-16e91bcb4363",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2161,7 +2161,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter14",
                                                     "designerId": "6e9571a9-d0ec-46b7-ab0d-11523cb26254",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2331,7 +2331,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging16",
+                    "name": "statusbarpaging1",
                     "designerId": "007a0d4c-2515-4998-91ed-043de4f99d12",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

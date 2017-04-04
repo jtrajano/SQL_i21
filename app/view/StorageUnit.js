@@ -36,8 +36,6 @@ Ext.define('Inventory.view.StorageUnit', {
 
     height: 572,
     hidden: false,
-    minHeight: 572,
-    minWidth: 931,
     width: 931,
     layout: 'fit',
     collapsible: true,

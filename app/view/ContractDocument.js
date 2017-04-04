@@ -29,8 +29,6 @@ Ext.define('Inventory.view.ContractDocument', {
 
     height: 309,
     hidden: false,
-    minHeight: 309,
-    minWidth: 451,
     width: 451,
     layout: 'fit',
     collapsible: true,

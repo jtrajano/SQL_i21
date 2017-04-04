@@ -28,8 +28,6 @@ Ext.define('Inventory.view.ImportLogMessageBox', {
     ],
 
     height: 375,
-    minHeight: 375,
-    minWidth: 672,
     width: 672,
     layout: 'fit',
     title: 'Log Messages',
