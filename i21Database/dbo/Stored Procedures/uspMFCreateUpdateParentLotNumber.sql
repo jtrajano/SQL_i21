@@ -19,6 +19,14 @@ BEGIN
 		,@dtmCurrentDateTime DATETIME
 		,@ysnRequireCustomerApproval BIT
 		,@intItemOwnerId INT
+		,@ysnPickByLotCode BIT
+		,@intLotCodeStartingPosition INT
+		,@intLotCodeNoOfDigits INT
+
+	SELECT @ysnPickByLotCode = ysnPickByLotCode
+		,@intLotCodeStartingPosition = intLotCodeStartingPosition
+		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
+	FROM tblMFCompanyPreference
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -80,6 +88,16 @@ BEGIN
 
 	IF ISNULL(@intParentLotId, 0) = 0
 	BEGIN
+		IF @ysnPickByLotCode = 1
+			AND ISNUMERIC(Substring(@strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)) = 0
+		BEGIN
+			RAISERROR (
+					90031
+					,11
+					,1
+					)
+		END
+
 		INSERT INTO tblICParentLot (
 			strParentLotNumber
 			,strParentLotAlias

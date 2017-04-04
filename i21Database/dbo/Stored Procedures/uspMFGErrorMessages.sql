@@ -132,3 +132,11 @@ EXEC sp_addmessage 90028,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90029) EXEC sp_dropmessage 90029, 'us_english'	
 SET @strmessage = 'Manufacturing Process cannot be blank'
 EXEC sp_addmessage 90029,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90030) EXEC sp_dropmessage 90030, 'us_english'	
+SET @strmessage = 'Pallet Id already exists'
+EXEC sp_addmessage 90030,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90031) EXEC sp_dropmessage 90031, 'us_english'	
+SET @strmessage = 'Invalid Lot Code'
+EXEC sp_addmessage 90031,11,@strmessage,'us_english','False'
