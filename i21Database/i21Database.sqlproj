@@ -5257,6 +5257,7 @@
     <Build Include="dbo\Stored Procedures\uspSMLicenseKey.sql" />
     <Build Include="dbo\Tables\tblMFCustomFieldValue.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveConsumeCustomFields.sql" />
+    <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
