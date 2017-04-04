@@ -18,6 +18,7 @@ BEGIN
 		,@strBlendAttributeValue NVARCHAR(MAX)
 		,@dtmCurrentDateTime DATETIME
 		,@strPackagingCategory NVARCHAR(50)
+		,@strTargetItemNo nvarchar(50)
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -135,6 +136,16 @@ BEGIN
 		OR @strItemNo IS NULL
 	BEGIN
 		SELECT @strItemNo = '%'
+	END
+
+	SELECT @strTargetItemNo = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'Target Item'
+
+	IF @strTargetItemNo = ''
+		OR @strTargetItemNo IS NULL
+	BEGIN
+		SELECT @strTargetItemNo = '%'
 	END
 
 	SELECT @strCompanyLocationName = [from]
@@ -266,8 +277,103 @@ BEGIN
 	BEGIN
 		SELECT @intStartedStatusId = 10
 	END
-
-	IF @strItemNo <> ''
+	if @strTargetItemNo <>''
+	Begin
+		IF @strItemNo <> ''
+		AND @strItemGroupName <> ''
+	BEGIN
+		INSERT INTO @tblICItem (
+			intItemId
+			,strItemNo
+			,strDescription
+			)
+		SELECT I.intItemId
+			,I.strItemNo
+			,I.strDescription
+		FROM tblICItem I
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+		JOIN tblMFRecipeItem RI on RI.intItemId=I.intItemId
+		JOIN tblMFRecipe R on R.intRecipeId =RI.intRecipeId and R.ysnActive =1
+		JOIN tblICItem P on P.intItemId=R.intItemId
+		WHERE C.strCategoryCode IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
+			AND I.strItemNo LIKE @strItemNo + '%'
+			And P.strItemNo like @strTargetItemNo 
+			--AND strItemGroupName LIKE @strItemGroupName + '%'
+	END
+	ELSE IF @strItemNo = ''
+		AND @strItemGroupName <> ''
+	BEGIN
+		INSERT INTO @tblICItem (
+			intItemId
+			,strItemNo
+			,strDescription
+			)
+		SELECT I.intItemId
+			,I.strItemNo
+			,I.strDescription
+		FROM tblICItem I
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+		JOIN tblMFRecipeItem RI on RI.intItemId=I.intItemId
+		JOIN tblMFRecipe R on R.intRecipeId =RI.intRecipeId and R.ysnActive =1
+		JOIN tblICItem P on P.intItemId=R.intItemId
+		WHERE C.strCategoryCode IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
+			--AND strItemGroupName LIKE @strItemGroupName + '%'
+		And P.strItemNo like @strTargetItemNo 
+	END
+	ELSE IF @strItemNo <> ''
+		AND @strItemGroupName = ''
+	BEGIN
+		INSERT INTO @tblICItem (
+			intItemId
+			,strItemNo
+			,strDescription
+			)
+		SELECT I.intItemId
+			,I.strItemNo
+			,I.strDescription
+		FROM tblICItem I
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+		JOIN tblMFRecipeItem RI on RI.intItemId=I.intItemId
+		JOIN tblMFRecipe R on R.intRecipeId =RI.intRecipeId and R.ysnActive =1
+		JOIN tblICItem P on P.intItemId=R.intItemId
+		WHERE C.strCategoryCode IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
+			AND I.strItemNo LIKE @strItemNo + '%'
+		And P.strItemNo like @strTargetItemNo 
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblICItem (
+			intItemId
+			,strItemNo
+			,strDescription
+			)
+		SELECT I.intItemId
+			,I.strItemNo
+			,I.strDescription
+		FROM tblICItem I
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+		JOIN tblMFRecipeItem RI on RI.intItemId=I.intItemId
+		JOIN tblMFRecipe R on R.intRecipeId =RI.intRecipeId and R.ysnActive =1
+		JOIN tblICItem P on P.intItemId=R.intItemId
+		WHERE C.strCategoryCode IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
+		And P.strItemNo like @strTargetItemNo 
+	END
+	end
+	else
+	Begin
+		IF @strItemNo <> ''
 		AND @strItemGroupName <> ''
 	BEGIN
 		INSERT INTO @tblICItem (
@@ -342,6 +448,7 @@ BEGIN
 				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
 				)
 	END
+	End
 
 	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
 
