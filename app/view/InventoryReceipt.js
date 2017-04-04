@@ -40,6 +40,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
 
     height: 700,
     hidden: false,
+    minHeight: 700,
     minWidth: 1100,
     width: 1100,
     layout: 'fit',

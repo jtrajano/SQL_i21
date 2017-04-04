@@ -30,6 +30,8 @@ Ext.define('Inventory.view.FactoryUnitType', {
 
     height: 385,
     hidden: false,
+    minHeight: 385,
+    minWidth: 637,
     width: 637,
     layout: 'fit',
     collapsible: true,

@@ -30,6 +30,8 @@ Ext.define('Inventory.view.LotDetailHistory', {
     ],
 
     height: 502,
+    minHeight: 502,
+    minWidth: 800,
     width: 800,
     layout: 'fit',
     title: 'Lot History',

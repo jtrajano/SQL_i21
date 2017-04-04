@@ -15,8 +15,8 @@
         "icon": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
-        "minWidth": null,
+        "minHeight": 629,
+        "minWidth": 1050,
         "minimizable": null,
         "reference": null,
         "title": "Card Count",
@@ -310,7 +310,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter125",
                                                     "designerId": "b82253f7-16e7-4b17-8c63-da802807ad77",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

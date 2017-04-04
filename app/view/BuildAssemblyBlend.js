@@ -36,6 +36,8 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
 
     height: 625,
     hidden: false,
+    minHeight: 625,
+    minWidth: 765,
     width: 765,
     layout: 'fit',
     collapsible: true,
@@ -126,7 +128,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            itemId: 'btnRecap',
+                            itemId: 'btnPostPreview',
                             ui: 'i21-button-toolbar-small',
                             text: 'Post Preview'
                         },
