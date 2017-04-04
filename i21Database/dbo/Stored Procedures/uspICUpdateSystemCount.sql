@@ -37,7 +37,7 @@ WHERE c.intImportFlagInternal = 1
 	OR d.intItemLocationId IS NULL
 	OR d.intItemId IS NULL)
 
--- Auto-create Lot
+-- Autocreate Lot
 -- Create the temp table 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#GeneratedLotItems')) 
 BEGIN 
