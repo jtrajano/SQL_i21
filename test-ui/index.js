@@ -2,7 +2,8 @@ var Harness = Siesta.Harness.Browser.ExtJS,
     version = Math.floor(Math.random() * 9999) + 1,
     commonIC = 'Common/CommonIC.js?v='+version,
     commonICST = 'Common/CommonICSmokeTest.js?v='+version,
-    functionalTest = '../../TestFramework/FunctionalTest.js?v='+version;
+    functionalTest = '../../TestFramework/FunctionalTest.js?v='+version,
+    commonGL = '../../GeneralLedger/test-ui/Common/commonGL.js?v='+version
 
 
 var _url = window.location.hash,
@@ -733,6 +734,39 @@ if(_url.indexOf('version=TF') < 1) {
                                 functionalTest,
                                 commonIC
 
+                            ]
+                        }
+                    ]
+                },
+
+                {
+                    group: 'TaxesAndCharges',
+                    items: [
+                        {
+                            url: 'BusinessDomain/TaxesAndCharges/TaxesAndChargesSetup.js?v=' + version,
+                            title: 'TaxesAndChargesSetup',
+                            preload: [
+                                functionalTest,
+                                commonIC,
+                                commonGL
+                            ]
+                        },
+                        {
+                            url: 'BusinessDomain/TaxesAndCharges/IRTaxesAndChargesCheckOffIsN.js?v=' + version,
+                            title: 'IRTaxesAndChargesCheckOffIsN',
+                            preload: [
+                                functionalTest,
+                                commonIC,
+                                commonGL
+                            ]
+                        },
+                        {
+                            url: 'BusinessDomain/TaxesAndCharges/IRTaxesAndChargesCheckOffIsY.js?v=' + version,
+                            title: 'IRTaxesAndChargesCheckOffIsY',
+                            preload: [
+                                functionalTest,
+                                commonIC,
+                                commonGL
                             ]
                         }
                     ]
