@@ -44,6 +44,7 @@ FROM (
 						), 0)
 				) > 0
 			AND CH.intContractTypeId = 1
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE t.intDayToShipment < EV.intDaysToRemind
@@ -87,6 +88,7 @@ FROM (
 					AND intLoadShippingInstructionId IS NOT NULL
 				)
 			AND CH.intContractTypeId = 1
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE t.intDayToShipment > EV.intDaysToRemind
@@ -128,6 +130,7 @@ FROM (
 				FROM tblLGLoadDocuments WHERE ISNULL(ysnReceived,0) = 1
 				)
 			AND CH.intContractTypeId = 1
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE t.intDayToShipment < EV.intDaysToRemind
@@ -170,6 +173,7 @@ FROM (
 				JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 				)
 			AND CH.intContractTypeId = 1
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE t.intDayToShipment >= EV.intDaysToRemind
@@ -210,6 +214,7 @@ FROM (
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE ISNULL(WCD.intBillId, 0) = 0
 			AND CH.intContractTypeId = 1
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE t.intDayToShipment > EV.intDaysToRemind
@@ -247,7 +252,9 @@ FROM (
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments WHERE ysnReceived = 1)
-			AND CH.intContractTypeId = 1 AND ISNULL(L.ysn4cRegistration,0) =0 
+			AND CH.intContractTypeId = 1 
+			AND ISNULL(L.ysn4cRegistration,0) =0 
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE EV.strEventName = 'Contracts w/o 4C'
@@ -284,7 +291,9 @@ FROM (
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments WHERE ysnReceived = 0)
-			AND CH.intContractTypeId = 1 AND L.dtmBLDate IS NOT NULL
+			AND CH.intContractTypeId = 1 
+			AND L.dtmBLDate IS NOT NULL
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE EV.strEventName = 'Contracts w/o TC'
