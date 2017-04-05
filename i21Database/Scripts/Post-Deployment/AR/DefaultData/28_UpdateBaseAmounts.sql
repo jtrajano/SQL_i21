@@ -4,7 +4,22 @@ GO
 
 DECLARE @Ids AS TABLE(intInvoiceId INT, intInvoiceDetailId INT)
 INSERT INTO @Ids(intInvoiceId, intInvoiceDetailId)
-SELECT intInvoiceId, intInvoiceDetailId FROM tblARInvoiceDetail WHERE dblCurrencyExchangeRate = 1 AND dblBaseTotal <> dblTotal
+SELECT intInvoiceId, intInvoiceDetailId FROM tblARInvoiceDetail WHERE ISNULL(dblCurrencyExchangeRate, 1) = 1 AND dblBaseTotal <> dblTotal
+
+UNION ALL
+
+SELECT ARI.intInvoiceId, ARID.intInvoiceDetailId
+FROM
+	tblARInvoice ARI
+INNER JOIN
+	tblARInvoiceDetail ARID
+		ON ARI.intInvoiceId = ARID.intInvoiceId
+INNER JOIN
+	tblARInvoiceDetailTax ARIDT
+		ON ARID.intInvoiceDetailId = ARIDT.intInvoiceDetailId
+WHERE
+	ISNULL(ARID.dblCurrencyExchangeRate, 1) = 1
+	AND ARIDT.dblAdjustedTax <> ARIDT.dblBaseAdjustedTax
 
 
 UPDATE
