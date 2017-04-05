@@ -5217,6 +5217,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\NE_Nebraska.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\27_RenamePricingForContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspSMTransactionApproved.sql" />
+    <None Include="dbo\Triggers\trgAfterInsertUpdatetblMFWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

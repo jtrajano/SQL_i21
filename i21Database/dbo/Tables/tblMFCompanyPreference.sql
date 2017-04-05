@@ -36,5 +36,7 @@
 	intBondStatusId int,
 	ysnSetExpiryDateByParentLot bit,
     ysnAddQtyOnExistingLot BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnAddQtyOnExistingLot] DEFAULT 1, 
+	ysnNotifyInventoryShortOnCreateWorkOrder BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnNotifyInventoryShortOnCreateWorkOrder] DEFAULT 0, 
+	ysnNotifyInventoryShortOnReleaseWorkOrder BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnNotifyInventoryShortOnReleaseWorkOrder] DEFAULT 0, 
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
