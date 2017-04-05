@@ -51,7 +51,6 @@ Declare @intMinHeader				INT,
 		@dtmETAPOD					DATETIME,
 		@intNoOfContainer			INT,
 		@intExternalContainerNo		INT,
-		@strAdviceNumber			NVARCHAR(100),
 		@str10Zeros					NVARCHAR(50)='0000000000'
 
 Declare @tblDetail AS Table
@@ -108,7 +107,7 @@ Select @strCreateIDOCHeader=dbo.fnIPGetSAPIDOCHeader('SHIPMENT CREATE')
 Select @strUpdateIDOCHeader=dbo.fnIPGetSAPIDOCHeader('SHIPMENT UPDATE')
 Select @strCompCode=dbo.[fnIPGetSAPIDOCTagValue]('GLOBAL','COMP_CODE')
 
-Select @intMinHeader=Min(intLoadStgId) From tblLGLoadStg Where ISNULL(strFeedStatus,'')=''
+Select @intMinHeader=Min(intLoadStgId) From tblLGLoadStg Where ISNULL(strFeedStatus,'')='' AND strTransactionType='Shipment'
 
 Set @strXml=''
 
@@ -118,7 +117,7 @@ Begin
 		@intLoadStgId				=	intLoadStgId ,
 		@intLoadId					=	intLoadId,
 		@strTransactionType			=	strTransactionType,
-		@strLoadNumber				=	strShippingInstructionNumber,
+		@strLoadNumber				=	strLoadNumber,
 		@strContractBasis			=	strContractBasis ,--INCOTERMS1
 		@strContractBasisDesc		=	strContractBasisDesc ,--INCOTERMS2
 		@strBillOfLading			=	strBillOfLading , 
@@ -127,8 +126,7 @@ Begin
 		@dtmScheduledDate			=   dtmScheduledDate,
 		@strFeedStatus				=	strFeedStatus,
 		@dtmETAPOD					=	dtmETAPOD,
-		@strHeaderRowState			=	strRowState,
-		@strAdviceNumber			=	strLoadNumber
+		@strHeaderRowState			=	strRowState
 	From tblLGLoadStg Where intLoadStgId=@intMinHeader
 
 	Select TOP 1 @strVendorAccountNo=v.strVendorAccountNum 
@@ -150,7 +148,7 @@ Begin
 
 	If ISNULL(@strLoadNumber,'')=''
 	Begin
-		Update tblLGLoadStg Set strMessage='Load/Shipping Instruction Number is empty.'  Where intLoadStgId=@intLoadStgId
+		Update tblLGLoadStg Set strMessage='Load Number is empty.'  Where intLoadStgId=@intLoadStgId
 		GOTO NEXT_SHIPMENT
 	End
 	If @dtmETAPOD is null
@@ -159,21 +157,11 @@ Begin
 		GOTO NEXT_SHIPMENT
 	End
 
-	If (Select intLoadShippingInstructionId From tblLGLoad Where intLoadId=@intLoadId AND intShipmentType=1) is not null
-		Set @strHeaderRowState='MODIFIED'
-	Else
-		Set @strAdviceNumber=''
-
 	If UPPER(@strHeaderRowState)='MODIFIED' AND ISNULL(@strExternalDeliveryNumber,'')=''
 		Begin
-			--update deliveryno for shipping advice from instruction
-			Select @strExternalDeliveryNumber=strExternalShipmentNumber From tblLGLoad 
-			Where intLoadId=(Select intLoadShippingInstructionId From tblLGLoad Where intLoadId=@intLoadId)
-			Update tblLGLoad Set strExternalShipmentNumber=@strExternalDeliveryNumber Where intLoadId=@intLoadId
-
-			If ISNULL(@strExternalDeliveryNumber,'')=''
-				GOTO NEXT_SHIPMENT
+			GOTO NEXT_SHIPMENT
 		End
+
 	--if ack is not received for the previous feed do not send the current feed
 	If (Select TOP 1 strFeedStatus From tblLGLoadStg Where intLoadId=@intLoadId AND strTransactionType='Shipment' 
 		AND intLoadStgId < @intLoadStgId Order By intLoadStgId Desc)<>'Ack Rcvd'
@@ -542,9 +530,9 @@ Begin
 		Update tblLGLoadStg Set strFeedStatus='Awt Ack' Where intLoadStgId = @intMinHeader
 
 	INSERT INTO @tblOutput(strLoadStgIds,strRowState,strXml,strShipmentNo,strDeliveryNo)
-	VALUES(@intMinHeader,CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN 'CREATE' WHEN UPPER(@strHeaderRowState)='DELETE' THEN 'DELETE' ELSE 'UPDATE' END,@strXml,CASE WHEN ISNULL(@strAdviceNumber,'')='' THEN ISNULL(@strLoadNumber,'') ELSE ISNULL(@strLoadNumber,'') + ' / ' + ISNULL(@strAdviceNumber,'') END,ISNULL(@strExternalDeliveryNumber,''))
+	VALUES(@intMinHeader,CASE WHEN UPPER(@strHeaderRowState)='ADDED' THEN 'CREATE' WHEN UPPER(@strHeaderRowState)='DELETE' THEN 'DELETE' ELSE 'UPDATE' END,@strXml,ISNULL(@strLoadNumber,''),ISNULL(@strExternalDeliveryNumber,''))
 
 	NEXT_SHIPMENT:
-	Select @intMinHeader=Min(intLoadStgId) From tblLGLoadStg Where intLoadStgId>@intMinHeader AND ISNULL(strFeedStatus,'')=''
+	Select @intMinHeader=Min(intLoadStgId) From tblLGLoadStg Where intLoadStgId>@intMinHeader AND ISNULL(strFeedStatus,'')=''  AND strTransactionType='Shipment'
 End --Loop Header End
 Select * From @tblOutput ORDER BY intRowNo
