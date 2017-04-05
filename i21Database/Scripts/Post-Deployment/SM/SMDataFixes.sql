@@ -233,6 +233,14 @@ GO
 	END
 
 GO
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMDocumentMaintenance WHERE strCode LIKE 'DOC-%')
+	BEGIN
+		UPDATE tblSMDocumentMaintenance SET strCode = REPLACE(strCode, 'DOC', 'REP')
+		WHERE strCode LIKE '%DOC%'
+	END
+
+GO
 	UPDATE tblSMActivity SET strFilter = NULL WHERE strType = 'Email' AND (strFilter = '' OR strFilter = 'null')
 GO
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Fix Payroll Menu')
