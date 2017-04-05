@@ -17,6 +17,7 @@ SELECT intFieldMapId = FieldMap.intImportFileHeaderId
 	, RecordMarker.strCondition
 	, RecordMarker.intSequence
 	, RecordMarker.strFormat
+	, RecordMarker.intRounding
 FROM tblSMImportFileHeader FieldMap
 LEFT JOIN tblSMImportFileRecordMarker RecordMarker ON RecordMarker.intImportFileHeaderId = FieldMap.intImportFileHeaderId
 LEFT JOIN tblSMImportFileColumnDetail ColumnDetail ON ColumnDetail.intImportFileRecordMarkerId = RecordMarker.intImportFileRecordMarkerId
