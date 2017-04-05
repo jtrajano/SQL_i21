@@ -130,7 +130,7 @@ print 'BEGIN POST DEPLOYMENT'
 --:r "..\..\..\Integration\dbo\Views\vyuTMLeaseCode.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 :r ".\TM\2_DataTransferAndCorrection.sql" 
-:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
+--:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateLeaseSearchView.sql"
