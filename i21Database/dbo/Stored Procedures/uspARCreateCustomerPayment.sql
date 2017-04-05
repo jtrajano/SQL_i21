@@ -134,8 +134,11 @@ BEGIN TRY
 		,[intPaymentMethodId]
 		,[intLocationId]
 		,[dblAmountPaid]
+		,[dblBaseAmountPaid]
 		,[dblUnappliedAmount]
+		,[dblBaseUnappliedAmount]
 		,[dblOverpayment]
+		,[dblBaseOverpayment]
 		,[dblBalance]
 		,[strPaymentInfo]
 		,[strNotes]
@@ -155,8 +158,11 @@ BEGIN TRY
 		,[intPaymentMethodId]			= @PaymentMethodId
 		,[intLocationId]				= @CompanyLocationId
 		,[dblAmountPaid]				= @AmountPaid
+		,[dblBaseAmountPaid]			= @AmountPaid
 		,[dblUnappliedAmount]			= @AmountPaid
+		,[dblBaseUnappliedAmount]		= @AmountPaid
 		,[dblOverpayment]				= @ZeroDecimal
+		,[dblBaseOverpayment]			= @ZeroDecimal
 		,[dblBalance]					= @ZeroDecimal
 		,[strPaymentInfo]				= @PaymentInfo
 		,[strNotes]						= @Notes
