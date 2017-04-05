@@ -15,8 +15,8 @@
         "icon": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
-        "minWidth": null,
+        "minHeight": 525,
+        "minWidth": 487,
         "minimizable": null,
         "reference": null,
         "title": "Fuel Tax Class",
@@ -420,7 +420,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter1",
+                                                            "name": "filter139",
                                                             "designerId": "e1124fa2-1f3c-4468-b2f5-c45d35cb7517",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -551,7 +551,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging110",
                     "designerId": "3ce78bff-7020-4a1e-8c5e-085e96515140",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

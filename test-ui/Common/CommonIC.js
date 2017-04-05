@@ -1301,7 +1301,7 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowNumber('OrderType',4,0)
             .selectComboBoxRowValue('Customer', customer, 'Customer',1)
             .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
-            .selectComboBoxRowValue('Currency', currency, 'FreightTerms',1)
+            .selectComboBoxRowValue('Currency', currency, 'Currency',1)
             .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
             .selectComboBoxRowNumber('ShipToAddress',1,0)
 
@@ -1327,6 +1327,146 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .displayText('===== Create Direct Inventory Shipment for Non Lotted Item Done=====')
             .clickMenuFolder('Inventory','Folder')
+
+            .done();
+    },
+
+
+    /**
+     * Add SO to Inventory Shipment for Non Lotted Item Shipment button
+     *
+     */
+    addSalesOrderSNonLotted: function (t,next, customer, freight, currency,fromlocation,itemno,uom, quantity) {
+        new iRely.FunctionalTest().start(t, next)
+
+            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuScreen('Sales Orders','Screen')
+            .waitUntilLoaded()
+            .clickButton('New')
+            .waitUntilLoaded('arsalesorder')
+            .selectComboBoxRowValue('Customer', customer, 'Customer',1)
+            .enterData('Text Field','BOLNo','Test BOL - 01')
+            .selectComboBoxRowValue('FreightTerm', freight, 'FreightTerm',1)
+            .selectComboBoxRowValue('Currency', currency, 'Currency',1)
+            .selectGridComboBoxRowValue('SalesOrder',1,'strItemNo', itemno,'strItemNo')
+            .selectGridComboBoxRowValue('SalesOrder',1,'strUnitMeasure', uom,'strUnitMeasure')
+            .addResult('Item Selected',1500)
+            .enterGridData('SalesOrder', 1, 'colOrdered', quantity)
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .verifyMessageBox('iRely i21','WARNING: Customer may exceed credit limit!','ok','information')
+            .clickMessageBoxButton('ok')
+            .waitUntilLoaded('')
+            .clickButton('Ship')
+            .waitUntilLoaded('')
+            .addResult('Clicked Ship Button',3000)
+            .waitUntilLoaded('')
+            .verifyMessageBox('iRely i21','WARNING: Customer may exceed credit limit!','ok','information')
+            .clickMessageBoxButton('ok')
+            .waitUntilLoaded('')
+            .addResult('Open Inventory Shipment Screen',3000)
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+
+            .selectComboBoxRowValue('Currency', 'USD', 'Currency',1)
+            .verifyData('Combo Box','OrderType','Sales Order')
+            .verifyData('Combo Box','Customer', customer)
+            .verifyData('Combo Box','FreightTerms', freight)
+            .verifyGridData('InventoryShipment', 1, 'colItemNumber', itemno)
+            .verifyGridData('InventoryShipment', 1, 'colOrderUOM', uom)
+
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+            .clickButton('Post')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',1500)
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .displayText('===== Ship Button SO to IS for Non Lotted Done=====')
+
+            .done();
+    },
+
+
+    /**
+     * Add SO to Inventory Shipment for  Lotted Item Shipment button
+     *
+     */
+    addSalesOrderSLotted: function (t,next, customer, freight, currency,fromlocation,itemno,uom, quantity, sublocation, storagelocation, lotno) {
+        new iRely.FunctionalTest().start(t, next)
+
+            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuScreen('Sales Orders','Screen')
+            .waitUntilLoaded()
+            .clickButton('New')
+            .waitUntilLoaded('arsalesorder')
+            .selectComboBoxRowValue('Customer', customer, 'Customer',1)
+            .enterData('Text Field','BOLNo','Test BOL - 01')
+            .selectComboBoxRowValue('FreightTerm', freight, 'FreightTerm',1)
+            .selectComboBoxRowValue('Currency', currency, 'Currency',1)
+            .selectGridComboBoxRowValue('SalesOrder',1,'strItemNo', itemno,'strItemNo')
+            .selectGridComboBoxRowValue('SalesOrder',1,'strUnitMeasure', uom,'strUnitMeasure')
+            .addResult('Item Selected',1500)
+            .enterGridData('SalesOrder', 1, 'colOrdered', quantity)
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .verifyMessageBox('iRely i21','WARNING: Customer may exceed credit limit!','ok','information')
+            .clickMessageBoxButton('ok')
+            .waitUntilLoaded('')
+            .clickButton('Ship')
+            .waitUntilLoaded('')
+            .addResult('Clicked Ship Button',3000)
+            .waitUntilLoaded('')
+            .verifyMessageBox('iRely i21','WARNING: Customer may exceed credit limit!','ok','information')
+            .clickMessageBoxButton('ok')
+            .waitUntilLoaded('')
+            .addResult('Open Inventory Shipment Screen',3000)
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+
+            .selectComboBoxRowValue('Currency', 'USD', 'Currency',1)
+            .verifyData('Combo Box','OrderType','Sales Order')
+            .verifyData('Combo Box','Customer', customer)
+            .verifyData('Combo Box','FreightTerms', freight)
+            .verifyGridData('InventoryShipment', 1, 'colItemNumber', itemno)
+            .verifyGridData('InventoryShipment', 1, 'colOrderUOM', uom)
+
+            .selectGridComboBoxRowValue('InventoryShipment',1,'strSubLocationName', sublocation,'strSubLocationName')
+            .selectGridComboBoxRowValue('InventoryShipment',1,'strStorageLocationName', storagelocation,'strStorageLocationName')
+
+            .selectGridComboBoxRowValue('LotTracking',1,'strLotId', lotno,'strLotId')
+            .enterGridData('LotTracking', 1, 'colShipQty', quantity)
+            .verifyGridData('LotTracking', 1, 'colLotUOM', uom)
+            .verifyGridData('LotTracking', 1, 'colGrossWeight', quantity)
+            .verifyGridData('LotTracking', 1, 'colTareWeight', '0')
+            .verifyGridData('LotTracking', 1, 'colNetWeight', quantity)
+            .verifyGridData('LotTracking', 1, 'colLotWeightUOM', uom)
+
+
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .clickTab('Details')
+            .waitUntilLoaded('')
+            .clickTab('Post Preview')
+            .waitUntilLoaded('')
+            .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+            .clickButton('Post')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',1500)
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .displayText('===== Ship Button SO to IS for Non Lotted Done=====')
 
             .done();
     },

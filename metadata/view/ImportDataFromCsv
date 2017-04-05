@@ -12,6 +12,8 @@
         "designer|userClassName": "ImportDataFromCsv",
         "height": 221,
         "layout": "fit",
+        "minHeight": 221,
+        "minWidth": 535,
         "modal": true,
         "title": "Import Data from CSV",
         "width": 535

@@ -33,6 +33,8 @@ Ext.define('Inventory.view.CardCount', {
 
     height: 629,
     hidden: false,
+    minHeight: 629,
+    minWidth: 1050,
     width: 1050,
     layout: 'fit',
     collapsible: true,

@@ -28,6 +28,8 @@ Ext.define('Inventory.view.BinToBinTransfer', {
 
     height: 275,
     hidden: false,
+    minHeight: 275,
+    minWidth: 400,
     width: 400,
     layout: 'fit',
     collapsible: true,

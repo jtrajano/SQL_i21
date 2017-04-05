@@ -15,8 +15,8 @@
         "icon": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
-        "minWidth": null,
+        "minHeight": 519,
+        "minWidth": 867,
         "minimizable": null,
         "reference": null,
         "title": "Pick Lots",
@@ -448,7 +448,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging121",
+                    "name": "statusbarpaging13",
                     "designerId": "6044e841-1435-447f-b1e6-641568ee7e11",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

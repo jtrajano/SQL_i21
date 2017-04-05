@@ -11,6 +11,8 @@
         "height": 502,
         "layout": "fit",
         "maximizable": true,
+        "minHeight": 502,
+        "minWidth": 800,
         "minimizable": true,
         "title": "Lot History",
         "width": 800
@@ -227,7 +229,7 @@
                                         "layout|flex": null,
                                         "width": 100
                                     },
-                                    "name": "filter1",
+                                    "name": "filter12",
                                     "designerId": "b19c0442-51eb-4b01-9c27-b939a88b7caa",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }

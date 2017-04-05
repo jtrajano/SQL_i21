@@ -38,6 +38,8 @@ Ext.define('Inventory.view.InventoryTransfer', {
 
     height: 580,
     hidden: false,
+    minHeight: 580,
+    minWidth: 950,
     width: 950,
     layout: 'fit',
     collapsible: true,

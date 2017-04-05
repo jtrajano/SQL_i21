@@ -891,8 +891,8 @@ namespace iRely.Inventory.BusinessLayer
                     , strTaxGroupOutput
                 );
 
-                taxGroup = (int)intTaxGroupIdOutput.Value;
-                taxGroupName = (string)strTaxGroupOutput.Value;
+                taxGroup = (intTaxGroupIdOutput.Value == DBNull.Value) ? null : (int?)intTaxGroupIdOutput.Value;
+                taxGroupName = (strTaxGroupOutput.Value == DBNull.Value) ? null : (string)strTaxGroupOutput.Value;
                 saveResult.HasError = false;
             }
             catch (Exception ex)
