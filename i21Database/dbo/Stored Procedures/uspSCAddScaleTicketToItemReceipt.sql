@@ -235,18 +235,21 @@ WHERE SCTicket.intTicketId = @intTicketId
 												CASE 
 													WHEN QM.dblDiscountAmount < 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod) * -1)
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId) * -1)
 														ELSE (QM.dblDiscountAmount * -1)
 													END 
 													WHEN QM.dblDiscountAmount > 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod)
+														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId)
 														ELSE QM.dblDiscountAmount
 													END 
 												END
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
-		,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(GR.intItemId, @intTicketItemUOMId)
+		,[intCostUOMId]						= CASE
+												WHEN ISNULL(UM.intUnitMeasureId,0) = 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, @intTicketItemUOMId)
+												WHEN ISNULL(UM.intUnitMeasureId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, UM.intItemUOMId)
+											END
 		,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
@@ -254,13 +257,13 @@ WHERE SCTicket.intTicketId = @intTicketId
 												CASE
 													WHEN QM.dblDiscountAmount < 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod) * -1)
-														ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId) * -1)
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId) * -1)
+														ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, GR.intUnitMeasureId) * -1)
 													END 
 													WHEN QM.dblDiscountAmount > 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod)
-														ELSE dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId)
+														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId)
+														ELSE dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, GR.intUnitMeasureId)
 													END 
 												END
 											END
@@ -279,7 +282,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
 		INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
-		INNER JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId
+		INNER JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
 		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0
 
 		--Insert record for fee
