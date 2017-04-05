@@ -79,6 +79,7 @@ WHERE c.intImportFlagInternal = 1
 	AND d.intItemUOMId IS NOT NULL
 	AND d.intItemLocationId IS NOT NULL
 	AND d.intItemId IS NOT NULL
+	AND d.strAutoCreatedLotNumber IS NOT NULL
 
 IF EXISTS(SELECT * FROM @Lots)
 BEGIN
