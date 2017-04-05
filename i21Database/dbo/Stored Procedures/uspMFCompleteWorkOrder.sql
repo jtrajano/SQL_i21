@@ -771,6 +771,7 @@ BEGIN TRY
 			,@ysnLotAlias = @ysnLotAlias
 			,@strLotAlias = @strLotAlias
 			,@intProductionTypeId = @intProductionTypeId
+			,@ysnFillPartialPallet=@ysnFillPartialPallet
 
 		SELECT @strCreateMultipleLots = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
