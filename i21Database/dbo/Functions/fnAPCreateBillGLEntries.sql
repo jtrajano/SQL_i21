@@ -113,8 +113,18 @@ BEGIN
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	0,      
 		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	CAST((CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
-											 ELSE Details.dblTotal END) AS DECIMAL(18,2)),
+		[dblCreditForeign]				=	CAST(
+											CASE WHEN Details.dblRate > 0 
+														THEN
+														(CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
+														 ELSE Details.dblTotal END)
+														ELSE
+														(
+														(CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
+														 ELSE A.dblAmountDue END)
+														)
+											END														 
+											AS DECIMAL(18,2)),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
@@ -136,11 +146,11 @@ BEGIN
 				FROM tblAPBillDetail A
 				WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 			) ForexRateCounter
-			CROSS APPLY
+			OUTER APPLY
 			(
 				SELECT (R.dblTotal + R.dblTax) AS dblTotal , R.dblRate  AS dblRate
 				FROM dbo.tblAPBillDetail R
-				WHERE R.intBillId = A.intBillId
+				WHERE R.intBillId = A.intBillId AND dblRate > 0
 			) Details
 			
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
