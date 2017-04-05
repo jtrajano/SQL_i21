@@ -1,4 +1,4 @@
-﻿ALTER PROC uspRKRollCost
+﻿CREATE PROC uspRKRollCost
 	@dtmFromDate datetime = null,
 	@dtmToDate datetime = null
 AS
