@@ -47,7 +47,7 @@ SELECT
 	,[intBankTransactionTypeId]		= 1
 	,[dtmDate]						= GETDATE()
 	,[dblAmount]					= UF.dblAmount
-	,[strMemo]						= P.strNotes
+	,[strMemo]						= 'AR ACH'
 	,[intCompanyLocationId]			= UF.intLocationId
 FROM tblCMUndepositedFund UF
 	INNER JOIN tblARPayment P ON UF.intSourceTransactionId = P.intPaymentId
