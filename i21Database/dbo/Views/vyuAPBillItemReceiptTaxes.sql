@@ -22,10 +22,12 @@ SELECT
 	[dblAdjustedTax]			=	ISNULL(A.dblAdjustedTax,0), 
 	[ysnTaxAdjusted]			=	A.ysnTaxAdjusted, 
 	[ysnSeparateOnBill]			=	A.ysnSeparateOnInvoice, 
-	[ysnCheckOffTax]			=	A.ysnCheckoffTax
+	[ysnCheckOffTax]			=	A.ysnCheckoffTax,
+	[strTaxCode]				=	D.strTaxCode
 FROM tblICInventoryReceiptItemTax A
 INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
+INNER JOIN tblSMTaxCode D ON D.intTaxCodeId = A.intTaxCodeId
 WHERE C.strReceiptType IN ('Direct','Purchase Contract','Inventory Return')
 UNION ALL
 --PURCHASE ORDER ITEM RECEIPT
@@ -46,10 +48,12 @@ SELECT
 	[dblAdjustedTax]			=	ISNULL(A.dblAdjustedTax,0),
 	[ysnTaxAdjusted]			=	A.ysnTaxAdjusted, 
 	[ysnSeparateOnBill]			=	A.ysnSeparateOnInvoice, 
-	[ysnCheckOffTax]			=	A.ysnCheckoffTax
+	[ysnCheckOffTax]			=	A.ysnCheckoffTax,
+	[strTaxCode]				=	D.strTaxCode
 FROM tblICInventoryReceiptItemTax A
 INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
+INNER JOIN tblSMTaxCode D ON D.intTaxCodeId = A.intTaxCodeId
 WHERE C.strReceiptType = 'Purchase Order'
 UNION ALL
 --PO MISCELLANEOUS
@@ -70,10 +74,12 @@ SELECT
 	[dblAdjustedTax]			=	ISNULL(A.dblAdjustedTax,0), 
 	[ysnTaxAdjusted]			=	A.ysnTaxAdjusted, 
 	[ysnSeparateOnBill]			=	A.ysnSeparateOnBill, 
-	[ysnCheckOffTax]			=	A.ysnCheckOffTax
+	[ysnCheckOffTax]			=	A.ysnCheckOffTax,
+	[strTaxCode]				=	D.strTaxCode
 FROM tblPOPurchaseDetailTax A
 INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseDetailId = B.intPurchaseDetailId
 INNER JOIN tblICItem C ON B.intItemId = C.intItemId
+INNER JOIN tblSMTaxCode D ON D.intTaxCodeId = A.intTaxCodeId
 WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
 UNION ALL
 -- INVENTORY SHIPMENT CHARGES
@@ -95,7 +101,8 @@ SELECT DISTINCT
 		[dblAdjustedTax]			= ISNULL(Taxes.dblAdjustedTax,0),
 		[ysnTaxAdjusted]			= Taxes.ysnTaxAdjusted,
 		[ysnSeparateOnBill]			= Taxes.ysnSeparateOnInvoice,
-		[ysnCheckOffTax]			= Taxes.ysnCheckoffTax
+		[ysnCheckOffTax]			= Taxes.ysnCheckoffTax,
+		[strTaxCode]				= D.strTaxCode
 	FROM vyuICShipmentChargesForBilling A
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	INNER JOIN dbo.tblICItem I ON I.intItemId = A.intItemId
@@ -129,7 +136,8 @@ SELECT DISTINCT
 		[dblAdjustedTax]			= A.dblAdjustedTax,
 		[ysnTaxAdjusted]			= A.ysnTaxAdjusted,
 		[ysnSeparateOnBill]			= 'false',
-		[ysnCheckOffTax]			= A.ysnCheckoffTax
+		[ysnCheckOffTax]			= A.ysnCheckoffTax,
+		[strTaxCode]				= A.strTaxCode
 	FROM tblICInventoryReceiptChargeTax A
 ) Items
 GO
