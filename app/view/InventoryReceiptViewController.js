@@ -2315,9 +2315,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                         chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
 
-                        if (transactionCurrencyId == chargeCurrencyId && ysnPrice) {
+                        if (transactionCurrencyId == chargeCurrencyId) {
                             totalChargeTaxes += otherChargeTax;
-                        }                        
+                        }
                     }
                 });
             }
@@ -2338,9 +2338,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {                        
-                        // Add the charges amount where:
-                        // 1. Charge Vendor is the same as the transaction vendor id. 
-                        // 2. Charge Currency is the same as the transaction currency id. 
+                        // Add the charges amount where:                        
+                        // 1. Charge Currency is the same as the transaction currency id. 
+                        // 2. Add it if Charges Vendor is the same as the transaction vendor id. 
+                        // 3. Reduce it if Price = true; 
                         var chargeCurrencyId = charge.get('intCurrencyId');
                         var chargeVendorId = charge.get('intEntityVendorId'); 
                         var amount = charge.get('dblAmount');
@@ -2348,15 +2349,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                         chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
                         chargeVendorId = Ext.isNumeric(chargeVendorId) ? chargeVendorId : transactionVendorId; 
-                        if (transactionCurrencyId == chargeCurrencyId && transactionVendorId == chargeVendorId) 
-                        {
-                            totalCharges = ysnPrice ? totalCharges - amount : totalCharges + amount;   
+                        if (transactionCurrencyId == chargeCurrencyId) {
+                            totalCharges += ysnPrice ? -amount : (transactionVendorId == chargeVendorId) ? amount : 0; 
                         }
-
-                        // Reduce other charge if: Charge is Price down and Other Charge currency is the same with the transaction currency. 
-                        if (transactionCurrencyId == chargeCurrencyId && ysnPrice) {
-                            totalCharges -= amount;
-                        }                        
                     }
                 });
             }
