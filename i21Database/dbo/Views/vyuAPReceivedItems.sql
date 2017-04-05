@@ -650,7 +650,7 @@ FROM
 		,[strRateType]								=	NULL
 		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
-		,[intSubCurrencyCents]						=	ISNULL(RC.intCent,0)
+		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
@@ -750,7 +750,7 @@ FROM
 		,[strRateType]								=	NULL
 		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
-		,[intSubCurrencyCents]						=	ISNULL(RC.intCent,0)
+		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END--ISNULL(RC.intCent,0)
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
