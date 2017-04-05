@@ -2301,46 +2301,28 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var totalChargeTaxes = 0;
         var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         var transactionCurrencyId = current.get('intCurrencyId');
-        var transactionVendorId = current.get('intEntityVendorId');
 
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
-                        // var otherChargeTax = charge.get('dblTax');  
-                        // var intCurrencyId = charge.get('intCurrencyId');
-
-                        // // Convert the amount to functional currency. 
-                        // if (intCurrencyId && intCurrencyId != intDefaultCurrencyId){
-                        //     var dblForexRate = charge.get('dblForexRate');
-                        //     dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0; 
-                        //     otherChargeTax = otherChargeTax * dblForexRate; 
-                        // }
-
-                        // totalChargeTaxes += otherChargeTax;
-
                         // Add the charge taxes if:
-                        // 1. Charge Vendor is the same as the transaction vendor id. 
-                        // 2. Charge Currency is the same as the transaction currency id. 
+                        // 1. Charge Currency is the same as the transaction currency id. 
                         var chargeCurrencyId = charge.get('intCurrencyId');
-                        var chargeVendorId = charge.get('intEntityVendorId'); 
                         var otherChargeTax = charge.get('dblTax');  
                         var ysnPrice = charge.get('ysnPrice'); 
 
                         chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
-                        chargeVendorId = Ext.isNumeric(chargeVendorId) ? chargeVendorId : transactionVendorId; 
-                        if (transactionCurrencyId == chargeCurrencyId && transactionVendorId == chargeVendorId) 
-                        {
-                            //totalChargeTaxes = ysnPrice ? totalChargeTaxes - otherChargeTax : totalChargeTaxes + otherChargeTax;   
+
+                        if (transactionCurrencyId == chargeCurrencyId && ysnPrice) {
                             totalChargeTaxes += otherChargeTax;
-                        }
+                        }                        
                     }
                 });
             }
         }
-        return totalChargeTaxes;       
-
+        return totalChargeTaxes;
     },
 
     calculateOtherCharges: function (win) {
@@ -2355,24 +2337,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var charges = current.tblICInventoryReceiptCharges();
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
-                    if (!charge.dummy) {
-                        // var amount = charge.get('dblAmount');
-                        // var intChargeCurrencyId = charge.get('intCurrencyId');
-
-                        // Convert the amount to functional currency. 
-                        // if (intChargeCurrencyId && intChargeCurrencyId != intDefaultCurrencyId){
-                        //     var dblForexRate = charge.get('dblForexRate');
-                        //     dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0; 
-                        //     amount = amount * dblForexRate; 
-                        // }
-
-                        // if (charge.get('ysnPrice') === true) {
-                        //     totalCharges -= amount;
-                        // }
-                        // else {
-                        //     totalCharges += amount;
-                        // }                        
-                        
+                    if (!charge.dummy) {                        
                         // Add the charges amount where:
                         // 1. Charge Vendor is the same as the transaction vendor id. 
                         // 2. Charge Currency is the same as the transaction currency id. 
@@ -2387,6 +2352,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         {
                             totalCharges = ysnPrice ? totalCharges - amount : totalCharges + amount;   
                         }
+
+                        // Reduce other charge if: Charge is Price down and Other Charge currency is the same with the transaction currency. 
+                        if (transactionCurrencyId == chargeCurrencyId && ysnPrice) {
+                            totalCharges -= amount;
+                        }                        
                     }
                 });
             }
