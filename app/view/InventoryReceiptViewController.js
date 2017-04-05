@@ -1004,6 +1004,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (txtUnitCost) {
             txtUnitCost.on('change', me.onCalculateTotalAmount);
         }
+
+        var colOrderNumber = grdInventoryReceipt.columns[0];
+        colOrderNumber.renderer = function(value, opt, record) {
+            if(record.intInventoryReceipt.get('strReceiptType') === 'Purchase Order')
+                return '<a style="color: #005FB2;text-decoration: none;" onMouseOut="this.style.textDecoration=\'none\'" onMouseOver="this.style.textDecoration=\'underline\'" href="javascript:void(0);">' + value + '</a>';
+            return value;
+        };
+
         return win.context;
     },
 
@@ -6618,6 +6626,52 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onItemCellClick: function(view, cell, cellIndex, record, row, rowIndex, e) {
+        var linkClicked = (e.target.tagName == 'A');
+        var clickedDataIndex =
+            view.panel.headerCt.getHeaderAtIndex(cellIndex).dataIndex;
+
+        if (linkClicked && clickedDataIndex == 'strOrderNumber') {
+            var win = view.up('window');
+            var me = win.controller;
+            var vm = win.getViewModel();
+
+            if (!record){
+                //iRely.Functions.showErrorDialog('Please select a location to edit.');
+                return;
+            }
+
+            if (vm.data.current.phantom === true) {
+                win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                    me.openPurchaseOrder(win, record);
+                    return;
+                } });
+            }
+            else {
+                win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                    if (valid) {
+                        me.openPurchaseOrder(win, record);
+                        return;
+                    }
+                });
+            }
+        }
+    },
+
+    openPurchaseOrder: function(win, record) {
+        var screenName = 'AccountsPayable.view.PurchaseOrder';
+        iRely.Functions.openScreen(screenName, {
+            action: 'view',
+            filters: [
+                {
+                    column: 'intPurchaseId',
+                    value: record.get('intOrderId'),
+                    condition: 'eq'
+                }
+            ]
+        });
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -6746,7 +6800,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 specialKey: this.onSpecialKeyTab
             },
             "#grdInventoryReceipt": {
-                selectionchange: this.onItemSelectionChange
+                selectionchange: this.onItemSelectionChange,
+                cellclick: this.onItemCellClick
             },
             "#grdLotTracking": {
                 beforecellclick: function(me, td, cellIndex, record, tr, rowIndex, e, eOpts) {
