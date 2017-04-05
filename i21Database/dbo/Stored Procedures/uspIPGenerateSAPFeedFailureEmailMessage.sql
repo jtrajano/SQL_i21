@@ -103,6 +103,26 @@ Begin
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
 End
 
+If @strMessageType='Receipt'
+Begin
+	SET @strHeader = '<tr>
+						<th>&nbsp;Receipt No</th>
+						<th>&nbsp;Ack Message</th>
+					</tr>'
+	
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + ISNULL(strExternalRefNo,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strErrorMessage,'') + '</td>
+	</tr>'
+	From tblIPReceiptError
+	Where strPartnerNo='i212SAP' AND GETDATE() > DATEADD(MI,@intDuration,dtmTransactionDate)
+	AND ISNULL(ysnMailSent,0)=0
+
+	Update tblIPReceiptError Set ysnMailSent=1
+	Where strPartnerNo='i212SAP' AND GETDATE() > DATEADD(MI,@intDuration,dtmTransactionDate)
+End
+
 Set @strHtml=REPLACE(@strHtml,'@header',@strHeader)
 Set @strHtml=REPLACE(@strHtml,'@detail',@strDetail)
 Set @strMessage=@strStyle + @strHtml

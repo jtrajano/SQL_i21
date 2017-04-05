@@ -89,7 +89,7 @@ From tblICInventoryReceiptItem ri
 Join tblICInventoryReceipt r on ri.intInventoryReceiptId=r.intInventoryReceiptId
 JOIN vyuLGLoadContainerPurchaseContracts s ON s.intPContractDetailId = ri.intLineNo
 JOIN tblLGLoad l on s.intLoadId=l.intLoadId
-Where r.intSourceType=2 AND r.ysnPosted=1 AND ri.ysnExported IS NULL AND ISNULL(l.strExternalShipmentNumber,'')<>''
+Where r.intSourceType=2 AND r.ysnPosted=1 AND ri.ysnExported IS NULL AND ISNULL(l.strExternalShipmentNumber,'')<>'' AND strReceiptType<>'Inventory Return'
 
 Select @intMinHeader=Min(intInventoryReceiptId) From @tblReceiptHeader
 
