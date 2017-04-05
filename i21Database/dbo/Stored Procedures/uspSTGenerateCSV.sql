@@ -93,8 +93,7 @@ BEGIN
 					, dblFinalSalesPrice
 				)
 				SELECT
-					x.intTermMsgSN
-					--, x.RecordCount
+					x.intRCN
 					, x.dtmWeekEndingDate 
 					, x.dtmTransactionDate
 					, x.strTransactionTime
@@ -128,7 +127,7 @@ BEGIN
 				FROM
 				(
 					SELECT
-							intTermMsgSN
+							624419 as intRCN
 							--, FORMAT(CAST(dtmClosedTime AS DATE), 'yyyyMMdd') as dtmWeekEndingDate 
 							--, FORMAT(CAST(dtmDate AS DATE), 'yyyyMMdd') as dtmTransactionDate
 							--, FORMAT(dtmDate, 'hh:mm:ss') as strTransactionTime
@@ -269,11 +268,6 @@ BEGIN
 	--END Loop to all store Id
 
 
-
-
-    --SET NOCOUNT ON;
-	--Add date range filter
-
 	--CHECK IF table has values
 	DECLARE @Count int
 	DECLARE @CreateCSV bit = 0
@@ -321,6 +315,26 @@ BEGIN
 			FROM @tblColumnTemp
 
 			SET @strCSV = ''
+
+			---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
+			IF(@strTableName = 'tblSTstgRebatesPMMorris')
+			BEGIN
+				DECLARE @intNumberOfRecords int
+				DECLARE @intSoldQuantity int
+				DECLARE @dblFinalSales decimal(10, 3)
+
+				--Get total number of records
+				SELECT @intNumberOfRecords = COUNT(*) FROM tblSTstgRebatesPMMorris
+
+				--Get total quantity sold
+				SELECT @intSoldQuantity = SUM(intQuantitySold) FROM tblSTstgRebatesPMMorris
+
+				--Get sum of the final sales price field
+				SELECT @dblFinalSales = SUM(dblFinalSalesPrice) FROM tblSTstgRebatesPMMorris
+
+				SET @strCSV = CAST(@intNumberOfRecords as NVARCHAR(50)) + '|' + CAST(@intSoldQuantity as NVARCHAR(50)) + '|' + CAST(@dblFinalSales as NVARCHAR(50)) + CHAR(13)
+			END
+			---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
 
 			DECLARE @intLoopCount int = 0
 
@@ -425,26 +439,14 @@ BEGIN
 							   , @dblFinalSalesPrice = dblFinalSalesPrice
 						FROM tblSTstgRebatesPMMorris WHERE intPMMId = @intMin
 
-						--IF(@intLoopCount = 0)
-						--BEGIN
-				
-						--END
-						--ELSE IF(@intLoopCount >= 1)
-						--BEGIN
-						--	SET @strCSV = @strCSV + ', ' + @strColumnNameVal
-						--END
-
 						--Removed CAST(@intManagementOrRetailNumber as NVARCHAR(20))
-						--For now intManagementOrRetailNumber will be empty
-						SET @strCSV = @strCSV + CHAR(13) + '' + ', ' + CAST(REPLACE(@strWeekEndingDate, '-', '') as NVARCHAR(20)) + ', ' + CAST(REPLACE(@strTransactionDate, '-', '') as NVARCHAR(50))
+						SET @strCSV = @strCSV + CHAR(13) + CAST(@intManagementOrRetailNumber as NVARCHAR(50)) + ', ' + CAST(REPLACE(@strWeekEndingDate, '-', '') as NVARCHAR(20)) + ', ' + CAST(REPLACE(@strTransactionDate, '-', '') as NVARCHAR(50))
 													+ ', ' + @strTransactionTime + ', ' + @strTransactionIdCode + ', ' + @strStoreNumber + ', ' + @strStoreName + ', ' + @strStoreAddress + ', ' + @strStoreCity + ', ' + @strStoreState
 													+ ', ' + CAST(@intStoreZipCode as NVARCHAR(50)) + ', ' + @strCategory + ', ' + @strManufacturerName + ', ' + @strSKUCode + ', ' + @strUpcCode + ', ' + @strSkuUpcDescription 
 													+ ', ' + @strUnitOfMeasure + ', ' + CAST(@intQuantitySold as NVARCHAR(50)) + ', ' + CAST(@intConsumerUnits as NVARCHAR(50)) + ', ' + @strMultiPackIndicator 
 													+ ', ' + CAST(@intMultiPackRequiredQuantity as NVARCHAR(50)) + ', ' + CAST(@dblMultiPackDiscountAmount as NVARCHAR(50)) + ', ' + @strRetailerFundedDIscountName 
 													+ ', ' + CAST(@dblRetailerFundedDiscountAmount as NVARCHAR(50)) + ', ' + @strMFGDealNameONE + ', ' + CAST(@dblMFGDealDiscountAmountONE as NVARCHAR(50)) + ', ' + @strMFGDealNameTWO
 													+ ', ' + CAST(@dblMFGDealDiscountAmountTWO as NVARCHAR(50)) + ', ' + @strMFGDealNameTHREE + ', ' + CAST(@dblMFGDealDiscountAmountTHREE as NVARCHAR(50)) + ', ' + CAST(@dblFinalSalesPrice as NVARCHAR(50))
-
-
 
 						SET @intLoopCount = @intLoopCount + 1
 					END
