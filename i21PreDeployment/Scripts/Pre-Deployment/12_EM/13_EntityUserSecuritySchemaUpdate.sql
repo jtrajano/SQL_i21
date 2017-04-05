@@ -63,12 +63,13 @@ BEGIN
 	END
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurity' and [COLUMN_NAME] = 'intEntityId')
+		AND NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurity' and [COLUMN_NAME] = 'intEntityUserSecurityId')	
 	BEGIN
 		PRINT '*** CHECKING FOR Entity ***'
 		EXEC('ALTER TABLE tblSMUserSecurity ADD intEntityId int null')
 	END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurity' and [COLUMN_NAME] = 'intEntityIdOld')
-	
+		AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurity' and [COLUMN_NAME] = 'intEntityId')
 	BEGIN
 		PRINT '*** CHECKING FOR OLD Entity ID PLACE HOLDER ***'
 		EXEC('ALTER TABLE tblSMUserSecurity ADD intEntityIdOld int null')
@@ -79,9 +80,21 @@ BEGIN
 	END
 END
 
+
+declare @build_m int
+set @build_m = 0
+
+if EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMBuildNumber' and [COLUMN_NAME] = 'strVersionNo')
+BEGIN
+
+	exec sp_executesql N'select @build_m = intVersionID from tblSMBuildNumber where strVersionNo like ''%16.1%'' '  , 
+		N'@build_m int output', @build_m output;
+END
+
+
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurity')  
 AND NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurity' and [COLUMN_NAME] = 'intEntityUserSecurityId')
-
+AND @build_m = 0
 AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' and [COLUMN_NAME] = 'strEntityNo') 
 AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' and [COLUMN_NAME] = 'strContactNumber') 
 
