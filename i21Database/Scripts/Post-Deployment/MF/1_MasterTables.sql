@@ -2439,3 +2439,7 @@ UPDATE tblMFCompanyPreference
 SET ysnAddQtyOnExistingLot = 1
 WHERE ysnAddQtyOnExistingLot IS NULL
 GO
+UPDATE tblMFCompanyPreference
+SET ysnNotifyInventoryShortOnCreateWorkOrder = 0,ysnNotifyInventoryShortOnReleaseWorkOrder=0
+WHERE ysnNotifyInventoryShortOnCreateWorkOrder IS NULL
+GO
