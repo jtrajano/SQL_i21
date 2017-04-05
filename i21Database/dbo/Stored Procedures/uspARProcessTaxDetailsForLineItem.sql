@@ -203,29 +203,33 @@ END CATCH
 --UPDATE
 BEGIN TRY
 	UPDATE
-		tblARInvoiceDetailTax
+		ARIDT
 	SET
-		 [intTaxGroupId]			= EFP.[intTaxGroupId]
-		,[intTaxCodeId]				= EFP.[intTaxCodeId]
-		,[intTaxClassId]			= EFP.[intTaxClassId]
-		,[strTaxableByOtherTaxes]	= EFP.[strTaxableByOtherTaxes]
-		,[strCalculationMethod]		= EFP.[strCalculationMethod]
-		,[dblRate]					= EFP.[dblRate]
-		,[intSalesTaxAccountId]		= EFP.[intTaxAccountId]
-		,[dblTax]					= EFP.[dblTax]
-		,[dblAdjustedTax]			= EFP.[dblAdjustedTax]
-		,[ysnTaxAdjusted]			= EFP.[ysnTaxAdjusted]
-		,[ysnSeparateOnInvoice]		= EFP.[ysnSeparateOnInvoice]
-		,[ysnCheckoffTax]			= EFP.[ysnCheckoffTax]
-		,[ysnTaxExempt]				= EFP.[ysnTaxExempt]
-		,[strNotes]					= EFP.[strNotes]
-		,[intConcurrencyId]			= tblARInvoiceDetailTax.[intConcurrencyId] + 1
+		 ARIDT.[intTaxGroupId]			= EFP.[intTaxGroupId]
+		,ARIDT.[intTaxCodeId]			= EFP.[intTaxCodeId]
+		,ARIDT.[intTaxClassId]			= EFP.[intTaxClassId]
+		,ARIDT.[strTaxableByOtherTaxes]	= EFP.[strTaxableByOtherTaxes]
+		,ARIDT.[strCalculationMethod]	= EFP.[strCalculationMethod]
+		,ARIDT.[dblRate]				= EFP.[dblRate]
+		,ARIDT.[intSalesTaxAccountId]	= EFP.[intTaxAccountId]
+		,ARIDT.[dblTax]					= EFP.[dblTax]
+		,ARIDT.[dblAdjustedTax]			= EFP.[dblAdjustedTax]
+		,ARIDT.[dblBaseAdjustedTax]		= [dbo].fnRoundBanker(ISNULL(EFP.[dblAdjustedTax], @ZeroDecimal) * ISNULL(ARID.[dblCurrencyExchangeRate], 1), [dbo].[fnARGetDefaultDecimal]())
+		,ARIDT.[ysnTaxAdjusted]			= EFP.[ysnTaxAdjusted]
+		,ARIDT.[ysnSeparateOnInvoice]	= EFP.[ysnSeparateOnInvoice]
+		,ARIDT.[ysnCheckoffTax]			= EFP.[ysnCheckoffTax]
+		,ARIDT.[ysnTaxExempt]			= EFP.[ysnTaxExempt]
+		,ARIDT.[strNotes]				= EFP.[strNotes]
+		,ARIDT.[intConcurrencyId]		= ARIDT.[intConcurrencyId] + 1
 	FROM
-		tblARInvoiceDetailTax
+		tblARInvoiceDetailTax ARIDT
+	INNER JOIN
+		tblARInvoiceDetail ARID
+			ON ARIDT.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 	INNER JOIN
 		@EntriesForProcessing EFP
-			ON tblARInvoiceDetailTax.[intInvoiceDetailId] = EFP.[intInvoiceDetailId]
-			AND tblARInvoiceDetailTax.[intInvoiceDetailTaxId] = EFP.[intDetailTaxId]
+			ON ARIDT.[intInvoiceDetailId] = EFP.[intInvoiceDetailId]
+			AND ARIDT.[intInvoiceDetailTaxId] = EFP.[intDetailTaxId]
 			AND ISNULL(EFP.[ysnUpdated],0) = 0
 			AND ISNULL(EFP.[intInvoiceDetailId],0) <> 0
 			AND ISNULL(EFP.[intDetailTaxId],0) <> 0

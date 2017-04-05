@@ -99,6 +99,15 @@ IF ISNULL(@RaiseError,0) = 0
 	
 BEGIN TRY
 
+	DECLARE	 @CurrencyExchangeRate	DECIMAL(18,6) 
+
+	SELECT
+		@CurrencyExchangeRate	= ISNULL([dblCurrencyExchangeRate], 1)
+	FROM
+		tblARInvoiceDetail WITH (NOLOCK)
+	WHERE
+		[intInvoiceDetailId] = @InvoiceDetailId
+
 	INSERT INTO [tblARInvoiceDetailTax]
 		([intInvoiceDetailId]
 		,[intTaxGroupId]
@@ -110,6 +119,7 @@ BEGIN TRY
 		,[intSalesTaxAccountId]
 		,[dblTax]
 		,[dblAdjustedTax]
+		,[dblBaseAdjustedTax]
 		,[ysnTaxAdjusted]
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
@@ -127,6 +137,7 @@ BEGIN TRY
 		,intSalesTaxAccountId	= CASE WHEN ISNULL(@SalesTaxAccountId,0) <> 0 THEN @SalesTaxAccountId ELSE intSalesTaxAccountId END
 		,dblTax					= ISNULL(@Tax, @ZeroDecimal)
 		,dblAdjustedTax			= ISNULL(@AdjustedTax, ISNULL(@Tax, @ZeroDecimal))
+		,dblBaseAdjustedTax		= [dbo].fnRoundBanker(ISNULL(@AdjustedTax, ISNULL(@Tax, @ZeroDecimal)) * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 		,ysnTaxAdjusted			= CASE WHEN ISNULL(@TaxAdjusted, 0) = 1 THEN ISNULL(@TaxAdjusted, 0) ELSE (CASE WHEN ISNULL(@Tax, @ZeroDecimal) <> ISNULL(@AdjustedTax,0) THEN 1 ELSE 0 END) END
 		,ysnSeparateOnInvoice	= ISNULL(@SeparateOnInvoice, 0)
 		,ysnCheckoffTax			= ISNULL(@CheckoffTax, [ysnCheckoffTax])
