@@ -66,7 +66,8 @@ AS
 			MA.intUnitMeasureId				AS intMarketUnitMeasureId,
 			MA.intCurrencyId				AS intMarketCurrencyId,
 			MU.strUnitMeasure				AS strMarketUnitMeasure,
-			XM.strUnitType					AS strQtyUnitType
+			XM.strUnitType					AS strQtyUnitType,
+			CAST(ISNULL(LG.intLoadDetailId,0) AS BIT) AS ysnLoadAvailable
 
 FROM		tblCTContractDetail			CD
 	 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=		CD.intContractHeaderId	
@@ -143,4 +144,8 @@ LEFT JOIN	(
 					) t
 					WHERE intRowNum = 1
 			) AP ON AP.intRecordId = CD.intContractHeaderId		
+LEFT JOIN	(
+				SELECT ROW_NUMBER() OVER (PARTITION BY intLoadDetailId ORDER BY intLoadDetailId DESC) intRowNum,ISNULL(intPContractDetailId,intSContractDetailId)intContractDetailId,intLoadDetailId 
+				FROM tblLGLoadDetail
+			)LG ON LG.intRowNum = 1 AND LG.intContractDetailId = CD.intContractDetailId
 OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
