@@ -111,18 +111,33 @@ BEGIN
 END
 ELSE 
 BEGIN
-	
-	DECLARE @availableQty INT
-	SET @availableQty =	(SELECT  CASE WHEN A.dblOpenReceive =  SUM(B.dblQtyReceived) THEN 1 ELSE 0 END
+	DECLARE @availableQty INT;
+	DECLARE @rtype NVARCHAR(50);
+	SET @rtype =  (SELECT TOP 1 strReceiptType FROM #tmpReceiptData) 
+
+	SET @availableQty =	(SELECT CASE WHEN SUM(A.dblOpenReceive) =  SUM(bilLDetails.dblQtyReceived) THEN 0 ELSE 1 END
 					FROM #tmpReceiptDetailData A
-						INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
-					where A.intInventoryReceiptItemId IN  (SELECT intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds))  AND B.intInventoryReceiptChargeId IS NULL
-					GROUP BY A.dblOpenReceive)
-		IF(@availableQty = 1)
+						OUTER APPLY
+						(
+							SELECT SUM(B.dblQtyReceived) AS dblQtyReceived  FROM dbo.tblAPBillDetail B
+							WHERE B.intInventoryReceiptItemId = A.intInventoryReceiptItemId  
+							AND B.intInventoryReceiptChargeId IS NULL
+						) bilLDetails
+					WHERE A.intInventoryReceiptItemId IN  (SELECT intInventoryReceiptItemId FROM #tmpReceiptDetailData WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds)))
+		
+		IF(@availableQty = 0)
 		BEGIN 
-			-- Voucher is no longer needed. All items have Voucher.
-			RAISERROR(80111, 11, 1)  
-		END 
+			-- Debit Memo is no longer needed. All items have Debit Memo.
+			IF(@rtype = 'Inventory Return')
+				BEGIN
+				    RAISERROR(80110, 11, 1)           
+				END              
+			ELSE
+			-- Voucher is no longer needed. All items have Voucher.      
+				BEGIN
+					RAISERROR(80111, 11, 1)     
+				END           
+		END   
 END
 
 --removed first the constraint
