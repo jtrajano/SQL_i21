@@ -60,12 +60,14 @@ SELECT
 	, intItemUOMId			= d.intItemUOMId
 	, strLotNumber			= d.strAutoCreatedLotNumber
 	, intSubLocationId		= d.intSubLocationId
-	, intStorageeLocationId	= d.intStorageLocationId
+	, intStorageLocationId	= d.intStorageLocationId
 	, dblQty				= d.dblSystemCount
 	, intLotStatusId		= 1
 	, intDetailId			= d.intInventoryCountDetailId
 FROM tblICInventoryCountDetail d
 	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = d.intInventoryCountId
+	INNER JOIN tblICItem Item ON Item.intItemId = d.intItemId
+			AND Item.strLotTracking <> 'No'
 WHERE c.intImportFlagInternal = 1
 
 IF EXISTS(SELECT * FROM @Lots)
