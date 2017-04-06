@@ -233,7 +233,7 @@ SELECT
 	,[ysnCalculated]						= 0
 	,[ysnSplitted]							= 0
 	,[intPaymentId]							= NULL
-	,[intSplitId]							= NULL
+	,[intSplitId]							= (SELECT TOP 1 intSplitId FROM tblSOSalesOrder WHERE intSalesOrderId = ARSI.intSalesOrderId)
 	,[intDistributionHeaderId]				= NULL
 	,[strActualCostId]						= NULL
 	,[intShipmentId]						= NULL
@@ -352,7 +352,7 @@ SELECT
 	,[ysnCalculated]						= 0
 	,[ysnSplitted]							= 0
 	,[intPaymentId]							= NULL
-	,[intSplitId]							= NULL
+	,[intSplitId]							= SO.intSplitId
 	,[intDistributionHeaderId]				= NULL
 	,[strActualCostId]						= NULL
 	,[intShipmentId]						= NULL
