@@ -380,8 +380,8 @@ BEGIN
 	INNER JOIN tblARInvoice INV ON PYMTDTL.intInvoiceId = INV.intInvoiceId
 	INNER JOIN tblARInvoiceDetail INVDTL ON INV.intInvoiceId = INVDTL.intInvoiceId AND INVDTL.intInventoryShipmentChargeId is null
 	INNER JOIN tblICItem Item ON INVDTL.intItemId = Item.intItemId
-	INNER JOIN tblICInventoryShipmentItem INVSHIPITEM ON INVDTL.intInventoryShipmentItemId = INVSHIPITEM.intInventoryShipmentItemId
-	INNER JOIN tblICInventoryShipment INVSHIP ON INVSHIPITEM.intInventoryShipmentId = INVSHIP.intInventoryShipmentId
+	LEFT JOIN tblICInventoryShipmentItem INVSHIPITEM ON INVDTL.intInventoryShipmentItemId = INVSHIPITEM.intInventoryShipmentItemId
+	LEFT JOIN tblICInventoryShipment INVSHIP ON INVSHIPITEM.intInventoryShipmentId = INVSHIP.intInventoryShipmentId
 	--INNER JOIN tblSCTicket TICKET ON INVSHIPITEM.intSourceId = TICKET.intTicketId
 	LEFT JOIN tblCTContractHeader CNTRCT ON INVDTL.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
@@ -684,8 +684,8 @@ BEGIN
 	INNER JOIN tblARInvoice INV ON PYMTDTL.intInvoiceId = INV.intInvoiceId
 	INNER JOIN tblARInvoiceDetail INVDTL ON INV.intInvoiceId = INVDTL.intInvoiceId  AND INVDTL.intInventoryShipmentChargeId is null
 	INNER JOIN tblICItem Item ON INVDTL.intItemId = Item.intItemId
-	INNER JOIN tblICInventoryShipmentItem INVSHIPITEM ON INVDTL.intInventoryShipmentItemId = INVSHIPITEM.intInventoryShipmentItemId
-	INNER JOIN tblICInventoryShipment INVSHIP ON INVSHIPITEM.intInventoryShipmentId = INVSHIP.intInventoryShipmentId
+	LEFT JOIN tblICInventoryShipmentItem INVSHIPITEM ON INVDTL.intInventoryShipmentItemId = INVSHIPITEM.intInventoryShipmentItemId
+	LEFT JOIN tblICInventoryShipment INVSHIP ON INVSHIPITEM.intInventoryShipmentId = INVSHIP.intInventoryShipmentId
 	--INNER JOIN tblSCTicket TICKET ON INVSHIPITEM.intSourceId = TICKET.intTicketId
 	LEFT JOIN tblCTContractHeader CNTRCT ON INVDTL.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
