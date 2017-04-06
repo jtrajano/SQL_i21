@@ -279,7 +279,7 @@ StartTest (function (t) {
         .displayText('===== Ship Button SO to IS for Non Lotted Done=====')
         //endregion
 
-        //region Scenario 6. Create Sales Order Inventory Shipment for Non Lotted Item Add Orders Screen
+        //region Scenario 6. Create Sales Order Inventory Shipment for Lotted Item Add Orders Screen
         .displayText('=====  Scenario 6. Add Orders Screen SO to IS for Lotted =====')
         .clickMenuFolder('Sales (Accounts Receivable)','Folder')
         .clickMenuScreen('Sales Orders','Screen')
