@@ -2301,6 +2301,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var totalChargeTaxes = 0;
         var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         var transactionCurrencyId = current.get('intCurrencyId');
+        var transactionVendorId = current.get('intEntityVendorId');
 
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
@@ -2311,12 +2312,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         // 1. Charge Currency is the same as the transaction currency id. 
                         var chargeCurrencyId = charge.get('intCurrencyId');
                         var otherChargeTax = charge.get('dblTax');  
+                        var chargeVendorId = charge.get('intEntityVendorId'); 
                         var ysnPrice = charge.get('ysnPrice'); 
 
                         chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
 
                         if (transactionCurrencyId == chargeCurrencyId) {
-                            totalChargeTaxes += otherChargeTax;
+                            totalChargeTaxes += (ysnPrice || (transactionVendorId == chargeVendorId)) ? otherChargeTax : 0;
                         }
                     }
                 });
