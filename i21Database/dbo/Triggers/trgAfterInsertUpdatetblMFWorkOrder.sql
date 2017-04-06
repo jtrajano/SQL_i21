@@ -287,12 +287,12 @@ BEGIN
 		BEGIN
 			SET @subject = 'Alert: Inventory shortage for Work Order ' + @strReferenceNo
 			SET @tableHTML = N'<head><style>table, th, td {border: 1px solid black;border-collapse: collapse;}</style></head><body><FONT COLOR="#4682B4"> ' + ' Inventory shortage for Work Order ' + @strReferenceNo + '</FONT>'
-			SET @tableHTML = @tableHTML + N'<table border="1">' + N'<tr bgcolor="#F0E68C"><FONT COLOR="#4682B4"><th>Item</th><th>Item Desc</th><th>Available Qty</th>' + N'<th>Required Qty</th><th>UOM</th></tr>'
+			SET @tableHTML = @tableHTML + N'<table border="1">' + N'<tr bgcolor="#F0E68C" style="text-align:center;"><FONT COLOR="#4682B4"><th>Item</th><th>Item Desc</th><th>Available Qty</th>' + N'<th>Required Qty</th><th>UOM</th></tr>'
 
 			SELECT @tableHTML = @tableHTML + (
 					CASE 
 						WHEN I.dblQuantity - IsNull(Inv.dblQuantity, 0) > 0
-							THEN '<tr bgcolor="Red"><td>'
+							THEN '<tr bgcolor="#ffb3b3"><td>'
 						ELSE '<tr><td>'
 						END
 					) + I1.strItemNo + '</td><td>' + I1.strDescription + '</td><td style="text-align:right;">' + Ltrim(Convert(DECIMAL(38, 2), IsNull(Inv.dblQuantity, 0))) + '</td><td style="text-align:right;">' + Ltrim(Convert(DECIMAL(38, 2), I.dblQuantity)) + '</td><td>' + U.strUnitMeasure + '</td></tr>'
