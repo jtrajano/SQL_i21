@@ -87,7 +87,7 @@ FROM
 		FROM dbo.tblSMScreen H
 		INNER JOIN dbo.tblSMTransaction I ON H.intScreenId = I.intScreenId
 		INNER JOIN dbo.tblSMApproval J ON I.intTransactionId = J.intTransactionId
-		INNER JOIN dbo.tblEMEntity K ON J.intApproverId = K.intEntityId
+		LEFT JOIN dbo.tblEMEntity K ON J.intApproverId = K.intEntityId
 		WHERE H.strScreenName = 'Voucher' AND H.strModule = 'Accounts Payable' AND J.ysnCurrent = 1
 		AND A.intBillId = I.intRecordId
 	) Approvals
