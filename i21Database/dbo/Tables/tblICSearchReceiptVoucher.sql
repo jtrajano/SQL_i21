@@ -40,7 +40,13 @@ Data here is used in the Voucher tab/grid.
 		[strFilterString] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmCreated] DATETIME NULL, 
 		[intCurrencyId] INT NULL,
-		[strCurrency] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strCurrency] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 		
+		[strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[intLoadContainerId] INT NULL,
+		[strItemUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[intItemUOMId] INT NULL,
+		[strCostUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[intCostUOMId] INT NULL,		
 		CONSTRAINT [PK_tblICSearchReceiptVoucher] PRIMARY KEY NONCLUSTERED ([intId])
 	)
 	GO
