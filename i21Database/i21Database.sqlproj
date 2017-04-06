@@ -1539,7 +1539,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateOptionsMonthList.sql" />
     <Build Include="dbo\Tables\tblMFProductionSummary.sql" />
-    <Build Include="dbo\Views\vyuRKSFuturePSTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKSFuturePSTransaction.sql" />	
     <Build Include="dbo\Views\vyuRKMatchedPSTransaction.sql" />
     <Build Include="dbo\Views\vyuRKLFuturePSTransaction.sql" />
     <Build Include="dbo\Views\vyuRKGetMarketCurrency.sql" />
@@ -5157,6 +5157,8 @@
     <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
     <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
     <Build Include="dbo\Views\vyuLGNotificationCount.sql" />
+	<Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
+	<Build Include="dbo\Stored Procedures\uspRKRollCostDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
