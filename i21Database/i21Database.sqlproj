@@ -5183,6 +5183,7 @@
     <Build Include="dbo\Views\vyuGRStorageStmtStorageType.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportStorageStatement.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportStorageStatementDetail.sql" />
+    <Build Include="dbo\Views\vyuCRMOpportunityLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
