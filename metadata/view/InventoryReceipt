@@ -1579,9 +1579,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "border": null,
-                                                "container|align": "stretch",
                                                 "designer|displayName": "Item and Lot grid",
-                                                "layout": "vbox",
+                                                "layout": "border",
                                                 "layout|flex": 1,
                                                 "width": 100
                                             },
@@ -1600,7 +1599,8 @@
                                                         "container|align": "stretch",
                                                         "designer|displayName": "Item Grid",
                                                         "layout": "vbox",
-                                                        "layout|flex": 3
+                                                        "layout|flex": 3,
+                                                        "layout|region": "center"
                                                     },
                                                     "name": "MyContainer37",
                                                     "designerId": "bb68f82d-f48a-4b92-802f-1170061268f1",
@@ -1801,7 +1801,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter141",
+                                                                            "name": "filter11",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3505,11 +3505,13 @@
                                                         "autoDestroy": false,
                                                         "container|align": "stretch",
                                                         "designer|displayName": "Lot Grid (pnlLotTracking)",
+                                                        "height": 150,
                                                         "hidden": true,
                                                         "itemId": "pnlLotTracking",
                                                         "layout": "hbox",
                                                         "layout|flex": 2,
-                                                        "width": 100
+                                                        "layout|region": "south",
+                                                        "layout|split": true
                                                     },
                                                     "name": "MyContainer3",
                                                     "designerId": "d82b1652-81ee-4cdb-87f1-0d0fd1de3032",
@@ -3651,7 +3653,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter142",
+                                                                            "name": "filter12",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4934,10 +4936,11 @@
                                                         "container|pack": "end",
                                                         "container|padding": 5,
                                                         "designer|displayName": "bottom total container",
+                                                        "height": 150,
                                                         "layout": "hbox",
+                                                        "layout|region": "south",
                                                         "maxHeight": 30,
-                                                        "title": null,
-                                                        "width": 100
+                                                        "title": null
                                                     },
                                                     "name": "MyPanel37",
                                                     "designerId": "da41988c-3db6-4345-ae38-5436224f6ed3",
@@ -5255,7 +5258,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter143",
+                                                                    "name": "filter13",
                                                                     "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6525,7 +6528,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter144",
+                                                    "name": "filter14",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -7005,7 +7008,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter145",
+                                                    "name": "filter15",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -7616,7 +7619,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging114",
+                    "name": "statusbarpaging1",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
