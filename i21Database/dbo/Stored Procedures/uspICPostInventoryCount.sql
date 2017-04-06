@@ -176,7 +176,7 @@ BEGIN
 			,dtmDate				= Header.dtmCountDate
 			,dblQty					= ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)
 			,dblUOMQty				= ItemUOM.dblUnitQty	
-			,dblCost				= dbo.fnMultiply(ItemPricing.dblLastCost, ItemUOM.dblUnitQty)
+			,dblCost				= dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty)
 			,0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= @DefaultCurrencyId 
