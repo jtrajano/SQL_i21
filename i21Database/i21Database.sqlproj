@@ -5174,6 +5174,7 @@
     <Build Include="dbo\Views\vyuCTItemCertification.sql" />
     <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
     <Build Include="dbo\Views\vyuLGNotificationCount.sql" />
+    <Build Include="dbo\Views\vyuCRMCampaignEntityLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
