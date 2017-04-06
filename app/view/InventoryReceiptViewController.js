@@ -213,11 +213,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { dataIndex: 'strReceiptType', text: 'Order Type', width: 120, dataType: 'string' },
                         { dataIndex: 'strOrderNumber', text: 'Order No', width: 100, dataType: 'string' },
                         { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
-                        { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
-                        // { dataIndex: 'strItemDescription', text: 'Item Description', flex: 1, dataType: 'string' },
+                        { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},                        
                         { dataIndex: 'dblUnitCost', text: 'Unit Cost', width: 120, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'strCostUOM', text: 'Cost UOM', width: 80, dataType: 'string' },
                         { dataIndex: 'dblReceiptQty', text: 'Receipt Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
                         { dataIndex: 'dblVoucherQty', text: 'Voucher Qty', width: 120, dataType: 'float', xtype: 'numbercolumn' },
+                        { dataIndex: 'strItemUOM', text: 'UOM', width: 80, dataType: 'string' },
                         { dataIndex: 'dblReceiptLineTotal', text: 'Receipt Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'  },
                         { dataIndex: 'dblVoucherLineTotal', text: 'Voucher Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'  },
                         { dataIndex: 'dblReceiptTax', text: 'Receipt Tax', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'  },
@@ -2579,6 +2580,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var totalChargeTaxes = 0;
         var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         var transactionCurrencyId = current.get('intCurrencyId');
+        var transactionVendorId = current.get('intEntityVendorId');
 
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
@@ -2589,12 +2591,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         // 1. Charge Currency is the same as the transaction currency id. 
                         var chargeCurrencyId = charge.get('intCurrencyId');
                         var otherChargeTax = charge.get('dblTax');  
+                        var chargeVendorId = charge.get('intEntityVendorId'); 
                         var ysnPrice = charge.get('ysnPrice'); 
 
                         chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
 
                         if (transactionCurrencyId == chargeCurrencyId) {
-                            totalChargeTaxes += otherChargeTax;
+                            totalChargeTaxes += (ysnPrice || (transactionVendorId == chargeVendorId)) ? otherChargeTax : 0;
                         }
                     }
                 });
