@@ -78,7 +78,13 @@ BEGIN TRY
 		WHERE intLoadId = @intLoadId
 
 		IF (ISNULL(@intShipmentStatus,0) = 4)
+		BEGIN
+			DELETE FROM tblLGLoadContainerLog
+			DELETE FROM tblLGLoadDetailLog
+			DELETE FROM tblLGLoadLog
+
 			RETURN;
+		END
 
 		SELECT @intMinLoadLogId = MIN(intLoadLogId)
 		FROM @tblLoadRecord

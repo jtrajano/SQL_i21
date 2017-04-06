@@ -75,7 +75,12 @@ BEGIN
 			,@strPhone = strPhone
 	FROM tblSMCompanySetup
 	
-	SELECT @strFullName = strFullName FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	SELECT TOP 1 @strFullName = E.strName
+	FROM tblSMUserSecurity US
+	JOIN tblEMEntity E ON US.intEntityUserSecurityId = E.intEntityId
+	JOIN tblEMEntityCredential EC ON EC.intEntityId = E.intEntityId
+	WHERE E.strExternalERPId = @strUserName
+	ORDER BY E.intEntityId DESC
 	
 	SELECT @strLogisticsCompanyName = strLogisticsCompanyName,
 		   @strLogisticsPrintSignOff = strLogisticsPrintSignOff
@@ -465,7 +470,7 @@ SELECT TOP 1 L.intLoadId
 	,@strCountry AS strCompanyCountry 
 	,@strPhone AS strCompanyPhone 
 	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
-	,@strUserName AS strUserFullName
+	,CASE WHEN ISNULL(@strFullName,'') = '' THEN  @strUserName ELSE @strFullName END AS strUserFullName
 	,@strLogisticsCompanyName AS strLogisticsCompanyName
 	,@strLogisticsPrintSignOff AS strLogisticsPrintSignOff
 	,@strPrintableRemarks AS strPrintableRemarks
