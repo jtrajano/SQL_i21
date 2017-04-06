@@ -3416,7 +3416,7 @@ IF @post = 1
 				(SELECT intItemId, intLocationId, intItemLocationId, strType, dblLastCost FROM vyuICGetItemStock WITH (NOLOCK)) IST
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId
-			CROSS APPLY
+			OUTER APPLY
 				dbo.[fnGetLoadDetailLots](Detail.intLoadDetailId) LGL
 			WHERE				
 				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND Detail.dblTotal <> 0) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
