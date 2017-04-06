@@ -2,20 +2,25 @@
 AS
 SELECT
 (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName
-,(SELECT TOP 1 dbo.[fnAPFormatAddress](strCompanyName, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+--,(SELECT TOP 1 dbo.[fnAPFormatAddress](strCompanyName, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+,strCompanyAddress = (SELECT TOP 1 ISNULL(RTRIM(strCompanyName) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(strAddress) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(strZip),'') + ' ' + ISNULL(RTRIM(strCity), '') + ' ' + ISNULL(RTRIM(strState), '') + CHAR(13) + char(10)
+				 + ISNULL('' + RTRIM(strCountry) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(strPhone)+ CHAR(13) + char(10), '') FROM tblSMCompanySetup)
 ,strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone))
 ,strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup), A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone))
 ,A.strBillId
 ,ContactEntity.strName AS strContactName
 ,ContactEntity.strEmail AS strContactEmail
-,strDateLocation = TranLoc.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 107)
+,strDateLocation = TranLoc.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 106)
 ,Bank.strBankName
 ,BankAccount.strBankAccountHolder
 ,BankAccount.strIBAN
 ,BankAccount.strSWIFT
 ,Term.strTerm
 ,A.strRemarks
-,CONVERT(VARCHAR(10), A.dtmDueDate, 101) AS dtmDueDate
+,CONVERT(VARCHAR(10), A.dtmDueDate, 103) AS dtmDueDate
 ,Bank.strCity + ', ' + Bank.strState +  ' ' + Bank.strCountry AS strBankAddress
 --,(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
 --(	
