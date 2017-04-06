@@ -1,0 +1,1063 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>Transports</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{c3d80b32-947e-4a7e-b5b8-e687235907b3}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql120DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>Transports</RootNamespace>
+    <AssemblyName>Transports</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Stored Procedures" />
+    <Folder Include="Views" />
+    <Folder Include="Functions" />
+    <Folder Include="Tables" />
+    <Folder Include="User Defined Types" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="..\i21Database\dbo\Views\vyuTRDispatchedLoad.sql">
+      <Link>Views\vyuTRDispatchedLoad.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetBulkPlantFreight.sql">
+      <Link>Views\vyuTRGetBulkPlantFreight.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetImportRackItemError.sql">
+      <Link>Views\vyuTRGetImportRackItemError.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetImportRackPriceDetail.sql">
+      <Link>Views\vyuTRGetImportRackPriceDetail.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetLoadBlendIngredient.sql">
+      <Link>Views\vyuTRGetLoadBlendIngredient.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetLoadDistributionDetail.sql">
+      <Link>Views\vyuTRGetLoadDistributionDetail.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetLoadDistributionHeader.sql">
+      <Link>Views\vyuTRGetLoadDistributionHeader.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetLoadReceipt.sql">
+      <Link>Views\vyuTRGetLoadReceipt.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetQuoteDetail.sql">
+      <Link>Views\vyuTRGetQuoteDetail.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetQuoteDetailFreight.sql">
+      <Link>Views\vyuTRGetQuoteDetailFreight.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetQuoteDetailTax.sql">
+      <Link>Views\vyuTRGetQuoteDetailTax.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetQuoteHeader.sql">
+      <Link>Views\vyuTRGetQuoteHeader.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetQuotePriceAdjustmentDetail.sql">
+      <Link>Views\vyuTRGetQuotePriceAdjustmentDetail.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetQuotePriceAdjustmentHeader.sql">
+      <Link>Views\vyuTRGetQuotePriceAdjustmentHeader.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetRackPriceDetail.sql">
+      <Link>Views\vyuTRGetRackPriceDetail.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetRackPriceHeader.sql">
+      <Link>Views\vyuTRGetRackPriceHeader.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRGetSupplyPointSearchValue.sql">
+      <Link>Views\vyuTRGetSupplyPointSearchValue.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRLinkedReceipts.sql">
+      <Link>Views\vyuTRLinkedReceipts.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRLoadHeader.sql">
+      <Link>Views\vyuTRLoadHeader.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRQuoteReport.sql">
+      <Link>Views\vyuTRQuoteReport.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRQuoteSelection.sql">
+      <Link>Views\vyuTRQuoteSelection.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRRackItems.sql">
+      <Link>Views\vyuTRRackItems.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRRackPriceEquation.sql">
+      <Link>Views\vyuTRRackPriceEquation.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRSupplyPointView.sql">
+      <Link>Views\vyuTRSupplyPointView.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuTRTerminal.sql">
+      <Link>Views\vyuTRTerminal.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuCTContractDetailView.sql">
+      <Link>Views\vyuCTContractDetailView.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuLGLoadDetailView.sql">
+      <Link>Views\vyuLGLoadDetailView.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuARCustomer.sql">
+      <Link>Views\vyuARCustomer.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuEMSalesperson.sql">
+      <Link>Views\vyuEMSalesperson.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuCTContractHeaderView.sql">
+      <Link>Views\vyuCTContractHeaderView.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Functions\fnCTConvertQtyToTargetItemUOM.sql">
+      <Link>Functions\fnCTConvertQtyToTargetItemUOM.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Functions\fnCTGetAdditionalColumnForDetailView.sql">
+      <Link>Functions\fnCTGetAdditionalColumnForDetailView.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Functions\fnCTGetCurrencyExchangeRate.sql">
+      <Link>Functions\fnCTGetCurrencyExchangeRate.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Functions\fnCTGetContractPrice.sql">
+      <Link>Functions\fnCTGetContractPrice.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuCTEntity.sql">
+      <Link>Views\vyuCTEntity.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Functions\fnCTGetContractStatuses.sql">
+      <Link>Functions\fnCTGetContractStatuses.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuCTContractHeaderNotMapped.sql">
+      <Link>Views\vyuCTContractHeaderNotMapped.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Functions\fnCTGetPrepaidIds.sql">
+      <Link>Functions\fnCTGetPrepaidIds.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Functions\fnCTConvertQuantityToTargetCommodityUOM.sql">
+      <Link>Functions\fnCTConvertQuantityToTargetCommodityUOM.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Functions\fnTRGetRackPrice.sql">
+      <Link>Functions\fnTRGetRackPrice.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuEMEntity.sql">
+      <Link>Views\vyuEMEntity.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuEMSearchShipVia.sql">
+      <Link>Views\vyuEMSearchShipVia.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuMFGetRecipeItem.sql">
+      <Link>Views\vyuMFGetRecipeItem.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuICGetItemLocation.sql">
+      <Link>Views\vyuICGetItemLocation.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuAPVendor.sql">
+      <Link>Views\vyuAPVendor.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuICGetItemUOM.sql">
+      <Link>Views\vyuICGetItemUOM.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuARCustomerAgingReport.sql">
+      <Link>Views\vyuARCustomerAgingReport.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuGLAccountDetail.sql">
+      <Link>Views\vyuGLAccountDetail.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuARCustomerContacts.sql">
+      <Link>Views\vyuARCustomerContacts.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Functions\fnARComputeDiscountForEarlyPayment.sql">
+      <Link>Functions\fnARComputeDiscountForEarlyPayment.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Functions\fnTRSplit.sql">
+      <Link>Functions\fnTRSplit.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuARCustomerSearch.sql">
+      <Link>Views\vyuARCustomerSearch.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblAPBill.sql">
+      <Link>Tables\tblAPBill.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblAPBillBatch.sql">
+      <Link>Tables\tblAPBillBatch.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblAPPayment.sql">
+      <Link>Tables\tblAPPayment.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblAPPaymentDetail.sql">
+      <Link>Tables\tblAPPaymentDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblAPVendor.sql">
+      <Link>Tables\tblAPVendor.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARAccountStatus.sql">
+      <Link>Tables\tblARAccountStatus.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARCustomer.sql">
+      <Link>Tables\tblARCustomer.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARCustomerBudget.sql">
+      <Link>Tables\tblARCustomerBudget.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARCustomerGroup.sql">
+      <Link>Tables\tblARCustomerGroup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARCustomerRackQuoteHeader.sql">
+      <Link>Tables\tblARCustomerRackQuoteHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARCustomerSpecialPrice.sql">
+      <Link>Tables\tblARCustomerSpecialPrice.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARInvoice.sql">
+      <Link>Tables\tblARInvoice.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARInvoiceDetail.sql">
+      <Link>Tables\tblARInvoiceDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARMarketZone.sql">
+      <Link>Tables\tblARMarketZone.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARPayment.sql">
+      <Link>Tables\tblARPayment.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARPaymentDetail.sql">
+      <Link>Tables\tblARPaymentDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARPrepaidAndCredit.sql">
+      <Link>Tables\tblARPrepaidAndCredit.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARQuoteTemplate.sql">
+      <Link>Tables\tblARQuoteTemplate.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARSalesperson.sql">
+      <Link>Tables\tblARSalesperson.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARServiceCharge.sql">
+      <Link>Tables\tblARServiceCharge.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblARTerritory.sql">
+      <Link>Tables\tblARTerritory.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCCCompanyOwnedSite.sql">
+      <Link>Tables\tblCCCompanyOwnedSite.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCCDealerSite.sql">
+      <Link>Tables\tblCCDealerSite.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCCSite.sql">
+      <Link>Tables\tblCCSite.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCCSiteDetail.sql">
+      <Link>Tables\tblCCSiteDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCCSiteHeader.sql">
+      <Link>Tables\tblCCSiteHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCCVendorDefault.sql">
+      <Link>Tables\tblCCVendorDefault.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFAccount.sql">
+      <Link>Tables\tblCFAccount.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFCard.sql">
+      <Link>Tables\tblCFCard.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFCardType.sql">
+      <Link>Tables\tblCFCardType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFDepartment.sql">
+      <Link>Tables\tblCFDepartment.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFDiscountSchedule.sql">
+      <Link>Tables\tblCFDiscountSchedule.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFFeeProfile.sql">
+      <Link>Tables\tblCFFeeProfile.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFInvoiceCycle.sql">
+      <Link>Tables\tblCFInvoiceCycle.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFNetwork.sql">
+      <Link>Tables\tblCFNetwork.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFPriceProfileHeader.sql">
+      <Link>Tables\tblCFPriceProfileHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFPriceRuleGroup.sql">
+      <Link>Tables\tblCFPriceRuleGroup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFProductAuth.sql">
+      <Link>Tables\tblCFProductAuth.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFSite.sql">
+      <Link>Tables\tblCFSite.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFSiteGroup.sql">
+      <Link>Tables\tblCFSiteGroup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFTransaction.sql">
+      <Link>Tables\tblCFTransaction.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCFVehicle.sql">
+      <Link>Tables\tblCFVehicle.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCMBank.sql">
+      <Link>Tables\tblCMBank.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCMBankAccount.sql">
+      <Link>Tables\tblCMBankAccount.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCMBankFileFormat.sql">
+      <Link>Tables\tblCMBankFileFormat.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTApprovalBasis.sql">
+      <Link>Tables\tblCTApprovalBasis.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTAssociation.sql">
+      <Link>Tables\tblCTAssociation.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTBook.sql">
+      <Link>Tables\tblCTBook.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTCompanyPreference.sql">
+      <Link>Tables\tblCTCompanyPreference.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTContractBasis.sql">
+      <Link>Tables\tblCTContractBasis.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTContractCost.sql">
+      <Link>Tables\tblCTContractCost.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTContractDetail.sql">
+      <Link>Tables\tblCTContractDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTContractHeader.sql">
+      <Link>Tables\tblCTContractHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTContractOptHeader.sql">
+      <Link>Tables\tblCTContractOptHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTContractPlan.sql">
+      <Link>Tables\tblCTContractPlan.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTContractStatus.sql">
+      <Link>Tables\tblCTContractStatus.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTContractText.sql">
+      <Link>Tables\tblCTContractText.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTContractType.sql">
+      <Link>Tables\tblCTContractType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTCropYear.sql">
+      <Link>Tables\tblCTCropYear.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTDiscountType.sql">
+      <Link>Tables\tblCTDiscountType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTFreightRate.sql">
+      <Link>Tables\tblCTFreightRate.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTIndex.sql">
+      <Link>Tables\tblCTIndex.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTInsuranceBy.sql">
+      <Link>Tables\tblCTInsuranceBy.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTInvoiceType.sql">
+      <Link>Tables\tblCTInvoiceType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTPosition.sql">
+      <Link>Tables\tblCTPosition.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTPriceContract.sql">
+      <Link>Tables\tblCTPriceContract.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTPriceFixation.sql">
+      <Link>Tables\tblCTPriceFixation.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTPricingType.sql">
+      <Link>Tables\tblCTPricingType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTRailGrade.sql">
+      <Link>Tables\tblCTRailGrade.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTSpreadArbitrage.sql">
+      <Link>Tables\tblCTSpreadArbitrage.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTSubBook.sql">
+      <Link>Tables\tblCTSubBook.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblCTWeightGrade.sql">
+      <Link>Tables\tblCTWeightGrade.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblEMEntity.sql">
+      <Link>Tables\tblEMEntity.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblEMEntityClass.sql">
+      <Link>Tables\tblEMEntityClass.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblEMEntityFarm.sql">
+      <Link>Tables\tblEMEntityFarm.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblEMEntityLocation.sql">
+      <Link>Tables\tblEMEntityLocation.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblEMEntityPhoneNumber.sql">
+      <Link>Tables\tblEMEntityPhoneNumber.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblEMEntitySplit.sql">
+      <Link>Tables\tblEMEntitySplit.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblEMEntityTariffType.sql">
+      <Link>Tables\tblEMEntityTariffType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblEMEntityToContact.sql">
+      <Link>Tables\tblEMEntityToContact.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblEMEntityType.sql">
+      <Link>Tables\tblEMEntityType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLAccount.sql">
+      <Link>Tables\tblGLAccount.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLAccountCategory.sql">
+      <Link>Tables\tblGLAccountCategory.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLAccountGroup.sql">
+      <Link>Tables\tblGLAccountGroup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLAccountRange.sql">
+      <Link>Tables\tblGLAccountRange.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLAccountSegment.sql">
+      <Link>Tables\tblGLAccountSegment.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLAccountSegmentMapping.sql">
+      <Link>Tables\tblGLAccountSegmentMapping.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLAccountStructure.sql">
+      <Link>Tables\tblGLAccountStructure.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLAccountSystem.sql">
+      <Link>Tables\tblGLAccountSystem.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLAccountUnit.sql">
+      <Link>Tables\tblGLAccountUnit.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLCOACrossReference.sql">
+      <Link>Tables\tblGLCOACrossReference.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLCompanyPreferenceOption.sql">
+      <Link>Tables\tblGLCompanyPreferenceOption.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGLCrossReferenceMapping.sql">
+      <Link>Tables\tblGLCrossReferenceMapping.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGRCustomerStorage.sql">
+      <Link>Tables\tblGRCustomerStorage.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGRDiscountCalculationOption.sql">
+      <Link>Tables\tblGRDiscountCalculationOption.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGRDiscountId.sql">
+      <Link>Tables\tblGRDiscountId.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGRDiscountSchedule.sql">
+      <Link>Tables\tblGRDiscountSchedule.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGRDiscountScheduleCode.sql">
+      <Link>Tables\tblGRDiscountScheduleCode.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGRShrinkCalculationOption.sql">
+      <Link>Tables\tblGRShrinkCalculationOption.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGRStorageScheduleRule.sql">
+      <Link>Tables\tblGRStorageScheduleRule.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblGRStorageType.sql">
+      <Link>Tables\tblGRStorageType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblHDJobCode.sql">
+      <Link>Tables\tblHDJobCode.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblHDMilestone.sql">
+      <Link>Tables\tblHDMilestone.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblHDModule.sql">
+      <Link>Tables\tblHDModule.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblHDTicket.sql">
+      <Link>Tables\tblHDTicket.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblHDTicketGroup.sql">
+      <Link>Tables\tblHDTicketGroup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblHDTicketHoursWorked.sql">
+      <Link>Tables\tblHDTicketHoursWorked.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblHDTicketPriority.sql">
+      <Link>Tables\tblHDTicketPriority.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblHDTicketProduct.sql">
+      <Link>Tables\tblHDTicketProduct.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblHDTicketStatus.sql">
+      <Link>Tables\tblHDTicketStatus.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblHDTicketType.sql">
+      <Link>Tables\tblHDTicketType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblHDVersion.sql">
+      <Link>Tables\tblHDVersion.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICBackup.sql">
+      <Link>Tables\tblICBackup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICBrand.sql">
+      <Link>Tables\tblICBrand.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICCategory.sql">
+      <Link>Tables\tblICCategory.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICCategoryUOM.sql">
+      <Link>Tables\tblICCategoryUOM.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICCommodity.sql">
+      <Link>Tables\tblICCommodity.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICCommodityAttribute.sql">
+      <Link>Tables\tblICCommodityAttribute.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICCommodityUnitMeasure.sql">
+      <Link>Tables\tblICCommodityUnitMeasure.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICCountGroup.sql">
+      <Link>Tables\tblICCountGroup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICInventoryReceipt.sql">
+      <Link>Tables\tblICInventoryReceipt.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICInventoryShipment.sql">
+      <Link>Tables\tblICInventoryShipment.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICInventoryShipmentCharge.sql">
+      <Link>Tables\tblICInventoryShipmentCharge.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICInventoryShipmentItem.sql">
+      <Link>Tables\tblICInventoryShipmentItem.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICInventoryTransfer.sql">
+      <Link>Tables\tblICInventoryTransfer.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICItem.sql">
+      <Link>Tables\tblICItem.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICItemContract.sql">
+      <Link>Tables\tblICItemContract.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICItemLocation.sql">
+      <Link>Tables\tblICItemLocation.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICItemOwner.sql">
+      <Link>Tables\tblICItemOwner.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICItemUOM.sql">
+      <Link>Tables\tblICItemUOM.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICLot.sql">
+      <Link>Tables\tblICLot.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICLotStatus.sql">
+      <Link>Tables\tblICLotStatus.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICM2MComputation.sql">
+      <Link>Tables\tblICM2MComputation.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICManufacturer.sql">
+      <Link>Tables\tblICManufacturer.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICRestriction.sql">
+      <Link>Tables\tblICRestriction.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICRinFuelCategory.sql">
+      <Link>Tables\tblICRinFuelCategory.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICStatus.sql">
+      <Link>Tables\tblICStatus.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICStorageLocation.sql">
+      <Link>Tables\tblICStorageLocation.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICStorageUnitType.sql">
+      <Link>Tables\tblICStorageUnitType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICTag.sql">
+      <Link>Tables\tblICTag.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblICUnitMeasure.sql">
+      <Link>Tables\tblICUnitMeasure.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGAllocationDetail.sql">
+      <Link>Tables\tblLGAllocationDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGAllocationHeader.sql">
+      <Link>Tables\tblLGAllocationHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGContainerType.sql">
+      <Link>Tables\tblLGContainerType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGEquipmentType.sql">
+      <Link>Tables\tblLGEquipmentType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGGenerateLoad.sql">
+      <Link>Tables\tblLGGenerateLoad.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGLoad.sql">
+      <Link>Tables\tblLGLoad.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGLoadDetail.sql">
+      <Link>Tables\tblLGLoadDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGPickLotDetail.sql">
+      <Link>Tables\tblLGPickLotDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGPickLotHeader.sql">
+      <Link>Tables\tblLGPickLotHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGReasonCode.sql">
+      <Link>Tables\tblLGReasonCode.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGReservation.sql">
+      <Link>Tables\tblLGReservation.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGShipment.sql">
+      <Link>Tables\tblLGShipment.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGShipmentContractQty.sql">
+      <Link>Tables\tblLGShipmentContractQty.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGShipmentPurchaseSalesContract.sql">
+      <Link>Tables\tblLGShipmentPurchaseSalesContract.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGShippingInstruction.sql">
+      <Link>Tables\tblLGShippingInstruction.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblLGShippingMode.sql">
+      <Link>Tables\tblLGShippingMode.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMBConsignmentGroup.sql">
+      <Link>Tables\tblMBConsignmentGroup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMBMeterAccount.sql">
+      <Link>Tables\tblMBMeterAccount.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMBMeterReading.sql">
+      <Link>Tables\tblMBMeterReading.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFAttributeType.sql">
+      <Link>Tables\tblMFAttributeType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFBuyingGroup.sql">
+      <Link>Tables\tblMFBuyingGroup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFCommentType.sql">
+      <Link>Tables\tblMFCommentType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFConsumptionMethod.sql">
+      <Link>Tables\tblMFConsumptionMethod.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFCostType.sql">
+      <Link>Tables\tblMFCostType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFManufacturingProcess.sql">
+      <Link>Tables\tblMFManufacturingProcess.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFMarginBy.sql">
+      <Link>Tables\tblMFMarginBy.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFOneLinePrint.sql">
+      <Link>Tables\tblMFOneLinePrint.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFRecipe.sql">
+      <Link>Tables\tblMFRecipe.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFRecipeItem.sql">
+      <Link>Tables\tblMFRecipeItem.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFRecipeItemType.sql">
+      <Link>Tables\tblMFRecipeItemType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblMFRecipeType.sql">
+      <Link>Tables\tblMFRecipeType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblPATPatronageCategory.sql">
+      <Link>Tables\tblPATPatronageCategory.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblRKFutureMarket.sql">
+      <Link>Tables\tblRKFutureMarket.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblRKFuturesMonth.sql">
+      <Link>Tables\tblRKFuturesMonth.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblRKVendorPriceFixationLimit.sql">
+      <Link>Tables\tblRKVendorPriceFixationLimit.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSCListTicketTypes.sql">
+      <Link>Tables\tblSCListTicketTypes.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSCScaleDevice.sql">
+      <Link>Tables\tblSCScaleDevice.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSCScaleSetup.sql">
+      <Link>Tables\tblSCScaleSetup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSCTicket.sql">
+      <Link>Tables\tblSCTicket.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSCTicketPool.sql">
+      <Link>Tables\tblSCTicketPool.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSCTruckDriverReference.sql">
+      <Link>Tables\tblSCTruckDriverReference.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMApprovalList.sql">
+      <Link>Tables\tblSMApprovalList.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMAttachment.sql">
+      <Link>Tables\tblSMAttachment.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMCity.sql">
+      <Link>Tables\tblSMCity.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMCompanyLocation.sql">
+      <Link>Tables\tblSMCompanyLocation.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMCompanyLocationPricingLevel.sql">
+      <Link>Tables\tblSMCompanyLocationPricingLevel.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMCompanyLocationSubLocation.sql">
+      <Link>Tables\tblSMCompanyLocationSubLocation.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMCompanySetup.sql">
+      <Link>Tables\tblSMCompanySetup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMCountry.sql">
+      <Link>Tables\tblSMCountry.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMCurrency.sql">
+      <Link>Tables\tblSMCurrency.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMCurrencyExchangeRate.sql">
+      <Link>Tables\tblSMCurrencyExchangeRate.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMCurrencyExchangeRateType.sql">
+      <Link>Tables\tblSMCurrencyExchangeRateType.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMFreightTerm.sql">
+      <Link>Tables\tblSMFreightTerm.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMImportFileHeader.sql">
+      <Link>Tables\tblSMImportFileHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMLineOfBusiness.sql">
+      <Link>Tables\tblSMLineOfBusiness.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMModule.sql">
+      <Link>Tables\tblSMModule.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMPaymentMethod.sql">
+      <Link>Tables\tblSMPaymentMethod.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMPurchasingGroup.sql">
+      <Link>Tables\tblSMPurchasingGroup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMSecurityPolicy.sql">
+      <Link>Tables\tblSMSecurityPolicy.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMShipVia.sql">
+      <Link>Tables\tblSMShipVia.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMTaxClass.sql">
+      <Link>Tables\tblSMTaxClass.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMTaxCode.sql">
+      <Link>Tables\tblSMTaxCode.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMTaxGroup.sql">
+      <Link>Tables\tblSMTaxGroup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMTerm.sql">
+      <Link>Tables\tblSMTerm.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMUserRole.sql">
+      <Link>Tables\tblSMUserRole.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSMUserSecurity.sql">
+      <Link>Tables\tblSMUserSecurity.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSOSalesOrder.sql">
+      <Link>Tables\tblSOSalesOrder.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSOSalesOrderDetail.sql">
+      <Link>Tables\tblSOSalesOrderDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSTPaymentOption.sql">
+      <Link>Tables\tblSTPaymentOption.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSTPromotionItemList.sql">
+      <Link>Tables\tblSTPromotionItemList.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSTRadiantItemTypeCode.sql">
+      <Link>Tables\tblSTRadiantItemTypeCode.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSTRegister.sql">
+      <Link>Tables\tblSTRegister.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSTStore.sql">
+      <Link>Tables\tblSTStore.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblSTSubcategory.sql">
+      <Link>Tables\tblSTSubcategory.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTFTaxAuthority.sql">
+      <Link>Tables\tblTFTaxAuthority.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTFTaxCategory.sql">
+      <Link>Tables\tblTFTaxCategory.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTFTerminalControlNumber.sql">
+      <Link>Tables\tblTFTerminalControlNumber.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTMClock.sql">
+      <Link>Tables\tblTMClock.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTMCustomer.sql">
+      <Link>Tables\tblTMCustomer.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTMFillGroup.sql">
+      <Link>Tables\tblTMFillGroup.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTMFillMethod.sql">
+      <Link>Tables\tblTMFillMethod.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTMGlobalJulianCalendar.sql">
+      <Link>Tables\tblTMGlobalJulianCalendar.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTMHoldReason.sql">
+      <Link>Tables\tblTMHoldReason.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTMRoute.sql">
+      <Link>Tables\tblTMRoute.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTMSite.sql">
+      <Link>Tables\tblTMSite.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTMTankTownship.sql">
+      <Link>Tables\tblTMTankTownship.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRBulkPlantFreight.sql">
+      <Link>Tables\tblTRBulkPlantFreight.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRCompanyPreference.sql">
+      <Link>Tables\tblTRCompanyPreference.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRImportRackPrice.sql">
+      <Link>Tables\tblTRImportRackPrice.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRImportRackPriceDetail.sql">
+      <Link>Tables\tblTRImportRackPriceDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRImportRackPriceDetailItem.sql">
+      <Link>Tables\tblTRImportRackPriceDetailItem.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRLoadBlendIngredient.sql">
+      <Link>Tables\tblTRLoadBlendIngredient.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRLoadDistributionDetail.sql">
+      <Link>Tables\tblTRLoadDistributionDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRLoadDistributionHeader.sql">
+      <Link>Tables\tblTRLoadDistributionHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRLoadHeader.sql">
+      <Link>Tables\tblTRLoadHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRLoadReceipt.sql">
+      <Link>Tables\tblTRLoadReceipt.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRQuoteDetail.sql">
+      <Link>Tables\tblTRQuoteDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRQuoteDetailTax.sql">
+      <Link>Tables\tblTRQuoteDetailTax.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRQuoteHeader.sql">
+      <Link>Tables\tblTRQuoteHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRQuotePriceAdjustmentDetail.sql">
+      <Link>Tables\tblTRQuotePriceAdjustmentDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRQuotePriceAdjustmentHeader.sql">
+      <Link>Tables\tblTRQuotePriceAdjustmentHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRRackPriceDetail.sql">
+      <Link>Tables\tblTRRackPriceDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRRackPriceHeader.sql">
+      <Link>Tables\tblTRRackPriceHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRSupplyPoint.sql">
+      <Link>Tables\tblTRSupplyPoint.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRSupplyPointProductSearchDetail.sql">
+      <Link>Tables\tblTRSupplyPointProductSearchDetail.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRSupplyPointProductSearchHeader.sql">
+      <Link>Tables\tblTRSupplyPointProductSearchHeader.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRSupplyPointRackPriceEquation.sql">
+      <Link>Tables\tblTRSupplyPointRackPriceEquation.sql</Link>
+    </Build>
+    <Build Include="C:\i21\i21_sqlscripts\i21Database\dbo\Tables\tblTRTransactionDetailLog.sql">
+      <Link>Tables\tblTRTransactionDetailLog.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Functions\fnARFormatCustomerAddress.sql">
+      <Link>Functions\fnARFormatCustomerAddress.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Views\vyuICGetItemStock.sql">
+      <Link>Views\vyuICGetItemStock.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Tables\tblARCustomerRackQuoteCategory.sql">
+      <Link>Tables\tblARCustomerRackQuoteCategory.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Tables\tblARCustomerRackQuoteVendor.sql">
+      <Link>Tables\tblARCustomerRackQuoteVendor.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Tables\tblARCustomerRackQuoteItem.sql">
+      <Link>Tables\tblARCustomerRackQuoteItem.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Tables\tblICItemPricing.sql">
+      <Link>Tables\tblICItemPricing.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Tables\tblICItemStock.sql">
+      <Link>Tables\tblICItemStock.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRBatchLoadPosting.sql">
+      <Link>Stored Procedures\uspTRBatchLoadPosting.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRDeleteTransportLoad.sql">
+      <Link>Stored Procedures\uspTRDeleteTransportLoad.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRFixRackPrices.sql">
+      <Link>Stored Procedures\uspTRFixRackPrices.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRGenerateQuotes.sql">
+      <Link>Stored Procedures\uspTRGenerateQuotes.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRGetCustomerFreight.sql">
+      <Link>Stored Procedures\uspTRGetCustomerFreight.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRGetQuotePrice.sql">
+      <Link>Stored Procedures\uspTRGetQuotePrice.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRGetRackPrice.sql">
+      <Link>Stored Procedures\uspTRGetRackPrice.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRLoadPosting.sql">
+      <Link>Stored Procedures\uspTRLoadPosting.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRLoadPostingValidation.sql">
+      <Link>Stored Procedures\uspTRLoadPostingValidation.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRLoadProcessContracts.sql">
+      <Link>Stored Procedures\uspTRLoadProcessContracts.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRLoadProcessLoadContracts.sql">
+      <Link>Stored Procedures\uspTRLoadProcessLoadContracts.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRLoadProcessLogisticsLoad.sql">
+      <Link>Stored Procedures\uspTRLoadProcessLogisticsLoad.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRLoadProcessToInventoryReceipt.sql">
+      <Link>Stored Procedures\uspTRLoadProcessToInventoryReceipt.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRLoadProcessToInventoryTransfer.sql">
+      <Link>Stored Procedures\uspTRLoadProcessToInventoryTransfer.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRLoadProcessToInvoice.sql">
+      <Link>Stored Procedures\uspTRLoadProcessToInvoice.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRLoadProcessTransportLoad.sql">
+      <Link>Stored Procedures\uspTRLoadProcessTransportLoad.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRLogTransactionDetail.sql">
+      <Link>Stored Procedures\uspTRLogTransactionDetail.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRProcessImportRackPrice.sql">
+      <Link>Stored Procedures\uspTRProcessImportRackPrice.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRReceived.sql">
+      <Link>Stored Procedures\uspTRReceived.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRShipped.sql">
+      <Link>Stored Procedures\uspTRShipped.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRTransportLoadAfterSave.sql">
+      <Link>Stored Procedures\uspTRTransportLoadAfterSave.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRUpdateImportRackPriceId.sql">
+      <Link>Stored Procedures\uspTRUpdateImportRackPriceId.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\Stored Procedures\uspTRUpdateSentQuote.sql">
+      <Link>Stored Procedures\uspTRUpdateSentQuote.sql</Link>
+    </Build>
+    <Build Include="User Defined Types\ReceiptItemTableType.sql" />
+    <Build Include="User Defined Types\ShipmentItemTableType.sql" />
+  </ItemGroup>
+</Project>
