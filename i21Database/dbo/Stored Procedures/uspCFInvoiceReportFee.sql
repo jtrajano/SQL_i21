@@ -88,51 +88,7 @@ BEGIN
 				, [begingroup] NVARCHAR(MAX)
 				, [endgroup] NVARCHAR(MAX)
 				, [datatype] NVARCHAR(MAX))
-
-
-
-			DECLARE @intCounter INT
-			DECLARE @strField	NVARCHAR(MAX)
-
-			WHILE (EXISTS(SELECT 1 FROM @tblCFFieldList))
-			BEGIN
-				SELECT @intCounter = [intFieldId] FROM @tblCFFieldList
-				SELECT @strField = [strFieldId] FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
-				
-			--MAIN LOOP			
-			SELECT TOP 1
-				 @From = [from]
-				,@To = [to]
-				,@Condition = [condition]
-				,@Fieldname = [fieldname]
-			FROM @temp_params WHERE [fieldname] = @strField
-			IF (UPPER(@Condition) = 'BETWEEN')
-			BEGIN
-					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-			END
-			ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','='))
-			BEGIN
-					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
-			END
-			ELSE IF (UPPER(@Condition) = 'IN')
-			BEGIN
-					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
-			END
-
-			SET @From = ''
-			SET @To = ''
-			SET @Condition = ''
-			SET @Fieldname = ''
-
-
-
-			--MAIN LOOP
-
-				DELETE FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
-			END
+		
 
 			DECLARE @ysnInvoiceBillingCycleFee	BIT = 0
 
@@ -192,6 +148,23 @@ BEGIN
 			SET @To = ''
 			SET @Condition = ''
 			SET @Fieldname = ''
+
+
+			--DECLARE @dtmInvoiceDate		DATETIME
+
+			--SELECT TOP 1
+			--	 @From = [from]
+			--	,@To = [to]
+			--	,@Condition = [condition]
+			--	,@Fieldname = [fieldname]
+			--FROM @temp_params WHERE [fieldname] = 'InvoiceDate'
+
+			--SET @dtmInvoiceDate = @From
+
+			--SET @From = ''
+			--SET @To = ''
+			--SET @Condition = ''
+			--SET @Fieldname = ''
 
 		
 
@@ -311,19 +284,22 @@ BEGIN
 
 
 			-----------------MAIN QUERY------------------
-			EXEC('SELECT * 
-			INTO ##tmpInvoiceFee
-			FROM vyuCFInvoiceFee '+ @whereClause)
+			--SELECT * FROM tblCFInvoiceStagingTable AS cfInv
+			--INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount ON cfInv.intCardId = cfCardAccount.intCardId
+
+			--EXEC('SELECT * 
+			--INTO ##tmpInvoiceFee
+			--FROM tblCFInvoiceStagingTable ')
 			-----------------MAIN QUERY------------------
 
 			INSERT @tblCFInvoiceFeesTemp
 			SELECT
-			 intAccountId			
-			,intCardId				
+			 cfInv.intAccountId			
+			,cfInv.intCardId				
 			,intFeeProfileId		
-			,intSalesPersonId		
+			,cfInv.intSalesPersonId		
 			,dtmInvoiceDate		
-			,intCustomerId			
+			,cfInv.intCustomerId			
 			,intInvoiceId			
 			,intTransactionId		
 			,intCustomerGroupId	
@@ -335,18 +311,18 @@ BEGIN
 			,intSort				
 			,intConcurrencyId		
 			,ysnAllowEFT			
-			,ysnActive				
+			,cfInv.ysnActive				
 			,ysnEnergyTrac			
 			,dblQuantity			
 			,dblTotalAmount		
 			,dblDiscountEP			
 			,dblAPR				
 			,strTerm				
-			,strType				
+			,cfCardAccount.strType				
 			,strTermCode			
-			,strNetwork			
+			,cfInv.strNetwork			
 			,strCustomerName		
-			,strInvoiceCycle		
+			,cfCardAccount.strInvoiceCycle		
 			,strGroupName			
 			,strInvoiceNumber		
 			,strInvoiceReportNumber
@@ -357,7 +333,8 @@ BEGIN
 			,strTransactionType	
 			,intNetworkId
 			,intARLocationId
-			FROM ##tmpInvoiceFee
+			FROM tblCFInvoiceStagingTable AS cfInv
+			INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount ON cfInv.intCardId = cfCardAccount.intCardId
 
 			-------------SET GROUP VOLUME TO OUTPUT---------------
 			DECLARE @dblTotalQuantity		NUMERIC(18,6)
@@ -911,6 +888,7 @@ BEGIN
 			----------------------------------
 			---**END DISCOUNT CALCULATION**---
 			----------------------------------
+			--SELECT * FROM ##tblCFInvoiceFeeOutput
 
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------
 			INSERT INTO tblCFInvoiceFeeStagingTable

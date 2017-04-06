@@ -34,7 +34,7 @@ BEGIN TRY
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam
 	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam	=	@xmlParam
-	EXEC "dbo"."uspCFInvoiceReportFee"		@xmlParam	=	@xmlParam
+	
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
 	-----------------------------------------------------------
@@ -285,6 +285,9 @@ BEGIN TRY
 	,intCustomerId
 	,strCustomerName
 	FROM tblCFInvoiceStagingTable
+
+	--INSERT FEE RECORDS--
+	EXEC "dbo"."uspCFInvoiceReportFee"		@xmlParam	=	@xmlParam
 
 	IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
 
