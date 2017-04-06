@@ -461,7 +461,7 @@ function getTemplateColumns(name) {
         case "Contract Items":
             return ["Item No","Location","Contract Name","Origin","Grade","Grade Type","Garden","Yield","Tolerance","Franchise"];
         case "Inventory Count":
-            return ["Location", "Count Group", "Description", "Date", "Item No", "Sub Location", "Storage Location", 
+            return ["Location", "Count Group", "Description", "Date", "Item No", "Sub Location", "Storage Location", "Cost",
                 "Physical Count", "UOM", "Lot No", "Pallets", "Qty Per Pallet", "Count by Lots", "Count by Pallets", "Recount"];
         case "Item Pricing":
             return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "Pricing Method",
