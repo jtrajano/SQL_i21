@@ -156,7 +156,7 @@ BEGIN
 		,strTransactionType
 		,strType
 		,intPaymentMethodId
-		,strComments + ' DUP: ' + strInvoiceNumber
+		,strComments + ' Split: ' + strInvoiceNumber
 		,strFooterComments
 		,intAccountId
 		,intSplitId
