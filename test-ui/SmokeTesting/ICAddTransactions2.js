@@ -4,85 +4,35 @@ StartTest (function (t) {
     new iRely.FunctionalTest().start(t)
 
 
-        //region Scenario 6. Create Inventory Transfer for Non Lotted Item Shipment Not Required Location to Location
-        .displayText('===== Scenario 6. Create Inventory Transfer for Non Lotted Item Shipment Not Required Location to Location =====')
-        .clickMenuFolder('Inventory','Folder')
-        .clickMenuScreen('Inventory Transfers','Screen')
-        .waitUntilLoaded()
-        .clickButton('New')
-        .waitUntilLoaded('icinventorytransfer')
-        .verifyData('Combo Box','TransferType','Location to Location')
-        .verifyData('Combo Box','FromLocation','0001 - Fort Wayne')
-        .verifyData('Combo Box','SourceType','None')
-        .selectComboBoxRowNumber('ToLocation',2,0)
-        .enterData('Text Field','Description','Test Transfer')
+        //Create Direct IS for Non Lotted Item
+        .displayText('===== Scenario 3: Create Direct IS for Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addSOtoISAddORdersNonLotted (t,next, 'Apple Spice Sales',  'USD', '0001 - Fort Wayne', 'Truck','Smoke - NLTI - 01','LB', 100)
+        })
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','Smoke - NLTI - 01','strItemNo')
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
-        .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
-        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
-        .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
-
-        .clickButton('PostPreview')
-        .waitUntilLoaded('cmcmrecaptransaction')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',1500)
-        .clickButton('Post')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',1500)
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .displayText('===== Scenario 6. Create Inventory Transfer for Non Lotted Item Shipment Not Required Location to Location Done=====')
-        //endregion
-
-        //region Scenario 7. Create Inventory Transfer for Lotted Item Shipment Not Required Location to Location
-        .displayText('===== Scenario 7. Create Inventory Transfer for Lotted Item Shipment Not Required Location to Location=====')
-        .clickMenuScreen('Inventory Transfers','Screen')
-        .waitUntilLoaded()
-        .clickButton('New')
-        .waitUntilLoaded('icinventorytransfer')
-        .verifyData('Combo Box','TransferType','Location to Location')
-        .verifyData('Combo Box','FromLocation','0001 - Fort Wayne')
-        .verifyData('Combo Box','SourceType','None')
-        .selectComboBoxRowNumber('ToLocation',2,0)
-        .enterData('Text Field','Description','Test Transfer')
-
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','Smoke - LTI - 01','strItemNo')
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
-        .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
-        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strLotNumber','LOT-01','strLotNumber')
-        .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
-
-        .clickButton('PostPreview')
-        .waitUntilLoaded('')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',1500)
-        .addResult('Successfully Posted',1500)
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0002-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
-        .clickButton('Post')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',1500)
-        .waitUntilLoaded('')
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .clickMenuFolder('Inventory','Folder')
-        .displayText('===== Scenario 7. Create Inventory Transfer for Lotted Item Shipment Not Required Location to Location Done =====')
-        //endregion
+        //Create Direct IS for Non Lotted Item
+        .displayText('===== Scenario 4: Create Direct IS for Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addSOtoISAddORdersLotted (t,next, 'Apple Spice Sales',  'USD', '0001 - Fort Wayne', 'Truck','Smoke - LTI - 01','LB', 100, 'Raw Station', 'RM Storage', 'LOT-01')
+        })
 
 
-        //region Scenario 8. Create Inventory Transfer for Lotted Item Shipment Required Different Location
-        .displayText('===== Scenario 8. Create Inventory Transfer for Lotted Item Shipment Required Location to Location =====')
+        //Create Direct IS for Non Lotted Item
+        .displayText('===== Scenario 5: Create Direct IS for Non Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addDirectISNonLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne','Smoke - NLTI - 01','LB', 100)
+        })
+
+
+        //Create Direct IS for Lotted Item
+        .displayText('===== Scenario 6: Create Direct IS for Lotted Item =====')
+        .addFunction(function(next){
+            commonIC.addDirectISLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 100, 'LOT-01')
+        })
+
+
+        //region Scenario 7. Create Inventory Transfer for Lotted Item Shipment Required Different Location
+        .displayText('===== Scenario 7. Create Inventory Transfer for Lotted Item Shipment Required Location to Location =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Inventory Transfers','Screen')
         .waitUntilLoaded()
@@ -110,10 +60,6 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .addResult('Successfully Posted',1500)
         .addResult('Successfully Posted',1500)
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',1500)
@@ -165,12 +111,91 @@ StartTest (function (t) {
         .clickButton('Close')
         .waitUntilLoaded('')
         .clickMenuFolder('Inventory','Folder')
-        .displayText('===== Scenario 8: Create Inventory Transfer for Non Lotted Item Shipment Required Location to Location Done =====')
+        .displayText('===== Scenario 7: Create Inventory Transfer for Non Lotted Item Shipment Required Location to Location Done =====')
         //endregion
 
 
-        //region Scenario 9. Inventory Adjustment Quantity Change Non Lotted Item
-        .displayText('===== Scenario 9. Inventory Adjustment Quantity Change Non Lotted Item=====')
+        //region Scenario 8. Create Inventory Transfer for Non Lotted Item Shipment Not Required Location to Location
+        .displayText('===== Scenario 8. Create Inventory Transfer for Non Lotted Item Shipment Not Required Location to Location =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Inventory Transfers','Screen')
+        .waitUntilLoaded()
+        .clickButton('New')
+        .waitUntilLoaded('icinventorytransfer')
+        .verifyData('Combo Box','TransferType','Location to Location')
+        .verifyData('Combo Box','FromLocation','0001 - Fort Wayne')
+        .verifyData('Combo Box','SourceType','None')
+        .selectComboBoxRowNumber('ToLocation',2,0)
+        .enterData('Text Field','Description','Test Transfer')
+
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','Smoke - NLTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
+        .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
+        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
+        .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
+
+        .clickButton('PostPreview')
+        .waitUntilLoaded('cmcmrecaptransaction')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',1500)
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',1500)
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        .displayText('===== Scenario 8. Create Inventory Transfer for Non Lotted Item Shipment Not Required Location to Location Done=====')
+        //endregion
+
+        //region Scenario 9. Create Inventory Transfer for Lotted Item Shipment Not Required Location to Location
+        .displayText('===== Scenario 9. Create Inventory Transfer for Lotted Item Shipment Not Required Location to Location=====')
+        .clickMenuScreen('Inventory Transfers','Screen')
+        .waitUntilLoaded()
+        .clickButton('New')
+        .waitUntilLoaded('icinventorytransfer')
+        .verifyData('Combo Box','TransferType','Location to Location')
+        .verifyData('Combo Box','FromLocation','0001 - Fort Wayne')
+        .verifyData('Combo Box','SourceType','None')
+        .selectComboBoxRowNumber('ToLocation',2,0)
+        .enterData('Text Field','Description','Test Transfer')
+
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','Smoke - LTI - 01','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
+        .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
+        .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strLotNumber','LOT-01','strLotNumber')
+        .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
+
+        .clickButton('PostPreview')
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',1500)
+        .addResult('Successfully Posted',1500)
+        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
+        .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16000-0002-000')
+        .verifyGridData('RecapTransaction', 2, 'colRecapDebit', '1000')
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',1500)
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        .clickMenuFolder('Inventory','Folder')
+        .displayText('===== Scenario 9. Create Inventory Transfer for Lotted Item Shipment Not Required Location to Location Done =====')
+        //endregion
+
+
+
+
+        //region Scenario 10. Inventory Adjustment Quantity Change Non Lotted Item
+        .displayText('===== Scenario 10. Inventory Adjustment Quantity Change Non Lotted Item=====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Inventory Adjustments','Screen')
         .waitUntilLoaded()
@@ -194,11 +219,11 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded('')
-        .displayText('===== Scenario 9. Inventory Adjustment Quantity Change Non Lotted Item Done =====')
+        .displayText('===== Scenario 10. Inventory Adjustment Quantity Change Non Lotted Item Done =====')
         //endregion
 
-        //region Scenario 10. Inventory Adjustment Quantity Change Lotted Item
-        .displayText('===== Scenario 10. Inventory Adjustment Quantity Change Lotted Item =====')
+        //region Scenario 11. Inventory Adjustment Quantity Change Lotted Item
+        .displayText('===== Scenario 11. Inventory Adjustment Quantity Change Lotted Item =====')
         .clickMenuScreen('Inventory Adjustments','Screen')
         .waitUntilLoaded()
         .clickButton('New')
@@ -229,12 +254,12 @@ StartTest (function (t) {
         .clickButton('Close')
         .waitUntilLoaded('')
         .clickMenuFolder('Inventory','Folder')
-        .displayText('===== Scenario 10. Inventory Adjustment Quantity Change Lotted Item =====')
+        .displayText('===== Scenario 11. Inventory Adjustment Quantity Change Lotted Item =====')
         //endregion
 
 
-        //region Scenario 11. Inventory Adjustment Lot Move Lotted Item
-        .displayText('===== Scenario 11. Inventory Adjustment Quantity Change Lotted Item =====')
+        //region Scenario 12. Inventory Adjustment Lot Move Lotted Item
+        .displayText('===== Scenario 12. Inventory Adjustment Quantity Change Lotted Item =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Inventory Adjustments','Screen')
         .waitUntilLoaded()
@@ -276,13 +301,13 @@ StartTest (function (t) {
         .clickButton('Close')
         .waitUntilLoaded('')
         .clickMenuFolder('Inventory','Folder')
-        .displayText('===== Scenario 11. Inventory Adjustment Quantity Change Lotted Item Done =====')
+        .displayText('===== Scenario 12. Inventory Adjustment Quantity Change Lotted Item Done =====')
         //endregion
 
 
 
-        //region Scenario 12. Inventory Count - Lock Inventory
-        .displayText('===== Scenario  12. Inventory Count - Lock Inventory =====')
+        //region Scenario 13. Inventory Count - Lock Inventory
+        .displayText('===== Scenario  13. Inventory Count - Lock Inventory =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Inventory Count','Screen')
         .clickButton('New')
@@ -341,7 +366,7 @@ StartTest (function (t) {
         //endregion
 
 
-        //region Scenario 13. Add new Storage Measurement Reading with 1 item only.
+        //region Scenario 14. Add new Storage Measurement Reading with 1 item only.
         .displayText('===== Scenario 13. Add new Storage Measurement Reading with 1 item only. ====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Storage Measurement Reading','Screen')
@@ -365,7 +390,7 @@ StartTest (function (t) {
         .clickButton('Close')
         .waitUntilLoaded()
         .clickMenuFolder('Inventory','Folder')
-        .displayText('===== Scenario 13. Add new Storage Measurement Reading with 1 item only. Done ====')
+        .displayText('===== Scenario 14. Add new Storage Measurement Reading with 1 item only. Done ====')
 
 
 

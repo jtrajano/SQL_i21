@@ -5,8 +5,34 @@ StartTest (function (t) {
 
 
 
+        //Create CT to IR for  Non Lotted Item Process Button
+        .displayText('===== Scenario 1: Create CT to IR for  Non Lotted Item Process Button =====')
+        .addFunction(function(next){
+            commonIC.addCTtoIRProcessButtonNonLotted (t,next, 'ABC Trucking','SC - Commodity - 01','0001 - Fort Wayne', 'Smoke - NLTI - 01','LB', 1000, 10)
+        })
+
+        //Create CT to IR for  Lotted Item Process Button
+        .displayText('===== Scenario 2:  CT to IR for Non Lotted Item Process Button =====')
+        .addFunction(function(next){
+            commonIC.addCTtoIRProcessButtonLotted (t,next, 'ABC Trucking', 'SC - Commodity - 01' ,'0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+        })
+
+
+        //Create PO to IR for Non Lotted Item Add Orders Screen
+        .displayText('===== Scenario 3: Create PO to IR for Non Lotted Item Add Orders Screen =====')
+        .addFunction(function(next){
+            commonIC.addPOtoIRAddOrdersButtonNonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - NLTI - 01','LB', 1000, 10)
+        })
+
+        //Create PO to IR for Lotted Item  Add Orders Screen
+        .displayText('===== Scenario 4: Create PO to IR for Lotted Item  Add Orders Screen =====')
+        .addFunction(function(next){
+            commonIC.addPOtoIRAddOrdersButtonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+        })
+
+
         //Create Direct IR for Lotted Item with other charges
-        .displayText('===== Scenario 1: Direct IR for Lotted Item with other charges  =====')
+        .displayText('===== Scenario 5: Direct IR for Lotted Item with other charges  =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Inventory Receipts','Screen')
         .clickButton('New')
@@ -76,54 +102,16 @@ StartTest (function (t) {
 
 
         //Create Direct IR for Non Lotted Item
-        .displayText('===== Scenario 2: Create Direct IR for Non Lotted Item =====')
+        .displayText('===== Scenario 6: Create Direct IR for Non Lotted Item =====')
         .addFunction(function(next){
             commonIC.addDirectIRNonLotted (t,next, 'ABC Trucking', 1, 'Smoke - NLTI - 01','LB', 1000, 10)
         })
 
         //Create Direct IR for Lotted Item
-        .displayText('===== Scenario 3: Create Direct IR for Lotted Item =====')
+        .displayText('===== Scenario 7: Create Direct IR for Lotted Item =====')
         .addFunction(function(next){
             commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
         })
-
-        //Create PO to IR for Non Lotted Item Add Orders Screen
-        .displayText('===== Scenario 6: Create PO to IR for Non Lotted Item Add Orders Screen =====')
-        .addFunction(function(next){
-            commonIC.addPOtoIRAddOrdersButtonNonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - NLTI - 01','LB', 1000, 10)
-        })
-
-        //Create PO to IR for Lotted Item  Add Orders Screen
-        .displayText('===== Scenario 7: Create PO to IR for Lotted Item  Add Orders Screen =====')
-        .addFunction(function(next){
-            commonIC.addPOtoIRAddOrdersButtonLotted (t,next, 'ABC Trucking', '0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
-        })
-
-        //Create CT to IR for  Non Lotted Item Process Button
-        .displayText('===== Scenario 8: Create CT to IR for  Non Lotted Item Process Button =====')
-        .addFunction(function(next){
-            commonIC.addCTtoIRProcessButtonNonLotted (t,next, 'ABC Trucking','SC - Commodity - 01','0001 - Fort Wayne', 'Smoke - NLTI - 01','LB', 1000, 10)
-        })
-
-        //Create CT to IR for  Lotted Item Process Button
-        .displayText('===== Scenario 9:  CT to IR for Non Lotted Item Process Button =====')
-        .addFunction(function(next){
-            commonIC.addCTtoIRProcessButtonLotted (t,next, 'ABC Trucking', 'SC - Commodity - 01' ,'0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
-        })
-
-        //Create Direct IS for Non Lotted Item
-        .displayText('===== Scenario 10: Create Direct IS for Non Lotted Item =====')
-        .addFunction(function(next){
-            commonIC.addDirectISNonLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne','Smoke - NLTI - 01','LB', 100)
-        })
-
-
-        //Create Direct IS for Non Lotted Item
-        .displayText('===== Scenario 11: Create Direct IS for Lotted Item =====')
-        .addFunction(function(next){
-            commonIC.addDirectISLotted (t,next, 'Apple Spice Sales', 'Truck', 'USD', '0001 - Fort Wayne', 'Smoke - LTI - 01','LB', 100, 'LOT-01')
-        })
-
 
 
 
