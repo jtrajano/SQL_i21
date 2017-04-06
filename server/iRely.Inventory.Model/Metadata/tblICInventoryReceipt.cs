@@ -1833,6 +1833,13 @@ namespace iRely.Inventory.Model
         public string strCurrency { get; set; }
         public string strAllVouchers { get; set; }
         public string strFilterString { get; set; }
+        public string strContainerNumber { get; set; }
+        public int? intLoadContainerId { get; set; }
+        public string strItemUOM { get; set; }
+        public int? intItemUOMId { get; set; }
+        public string strCostUOM { get; set; }
+        public int? intCostUOMId { get; set; }
+
     }
 
     public class vyuICGetReceiptAddTransferOrder

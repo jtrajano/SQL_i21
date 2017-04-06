@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets89db868f9378a9aff5459ab346254290df8cce1d8ee6addfe3c9883cebef4bee))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsc7cd12b83eb077ea63d5c2e0aaa2892aa8bdd17ef7bcdfa9f42121124181afe9))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets89db868f9378a9aff5459ab346254290df8cce1d8ee6addfe3c9883cebef4bee : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsc7cd12b83eb077ea63d5c2e0aaa2892aa8bdd17ef7bcdfa9f42121124181afe9 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "89db868f9378a9aff5459ab346254290df8cce1d8ee6addfe3c9883cebef4bee"; }
+            get { return "c7cd12b83eb077ea63d5c2e0aaa2892aa8bdd17ef7bcdfa9f42121124181afe9"; }
         }
 
         /// <summary>
@@ -13349,7 +13349,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryReceiptVoucher
-        [CodeFirstDatabaseSchema.vyuICGetInventoryReceiptVoucher](T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptId, T1.vyuICGetInventoryReceiptVoucher_dtmReceiptDate, T1.vyuICGetInventoryReceiptVoucher_strVendor, T1.vyuICGetInventoryReceiptVoucher_strLocationName, T1.vyuICGetInventoryReceiptVoucher_strReceiptNumber, T1.vyuICGetInventoryReceiptVoucher_strBillOfLading, T1.vyuICGetInventoryReceiptVoucher_strReceiptType, T1.vyuICGetInventoryReceiptVoucher_strOrderNumber, T1.vyuICGetInventoryReceiptVoucher_strItemNo, T1.vyuICGetInventoryReceiptVoucher_strItemDescription, T1.vyuICGetInventoryReceiptVoucher_dblUnitCost, T1.vyuICGetInventoryReceiptVoucher_dblReceiptQty, T1.vyuICGetInventoryReceiptVoucher_dblVoucherQty, T1.vyuICGetInventoryReceiptVoucher_dblReceiptLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblVoucherLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblReceiptTax, T1.vyuICGetInventoryReceiptVoucher_dblVoucherTax, T1.vyuICGetInventoryReceiptVoucher_dblOpenQty, T1.vyuICGetInventoryReceiptVoucher_dblItemsPayable, T1.vyuICGetInventoryReceiptVoucher_dblTaxesPayable, T1.vyuICGetInventoryReceiptVoucher_dtmLastVoucherDate, T1.vyuICGetInventoryReceiptVoucher_intCurrencyId, T1.vyuICGetInventoryReceiptVoucher_strCurrency, T1.vyuICGetInventoryReceiptVoucher_strAllVouchers, T1.vyuICGetInventoryReceiptVoucher_strFilterString)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryReceiptVoucher](T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptId, T1.vyuICGetInventoryReceiptVoucher_dtmReceiptDate, T1.vyuICGetInventoryReceiptVoucher_strVendor, T1.vyuICGetInventoryReceiptVoucher_strLocationName, T1.vyuICGetInventoryReceiptVoucher_strReceiptNumber, T1.vyuICGetInventoryReceiptVoucher_strBillOfLading, T1.vyuICGetInventoryReceiptVoucher_strReceiptType, T1.vyuICGetInventoryReceiptVoucher_strOrderNumber, T1.vyuICGetInventoryReceiptVoucher_strItemNo, T1.vyuICGetInventoryReceiptVoucher_strItemDescription, T1.vyuICGetInventoryReceiptVoucher_dblUnitCost, T1.vyuICGetInventoryReceiptVoucher_dblReceiptQty, T1.vyuICGetInventoryReceiptVoucher_dblVoucherQty, T1.vyuICGetInventoryReceiptVoucher_dblReceiptLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblVoucherLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblReceiptTax, T1.vyuICGetInventoryReceiptVoucher_dblVoucherTax, T1.vyuICGetInventoryReceiptVoucher_dblOpenQty, T1.vyuICGetInventoryReceiptVoucher_dblItemsPayable, T1.vyuICGetInventoryReceiptVoucher_dblTaxesPayable, T1.vyuICGetInventoryReceiptVoucher_dtmLastVoucherDate, T1.vyuICGetInventoryReceiptVoucher_intCurrencyId, T1.vyuICGetInventoryReceiptVoucher_strCurrency, T1.vyuICGetInventoryReceiptVoucher_strAllVouchers, T1.vyuICGetInventoryReceiptVoucher_strFilterString, T1.vyuICGetInventoryReceiptVoucher_strContainerNumber, T1.vyuICGetInventoryReceiptVoucher_intLoadContainerId, T1.vyuICGetInventoryReceiptVoucher_strItemUOM, T1.vyuICGetInventoryReceiptVoucher_intItemUOMId, T1.vyuICGetInventoryReceiptVoucher_strCostUOM, T1.vyuICGetInventoryReceiptVoucher_intCostUOMId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, 
@@ -13378,6 +13378,12 @@ namespace Edm_EntityMappingGeneratedViews
             T.strCurrency AS vyuICGetInventoryReceiptVoucher_strCurrency, 
             T.strAllVouchers AS vyuICGetInventoryReceiptVoucher_strAllVouchers, 
             T.strFilterString AS vyuICGetInventoryReceiptVoucher_strFilterString, 
+            T.strContainerNumber AS vyuICGetInventoryReceiptVoucher_strContainerNumber, 
+            T.intLoadContainerId AS vyuICGetInventoryReceiptVoucher_intLoadContainerId, 
+            T.strItemUOM AS vyuICGetInventoryReceiptVoucher_strItemUOM, 
+            T.intItemUOMId AS vyuICGetInventoryReceiptVoucher_intItemUOMId, 
+            T.strCostUOM AS vyuICGetInventoryReceiptVoucher_strCostUOM, 
+            T.intCostUOMId AS vyuICGetInventoryReceiptVoucher_intCostUOMId, 
             True AS _from0
         FROM InventoryEntities.vyuICGetInventoryReceiptVouchers AS T
     ) AS T1");
@@ -13391,7 +13397,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryReceiptVouchers
-        [iRely.Inventory.Model.vyuICGetInventoryReceiptVoucher](T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptId, T1.vyuICGetInventoryReceiptVoucher_dtmReceiptDate, T1.vyuICGetInventoryReceiptVoucher_strVendor, T1.vyuICGetInventoryReceiptVoucher_strLocationName, T1.vyuICGetInventoryReceiptVoucher_strReceiptNumber, T1.vyuICGetInventoryReceiptVoucher_strBillOfLading, T1.vyuICGetInventoryReceiptVoucher_strReceiptType, T1.vyuICGetInventoryReceiptVoucher_strOrderNumber, T1.vyuICGetInventoryReceiptVoucher_strItemNo, T1.vyuICGetInventoryReceiptVoucher_strItemDescription, T1.vyuICGetInventoryReceiptVoucher_dblUnitCost, T1.vyuICGetInventoryReceiptVoucher_dblReceiptQty, T1.vyuICGetInventoryReceiptVoucher_dblVoucherQty, T1.vyuICGetInventoryReceiptVoucher_dblReceiptLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblVoucherLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblReceiptTax, T1.vyuICGetInventoryReceiptVoucher_dblVoucherTax, T1.vyuICGetInventoryReceiptVoucher_dblOpenQty, T1.vyuICGetInventoryReceiptVoucher_dblItemsPayable, T1.vyuICGetInventoryReceiptVoucher_dblTaxesPayable, T1.vyuICGetInventoryReceiptVoucher_dtmLastVoucherDate, T1.vyuICGetInventoryReceiptVoucher_intCurrencyId, T1.vyuICGetInventoryReceiptVoucher_strCurrency, T1.vyuICGetInventoryReceiptVoucher_strAllVouchers, T1.vyuICGetInventoryReceiptVoucher_strFilterString)
+        [iRely.Inventory.Model.vyuICGetInventoryReceiptVoucher](T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptId, T1.vyuICGetInventoryReceiptVoucher_dtmReceiptDate, T1.vyuICGetInventoryReceiptVoucher_strVendor, T1.vyuICGetInventoryReceiptVoucher_strLocationName, T1.vyuICGetInventoryReceiptVoucher_strReceiptNumber, T1.vyuICGetInventoryReceiptVoucher_strBillOfLading, T1.vyuICGetInventoryReceiptVoucher_strReceiptType, T1.vyuICGetInventoryReceiptVoucher_strOrderNumber, T1.vyuICGetInventoryReceiptVoucher_strItemNo, T1.vyuICGetInventoryReceiptVoucher_strItemDescription, T1.vyuICGetInventoryReceiptVoucher_dblUnitCost, T1.vyuICGetInventoryReceiptVoucher_dblReceiptQty, T1.vyuICGetInventoryReceiptVoucher_dblVoucherQty, T1.vyuICGetInventoryReceiptVoucher_dblReceiptLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblVoucherLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblReceiptTax, T1.vyuICGetInventoryReceiptVoucher_dblVoucherTax, T1.vyuICGetInventoryReceiptVoucher_dblOpenQty, T1.vyuICGetInventoryReceiptVoucher_dblItemsPayable, T1.vyuICGetInventoryReceiptVoucher_dblTaxesPayable, T1.vyuICGetInventoryReceiptVoucher_dtmLastVoucherDate, T1.vyuICGetInventoryReceiptVoucher_intCurrencyId, T1.vyuICGetInventoryReceiptVoucher_strCurrency, T1.vyuICGetInventoryReceiptVoucher_strAllVouchers, T1.vyuICGetInventoryReceiptVoucher_strFilterString, T1.vyuICGetInventoryReceiptVoucher_strContainerNumber, T1.vyuICGetInventoryReceiptVoucher_intLoadContainerId, T1.vyuICGetInventoryReceiptVoucher_strItemUOM, T1.vyuICGetInventoryReceiptVoucher_intItemUOMId, T1.vyuICGetInventoryReceiptVoucher_strCostUOM, T1.vyuICGetInventoryReceiptVoucher_intCostUOMId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, 
@@ -13420,6 +13426,12 @@ namespace Edm_EntityMappingGeneratedViews
             T.strCurrency AS vyuICGetInventoryReceiptVoucher_strCurrency, 
             T.strAllVouchers AS vyuICGetInventoryReceiptVoucher_strAllVouchers, 
             T.strFilterString AS vyuICGetInventoryReceiptVoucher_strFilterString, 
+            T.strContainerNumber AS vyuICGetInventoryReceiptVoucher_strContainerNumber, 
+            T.intLoadContainerId AS vyuICGetInventoryReceiptVoucher_intLoadContainerId, 
+            T.strItemUOM AS vyuICGetInventoryReceiptVoucher_strItemUOM, 
+            T.intItemUOMId AS vyuICGetInventoryReceiptVoucher_intItemUOMId, 
+            T.strCostUOM AS vyuICGetInventoryReceiptVoucher_strCostUOM, 
+            T.intCostUOMId AS vyuICGetInventoryReceiptVoucher_intCostUOMId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetInventoryReceiptVoucher AS T
     ) AS T1");
