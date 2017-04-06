@@ -4,6 +4,7 @@
     [strDescription]   NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [intProfitCenter]  INT           NULL,
     [intLOB]		   INT           NULL,
+	[strDifferentialPay] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL DEFAULT (('Actual')), 
     [intSort]          INT           NULL,
     [intConcurrencyId] INT           DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblPRDepartment] PRIMARY KEY CLUSTERED ([intDepartmentId] ASC),
