@@ -650,6 +650,74 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "alwaysDisplayDecimals": null,
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intEntityLocationId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Location Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strLocationName',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Location Name',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strAddress',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Address',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "    {",
+                                                    "\t\tdataIndex: 'intShipViaId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Ship Via Id',",
+                                                    "\t\thidden: true",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strLocationName",
+                                                "fieldLabel": "Ship From",
+                                                "hideTrigger": null,
+                                                "itemId": "cboShipFrom",
+                                                "labelAlign": "top",
+                                                "labelWidth": 65,
+                                                "layout|flex": 1,
+                                                "layout|margins": null,
+                                                "name": null,
+                                                "valueField": "strLocationName"
+                                            },
+                                            "name": "MyComboBox6",
+                                            "configAlternates": {
+                                                "alwaysDisplayDecimals": "boolean",
+                                                "columns": "array"
+                                            },
+                                            "designerId": "5213581d-f8f3-4c04-a933-56bc58404677",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "alwaysDisplayDecimals",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "columns": [
                                                     "[",
                                                     "\t{",
@@ -741,7 +809,7 @@
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strLocationName",
                                                 "enableDrillDown": true,
-                                                "fieldLabel": "Location",
+                                                "fieldLabel": "Location (Ship To)",
                                                 "itemId": "cboLocation",
                                                 "labelAlign": "top",
                                                 "labelWidth": 80,
@@ -1110,73 +1178,6 @@
                                                             },
                                                             "designerId": "d9440ce3-8e07-4197-a08b-74d2b9cccca9",
                                                             "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intEntityLocationId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Location Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strLocationName',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Location Name',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strAddress',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Address',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "    {",
-                                                                    "\t\tdataIndex: 'intShipViaId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Ship Via Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strLocationName",
-                                                                "fieldLabel": "Ship From",
-                                                                "hideTrigger": null,
-                                                                "itemId": "cboShipFrom",
-                                                                "labelWidth": 65,
-                                                                "layout|flex": null,
-                                                                "layout|margins": null,
-                                                                "name": null,
-                                                                "valueField": "strLocationName"
-                                                            },
-                                                            "name": "MyComboBox6",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean",
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "5213581d-f8f3-4c04-a933-56bc58404677",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
-                                                                    "type": "string"
-                                                                },
                                                                 {
                                                                     "group": "(Custom Properties)",
                                                                     "name": "columns",
@@ -1825,7 +1826,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter124",
+                                                                            "name": "filter11",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3677,7 +3678,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter125",
+                                                                            "name": "filter12",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -5434,7 +5435,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter126",
+                                                                    "name": "filter13",
                                                                     "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6704,7 +6705,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter127",
+                                                    "name": "filter14",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -7184,7 +7185,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter128",
+                                                    "name": "filter15",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -7795,7 +7796,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging1",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
