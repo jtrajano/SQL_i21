@@ -3355,27 +3355,28 @@ IF @post = 1
 				,dblUOMQty					= ItemUOM.dblUnitQty
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost					= ISNULL(dbo.fnMultiply (	CASE WHEN IST.strType = 'Finished Good' AND Detail.ysnBlended = 1 
-																			THEN (
-																				SELECT SUM(ICIT.[dblCost]) 
-																				FROM
-																					(SELECT [intTransactionId], [strTransactionId], [dblCost], [ysnIsUnposted], [strTransactionForm] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
-																				INNER JOIN
-																					(SELECT [intWorkOrderId], [intBatchID], [strWorkOrderNo] FROM tblMFWorkOrder WITH (NOLOCK)) MFWO
-																						ON ICIT.[strTransactionId] = MFWO.[strWorkOrderNo]
-																						AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
-																				WHERE
-																					MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.intWorkOrderId)FROM tblMFWorkOrder WITH (NOLOCK) WHERE tblMFWorkOrder.intInvoiceDetailId = Detail.intInvoiceDetailId)
-																					AND ICIT.[ysnIsUnposted] = 0
-																					AND ICIT.[strTransactionForm] = 'Produce'
-																			)
-																			ELSE
-																				CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
-																							dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) 
-																						ELSE 
-																							IST.dblLastCost  
-																				END 
-																		END
+				,dblCost					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN IST.strType = 'Finished Good' AND Detail.ysnBlended = 1 
+																				THEN (
+																					SELECT SUM(ICIT.[dblCost]) 
+																					FROM
+																						(SELECT [intTransactionId], [strTransactionId], [dblCost], [ysnIsUnposted], [strTransactionForm] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
+																					INNER JOIN
+																						(SELECT [intWorkOrderId], [intBatchID], [strWorkOrderNo] FROM tblMFWorkOrder WITH (NOLOCK)) MFWO
+																							ON ICIT.[strTransactionId] = MFWO.[strWorkOrderNo]
+																							AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
+																					WHERE
+																						MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.intWorkOrderId)FROM tblMFWorkOrder WITH (NOLOCK) WHERE tblMFWorkOrder.intInvoiceDetailId = Detail.intInvoiceDetailId)
+																						AND ICIT.[ysnIsUnposted] = 0
+																						AND ICIT.[strTransactionForm] = 'Produce'
+																				)
+																				ELSE
+																					CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
+																								dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) 
+																							ELSE 
+																								IST.dblLastCost  
+																					END 
+																			END
+																			,Header.dblSplitPercent)
 																		,ItemUOM.dblUnitQty
 																	),@ZeroDecimal)
 				,dblSalesPrice				= Detail.dblPrice 
@@ -3397,7 +3398,7 @@ IF @post = 1
 				 FROM tblARInvoiceDetail WITH (NOLOCK)) Detail
 			INNER JOIN
 				(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCurrencyId, strImportFormat, intCompanyLocationId, intDistributionHeaderId, 
-					intLoadDistributionHeaderId, strActualCostId, dtmShipDate, intPeriodsToAccrue, ysnImpactInventory
+					intLoadDistributionHeaderId, strActualCostId, dtmShipDate, intPeriodsToAccrue, ysnImpactInventory, dblSplitPercent
 				 FROM tblARInvoice WITH (NOLOCK)) Header
 					ON Detail.intInvoiceId = Header.intInvoiceId AND strTransactionType  IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')
 						AND ISNULL(intPeriodsToAccrue,0) <= 1
@@ -3438,12 +3439,13 @@ IF @post = 1
 				,dblUOMQty					= ICIUOM.[dblUnitQty]
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost					= ISNULL(dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.intItemLocationId) = @AVERAGECOST THEN 
-																					dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.intItemLocationId, ARIC.[intItemUnitMeasureId]) 
-																				ELSE 
-																					IST.dblLastCost  
-																		END 
-																		,ICIUOM.dblUnitQty
+				,dblCost					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.intItemLocationId) = @AVERAGECOST THEN 
+																										dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.intItemLocationId, ARIC.[intItemUnitMeasureId]) 
+																									ELSE 
+																										IST.dblLastCost  
+																							END 
+																							,ARI.[dblSplitPercent]
+																					), ICIUOM.dblUnitQty
 																),@ZeroDecimal)
 				,dblSalesPrice				= ARID.[dblPrice]
 				,intCurrencyId				= ARI.[intCurrencyId]
@@ -3466,7 +3468,7 @@ IF @post = 1
 				 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 					ON ARIC.[intItemId] = ARID.[intItemId]
 			INNER JOIN
-				(SELECT [intInvoiceId], [strInvoiceNumber], [dtmShipDate], [strTransactionType], [intCompanyLocationId], [intCurrencyId], intDistributionHeaderId, intLoadDistributionHeaderId, strActualCostId, [strImportFormat] 
+				(SELECT [intInvoiceId], [strInvoiceNumber], [dtmShipDate], [strTransactionType], [intCompanyLocationId], [intCurrencyId], intDistributionHeaderId, intLoadDistributionHeaderId, strActualCostId, [strImportFormat], [dblSplitPercent]
 				 FROM tblARInvoice WITH (NOLOCK)) ARI
 					ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARIC.[intCompanyLocationId] = ARI.[intCompanyLocationId]
 			INNER JOIN
