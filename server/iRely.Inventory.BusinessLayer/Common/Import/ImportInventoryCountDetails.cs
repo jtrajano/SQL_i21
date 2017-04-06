@@ -46,8 +46,8 @@ namespace iRely.Inventory.BusinessLayer
             fc.dblLastCost = 0;
             fc.dblPhysicalCount = 0;
 
-            int? intLocationId;
-            int? intItemId;
+            int? intLocationId=null;
+            int? intItemId=null;
 
             tblICInventoryCount fh = null;
 
@@ -80,7 +80,7 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         lu = GetLookUpId<tblSMCompanyLocation>(
                             context,
-                            m => m.strLocationName == value,
+                            m => m.strLocationName.Trim().ToLower() == value.Trim().ToLower(),
                             e => e.intCompanyLocationId);
                         if (lu != null)
                         {
@@ -262,7 +262,7 @@ namespace iRely.Inventory.BusinessLayer
                         {
                             lu = GetLookUpId<vyuICGetItemUOM>(
                                 context,
-                                m => m.strUnitMeasure == value && m.intItemId == fc.intItemId,
+                                m => m.strUnitMeasure.Trim().ToLower() == value.Trim().ToLower() && m.intItemId == fc.intItemId,
                                 e => e.intItemUOMId);
                             if (lu != null && lu != 0)
                                 fc.intItemUOMId = (int)lu;
@@ -287,7 +287,7 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         lu = GetLookUpId<tblICLot>(
                             context,
-                            m => m.strLotNumber == value.Trim(),
+                            m => m.strLotNumber.Trim() == value.Trim(),
                             e => e.intLotId);
                         if (lu != null)
                         {
@@ -304,7 +304,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_WARN,
                                 Status = STAT_INNER_AUTO,
-                                Message = string.Format("Lot '{0}' will be auto-created because it does not exists.", value)
+                                Message = string.Format("Lot '{0}' does not exists. It will be auto-created if the item is lotted.", value)
                             });
                             dr.Info = INFO_WARN;
                             //dr.Messages.Add(new ImportDataMessage()
@@ -318,6 +318,24 @@ namespace iRely.Inventory.BusinessLayer
                             //dr.Info = INFO_WARN;
                         }
                         break;
+                    case "cost":
+                    case "last cost":
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            if (intItemId != null)
+                            {
+                                var llu = GetLookUpObject<tblICItemPricing>(
+                                    context,
+                                    m => m.intItemId == (int)intItemId && m.intItemLocationId == fc.intItemLocationId);
+                                if (llu != null)
+                                {
+                                    fc.dblLastCost = llu.dblLastCost;
+                                }
+                            }
+                            break;
+                        }
+                        SetDecimal(value, del => fc.dblLastCost = del, "Cost", dr, header, row);
+                        break;
                     case "sub location":
                         if (string.IsNullOrEmpty(value))
                         {
@@ -325,7 +343,7 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         lu = GetLookUpId<tblSMCompanyLocationSubLocation>(
                             context,
-                            m => m.strSubLocationName == value,
+                            m => m.strSubLocationName.Trim().ToLower() == value.Trim().ToLower(),
                             e => e.intCompanyLocationSubLocationId);
                         if (lu != null)
                             fc.intSubLocationId = (int?)lu;
@@ -349,7 +367,7 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         lu = GetLookUpId<tblICStorageLocation>(
                             context,
-                            m => m.strName == value,
+                            m => m.strName.Trim().ToLower() == value.Trim().ToLower(),
                             e => e.intStorageLocationId);
                         if (lu != null)
                             fc.intStorageLocationId = (int?)lu;
