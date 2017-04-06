@@ -744,14 +744,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         xtype: 'container',
                                                         flex: 1,
                                                         width: 100,
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
+                                                        layout: 'border',
                                                         items: [
                                                             {
                                                                 xtype: 'container',
                                                                 flex: 3,
+                                                                region: 'center',
                                                                 layout: {
                                                                     type: 'vbox',
                                                                     align: 'stretch'
@@ -1676,9 +1674,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'container',
                                                                 flex: 2,
+                                                                region: 'south',
+                                                                split: true,
+                                                                height: 150,
                                                                 hidden: true,
                                                                 itemId: 'pnlLotTracking',
-                                                                width: 100,
                                                                 autoDestroy: false,
                                                                 layout: {
                                                                     type: 'hbox',
@@ -2288,9 +2288,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             },
                                                             {
                                                                 xtype: 'panel',
+                                                                region: 'south',
                                                                 border: false,
+                                                                height: 150,
                                                                 maxHeight: 30,
-                                                                width: 100,
                                                                 layout: {
                                                                     type: 'hbox',
                                                                     align: 'middle',
