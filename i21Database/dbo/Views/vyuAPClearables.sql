@@ -154,8 +154,8 @@ LEFT JOIN vyuAPVendor Vendor
 
 	
 WHERE Receipt.ysnPosted = 1 
-	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT TOP 1 intInventoryReceiptChargeId FROM tblAPBillDetail A
-																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId where B.ysnPosted = 1)
+	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
+																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
 
 UNION ALL
 SELECT 

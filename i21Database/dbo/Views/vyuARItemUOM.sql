@@ -6,5 +6,7 @@ A.intUnitMeasureId,
 A.intItemId, 
 B.strUnitMeasure,
 A.dblUnitQty 
-FROM dbo.tblICItemUOM AS A INNER JOIN
-dbo.tblICUnitMeasure AS B ON A.intUnitMeasureId = B.intUnitMeasureId
+FROM 
+	(SELECT intUnitMeasureId, intItemUOMId, intItemId, dblUnitQty FROM dbo.tblICItemUOM WITH (NOLOCK)) AS A 
+INNER JOIN
+	(SELECT intUnitMeasureId, strUnitMeasure FROM dbo.tblICUnitMeasure WITH (NOLOCK)) AS B ON A.intUnitMeasureId = B.intUnitMeasureId

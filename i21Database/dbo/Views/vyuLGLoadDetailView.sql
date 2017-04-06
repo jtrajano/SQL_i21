@@ -236,7 +236,7 @@ LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LoadDetai
 LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
 LEFT JOIN tblCTPricingType SPricingType ON SPricingType.intPricingTypeId = SDetail.intPricingTypeId
 LEFT JOIN tblCTIndex SIndex ON SIndex.intIndexId = SDetail.intIndexId
-LEFT JOIN tblTRSupplyPoint SSP ON SSP.intEntityVendorId = PIndex.intVendorId AND SSP.intEntityLocationId = PIndex.intVendorLocationId
+LEFT JOIN tblTRSupplyPoint SSP ON SSP.intEntityVendorId = SIndex.intVendorId AND SSP.intEntityLocationId = SIndex.intVendorLocationId
 LEFT JOIN tblICItem	IMS ON IMS.intItemId = SDetail.intItemId
 CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(SDetail.intContractDetailId) ADS
 LEFT JOIN tblSMCurrency	CUS ON CUS.intCurrencyID = SDetail.intCurrencyId			

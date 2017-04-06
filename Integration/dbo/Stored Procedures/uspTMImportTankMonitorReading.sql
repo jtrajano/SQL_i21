@@ -18,7 +18,7 @@ EXEC('
 		@ts_capacity NUMERIC(18,6) = 0,
 		@str_rpt_date_ti NVARCHAR(20) = NULL,
 		@ts_cat_1 NVARCHAR(50) = '''', --5 customer Number
-		@tk_level INT = NULL,
+		@tk_level NUMERIC(18,6) = NULL,
 		@tk_w_dau NUMERIC(18,6) = NULL,
 		@tx_serialnum NVARCHAR(50) = '''', --11 tank Monitor
 		@base_temp NVARCHAR(50) = '''',

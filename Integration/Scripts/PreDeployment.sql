@@ -222,6 +222,9 @@
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
 :r "..\dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql"
 
+--MANUFACTURING RECIPE
+:r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
+
 -- EnergyTrac
 :r "..\dbo\Stored Procedures\uspETRecreateDeliveryMetricsView.sql"
 

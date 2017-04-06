@@ -21,10 +21,10 @@ BEGIN
 	SET @dtmDate = GETDATE()
 
 	SELECT @intSplitId = intSplitId, @customerId = intEntityCustomerId
-	FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
+	FROM tblARInvoice WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceId
 
 	INSERT INTO @splitDetails(intSplitDetailId, intEntityId, dblSplitPercent)
-	SELECT intSplitDetailId, intEntityId, dblSplitPercent FROM [tblEMEntitySplitDetail] WHERE intSplitId = @intSplitId
+	SELECT intSplitDetailId, intEntityId, dblSplitPercent FROM [tblEMEntitySplitDetail]  WITH (NOLOCK) WHERE intSplitId = @intSplitId
 
 	WHILE EXISTS(SELECT NULL FROM @splitDetails)
 		BEGIN
@@ -48,13 +48,13 @@ BEGIN
 				BEGIN
 					SELECT @newInvoiceId	= intInvoiceId
 					     , @newCustomerId	= intEntityCustomerId 
-					FROM tblARInvoice 
+					FROM tblARInvoice  WITH (NOLOCK)
 					WHERE strInvoiceNumber = @newInvoiceNumber
 
 					SELECT @newShipToId = intShipToId
 					     , @newBillToId = intBillToId
 						 , @newTermId	= intTermsId 
-					FROM vyuARCustomerSearch 
+					FROM vyuARCustomerSearch  WITH (NOLOCK)
 					WHERE intEntityCustomerId = @newCustomerId
 
 					UPDATE tblARInvoice
@@ -73,13 +73,13 @@ BEGIN
 	UPDATE_CURRENT_INVOICE:
 	SELECT @intSplitEntityId = intEntityId
 		 , @dblSplitPercent = dblSplitPercent/100 
-	FROM [tblEMEntitySplitDetail] 
+	FROM [tblEMEntitySplitDetail]  WITH (NOLOCK)
 	WHERE intSplitDetailId = @intSplitDetailId
 
 	SELECT @newShipToId = intShipToId
 		 , @newBillToId = intBillToId
 		 , @newTermId	= intTermsId 
-	FROM vyuARCustomerSearch 
+	FROM vyuARCustomerSearch  WITH (NOLOCK)
 	WHERE intEntityCustomerId = @intSplitEntityId
 
 	UPDATE tblARInvoice 
@@ -98,10 +98,10 @@ BEGIN
 	WHERE intInvoiceId = @intInvoiceId
 		
 	INSERT INTO @InvoiceDetails
-	SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId
+	SELECT intInvoiceDetailId FROM tblARInvoiceDetail  WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceId
 
 	DECLARE @TransactionType varchar(20)
-	SET @TransactionType = (SELECT strTransactionType FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
+	SET @TransactionType = (SELECT strTransactionType FROM tblARInvoice  WITH (NOLOCK) WHERE intInvoiceId = @intInvoiceId)
 
 	WHILE EXISTS(SELECT NULL FROM @InvoiceDetails)
 		BEGIN

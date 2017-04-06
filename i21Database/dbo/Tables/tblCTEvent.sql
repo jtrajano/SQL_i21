@@ -12,7 +12,7 @@
 	[strReminderCondition] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intAlertFrequency] INT NULL DEFAULT 0, 
 	[strSubject] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
-	[strMessage] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strMessage] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NOT NULL, 
 	CONSTRAINT [PK_tblCTEvent_intActionId] PRIMARY KEY CLUSTERED ([intEventId] ASC),
 	CONSTRAINT [UK_tblCTEvent_strActionName] UNIQUE ([strEventName]),

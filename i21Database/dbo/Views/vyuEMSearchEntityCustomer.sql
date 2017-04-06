@@ -11,7 +11,8 @@
 		e.strState,  
 		e.strZipCode,
 		intWarehouseId = isnull(e.intWarehouseId, -99),
-		b.strFederalTaxId
+		b.strFederalTaxId,
+		c.ysnActive
 	from tblEMEntity b			
 		join tblARCustomer c
 			on c.intEntityCustomerId =b.intEntityId --and c.ysnActive = 1

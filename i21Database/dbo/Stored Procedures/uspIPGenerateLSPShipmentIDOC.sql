@@ -147,7 +147,8 @@ Begin
 		@strWarehouseVendorAccNo	=	strWarehouseVendorAccNo,
 		@strMVessel					=	strMVessel,
 		@strMVoyageNumber			=	strMVoyageNumber,
-		@strHeaderRowState			=	strRowState
+		@strHeaderRowState			=	strRowState,
+		@strSubLocation				=	strSubLocation
 	From tblLGLoadLSPStg Where intLoadStgId=@intMinHeader
 
 	Set @intPositionId=NULL
@@ -352,7 +353,7 @@ Begin
 			@strDeliverySubItemNo		=	strDeliverySubItemNo,
 			@strItemNo					=	strItemNo,
 			@strItemDesc				=	strItemDesc,
-			@strSubLocation				=	strSubLocation,
+			--@strSubLocation				=	strSubLocation,
 			@strStorageLocation			=	strStorageLocation,
 			@strContainerNo				=	strContainerNo,
 			@dblQuantity				=	dblQuantity,

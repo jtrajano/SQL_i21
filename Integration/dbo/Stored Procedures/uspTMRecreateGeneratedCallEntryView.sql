@@ -122,7 +122,7 @@ BEGIN
 				,dtmDispatchedDate = A.dtmDispatchingDate
 				,intConcurrencyId = A.intConcurrencyId
 				,intDispatchId = A.intDispatchID
-				,intCustomerID = B.intCustomerID
+				--,intCustomerID = B.intCustomerID
 				,intCompanyLocationId  = B.intLocationId
 				,strCompanyLocationName  = I.strLocationName
 				,dblLocationLongitude = ISNULL(I.dblLongitude,0.0)

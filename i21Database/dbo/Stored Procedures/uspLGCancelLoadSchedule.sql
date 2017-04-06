@@ -14,6 +14,7 @@ BEGIN TRY
 	DECLARE @dblContractSIQty NUMERIC(18, 6)
 	DECLARE @intExternalId INT
 	DECLARE @strScreenName NVARCHAR(100)
+	DECLARE @intLoadShippingInstructionId INT
 	DECLARE @tblLoadDetail TABLE (intLoadDetailRecordId INT Identity(1, 1)
 								 ,intLoadDetailId INT
 								 ,intContractDetailId INT
@@ -40,6 +41,10 @@ BEGIN TRY
 		BEGIN
 			SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
 			FROM @tblLoadDetail
+
+			SELECT @intLoadShippingInstructionId = intLoadShippingInstructionId
+			FROM tblLGLoad
+			WHERE intLoadId = @intLoadId
 
 			WHILE (@intMinLoadDetailId IS NOT NULL)
 			BEGIN
@@ -85,6 +90,18 @@ BEGIN TRY
 			EXEC [uspLGCreateLoadIntegrationLSPLog] @intLoadId = @intLoadId
 				,@strRowState = 'Delete'
 				,@intShipmentType = @intShipmentType
+
+			IF (ISNULL(@intLoadShippingInstructionId,0) <> 0)
+			BEGIN
+				UPDATE tblLGLoad
+				SET intShipmentStatus = 7
+					,strExternalShipmentNumber = NULL
+				WHERE intLoadId = @intLoadShippingInstructionId
+
+				EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadShippingInstructionId
+					,@strRowState = 'Added'
+					,@intShipmentType = 2
+			END
 		END
 		ELSE
 		BEGIN

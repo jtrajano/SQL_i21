@@ -47,7 +47,9 @@ AS
 					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId,
 					CD.strEntityContract,
 					CD.dtmStartDate,
-					CD.dtmEndDate
+					CD.dtmEndDate,
+					CD.strBook,
+					CD.strSubBook
 
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
@@ -96,7 +98,7 @@ AS
 					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
 					'Unpriced' AS strStatus,
 					CAST(0 AS INT) AS intLotsFixed,
-					SUM(CD.dblNoOfLots) AS dblBalanceNoOfLots,
+					CH.dblNoOfLots AS dblBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
 					CAST(NULL AS NUMERIC(18, 6)) AS dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
@@ -104,7 +106,9 @@ AS
 					CU.intCommodityUnitMeasureId			AS	intBasisCommodityUOMId,
 					CD.strEntityContract,
 					MAX(CD.dtmStartDate)		AS	dtmStartDate,
-					MAX(CD.dtmEndDate)			AS	dtmEndDate
+					MAX(CD.dtmEndDate)			AS	dtmEndDate,
+					CD.strBook,
+					CD.strSubBook
 
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
@@ -130,7 +134,9 @@ AS
 					CD.intSalespersonId,
 					CU.intCommodityUnitMeasureId,
 					CH.dblNoOfLots,
-					CD.strEntityContract
+					CD.strEntityContract,
+					CD.strBook,
+					CD.strSubBook
 
 		UNION ALL
 
@@ -180,7 +186,9 @@ AS
 					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId,
 					CD.strEntityContract,
 					CD.dtmStartDate,
-					CD.dtmEndDate
+					CD.dtmEndDate,
+					CD.strBook,
+					CD.strSubBook
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractSequence		CD	ON	CD.intContractDetailId = PF.intContractDetailId
@@ -239,7 +247,9 @@ AS
 					CAST (NULL AS INT)			AS	intBasisCommodityUOMId,
 					CD.strEntityContract,
 					MAX(CD.dtmStartDate)		AS	dtmStartDate,
-					MAX(CD.dtmEndDate)			AS	dtmEndDate
+					MAX(CD.dtmEndDate)			AS	dtmEndDate,
+					CD.strBook,
+					CD.strSubBook
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractSequence		CD	ON	CD.intContractHeaderId = PF.intContractHeaderId
@@ -266,5 +276,7 @@ AS
 					PF.intPriceFixationId,
 					CU.intCommodityUnitMeasureId,
 					CD.strEntityContract,
-					PF.intPriceContractId
+					PF.intPriceContractId,
+					CD.strBook,
+					CD.strSubBook
 	)t

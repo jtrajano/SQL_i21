@@ -540,32 +540,33 @@ BEGIN TRY
 				,@intWeightUOMId = NULL
 				,@dblWeightPerQty = NULL
 
-			SELECT @intLotId = intLotId
-			FROM tblMFWorkOrderInputLot
-			WHERE intWorkOrderId = @intWorkOrderId
-				AND intItemId = @intItemId
+	--		SELECT @intLotId = WI.intLotId
+	--		FROM tblMFWorkOrderInputLot WI
+	--		JOIN tblICLot L on L.intLotId=WI.intLotId
+	--		WHERE intWorkOrderId = @intWorkOrderId
+	--			AND WI.intItemId = @intItemId
+	--			And L.dblWeight -@dblYieldQuantity>0
 
-			SELECT @strLotNumber = strLotNumber
-			FROM dbo.tblICLot
-			WHERE intLotId = @intLotId
+	--		SELECT @strLotNumber = strLotNumber
+	--		FROM dbo.tblICLot
+	--		WHERE intLotId = @intLotId
 
-			SELECT @intLotId = intLotId
-			FROM tblICLot
-			WHERE strLotNumber = @strLotNumber
-				AND intStorageLocationId = @intStorageLocationId
+	--		SELECT @intLotId = intLotId
+	--		FROM tblICLot
+	--		WHERE strLotNumber = @strLotNumber
+	--			AND intStorageLocationId = @intStorageLocationId
+	----			
 
-			SELECT @strLotNumber = strLotNumber
-				,@intLotId = intLotId
-				,@dblQty = dblQty
-				,@intItemUOMId = intItemUOMId
-				,@intSubLocationId = intSubLocationId
-				,@intWeightUOMId = intWeightUOMId
-				,@dblWeightPerQty = dblWeightPerQty
-			FROM dbo.tblICLot
-			WHERE intLotId = @intLotId
+	--		SELECT @strLotNumber = strLotNumber
+	--			,@intLotId = intLotId
+	--			,@dblQty = dblQty
+	--			,@intItemUOMId = intItemUOMId
+	--			,@intSubLocationId = intSubLocationId
+	--			,@intWeightUOMId = intWeightUOMId
+	--			,@dblWeightPerQty = dblWeightPerQty
+	--		FROM dbo.tblICLot
+	--		WHERE intLotId = @intLotId
 
-			IF @intLotId IS NULL
-			BEGIN
 				SELECT TOP 1 @strLotNumber = strLotNumber
 					,@intLotId = intLotId
 					,@dblQty = dblQty
@@ -578,10 +579,9 @@ BEGIN TRY
 					AND intItemId = @intItemId
 					AND intLotStatusId = 1
 					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND dblQty > 0
+					AND dblQty-abs(@dblYieldQuantity) > 0
 				ORDER BY dtmDateCreated DESC
-			END
-
+	
 			IF @intLotId IS NULL
 				--AND @dblYieldQuantity > 0
 			BEGIN

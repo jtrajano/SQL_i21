@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantMSM]
-@intCheckoutId Int
+@intCheckoutId Int,
+@strStatusMsg NVARCHAR(250) OUTPUT,
+@intCountRows int OUTPUT
 AS
 BEGIN
 
@@ -185,6 +187,6 @@ BEGIN
             SET @intCnt = @intCnt + 1
     END
 
+	SET @intCountRows = 1
+	SET @strStatusMsg = 'Success'
 END
-GO
-

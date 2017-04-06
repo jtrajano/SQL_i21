@@ -19,7 +19,7 @@ SELECT
 	,[intOrderUOMId]					= CTCD.[intItemUOMId]
 	,[strOrderUnitMeasure]				= ICUMO.[strUnitMeasure]
 	,[intItemUOMId]						= CTCD.[intPriceItemUOMId]
-	,[strUnitMeasure]					= ISNULL(ICUMO.[strUnitMeasure], ICUMP.[strUnitMeasure])
+	,[strUnitMeasure]					= ISNULL(ICUMP.[strUnitMeasure], ICUMO.[strUnitMeasure])
 	,[intPricingTypeId]					= CTPT.[intPricingTypeId]
 	,[strPricingType]					= CTPT.[strPricingType]
 	,[dblOrderPrice]					= CTCD.[dblCashPrice] / (CASE WHEN CTCD.[intItemUOMId] <> CTCD.[intPriceItemUOMId] THEN ISNULL(ICIUP.dblUnitQty,1) ELSE 1 END)
@@ -48,6 +48,8 @@ SELECT
 	,[strDestinationGrade]				= CTCH.[strDestinationGrade]
 	,[intDestinationWeightId]			= CTCH.[intWeightId]
 	,[strDestinationWeight]				= CTCH.[strDestinationWeight]
+	,[intItemWeightUOMId]				= CTCD.[intNetWeightUOMId]
+	,[strWeightUnitMeasure]				= ICUMW.[strUnitMeasure]
 	FROM
 		(SELECT [intContractHeaderId],
 				[intContractDetailId],
@@ -69,7 +71,8 @@ SELECT
 				[intPricingTypeId],
 				[intRateTypeId],
 				[intCurrencyExchangeRateId],
-				[dblRate]
+				[dblRate],
+				[intNetWeightUOMId]
 		 FROM 
 			tblCTContractDetail) CTCD 
 	INNER JOIN
@@ -148,7 +151,18 @@ SELECT
 		(SELECT [intUnitMeasureId],
 				[strUnitMeasure]
 		 FROM 
-			tblICUnitMeasure) ICUMO ON ICIUO.[intUnitMeasureId] = ICUMO.[intUnitMeasureId]					
+			tblICUnitMeasure) ICUMO ON ICIUO.[intUnitMeasureId] = ICUMO.[intUnitMeasureId]		
+	LEFT OUTER JOIN
+		(SELECT [intItemUOMId],
+				[intItemId],
+				[intUnitMeasureId]
+		 FROM 
+			tblICItemUOM) ICIUW ON CTCD.[intNetWeightUOMId] = ICIUW.[intItemUOMId] AND CTCD.[intItemId] = ICIUW.[intItemId]
+	LEFT OUTER JOIN
+		(SELECT [intUnitMeasureId],
+				[strUnitMeasure]
+		 FROM 
+			tblICUnitMeasure) ICUMW ON ICIUW.[intUnitMeasureId] = ICUMW.[intUnitMeasureId]			
 	LEFT OUTER JOIN
 		(SELECT [intCurrencyID]
 				,[strCurrency]

@@ -34,9 +34,9 @@ SELECT
 	,@CustomerLocationId	= (CASE WHEN ISNULL(F.[strFobPoint],'Destination') = 'Origin ' THEN I.[intBillToLocationId] ELSE I.[intShipToLocationId] END)
 	,@FreightTermId			= I.[intFreightTermId] 
 FROM
-	tblARInvoice I
+	(SELECT [intEntityCustomerId], [intCompanyLocationId], [dtmDate], [intDistributionHeaderId], [intFreightTermId], [intBillToLocationId],[intShipToLocationId], [intInvoiceId] FROM tblARInvoice WITH (NOLOCK)) I
 LEFT OUTER JOIN
-	tblSMFreightTerms F
+	(SELECT [intFreightTermId], [strFobPoint] FROM tblSMFreightTerms WITH (NOLOCK)) F
 		ON I.[intFreightTermId] = F.[intFreightTermId] 
 WHERE
 	I.[intInvoiceId] = @InvoiceIdLocal
@@ -54,7 +54,7 @@ SELECT
 	 [intInvoiceDetailId]
 	,[intItemId]
 FROM
-	tblARInvoiceDetail
+	tblARInvoiceDetail WITH (NOLOCK)
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 	AND (
@@ -95,11 +95,11 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,@SubCurrencyRate		= ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
 			,@CurrencyExchangeRate	= ISNULL(tblARInvoiceDetail.[dblCurrencyExchangeRate], 1)
 		FROM
-			tblARInvoiceDetail
+			tblARInvoiceDetail WITH (NOLOCK)
 		WHERE
 			[intInvoiceDetailId] = @InvoiceDetailId
 			
-		SELECT @ItemType = [strType] FROM tblICItem WHERE intItemId = @ItemId
+		SELECT @ItemType = [strType] FROM tblICItem WITH (NOLOCK) WHERE intItemId = @ItemId
 			
 		IF @TaxGroupId = 0
 			SET @TaxGroupId = NULL
@@ -158,7 +158,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 		SELECT
 			 @TotalItemTax		= SUM([dblAdjustedTax])
 			,@TotalBaseItemTax	= SUM([dblBaseAdjustedTax])
-			,@TaxGroupId		= MAX([intTaxGroupId]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
+			,@TaxGroupId		= MAX([intTaxGroupId]) FROM [tblARInvoiceDetailTax] WITH (NOLOCK) WHERE [intInvoiceDetailId] = @InvoiceDetailId
 
 		IF @TaxGroupId = 0
 			SET @TaxGroupId = NULL

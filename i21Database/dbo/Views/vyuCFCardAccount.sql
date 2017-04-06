@@ -27,5 +27,5 @@ FROM         dbo.tblCFAccount AS A INNER JOIN
                          dbo.tblCFDepartment AS D ON D.intDepartmentId = C.intDepartmentId LEFT JOIN
                          dbo.vyuCFCustomerEntity AS Cus ON A.intCustomerId = Cus.intEntityCustomerId INNER JOIN
                          dbo.tblCFInvoiceCycle AS I ON I.intInvoiceCycleId = A.intInvoiceCycle LEFT JOIN
-                         dbo.vyuARCustomerContacts AS arCustCon ON A.intCustomerId = arCustCon.intCustomerEntityId
+                         dbo.vyuARCustomerContacts AS arCustCon ON A.intCustomerId = arCustCon.intCustomerEntityId AND arCustCon.ysnDefaultContact = 1 AND arCustCon.ysnPortalAccess = 0
 GO

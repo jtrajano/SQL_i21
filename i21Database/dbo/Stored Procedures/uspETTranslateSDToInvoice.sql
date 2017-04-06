@@ -103,7 +103,7 @@ BEGIN
 	BEGIN
 		DROP TABLE #tmpSDToInvoice
 	END
-	SELECT * INTO #tmpSDToInvoice 
+	SELECT intImportSDToInvoiceId = IDENTITY(INT, 1, 1), * INTO #tmpSDToInvoice 
 	FROM @StagingTable
 
 	IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpUniqueInvoiceList')) 
@@ -198,43 +198,11 @@ BEGIN
 
 			--Get Customer Entity Id
 			SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)
-	
 			--Get Location Id
 			SET @intLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @strLocation)
-
 			--Get Item id
 			SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
-
-			--Get Site Id 
-			SET @intSiteId = ( 
-				SELECT TOP 1 intSiteID
-				FROM tblTMCustomer A
-				INNER JOIN tblTMSite B
-					ON A.intCustomerID = B.intCustomerID
-				WHERE intCustomerNumber = @intCustomerEntityId
-					AND B.intSiteNumber = CAST(@strSiteNumber AS INT)
-			)
-
-			IF (ISNULL(@intSiteId,0) = 0)
-			BEGIN
-				SET @strErrorMessage = 'Invalid Site.'
-				IF(@ysnHeader = 1)
-				BEGIN
-					GOTO LOGHEADERENTRY
-				END
-				ELSE
-				BEGIN
-					GOTO LOGDETAILENTRY
-				END
-				
-			END
-
-			--Get other Site Info
-			SELECT TOP 1
-				@strSiteBillingBy = strBillingBy
-			FROM tblTMSite
-			WHERE intSiteID = @intSiteId
-
+			
 			---Set TransactionType
 			SET @strTransactionType = (SELECT (CASE	WHEN @strType = 'B' THEN 'Invoice'
 													WHEN @strType = 'A' THEN 'Cash'
@@ -269,6 +237,32 @@ BEGIN
 											WHERE A.strContractNumber = @strContractNumber
 											AND A.intEntityId = @intCustomerEntityId
 											AND B.intContractSeq = @intContractSequence)
+			
+				--TM----------------------------------------------------------------------------------------------------------------------------
+				--Get Site Id 
+				SET @intSiteId = ( SELECT TOP 1 intSiteID	FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
+															WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))
+				----------------------------------------------------------------------------------------------------------------------------
+
+				
+				--Notification/Warnings/Messsages
+				 --------------------------------------------------------------------------------------------------------------------------
+				 --IF (ISNULL(@intSiteId,0) = 0)
+					--BEGIN
+					--	SET @strErrorMessage = 'Invalid Site.'
+					--	IF(@ysnHeader = 1)
+					--		BEGIN
+					--			GOTO LOGHEADERENTRY
+					--		END
+					--	ELSE
+					--		BEGIN
+					--			GOTO LOGDETAILENTRY
+					--		END
+					--END
+
+					--Get other Site Info
+					--NOT IN USED-  SELECT TOP 1 @strSiteBillingBy = strBillingBy FROM tblTMSite WHERE intSiteID = @intSiteId
+					--------------------------------------------------------------------------------------------------------------------------
 
 			---Insert/Create Invoice 
 			IF(@ysnHeader = 1)
@@ -304,6 +298,7 @@ BEGIN
 				--GEt the created invoice number
 				SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
 				SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
+
 
 				--Check if any error in creating invoice 
 				--Log Entry
@@ -341,38 +336,6 @@ BEGIN
 					
 					GOTO CONTINUELOOP
 
-					/*
-					--Proceed to next customer invoice list if header insertion failed and not a skipped tax record 
-					IF(@ysnProcessNextAsHeader = 0)
-					BEGIN
-						--Delete the Header record from the detail table
-						DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceId
-
-						---insert the remaining details to the log table
-						INSERT INTO @ResultTableLog (
-								strCustomerNumber			
-								,strInvoiceNumber			
-								,strSiteNumber				
-								,dtmDate					
-								,intLineItem				
-								,strFileName				
-								,strStatus
-								,ysnSuccessful
-						)
-						SELECT
-								strCustomerNumber = strCustomerNumber		
-								,strInvoiceNumber =	strInvoiceNumber		
-								,strSiteNumber = strSiteNumber				
-								,dtmDate = dtmDate					
-								,intLineItem = intLineItem		
-								,strFileName = ''				
-								,strStatus = 'Header Record not Created'
-								,ysnSuccessful = 0
-						FROM #tmpCustomerInvoiceDetail
-						
-					
-						GOTO CONTINUELOOP
-					END */
 				END
 			END
 			ELSE
@@ -399,7 +362,6 @@ BEGIN
 				IF 	LTRIM(@strErrorMessage) != ''
 				BEGIN		
 					ROLLBACK TRANSACTION
-					
 
 					---insert log table
 					INSERT INTO @ResultTableLog (
@@ -430,30 +392,6 @@ BEGIN
 							,strTransactionType = 'Invoice'
 					GOTO CONTINUELOOP
 				END
-				/*
-				ELSE
-				BEGIN
-					-- Insert the detail to log table 	
-					INSERT INTO @ResultTableLog (
-							strCustomerNumber			
-							,strInvoiceNumber			
-							,strSiteNumber				
-							,dtmDate					
-							,intLineItem				
-							,strFileName				
-							,strStatus
-							,ysnSuccessful
-					)
-					SELECT
-							strCustomerNumber = @strCustomerNumber		
-							,strInvoiceNumber =	@strInvoiceNumber		
-							,strSiteNumber = @strSiteNumber				
-							,dtmDate = @dtmInvoiceDate					
-							,intLineItem = @intLineItem		
-							,strFileName = ''				
-							,strStatus = 'Added as line item to ' + @strNewInvoiceNumber
-							,ysnSuccessful = 1
-				END*/
 			END
 			
 			--CHECK  for taxes
@@ -582,7 +520,22 @@ BEGIN
 						,dtmDate = @dtmInvoiceDate
 						,intLineItem = 0						
 						,strFileName = ''				
-						,strStatus = 'Successfully created ' + @strNewInvoiceNumber
+						,strStatus = 'Successfully created ' + @strNewInvoiceNumber  +
+						-- Tank consumption site
+						ISNULL((SELECT '<br>' + 'Unable to find a tank consumption site for item no. ' + ICI.strItemNo
+						FROM
+							tblARInvoice ARI
+						INNER JOIN tblARInvoiceDetail ARID
+							ON ARI.intInvoiceId = ARID.intInvoiceId
+						INNER JOIN tblICItem ICI
+							ON ARID.intItemId = ICI.intItemId
+						WHERE
+							ARI.strType = 'Tank Delivery'
+							AND ARID.intSiteId IS NULL
+							AND ICI.ysnTankRequired = 1
+							AND ICI.strType <> 'Comment'
+							AND ARI.intInvoiceId =  @intNewInvoiceId),'')
+
 						,ysnSuccessful = 1
 						,intInvoiceId = @intNewInvoiceId
 						,strRecordId  = @intNewInvoiceId     
@@ -592,12 +545,11 @@ BEGIN
 			--Delete the processed detail list
 			DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceId
 			
-			
-			
 			--IF(@ysnProcessNextAsHeader = 0)
 			--BEGIN
 				SET @ysnHeader = 0
 			--END
+
 		END
 		
 		COMMIT TRANSACTION

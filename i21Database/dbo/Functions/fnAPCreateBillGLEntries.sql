@@ -81,7 +81,7 @@ BEGIN
 		[dblDebit]						=	0,
 		[dblCredit]						=	 CAST(CASE WHEN ForexRate.dblRate > 0 
 												 THEN  (CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
-													 ELSE Details.dblTotal END)
+													 ELSE Details.dblTotal END) * ISNULL(NULLIF(Details.dblRate,0),1) 
 											ELSE (
 													(CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
 													 ELSE A.dblAmountDue END))
@@ -113,8 +113,18 @@ BEGIN
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	0,      
 		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	CAST((CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
-											 ELSE A.dblAmountDue END) AS DECIMAL(18,2)),
+		[dblCreditForeign]				=	CAST(
+											CASE WHEN Details.dblRate > 0 
+														THEN
+														(CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
+														 ELSE Details.dblTotal END)
+														ELSE
+														(
+														(CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
+														 ELSE A.dblAmountDue END)
+														)
+											END														 
+											AS DECIMAL(18,2)),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
@@ -134,13 +144,13 @@ BEGIN
 			(
 				SELECT CASE COUNT(DISTINCT A.dblRate) WHEN 1 THEN 0 ELSE 1 END AS ysnUniqueForex
 				FROM tblAPBillDetail A
-				WHERE A.intBillId = (SELECT intTransactionId FROM @tmpTransacions)
-			) ForexRateCounter
-			CROSS APPLY
-			(
-				SELECT SUM((dblTotal + dblTax) * A.dblRate) AS dblTotal
-				FROM dbo.tblAPBillDetail A 
 				WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+			) ForexRateCounter
+			OUTER APPLY
+			(
+				SELECT (R.dblTotal + R.dblTax) AS dblTotal , R.dblRate  AS dblRate
+				FROM dbo.tblAPBillDetail R
+				WHERE R.intBillId = A.intBillId AND dblRate > 0
 			) Details
 			
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
@@ -412,8 +422,9 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL OR D.ysnInventoryCost = 0 THEN B.intAccountId
-												ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
+		--[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL OR D.ysnInventoryCost = 0 THEN B.intAccountId
+		--										ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
+		[intAccountId]					=	dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing'), --AP-3227 always use the AP Clearing Account
 		[dblDebit]						=	CAST(CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal 
 												 ELSE (CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
 														ELSE 

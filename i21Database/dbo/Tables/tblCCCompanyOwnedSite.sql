@@ -12,5 +12,5 @@
 
 	CONSTRAINT [FK_tblCCCompanyOwnedSite_tblGLAccount_intCreditCardReceivableAccountId] FOREIGN KEY ([intCreditCardReceivableAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]) ,
 	CONSTRAINT [FK_tblCCCompanyOwnedSite_tblGLAccount_intFeeExpenseAccountId] FOREIGN KEY ([intFeeExpenseAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]) ,
-	CONSTRAINT [FK_tblCCCompanyOwnedSite_tblCCVendorDefault_intVendorDefaultId] FOREIGN KEY ([intVendorDefaultId]) REFERENCES [dbo].[tblCCVendorDefault] ([intVendorDefaultId])
+	CONSTRAINT [FK_tblCCCompanyOwnedSite_tblCCVendorDefault_intVendorDefaultId] FOREIGN KEY ([intVendorDefaultId]) REFERENCES [dbo].[tblCCVendorDefault] ([intVendorDefaultId]) ON DELETE CASCADE
 )

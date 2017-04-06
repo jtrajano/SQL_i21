@@ -7,9 +7,9 @@ BEGIN
 
 	INSERT INTO @OrderToUpdate(intSalesOrderId)
 	SELECT DISTINCT intSalesOrderId 
-	FROM tblSOSalesOrderDetail 
+	FROM tblSOSalesOrderDetail WITH (NOLOCK)
 		WHERE intSalesOrderDetailId IN (SELECT DISTINCT intSalesOrderDetailId 
-											FROM tblARInvoiceDetail 			
+											FROM tblARInvoiceDetail WITH (NOLOCK)			
 											WHERE intInvoiceId = @intInvoiceId)
 	
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderToUpdate ORDER BY intSalesOrderId)

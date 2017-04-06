@@ -2043,10 +2043,10 @@ IF @post = 0
 				,GL.strTransactionForm
 				,GL.strModuleName
 				,GL.intConcurrencyId
-				,[dblDebitForeign]				= GL.dblDebitForeign
-				,[dblDebitReport]				= GL.dblDebitReport
-				,[dblCreditForeign]				= GL.dblCreditForeign
-				,[dblCreditReport]				= GL.dblCreditReport
+				,[dblDebitForeign]				= GL.dblCreditForeign
+				,[dblDebitReport]				= GL.dblCreditReport
+				,[dblCreditForeign]				= GL.dblDebitForeign
+				,[dblCreditReport]				= GL.dblDebitReport
 				,[dblReportingRate]				= GL.dblReportingRate 
 				,[dblForeignRate]				= GL.dblForeignRate 
 				,[strRateType]					= ''

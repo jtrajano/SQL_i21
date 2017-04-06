@@ -130,7 +130,7 @@ print 'BEGIN POST DEPLOYMENT'
 --:r "..\..\..\Integration\dbo\Views\vyuTMLeaseCode.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 :r ".\TM\2_DataTransferAndCorrection.sql" 
-:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
+--:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateLeaseSearchView.sql"
@@ -214,6 +214,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
 :r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
 :r .\AR\DefaultData\27_RenamePricingForContracts.sql
+:r .\AR\DefaultData\28_UpdateBaseAmounts.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -365,7 +366,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\10_Checkout_Commander_Translog.sql
 
 -- Motor Fuel Tax
-:r .\TF\DefaultData\_TaxAuthority.sql
+--:r .\TF\DefaultData\_TaxAuthority.sql
 --:r .\TF\DefaultData\_Frequency.sql
 --:r .\TF\DefaultData\_ReportingComponent.sql
 --:r .\TF\DefaultData\_ProductCode.sql

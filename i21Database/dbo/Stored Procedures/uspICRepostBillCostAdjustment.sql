@@ -148,7 +148,39 @@ BEGIN
 
 	IF EXISTS(SELECT TOP 1 1 FROM @adjustedEntries)
 	BEGIN
-		INSERT INTO @billGLEntries 
+		INSERT INTO @billGLEntries (
+			dtmDate						
+			,strBatchId					
+			,intAccountId				
+			,dblDebit					
+			,dblCredit					
+			,dblDebitUnit				
+			,dblCreditUnit				
+			,strDescription				
+			,strCode					
+			,strReference				
+			,intCurrencyId				
+			,dblExchangeRate			
+			,dtmDateEntered				
+			,dtmTransactionDate			
+			,strJournalLineDescription  
+			,intJournalLineNo			
+			,ysnIsUnposted				
+			,intUserId					
+			,intEntityId				
+			,strTransactionId			
+			,intTransactionId			
+			,strTransactionType			
+			,strTransactionForm			
+			,strModuleName				
+			,intConcurrencyId			
+			,dblDebitForeign			
+			,dblDebitReport				
+			,dblCreditForeign			
+			,dblCreditReport			
+			,dblReportingRate			
+			,dblForeignRate			
+		)
 		EXEC uspICPostCostAdjustment 
 			@adjustedEntries
 			, @strBatchId

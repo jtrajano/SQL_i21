@@ -29,10 +29,11 @@ SELECT
 		,t.strFilterString
 		,t.dtmCreated
 		,t.intCurrencyId
-		,t.strCurrency
-		,ri.intContainerId
-		,strContainer = c.strContainerNumber 
-FROM	tblICSearchReceiptVoucher t INNER JOIN tblICInventoryReceiptItem ri
-			ON t.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-		LEFT JOIN tblLGLoadContainer c
-			ON c.intLoadContainerId = ri.intContainerId
+		,t.strCurrency		
+		,t.strContainerNumber 
+		,t.intLoadContainerId
+		,t.strItemUOM
+		,t.intItemUOMId
+		,t.strCostUOM
+		,t.intCostUOMId
+FROM	tblICSearchReceiptVoucher t 

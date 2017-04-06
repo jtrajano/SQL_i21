@@ -37,6 +37,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@endgroup					AS NVARCHAR(50)
 		,@datatype					AS NVARCHAR(50)
 		,@strCustomerName			AS NVARCHAR(MAX)
+		,@ysnReportDetail			AS BIT				= 0
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -160,6 +161,10 @@ SELECT @strCustomerName = [from]
 FROM @temp_xml_table
 WHERE [fieldname] IN ('strName', 'strCustomerName')
 
+SELECT @ysnReportDetail = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnReportDetail'
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -171,7 +176,7 @@ IF @dtmDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 	
-DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue')
+DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue', 'ysnReportDetail')
 
 SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
 
@@ -180,9 +185,12 @@ BEGIN
 	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
 	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
 	
-	IF (@fieldname = 'strName' OR @fieldname = 'strCustomerName' )
-		SET @filter = REPLACE (@filter, '|^|', ''',''')
-		SET @filter = REPLACE (@filter, ''',''''', '''')
+		IF (@fieldname = 'strName' OR @fieldname = 'strCustomerName' )
+			SET @filter = REPLACE (@filter, '|^|', ''',''')
+			SET @filter = REPLACE (@filter, ''',''''', '''')
+			SET @filter = REPLACE (@filter, '=', 'IN (')
+			SET @filter = @filter + ')'
+			SET @filter = REPLACE (@filter, '))', ')')
 
 	DELETE FROM @temp_xml_table WHERE id = @id
 
@@ -390,205 +398,210 @@ WHERE
 					WHERE 
 						strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo') )
 
---- Get only valid customers
-TRUNCATE TABLE tblARSearchStatementCustomer
-INSERT INTO tblARSearchStatementCustomer (intEntityCustomerId, strCustomerNumber, strCustomerName, dblARBalance, intConcurrencyId)
-SELECT DISTINCT ABC.intEntityCustomerId, ABC.strCustomerNumber, ABC.strCustomerName, ARC.dblARBalance, 0 	 
-FROM
-(
---- Without CF Report
-SELECT  
-	   [STATEMENTREPORT].[intEntityCustomerId]		 
-	  ,[STATEMENTREPORT].[strCustomerNumber]		 
-	  ,[STATEMENTREPORT].[strCustomerName]			 
-	  ,[STATEMENTREPORT].[dblCreditLimit]			
-	  ,[intInvoiceId]							= 1			 
-	  ,[strInvoiceNumber]			 
-	  ,[strBOLNumber]				 
-	  ,[dtmDate]					
-	  ,[dtmDueDate]				
-	  ,[dtmShipDate]				
-	  ,[dblInvoiceTotal]			
-	  ,[intPaymentId]				
-	  ,[strRecordNumber]			
-	  ,[strPaymentInfo]			
-	  ,[dtmDatePaid]				
-	  ,[dblPayment]				
-	  ,[dblBalance]				
-	  ,[STATEMENTREPORT].[strSalespersonName]		
-      ,[strAccountStatusCode]			
-	  ,[strLocationName]			  
-	  ,[strFullAddress]			
-	  ,[strCompanyName]			
-	  ,[strCompanyAddress]		
-      ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-      ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
-      ,dbl10Days								= ISNULL(AGINGREPORT.dbl10Days, 0)
-      ,dbl30Days								= ISNULL(AGINGREPORT.dbl30Days, 0)
-      ,dbl60Days								= ISNULL(AGINGREPORT.dbl60Days, 0)
-      ,dbl90Days								= ISNULL(AGINGREPORT.dbl90Days, 0)
-      ,dbl91Days								= ISNULL(AGINGREPORT.dbl91Days, 0)
-      ,dblCredits								= ISNULL(AGINGREPORT.dblCredits, 0)
-	  ,dblPrepayments							= ISNULL(AGINGREPORT.dblPrepayments, 0)
-      ,dtmAsOfDate								= @dtmDateTo
-      ,blbLogo									= dbo.fnSMGetCompanyLogo('Header')
-FROM @temp_statement_table AS STATEMENTREPORT
-INNER JOIN @temp_aging_table AS AGINGREPORT 
-	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-INNER JOIN tblARCustomer CUSTOMER 
-	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
-AND STATEMENTREPORT.intInvoiceId NOT IN (SELECT intInvoiceId FROM @temp_cf_table)
+IF @ysnReportDetail = 1
+BEGIN
+	--- Get only valid customers
+	TRUNCATE TABLE tblARSearchStatementCustomer
+	INSERT INTO tblARSearchStatementCustomer (intEntityCustomerId, strCustomerNumber, strCustomerName, dblARBalance, strTransactionId, strTransactionDate, dblTotalAmount, intConcurrencyId)
+	SELECT DISTINCT ABC.intEntityCustomerId, ABC.strCustomerNumber, ABC.strCustomerName, ARC.dblARBalance, '', CONVERT(char(10), GETDATE(),126), 0, 0
+	FROM
+	(
+	--- Without CF Report
+	SELECT  
+		   [STATEMENTREPORT].[intEntityCustomerId]		 
+		  ,[STATEMENTREPORT].[strCustomerNumber]		 
+		  ,[STATEMENTREPORT].[strCustomerName]			 
+		  ,[STATEMENTREPORT].[dblCreditLimit]			
+		  ,[intInvoiceId]							= 1			 
+		  ,[strInvoiceNumber]			 
+		  ,[strBOLNumber]				 
+		  ,[dtmDate]					
+		  ,[dtmDueDate]				
+		  ,[dtmShipDate]				
+		  ,[dblInvoiceTotal]			
+		  ,[intPaymentId]				
+		  ,[strRecordNumber]			
+		  ,[strPaymentInfo]			
+		  ,[dtmDatePaid]				
+		  ,[dblPayment]				
+		  ,[dblBalance]				
+		  ,[STATEMENTREPORT].[strSalespersonName]		
+		  ,[strAccountStatusCode]			
+		  ,[strLocationName]			  
+		  ,[strFullAddress]			
+		  ,[strCompanyName]			
+		  ,[strCompanyAddress]		
+		  ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+		  ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
+		  ,dbl10Days								= ISNULL(AGINGREPORT.dbl10Days, 0)
+		  ,dbl30Days								= ISNULL(AGINGREPORT.dbl30Days, 0)
+		  ,dbl60Days								= ISNULL(AGINGREPORT.dbl60Days, 0)
+		  ,dbl90Days								= ISNULL(AGINGREPORT.dbl90Days, 0)
+		  ,dbl91Days								= ISNULL(AGINGREPORT.dbl91Days, 0)
+		  ,dblCredits								= ISNULL(AGINGREPORT.dblCredits, 0)
+		  ,dblPrepayments							= ISNULL(AGINGREPORT.dblPrepayments, 0)
+		  ,dtmAsOfDate								= @dtmDateTo
+		  ,blbLogo									= dbo.fnSMGetCompanyLogo('Header')
+	FROM @temp_statement_table AS STATEMENTREPORT
+	INNER JOIN @temp_aging_table AS AGINGREPORT 
+		ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+	INNER JOIN tblARCustomer CUSTOMER 
+		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+	WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
+	AND STATEMENTREPORT.intInvoiceId NOT IN (SELECT intInvoiceId FROM @temp_cf_table)
 
-UNION ALL
+	UNION ALL
 
---- With CF Report
-SELECT  
-	   [STATEMENTREPORT].[intEntityCustomerId]		 
-	  ,[STATEMENTREPORT].[strCustomerNumber]		 
-	  ,[STATEMENTREPORT].[strCustomerName]			 
-	  ,[STATEMENTREPORT].[dblCreditLimit]			
-	  ,[intInvoiceId]							= CFReportTable.intInvoiceId
-	  ,[strInvoiceNumber]						= CFReportTable.strInvoiceReportNumber
-	  ,[strBOLNumber]				 
-	  ,[dtmDate]								= CFReportTable.dtmInvoiceDate				
-	  ,[dtmDueDate]								= CFReportTable.dtmInvoiceDate
-	  ,[dtmShipDate]				
-	  ,[dblInvoiceTotal]			
-	  ,[intPaymentId]				
-	  ,[strRecordNumber]								
-	  ,[strPaymentInfo]			
-	  ,[dtmDatePaid]				
-	  ,[dblPayment]				
-	  ,[dblBalance]				
-	  ,[STATEMENTREPORT].[strSalespersonName]		
-      ,[strAccountStatusCode]			
-	  ,[strLocationName]			  
-	  ,[strFullAddress]			
-	  ,[strCompanyName]			
-	  ,[strCompanyAddress]		
-      ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-      ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
-      ,dbl10Days								= ISNULL(AGINGREPORT.dbl10Days, 0)
-      ,dbl30Days								= ISNULL(AGINGREPORT.dbl30Days, 0)
-      ,dbl60Days								= ISNULL(AGINGREPORT.dbl60Days, 0)
-      ,dbl90Days								= ISNULL(AGINGREPORT.dbl90Days, 0)
-      ,dbl91Days								= ISNULL(AGINGREPORT.dbl91Days, 0)
-      ,dblCredits								= ISNULL(AGINGREPORT.dblCredits, 0)
-	  ,dblPrepayments							= ISNULL(AGINGREPORT.dblPrepayments, 0)
-      ,dtmAsOfDate								= @dtmDateTo
-      ,blbLogo									= dbo.fnSMGetCompanyLogo('Header')
-FROM @temp_statement_table AS STATEMENTREPORT
-INNER JOIN @temp_aging_table AS AGINGREPORT 
-	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-INNER JOIN tblARCustomer CUSTOMER 
-	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-INNER JOIN (SELECT 
-				intInvoiceId
-				, strInvoiceNumber
-				, strInvoiceReportNumber
-				, dtmInvoiceDate 
-			FROM 
-				@temp_cf_table) CFReportTable ON STATEMENTREPORT.intInvoiceId = CFReportTable.intInvoiceId
-WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
-AND STATEMENTREPORT.intInvoiceId IN (SELECT intInvoiceId FROM @temp_cf_table)) ABC 
-INNER JOIN 
-	(SELECT intEntityCustomerId, dblARBalance FROM tblARCustomer ) ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
+	--- With CF Report
+	SELECT  
+		   [STATEMENTREPORT].[intEntityCustomerId]		 
+		  ,[STATEMENTREPORT].[strCustomerNumber]		 
+		  ,[STATEMENTREPORT].[strCustomerName]			 
+		  ,[STATEMENTREPORT].[dblCreditLimit]			
+		  ,[intInvoiceId]							= CFReportTable.intInvoiceId
+		  ,[strInvoiceNumber]						= CFReportTable.strInvoiceReportNumber
+		  ,[strBOLNumber]				 
+		  ,[dtmDate]								= CFReportTable.dtmInvoiceDate				
+		  ,[dtmDueDate]								= CFReportTable.dtmInvoiceDate
+		  ,[dtmShipDate]				
+		  ,[dblInvoiceTotal]			
+		  ,[intPaymentId]				
+		  ,[strRecordNumber]								
+		  ,[strPaymentInfo]			
+		  ,[dtmDatePaid]				
+		  ,[dblPayment]				
+		  ,[dblBalance]				
+		  ,[STATEMENTREPORT].[strSalespersonName]		
+		  ,[strAccountStatusCode]			
+		  ,[strLocationName]			  
+		  ,[strFullAddress]			
+		  ,[strCompanyName]			
+		  ,[strCompanyAddress]		
+		  ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+		  ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
+		  ,dbl10Days								= ISNULL(AGINGREPORT.dbl10Days, 0)
+		  ,dbl30Days								= ISNULL(AGINGREPORT.dbl30Days, 0)
+		  ,dbl60Days								= ISNULL(AGINGREPORT.dbl60Days, 0)
+		  ,dbl90Days								= ISNULL(AGINGREPORT.dbl90Days, 0)
+		  ,dbl91Days								= ISNULL(AGINGREPORT.dbl91Days, 0)
+		  ,dblCredits								= ISNULL(AGINGREPORT.dblCredits, 0)
+		  ,dblPrepayments							= ISNULL(AGINGREPORT.dblPrepayments, 0)
+		  ,dtmAsOfDate								= @dtmDateTo
+		  ,blbLogo									= dbo.fnSMGetCompanyLogo('Header')
+	FROM @temp_statement_table AS STATEMENTREPORT
+	INNER JOIN @temp_aging_table AS AGINGREPORT 
+		ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+	INNER JOIN tblARCustomer CUSTOMER 
+		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+	INNER JOIN (SELECT 
+					intInvoiceId
+					, strInvoiceNumber
+					, strInvoiceReportNumber
+					, dtmInvoiceDate 
+				FROM 
+					@temp_cf_table) CFReportTable ON STATEMENTREPORT.intInvoiceId = CFReportTable.intInvoiceId
+	WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
+	AND STATEMENTREPORT.intInvoiceId IN (SELECT intInvoiceId FROM @temp_cf_table)) ABC 
+	INNER JOIN 
+		(SELECT intEntityCustomerId, dblARBalance FROM tblARCustomer ) ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
+END
 
+ELSE
+BEGIN
+	--- Without CF Report
+	SELECT  
+		   [STATEMENTREPORT].[intEntityCustomerId]		 
+		  ,[STATEMENTREPORT].[strCustomerNumber]		 
+		  ,[STATEMENTREPORT].[strCustomerName]			 
+		  ,[STATEMENTREPORT].[dblCreditLimit]			
+		  ,[intInvoiceId]							= 1			 
+		  ,[strInvoiceNumber]			 
+		  ,[strBOLNumber]				 
+		  ,[dtmDate]					
+		  ,[dtmDueDate]				
+		  ,[dtmShipDate]				
+		  ,[dblInvoiceTotal]			
+		  ,[intPaymentId]				
+		  ,[strRecordNumber]			
+		  ,[strPaymentInfo]			
+		  ,[dtmDatePaid]				
+		  ,[dblPayment]				
+		  ,[dblBalance]				
+		  ,[STATEMENTREPORT].[strSalespersonName]		
+		  ,[strAccountStatusCode]			
+		  ,[strLocationName]			  
+		  ,[strFullAddress]			
+		  ,[strCompanyName]			
+		  ,[strCompanyAddress]		
+		  ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+		  ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
+		  ,dbl10Days								= ISNULL(AGINGREPORT.dbl10Days, 0)
+		  ,dbl30Days								= ISNULL(AGINGREPORT.dbl30Days, 0)
+		  ,dbl60Days								= ISNULL(AGINGREPORT.dbl60Days, 0)
+		  ,dbl90Days								= ISNULL(AGINGREPORT.dbl90Days, 0)
+		  ,dbl91Days								= ISNULL(AGINGREPORT.dbl91Days, 0)
+		  ,dblCredits								= ISNULL(AGINGREPORT.dblCredits, 0)
+		  ,dblPrepayments							= ISNULL(AGINGREPORT.dblPrepayments, 0)
+		  ,dtmAsOfDate								= @dtmDateTo
+		  ,blbLogo									= dbo.fnSMGetCompanyLogo('Header')
+	FROM @temp_statement_table AS STATEMENTREPORT
+	INNER JOIN @temp_aging_table AS AGINGREPORT 
+		ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+	INNER JOIN tblARCustomer CUSTOMER 
+		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+	WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
+	AND STATEMENTREPORT.intInvoiceId NOT IN (SELECT intInvoiceId FROM @temp_cf_table)
 
---- Without CF Report
-SELECT  
-	   [STATEMENTREPORT].[intEntityCustomerId]		 
-	  ,[STATEMENTREPORT].[strCustomerNumber]		 
-	  ,[STATEMENTREPORT].[strCustomerName]			 
-	  ,[STATEMENTREPORT].[dblCreditLimit]			
-	  ,[intInvoiceId]							= 1			 
-	  ,[strInvoiceNumber]			 
-	  ,[strBOLNumber]				 
-	  ,[dtmDate]					
-	  ,[dtmDueDate]				
-	  ,[dtmShipDate]				
-	  ,[dblInvoiceTotal]			
-	  ,[intPaymentId]				
-	  ,[strRecordNumber]			
-	  ,[strPaymentInfo]			
-	  ,[dtmDatePaid]				
-	  ,[dblPayment]				
-	  ,[dblBalance]				
-	  ,[STATEMENTREPORT].[strSalespersonName]		
-      ,[strAccountStatusCode]			
-	  ,[strLocationName]			  
-	  ,[strFullAddress]			
-	  ,[strCompanyName]			
-	  ,[strCompanyAddress]		
-      ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-      ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
-      ,dbl10Days								= ISNULL(AGINGREPORT.dbl10Days, 0)
-      ,dbl30Days								= ISNULL(AGINGREPORT.dbl30Days, 0)
-      ,dbl60Days								= ISNULL(AGINGREPORT.dbl60Days, 0)
-      ,dbl90Days								= ISNULL(AGINGREPORT.dbl90Days, 0)
-      ,dbl91Days								= ISNULL(AGINGREPORT.dbl91Days, 0)
-      ,dblCredits								= ISNULL(AGINGREPORT.dblCredits, 0)
-	  ,dblPrepayments							= ISNULL(AGINGREPORT.dblPrepayments, 0)
-      ,dtmAsOfDate								= @dtmDateTo
-      ,blbLogo									= dbo.fnSMGetCompanyLogo('Header')
-FROM @temp_statement_table AS STATEMENTREPORT
-INNER JOIN @temp_aging_table AS AGINGREPORT 
-	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-INNER JOIN tblARCustomer CUSTOMER 
-	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
-AND STATEMENTREPORT.intInvoiceId NOT IN (SELECT intInvoiceId FROM @temp_cf_table)
+	UNION ALL
 
-UNION ALL
-
---- With CF Report
-SELECT  
-	   [STATEMENTREPORT].[intEntityCustomerId]		 
-	  ,[STATEMENTREPORT].[strCustomerNumber]		 
-	  ,[STATEMENTREPORT].[strCustomerName]			 
-	  ,[STATEMENTREPORT].[dblCreditLimit]			
-	  ,[intInvoiceId]							= CFReportTable.intInvoiceId
-	  ,[strInvoiceNumber]						= CFReportTable.strInvoiceReportNumber
-	  ,[strBOLNumber]				 
-	  ,[dtmDate]								= CFReportTable.dtmInvoiceDate				
-	  ,[dtmDueDate]								= CFReportTable.dtmInvoiceDate
-	  ,[dtmShipDate]				
-	  ,[dblInvoiceTotal]			
-	  ,[intPaymentId]				
-	  ,[strRecordNumber]								
-	  ,[strPaymentInfo]			
-	  ,[dtmDatePaid]				
-	  ,[dblPayment]				
-	  ,[dblBalance]				
-	  ,[STATEMENTREPORT].[strSalespersonName]		
-      ,[strAccountStatusCode]			
-	  ,[strLocationName]			  
-	  ,[strFullAddress]			
-	  ,[strCompanyName]			
-	  ,[strCompanyAddress]		
-      ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-      ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
-      ,dbl10Days								= ISNULL(AGINGREPORT.dbl10Days, 0)
-      ,dbl30Days								= ISNULL(AGINGREPORT.dbl30Days, 0)
-      ,dbl60Days								= ISNULL(AGINGREPORT.dbl60Days, 0)
-      ,dbl90Days								= ISNULL(AGINGREPORT.dbl90Days, 0)
-      ,dbl91Days								= ISNULL(AGINGREPORT.dbl91Days, 0)
-      ,dblCredits								= ISNULL(AGINGREPORT.dblCredits, 0)
-	  ,dblPrepayments							= ISNULL(AGINGREPORT.dblPrepayments, 0)
-      ,dtmAsOfDate								= @dtmDateTo
-      ,blbLogo									= dbo.fnSMGetCompanyLogo('Header')
-FROM @temp_statement_table AS STATEMENTREPORT
-INNER JOIN @temp_aging_table AS AGINGREPORT 
-	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-INNER JOIN tblARCustomer CUSTOMER 
-	ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-INNER JOIN (SELECT 
-				intInvoiceId
-				, strInvoiceNumber
-				, strInvoiceReportNumber
-				, dtmInvoiceDate 
-			FROM 
-				@temp_cf_table) CFReportTable ON STATEMENTREPORT.intInvoiceId = CFReportTable.intInvoiceId
-WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
-AND STATEMENTREPORT.intInvoiceId IN (SELECT intInvoiceId FROM @temp_cf_table)
+	--- With CF Report
+	SELECT  
+		   [STATEMENTREPORT].[intEntityCustomerId]		 
+		  ,[STATEMENTREPORT].[strCustomerNumber]		 
+		  ,[STATEMENTREPORT].[strCustomerName]			 
+		  ,[STATEMENTREPORT].[dblCreditLimit]			
+		  ,[intInvoiceId]							= CFReportTable.intInvoiceId
+		  ,[strInvoiceNumber]						= CFReportTable.strInvoiceReportNumber
+		  ,[strBOLNumber]				 
+		  ,[dtmDate]								= CFReportTable.dtmInvoiceDate				
+		  ,[dtmDueDate]								= CFReportTable.dtmInvoiceDate
+		  ,[dtmShipDate]				
+		  ,[dblInvoiceTotal]			
+		  ,[intPaymentId]				
+		  ,[strRecordNumber]								
+		  ,[strPaymentInfo]			
+		  ,[dtmDatePaid]				
+		  ,[dblPayment]				
+		  ,[dblBalance]				
+		  ,[STATEMENTREPORT].[strSalespersonName]		
+		  ,[strAccountStatusCode]			
+		  ,[strLocationName]			  
+		  ,[strFullAddress]			
+		  ,[strCompanyName]			
+		  ,[strCompanyAddress]		
+		  ,dblCreditAvailable						= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+		  ,dbl0Days									= ISNULL(AGINGREPORT.dbl0Days, 0)
+		  ,dbl10Days								= ISNULL(AGINGREPORT.dbl10Days, 0)
+		  ,dbl30Days								= ISNULL(AGINGREPORT.dbl30Days, 0)
+		  ,dbl60Days								= ISNULL(AGINGREPORT.dbl60Days, 0)
+		  ,dbl90Days								= ISNULL(AGINGREPORT.dbl90Days, 0)
+		  ,dbl91Days								= ISNULL(AGINGREPORT.dbl91Days, 0)
+		  ,dblCredits								= ISNULL(AGINGREPORT.dblCredits, 0)
+		  ,dblPrepayments							= ISNULL(AGINGREPORT.dblPrepayments, 0)
+		  ,dtmAsOfDate								= @dtmDateTo
+		  ,blbLogo									= dbo.fnSMGetCompanyLogo('Header')
+	FROM @temp_statement_table AS STATEMENTREPORT
+	INNER JOIN @temp_aging_table AS AGINGREPORT 
+		ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+	INNER JOIN tblARCustomer CUSTOMER 
+		ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+	INNER JOIN (SELECT 
+					intInvoiceId
+					, strInvoiceNumber
+					, strInvoiceReportNumber
+					, dtmInvoiceDate 
+				FROM 
+					@temp_cf_table) CFReportTable ON STATEMENTREPORT.intInvoiceId = CFReportTable.intInvoiceId
+	WHERE CUSTOMER.strStatementFormat = 'Payment Activity'
+	AND STATEMENTREPORT.intInvoiceId IN (SELECT intInvoiceId FROM @temp_cf_table)
+END

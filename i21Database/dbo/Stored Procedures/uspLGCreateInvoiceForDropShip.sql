@@ -184,10 +184,10 @@ BEGIN
 		,[intOrderUOMId]						= CD.[intOrderUOMId] 
 		,[dblQtyOrdered]						= CD.[dblOrderQuantity] 
 		,[intItemUOMId]							= CD.[intItemUOMId] 
-		,[dblQtyShipped]						= CD.[dblShipQuantity] 
+		,[dblQtyShipped]						= LD.dblQuantity
 		,[dblDiscount]							= 0 
 		,[dblItemWeight]						= 0 
-		,[intItemWeightUOMId]					= 0
+		,[intItemWeightUOMId]					= CD.[intItemWeightUOMId]
 		,[dblPrice]								= CD.[dblCashPrice] 
 		,[strPricing]							= 'Contract Pricing'
 		,[ysnRefreshPrice]						= 0

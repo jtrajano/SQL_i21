@@ -66,7 +66,7 @@ FROM
 			D.intBillId
 			,D.intPaymentId
 			,D.strPaymentInfo
-			,D.strBankAccountNo
+			,CONVERT(NVARCHAR(MAX),DecryptByKey(CAST(N'' as XML).value('xs:base64Binary(sql:column(''strBankAccountNo''))', 'varbinary(128)')))	 AS strBankAccountNo
 			,D.ysnPrinted
 			,D.ysnVoid
 			,D.ysnCleared
@@ -87,7 +87,7 @@ FROM
 		FROM dbo.tblSMScreen H
 		INNER JOIN dbo.tblSMTransaction I ON H.intScreenId = I.intScreenId
 		INNER JOIN dbo.tblSMApproval J ON I.intTransactionId = J.intTransactionId
-		INNER JOIN dbo.tblEMEntity K ON J.intApproverId = K.intEntityId
+		LEFT JOIN dbo.tblEMEntity K ON J.intApproverId = K.intEntityId
 		WHERE H.strScreenName = 'Voucher' AND H.strModule = 'Accounts Payable' AND J.ysnCurrent = 1
 		AND A.intBillId = I.intRecordId
 	) Approvals
