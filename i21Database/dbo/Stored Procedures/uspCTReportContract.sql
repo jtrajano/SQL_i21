@@ -30,6 +30,7 @@ BEGIN TRY
 			@SecondApprovalSign     VARBINARY(MAX),
 			@IsFullApproved         BIT = 0,
 			@ysnFairtrade			BIT = 0,
+			@ysnFeedOnApproval		BIT = 0,
 
 			@intLastApprovedContractId INT,
 			@intPrevApprovedContractId INT,
@@ -307,7 +308,10 @@ BEGIN TRY
 			)					SQ	ON	SQ.intContractHeaderId	=	CH.intContractHeaderId	AND  SQ.intRowNum = 1 
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 	
-	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId
+	SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference
+
+	IF @IsFullApproved=1  OR ISNULL(@ysnFeedOnApproval,0) = 0
+		UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId
 
 END TRY
 

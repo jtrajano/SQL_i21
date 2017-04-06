@@ -25,7 +25,9 @@ AS
 			END  dblAmountPer,
 			BD.dblTotal * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1) dblActual,
 			BD.dblTotal/ 
-			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CD.intPriceUnitMeasureId,CD.dblDetailQuantity) * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1)dblActualPer
+			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CD.intPriceUnitMeasureId,CD.dblDetailQuantity) * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1)dblActualPer,
+			BD.strBillTranactionType
+
 	FROM	vyuCTContractCostView		CC 
 	JOIN	vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId	
 	JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
@@ -34,11 +36,23 @@ AS
 											AND	CM.intItemId			=	CD.intItemId			LEFT
 	JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId			=	CD.intItemUOMId			LEFT
 	JOIN	(
-				SELECT	BD.intItemId,
-						BD.dblTotal,	
-						RC.intContractId AS intContractHeaderId
+					SELECT	BD.intItemId,
+							BD.dblTotal,	
+							BD.intContractHeaderId,
+							CASE	WHEN BL.intTransactionType = 1 THEN 'Voucher'
+									WHEN BL.intTransactionType = 2 THEN 'Vendor Prepayment'
+									WHEN BL.intTransactionType = 3 THEN 'Debit Memo'
+									WHEN BL.intTransactionType = 4 THEN 'Payable'
+									WHEN BL.intTransactionType = 5 THEN 'Purchase Order'
+									WHEN BL.intTransactionType = 6 THEN 'Bill Template'
+									WHEN BL.intTransactionType = 7 THEN 'Bill Approval'
+									WHEN BL.intTransactionType = 8 THEN 'Overpayment'
+									WHEN BL.intTransactionType = 9 THEN '1099 Adjustment'
+									WHEN BL.intTransactionType = 10 THEN 'Patronage'
+									WHEN BL.intTransactionType = 11 THEN 'Claim'
+							END	strBillTranactionType
+					FROM	tblAPBillDetail		BD
+					JOIN	tblAPBill			BL	ON	BL.intBillId	=	BD.intBillId
 
-				FROM	tblAPBillDetail				BD
-				JOIN	tblICInventoryReceiptCharge	RC	ON	RC.intInventoryReceiptChargeId	=	BD.intInventoryReceiptChargeId	
-				WHERE	BD.intInventoryReceiptChargeId IS NOT NULL 
+
 			)BD	ON	BD.intContractHeaderId	=	CC.intContractHeaderId AND CC.intItemId = BD.intItemId

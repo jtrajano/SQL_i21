@@ -7,7 +7,8 @@
 	@intMarketId			INT = NULL,
 	@intLocationId			INT = NULL,
 	@intCommodityId			INT = NULL,
-	@intStorageLocationId	INT = NULL
+	@intStorageLocationId	INT = NULL,
+	@intItemContractId		INT = NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId	INT,
@@ -15,7 +16,8 @@ BEGIN
 			@intFutureMonthId	INT,
 			@strFutureMonthYear NVARCHAR(100),
 			@strSubLocationName NVARCHAR(100),
-			@strStorageLocation NVARCHAR(100)
+			@strStorageLocation NVARCHAR(100),
+			@strContractItemNo NVARCHAR(100)
 
 	DECLARE @intVendorId INT, @strCity NVARCHAR(100),@intCityId INT, @ysnPort BIT, @ysnRegion BIT
 
@@ -27,7 +29,8 @@ BEGIN
 		strOrigin				NVARCHAR(100),
 		intProductTypeId		INT,
 		intSubLocationId		INT,
-		intStorageLocationId	INT
+		intStorageLocationId	INT,
+		intItemContractId		INT
 	)
 
 	IF @strType = 'FutureMarket'
@@ -88,18 +91,19 @@ BEGIN
 	BEGIN
 		SELECT @strSubLocationName = strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSubLocationId 
 		SELECT @strStorageLocation = strName FROM tblICStorageLocation WHERE intStorageLocationId = @intStorageLocationId 
+		SELECT @strContractItemNo  = strContractItemNo FROM tblICItemContract WHERE intItemContractId = ISNULL(@intItemContractId,0)
 
 		IF ISNULL(@intItemId,0) > 0
 		BEGIN 
 			IF EXISTS(SELECT * FROM vyuCTInventoryItem WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId AND intItemId = @intItemId)
 			BEGIN
 				INSERT INTO @Item
-				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null  FROM vyuCTInventoryItem WHERE intItemId = @intItemId
+				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null  FROM vyuCTInventoryItem WHERE intItemId = @intItemId
 			END
 			ELSE
 			BEGIN
 				INSERT INTO @Item
-				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null  FROM vyuCTInventoryItem 
+				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null  FROM vyuCTInventoryItem 
 				WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId
 				ORDER BY intItemId ASC
 			END
@@ -107,7 +111,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @Item
-			SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null FROM vyuCTInventoryItem 
+			SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null FROM vyuCTInventoryItem 
 			WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId
 			ORDER BY intItemId ASC
 		END
@@ -123,7 +127,13 @@ BEGIN
 
 		SELECT @intStorageLocationId = intStorageLocationId FROM tblICStorageLocation WHERE intSubLocationId = @intSubLocationId AND strName = @strStorageLocation
 
-		UPDATE @Item SET intSubLocationId = @intSubLocationId,intStorageLocationId = @intStorageLocationId 
+		SELECT	@intItemContractId = IC.intItemContractId
+		FROM	tblICItemContract		IC
+		JOIN	tblICItem				IM	ON	IM.intItemId			=	IC.intItemId
+		JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId	=	IC.intItemLocationId
+		WHERE	IC.strContractItemNo = @strContractItemNo AND IL.intLocationId = @intLocationId AND IC.intItemId = @intItemId
+			
+		UPDATE @Item SET intSubLocationId = @intSubLocationId,intStorageLocationId = @intStorageLocationId,intItemContractId = @intItemContractId 
 
 		SELECT * FROM @Item
 	END
