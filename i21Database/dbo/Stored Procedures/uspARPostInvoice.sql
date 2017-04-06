@@ -1069,7 +1069,7 @@ END CATCH
 					@batchId,
 					A.intInvoiceId
 				FROM 
-					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intPeriodsToAccrue FROM tblARInvoice WITH (NOLOCK)) A 
+					(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intPeriodsToAccrue, strType FROM tblARInvoice WITH (NOLOCK)) A 
 				INNER JOIN 
 					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
@@ -1083,6 +1083,7 @@ END CATCH
 					D.dblTotal <> @ZeroDecimal 
 					AND (ISNULL(D.intSalesAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND A.strTransactionType = 'Debit Memo'
+					AND A.strType NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
 					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
                 --Sales Tax Account
@@ -2898,7 +2899,7 @@ IF @post = 1
 						intCurrencyExchangeRateTypeId, dblBaseTotal, dblBasePrice, dblCurrencyExchangeRate
 				 FROM tblARInvoiceDetail WITH (NOLOCK)) B
 			INNER JOIN
-				(SELECT intInvoiceId, strInvoiceNumber, [intEntityCustomerId], dtmPostDate, dtmDate, strTransactionType, strComments, intCurrencyId, intCompanyLocationId, intPeriodsToAccrue
+				(SELECT intInvoiceId, strInvoiceNumber, [intEntityCustomerId], dtmPostDate, dtmDate, strTransactionType, strComments, intCurrencyId, intCompanyLocationId, intPeriodsToAccrue, strType
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
@@ -2926,6 +2927,7 @@ IF @post = 1
 			WHERE
 				B.dblQtyShipped <> @ZeroDecimal  
 				AND A.strTransactionType = 'Debit Memo'
+				AND A.strType NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND I.strType <> 'Comment'
 
