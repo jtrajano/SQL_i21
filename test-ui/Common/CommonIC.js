@@ -1682,6 +1682,187 @@ Ext.define('Inventory.CommonIC', {
 
 
 
+    /**
+     * Add Sales Contract to Inventory Shipment for Non Lotted Item Add Orders Screen
+     *
+     */
+    addSCtoISAddORdersNonLotted: function (t,next, customer,itemno, commodity, quantity, uom, location, currency, price, freight) {
+        var linetotal =  quantity * price;
+        new iRely.FunctionalTest().start(t, next)
+
+            .displayText('===== Ship Button SC to IS for Non Lotted =====')
+            .clickMenuFolder('Contract Management','Folder')
+            .clickMenuScreen('Contracts','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('ctcontract')
+            .selectComboBoxRowValue('Type', 'Sale', 'Type',1)
+            .selectComboBoxRowValue('Customer', customer, 'Customer',1)
+            .selectComboBoxRowValue('Commodity', commodity, 'Commodity',1)
+            .enterData('Text Field','Quantity', quantity)
+            .selectComboBoxRowValue('CommodityUOM', uom, 'CommodityUOM',1)
+            .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
+            .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
+            .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
+            .clickButton('AddDetail')
+            .waitUntilLoaded('ctcontractsequence')
+            .addFunction (function (next){
+            var date = new Date().toLocaleDateString();
+            new iRely.FunctionalTest().start(t, next)
+                .enterData('Date Field','EndDate', date, 0, 10)
+                .done();
+        })
+            .selectComboBoxRowValue('Location', location, 'Location',1)
+            .selectComboBoxRowValue('Item', itemno, 'Item',1)
+            .selectComboBoxRowValue('NetWeightUOM', uom, 'NetWeightUOM',1)
+            .verifyData('Combo Box','PricingType','Cash')
+            .selectComboBoxRowValue('PriceCurrency', currency, 'PriceCurrency',1)
+            .selectComboBoxRowValue('CashPriceUOM', uom, 'CashPriceUOM',1)
+            .enterData('Text Field','CashPrice', price)
+            .clickButton('Save')
+            .waitUntilLoaded('ctcontract')
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Contract Management','Folder')
+
+
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Inventory Shipments','Screen')
+            .waitUntilLoaded()
+            .clickButton('New')
+            .waitUntilLoaded('icinventoryshipment')
+            .selectComboBoxRowNumber('OrderType',1,0)
+            .selectComboBoxRowNumber('SourceType',1,0)
+            .selectComboBoxRowValue('Customer', customer, 'Customer',1)
+            .waitUntilLoaded()
+//            .selectSearchRowNumber(1)
+//            .clickButton('OpenSelected')
+            .doubleClickSearchRowValue(itemno, 'strItemNo', 1)
+            .waitUntilLoaded('')
+            .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
+            .selectComboBoxRowValue('Currency', currency, 'Currency',1)
+            .selectComboBoxRowValue('ShipFromAddress', location, 'ShipFromAddress',1)
+            .selectComboBoxRowNumber('ShipToAddress',1,0)
+
+            .verifyGridData('InventoryShipment', 1, 'colItemNumber', itemno)
+            .verifyGridData('InventoryShipment', 1, 'colUnitPrice', price)
+            .verifyGridData('InventoryShipment', 1, 'colOwnershipType', 'Own')
+            .verifyGridData('InventoryShipment', 1, 'colLineTotal', linetotal)
+
+            .clickTab('PostPreview')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .clickButton('Post')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',1500)
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Inventory','Folder')
+            .displayText('===== Ship Button SC to IS for Non Lotted Done=====')
+
+
+            .done();
+    },
+
+
+    /**
+     * Add Sales Contract to Inventory Shipment for Lotted Item Add Orders Screen
+     *
+     */
+    addSCtoISAddORdersLotted: function (t,next, customer,itemno, commodity, quantity, uom, location, currency, price, freight, sublocation, storagelocation, lotno) {
+        var linetotal =  quantity * price;
+        new iRely.FunctionalTest().start(t, next)
+
+            .displayText('===== Ship Button SC to IS for Lotted =====')
+            .clickMenuFolder('Contract Management','Folder')
+            .clickMenuScreen('Contracts','Screen')
+            .clickButton('New')
+            .waitUntilLoaded('ctcontract')
+            .selectComboBoxRowValue('Type', 'Sale', 'Type',1)
+            .selectComboBoxRowValue('Customer', customer, 'Customer',1)
+            .selectComboBoxRowValue('Commodity', commodity, 'Commodity',1)
+            .enterData('Text Field','Quantity', quantity)
+            .selectComboBoxRowValue('CommodityUOM', uom, 'CommodityUOM',1)
+            .selectComboBoxRowValue('Position', 'Arrival', 'Position',1)
+            .selectComboBoxRowValue('PricingType', 'Cash', 'PricingType',1)
+            .selectComboBoxRowValue('Salesperson', 'Bob Smith', 'Salesperson',1)
+            .clickButton('AddDetail')
+            .waitUntilLoaded('ctcontractsequence')
+            .addFunction (function (next){
+            var date = new Date().toLocaleDateString();
+            new iRely.FunctionalTest().start(t, next)
+                .enterData('Date Field','EndDate', date, 0, 10)
+                .done();
+        })
+            .selectComboBoxRowValue('Location', location, 'Location',1)
+            .selectComboBoxRowValue('Item', itemno, 'Item',1)
+            .selectComboBoxRowValue('NetWeightUOM', uom, 'NetWeightUOM',1)
+            .verifyData('Combo Box','PricingType','Cash')
+            .selectComboBoxRowValue('PriceCurrency', currency, 'PriceCurrency',1)
+            .selectComboBoxRowValue('CashPriceUOM', uom, 'CashPriceUOM',1)
+            .enterData('Text Field','CashPrice', price)
+            .clickButton('Save')
+            .waitUntilLoaded('ctcontract')
+            .clickButton('Save')
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Contract Management','Folder')
+
+
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Inventory Shipments','Screen')
+            .waitUntilLoaded()
+            .clickButton('New')
+            .waitUntilLoaded('icinventoryshipment')
+            .selectComboBoxRowNumber('OrderType',1,0)
+            .selectComboBoxRowNumber('SourceType',1,0)
+            .selectComboBoxRowValue('Customer', customer, 'Customer',1)
+            .waitUntilLoaded()
+//            .selectSearchRowNumber(1)
+//            .clickButton('OpenSelected')
+            .doubleClickSearchRowValue(itemno, 'strItemNo', 1)
+            .waitUntilLoaded('')
+            .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
+            .selectComboBoxRowValue('Currency', currency, 'Currency',1)
+            .selectComboBoxRowValue('ShipFromAddress', location, 'ShipFromAddress',1)
+            .selectComboBoxRowNumber('ShipToAddress',1,0)
+
+            .verifyGridData('InventoryShipment', 1, 'colItemNumber', itemno)
+            .verifyGridData('InventoryShipment', 1, 'colUnitPrice', price)
+            .verifyGridData('InventoryShipment', 1, 'colOwnershipType', 'Own')
+            .verifyGridData('InventoryShipment', 1, 'colLineTotal', linetotal)
+
+            .selectGridComboBoxRowValue('InventoryShipment',1,'strSubLocationName', sublocation,'strSubLocationName')
+            .selectGridComboBoxRowValue('InventoryShipment',1,'strStorageLocationName', storagelocation,'strStorageLocationName')
+
+            .selectGridComboBoxRowValue('LotTracking',1,'strLotId', lotno,'strLotId')
+            .enterGridData('LotTracking', 1, 'colShipQty', quantity)
+            .verifyGridData('LotTracking', 1, 'colLotUOM', uom)
+            .verifyGridData('LotTracking', 1, 'colGrossWeight', quantity)
+            .verifyGridData('LotTracking', 1, 'colTareWeight', '0')
+            .verifyGridData('LotTracking', 1, 'colNetWeight', quantity)
+            .verifyGridData('LotTracking', 1, 'colLotWeightUOM', uom)
+
+            .clickTab('PostPreview')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .clickButton('Post')
+            .waitUntilLoaded('')
+            .addResult('Successfully Posted',1500)
+            .waitUntilLoaded('')
+            .clickButton('Close')
+            .waitUntilLoaded('')
+            .clickMenuFolder('Inventory','Folder')
+            .displayText('===== Ship Button SC to IS for Lotted Done=====')
+
+
+            .done();
+    },
+
+
 
     /**
      * Add Other Charge Item
