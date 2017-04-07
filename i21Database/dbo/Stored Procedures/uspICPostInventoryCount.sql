@@ -174,7 +174,7 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= Detail.intItemUOMId 
 			,dtmDate				= Header.dtmCountDate
-			,dblQty					= ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)
+			,dblQty					= ISNULL(Detail.dblPhysicalCount, 0) - CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ISNULL(ItemLot.dblQty, 0) END
 			,dblUOMQty				= ItemUOM.dblUnitQty	
 			,dblCost				= dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty)
 			,0
@@ -188,18 +188,17 @@ BEGIN
 			,intLotId				= Detail.intLotId
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId
-	FROM	dbo.tblICInventoryCount Header INNER JOIN dbo.tblICInventoryCountDetail Detail
-				ON Header.intInventoryCountId = Detail.intInventoryCountId
-				AND Detail.ysnRecount = 0
-			INNER JOIN dbo.tblICItemLocation ItemLocation 
-				ON ItemLocation.intLocationId = Header.intLocationId 
-				AND ItemLocation.intItemId = Detail.intItemId
-			INNER JOIN dbo.tblICItemPricing ItemPricing
-				ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
-			LEFT JOIN dbo.tblICItemUOM ItemUOM
-				ON Detail.intItemUOMId = ItemUOM.intItemUOMId
-	WHERE	Header.intInventoryCountId = @intTransactionId
-			AND ISNULL(Detail.dblPhysicalCount, 0) <> ISNULL(Detail.dblSystemCount, 0)
+	FROM dbo.tblICInventoryCount Header
+		INNER JOIN dbo.tblICInventoryCountDetail Detail ON Header.intInventoryCountId = Detail.intInventoryCountId
+			AND Detail.ysnRecount = 0
+		INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Header.intLocationId 
+			AND ItemLocation.intItemId = Detail.intItemId
+		INNER JOIN dbo.tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+		LEFT JOIN dbo.tblICItemUOM ItemUOM ON Detail.intItemUOMId = ItemUOM.intItemUOMId
+		LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = Detail.intLotId
+		LEFT JOIN dbo.tblICItem Item ON Item.intItemId = Detail.intItemId
+	WHERE Header.intInventoryCountId = @intTransactionId
+			AND ISNULL(Detail.dblPhysicalCount, 0) <> CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ISNULL(ItemLot.dblQty, 0) END
 	
 
 
