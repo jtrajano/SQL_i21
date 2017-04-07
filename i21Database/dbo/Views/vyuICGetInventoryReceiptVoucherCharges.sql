@@ -82,7 +82,7 @@ FROM	tblICInventoryReceipt Receipt
 						FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
 									ON b.intBillId = bd.intBillId
 						WHERE	bd.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
-								AND bd.intInventoryReceiptItemId IS NULL
+								--AND bd.intInventoryReceiptItemId IS NULL
 								AND b.ysnPosted = 1 
 					) voucher
 					LEFT JOIN (
@@ -109,7 +109,7 @@ FROM	tblICInventoryReceipt Receipt
 			FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
 						ON b.intBillId = bd.intBillId
 			WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-					AND bd.intInventoryReceiptItemId IS NULL 
+					--AND bd.intInventoryReceiptItemId IS NULL 
 					AND b.ysnPosted = 1
 			ORDER BY b.intBillId DESC 
 		) topVoucher
@@ -122,7 +122,7 @@ FROM	tblICInventoryReceipt Receipt
 								FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
 											ON b.intBillId = bd.intBillId
 								WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-										AND bd.intInventoryReceiptItemId IS NULL 
+										--AND bd.intInventoryReceiptItemId IS NULL 
 										AND b.ysnPosted = 1
 								GROUP BY b.intBillId
 								FOR xml path('')
@@ -141,7 +141,7 @@ FROM	tblICInventoryReceipt Receipt
 							FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
 										ON b.intBillId = bd.intBillId
 							WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-									AND bd.intInventoryReceiptItemId IS NULL 
+									--AND bd.intInventoryReceiptItemId IS NULL 
 									AND b.ysnPosted = 1
 							GROUP BY b.strBillId
 							FOR xml path('')
