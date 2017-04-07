@@ -13,5 +13,5 @@
 	CONSTRAINT [PK_tblCRMOpportunityContact_intOpportunityContactId] PRIMARY KEY CLUSTERED ([intOpportunityContactId] ASC),
 	CONSTRAINT [UQ_tblCRMOpportunityContact_intOpportunityId_intEnityId] UNIQUE ([intOpportunityId],[intEntityId]),
     CONSTRAINT [FK_tblCRMOpportunityContact_tblCRMOpportunity_intOpportunityId] FOREIGN KEY ([intOpportunityId]) REFERENCES [dbo].[tblCRMOpportunity] ([intOpportunityId]) on delete cascade,
-	CONSTRAINT [FK_tblCRMOpportunityContact_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
+	CONSTRAINT [FK_tblCRMOpportunityContact_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE
 )
