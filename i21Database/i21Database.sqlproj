@@ -5160,6 +5160,7 @@
     <Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRollCostDetail.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherPriceCharges.sql" />
+    <Build Include="dbo\Views\vyuICItemStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
