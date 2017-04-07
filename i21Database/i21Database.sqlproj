@@ -5164,6 +5164,7 @@
     <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
     <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
     <Build Include="dbo\Views\vyuLGNotificationCount.sql" />
+    <Build Include="dbo\Views\vyuSMDocumentSourceFolder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
