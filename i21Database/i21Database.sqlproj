@@ -5088,6 +5088,13 @@
     <Build Include="dbo\Views\vyuARCustomerContractHeader.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceFee.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
+    <Build Include="dbo\Tables\tblSMDocument.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentType.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentTypeField.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentSourceFolder.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentTypeFieldValue.sql" />
+    <Build Include="dbo\Tables\tblSMNewDocument.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDeleteDocumentSourceFolder.sql" />
     <Build Include="dbo\Tables\tblSTstgRebatesPMMorris.sql" />
     <Build Include="dbo\Tables\tblSTstgRebatesRJReynolds.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCreateFeeDebitMemo.sql" />
@@ -5157,6 +5164,7 @@
     <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
     <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
     <Build Include="dbo\Views\vyuLGNotificationCount.sql" />
+    <Build Include="dbo\Views\vyuSMDocumentSourceFolder.sql" />
     <Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRollCostDetail.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherPriceCharges.sql" />
