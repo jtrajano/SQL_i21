@@ -233,6 +233,7 @@ BEGIN
 		,ysnPrice
 		,dblForexRate
 		,strRateType
+		,strItemNo
 	)
 	AS 
 	(
@@ -254,6 +255,7 @@ BEGIN
 				,AllocatedOtherCharges.ysnPrice
 				,dblForexRate = ISNULL(ShipmentCharges.dblForexRate, 1) 
 				,strRateType = currencyRateType.strCurrencyExchangeRateType
+				,Charge.strItemNo
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem 
 					ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 				INNER JOIN dbo.tblICInventoryShipmentItemAllocatedCharge AllocatedOtherCharges
@@ -261,6 +263,8 @@ BEGIN
 					AND AllocatedOtherCharges.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 				INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharges
 					ON ShipmentCharges.intInventoryShipmentChargeId = AllocatedOtherCharges.intInventoryShipmentChargeId
+				INNER JOIN tblICItem Charge	
+					ON Charge.intItemId = ShipmentCharges.intChargeId
 				LEFT JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intItemId = ShipmentItem.intItemId
 					AND ItemLocation.intLocationId = Shipment.intShipFromLocationId
@@ -291,7 +295,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -349,7 +353,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
