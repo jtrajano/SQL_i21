@@ -417,117 +417,119 @@ namespace iRely.Inventory.BusinessLayer
                 throw new IOException("Please select a valid file.");
             int row = 0;
 
-            using (CsvReader csv = new CsvReader(new StreamReader(ms), true))
+            using (var sr = new StreamReader(ms))
             {
-                int fieldCount = csv.FieldCount;
-                string[] headers = csv.GetFieldHeaders();
-                List<string> missingFields;
-
-                if (!ValidHeaders(headers, out missingFields))
+                using (CsvReader csv = new CsvReader(sr, true))
                 {
-                    dr.Info = INFO_ERROR;
-                    dr.Description = "Invalid template format. Some fields were missing.";
-                    StringBuilder sb = new StringBuilder();
-                    foreach (string s in missingFields)
-                    {
-                        sb.Append("'" + s + "'" + ", ");
-                    }
-                    dr.Messages.Add(new ImportDataMessage()
-                    {
-                        Type = TYPE_INNER_ERROR,
-                        Status = "Import Failed",
-                        Message = "Invalid template format. Some fields were missing. Missing fields: " +
-                            CultureInfo.CurrentCulture.TextInfo.ToTitleCase(sb.ToString().Substring(0, sb.Length - 2))
-                    });
-                    //throw new FormatException("Invalid template format.");
-                    return dr;
-                }
+                    int fieldCount = csv.FieldCount;
+                    string[] headers = csv.GetFieldHeaders();
+                    List<string> missingFields;
 
-                uniqueIds.Clear();
-
-                while (csv.ReadNextRecord())
-                {
-                    row++;
-
-                    using (var transaction = context.ContextManager.Database.BeginTransaction())
+                    if (!ValidHeaders(headers, out missingFields))
                     {
-                        try
+                        dr.Info = INFO_ERROR;
+                        dr.Description = "Invalid template format. Some fields were missing.";
+                        StringBuilder sb = new StringBuilder();
+                        foreach (string s in missingFields)
                         {
-                            LogItems.Clear();
-                            dr.IsUpdate = false;
+                            sb.Append("'" + s + "'" + ", ");
+                        }
+                        dr.Messages.Add(new ImportDataMessage()
+                        {
+                            Type = TYPE_INNER_ERROR,
+                            Status = "Import Failed",
+                            Message = "Invalid template format. Some fields were missing. Missing fields: " +
+                                CultureInfo.CurrentCulture.TextInfo.ToTitleCase(sb.ToString().Substring(0, sb.Length - 2))
+                        });
+                        //throw new FormatException("Invalid template format.");
+                        return dr;
+                    }
 
+                    uniqueIds.Clear();
+
+                    while (csv.ReadNextRecord())
+                    {
+                        row++;
+
+                        using (var transaction = context.ContextManager.Database.BeginTransaction())
+                        {
                             try
                             {
-                                tblICInventoryCountDetail entity = ProcessRow(row, fieldCount, headers, csv, dr);
-                                if (entity != null)
+                                LogItems.Clear();
+                                dr.IsUpdate = false;
+
+                                try
                                 {
-                                    context.Save();
-                                    LogTransaction(ref entity, dr);
-                                    dr.Messages.Add(new ImportDataMessage()
+                                    tblICInventoryCountDetail entity = ProcessRow(row, fieldCount, headers, csv, dr);
+                                    if (entity != null)
                                     {
-                                        Message = "Record " + (dr.IsUpdate ? "updated" : "imported") + " successfully.",
-                                        Row = row,
-                                        Status = STAT_INNER_SUCCESS,
-                                        Type = TYPE_INNER_INFO
-                                    });
-                                    if (dr.Info == INFO_ERROR)
+                                        context.Save();
+                                        LogTransaction(ref entity, dr);
+                                        dr.Messages.Add(new ImportDataMessage()
+                                        {
+                                            Message = "Record " + (dr.IsUpdate ? "updated" : "imported") + " successfully.",
+                                            Row = row,
+                                            Status = STAT_INNER_SUCCESS,
+                                            Type = TYPE_INNER_INFO
+                                        });
+                                        if (dr.Info == INFO_ERROR)
+                                            hasErrors = true;
+                                        if (dr.Info == INFO_WARN)
+                                            hasWarnings = true;
+                                        transaction.Commit();
+                                    }
+                                    else
+                                    {
+                                        dr.Messages.Add(new ImportDataMessage()
+                                        {
+                                            Message = "Invalid values found. Items that were auto created or modified in this record will be rolled back.",
+                                            Exception = null,
+                                            Row = row,
+                                            Status = "Record import failed.",
+                                            Type = TYPE_INNER_ERROR
+                                        });
+                                        dr.Info = INFO_ERROR;
                                         hasErrors = true;
-                                    if (dr.Info == INFO_WARN)
-                                        hasWarnings = true;
-                                    transaction.Commit();
+                                        transaction.Rollback();
+                                        continue;
+                                    }
                                 }
-                                else
+                                catch (Exception ex)
                                 {
                                     dr.Messages.Add(new ImportDataMessage()
                                     {
-                                        Message = "Invalid values found. Items that were auto created or modified in this record will be rolled back.",
+                                        Message = ex.Message + ". Items that were auto created or modified in this record will be rolled back.",
                                         Exception = null,
                                         Row = row,
                                         Status = "Record import failed.",
                                         Type = TYPE_INNER_ERROR
                                     });
-                                    dr.Info = INFO_ERROR;
-                                    hasErrors = true;
-                                    transaction.Rollback();
-                                    continue;
                                 }
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
+                                string message = ex.Message;
+                                if (ex.InnerException != null && ex.InnerException.InnerException != null)
+                                    message = ex.InnerException.InnerException.Message;
+                                else
+                                    message = ex.InnerException.Message;
                                 dr.Messages.Add(new ImportDataMessage()
                                 {
-                                    Message = ex.Message + ". Items that were auto created or modified in this record will be rolled back.",
-                                    Exception = null,
+                                    Message = message + " Items that were auto created or modified in this record will be rolled back.",
+                                    Exception = ex,
                                     Row = row,
-                                    Status = "Record import failed.",
-                                    Type = TYPE_INNER_ERROR
+                                    Status = REC_SKIP,
+                                    Type = TYPE_INNER_EXCEPTION
                                 });
+                                dr.Info = INFO_ERROR;
+                                hasErrors = true;
+                                transaction.Rollback();
+                                continue;
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            string message = ex.Message;
-                            if (ex.InnerException != null && ex.InnerException.InnerException != null)
-                                message = ex.InnerException.InnerException.Message;
-                            else
-                                message = ex.InnerException.Message;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Message = message + " Items that were auto created or modified in this record will be rolled back.",
-                                Exception = ex,
-                                Row = row,
-                                Status = REC_SKIP,
-                                Type = TYPE_INNER_EXCEPTION
-                            });
-                            dr.Info = INFO_ERROR;
-                            hasErrors = true;
-                            transaction.Rollback();
-                            continue;
                         }
                     }
                 }
             }
-
             dr.Rows = row;
 
             if (hasWarnings)
