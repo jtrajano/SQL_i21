@@ -177,7 +177,7 @@ BEGIN
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptItem.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId		
 		
-		-- Accrue Other Charge taxes
+		-- Charge taxes
 		UNION ALL 
 		SELECT	dtmDate								= Receipt.dtmReceiptDate
 				,intItemId							= ReceiptCharge.intChargeId 
