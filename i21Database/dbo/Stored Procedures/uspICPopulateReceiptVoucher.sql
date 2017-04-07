@@ -51,6 +51,7 @@ BEGIN
 			,intCostUOMId
 			,strCostUOM
 	)
+	-- Insert the items: 
 	SELECT	
 			intInventoryReceiptId
 			,intInventoryReceiptItemId
@@ -92,6 +93,52 @@ BEGIN
 				FROM	vyuICGetInventoryReceiptVoucherItems items
 				WHERE	items.intEntityVendorId = vendor.[intEntityId]
 			) receiptItem
+
+	-- Insert the price down charges (against the receipt vendor)
+	UNION ALL 
+	SELECT	
+			intInventoryReceiptId
+			,intInventoryReceiptChargeId
+			,dtmReceiptDate
+			,strVendor = vendor.strVendorId + ' ' + entity.strName
+			,strLocationName
+			,strReceiptNumber
+			,strBillOfLading
+			,strReceiptType
+			,strOrderNumber
+			,strItemNo
+			,strItemDescription
+			,dblUnitCost
+			,dblReceiptQty
+			,dblVoucherQty
+			,dblReceiptLineTotal
+			,dblVoucherLineTotal
+			,dblReceiptTax
+			,dblVoucherTax
+			,dblOpenQty
+			,dblItemsPayable
+			,dblTaxesPayable
+			,dtmLastVoucherDate
+			,strAllVouchers
+			,strFilterString
+			,dtmCreated = @dtmCreated
+			,receiptPriceCharges.intCurrencyId
+			,receiptPriceCharges.strCurrency
+			,intLoadContainerId = CAST(NULL AS INT)
+			,strContainerNumber = CAST(NULL AS NVARCHAR(100)) 
+			,intItemUOMId = CAST(NULL AS INT)
+			,strItemUOM = CAST(NULL AS NVARCHAR(50)) 
+			,intCostUOMId = CAST(NULL AS INT)
+			,strCostUOM = CAST(NULL AS NVARCHAR(50)) 
+	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
+				ON entity.intEntityId = vendor.intEntityVendorId
+			CROSS APPLY (
+				SELECT	* 
+				FROM	vyuICGetInventoryReceiptVoucherPriceCharges prices
+				WHERE	prices.intEntityVendorId = vendor.intEntityVendorId
+			) receiptPriceCharges
+
+	-- Insert the accrue other charges. 
 	UNION ALL 
 	SELECT	
 			intInventoryReceiptId
