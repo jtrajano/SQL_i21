@@ -31,8 +31,8 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@fieldname					AS NVARCHAR(50)
 		,@condition					AS NVARCHAR(20)
 		,@id						AS INT 
-		,@from						AS NVARCHAR(100)
-		,@to						AS NVARCHAR(100)
+		,@from						AS NVARCHAR(MAX)
+		,@to						AS NVARCHAR(MAX)
 		,@join						AS NVARCHAR(10)
 		,@begingroup				AS NVARCHAR(50)
 		,@endgroup					AS NVARCHAR(50)

@@ -5165,6 +5165,11 @@
     <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
     <Build Include="dbo\Views\vyuLGNotificationCount.sql" />
     <Build Include="dbo\Views\vyuSMDocumentSourceFolder.sql" />
+    <Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRollCostDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherPriceCharges.sql" />
+    <Build Include="dbo\Views\vyuICItemStock.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -110,6 +110,7 @@ BEGIN
 		,[strSalesOrderNumber]
 		,[intContractHeaderId]
 		,[intContractDetailId]
+		,[intLoadDetailId] 
 		,[intShipmentPurchaseSalesContractId]
 		,[dblShipmentGrossWt]
 		,[dblShipmentTareWt]
@@ -218,6 +219,7 @@ BEGIN
 		,[strSalesOrderNumber]					= NULL
 		,[intContractHeaderId]					= CH.[intContractHeaderId] 
 		,[intContractDetailId]					= CD.[intContractDetailId] 
+		,[intLoadDetailId]						= LD.intLoadDetailId
 		,[intShipmentPurchaseSalesContractId]	= NULL
 		,[dblShipmentGrossWt]					= LD.dblGross
 		,[dblShipmentTareWt]					= LD.dblTare

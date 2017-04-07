@@ -2,8 +2,8 @@
 (
 	@fieldname nvarchar(50)
 	, @condition nvarchar(20)
-	, @from nvarchar(100)
-	, @to nvarchar(100)
+	, @from nvarchar(MAX)
+	, @to nvarchar(MAX)
 	, @join nvarchar(10)
 	, @begingroup nvarchar(50)
 	, @endgroup nvarchar(50)

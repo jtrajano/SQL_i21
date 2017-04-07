@@ -114,6 +114,7 @@ BEGIN
 		,ysnPosted
 		,ysnPaid
 		,ysnSplitted
+		,dblSplitPercent 
 		,intFreightTermId
 		,strDeliverPickup 
 		,intShipToLocationId
@@ -155,7 +156,7 @@ BEGIN
 		,strTransactionType
 		,strType
 		,intPaymentMethodId
-		,strComments + ' DUP: ' + strInvoiceNumber
+		,strComments + ' Split: ' + strInvoiceNumber
 		,strFooterComments
 		,intAccountId
 		,intSplitId
@@ -163,6 +164,7 @@ BEGIN
 		,0
 		,0
 		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN 1 ELSE 0 END
+		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN ISNULL(@dblSplitPercent,1) ELSE 1 END
 		,intFreightTermId
 		,strDeliverPickup 
 		,intShipToLocationId

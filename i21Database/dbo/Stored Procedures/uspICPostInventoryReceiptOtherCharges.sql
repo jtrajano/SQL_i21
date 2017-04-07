@@ -387,6 +387,7 @@ BEGIN
 		,ysnInventoryCost
 		,dblForexRate
 		,strRateType
+		,strItemNo
 	)
 	AS 
 	(
@@ -415,6 +416,7 @@ BEGIN
 				,AllocatedOtherCharges.ysnInventoryCost
 				,dblForexRate = ISNULL(ReceiptCharges.dblForexRate, 1) 
 				,strRateType = currencyRateType.strCurrencyExchangeRateType
+				,Charge.strItemNo
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
@@ -422,6 +424,8 @@ BEGIN
 					AND AllocatedOtherCharges.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 				INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharges
 					ON ReceiptCharges.intInventoryReceiptChargeId = AllocatedOtherCharges.intInventoryReceiptChargeId
+				INNER JOIN tblICItem Charge
+					ON Charge.intItemId = ReceiptCharges.intChargeId
 				LEFT JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intItemId = ReceiptItem.intItemId
 					AND ItemLocation.intLocationId = Receipt.intLocationId
@@ -451,7 +455,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -509,7 +513,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -573,7 +577,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -632,7 +636,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -698,7 +702,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -753,7 +757,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -816,7 +820,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -871,7 +875,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId

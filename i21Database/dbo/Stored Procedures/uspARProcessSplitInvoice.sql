@@ -95,6 +95,7 @@ BEGIN
 	  , dblInvoiceSubtotal  = dblInvoiceSubtotal * @dblSplitPercent
 	  , dblInvoiceTotal     = dblInvoiceTotal * @dblSplitPercent
 	  , dblTax				= dblTax * @dblSplitPercent
+	  , dblSplitPercent		= ISNULL(@dblSplitPercent, 1)
 	WHERE intInvoiceId = @intInvoiceId
 		
 	INSERT INTO @InvoiceDetails

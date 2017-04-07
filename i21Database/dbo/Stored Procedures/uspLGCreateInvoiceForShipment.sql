@@ -237,6 +237,7 @@ DECLARE
 		,[intInventoryShipmentItemId]
 		,[intLoadDetailId]
 		,[intLoadId]
+		,[intLotId]
 		,[strShipmentNumber]
 		,[intRecipeItemId] 
 		,[intSalesOrderDetailId]
@@ -332,6 +333,7 @@ DECLARE
 		,[intInventoryShipmentItemId]			= NULL
 		,[intLoadDetailId]						= ARSI.[intLoadDetailId] 
 		,[intLoadId]							= @intLoadId
+		,[intLotId]								= ARSI.[intLotId] 
 		,[strShipmentNumber]					= ARSI.strInventoryShipmentNumber 
 		,[intRecipeItemId]						= ARSI.[intRecipeItemId] 
 		,[intSalesOrderDetailId]				= ARSI.[intSalesOrderDetailId] 

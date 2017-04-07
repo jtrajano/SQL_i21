@@ -91,7 +91,12 @@ BEGIN
 				,@strPhone = strPhone
 	FROM tblSMCompanySetup
 
-	SELECT @strFullName = strFullName FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	SELECT TOP 1 @strFullName = E.strName
+	FROM tblSMUserSecurity US
+	JOIN tblEMEntity E ON US.intEntityUserSecurityId = E.intEntityId
+	JOIN tblEMEntityCredential EC ON EC.intEntityId = E.intEntityId
+	WHERE E.strExternalERPId = @strUserName
+	ORDER BY E.intEntityId DESC
 
 	SELECT @strWarehouseEntityName = CASE 
 			WHEN ISNULL(E.strName, '') = ''
@@ -234,7 +239,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strCountry AS strCompanyCountry ,
 				@strPhone AS strCompanyPhone ,
 				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip,
-				@strUserName AS strUserFullName,
+				CASE WHEN ISNULL(@strFullName,'') = '' THEN  @strUserName ELSE @strFullName END AS strUserFullName,
 				CD.strERPPONumber AS strExternalPONumber,
 				CONVERT(NVARCHAR,L.intNumberOfContainers) + ' (' + L.strPackingDescription +')' AS strNumberOfContainers,
 				CType.strContainerType,
@@ -390,7 +395,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strCountry AS strCompanyCountry ,
 				@strPhone AS strCompanyPhone ,
 				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip,
-				@strUserName AS strUserFullName,
+				CASE WHEN ISNULL(@strFullName,'') = '' THEN  @strUserName ELSE @strFullName END AS strUserFullName,
 				CD.strERPPONumber AS strExternalPONumber,
 				CONVERT(NVARCHAR,L.intNumberOfContainers) + ' (' + L.strPackingDescription +')' AS strNumberOfContainers,
 				CType.strContainerType,

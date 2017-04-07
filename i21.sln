@@ -15,6 +15,8 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tSQLt", "tSQLt\tSQLt.sqlpro
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "TestAP", "TestAP\TestAP.sqlproj", "{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Transports", "Transports\Transports.sqlproj", "{C3D80B32-947E-4A7E-B5B8-E687235907B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,12 @@ Global
 		{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{C3D80B32-947E-4A7E-B5B8-E687235907B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3D80B32-947E-4A7E-B5B8-E687235907B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3D80B32-947E-4A7E-B5B8-E687235907B3}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{C3D80B32-947E-4A7E-B5B8-E687235907B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3D80B32-947E-4A7E-B5B8-E687235907B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3D80B32-947E-4A7E-B5B8-E687235907B3}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

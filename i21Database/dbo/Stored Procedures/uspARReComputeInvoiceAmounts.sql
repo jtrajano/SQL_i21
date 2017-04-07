@@ -84,6 +84,7 @@ SET
 	,[dblTotalTermDiscount]		= ISNULL([dblTotalTermDiscount], @ZeroDecimal)
 	,[dblInterest]				= ISNULL([dblInterest], @ZeroDecimal)
 	,[dblBaseInterest]			= ISNULL([dblBaseInterest], @ZeroDecimal)
+	,[dblSplitPercent] 			= CASE WHEN ISNULL([ysnSplitted],0) = 0 OR [intSplitId] IS NULL THEN 1 ELSE ISNULL([dblSplitPercent],1) END
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 

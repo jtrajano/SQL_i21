@@ -14,6 +14,7 @@ dblWtAvgOpenLongPosition  DECIMAL(24,10),
 dblSellMinusBuy  DECIMAL(24,10),
 dblSumBuy  DECIMAL(24,10),
 dblSumQty  DECIMAL(24,10),
+dblSumAvgLong  DECIMAL(24,10),
 ysnSubCurrency bit,
 dblContractSize DECIMAL(24,10)
 )
@@ -21,18 +22,18 @@ dblContractSize DECIMAL(24,10)
 INSERT INTO @RollCost
 SELECT strFutMarketName,strCommodityCode,strFutureMonth,
 	intFutureMarketId,intCommodityId,SUM(isnull(dblContratPrice,0))/ case when isnull(SUM(intOpenContract),0)=0 then 1 else SUM(intOpenContract) end dblWtAvgOpenLongPosition,
-	((
-	sum(isnull(dblSellPrice,0)*isnull(dblSellQty,0))/case when sum(isnull(dblSellQty,0))=0 then 1 else  sum(isnull(dblSellQty,0)) end
-	-
-	sum((isnull(dblBuyPrice,0)*isnull(dblBuyQty,0))) /
-	case when isnull(sum(isnull(dblBuyQty,0)),0)=0 then 1 
-	else sum(isnull(dblBuyQty,0)) end
+
+((sum(isnull(dblSellPrice,0))	- sum(isnull(dblBuyPrice,0))
 	) * dblContractSize) / case when isnull(ysnSubCurrency,0)= 0 then 1 else 100 end dblSellMinusBuy,
 	
 	((sum(isnull(dblBlankRMQtyPrice,0)+isnull(dblRMNotEqFMQtyPrice,0) )
 	* dblContractSize))	/ case when isnull(ysnSubCurrency,0)= 0 then 1 else 100 end dblSumBuy,
 
-	sum(isnull(dblBlankRMQty,0)+isnull(dblRMNotEqFMQty,0))  dblSumQty,ysnSubCurrency,dblContractSize
+	sum(isnull(dblBlankRMQty,0)+isnull(dblRMNotEqFMQty,0))  dblSumQty,
+
+	(sum(isnull(dblBlankRMQtyPrice,0)+isnull(dblRMNotEqFMQtyPrice,0) ))	
+	/ case when sum(isnull(dblBlankRMQty,0)+isnull(dblRMNotEqFMQty,0) )= 0 then 1 else sum(isnull(dblBlankRMQty,0)+isnull(dblRMNotEqFMQty,0) ) end dblSumAvgLong,
+	ysnSubCurrency,dblContractSize
 
 FROM (
 
@@ -46,27 +47,27 @@ isnull((SELECT sum(intOpenContract) from vyuRKGetOpenContract fc
 		join tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and strBuySell='Buy'
 		WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId  AND isnull(fc.intOpenContract,0) > 0)*isnull(ft.dblPrice,0),0) dblContratPrice
 
-	,(SELECT sum(dblMatchQty) intNoOfContract from (
-		SELECT distinct 
-			m.dblMatchQty,
-			futM.dblPrice 
-			FROM tblRKFutOptTransaction t
-			JOIN tblRKFutOptTransaction ft1 on ft1.intRollingMonthId=t.intRollingMonthId --and  ft1.strBuySell = 'Buy'
-			JOIN tblRKMatchFuturesPSDetail m on m.intSFutOptTransactionId=ft1.intFutOptTransactionId
-			JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intSFutOptTransactionId
-			JOIN tblRKFutOptTransaction futM on fut.intFutureMonthId=futM.intFutureMonthId and futM.strBuySell = 'Sell' 
-		WHERE futM.intFutOptTransactionId=ft.intFutOptTransactionId)t) dblSellQty
+,(SELECT SUM(dblMatchQty) intNoOfContract from (
+	SELECT DISTINCT 
+		m.dblMatchQty,
+		fut.dblPrice a
+		FROM tblRKFutOptTransaction t
+		JOIN tblRKFutOptTransaction ft1 on ft1.intRollingMonthId=t.intRollingMonthId  and isnull(ft1.intRollingMonthId,0) <>0
+		JOIN tblRKMatchFuturesPSDetail m on m.intSFutOptTransactionId=ft1.intFutOptTransactionId
+		JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intSFutOptTransactionId
+		--JOIN tblRKFutOptTransaction futM on fut.intFutureMonthId=futM.intFutureMonthId and futM.strBuySell = 'Sell' 
+	WHERE fut.intFutOptTransactionId=ft.intFutOptTransactionId)t) dblSellQty
 
 	,(SELECT SUM(dblPrice) dblPrice from (
 			SELECT distinct 
 				m.dblMatchQty,
-				m.dblMatchQty*futM.dblPrice dblPrice
+				m.dblMatchQty*fut.dblPrice dblPrice
 				FROM tblRKFutOptTransaction t
-			JOIN tblRKFutOptTransaction ft1 on ft1.intRollingMonthId=t.intRollingMonthId --and ft1.strBuySell = 'Buy'
+			JOIN tblRKFutOptTransaction ft1 on ft1.intRollingMonthId=t.intRollingMonthId  and isnull(ft1.intRollingMonthId,0) <>0
 			JOIN tblRKMatchFuturesPSDetail m on m.intSFutOptTransactionId=ft1.intFutOptTransactionId
 			JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intSFutOptTransactionId
-			JOIN tblRKFutOptTransaction futM on fut.intFutureMonthId=futM.intFutureMonthId and futM.strBuySell = 'Sell' 
-			WHERE futM.intFutOptTransactionId=ft.intFutOptTransactionId)t) dblSellPrice
+			--JOIN tblRKFutOptTransaction futM on fut.intFutureMonthId=futM.intFutureMonthId and futM.strBuySell = 'Sell' 
+			WHERE fut.intFutOptTransactionId=ft.intFutOptTransactionId)t) dblSellPrice
 
 	,(SELECT sum(dblMatchQty) intNoOfContract from (
 		SELECT distinct 
@@ -120,7 +121,9 @@ and convert(datetime,CONVERT(VARCHAR(10),ft.dtmFilledDate,110)) BETWEEN @dtmFrom
  GROUP BY  strFutMarketName,strCommodityCode,strFutureMonth,intFutureMarketId,intCommodityId,dblContractSize,ysnSubCurrency,ysnSubCurrency
  ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC 
 
-SELECT *,(isnull(dblSumPrevValue,0)/CASE WHEN isnull(dblSumQty,0)=0 THEN 1 ELSE dblSumQty END /ISNULL(dblContractSize,1))*100 dblWtAvgPosition FROM (
+SELECT *,(isnull(dblSumPrevValue,0)/CASE WHEN isnull(dblSumQty,0)=0 THEN 1 ELSE dblSumQty END /ISNULL(dblContractSize,1))*100 dblWtAvgPosition,
+(isnull(dblSumPrevValue,0)/CASE WHEN isnull(dblSumQty,0)=0 THEN 1 ELSE dblSumQty END /ISNULL(dblContractSize,1))*100 - isnull(dblSumAvgLong,0) as dblRollCost
+ FROM (
 SELECT *,isnull(dblSumBuy,0)+CASE WHEN ISNULL(PreviousValue,0)<0 THEN ABS(ISNULL(PreviousValue,0)) ELSE -ISNULL(PreviousValue,0) end dblSumPrevValue from (
 SELECT
 prev.dblSellMinusBuy PreviousValue,TT.*  
