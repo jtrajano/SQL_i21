@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
-	 @xmlParam					NVARCHAR(MAX)  
-	,@entityId					INT			   = NULL
+	@entityId					INT			   = NULL
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
 	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -29,49 +28,7 @@ BEGIN
 		)
 
 		SET @executedLine = 2
-		CREATE TABLE #tblCFInvoiceDiscount	
-		(
-			 intAccountId					INT
-			,intSalesPersonId				INT
-			,dtmInvoiceDate					DATETIME
-			,intCustomerId					INT
-			,intInvoiceId					INT
-			,intTransactionId				INT
-			,intCustomerGroupId				INT
-			,intTermID						INT
-			,intBalanceDue					INT
-			,intDiscountDay					INT	
-			,intDayofMonthDue				INT
-			,intDueNextMonth				INT
-			,intSort						INT
-			,intConcurrencyId				INT
-			,ysnAllowEFT					BIT
-			,ysnActive						BIT
-			,ysnEnergyTrac					BIT
-			,dblQuantity					NUMERIC(18,6)
-			,dblTotalQuantity				NUMERIC(18,6)
-			,dblDiscountRate				NUMERIC(18,6)
-			,dblDiscount					NUMERIC(18,6)
-			,dblTotalAmount					NUMERIC(18,6)
-			,dblAccountTotalAmount			NUMERIC(18,6)
-			,dblAccountTotalDiscount		NUMERIC(18,6)
-			,dblAccountTotalLessDiscount	NUMERIC(18,6)
-			,dblDiscountEP					NUMERIC(18,6)
-			,dblAPR							NUMERIC(18,6)	
-			,strTerm						NVARCHAR(MAX)
-			,strType						NVARCHAR(MAX)
-			,strTermCode					NVARCHAR(MAX)	
-			,strNetwork						NVARCHAR(MAX)	
-			,strCustomerName				NVARCHAR(MAX)
-			,strInvoiceCycle				NVARCHAR(MAX)
-			,strGroupName					NVARCHAR(MAX)
-			,strInvoiceNumber				NVARCHAR(MAX)
-			,strInvoiceReportNumber			NVARCHAR(MAX)
-			,dtmDiscountDate				DATETIME
-			,dtmDueDate						DATETIME
-			,dtmTransactionDate				DATETIME
-			,dtmPostedDate					DATETIME
-		)
+		
 		--------------------------------------
 
 		----------COMPANY PREFERENCE----------
@@ -84,8 +41,7 @@ BEGIN
 	
 		-------------INVOICE LIST-------------
 		SET @executedLine = 4
-		INSERT INTO #tblCFInvoiceDiscount
-		EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
+	
 		--------------------------------------
 
 		----------GROUP BY CUSTOMER-----------
@@ -97,7 +53,7 @@ BEGIN
 		SELECT 
 			 intAccountId	
 			,intCustomerId	
-		FROM #tblCFInvoiceDiscount
+		FROM tblCFInvoiceStagingTable
 		GROUP BY intAccountId,intCustomerId	
 		--------------------------------------
 
@@ -147,13 +103,13 @@ BEGIN
 
 			------------LOOP INVOICE------------
 			SET @executedLine = 10
-			WHILE (EXISTS(SELECT 1 FROM #tblCFInvoiceDiscount WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId))
+			WHILE (EXISTS(SELECT 1 FROM tblCFInvoiceStagingTable WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId))
 			---------------------------------------
 			BEGIN
 
 				SET @executedLine = 11
 				SELECT	TOP 1 @id = intTransactionId
-				FROM #tblCFInvoiceDiscount
+				FROM tblCFInvoiceStagingTable
 				WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId
 
 				SET @executedLine = 12
@@ -166,7 +122,7 @@ BEGIN
 				,@PaymentMethodId		= (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'CF Invoice')
 				,@InvoiceReportNumber	= strInvoiceReportNumber 
 				,@PaymentInfo			= strInvoiceReportNumber
-				FROM #tblCFInvoiceDiscount 
+				FROM tblCFInvoiceStagingTable 
 				WHERE intTransactionId = @id
 				AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
 
@@ -252,7 +208,7 @@ BEGIN
 				END
 
 				SET @executedLine = 17
-				DELETE FROM #tblCFInvoiceDiscount 
+				DELETE FROM tblCFInvoiceStagingTable 
 				WHERE intTransactionId = @id
 				AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
 
@@ -275,7 +231,7 @@ BEGIN
 		--------------------------------------------
 
 		SET @executedLine = 20
-		DROP TABLE #tblCFInvoiceDiscount
+		--DROP TABLE #tblCFInvoiceDiscount
 		DROP TABLE #tblCFDisctinctCustomerInvoice
 
 	END TRY
@@ -299,7 +255,7 @@ BEGIN
 		----------------------------------------
 
 		----------DROP TEMPORARY TABLE----------
-		DROP TABLE #tblCFInvoiceDiscount
+		--DROP TABLE #tblCFInvoiceDiscount
 		DROP TABLE #tblCFDisctinctCustomerInvoice
 		----------------------------------------
 

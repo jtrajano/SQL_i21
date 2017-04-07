@@ -213,6 +213,7 @@ BEGIN
 				 ,strGroupName				NVARCHAR(MAX)
 				 ,strInvoiceNumber			NVARCHAR(MAX)
 				 ,strInvoiceReportNumber	NVARCHAR(MAX)
+				 ,strTempInvoiceReportNumber NVARCHAR(MAX)
 				 ,dtmDiscountDate			DATETIME
 				 ,dtmDueDate				DATETIME
 				 ,dtmTransactionDate		DATETIME
@@ -326,6 +327,7 @@ BEGIN
 			,strGroupName			
 			,strInvoiceNumber		
 			,strInvoiceReportNumber
+			,strTempInvoiceReportNumber
 			,dtmDiscountDate		
 			,dtmDueDate			
 			,dtmTransactionDate	
@@ -361,7 +363,7 @@ BEGIN
 				 @intLoopId					= intAccountId 
 				,@intFeeProfileId			= intFeeProfileId
 				,@dtmInvoiceDate			= dtmInvoiceDate
-				,@strInvoiceReportNumber	= strInvoiceReportNumber
+				,@strInvoiceReportNumber	= strTempInvoiceReportNumber
 				,@intCustomerId				= intCustomerId
 				,@intTermID					= intTermID
 				,@intSalesPersonId			= intSalesPersonId
