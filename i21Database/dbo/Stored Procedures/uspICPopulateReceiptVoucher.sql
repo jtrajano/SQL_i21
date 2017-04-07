@@ -44,6 +44,12 @@ BEGIN
 			,dtmCreated
 			,intCurrencyId
 			,strCurrency
+			,intLoadContainerId
+			,strContainerNumber
+			,intItemUOMId
+			,strItemUOM
+			,intCostUOMId
+			,strCostUOM
 	)
 	SELECT	
 			intInventoryReceiptId
@@ -73,6 +79,12 @@ BEGIN
 			,dtmCreated = @dtmCreated
 			,receiptItem.intCurrencyId
 			,receiptItem.strCurrency
+			,receiptItem.intLoadContainerId
+			,receiptItem.strContainerNumber
+			,receiptItem.intItemUOMId
+			,receiptItem.strItemUOM
+			,receiptItem.intCostUOMId
+			,receiptItem.strCostUOM
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
 				ON entity.intEntityId = vendor.intEntityVendorId
 			CROSS APPLY (
@@ -109,6 +121,12 @@ BEGIN
 			,dtmCreated = @dtmCreated
 			,receiptCharges.intCurrencyId
 			,receiptCharges.strCurrency
+			,intLoadContainerId = CAST(NULL AS INT)
+			,strContainerNumber = CAST(NULL AS NVARCHAR(100)) 
+			,intItemUOMId = CAST(NULL AS INT)
+			,strItemUOM = CAST(NULL AS NVARCHAR(50)) 
+			,intCostUOMId = CAST(NULL AS INT)
+			,strCostUOM = CAST(NULL AS NVARCHAR(50)) 
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
 				ON entity.intEntityId = vendor.intEntityVendorId
 			CROSS APPLY (

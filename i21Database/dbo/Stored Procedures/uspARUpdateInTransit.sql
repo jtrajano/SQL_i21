@@ -38,15 +38,20 @@ BEGIN
 				 , I.strInvoiceNumber
 				 , 7
 				 , fp.intFobPointId
-			FROM tblARInvoiceDetail ID
-				INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
-				INNER JOIN tblICItemLocation IL ON ID.intItemId = IL.intItemId AND I.intCompanyLocationId = IL.intLocationId
-				LEFT JOIN tblSMFreightTerms ft
-					ON I.intFreightTermId = ft.intFreightTermId
-				LEFT JOIN tblICFobPoint fp
-					ON fp.strFobPoint = ft.strFobPoint
-			WHERE ID.intInvoiceId = @TransactionId 
-			  AND ISNULL(ID.intInventoryShipmentItemId, 0) > 0
+			FROM 
+				(SELECT intInvoiceId, intItemId, dblQtyShipped, intItemUOMId, intInventoryShipmentItemId FROM tblARInvoiceDetail WITH (NOLOCK)) ID
+			INNER JOIN 
+				(SELECT intInvoiceId, strInvoiceNumber, intCompanyLocationId, intFreightTermId FROM tblARInvoice WITH (NOLOCK)) I ON ID.intInvoiceId = I.intInvoiceId
+			INNER JOIN 
+				(SELECT intItemId, intLocationId, intItemLocationId FROM tblICItemLocation WITH (NOLOCK)) IL ON ID.intItemId = IL.intItemId AND I.intCompanyLocationId = IL.intLocationId
+			LEFT JOIN 
+				(SELECT intFreightTermId, strFobPoint FROM tblSMFreightTerms WITH (NOLOCK)) ft ON I.intFreightTermId = ft.intFreightTermId
+			LEFT JOIN 
+				(SELECT intFobPointId, strFobPoint FROM tblICFobPoint WITH (NOLOCK)) fp ON fp.strFobPoint = ft.strFobPoint
+            WHERE ID.intInvoiceId = @TransactionId 
+               AND ISNULL(ID.intInventoryShipmentItemId, 0) > 0
+
+			 
 	  END
 	ELSE
 		BEGIN
@@ -74,16 +79,22 @@ BEGIN
 				, ISH.strShipmentNumber
 				, 5
 				, fp.intFobPointId
-			FROM tblICInventoryShipmentItem ISHI
-				INNER JOIN tblICInventoryShipment ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
-				INNER JOIN tblSOSalesOrderDetail SOD ON ISHI.intLineNo = SOD.intSalesOrderDetailId
-				INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
-				INNER JOIN tblICItemLocation IL ON ISHI.intItemId = IL.intItemId AND SO.intCompanyLocationId = IL.intLocationId
-				LEFT JOIN tblSMFreightTerms ft
-					ON ISH.intFreightTermId = ft.intFreightTermId
-				LEFT JOIN tblICFobPoint fp
-					ON fp.strFobPoint = ft.strFobPoint
-			WHERE ISHI.intInventoryShipmentId = @TransactionId
+			FROM 
+				(SELECT intItemId, intItemUOMId, dblQuantity, intInventoryShipmentId, intLineNo FROM tblICInventoryShipmentItem WITH (NOLOCK)) ISHI
+			INNER JOIN 
+				(SELECT intInventoryShipmentId, strShipmentNumber, intFreightTermId FROM tblICInventoryShipment WITH (NOLOCK)) ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
+			INNER JOIN 
+				(SELECT intSalesOrderId, intSalesOrderDetailId FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOD ON ISHI.intLineNo = SOD.intSalesOrderDetailId
+			INNER JOIN 
+				(SELECT intSalesOrderId, intCompanyLocationId FROM tblSOSalesOrder WITH (NOLOCK)) SO ON SOD.intSalesOrderId = SO.intSalesOrderId
+			INNER JOIN 
+				(SELECT intItemId, intItemLocationId, intLocationId FROM tblICItemLocation WITH (NOLOCK)) IL ON ISHI.intItemId = IL.intItemId AND SO.intCompanyLocationId = IL.intLocationId
+			LEFT JOIN 
+				(SELECT intFreightTermId, strFobPoint FROM tblSMFreightTerms WITH (NOLOCK)) ft ON ISH.intFreightTermId = ft.intFreightTermId
+			LEFT JOIN 
+				(SELECT strFobPoint, intFobPointId FROM tblICFobPoint WITH (NOLOCK)) fp ON fp.strFobPoint = ft.strFobPoint
+            WHERE ISHI.intInventoryShipmentId = @TransactionId
+			 
 		END
 
 	UPDATE @tblItemsToUpdate

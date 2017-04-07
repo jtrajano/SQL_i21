@@ -1,6 +1,4 @@
-﻿----Check Recreate
-
-CREATE PROCEDURE [dbo].[uspTMGetBudgetCalculationSite]  
+﻿CREATE PROCEDURE [dbo].[uspTMGetBudgetCalculationSite]  
 	@ysnIncludeInvoices		BIT
 	,@ysnIncludeCredits		BIT	
 	,@ysnIncludeEstimatedTankInventory	BIT
@@ -68,9 +66,9 @@ BEGIN
 									(30 * ISNULL(@intNumberOfMonthsInBudget,0) * (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END))
 								END
 								)
-		,dblCurrentARBalance = CAST((ISNULL(G.dbl10Days,0.0) + ISNULL(G.dbl30Days,0.0) + ISNULL(G.dbl60Days,0.0) + ISNULL(G.dbl90Days,0.0) + ISNULL(G.dbl91Days,0.0) + ISNULL(G.dblFuture,0.0) - ISNULL(G.dblUnappliedCredits,0.0)) AS NUMERIC(18,6))
+		,dblCurrentARBalance = CAST((ISNULL(G.dbl0Days,0.0) + ISNULL(G.dbl10Days,0.0) + ISNULL(G.dbl30Days,0.0) + ISNULL(G.dbl60Days,0.0) + ISNULL(G.dbl90Days,0.0) + ISNULL(G.dbl91Days,0.0) + ISNULL(G.dblFuture,0.0) ) AS NUMERIC(18,6))
 		,intSiteID = A.intSiteID
-		,dblUnappliedCredits = ISNULL(G.dblUnappliedCredits,0.0)
+		,dblUnappliedCredits = ISNULL(G.dblUnappliedCredits,0.0) + ISNULL(G.dblPrepaids,0.0)
 		,intEntityCustomerId = C.intEntityId
 		,A.intLocationId
 		,intSiteItemId = A.intProduct
@@ -157,14 +155,14 @@ BEGIN
 	SELECT 
 		*
 		,dblTempEstimatedBudget = (CASE WHEN @ysnIncludeCredits = 0 AND @ysnIncludeInvoices = 0
-										THEN ROUND((dblRequiredQuantity * dblPrice / @intNumberOfMonthsInBudget),0)
-									WHEN @ysnIncludeCredits = 1 AND @ysnIncludeInvoices = 0
-										THEN ROUND((((dblRequiredQuantity * dblPrice) - dblUnappliedCredits) / @intNumberOfMonthsInBudget),0) 
-									WHEN @ysnIncludeCredits = 0 AND @ysnIncludeInvoices = 1
-										THEN ROUND((((dblRequiredQuantity * dblPrice) + dblCurrentARBalance) / @intNumberOfMonthsInBudget),0) 
-									WHEN @ysnIncludeCredits = 1 AND @ysnIncludeInvoices = 1
-										THEN ROUND((((dblRequiredQuantity * dblPrice) + dblCurrentARBalance - dblUnappliedCredits) / @intNumberOfMonthsInBudget),0)
-								END) 
+                                        THEN ROUND((dblRequiredQuantity * dblPrice / @intNumberOfMonthsInBudget),0)
+                                    WHEN @ysnIncludeCredits = 1 AND @ysnIncludeInvoices = 0
+                                        THEN ROUND((((dblRequiredQuantity * dblPrice) + dblUnappliedCredits) / @intNumberOfMonthsInBudget),0) 
+                                    WHEN @ysnIncludeCredits = 0 AND @ysnIncludeInvoices = 1
+                                        THEN ROUND((((dblRequiredQuantity * dblPrice) + dblCurrentARBalance) / @intNumberOfMonthsInBudget),0) 
+                                    WHEN @ysnIncludeCredits = 1 AND @ysnIncludeInvoices = 1
+                                        THEN ROUND((((dblRequiredQuantity * dblPrice) + dblCurrentARBalance + dblUnappliedCredits) / @intNumberOfMonthsInBudget),0)
+                                END)
 							
 	INTO #tmpStage3
 	FROM #tmpStage2

@@ -27,9 +27,27 @@ SELECT	Receipt.intEntityVendorId
 		,receiptAndVoucheredItems.strCurrency
 		,strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) 
 		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) 
+		,lc.intLoadContainerId
+		,lc.strContainerNumber
+		,intItemUOMId = COALESCE(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
+		,strItemUOM = ItemUOMName.strUnitMeasure
+		,intCostUOMId = COALESCE(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId)
+		,strCostUOM = ItemUOMName.strUnitMeasure
+
 FROM	tblICInventoryReceipt Receipt 
 		INNER JOIN tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		INNER JOIN (
+			tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure ItemUOMName
+				ON ItemUOM.intUnitMeasureId = ItemUOMName.intUnitMeasureId
+		)
+			ON ItemUOM.intItemUOMId = COALESCE(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
+		INNER JOIN (
+			tblICItemUOM CostUOM INNER JOIN tblICUnitMeasure CostUOMName
+				ON CostUOM.intUnitMeasureId = CostUOMName.intUnitMeasureId
+		)
+			ON CostUOM.intItemUOMId = COALESCE(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId)
+
 		LEFT JOIN tblSMCompanyLocation c
 			ON c.intCompanyLocationId = Receipt.intLocationId
 		OUTER APPLY (
@@ -117,6 +135,7 @@ FROM	tblICInventoryReceipt Receipt
 					,strItemDescription = i.strDescription
 					,intCurrencyId = currency.intCurrencyID
 					,strCurrency = currency.strCurrency
+
 			FROM	tblICInventoryReceiptItem ri 
 					OUTER APPLY (
 						SELECT	QtyTotal = 
@@ -246,4 +265,8 @@ FROM	tblICInventoryReceipt Receipt
 					)
 				)
 		) allLinkedVoucherId  
+		
+		LEFT JOIN tblLGLoadContainer lc
+			ON lc.intLoadContainerId = ReceiptItem.intContainerId
+
 WHERE	Receipt.ysnPosted = 1

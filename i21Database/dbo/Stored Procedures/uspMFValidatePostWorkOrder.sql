@@ -115,10 +115,10 @@ BEGIN TRY
 			ELSE dtmPlannedDate
 			END
 
-	IF NOT EXISTS (
+	IF EXISTS (
 			SELECT 1
 			FROM dbo.tblMFWorkOrder
-			WHERE intCountStatusId = 13
+			WHERE intCountStatusId = 10
 				AND intWorkOrderId = @intPriorWorkOrderId
 			)
 		AND @intPriorWorkOrderId IS NOT NULL

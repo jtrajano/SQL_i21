@@ -7,6 +7,9 @@
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Document Maintenance'
 	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Comment Maintenance'
 
+	UPDATE tblSMStartingNumber SET strTransactionType = 'Report Messages', strModule = 'System Manager'
+	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Document Maintenance'
+
 GO
 	PRINT N'BEGIN RENAME OF TRANSACTION'
 
@@ -624,13 +627,13 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Vendor Overpayment')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 67
-			,[strTransactionType]	= N'Document Maintenance'
-			,[strPrefix]			= N'DOC-'
+			,[strTransactionType]	= N'Report Messages'
+			,[strPrefix]			= N'REP-'
 			,[intNumber]			= 1
-			,[strModule]			= 'Accounts Receivable'
+			,[strModule]			= 'System Manager'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Document Maintenance')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Report Messages')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 68
 			,[strTransactionType]	= N'Pick List Number'
@@ -1117,6 +1120,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Revalue Transaction')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 117
+			,[strTransactionType]	= N'Storage Statement FormNo'
+			,[strPrefix]			= N'L '
+			,[intNumber]			= 1
+			,[strModule]			= 'Grain'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Storage Statement FormNo')
 	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
@@ -1167,6 +1180,13 @@ GO
 		SET [strPrefix] = 'DOC-'
 		WHERE strTransactionType = N'Document Maintenance'
 	END  
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Report Messages')
+	BEGIN
+		UPDATE tblSMStartingNumber
+		SET [strPrefix] = 'REP-'
+		WHERE strTransactionType = N'Report Messages'
+	END  
 GO
 	PRINT N'BEGIN RENAME S'
 
@@ -1178,7 +1198,7 @@ GO
 GO
 	PRINT N'BEGIN CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR ACCOUNTS PAYABLE'
 GO
-	EXEC uspAPFixStartingNumbers
+	--EXEC uspAPFixStartingNumbers
 GO
 	PRINT N'END CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR ACCOUNTS PAYABLE'
 GO

@@ -208,7 +208,8 @@ BEGIN
 	0 as OutboundNetDue,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
 	0 as SalesAdjustment,
-	PYMT.dblAmountPaid as CheckAmount
+	PYMT.dblAmountPaid as CheckAmount,
+	'False' as IsAdjustment
 	 
 	FROM tblCMBankTransaction BNKTRN
 	INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
@@ -337,18 +338,39 @@ BEGIN
 
 	--Settlement Total
 	0 as InboundNetWeight,
-	INVDTL.dblQtyShipped as OutboundNetWeight,
+	CASE WHEN INVDTL.intInventoryShipmentItemId IS NULL AND INVDTL.intInventoryShipmentChargeId IS NULL THEN
+		0
+		ELSE
+		INVDTL.dblQtyShipped 
+		END as OutboundNetWeight,
 	0 as InboundGrossDollars,
-	INVDTL.dblTotal as OutboundGrossDollars,
+	CASE WHEN INVDTL.intInventoryShipmentItemId IS NULL AND INVDTL.intInventoryShipmentChargeId IS NULL THEN
+		0
+		ELSE
+		INVDTL.dblTotal  
+		END as OutboundGrossDollars,
 	0 as InboundTax,
-	INVDTL.dblTotalTax as OutboundTax,
+	CASE WHEN INVDTL.intInventoryShipmentItemId IS NULL AND INVDTL.intInventoryShipmentChargeId IS NULL THEN
+		0
+		ELSE
+		INVDTL.dblTotalTax  
+		END as OutboundTax,
 	0 as InboundDiscount,
 	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)  as OutboundDiscount,
 	0 as InboundNetDue,
-	(INVDTL.dblTotal + INVDTL.dblTotalTax + ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)) as OutboundNetDue,
+	CASE WHEN INVDTL.intInventoryShipmentItemId IS NULL AND INVDTL.intInventoryShipmentChargeId IS NULL THEN
+		0
+		ELSE
+		(INVDTL.dblTotal + INVDTL.dblTotalTax + ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)) 
+		END as OutboundNetDue,
 	0 as VoucherAdjustment,
-	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND (intInventoryShipmentItemId IS NULL AND intInventoryShipmentChargeId IS NULL)),0) AS SalesAdjustment,
-	PYMT.dblAmountPaid as CheckAmount
+	ISNULL((SELECT dblTotal FROM tblARInvoiceDetail WHERE intInvoiceDetailId = INVDTL.intInvoiceDetailId AND (intInventoryShipmentItemId IS NULL AND intInventoryShipmentChargeId IS NULL)),0) AS SalesAdjustment,
+	PYMT.dblAmountPaid as CheckAmount,
+	CASE WHEN INVDTL.intInventoryShipmentItemId IS NULL AND INVDTL.intInventoryShipmentChargeId IS NULL THEN
+		'True'
+		ELSE
+		'False'
+		END as IsAdjustment
 
 	FROM tblCMBankTransaction BNKTRN
 	INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
@@ -358,8 +380,8 @@ BEGIN
 	INNER JOIN tblARInvoice INV ON PYMTDTL.intInvoiceId = INV.intInvoiceId
 	INNER JOIN tblARInvoiceDetail INVDTL ON INV.intInvoiceId = INVDTL.intInvoiceId AND INVDTL.intInventoryShipmentChargeId is null
 	INNER JOIN tblICItem Item ON INVDTL.intItemId = Item.intItemId
-	INNER JOIN tblICInventoryShipmentItem INVSHIPITEM ON INVDTL.intInventoryShipmentItemId = INVSHIPITEM.intInventoryShipmentItemId
-	INNER JOIN tblICInventoryShipment INVSHIP ON INVSHIPITEM.intInventoryShipmentId = INVSHIP.intInventoryShipmentId
+	LEFT JOIN tblICInventoryShipmentItem INVSHIPITEM ON INVDTL.intInventoryShipmentItemId = INVSHIPITEM.intInventoryShipmentItemId
+	LEFT JOIN tblICInventoryShipment INVSHIP ON INVSHIPITEM.intInventoryShipmentId = INVSHIP.intInventoryShipmentId
 	--INNER JOIN tblSCTicket TICKET ON INVSHIPITEM.intSourceId = TICKET.intTicketId
 	LEFT JOIN tblCTContractHeader CNTRCT ON INVDTL.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
@@ -490,7 +512,8 @@ BEGIN
 	0 as OutboundNetDue,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
 	0 as SalesAdjustment,
-	PYMT.dblAmountPaid as CheckAmount
+	PYMT.dblAmountPaid as CheckAmount,
+	'False' as IsAdjustment
 	 
 	FROM tblCMBankTransaction BNKTRN
 	--INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
@@ -619,18 +642,39 @@ BEGIN
 
 	--Settlement Total
 	0 as InboundNetWeight,
-	INVDTL.dblQtyShipped as OutboundNetWeight,
+	CASE WHEN INVDTL.intInventoryShipmentItemId IS NULL AND INVDTL.intInventoryShipmentChargeId IS NULL THEN
+		0
+		ELSE
+		INVDTL.dblQtyShipped 
+		END as OutboundNetWeight,
 	0 as InboundGrossDollars,
-	INVDTL.dblTotal as OutboundGrossDollars,
+	CASE WHEN INVDTL.intInventoryShipmentItemId IS NULL AND INVDTL.intInventoryShipmentChargeId IS NULL THEN
+		0
+		ELSE
+		INVDTL.dblTotal  
+		END as OutboundGrossDollars,
 	0 as InboundTax,
-	INVDTL.dblTotalTax as OutboundTax,
+	CASE WHEN INVDTL.intInventoryShipmentItemId IS NULL AND INVDTL.intInventoryShipmentChargeId IS NULL THEN
+		0
+		ELSE
+		INVDTL.dblTotalTax  
+		END as OutboundTax,
 	0 as InboundDiscount,
 	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)  as OutboundDiscount,
 	0 as InboundNetDue,
-	(INVDTL.dblTotal + INVDTL.dblTotalTax + ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)) as OutboundNetDue,
+	CASE WHEN INVDTL.intInventoryShipmentItemId IS NULL AND INVDTL.intInventoryShipmentChargeId IS NULL THEN
+		0
+		ELSE
+		(INVDTL.dblTotal + INVDTL.dblTotalTax + ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND intInventoryShipmentChargeId IS NOT NULL),0)) 
+		END as OutboundNetDue,
 	0 as VoucherAdjustment,
-	ISNULL((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = INVDTL.intInvoiceId AND (intInventoryShipmentItemId IS NULL AND intInventoryShipmentChargeId IS NULL)),0) AS SalesAdjustment,
-	PYMT.dblAmountPaid as CheckAmount
+	ISNULL((SELECT dblTotal FROM tblARInvoiceDetail WHERE intInvoiceDetailId = INVDTL.intInvoiceDetailId AND (intInventoryShipmentItemId IS NULL AND intInventoryShipmentChargeId IS NULL)),0) AS SalesAdjustment,
+	PYMT.dblAmountPaid as CheckAmount,
+	CASE WHEN INVDTL.intInventoryShipmentItemId IS NULL AND INVDTL.intInventoryShipmentChargeId IS NULL THEN
+		'True'
+		ELSE
+		'False'
+		END as IsAdjustment
 
 	FROM tblCMBankTransaction BNKTRN
 	--INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
@@ -640,8 +684,8 @@ BEGIN
 	INNER JOIN tblARInvoice INV ON PYMTDTL.intInvoiceId = INV.intInvoiceId
 	INNER JOIN tblARInvoiceDetail INVDTL ON INV.intInvoiceId = INVDTL.intInvoiceId  AND INVDTL.intInventoryShipmentChargeId is null
 	INNER JOIN tblICItem Item ON INVDTL.intItemId = Item.intItemId
-	INNER JOIN tblICInventoryShipmentItem INVSHIPITEM ON INVDTL.intInventoryShipmentItemId = INVSHIPITEM.intInventoryShipmentItemId
-	INNER JOIN tblICInventoryShipment INVSHIP ON INVSHIPITEM.intInventoryShipmentId = INVSHIP.intInventoryShipmentId
+	LEFT JOIN tblICInventoryShipmentItem INVSHIPITEM ON INVDTL.intInventoryShipmentItemId = INVSHIPITEM.intInventoryShipmentItemId
+	LEFT JOIN tblICInventoryShipment INVSHIP ON INVSHIPITEM.intInventoryShipmentId = INVSHIP.intInventoryShipmentId
 	--INNER JOIN tblSCTicket TICKET ON INVSHIPITEM.intSourceId = TICKET.intTicketId
 	LEFT JOIN tblCTContractHeader CNTRCT ON INVDTL.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)

@@ -22,6 +22,7 @@ EXEC dbo.[uspARUpdateItemComponent] @InvoiceId, 1
 EXEC dbo.[uspARUpdateContractOnInvoice] @InvoiceId, @ForDelete, @UserId
 EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @InvoiceId, @ForDelete, @UserId
 EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @InvoiceId, @ForDelete, @UserId
+EXEC dbo.[uspARUpdateCommitted] @InvoiceId, @ForDelete, @UserId, 0
 
 DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @InvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @InvoiceId)
 

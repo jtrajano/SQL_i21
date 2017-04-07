@@ -24,9 +24,9 @@ AS
 						)GS	ON	GS.intContractDetailId	=	CD.intContractDetailId	LEFT
 				JOIN	(
 							SELECT	intContractDetailId,
-									CAST(SUM(dblShippedWeight) AS NUMERIC(18, 6)) dblShippedWeight,
+									CAST(SUM(dblNetWeight) AS NUMERIC(18, 6)) dblShippedWeight,
 									MIN(intItemUOMId) intItemUOMId 
-							FROM	vyuCTContStsContainer	
+							FROM	vyuCTContStsInventoryReceipt	
 							GROUP
 							BY		intContractDetailId	
 						)CR	ON	CR.intContractDetailId	=	CD.intContractDetailId	

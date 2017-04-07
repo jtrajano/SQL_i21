@@ -15,6 +15,7 @@ BEGIN TRY
 	DECLARE @strWarehouseVendorCity NVARCHAR(100)
 	DECLARE @strWarehouseVendorCountry NVARCHAR(100)
 	DECLARE @strWarehouseVendorAccNo NVARCHAR(100)
+	DECLARE @intMaxLoadStgId INT
 
 	SELECT TOP 1 @strWarehouseVendorNo = WE.strEntityNo
 			  ,  @strWarehouseVendorName = WE.strName
@@ -33,7 +34,12 @@ BEGIN TRY
 	LEFT JOIN tblAPVendor A ON A.intEntityVendorId = WE.intEntityId
 	WHERE LD.intLoadId = @intLoadId
 
+	SELECT @intMaxLoadStgId = intLoadStgId FROM tblLGLoadStg WHERE intLoadId = @intLoadId
 
+	IF EXISTS (SELECT TOP 1 1 FROM tblLGLoadStg WHERE strFeedStatus = 'Ack Rcvd' AND intLoadStgId = @intMaxLoadStgId AND strMessage <> 'Success')
+	BEGIN
+		UPDATE tblLGLoadStg SET strFeedStatus='',strMessage = NULL WHERE intLoadStgId = @intMaxLoadStgId
+	END
 
 	IF(@strRowState = 'Delete')
 	BEGIN

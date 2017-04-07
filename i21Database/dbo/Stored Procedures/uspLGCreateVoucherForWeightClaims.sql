@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspLGCreateVoucherForWeightClaims
 	 @intWeightClaimId INT
 	,@intEntityUserSecurityId INT
-	,@intBillId INT OUTPUT
+	,@strBillId NVARCHAR(100) = '' OUTPUT
 AS
 BEGIN TRY
 	DECLARE @strErrorMessage NVARCHAR(4000);
@@ -22,6 +22,7 @@ BEGIN TRY
 	DECLARE @dblNetWeight NUMERIC(18,6)
 	DECLARE @dblTotalForBill NUMERIC(18,6)
 	DECLARE @dblAmountDueForBill NUMERIC(18,6)
+	DECLARE @intBillId INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intWeightClaimRecordId INT Identity(1, 1)
@@ -183,16 +184,6 @@ BEGIN TRY
 	SELECT DISTINCT intItemId
 	FROM @voucherDetailData
 
-	IF EXISTS (SELECT 1 
-		   FROM tblICItem I
-		   LEFT JOIN tblICItemAccount IA ON IA.intItemId = I.intItemId
-		   LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = IA.intAccountCategoryId
-		   WHERE strAccountCategory IS NULL
-			  AND I.intItemId IN (SELECT intItemId FROM @distinctItem))
-	BEGIN
-		RAISERROR ('''AP Clearing'' is not configured for one or more item(s).',11,1);
-	END
-
 	SELECT @total = COUNT(*)
 	FROM @voucherDetailData;
 
@@ -298,6 +289,8 @@ BEGIN TRY
 
 		DELETE
 		FROM @VoucherDetailClaim
+
+		SET @strBillId = ISNULL(@strBillId,'') + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
 
 		SELECT @intMinRecord = MIN(intRecordId)
 		FROM @distinctVendor

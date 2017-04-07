@@ -1539,7 +1539,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateOptionsMonthList.sql" />
     <Build Include="dbo\Tables\tblMFProductionSummary.sql" />
-    <Build Include="dbo\Views\vyuRKSFuturePSTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKSFuturePSTransaction.sql" />	
     <Build Include="dbo\Views\vyuRKMatchedPSTransaction.sql" />
     <Build Include="dbo\Views\vyuRKLFuturePSTransaction.sql" />
     <Build Include="dbo\Views\vyuRKGetMarketCurrency.sql" />
@@ -5141,6 +5141,30 @@
     <Build Include="dbo\Tables\tblCFInvoiceDiscountTempTable.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceToStagingTable.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceFeeStagingTable.sql" />
+    <Build Include="dbo\Views\vyuARPaymentACHSearch.sql" />
+    <Build Include="dbo\Tables\tblGRStorageStatement.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageEntity.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageStmtItem.sql" />
+    <Build Include="dbo\Views\vyuGRStorageStatement.sql" />
+    <Build Include="dbo\Views\vyuGRStorageStmtSchedule.sql" />
+    <Build Include="dbo\Views\vyuGRStorageStmtStorageType.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportStorageStatement.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportStorageStatementDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostBillCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
+    <Build Include="dbo\Tables\tblARSearchStatementCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdatePricebookItem.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\28_UpdateBaseAmounts.sql" />
+    <Build Include="dbo\Views\vyuCTItemCertification.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateLoadShipmentOnInvoicePost.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
+    <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
+    <Build Include="dbo\Views\vyuLGNotificationCount.sql" />
+	<Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
+	<Build Include="dbo\Stored Procedures\uspRKRollCostDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5280,6 +5304,8 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\NE_Nebraska.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\27_RenamePricingForContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspSMTransactionApproved.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMTransactionCheckIfRequiredApproval.sql" />
+    <None Include="dbo\Triggers\trgAfterInsertUpdatetblMFWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

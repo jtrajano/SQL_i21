@@ -267,7 +267,16 @@ BEGIN
 	BEGIN 
 		SET @strTransactionType = 'Local/Network'
 	END
-	 
+
+
+	IF(@dblOriginalGrossPrice < 0)
+	BEGIN
+		SET @dblOriginalGrossPrice = ABS(@dblOriginalGrossPrice)
+		IF(ISNULL(@dblQuantity,0) > 0)
+		BEGIN
+			SET @dblQuantity = (@dblQuantity * -1)
+		END
+	END
 
 	DECLARE @ysnCreateSite BIT 
 	------------------------------------------------------------
@@ -1001,6 +1010,7 @@ BEGIN
 		,@dblPriceIndexRate				= dblPriceIndexRate	
 		,@dtmPriceIndexDate				= dtmPriceIndexDate	
 		,@ysnDuplicate					= ysnDuplicate
+		,@ysnInvalid					= ysnInvalid
 		FROM ##tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
@@ -1257,5 +1267,3 @@ BEGIN
 		------------------------------------------------------------
 	END
 END
-
-

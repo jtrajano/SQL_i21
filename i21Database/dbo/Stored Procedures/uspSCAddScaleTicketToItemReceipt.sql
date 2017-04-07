@@ -235,18 +235,21 @@ WHERE SCTicket.intTicketId = @intTicketId
 												CASE 
 													WHEN QM.dblDiscountAmount < 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod) * -1)
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId) * -1)
 														ELSE (QM.dblDiscountAmount * -1)
 													END 
 													WHEN QM.dblDiscountAmount > 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod)
+														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId)
 														ELSE QM.dblDiscountAmount
 													END 
 												END
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
-		,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(GR.intItemId, @intTicketItemUOMId)
+		,[intCostUOMId]						= CASE
+												WHEN ISNULL(UM.intUnitMeasureId,0) = 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, @intTicketItemUOMId)
+												WHEN ISNULL(UM.intUnitMeasureId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, UM.intItemUOMId)
+											END
 		,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
@@ -254,13 +257,13 @@ WHERE SCTicket.intTicketId = @intTicketId
 												CASE
 													WHEN QM.dblDiscountAmount < 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod) * -1)
-														ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId) * -1)
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId) * -1)
+														ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, GR.intUnitMeasureId) * -1)
 													END 
 													WHEN QM.dblDiscountAmount > 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod)
-														ELSE dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId)
+														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, IC.strCostMethod, GR.intUnitMeasureId)
+														ELSE dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, GR.intUnitMeasureId)
 													END 
 												END
 											END
@@ -279,7 +282,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
 		INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
-		INNER JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId
+		INNER JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
 		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0
 
 		--Insert record for fee
@@ -319,7 +322,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[intCostCurrencyId]  				= RE.intCurrencyId
 		,[intChargeId]						= IC.intItemId
 		,[intForexRateTypeId]				= RE.intForexRateTypeId
-		,[dblForexRate]						= dblForexRate
+		,[dblForexRate]						= RE.dblForexRate
 		,[ysnInventoryCost]					= 0
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
@@ -486,7 +489,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								LEFT JOIN tblLGLoadCost LoadCost
 									ON LoadCost.intLoadId = LoadDetail.intLoadId
 								WHERE LoadCost.intItemId != @intFreightItemId
-								AND LoadCost.dblRate != 0;
+								AND LoadCost.dblRate != 0
 							END
 						ELSE
 							BEGIN
@@ -544,7 +547,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								WHERE ContractCost.intItemId != @intFreightItemId
 								AND RE.intContractDetailId = @intLoadContractId
 								AND ContractCost.intItemId != @intFreightItemId
-								AND ContractCost.dblRate != 0;
+								AND ContractCost.dblRate != 0
 							END
 					END
 				ELSE IF ISNULL(@intFreightItemId,0) != 0 AND ISNULL(@intHaulerId,0) = 0 AND @ysnDeductFreightFarmer = 1
@@ -662,7 +665,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									ON LoadCost.intLoadId = LoadDetail.intLoadId
 								WHERE LoadCost.intItemId = @intFreightItemId
 								AND LoadDetail.intPContractDetailId = @intLoadContractId
-								AND LoadCost.dblRate != 0;
+								AND LoadCost.dblRate != 0
 
 								INSERT INTO @OtherCharges
 								(
@@ -717,7 +720,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									ON LoadCost.intLoadId = LoadDetail.intLoadId
 								WHERE LoadCost.intItemId != @intFreightItemId
 								AND LoadDetail.intPContractDetailId = @intLoadContractId
-								AND LoadCost.dblRate != 0;
+								AND LoadCost.dblRate != 0
 							END
 						ELSE
 							BEGIN
@@ -774,7 +777,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								ON RE.intContractDetailId = ContractCost.intContractDetailId
 								WHERE ContractCost.intItemId = @intFreightItemId
 								AND RE.intContractDetailId = @intLoadContractId
-								AND ContractCost.dblRate != 0;
+								AND ContractCost.dblRate != 0
 
 								INSERT INTO @OtherCharges
 								(
@@ -829,7 +832,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								ON RE.intContractDetailId = ContractCost.intContractDetailId
 								WHERE ContractCost.intItemId != @intFreightItemId
 								AND RE.intContractDetailId = @intLoadContractId
-								AND ContractCost.dblRate != 0;
+								AND ContractCost.dblRate != 0
 							END
 					END
 				ELSE
@@ -891,7 +894,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									ON LoadCost.intLoadId = LoadDetail.intLoadId
 								WHERE LoadCost.intItemId = @intFreightItemId
 								AND LoadDetail.intPContractDetailId = @intLoadContractId
-								AND LoadCost.dblRate != 0;
+								AND LoadCost.dblRate != 0
 
 								INSERT INTO @OtherCharges
 								(
@@ -948,7 +951,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									ON LoadCost.intLoadId = LoadDetail.intLoadId
 								WHERE LoadCost.intItemId != @intFreightItemId
 								AND LoadDetail.intPContractDetailId = @intLoadContractId
-								AND LoadCost.dblRate != 0;
+								AND LoadCost.dblRate != 0
 							END
 						ELSE
 							BEGIN
@@ -1005,7 +1008,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								ON RE.intContractDetailId = ContractCost.intContractDetailId
 								WHERE ContractCost.intItemId = @intFreightItemId
 								AND RE.intContractDetailId = @intLoadContractId
-								AND ContractCost.dblRate != 0;
+								AND ContractCost.dblRate != 0
 
 								INSERT INTO @OtherCharges
 								(
@@ -1060,7 +1063,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								ON RE.intContractDetailId = ContractCost.intContractDetailId
 								WHERE ContractCost.intItemId != @intFreightItemId
 								AND RE.intContractDetailId = @intLoadContractId
-								AND ContractCost.dblRate != 0;
+								AND ContractCost.dblRate != 0
 							END
 					END
 			END
@@ -1310,7 +1313,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[ysnPrice]							= ContractCost.ysnPrice
 						FROM tblCTContractCost ContractCost
 						LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
-						WHERE ContractCost.intItemId = @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0;
+						WHERE ContractCost.intItemId = @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0
 					END
 				INSERT INTO @OtherCharges
 				(
@@ -1371,7 +1374,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 				ON RE.intContractDetailId = ContractCost.intContractDetailId
 				WHERE ContractCost.intItemId != @intFreightItemId
 				AND RE.intContractDetailId IS NOT NULL
-				AND ContractCost.dblRate != 0;
+				AND ContractCost.dblRate != 0
 			END
 	END
 

@@ -53,7 +53,7 @@ BEGIN
 	WHILE(@intStoreIdMin <= @intStoreIdMax)
 	BEGIN
 
-		IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId = @intStoreIdMin AND CAST(dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(dtmClosedTime as DATE) <= @dtmEndingDate)
+		IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId = @intStoreIdMin AND CAST(dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(dtmClosedTime as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
 		BEGIN
 			--START Insert data from tblSTstgRebatesPMMorris
 			IF(@strTableName = 'tblSTstgRebatesPMMorris')
@@ -93,8 +93,7 @@ BEGIN
 					, dblFinalSalesPrice
 				)
 				SELECT
-					x.intTermMsgSN
-					--, x.RecordCount
+					x.intRCN
 					, x.dtmWeekEndingDate 
 					, x.dtmTransactionDate
 					, x.strTransactionTime
@@ -128,10 +127,13 @@ BEGIN
 				FROM
 				(
 					SELECT
-							intTermMsgSN
-							, FORMAT(CAST(dtmClosedTime AS DATE), 'yyyyMMdd') as dtmWeekEndingDate 
-							, FORMAT(CAST(dtmDate AS DATE), 'yyyyMMdd') as dtmTransactionDate
-							, FORMAT(dtmDate, 'hh:mm:ss') as strTransactionTime
+							624419 as intRCN
+							--, FORMAT(CAST(dtmClosedTime AS DATE), 'yyyyMMdd') as dtmWeekEndingDate 
+							--, FORMAT(CAST(dtmDate AS DATE), 'yyyyMMdd') as dtmTransactionDate
+							--, FORMAT(dtmDate, 'hh:mm:ss') as strTransactionTime
+							, replace(convert(NVARCHAR, dtmClosedTime, 111), '/', '') as dtmWeekEndingDate 
+							, replace(convert(NVARCHAR, dtmDate, 111), '/', '') as dtmTransactionDate 
+							, convert(NVARCHAR, dtmDate, 108) as strTransactionTime
 							, intTermMsgSN as strTransactionIdCode
 							, ST.intStoreNo as strStoreNumber
 							, ST.strDescription as strStoreName
@@ -161,7 +163,7 @@ BEGIN
 							, CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlLineTot ELSE 0 END as dblFinalSalesPrice
 						FROM tblSTTranslogRebates TR
 						JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-						WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate
+						WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate AND ysnSubmitted = 0
 				) x
 			END
 			--END Insert data from tblSTstgRebatesPMMorris
@@ -230,7 +232,8 @@ BEGIN
 							, ST.strCity as strOutletCity
 							, ST.strState as strOutletState
 							, ST.strZipCode as intOutletZipCode
-							, FORMAT(CAST(dtmDate AS datetime), 'yyyy-MM-dd-HH:mm:ss') as strTransactionDateTime
+							--, FORMAT(CAST(dtmDate AS datetime), 'yyyy-MM-dd-HH:mm:ss') as strTransactionDateTime
+							, replace(convert(NVARCHAR, dtmDate, 120), ' ', '-') as strTransactionDateTime
 							, intTermMsgSN as intMarketBasketTransactionId
 							, intTermMsgSN as intScanTransactionId
 							, intPosNum as intRegisterId
@@ -250,10 +253,12 @@ BEGIN
 							, 0 as dblManufacturerDiscountAmount
 						FROM tblSTTranslogRebates TR
 						JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-						WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate
+						WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate AND ysnSubmitted = 0
 				) x
 			END
 			--END Insert data from tblSTstgRebatesRJReynolds
+
+			--Mark
 		END
 			
 		PRINT @intStoreIdMin
@@ -262,11 +267,6 @@ BEGIN
 	END
 	--END Loop to all store Id
 
-
-
-
-    --SET NOCOUNT ON;
-	--Add date range filter
 
 	--CHECK IF table has values
 	DECLARE @Count int
@@ -316,6 +316,26 @@ BEGIN
 
 			SET @strCSV = ''
 
+			---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
+			IF(@strTableName = 'tblSTstgRebatesPMMorris')
+			BEGIN
+				DECLARE @intNumberOfRecords int
+				DECLARE @intSoldQuantity int
+				DECLARE @dblFinalSales decimal(10, 3)
+
+				--Get total number of records
+				SELECT @intNumberOfRecords = COUNT(*) FROM tblSTstgRebatesPMMorris
+
+				--Get total quantity sold
+				SELECT @intSoldQuantity = SUM(intQuantitySold) FROM tblSTstgRebatesPMMorris
+
+				--Get sum of the final sales price field
+				SELECT @dblFinalSales = SUM(dblFinalSalesPrice) FROM tblSTstgRebatesPMMorris
+
+				SET @strCSV = CAST(@intNumberOfRecords as NVARCHAR(50)) + '|' + CAST(@intSoldQuantity as NVARCHAR(50)) + '|' + CAST(@dblFinalSales as NVARCHAR(50)) + CHAR(13)
+			END
+			---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
+
 			DECLARE @intLoopCount int = 0
 
 			DECLARE @strTableNameVal NVARCHAR(50), @strColumnNameVal NVARCHAR(50), @intOrdinalPositionVal int, @strIsNullableVal NVARCHAR(10), @strDataTypeVal NVARCHAR(50)
@@ -362,7 +382,7 @@ BEGIN
 						, @strStoreState nvarchar(2)
 						, @intStoreZipCode int
 						, @strCategory nvarchar(20)
-						, @strManufacturerName nvarchar(20)
+						, @strManufacturerName nvarchar(250)
 						, @strSKUCode nvarchar(50)
 						, @strUpcCode nvarchar(14)
 						, @strSkuUpcDescription nvarchar(50)
@@ -419,26 +439,14 @@ BEGIN
 							   , @dblFinalSalesPrice = dblFinalSalesPrice
 						FROM tblSTstgRebatesPMMorris WHERE intPMMId = @intMin
 
-						--IF(@intLoopCount = 0)
-						--BEGIN
-				
-						--END
-						--ELSE IF(@intLoopCount >= 1)
-						--BEGIN
-						--	SET @strCSV = @strCSV + ', ' + @strColumnNameVal
-						--END
-
 						--Removed CAST(@intManagementOrRetailNumber as NVARCHAR(20))
-						--For now intManagementOrRetailNumber will be empty
-						SET @strCSV = @strCSV + CHAR(13) + '' + ', ' + CAST(REPLACE(@strWeekEndingDate, '-', '') as NVARCHAR(20)) + ', ' + CAST(REPLACE(@strTransactionDate, '-', '') as NVARCHAR(50))
+						SET @strCSV = @strCSV + CHAR(13) + CAST(@intManagementOrRetailNumber as NVARCHAR(50)) + ', ' + CAST(REPLACE(@strWeekEndingDate, '-', '') as NVARCHAR(20)) + ', ' + CAST(REPLACE(@strTransactionDate, '-', '') as NVARCHAR(50))
 													+ ', ' + @strTransactionTime + ', ' + @strTransactionIdCode + ', ' + @strStoreNumber + ', ' + @strStoreName + ', ' + @strStoreAddress + ', ' + @strStoreCity + ', ' + @strStoreState
 													+ ', ' + CAST(@intStoreZipCode as NVARCHAR(50)) + ', ' + @strCategory + ', ' + @strManufacturerName + ', ' + @strSKUCode + ', ' + @strUpcCode + ', ' + @strSkuUpcDescription 
 													+ ', ' + @strUnitOfMeasure + ', ' + CAST(@intQuantitySold as NVARCHAR(50)) + ', ' + CAST(@intConsumerUnits as NVARCHAR(50)) + ', ' + @strMultiPackIndicator 
 													+ ', ' + CAST(@intMultiPackRequiredQuantity as NVARCHAR(50)) + ', ' + CAST(@dblMultiPackDiscountAmount as NVARCHAR(50)) + ', ' + @strRetailerFundedDIscountName 
 													+ ', ' + CAST(@dblRetailerFundedDiscountAmount as NVARCHAR(50)) + ', ' + @strMFGDealNameONE + ', ' + CAST(@dblMFGDealDiscountAmountONE as NVARCHAR(50)) + ', ' + @strMFGDealNameTWO
 													+ ', ' + CAST(@dblMFGDealDiscountAmountTWO as NVARCHAR(50)) + ', ' + @strMFGDealNameTHREE + ', ' + CAST(@dblMFGDealDiscountAmountTHREE as NVARCHAR(50)) + ', ' + CAST(@dblFinalSalesPrice as NVARCHAR(50))
-
-
 
 						SET @intLoopCount = @intLoopCount + 1
 					END
@@ -526,7 +534,25 @@ BEGIN
 			END
 			--END tblSTstgRebatesRJReynolds
 
-		SET @strStatusMsg = 'Success'
+			--START mark ysnSubmitted = 1 (mark as submitted)
+			SELECT @intStoreIdMin = MIN(intStoreId), @intStoreIdMax = MAX(intStoreId)
+			FROM @tblStoreIdList
+
+			WHILE(@intStoreIdMin <= @intStoreIdMax)
+			BEGIN
+
+				UPDATE tblSTTranslogRebates
+				SET ysnSubmitted = 1
+				WHERE intStoreId = @intStoreIdMin 
+				AND CAST(dtmOpenedTime as DATE) >= @dtmBeginningDate 
+				AND CAST(dtmClosedTime as DATE) <= @dtmEndingDate 
+				AND ysnSubmitted = 0
+
+				SET @intStoreIdMin = @intStoreIdMin + 1
+			END 
+			--END mark ysnSubmitted = 1 (mark as submitted)
+
+			SET @strStatusMsg = 'Success'
 	END
 
 	ELSE IF(@CreateCSV = 0)
@@ -538,5 +564,4 @@ BEGIN
 	SET @SQL = 'DELETE FROM ' + @strTableName
 	EXEC sp_executesql @SQL
 
-	--EXEC XMLDB.dbo.PrintString @strCSV
 END

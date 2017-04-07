@@ -103,7 +103,7 @@ BEGIN
 	BEGIN 
 		-- Retrieve the Max transaction id. 
 		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(CAST(REPLACE(strPaymentRecordNum, @strPrefix, '') AS INT))			
+		SELECT	@strTransactionId = MAX(CAST(REPLACE(REPLACE(strPaymentRecordNum, @strPrefix, ''),'V','') AS INT))			
 		FROM	dbo.tblAPPayment
 		
 		IF (@strTransactionId IS NOT NULL)	

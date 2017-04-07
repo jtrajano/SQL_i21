@@ -1,7 +1,6 @@
-﻿CREATE FUNCTION fnGLGetJournalExport(@intJournalId INT)
+﻿CREATE  FUNCTION [dbo].[fnGLGetJournalExport](@intJournalId INT)
 RETURNS  @tbl TABLE(
 	strAccountId NVARCHAR(40),
-	strCurrencyExchangeRateType NVARCHAR(20),
 	strDescription NVARCHAR(255),
 	dtmDate VARCHAR(20),
 	strDebitCredit VARCHAR(1),
@@ -11,14 +10,14 @@ RETURNS  @tbl TABLE(
 	intLineNo INT,
 	strDocument NVARCHAR(100),
 	strComments NVARCHAR(255),
-	strReference NVARCHAR(100)
+	strReference NVARCHAR(100),
+	strCurrencyExchangeRateType NVARCHAR(20)
 )
 as
 BEGIN
 	INSERT INTO @tbl
 	SELECT 
 		A.strAccountId 
-		,tsert.strCurrencyExchangeRateType
 		,RTRIM(D.strDescription) strDescription
 		,CONVERT(VARCHAR(20),dtmDate,101) dtmDate
 		,CASE WHEN	dblDebit > dblCredit THEN 'D' ELSE 'C'END strDebitCredit
@@ -36,6 +35,7 @@ BEGIN
 		,strDocument
 		,D.strComments
 		,strReference 
+		,tsert.strCurrencyExchangeRateType
 	FROM tblGLJournalDetail D 
 		LEFT JOIN tblGLAccount A ON A.intAccountId = D.intAccountId 
 		LEFT JOIN dbo.tblSMCurrencyExchangeRateType tsert ON tsert.intCurrencyExchangeRateTypeId = D.intCurrencyExchangeRateTypeId

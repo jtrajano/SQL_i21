@@ -21,6 +21,7 @@
 	,@ysnLotAlias BIT = 0
 	,@strLotAlias NVARCHAR(50)
 	,@intProductionTypeId BIT = 3
+	,@ysnFillPartialPallet BIT=0
 	)
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -65,6 +66,7 @@ BEGIN TRY
 		,@dtmStartedDate DATETIME
 		,@intControlPointId INT
 		,@intSampleTypeId INT
+		,@ysnAddQtyOnExistingLot bit
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -80,6 +82,19 @@ BEGIN TRY
 				,1
 				)
 	END
+
+	Select @ysnAddQtyOnExistingLot=ysnAddQtyOnExistingLot
+	from tblMFCompanyPreference 
+
+	If @ysnFillPartialPallet=0 and @ysnAddQtyOnExistingLot=0 and exists(Select *from dbo.tblICLot L JOIN dbo.tblMFWorkOrderProducedLot WP on L.intLotId=WP.intLotId Where strLotNumber =@strLotNumber and WP.ysnProductionReversed=0)
+	Begin
+		RAISERROR (
+				90030
+				,11
+				,1
+				)
+	End
+
 
 	IF @dblQuantity <> @dblUnitCount
 		AND @intItemUOMId = @intItemUnitCountUOMId

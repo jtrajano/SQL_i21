@@ -363,3 +363,10 @@ CREATE NONCLUSTERED INDEX [IX_tblTMDevice_ysnAppliance_intDeviceId_intDeviceType
 )
 GO
 
+CREATE NONCLUSTERED INDEX [IX_tblTMDevice_intDeviceId_intDeviceTypeId] ON [dbo].[tblTMDevice]
+(
+	[intDeviceId] ASC,
+	[intDeviceTypeId] ASC
+)
+INCLUDE ([strSerialNumber]) 
+GO

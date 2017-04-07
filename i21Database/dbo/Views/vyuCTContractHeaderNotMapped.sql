@@ -26,7 +26,8 @@ AS
 						W2.strWeightGradeDesc		AS	strWeight,
 						TM.strTerm,
 						CB.strINCOLocationType,
-						U2.strUnitMeasure			AS	strCommodityUOM
+						U2.strUnitMeasure			AS	strCommodityUOM,
+						CB.strContractBasis
 
 				FROM	tblCTContractHeader			CH	
 				JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CH.intEntityId			LEFT
@@ -39,5 +40,5 @@ AS
 				JOIN	tblSMTerm					TM	ON	TM.intTermID				=	CH.intTermId			LEFT
 				JOIN	tblCTContractBasis			CB	ON	CB.intContractBasisId		=	CH.intContractBasisId	LEFT
 				JOIN	tblICCommodityUnitMeasure	CM	ON	CM.intCommodityUnitMeasureId=	CH.intCommodityUOMId	LEFT	
-				JOIN	tblICUnitMeasure			U2	ON	U2.intUnitMeasureId			=	CM.intUnitMeasureId	
+				JOIN	tblICUnitMeasure			U2	ON	U2.intUnitMeasureId			=	CM.intUnitMeasureId		
 			)t

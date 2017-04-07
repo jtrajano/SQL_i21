@@ -8,8 +8,16 @@ AS
 		SELECT	RI.intLineNo AS intContractDetailId,
 				IR.strReceiptNumber, 
 				RL.strLotNumber, 
-				RL.dblQuantity,
-				dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,RL.dblGrossWeight - RL.dblTareWeight) AS dblNetWeight,
+				CASE	WHEN IR.strReceiptType = 'Inventory Return' 
+							THEN -1*RL.dblQuantity
+							ELSE	RL.dblQuantity
+				END AS dblQuantity,
+				dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,
+					CASE	WHEN IR.strReceiptType = 'Inventory Return' 
+							THEN -1*(RL.dblGrossWeight - RL.dblTareWeight) 
+							ELSE	(RL.dblGrossWeight - RL.dblTareWeight) 
+					END
+				) AS dblNetWeight,
 				RI.intWeightUOMId intItemUOMId,
 				IM.strUnitMeasure,
 				SL.strSubLocationName
@@ -17,7 +25,7 @@ AS
 		FROM	tblICInventoryReceiptItemLot	RL
 		JOIN	tblICInventoryReceiptItem		RI	ON	RI.intInventoryReceiptItemId		=	RL.intInventoryReceiptItemId
 		JOIN	tblICInventoryReceipt			IR	ON	IR.intInventoryReceiptId			=	RI.intInventoryReceiptId 
-													AND IR.strReceiptType					=	'Purchase Contract'
+													AND IR.strReceiptType					IN	('Purchase Contract','Inventory Return')
 		JOIN	tblSMCompanyLocationSubLocation SL	ON	SL.intCompanyLocationSubLocationId	=	RI.intSubLocationId
 		JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId						=	RI.intWeightUOMId
 		JOIN	tblICUnitMeasure				IM	ON	IM.intUnitMeasureId					=	IU.intUnitMeasureId		CROSS	
@@ -28,8 +36,16 @@ AS
 		SELECT	AD.intSContractDetailId,
 				IR.strReceiptNumber, 
 				RL.strLotNumber, 
-				RL.dblQuantity,
-				dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,RL.dblGrossWeight - RL.dblTareWeight) AS dblNetWeight,
+				CASE	WHEN IR.strReceiptType = 'Inventory Return' 
+							THEN -1*RL.dblQuantity
+							ELSE	RL.dblQuantity
+				END AS dblQuantity,
+				dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,
+					CASE	WHEN IR.strReceiptType = 'Inventory Return' 
+							THEN -1*(RL.dblGrossWeight - RL.dblTareWeight) 
+							ELSE	(RL.dblGrossWeight - RL.dblTareWeight) 
+					END
+				) AS dblNetWeight,
 				RI.intWeightUOMId intItemUOMId,
 				IM.strUnitMeasure,
 				SL.strSubLocationName

@@ -15,13 +15,15 @@ AS
 BEGIN
 	DECLARE @dblRepresentingQty NUMERIC(18,6),
 			@dblQuantity		NUMERIC(18,6),
-			@strSampleStatus	NVARCHAR(100)
+			@strSampleStatus	NVARCHAR(100),
+			@intUnitMeasureId	INT,
+			@intItemId			INT
 	
-	SELECT @dblQuantity = dblQuantity FROM tblCTContractDetail WHERE  intContractDetailId = @intContractDetailId
+	SELECT @dblQuantity = dblQuantity, @intUnitMeasureId = intUnitMeasureId ,@intItemId = intItemId FROM tblCTContractDetail WHERE  intContractDetailId = @intContractDetailId
 
 	IF EXISTS(SELECT * FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3)
 	BEGIN
-		SELECT @dblRepresentingQty = SUM(dblRepresentingQty) FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3
+		SELECT @dblRepresentingQty = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,intRepresentingUOMId,@intUnitMeasureId, dblRepresentingQty)) FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3
 		IF @dblRepresentingQty >= @dblQuantity
 			SET @strSampleStatus = 'Approved'
 		ELSE
@@ -29,7 +31,7 @@ BEGIN
 	END		
 	ELSE IF EXISTS(SELECT * FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 4)
 	BEGIN
-		SELECT @dblRepresentingQty = SUM(dblRepresentingQty) FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 4
+		SELECT @dblRepresentingQty = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,intRepresentingUOMId,@intUnitMeasureId, dblRepresentingQty)) FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 4
 		IF @dblRepresentingQty >= @dblQuantity
 			SET @strSampleStatus = 'Rejected'
 		ELSE

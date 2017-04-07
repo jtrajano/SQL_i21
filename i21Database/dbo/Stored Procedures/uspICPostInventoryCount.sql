@@ -122,7 +122,7 @@ SELECT TOP 1 @ItemNo = Item.strItemNo
 FROM tblICInventoryCount IC 
 	LEFT JOIN tblICInventoryCountDetail ICDetail ON ICDetail.intInventoryCountId = IC.intInventoryCountId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ICDetail.intItemId
-WHERE IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICDetail.intLotId IS NULL OR ICDetail.intLotId NOT IN (SELECT intLotId FROM tblICInventoryLot WHERE intItemId = ICDetail.intItemId))
+WHERE IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICDetail.intLotId IS NULL OR ICDetail.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ICDetail.intItemId))
 
 IF @ItemNo IS NOT NULL
 	BEGIN
@@ -176,7 +176,7 @@ BEGIN
 			,dtmDate				= Header.dtmCountDate
 			,dblQty					= ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)
 			,dblUOMQty				= ItemUOM.dblUnitQty	
-			,dblCost				= dbo.fnMultiply(ItemPricing.dblLastCost, ItemUOM.dblUnitQty)
+			,dblCost				= dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty)
 			,0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= @DefaultCurrencyId 

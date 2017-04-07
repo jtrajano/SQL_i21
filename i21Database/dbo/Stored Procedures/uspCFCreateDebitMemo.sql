@@ -171,7 +171,7 @@ BEGIN
 			,[intTransactionId]						= NULL
 			,[intEntityId]							= @entityId											-- TEMPORARY
 			,[ysnResetDetails]						= 0
-			,[ysnPost]								= NULL--1
+			,[ysnPost]								= 1
 			,[intInvoiceDetailId]					= NULL
 			,[intItemId]							= NULL
 			,[ysnInventory]							= 0
@@ -355,7 +355,7 @@ BEGIN
 			,[intTransactionId]						= NULL
 			,[intEntityId]							= @entityId											-- TEMPORARY
 			,[ysnResetDetails]						= 0
-			,[ysnPost]								= -NULL-1
+			,[ysnPost]								= 1
 			,[intInvoiceDetailId]					= NULL
 			,[intItemId]							= intItemId
 			,[ysnInventory]							= 0

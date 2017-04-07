@@ -234,9 +234,6 @@ BEGIN
 			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
--- TODO:
--- 1. Fix the Unpost Cost adjustment. It must reduce the Lot Out --> dblCostAdjustQty
-
 -- Remove the cost buckets if it is posted within the date range. 
 BEGIN 
 	DELETE	FROM tblICInventoryLot 
@@ -624,7 +621,7 @@ BEGIN
 
 		-- Run the post routine. 
 		BEGIN 
-			--PRINT 'Posting ' + @strBatchId
+			PRINT 'Posting ' + @strBatchId
 
 			-- Setup the GL Description
 			SET @strGLDescription = 
@@ -662,17 +659,27 @@ BEGIN
 			DELETE FROM @ItemsToPost
 			DELETE FROM @ItemsForInTransitCosting
 
-			-- Repost the cost adjustments
-			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment'))
+			-- Repost the Bill cost adjustments
+			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment') AND ISNULL(@strTransactionForm, 'Bill') IN ('Bill'))
 			BEGIN 
-				PRINT 'Reposting Cost Adjustments: ' + @strTransactionId
+				PRINT 'Reposting Bill Cost Adjustments: ' + @strTransactionId
 				
-				-- uspICRepostCostAdjustment creates and posts it own g/l entries 
-				EXEC dbo.uspICRepostCostAdjustment
+				-- uspICRepostBillCostAdjustment creates and posts it own g/l entries 
+				EXEC uspICRepostBillCostAdjustment
 					@strTransactionId
 					,@strBatchId
 					,@intEntityUserSecurityId
 					,@ysnRegenerateBillGLEntries
+			END
+			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment') AND @strTransactionForm IN ('Settle Storage'))
+			BEGIN 
+				PRINT 'Reposting Settle Storage Cost Adjustments: ' + @strTransactionId
+				
+				-- uspICRepostSettleStorageCostAdjustment creates and posts it own g/l entries 
+				EXEC uspICRepostSettleStorageCostAdjustment
+					@strTransactionId
+					,@strBatchId
+					,@intEntityUserSecurityId
 			END
 
 			-- Repost 'Consume' and 'Produce'
@@ -1574,7 +1581,7 @@ BEGIN
 					,@strAccountToCounterInventory
 					,@intEntityUserSecurityId
 					,@strGLDescription
-					,@strAccountToCounterInventory 
+					,NULL  
 					,@intItemId -- This is only used when rebuilding the stocks. 
 					
 				IF @intReturnId <> 0 

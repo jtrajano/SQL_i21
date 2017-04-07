@@ -22,7 +22,7 @@ AS
 			CY.strCurrency			AS	strMainCurrency,	WM.strUnitMeasure			AS	strNetWeightUOM,
 			IC.strContractItemNo,	IC.strContractItemName,	REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')AS	strFutureMonth,
 			SL.strName				AS strStorageLocation,	UL.strSubLocationName		AS	strSubLocation,
-			PG.strName	COLLATE Latin1_General_CI_AS		AS strPurchasingGroup ,				
+			BK.strBook,				SB.strSubBook,			PG.strName	COLLATE Latin1_General_CI_AS		AS strPurchasingGroup ,				
 			CE.strEntityNo			AS	strCreatedByNo,		PA.strDescription AS strProductType,
 
 			--Detail Computed Columns
@@ -75,4 +75,6 @@ AS
 	JOIN	tblICStorageLocation		SL	ON	SL.intStorageLocationId		=	CD.intStorageLocationId		LEFT
 	JOIN	tblEMEntity					CE	ON	CE.intEntityId				=	CD.intCreatedById			LEFT
 	JOIN	tblICCommodityAttribute		PA	ON	PA.intCommodityAttributeId	=	IM.intProductTypeId			LEFT
+	JOIN	tblCTBook					BK	ON	BK.intBookId				=	CD.intBookId				LEFT
+	JOIN	tblCTSubBook				SB	ON	SB.intSubBookId				=	CD.intSubBookId				LEFT
 	JOIN	tblSMCompanyLocationSubLocation	UL	ON	UL.intCompanyLocationSubLocationId	=	CD.intSubLocationId

@@ -2043,10 +2043,10 @@ IF @post = 0
 				,GL.strTransactionForm
 				,GL.strModuleName
 				,GL.intConcurrencyId
-				,[dblDebitForeign]				= GL.dblDebitForeign
-				,[dblDebitReport]				= GL.dblDebitReport
-				,[dblCreditForeign]				= GL.dblCreditForeign
-				,[dblCreditReport]				= GL.dblCreditReport
+				,[dblDebitForeign]				= GL.dblCreditForeign
+				,[dblDebitReport]				= GL.dblCreditReport
+				,[dblCreditForeign]				= GL.dblDebitForeign
+				,[dblCreditReport]				= GL.dblDebitReport
 				,[dblReportingRate]				= GL.dblReportingRate 
 				,[dblForeignRate]				= GL.dblForeignRate 
 				,[strRateType]					= ''
@@ -2803,7 +2803,7 @@ IF @raiseError = 0
 						BEGIN
 							DECLARE @paymentIdACH INT
 
-							SELECT TOP 1 @paymentToUpdate = intPaymentId FROM @tblPaymentsToUpdateBudget ORDER BY intPaymentId
+							SELECT TOP 1 @paymentIdACH = intPaymentId FROM @tblACHPayments ORDER BY intPaymentId
 
 							EXEC dbo.uspARProcessACHPayments @paymentIdACH, @userId
 

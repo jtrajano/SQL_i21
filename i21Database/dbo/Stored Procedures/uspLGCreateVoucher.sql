@@ -22,7 +22,7 @@ BEGIN TRY
 			   ,@intEntityUserSecurityId = @intEntityUserSecurityId
 			   ,@intBillId = @intBillId OUTPUT
 	END
-	ELSE IF @intPurchaseSale = 2
+	ELSE IF @intPurchaseSale IN (2,3)
 	BEGIN
 		EXEC uspLGCreateVoucherForOutbound 
 				@intLoadId = @intLoadId

@@ -107,7 +107,8 @@ BEGIN TRY
 		,[dblMaintenanceAmount]					= NULL
 		,[dblLicenseAmount]						= NULL
 		,[intTaxGroupId]						= DD.intTaxGroupId
-		,[ysnRecomputeTax]						= 1
+		,[ysnRecomputeTax]						= CASE WHEN ISNULL(DD.intTaxGroupId, '') <> '' THEN 1
+														ELSE 0 END
 		,[intSCInvoiceId]						= NULL
 		,[strSCInvoiceNumber]					= ''
 		,[intInventoryShipmentItemId]			= NULL

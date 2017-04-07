@@ -44,6 +44,7 @@ FROM (
 						), 0)
 				) > 0
 			AND CH.intContractTypeId = 1
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE t.intDayToShipment < EV.intDaysToRemind
@@ -74,7 +75,7 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 2
+			AND L.intShipmentType = 2 AND L.intShipmentStatus <> 10
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -87,6 +88,7 @@ FROM (
 					AND intLoadShippingInstructionId IS NOT NULL
 				)
 			AND CH.intContractTypeId = 1
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE t.intDayToShipment > EV.intDaysToRemind
@@ -117,7 +119,7 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 1
+			AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -128,6 +130,7 @@ FROM (
 				FROM tblLGLoadDocuments WHERE ISNULL(ysnReceived,0) = 1
 				)
 			AND CH.intContractTypeId = 1
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE t.intDayToShipment < EV.intDaysToRemind
@@ -158,7 +161,7 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 1
+			AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -170,6 +173,7 @@ FROM (
 				JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 				)
 			AND CH.intContractTypeId = 1
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE t.intDayToShipment >= EV.intDaysToRemind
@@ -200,7 +204,7 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 1
+			AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10
 		JOIN tblLGWeightClaim WC ON L.intLoadId = WC.intLoadId
 		JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
@@ -210,6 +214,7 @@ FROM (
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE ISNULL(WCD.intBillId, 0) = 0
 			AND CH.intContractTypeId = 1
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE t.intDayToShipment > EV.intDaysToRemind
@@ -240,14 +245,16 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 1
+			AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments WHERE ysnReceived = 1)
-			AND CH.intContractTypeId = 1 AND ISNULL(L.ysn4cRegistration,0) =0 
+			AND CH.intContractTypeId = 1 
+			AND ISNULL(L.ysn4cRegistration,0) =0 
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE EV.strEventName = 'Contracts w/o 4C'
@@ -277,14 +284,16 @@ FROM (
 		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			AND L.intShipmentType = 1
+			AND L.intShipmentType = 1 AND L.intShipmentStatus <> 10
 		JOIN tblICItem I ON I.intItemId = CD.intItemId
 		JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 		LEFT JOIN tblSMCity LCI ON LCI.intCityId = CD.intLoadingPortId
 		LEFT JOIN tblSMCity DCI ON DCI.intCityId = CD.intDestinationPortId
 		WHERE L.intLoadId IN (SELECT DISTINCT intLoadId FROM tblLGLoadDocuments WHERE ysnReceived = 0)
-			AND CH.intContractTypeId = 1 AND L.dtmBLDate IS NOT NULL
+			AND CH.intContractTypeId = 1 
+			AND L.dtmBLDate IS NOT NULL
+			AND CD.intContractStatusId <> 3
 		) t
 		,tblCTEvent EV
 	WHERE EV.strEventName = 'Contracts w/o TC'
