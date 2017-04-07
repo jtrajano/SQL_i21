@@ -32,6 +32,7 @@ SELECT
 	,[strPricing]							= ''
 	,[dblTotalTax]							= 0.00
 	,[dblTotal]								= LGSPS.[dblSAllocatedQty] * ARCC.[dblCashPrice]
+	,[intLotId]								= NULL
 	,[intAccountId]							= ARIA.[intAccountId]
 	,[intCOGSAccountId]						= ARIA.[intCOGSAccountId]
 	,[intSalesAccountId]					= ARIA.[intSalesAccountId]
