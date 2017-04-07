@@ -1400,9 +1400,6 @@ Ext.define('Inventory.view.ItemViewController', {
             });
         }
 
-        var colStockUOM = grdStock.columns[1];
-        colStockUOM.renderer = this.onRenderStockUOM;
-
         var colLocationLocation = grdLocationStore.columns[0];
         colLocationLocation.renderer = function(value, opt, record) {
             return '<a style="color: #005FB2;text-decoration: none;" onMouseOut="this.style.textDecoration=\'none\'" onMouseOver="this.style.textDecoration=\'underline\'" href="javascript:void(0);">' + value + '</a>';
