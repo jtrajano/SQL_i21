@@ -72,7 +72,6 @@ BEGIN
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnIncludeBudget</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintOnlyPastDue</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnReportDetail</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter></filters></xmlparam>'
-	PRINT @xmlParam
 	SET @strQuery  = 'EXEC uspARCustomerStatementReport ' + '''' +  @xmlParam + ''''	 		
 	EXEC(@strQuery)	 
 END 
@@ -86,8 +85,8 @@ BEGIN
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnIncludeBudget</fieldname><condition>Equal To</condition><from>0</from><to>False</to><join /><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintOnlyPastDue</fieldname><condition>Equal To</condition><from>1</from><to>True</to><join /><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnReportDetail</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter></filters></xmlparam>'
-	SET @strQuery  = 'EXEC uspARCustomerStatementBalanceForwardReport ' + '''' +  @xmlParam + ''''	 
-	EXEC(@strQuery)		
+	SET @strQuery  = 'EXEC uspARCustomerStatementBalanceForwardReport ' + '''' +  @xmlParam + ''''
+	EXEC(@strQuery)
 END
 
 ELSE IF (@tmpstrStatementFormat = 'Payment Activity')
@@ -105,16 +104,16 @@ END
 
 ELSE IF (@tmpstrStatementFormat = 'Running Balance')
 BEGIN
-	SET @xmlParam =N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>dtmDate</fieldname><condition>Between</condition><from>01/01/1900</from>'
-	SET @xmlParam = @xmlParam + @tmpDate + '<to>03/29/2017</to><join /><begingroup /><endgroup /><datatype>DateTime</datatype></filter>'
+	SET @xmlParam =N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>dtmDate</fieldname><condition>Between</condition><from>01/01/1900</from><to>'
+	SET @xmlParam = @xmlParam + @tmpDate + '</to><join /><begingroup /><endgroup /><datatype>DateTime</datatype></filter>'
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintZeroBalance</fieldname><condition>Equal To</condition><from>0</from><to>False</to><join /><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintCreditBalance</fieldname><condition>Equal To</condition><from>1</from><to>True</to><join /><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnIncludeBudget</fieldname><condition>Equal To</condition><from>0</from><to>False</to><join /><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintOnlyPastDue</fieldname><condition>Equal To</condition><from>1</from><to>True</to><join /><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>strStatementFormat</fieldname><condition>Equal To</condition><from>Running Balance</from><join /><begingroup /><endgroup /><datatype>String</datatype></filter>'
+	SET @xmlParam = @xmlParam + '<filter><fieldname>strStatementFormat</fieldname><condition>Equal To</condition><from>Running Balance</from><join /><begingroup /><endgroup /><datatype>String</datatype></filter>'  
 	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnReportDetail</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter></filters></xmlparam>'
 	SET @strQuery  = 'EXEC uspARCustomerStatementReport ' + '''' +  @xmlParam + ''''	
-	EXEC(@strQuery)	 			
+	EXEC(@strQuery)			
 END
 
 ELSE
