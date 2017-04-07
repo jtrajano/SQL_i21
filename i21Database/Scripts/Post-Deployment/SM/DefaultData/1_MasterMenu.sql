@@ -704,6 +704,30 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Report Me
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.DocumentMaintenance', intSort = 27 WHERE strMenuName = 'Report Messages' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document Source' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Document Source', N'System Manager', @CommonInfoParentMenuId, N'Document Source', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.DocumentSource', N'small-menu-maintenance', 0, 0, 0, 1, 28, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.DocumentSource', intSort = 28 WHERE strMenuName = 'Document Source' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document Type' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Document Type', N'System Manager', @CommonInfoParentMenuId, N'Document Type', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.DocumentType', N'small-menu-maintenance', 0, 0, 0, 1, 29, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.DocumentType', intSort = 29 WHERE strMenuName = 'Document Type' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document Manager' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Document Manager', N'System Manager', @CommonInfoParentMenuId, N'Document Manager', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.DocumentManager', N'small-menu-maintenance', 0, 0, 0, 1, 30, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.DocumentManager', intSort = 30 WHERE strMenuName = 'Document Manager' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Pending Documents' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Pending Documents', N'System Manager', @CommonInfoParentMenuId, N'Pending Documents', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.DocumentPending?activeTab=Pending', N'small-menu-maintenance', 0, 0, 0, 1, 31, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.DocumentPending?activeTab=Pending', intSort = 31 WHERE strMenuName = 'Pending Documents' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
 --IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Group Masters' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
 --	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 --	VALUES (N'Tax Group Masters', N'System Manager', @CommonInfoParentMenuId, N'Tax Group Masters', N'Maintenance', N'Screen', N'i21.view.TaxGroupMaster', N'small-menu-maintenance', 0, 0, 0, 1, 12, 1)
