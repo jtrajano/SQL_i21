@@ -282,10 +282,10 @@ WHERE SCTicket.intTicketId = @intTicketId
 												WHEN QM.dblDiscountAmount > 0 THEN 1
 											END
 		FROM @ReceiptStagingTable RE
-		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
-		INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
-		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
-		INNER JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
+		LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
+		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
+		LEFT JOIN tblICItem IC ON IC.intItemId = GR.intItemId
+		LEFT JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
 		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0
 
 		--Insert record for fee
