@@ -677,7 +677,7 @@ BEGIN TRY
 
 				IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadShippingInstructionId = @intLoadId)
 				BEGIN
-					IF ((@dtmCurrentETAPOD IS NOT NULL) AND (@dtmCurrentETAPOD <> @dtmCurrentPlannedAvailabilityDate))
+					IF ((@dtmCurrentETAPOD IS NOT NULL) AND (ISNULL(@dtmCurrentETAPOD,'') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,'')))
 					BEGIN
 						UPDATE tblCTContractDetail SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD  WHERE intContractDetailId = @intContractDetailId 
 
