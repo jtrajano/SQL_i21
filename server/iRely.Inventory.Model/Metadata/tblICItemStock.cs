@@ -26,29 +26,10 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitReserved { get; set; }
         public decimal? dblLastCountRetail { get; set; }
         public int? intSort { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strLocationName { get; set; }
 
-        private string _location;
-        [NotMapped]
-        public string strLocationName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_location))
-                    if (tblICItemLocation != null)
-                        return tblICItemLocation.strLocationName;
-                    else
-                        return null;
-                else
-                    return _location;
-            }
-            set
-            {
-                _location = value;
-            }
-        }
-        
         public tblICItem tblICItem { get; set; }
-        public tblICItemLocation tblICItemLocation { get; set; }
     }
 
     public class ItemStockVM

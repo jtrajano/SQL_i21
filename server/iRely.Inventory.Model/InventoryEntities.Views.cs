@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets2eb526951da1449d7eb01e7ece340d4315d735c2644bdc7fe4a7c80dc111082e))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets580587c7f06108be2f4fdeb676cfb28bc682d04fc2ea29b4d18daeae992e7f97))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets2eb526951da1449d7eb01e7ece340d4315d735c2644bdc7fe4a7c80dc111082e : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets580587c7f06108be2f4fdeb676cfb28bc682d04fc2ea29b4d18daeae992e7f97 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "2eb526951da1449d7eb01e7ece340d4315d735c2644bdc7fe4a7c80dc111082e"; }
+            get { return "580587c7f06108be2f4fdeb676cfb28bc682d04fc2ea29b4d18daeae992e7f97"; }
         }
 
         /// <summary>
@@ -3027,7 +3027,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemStock
-        [CodeFirstDatabaseSchema.tblICItemStock](T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblInTransitInbound, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblInTransitOutbound, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblUnitStorage, T1.tblICItemStock_dblConsignedPurchase, T1.tblICItemStock_dblConsignedSale, T1.tblICItemStock_dblUnitReserved, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItemStock](T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblInTransitInbound, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblInTransitOutbound, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblUnitStorage, T1.tblICItemStock_dblConsignedPurchase, T1.tblICItemStock_dblConsignedSale, T1.tblICItemStock_dblUnitReserved, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_strUnitMeasure, T1.tblICItemStock_strLocationName, T1.tblICItemStock_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemStockId AS tblICItemStock_intItemStockId, 
@@ -3045,6 +3045,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblUnitReserved AS tblICItemStock_dblUnitReserved, 
             T.dblLastCountRetail AS tblICItemStock_dblLastCountRetail, 
             T.intSort AS tblICItemStock_intSort, 
+            T.strUnitMeasure AS tblICItemStock_strUnitMeasure, 
+            T.strLocationName AS tblICItemStock_strLocationName, 
             T.intConcurrencyId AS tblICItemStock_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICItemStocks AS T
@@ -6438,7 +6440,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemStocks
-        [iRely.Inventory.Model.tblICItemStock](T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblInTransitInbound, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblInTransitOutbound, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblUnitStorage, T1.tblICItemStock_dblConsignedPurchase, T1.tblICItemStock_dblConsignedSale, T1.tblICItemStock_dblUnitReserved, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItemStock](T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblInTransitInbound, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblInTransitOutbound, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblUnitStorage, T1.tblICItemStock_dblConsignedPurchase, T1.tblICItemStock_dblConsignedSale, T1.tblICItemStock_dblUnitReserved, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_strUnitMeasure, T1.tblICItemStock_strLocationName, T1.tblICItemStock_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemStockId AS tblICItemStock_intItemStockId, 
@@ -6456,6 +6458,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblUnitReserved AS tblICItemStock_dblUnitReserved, 
             T.dblLastCountRetail AS tblICItemStock_dblLastCountRetail, 
             T.intSort AS tblICItemStock_intSort, 
+            T.strUnitMeasure AS tblICItemStock_strUnitMeasure, 
+            T.strLocationName AS tblICItemStock_strLocationName, 
             T.intConcurrencyId AS tblICItemStock_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICItemStock AS T
