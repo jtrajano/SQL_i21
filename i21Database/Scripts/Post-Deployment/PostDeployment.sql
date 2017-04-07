@@ -215,6 +215,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
 :r .\AR\DefaultData\27_RenamePricingForContracts.sql
 :r .\AR\DefaultData\28_UpdateBaseAmounts.sql
+:r .\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql

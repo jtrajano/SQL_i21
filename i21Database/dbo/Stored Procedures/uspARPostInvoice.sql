@@ -3349,9 +3349,9 @@ IF @post = 1
 			SELECT 
 				 intItemId					= Detail.intItemId  
 				,intItemLocationId			= IST.intItemLocationId
-				,intItemUOMId				= CASE WHEN ISNULL(LGL.intLotId,0) = 0 THEN Detail.intItemUOMId ELSE ISNULL(Detail.intItemWeightUOMId, Detail.intItemUOMId)  END
+				,intItemUOMId				= CASE WHEN ISNULL(Detail.intLotId,0) = 0 THEN Detail.intItemUOMId ELSE ISNULL(Detail.intItemWeightUOMId, Detail.intItemUOMId)  END
 				,dtmDate					= Header.dtmShipDate
-				,dblQty						= ((CASE WHEN ISNULL(LGL.intLotId,0) = 0 OR ISNULL(Detail.intItemWeightUOMId,0) = 0 THEN Detail.dblQtyShipped ELSE Detail.dblShipmentNetWt END) * (CASE WHEN Header.strTransactionType IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
+				,dblQty						= ((CASE WHEN ISNULL(Detail.intLotId,0) = 0 OR ISNULL(Detail.intItemWeightUOMId,0) = 0 THEN Detail.dblQtyShipped ELSE Detail.dblShipmentNetWt END) * (CASE WHEN Header.strTransactionType IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
 				,dblUOMQty					= ItemUOM.dblUnitQty
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
@@ -3386,7 +3386,7 @@ IF @post = 1
 				,intTransactionDetailId		= Detail.intInvoiceDetailId
 				,strTransactionId			= Header.strInvoiceNumber 
 				,intTransactionTypeId		= @INVENTORY_INVOICE_TYPE
-				,intLotId					= LGL.intLotId  
+				,intLotId					= Detail.intLotId  
 				,intSubLocationId			= Detail.intCompanyLocationSubLocationId 
 				,intStorageLocationId		= Detail.intStorageLocationId
 				,strActualCostId			= CASE WHEN (ISNULL(Header.intDistributionHeaderId,0) <> 0 OR ISNULL(Header.intLoadDistributionHeaderId,0) <> 0) THEN Header.strActualCostId ELSE NULL END
@@ -3394,7 +3394,7 @@ IF @post = 1
 				,dblForexRate				= Detail.dblCurrencyExchangeRate
 			FROM 
 				(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblPrice, intCompanyLocationSubLocationId, intStorageLocationId, intItemUOMId, intLoadDetailId, dblTotal, ysnBlended,
-					dblQtyShipped, intInventoryShipmentItemId, intShipmentPurchaseSalesContractId, intStorageScheduleTypeId, intItemWeightUOMId, intCurrencyExchangeRateTypeId, dblCurrencyExchangeRate, dblShipmentNetWt
+					dblQtyShipped, intInventoryShipmentItemId, intShipmentPurchaseSalesContractId, intStorageScheduleTypeId, intItemWeightUOMId, intCurrencyExchangeRateTypeId, dblCurrencyExchangeRate, dblShipmentNetWt, intLotId
 				 FROM tblARInvoiceDetail WITH (NOLOCK)) Detail
 			INNER JOIN
 				(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, intCurrencyId, strImportFormat, intCompanyLocationId, intDistributionHeaderId, 
@@ -3417,8 +3417,6 @@ IF @post = 1
 				(SELECT intItemId, intLocationId, intItemLocationId, strType, dblLastCost FROM vyuICGetItemStock WITH (NOLOCK)) IST
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId
-			OUTER APPLY
-				dbo.[fnGetLoadDetailLots](Detail.intLoadDetailId) LGL
 			WHERE				
 				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND Detail.dblTotal <> 0) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)

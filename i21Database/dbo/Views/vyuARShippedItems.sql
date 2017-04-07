@@ -21,6 +21,7 @@ SELECT
 	,[strShipmentNumber]				= NULL
 	,[intLoadId]						= NULL
 	,[intLoadDetailId]					= NULL
+	,[intLotId]							= NULL
 	,[strLoadNumber]					= NULL
 	,[intRecipeItemId]					= SOD.[intRecipeItemId]
 	,[intContractHeaderId]				= SOD.[intContractHeaderId]
@@ -250,6 +251,7 @@ SELECT
 	,[strShipmentNumber]				= NULL
 	,[intLoadId]						= NULL
 	,[intLoadDetailId]					= NULL
+	,[intLotId]							= NULL
 	,[strLoadNumber]					= NULL
 	,[intRecipeItemId]					= NULL
 	,[intContractHeaderId]				= SOD.[intContractHeaderId]
@@ -479,9 +481,10 @@ SELECT
 	,[strInventoryShipmentNumber]		= SHP.[strShipmentNumber] 	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
-	,[intLoadId]						= NULL
-	,[strLoadNumber]					= NULL
+	,[intLoadId]						= NULL	
 	,[intLoadDetailId]					= NULL
+	,[intLotId]							= NULL
+	,[strLoadNumber]					= NULL
 	,[intRecipeItemId]					= NULL
 	,[intContractHeaderId]				= SOD.[intContractHeaderId]
 	,[strContractNumber]				= ARCC.[strContractNumber]
@@ -847,9 +850,10 @@ SELECT
 	,[strInventoryShipmentNumber]		= ICIS.[strShipmentNumber] 	
 	,[intShipmentId]					= LGICShipment.[intShipmentId]
 	,[strShipmentNumber]				= NULL
-	,[intLoadId]						= NULL
-	,[strLoadNumber]					= NULL
+	,[intLoadId]						= NULL	
 	,[intLoadDetailId]					= NULL
+	,[intLotId]							= NULL
+	,[strLoadNumber]					= NULL
 	,[intRecipeItemId]					= NULL
 	,[intContractHeaderId]				= ISNULL(ARCC.[intContractHeaderId], LGICShipment.[intContractHeaderId])
 	,[strContractNumber]				= ISNULL(ARCC.[strContractNumber], LGICShipment.[strContractNumber])
@@ -1123,9 +1127,10 @@ SELECT
 	,[strInventoryShipmentNumber]		= ICIS.[strShipmentNumber] 	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
-	,[intLoadId]						= NULL
-	,[strLoadNumber]					= NULL
+	,[intLoadId]						= NULL	
 	,[intLoadDetailId]					= NULL
+	,[intLotId]							= NULL
+	,[strLoadNumber]					= NULL
 	,[intRecipeItemId]					= NULL
 	,[intContractHeaderId]				= ARCC.[intContractHeaderId]
 	,[strContractNumber]				= ARCC.[strContractNumber]
@@ -1311,9 +1316,10 @@ SELECT
 	,[strInventoryShipmentNumber]		= ''	
 	,[intShipmentId]					= LGS.[intShipmentId]
 	,[strShipmentNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
-	,[intLoadId]						= NULL
-	,[strLoadNumber]					= NULL
+	,[intLoadId]						= NULL	
 	,[intLoadDetailId]					= NULL
+	,[intLotId]							= ARSID.[intLotId]
+	,[strLoadNumber]					= NULL
 	,[intRecipeItemId]					= NULL
 	,[intContractHeaderId]				= NULL
 	,[strContractNumber]				= ''
@@ -1395,7 +1401,8 @@ FROM
 			[intCurrencyExchangeRateTypeId],
 			[strCurrencyExchangeRateType],
 			[intCurrencyExchangeRateId],
-			[dblCurrencyExchangeRate]
+			[dblCurrencyExchangeRate],
+			[intLotId]
 	 FROM vyuARShippedItemDetail WITH (NOLOCK))ARSID
 INNER JOIN
 	(SELECT [intShipmentId],
@@ -1469,9 +1476,10 @@ SELECT
 	,[strInventoryShipmentNumber]		= ''	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
-	,[intLoadId]						= NULL
-	,[strLoadNumber]					= NULL
+	,[intLoadId]						= NULL	
 	,[intLoadDetailId]					= NULL
+	,[intLotId]							= NULL
+	,[strLoadNumber]					= NULL
 	,[intRecipeItemId]					= MFG.[intRecipeItemId] 
 	,[intContractHeaderId]				= NULL
 	,[strContractNumber]				= NULL
@@ -1654,9 +1662,10 @@ SELECT DISTINCT
 	,[strInventoryShipmentNumber]		= ICIS.[strShipmentNumber] 	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
-	,[intLoadId]						= NULL
-	,[strLoadNumber]					= NULL
+	,[intLoadId]						= NULL	
 	,[intLoadDetailId]					= NULL
+	,[intLotId]							= NULL
+	,[strLoadNumber]					= NULL
 	,[intRecipeItemId]					= MFG.[intRecipeItemId]
 	,[intContractHeaderId]				= NULL
 	,[strContractNumber]				= NULL
@@ -1843,6 +1852,7 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[strShipmentNumber]				= NULL
 	,[intLoadId]						= L.intLoadId
 	,[intLoadDetailId]					= LD.intLoadDetailId
+	,[intLotId]							= LDL.[intLotId] 
 	,[strLoadNumber]					= L.strLoadNumber
 	,[intRecipeItemId]					= NULL
 	,[intContractHeaderId]				= ARCC.[intContractHeaderId]
@@ -2047,6 +2057,7 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[strShipmentNumber]				= NULL
 	,[intLoadId]						= intLoadId
 	,[intLoadDetailId]					= LWS.intLoadDetailId
+	,[intLotId]							= NULL
 	,[strLoadNumber]					= strLoadNumber
 	,[intRecipeItemId]					= NULL
 	,[intContractHeaderId]				= LWS.[intContractHeaderId]
@@ -2200,8 +2211,9 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[strInventoryShipmentNumber]		= NULL
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
-	,[intLoadId]						= intLoadId
+	,[intLoadId]						= LC.intLoadId
 	,[intLoadDetailId]					= LC.intLoadDetailId
+	,[intLotId]							= LGLDL.[intLotId]
 	,[strLoadNumber]					= strLoadNumber
 	,[intRecipeItemId]					= NULL
 	,[intContractHeaderId]				= LC.[intContractHeaderId]
@@ -2333,6 +2345,26 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMCurrencyExchangeRateType SMCRT
 		ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN
+	(
+		SELECT 
+			 LGLSC.[intLoadId]
+			,LDL.[intLotId]
+			,LDL.[intLoadDetailId]
+		FROM
+			tblLGLoadDetailLot LDL
+		INNER JOIN
+			(
+				SELECT
+					 [intLoadId]
+					,[intLoadDetailLotId]
+				FROM
+					tblLGLoadStorageCost 
+			) LGLSC
+				ON LDL.[intLoadDetailLotId] = LGLSC.[intLoadDetailLotId]
+	) LGLDL
+		ON LC.[intLoadId] = LGLDL.[intLoadId]
+		AND LC.[intLoadDetailId] = LGLDL.[intLoadDetailId]
 WHERE LC.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 
 UNION
@@ -2353,8 +2385,9 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[strInventoryShipmentNumber]		= NULL
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
-	,[intLoadId]						= intLoadId
+	,[intLoadId]						= LC.intLoadId
 	,[intLoadDetailId]					= LC.intLoadDetailId
+	,[intLotId]							= LGLDL.intLotId 
 	,[strLoadNumber]					= strLoadNumber
 	,[intRecipeItemId]					= NULL
 	,[intContractHeaderId]				= LC.[intContractHeaderId]
@@ -2486,5 +2519,25 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMCurrencyExchangeRateType SMCRT
 		ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN
+	(
+		SELECT 
+			 LGLSC.[intLoadId]
+			,LDL.[intLotId]
+			,LDL.[intLoadDetailId]
+		FROM
+			tblLGLoadDetailLot LDL
+		INNER JOIN
+			(
+				SELECT
+					 [intLoadId]
+					,[intLoadDetailLotId]
+				FROM
+					tblLGLoadStorageCost 
+			) LGLSC
+				ON LDL.[intLoadDetailLotId] = LGLSC.[intLoadDetailLotId]
+	) LGLDL
+		ON LC.[intLoadId] = LGLDL.[intLoadId]
+		AND LC.[intLoadDetailId] = LGLDL.[intLoadDetailId]
 WHERE LC.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 ) ShippedItems
