@@ -40,6 +40,7 @@
 	ysnAutoEvaluateMonth BIT,
 	ysnAllowChangePricing BIT,
 	ysnHideVendorWOAccNo BIT,
+	ysnReadOnlyStatusOnCancel BIT,
 	ysnBroker BIT,
 
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
