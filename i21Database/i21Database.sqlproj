@@ -5184,7 +5184,8 @@
     <Build Include="dbo\Stored Procedures\uspGRReportStorageStatement.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportStorageStatementDetail.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityLink.sql" />
-	<Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherPriceCharges.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucherPriceCharges.sql" />
+    <Build Include="dbo\Views\vyuICItemStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
