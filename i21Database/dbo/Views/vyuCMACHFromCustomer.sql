@@ -46,7 +46,7 @@ strPayeeBankName = ISNULL((
 		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = Inv.intEntityCustomerId ORDER BY dtmEffectiveDate desc
 ),''),
 strPayeeBankAccountNumber  = ISNULL((
-		SELECT TOP 1 strAccountNumber FROM [tblEMEntityEFTInformation] EFTInfo 
+		SELECT TOP 1 dbo.fnAESDecryptASym(strAccountNumber) FROM [tblEMEntityEFTInformation] EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = Inv.intEntityCustomerId ORDER BY dtmEffectiveDate desc
 ),''),
 strPayeeBankRoutingNumber = ISNULL((
