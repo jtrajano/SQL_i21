@@ -50,6 +50,7 @@ SELECT
 	 ,D.strType
 	 ,dblForexRate
 	 ,intForexRateTypeId
+	 ,dblQtyToReceive = CASE WHEN B.dblQtyReceived >= B.dblQtyOrdered THEN 0 ELSE B.dblQtyOrdered - B.dblQtyReceived END
 FROM tblPOPurchase A
  INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
  INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.[intEntityId] = C2.intEntityId) ON A.[intEntityVendorId] = C.[intEntityId]
