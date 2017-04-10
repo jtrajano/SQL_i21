@@ -426,38 +426,17 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				WETCP.strPhone,
 				WETCM.strPhone strMobile,
 
-				WHVendor.strName + ' ' + WHVendorLoc.strLocationName + CHAR(13) + 
-
-				CASE 
-				WHEN ISNULL((
-							WHVendor.strName + ' ' + WHVendorLoc.strLocationName + CHAR(13) + RTRIM(LTRIM(WHVendorLoc.strAddress)) + CHAR(13) + WHVendorLoc.strZipCode + ' ' + CASE 
-								WHEN ISNULL(WHVendorLoc.strCity, '') = ''
-									THEN ''
-								ELSE WHVendorLoc.strCity
-								END + CHAR(13) + CASE 
-								WHEN ISNULL(WHVendorLoc.strState, '') = ''
-									THEN ''
-								ELSE WHVendorLoc.strState
-								END + CHAR(13) + WHVendorLoc.strCountry
-							), '') = ''
-					THEN WH.strSubLocationName
-				ELSE (
-						WHVendor.strName + ' ' + WHVendorLoc.strLocationName + CHAR(13) + RTRIM(LTRIM(WHVendorLoc.strAddress)) + CHAR(13) + WHVendorLoc.strZipCode + ' ' + CASE 
-							WHEN ISNULL(WHVendorLoc.strCity, '') = ''
-								THEN ''
-							ELSE WHVendorLoc.strCity
-							END + CHAR(13) + CASE 
-							WHEN ISNULL(WHVendorLoc.strState, '') = ''
-								THEN ''
-							ELSE WHVendorLoc.strState
-							END + CHAR(13) + WHVendorLoc.strCountry
-						)
-				END strWarehouseAddressInfo,
+				WHVendor.strName + ' ' + ISNULL(WHVendorLoc.strLocationName,'') + CHAR(13) + 
+				RTRIM(LTRIM(ISNULL(WHVendorLoc.strAddress,''))) + CHAR(13) + 
+				ISNULL(WHVendorLoc.strZipCode,'') + ' ' + 
+				CASE WHEN ISNULL(WHVendorLoc.strCity,'') = '' THEN '' ELSE WHVendorLoc.strCity END + CHAR(13) + 
+				CASE WHEN ISNULL(WHVendorLoc.strState,'') = '' THEN '' ELSE WHVendorLoc.strState END + CHAR(13) +  
+				ISNULL(WHVendorLoc.strCountry,'') strWarehouseAddressInfo,
 
 				WETC.strName + CHAR(13) + 
-				WETCP.strPhone + CHAR(13) + 
-				WETCM.strPhone  + CHAR(13) + 
-				WETCM.strPhone strWarehouseContractInfo
+				'Phone: ' + WETCP.strPhone + CHAR(13) + 
+				'FAX: ' + WETCM.strPhone + CHAR(13) + 
+				'E-Mail: ' + WETC.strEmail strWarehouseContractInfo
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
