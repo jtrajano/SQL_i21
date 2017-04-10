@@ -2588,16 +2588,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
                         // Add the charge taxes if:
-                        // 1. Charge Currency is the same as the transaction currency id. 
+                        // 1. Charge Currency is the same as the transaction currency id and if ysnAccure = true. 
+                        // 2. However, if ysnPrice = true, reduce it instead of adding it. 
                         var chargeCurrencyId = charge.get('intCurrencyId');
                         var otherChargeTax = charge.get('dblTax');  
                         var chargeVendorId = charge.get('intEntityVendorId'); 
                         var ysnPrice = charge.get('ysnPrice'); 
+                        var ysnAccrue = charge.get('ysnAccrue'); 
 
                         chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
 
                         if (transactionCurrencyId == chargeCurrencyId) {
-                            totalChargeTaxes += (ysnPrice || (transactionVendorId == chargeVendorId)) ? otherChargeTax : 0;
+                            totalChargeTaxes += (ysnPrice || (transactionVendorId == chargeVendorId && ysnAccrue)) ? otherChargeTax : 0;
                         }
                     }
                 });
@@ -2621,17 +2623,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (!charge.dummy) {                        
                         // Add the charges amount where:                        
                         // 1. Charge Currency is the same as the transaction currency id. 
-                        // 2. Add it if Charges Vendor is the same as the transaction vendor id. 
+                        // 2. Add it if Charges Vendor is the same as the transaction vendor id and ysnAccrue = true. 
                         // 3. Reduce it if Price = true; 
                         var chargeCurrencyId = charge.get('intCurrencyId');
                         var chargeVendorId = charge.get('intEntityVendorId'); 
                         var amount = charge.get('dblAmount');
-                        var ysnPrice = charge.get('ysnPrice'); 
+                        var ysnPrice = charge.get('ysnPrice');
+                        var ysnAccrue = charge.get('ysnAccrue'); 
 
                         chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
                         chargeVendorId = Ext.isNumeric(chargeVendorId) ? chargeVendorId : transactionVendorId; 
                         if (transactionCurrencyId == chargeCurrencyId) {
-                            totalCharges += ysnPrice ? -amount : (transactionVendorId == chargeVendorId) ? amount : 0; 
+                            totalCharges += ysnPrice ? -amount : (transactionVendorId == chargeVendorId && ysnAccrue) ? amount : 0; 
                         }
                     }
                 });
