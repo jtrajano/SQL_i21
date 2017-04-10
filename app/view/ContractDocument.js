@@ -23,11 +23,12 @@ Ext.define('Inventory.view.ContractDocument', {
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
+        'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
 
-    height: 309,
+    height: 359,
     hidden: false,
     minHeight: 309,
     minWidth: 451,
@@ -219,6 +220,20 @@ Ext.define('Inventory.view.ContractDocument', {
                                             labelWidth: 105,
                                             displayField: 'strCertificationName',
                                             valueField: 'intCertificationId'
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtOriginal',
+                                            fieldLabel: 'Original',
+                                            labelWidth: 105,
+                                            allowDecimals: false
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtCopies',
+                                            fieldLabel: 'Copies',
+                                            labelWidth: 105,
+                                            allowDecimals: false
                                         },
                                         {
                                             xtype: 'checkboxfield',
