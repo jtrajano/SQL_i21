@@ -58,11 +58,14 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@success AS INT
 		,@batchIdUsed AS INT
 		,@recapId AS INT
-		,@dblTotal AS DECIMAL(18,6);
+		,@dblTotal AS DECIMAL(18,6)
+		,@returnValue AS BIT
+		,@requireApproval AS BIT
+		,@intLocationId AS INT;
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
-	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
+	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @intLocationId = ST.intProcessingLocationId
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
 END
@@ -517,7 +520,16 @@ BEGIN TRY
 				BEGIN
 					EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
 					SELECT @intBillId = intBillId, @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
-					IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@dblTotal,0) > 0
+
+					EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+					@type = N'AccountsPayable.view.Voucher',
+					@transactionEntityId = @intEntityId,
+					@currentUserEntityId = @intUserId,
+					@locationId = @intLocationId,
+					@amount = @dblTotal,
+					@requireApproval = @requireApproval OUTPUT
+
+					IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
 					BEGIN
 						EXEC [dbo].[uspAPPostBill]
 						@post = 1
