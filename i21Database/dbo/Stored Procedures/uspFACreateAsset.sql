@@ -210,10 +210,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 		
 		FROM tblFAFixedAsset A
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
-
-		
-		EXEC uspGLBookEntries @GLEntries, @ysnPost
-		
+					
+		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost	
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -228,6 +226,15 @@ UPDATE tblFAFixedAsset
 	SET [ysnAcquired] = 1
 	WHERE [intAssetId] IN (SELECT intAssetId From #AssetID)
 
+
+IF @@ERROR <> 0	GOTO Post_Rollback;
+
+IF EXISTS(SELECT TOP 1 1 FROM (SELECT TOP 1 A.intAssetId FROM tblFAFixedAsset A 
+						WHERE A.[intAssetId] IN (SELECT intAssetId From #AssetID) 
+								AND ISNULL([dbo].isOpenAccountingDate(A.dtmDateAcquired), 0) = 0) TBL)
+BEGIN
+	GOTO Post_Rollback
+END
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
