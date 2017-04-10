@@ -63,9 +63,9 @@ BEGIN
 									END) AS NUMERIC(18,6))
 								+ (CASE WHEN @strCalculateBudgetFor = 'Next Year'
 								THEN
-									(365 * (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END))
+									(365 * (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END))
 								ELSE
-									(30 * ISNULL(@intNumberOfMonthsInBudget,0) * (CASE WHEN E.strCurrentSeason = 'Winter' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END))
+									(30 * ISNULL(@intNumberOfMonthsInBudget,0) * (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END))
 								END
 								)
 		,dblCurrentARBalance = CAST((ISNULL(G.dbl10Days,0.0) + ISNULL(G.dbl30Days,0.0) + ISNULL(G.dbl60Days,0.0) + ISNULL(G.dbl90Days,0.0) + ISNULL(G.dbl91Days,0.0) + ISNULL(G.dblFuture,0.0) - ISNULL(G.dblUnappliedCredits,0.0)) AS NUMERIC(18,6))
