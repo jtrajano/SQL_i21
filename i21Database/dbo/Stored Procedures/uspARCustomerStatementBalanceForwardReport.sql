@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerStatementBalanceForwardReport]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
- 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -192,7 +191,7 @@ WHERE [fieldname] IN ('strName', 'strCustomerName')
 
 SELECT @ysnReportDetail = [from]
 FROM @temp_xml_table
-WHERE [fieldname] IN ('ysnReportDetail')
+WHERE [fieldname] = 'ysnReportDetail'
 
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
@@ -461,11 +460,11 @@ WHERE
 						strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo') )
 
 IF @ysnReportDetail = 1
-BEGIN 
+BEGIN
 	--- Get only valid customers
 	TRUNCATE TABLE tblARSearchStatementCustomer
 	INSERT INTO tblARSearchStatementCustomer (intEntityCustomerId, strCustomerNumber, strCustomerName, dblARBalance, strTransactionId, strTransactionDate, dblTotalAmount, intConcurrencyId)
-	SELECT DISTINCT ABC.intEntityCustomerId, ABC.strCustomerNumber, ABC.strCustomerName, CONVERT(char(10), GETDATE(),126), '', ARC.dblARBalance, 0, 0 	 
+	SELECT DISTINCT ABC.intEntityCustomerId, ABC.strCustomerNumber, ABC.strCustomerName, ARC.dblARBalance, '', CONVERT(char(10), GETDATE(),126), 0, 0
 	FROM
 	(--- Without CF Report
 	SELECT

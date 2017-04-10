@@ -43,8 +43,8 @@ DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
 	,[fieldname]	NVARCHAR(50)
 	,[condition]	NVARCHAR(20)
-	,[from]			NVARCHAR(100)
-	,[to]			NVARCHAR(100)
+	,[from]			NVARCHAR(MAX)
+	,[to]			NVARCHAR(MAX)
 	,[join]			NVARCHAR(10)
 	,[begingroup]	NVARCHAR(50)
 	,[endgroup]		NVARCHAR(50)
@@ -52,7 +52,7 @@ DECLARE @temp_xml_table TABLE (
 )
 
 DECLARE @temp_SOA_table TABLE(
-	 [strCustomerName]			NVARCHAR(100)
+	 [strCustomerName]			NVARCHAR(MAX)
 	,[strAccountStatusCode]		NVARCHAR(5)
 	,[strLocationName]			NVARCHAR(50)
 	,[ysnPrintZeroBalance]		BIT
