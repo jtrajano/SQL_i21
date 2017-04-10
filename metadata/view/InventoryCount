@@ -446,6 +446,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strLocationName",
+                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Location",
                                                         "itemId": "cboLocation",
                                                         "labelWidth": 85,
@@ -455,13 +456,19 @@
                                                     },
                                                     "name": "MyComboBox81",
                                                     "configAlternates": {
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "741e242a-a3bf-4503-b574-04c2ce271306",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -497,6 +504,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strCategoryCode",
+                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Category",
                                                         "itemId": "cboCategory",
                                                         "labelWidth": 85,
@@ -506,13 +514,19 @@
                                                     },
                                                     "name": "MyComboBox83",
                                                     "configAlternates": {
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "39ed00ed-74b7-4bc9-a789-d2be82619ac8",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -548,6 +562,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strCommodityCode",
+                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Commodity",
                                                         "itemId": "cboCommodity",
                                                         "labelWidth": 85,
@@ -557,13 +572,19 @@
                                                     },
                                                     "name": "MyComboBox84",
                                                     "configAlternates": {
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "8301b7d7-7fc2-42b6-a12b-3705838fe31e",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -629,6 +650,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strCountGroup",
+                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Count Group",
                                                         "itemId": "cboCountGroup",
                                                         "labelWidth": 85,
@@ -638,13 +660,19 @@
                                                     },
                                                     "name": "MyComboBox85",
                                                     "configAlternates": {
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "04129fc7-78ac-4e7f-aab9-870d64da27ce",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -755,6 +783,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strSubLocationName",
+                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Storage Location",
                                                         "itemId": "cboSubLocation",
                                                         "layout|flex": null,
@@ -763,13 +792,19 @@
                                                     },
                                                     "name": "MyComboBox82",
                                                     "configAlternates": {
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "dcb4e6f6-acf4-4cbd-986c-0c7c45fcc7e7",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -805,6 +840,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strName",
+                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Storage Unit",
                                                         "itemId": "cboStorageLocation",
                                                         "layout|flex": null,
@@ -813,13 +849,19 @@
                                                     },
                                                     "name": "MyComboBox",
                                                     "configAlternates": {
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "f34d8016-47d1-47c7-97eb-1c664273aa6d",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -1211,7 +1253,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter122",
+                                                    "name": "filter11",
                                                     "designerId": "8725b495-60b5-4fac-b7b6-11f36b61fc8d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1227,11 +1269,25 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "headerDrillDownClick": "onHeaderItemDrillDown",
+                                                "headerDrillDownText": "Open",
                                                 "itemId": "colItem",
                                                 "text": "Item"
                                             },
                                             "name": "MyColumn6",
                                             "designerId": "bcc23027-7382-43e9-a224-fddf55b77c7a",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownClick",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownText",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -2160,7 +2216,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging112",
+                    "name": "statusbarpaging1",
                     "designerId": "819ea614-6c35-4e6e-8d56-521d4ef1d53e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

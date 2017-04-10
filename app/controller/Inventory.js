@@ -403,7 +403,7 @@ Ext.define('Inventory.controller.Inventory', {
                 columnName = 'strCountGroup';
                 break;
             case 'Commodity':
-                screenName = 'Store.view.Commodity';
+                screenName = 'Inventory.view.Commodity';
                 columnName = 'strCommodityCode';
                 break;
             case 'SubCategory':

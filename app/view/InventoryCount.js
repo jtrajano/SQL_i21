@@ -222,6 +222,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             flex: 1
                                                         }
                                                     ],
+                                                    enableDrillDown: true,
                                                     itemId: 'cboLocation',
                                                     fieldLabel: 'Location',
                                                     labelWidth: 85,
@@ -249,6 +250,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             flex: 1
                                                         }
                                                     ],
+                                                    enableDrillDown: true,
                                                     itemId: 'cboCategory',
                                                     fieldLabel: 'Category',
                                                     labelWidth: 85,
@@ -276,6 +278,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             flex: 1
                                                         }
                                                     ],
+                                                    enableDrillDown: true,
                                                     itemId: 'cboCommodity',
                                                     fieldLabel: 'Commodity',
                                                     labelWidth: 85,
@@ -333,6 +336,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             hidden: true
                                                         }
                                                     ],
+                                                    enableDrillDown: true,
                                                     itemId: 'cboCountGroup',
                                                     fieldLabel: 'Count Group',
                                                     labelWidth: 85,
@@ -394,6 +398,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             flex: 1
                                                         }
                                                     ],
+                                                    enableDrillDown: true,
                                                     itemId: 'cboSubLocation',
                                                     fieldLabel: 'Storage Location',
                                                     displayField: 'strSubLocationName',
@@ -420,6 +425,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                             flex: 1
                                                         }
                                                     ],
+                                                    enableDrillDown: true,
                                                     itemId: 'cboStorageLocation',
                                                     fieldLabel: 'Storage Unit',
                                                     displayField: 'strName',
@@ -582,6 +588,8 @@ Ext.define('Inventory.view.InventoryCount', {
                                     columns: [
                                         {
                                             xtype: 'gridcolumn',
+                                            headerDrillDownClick: 'onHeaderItemDrillDown',
+                                            headerDrillDownText: 'Open',
                                             itemId: 'colItem',
                                             dataIndex: 'string',
                                             text: 'Item',

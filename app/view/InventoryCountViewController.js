@@ -1217,13 +1217,108 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         }
     },
 
+    onLocationDrilldown: function (combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true } });
+        }
+        else {
+            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'LocationName');
+        }
+    },
+
+    onCategoryDrilldown: function (combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true } });
+        }
+        else {
+            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'Category');
+        }
+    },
+
+    onCommodityDrilldown: function (combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true } });
+        }
+        else {
+            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'Commodity');
+        }
+    },
+
+    onCountGroupDrilldown: function (combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.CountGroup', { action: 'new', viewConfig: { modal: true } });
+        }
+        else {
+            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'CountGroup');
+        }
+    },
+
+    onStorageLocationDrillDown: function(combo) {
+        if(!iRely.Functions.isEmpty(combo.getValue())) {
+            var win = combo.up('window');
+            var current = win.viewModel.data.current;
+
+            if (current) {
+                if (iRely.Functions.isEmpty(current.get('intLocationId'))) {
+                    iRely.Functions.showErrorDialog('Location must be specified.');
+                    return;
+                }
+                else {
+                    iRely.Functions.openScreen('i21.view.CompanyLocation', { 
+                        action: 'view',
+                        filters: [
+                            {
+                                 column: 'intCompanyLocationId',
+                                 value: current.get('intLocationId'),
+                                 conjunction: 'and'
+                            }  
+                        ],
+                        activeTab: 'Sub Location'
+                    });
+                }
+            }
+        }
+    },
+
+    onStorageUnitDrillDown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true } });
+        }
+        else {
+            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'StorageLocation');
+        }
+    },
+    
+    onHeaderItemDrillDown: function (menu, column) {
+        // var grid = column.initOwnerCt.grid; 
+        var grid = column.$initParent.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intItemId');
+    },
+
     init: function (application) {
         this.control({
+            "#cboLocation": {
+                drillDown: this.onLocationDrilldown
+            },
+            "#cboCategory": {
+                drillDown: this.onCategoryDrilldown
+            },
+            "#cboCommodity": {
+                drillDown: this.onCommodityDrilldown
+            },
+            "#cboSubLocation": {
+                drillDown: this.onStorageLocationDrillDown
+            },
             "#cboUOM": {
                 select: this.onInventoryCountDetailSelect
             },
             "#cboCountGroup": {
-                select: this.onCountGroupSelect
+                select: this.onCountGroupSelect,
+                drillDown: this.onCountGroupDrilldown
+            },
+            "#cboStorageLocation": {
+                drillDown: this.onStorageUnitDrillDown
             },
             "#btnFetch": {
                 click: this.onFetchClick
