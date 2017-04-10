@@ -19,6 +19,16 @@ BEGIN
 			@strStorageLocation NVARCHAR(100),
 			@strContractItemNo NVARCHAR(100)
 
+	SELECT	@intItemId				= CASE WHEN @intItemId= 0 THEN NULL ELSE @intItemId END,
+			@intSubLocationId		= CASE WHEN @intSubLocationId= 0 THEN NULL ELSE @intSubLocationId END,
+			@intPlannedMonth		= CASE WHEN @intPlannedMonth= 0 THEN NULL ELSE @intPlannedMonth END,
+			@intYear				= CASE WHEN @intYear= 0 THEN NULL ELSE @intYear END,
+			@intMarketId			= CASE WHEN @intMarketId= 0 THEN NULL ELSE @intMarketId END,
+			@intLocationId			= CASE WHEN @intLocationId= 0 THEN NULL ELSE @intLocationId END,
+			@intCommodityId			= CASE WHEN @intCommodityId= 0 THEN NULL ELSE @intCommodityId END,
+			@intStorageLocationId	= CASE WHEN @intStorageLocationId= 0 THEN NULL ELSE @intStorageLocationId END,
+			@intItemContractId		= CASE WHEN @intItemContractId= 0 THEN NULL ELSE @intItemContractId END
+
 	DECLARE @intVendorId INT, @strCity NVARCHAR(100),@intCityId INT, @ysnPort BIT, @ysnRegion BIT
 
 	DECLARE @Item TABLE
