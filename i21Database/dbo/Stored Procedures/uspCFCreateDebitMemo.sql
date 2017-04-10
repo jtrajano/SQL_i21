@@ -220,7 +220,6 @@ BEGIN
 		intCustomerId
 		,strTempInvoiceReportNumber
 		,dblAccountTotalAmount
-		,dblTotalQuantity
 		,dblAccountTotalDiscount
 		,intTermID
 		,dtmInvoiceDate
@@ -428,7 +427,15 @@ BEGIN
 
 		
 
-		DECLARE @intInvoiceResultId	INT
+		DECLARE @intInvoiceResultId			INT
+		DECLARE @dblTotalQuantity			NUMERIC(18,6)
+		DECLARE @strInvoiceReportNumber		NVARCHAR(MAX)
+		DECLARE @strInvoiceNumber			NVARCHAR(MAX)
+		DECLARE @intEntityCustomerId		INT
+		DECLARE @dblAccountTotalDiscount	NUMERIC(18,6)
+		DECLARE @dblAccountTotalAmount		NUMERIC(18,6)
+		DECLARE @dblFeeAmount				NUMERIC(18,6)
+
 		---------INVOICE PROCESS RESULT---------
 		SET @executedLine = 7
 		INSERT INTO #tblCFInvoiceResult
@@ -450,24 +457,52 @@ BEGIN
 			SELECT	TOP 1 
 			@intInvoiceResultId = intDebitMemoId
 			FROM #tblCFInvoiceResult
+
+
+			SELECT TOP 1 
+			 @strInvoiceNumber = strInvoiceNumber
+			,@intEntityCustomerId = intEntityCustomerId	
+			FROM tblARInvoice 
+			WHERE intInvoiceId = @intInvoiceResultId
+
+			SELECT TOP 1 
+			 @strInvoiceReportNumber = strTempInvoiceReportNumber 
+			,@dblTotalQuantity = SUM(dblQuantity)
+			,@dblAccountTotalAmount = dblAccountTotalAmount
+			,@dblAccountTotalDiscount = dblAccountTotalDiscount
+		
+			FROM tblCFInvoiceStagingTable 
+			WHERE intCustomerId = @intEntityCustomerId
+			GROUP BY
+			 intCustomerId
+			,strTempInvoiceReportNumber
+			,dblAccountTotalAmount
+			,dblAccountTotalDiscount
+			,intTermID
+			,dtmInvoiceDate
+			,intSalesPersonId
+
+
+			SELECT TOP 1 
+			@dblFeeAmount = dblFeeTotalAmount
+			FROM tblCFInvoiceFeeStagingTable 
+			WHERE intCustomerId = @intEntityCustomerId
 			
 			SET @executedLine = 10
-			INSERT INTO tblCFInvoiceProcessResult(
-				 strInvoiceProcessResultId
-				,intTransactionProcessId
-				,ysnStatus
-				,strRunProcessId
-				,intCustomerId
-				,strInvoiceReportNumber
-			)
-			SELECT TOP 1 
-			(SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intInvoiceResultId)
-			,@intInvoiceResultId
-			,1
-			,''
-			,intEntityCustomerId
-			,(SELECT TOP 1 strInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intCustomerId = arInv.intEntityCustomerId)
-			FROM tblARInvoice AS arInv WHERE intInvoiceId = @intInvoiceResultId
+			UPDATE tblCFInvoiceProcessResult
+			SET 
+			 strInvoiceId				= @strInvoiceNumber
+			,intInvoiceId				= @intInvoiceResultId
+			,ysnStatus					= 1
+			,strRunProcessId			= ''
+			,intCustomerId				= @intEntityCustomerId
+			,strInvoiceReportNumber		= @strInvoiceReportNumber
+			,dblInvoiceQuantity			= @dblTotalQuantity
+			,dblInvoiceDiscount			= @dblAccountTotalDiscount
+			,dblInvoiceAmount			= (@dblAccountTotalAmount + @dblFeeAmount)
+			,dblInvoiceFee				= @dblFeeAmount
+			WHERE intCustomerId = @intEntityCustomerId
+			
 
 			SET @executedLine = 11
 			DELETE FROM #tblCFInvoiceResult 

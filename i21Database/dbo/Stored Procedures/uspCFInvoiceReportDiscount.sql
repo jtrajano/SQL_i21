@@ -843,6 +843,7 @@ BEGIN
 			,dblAccountTotalAmount
 			,dblAccountTotalDiscount
 			,dblAccountTotalLessDiscount
+			,dblEligableGallon
 			,dblDiscountEP
 			,dblAPR
 			,intAccountId
@@ -865,6 +866,7 @@ BEGIN
 			,dblAccountTotalAmount
 			,dblAccountTotalDiscount
 			,dblAccountTotalLessDiscount
+			,dblTotalQuantity
 			,dblDiscountEP
 			,dblAPR
 			,intAccountId

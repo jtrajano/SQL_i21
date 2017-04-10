@@ -19,6 +19,9 @@
     [dblDiscountEP]               NUMERIC (18, 6) NULL,
     [dblAPR]                      NUMERIC (18, 6) NULL,
     [intAccountId]                INT             NULL,
-    [intTransactionId]            INT             NULL
+    [intTransactionId]            INT             NULL,
+    [dblEligableGallon]           NUMERIC (18, 6) NULL
 );
+
+
 

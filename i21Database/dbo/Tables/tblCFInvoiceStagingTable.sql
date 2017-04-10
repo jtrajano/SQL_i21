@@ -115,6 +115,7 @@
     [dblAPR]                       NUMERIC (18, 6) NULL,
     [dblFeeAmount]                 NUMERIC (18, 6) NULL,
     [dblFeeRate]                   NUMERIC (18, 6) NULL,
+    [dblEligableGallon]            NUMERIC (18, 6) NULL,
     [ysnPrintMiscellaneous]        BIT             NULL,
     [ysnSummaryByCard]             BIT             NULL,
     [ysnSummaryByDepartment]       BIT             NULL,
@@ -130,4 +131,6 @@
     [ysnActive]                    BIT             NULL,
     [ysnEnergyTrac]                BIT             NULL
 );
+
+
 

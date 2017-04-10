@@ -134,6 +134,7 @@ BEGIN TRY
 	,dblTotalNetAmount
 	,dblTotalAmount
 	,dblTotalTaxAmount
+	,dblEligableGallon
 	,TotalFET
 	,TotalSET
 	,TotalSST
@@ -252,6 +253,7 @@ BEGIN TRY
 	,dblTotalNetAmount
 	,dblTotalAmount
 	,dblTotalTaxAmount
+	,dblEligableGallon
 	,TotalFET
 	,TotalSET
 	,TotalSST
