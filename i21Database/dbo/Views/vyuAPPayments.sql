@@ -28,7 +28,8 @@ SELECT
 	D.dblCreditLimit AS dblCredit,
 	D.strVendorId,
 	D1.strName,
-	ISNULL(E.ysnClr,0) AS ysnClear
+	ISNULL(E.ysnClr,0) AS ysnClear,
+	F.strPaymentMethod
 	FROM dbo.tblAPPayment A
 		LEFT JOIN dbo.tblCMBankAccount B
 			ON A.intBankAccountId = B.intBankAccountId
@@ -38,3 +39,5 @@ SELECT
 			ON A.[intEntityVendorId] = D.[intEntityId]
 		LEFT JOIN dbo.tblCMBankTransaction E
 			ON A.strPaymentRecordNum = E.strTransactionId
+		LEFT JOIN dbo.tblSMPaymentMethod F
+			ON A.intPaymentMethodId = F.intPaymentMethodID
