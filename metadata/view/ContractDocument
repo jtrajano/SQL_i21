@@ -10,7 +10,7 @@
         "defaultFocus": null,
         "designer|userAlias": "iccontractdocument",
         "designer|userClassName": "ContractDocument",
-        "height": 309,
+        "height": 359,
         "hidden": false,
         "icon": null,
         "layout": "fit",
@@ -479,6 +479,58 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "allowDecimals": false,
+                                                "designer|displayName": null,
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Original",
+                                                "itemId": "txtOriginal",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 105,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "width": null
+                                            },
+                                            "name": "MyNumberField2",
+                                            "designerId": "13eb8707-019d-4658-8510-0e1f9790b056"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "allowDecimals": false,
+                                                "designer|displayName": null,
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Copies",
+                                                "itemId": "txtCopies",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 105,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "width": null
+                                            },
+                                            "name": "MyNumberField9",
+                                            "designerId": "63671348-46c6-486d-87ab-6405833bc354"
+                                        },
+                                        {
                                             "type": "Ext.form.field.Checkbox",
                                             "reference": {
                                                 "name": "items",
@@ -516,7 +568,7 @@
                         "itemId": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging16",
+                    "name": "statusbarpaging11",
                     "designerId": "402098fb-f9d8-4138-b21f-ad603c46de1f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
