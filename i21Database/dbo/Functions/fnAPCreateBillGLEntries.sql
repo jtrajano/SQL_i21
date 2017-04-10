@@ -214,7 +214,7 @@ BEGIN
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=	CAST(
 												
-												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal - CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
+												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal /*- CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2))*/ --IC Tax Commented AP-3485
 														ELSE
 															CASE	WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 																	ELSE 
@@ -226,7 +226,7 @@ BEGIN
 																				ELSE 
 																					B.dblTotal 
 																		END																		
-																		+ CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
+																		--+ CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax Commented AP-3485
 															END
 															
 															
@@ -260,7 +260,7 @@ BEGIN
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	CAST(
 												
-												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal - CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
+												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal /*- CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2))*/ --IC Tax Commented AP-3485
 														ELSE
 															CASE	WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 																	ELSE 
@@ -272,8 +272,8 @@ BEGIN
 																				ELSE 
 																					B.dblTotal 
 																		END																		
-																		+ CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
-															END
+																		--+ CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax Commented AP-3485
+														END
 														END
 												AS DECIMAL(18,2)
 											), --Bill Detail Foreign,      
@@ -570,7 +570,7 @@ BEGIN
 	AND D.dblTax != 0
 	AND 1 = (
 		--create tax only from item receipt if it is adjusted / Cost is Adjusted  / third party vendor tax in other charge of receipt (AP-3227)
-		CASE WHEN B.intInventoryReceiptItemId IS NOT NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL AND B.intInventoryReceiptChargeId IS NULL
+		CASE WHEN B.intInventoryReceiptItemId IS NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL AND B.intInventoryReceiptChargeId IS NULL --Commented for AP-3461 
 				THEN 0 --AP-2792
 		ELSE 1 END
 	)

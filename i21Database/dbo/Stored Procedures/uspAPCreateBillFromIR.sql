@@ -658,6 +658,7 @@ BEGIN
 			FROM #tmpCreatedBillDetail A 
 			INNER JOIN tblAPBillDetail B ON A.intBillDetailId = B.intBillDetailId
 
+			--INSERT ITEM TAX
 			INSERT INTO tblAPBillDetailTax(
 				[intBillDetailId]		, 
 				--[intTaxGroupMasterId]	, 
@@ -780,7 +781,7 @@ BEGIN
 	--LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	WHERE A.intInventoryReceiptId = @receiptId
 
-	DELETE FROM #tmpReceiptIds WHERE intInventoryReceiptId = @receiptId  
+	
 END
 
 --UPDATE VOUCHER DATA
@@ -836,7 +837,43 @@ BEGIN
 		FROM tblAPBill Voucher
 		WHERE Voucher.intBillId = @currentVoucher
 	END
+	
+	--INSERT BILLDETAIL CHARGE TAX
+	INSERT INTO tblAPBillDetailTax(
+		[intBillDetailId]		, 
+		[intTaxGroupId]			, 
+		[intTaxCodeId]			, 
+		[intTaxClassId]			, 
+		[strTaxableByOtherTaxes], 
+		[strCalculationMethod]	, 
+		[dblRate]				, 
+		[intAccountId]			, 
+		[dblTax]				, 
+		[dblAdjustedTax]		, 
+		[ysnTaxAdjusted]		, 
+		[ysnSeparateOnBill]		, 
+		[ysnCheckOffTax]
+	)
+	SELECT
+		[intBillDetailId]		=	D.intBillDetailId, 
+		[intTaxGroupId]			=	A.intTaxGroupId, 
+		[intTaxCodeId]			=	A.intTaxCodeId, 
+		[intTaxClassId]			=	A.intTaxClassId, 
+		[strTaxableByOtherTaxes]=	A.strTaxableByOtherTaxes, 
+		[strCalculationMethod]	=	A.strCalculationMethod, 
+		[dblRate]				=	A.dblRate, 
+		[intAccountId]			=	A.intTaxAccountId, 
+		[dblTax]				=	A.dblTax, 
+		[dblAdjustedTax]		=	ISNULL(A.dblAdjustedTax,0), 
+		[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
+		[ysnSeparateOnBill]		=	0, 
+		[ysnCheckOffTax]		=	A.ysnCheckoffTax
+	FROM tblICInventoryReceiptChargeTax A
+	INNER JOIN dbo.tblICInventoryReceiptCharge B ON A.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+	INNER JOIN dbo.tblAPBillDetail D ON D.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+	AND B.intInventoryReceiptId IN (@receiptId) AND D.intBillId  = @currentVoucher
 
+	DELETE FROM #tmpReceiptIds WHERE intInventoryReceiptId = @receiptId  
 	DELETE FROM #tmpVouchersCreated WHERE intBillId = @currentVoucher
 END
 
