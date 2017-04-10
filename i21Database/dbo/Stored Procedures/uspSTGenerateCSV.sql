@@ -139,7 +139,7 @@ BEGIN
 							, ST.strDescription as strStoreName
 							, ST.strAddress as strStoreAddress
 							, ST.strCity as strStoreCity
-							, ST.strState as strStoreState
+							, UPPER(LEFT(ST.strState, 2)) as strStoreState
 							, ST.strZipCode as intStoreZipCode
 							, strTrlDept as strCategory
 							, @strVendorName as strManufacturerName
@@ -230,7 +230,7 @@ BEGIN
 							, ST.intStoreNo as intOutletNumber
 							, ST.strAddress as strOutletAddress
 							, ST.strCity as strOutletCity
-							, ST.strState as strOutletState
+							, UPPER(LEFT(ST.strState, 2)) as strOutletState
 							, ST.strZipCode as intOutletZipCode
 							--, FORMAT(CAST(dtmDate AS datetime), 'yyyy-MM-dd-HH:mm:ss') as strTransactionDateTime
 							, replace(convert(NVARCHAR, dtmDate, 120), ' ', '-') as strTransactionDateTime
