@@ -200,14 +200,12 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 break;
         }
 
-        var allowOverwrite = this.view.viewModel.getData().allowOverwrite;
         var lineOfBusiness = this.view.viewModel.getData().lineOfBusiness;
         if (type !== null) {
             iRely.Functions.openScreen('Inventory.view.ImportDataFromCsv', {
                 type: type,
                 method: "POST",
-                title: button.text,
-                allowOverwrite: allowOverwrite
+                title: button.text
             });
         }
         else if(originType !== null) {
@@ -293,10 +291,6 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 click: this.onExportCsvTemplate
             },
 
-            "#btnAllowOverwrite": {
-                toggle: this.onAllowOverwriteCheckChange
-            },
-
             "#cboLOB": {
                 select: this.onLOBSelect
             }
@@ -309,10 +303,6 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             this.view.viewModel.set('lineOfBusiness', lob);
             this.view.viewModel.set('currentTask', 'UOM');
         }
-    },
-
-    onAllowOverwriteCheckChange: function(button, state) {
-        this.view.viewModel.setData({ allowOverwrite: state });
     },
 
     onExportCsvTemplate: function(button, e, eOpts) {

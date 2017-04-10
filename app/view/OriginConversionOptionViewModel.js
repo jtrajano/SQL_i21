@@ -18,7 +18,6 @@ Ext.define('Inventory.view.OriginConversionOptionViewModel', {
     alias: 'viewmodel.icoriginconversionoption',
 
     data: {
-        allowOverwrite: false,
         lineOfBusiness: '',
         currentTask: 'LOB'
     },

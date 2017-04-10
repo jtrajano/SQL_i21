@@ -23,12 +23,14 @@ Ext.define('Inventory.view.ImportDataFromCsv', {
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.Label',
-        'Ext.form.field.File'
+        'Ext.form.field.File',
+        'Ext.form.FieldSet',
+        'Ext.form.field.Checkbox'
     ],
 
     autoShow: true,
-    height: 221,
-    minHeight: 221,
+    height: 225,
+    minHeight: 225,
     minWidth: 535,
     width: 535,
     layout: 'fit',
@@ -83,16 +85,17 @@ Ext.define('Inventory.view.ImportDataFromCsv', {
                         {
                             xtype: 'panel',
                             itemId: 'tabImport',
-                            layout: 'fit',
                             title: 'Details',
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch'
+                            },
                             items: [
                                 {
                                     xtype: 'container',
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle',
-                                        padding: 10
-                                    },
+                                    height: 42,
+                                    padding: '8 8 0 8',
+                                    layout: 'hbox',
                                     items: [
                                         {
                                             xtype: 'label',
@@ -105,6 +108,34 @@ Ext.define('Inventory.view.ImportDataFromCsv', {
                                             itemId: 'txtBrowseFile',
                                             padding: 3,
                                             width: 199
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'fieldset',
+                                    flex: 1,
+                                    height: 77,
+                                    margin: 8,
+                                    padding: 8,
+                                    title: 'Options',
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'form',
+                                            flex: 1,
+                                            border: false,
+                                            height: 42,
+                                            items: [
+                                                {
+                                                    xtype: 'checkboxfield',
+                                                    anchor: '100%',
+                                                    itemId: 'chbOverwrite',
+                                                    boxLabel: 'Overwrite existing records'
+                                                }
+                                            ]
                                         }
                                     ]
                                 }

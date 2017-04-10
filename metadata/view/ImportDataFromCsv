@@ -10,9 +10,10 @@
         "collapsible": true,
         "designer|userAlias": "icimportdatafromcsv",
         "designer|userClassName": "ImportDataFromCsv",
-        "height": 221,
+        "height": 225,
         "layout": "fit",
-        "minHeight": 221,
+        "maxHeight": null,
+        "minHeight": 225,
         "minWidth": 535,
         "modal": true,
         "title": "Import Data from CSV",
@@ -124,8 +125,9 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "container|align": "stretch",
                                 "itemId": "tabImport",
-                                "layout": "fit",
+                                "layout": "vbox",
                                 "title": "Details"
                             },
                             "name": "MyPanel",
@@ -149,9 +151,11 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "container|align": "middle",
-                                        "container|padding": 10,
-                                        "layout": "hbox"
+                                        "container|padding": null,
+                                        "height": 42,
+                                        "layout": "hbox",
+                                        "layout|flex": null,
+                                        "padding": "8 8 0 8"
                                     },
                                     "name": "MyContainer",
                                     "designerId": "d8fc58cd-a03a-4eb5-929f-25dbed1e1164",
@@ -186,6 +190,62 @@
                                             },
                                             "name": "MyFileUpload",
                                             "designerId": "104d8e04-975e-4794-8465-53b416c421fc"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.form.FieldSet",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "height": 77,
+                                        "layout": "vbox",
+                                        "layout|flex": 1,
+                                        "margin": 8,
+                                        "padding": 8,
+                                        "title": "Options"
+                                    },
+                                    "name": "MyFieldSet",
+                                    "designerId": "c18b0eeb-6cfe-43ad-98f0-eec9e4c4f47a",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Panel",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "bodyPadding": null,
+                                                "border": false,
+                                                "height": 42,
+                                                "layout|flex": 1,
+                                                "title": null
+                                            },
+                                            "name": "MyForm2",
+                                            "designerId": "7cbdda28-f342-411c-b1f3-68e0464e1400",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": "Overwrite existing records",
+                                                        "fieldLabel": null,
+                                                        "itemId": "chbOverwrite",
+                                                        "layout|anchor": "100%"
+                                                    },
+                                                    "name": "MyCheckbox1",
+                                                    "designerId": "4bb0898c-20a4-4c7e-9ee0-0be9862d99be"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }

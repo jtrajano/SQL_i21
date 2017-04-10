@@ -18,6 +18,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
     alias: 'widget.icoriginconversionoption',
 
     requires: [
+        'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
         'Ext.button.Button',
         'Ext.menu.Menu',
@@ -32,1565 +33,1566 @@ Ext.define('Inventory.view.OriginConversionOption', {
 
     items: [
         {
-            xtype: 'toolbar',
-            height: 30,
-            maxHeight: 30,
-            ui: 'i21-toolbar',
-            anchorSize: 30,
-            items: [
-                {
-                    xtype: 'button',
-                    itemId: 'btnDowloadCSVTemplate',
-                    ui: 'i21-button-toolbar-small',
-                    text: 'Download CSV Template',
-                    menu: {
-                        xtype: 'menu',
-                        items: [
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuUnitsOfMeasurement',
-                                text: 'Units of Measurement'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuFuelCategories',
-                                text: 'Fuel Categories'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuFeedStocks',
-                                text: 'Feed Stocks'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuFuelCodes',
-                                text: 'Fuel Codes'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuProcessCodes',
-                                text: 'Process Codes'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuFeedStockUOMs',
-                                text: 'Feed Stock UOMs'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuFuelTypes',
-                                text: 'Fuel Types'
-                            },
-                            {
-                                xtype: 'menuseparator'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuStorageLocations',
-                                text: 'Storage Locations'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuStorageUnitTypes',
-                                text: 'Storage Unit Types'
-                            },
-                            {
-                                xtype: 'menuseparator'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuLineOfBusiness',
-                                text: 'Line of Business'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuCategories',
-                                text: 'Categories'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuManufacturers',
-                                text: 'Manufacturers'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuBrands',
-                                text: 'Brands'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuCommodities',
-                                text: 'Commodities'
-                            },
-                            {
-                                xtype: 'menuseparator'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuItems',
-                                text: 'Items'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuAccountCategories',
-                                text: 'Item GL Account Categories'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuItemUOM',
-                                text: 'Item UOM'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuAccounts',
-                                text: 'Item GL Accounts'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuContractItems',
-                                text: 'Contract Items'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuImportItemLocation',
-                                text: 'Item Location'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuImportItemPricing',
-                                text: 'Item Pricing'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuImportItemPricingLevels',
-                                text: 'Item Pricing Levels'
-                            },
-                            {
-                                xtype: 'menuseparator'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                itemId: 'mnuImportInventoryCountDetails',
-                                text: 'Inventory Count'
-                            }
-                        ]
-                    }
-                },
-                {
-                    xtype: 'button',
-                    itemId: 'btnAllowOverwrite',
-                    ui: 'i21-button-toolbar-small',
-                    enableToggle: true,
-                    text: 'Overwrite Existing Record',
-                    tooltip: 'When checked, existing records that are matched to the records in the file will be overwritten.',
-                    tooltipType: 'title'
-                }
-            ]
-        },
-        {
-            xtype: 'panel',
-            border: false,
-            height: 2369,
-            itemId: 'pnlImportOrigin',
-            margin: '0 0 5 0',
-            width: 765,
+            xtype: 'form',
             bodyPadding: 10,
-            title: 'Inventory Data Import',
-            layout: {
-                type: 'vbox',
-                align: 'stretch'
-            },
+            title: 'My Form',
+            dockedItems: [
+                {
+                    xtype: 'toolbar',
+                    dock: 'top',
+                    height: 30,
+                    maxHeight: 30,
+                    ui: 'i21-toolbar',
+                    anchorSize: 30,
+                    items: [
+                        {
+                            xtype: 'button',
+                            itemId: 'btnDowloadCSVTemplate',
+                            ui: 'i21-button-toolbar-small',
+                            text: 'Download CSV Template',
+                            menu: {
+                                xtype: 'menu',
+                                items: [
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuUnitsOfMeasurement',
+                                        text: 'Units of Measurement'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuFuelCategories',
+                                        text: 'Fuel Categories'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuFeedStocks',
+                                        text: 'Feed Stocks'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuFuelCodes',
+                                        text: 'Fuel Codes'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuProcessCodes',
+                                        text: 'Process Codes'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuFeedStockUOMs',
+                                        text: 'Feed Stock UOMs'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuFuelTypes',
+                                        text: 'Fuel Types'
+                                    },
+                                    {
+                                        xtype: 'menuseparator'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuStorageLocations',
+                                        text: 'Storage Locations'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuStorageUnitTypes',
+                                        text: 'Storage Unit Types'
+                                    },
+                                    {
+                                        xtype: 'menuseparator'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuLineOfBusiness',
+                                        text: 'Line of Business'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuCategories',
+                                        text: 'Categories'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuManufacturers',
+                                        text: 'Manufacturers'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuBrands',
+                                        text: 'Brands'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuCommodities',
+                                        text: 'Commodities'
+                                    },
+                                    {
+                                        xtype: 'menuseparator'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuItems',
+                                        text: 'Items'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuAccountCategories',
+                                        text: 'Item GL Account Categories'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuItemUOM',
+                                        text: 'Item UOM'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuAccounts',
+                                        text: 'Item GL Accounts'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuContractItems',
+                                        text: 'Contract Items'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuImportItemLocation',
+                                        text: 'Item Location'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuImportItemPricing',
+                                        text: 'Item Pricing'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuImportItemPricingLevels',
+                                        text: 'Item Pricing Levels'
+                                    },
+                                    {
+                                        xtype: 'menuseparator'
+                                    },
+                                    {
+                                        xtype: 'menuitem',
+                                        itemId: 'mnuImportInventoryCountDetails',
+                                        text: 'Inventory Count'
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ],
             items: [
                 {
                     xtype: 'panel',
-                    height: 596,
-                    animCollapse: true,
+                    border: false,
+                    height: 2369,
+                    itemId: 'pnlImportOrigin',
+                    margin: '0 0 5 0',
+                    width: 765,
                     bodyPadding: 10,
-                    collapsed: false,
-                    collapsible: true,
-                    title: 'Common',
-                    titleCollapse: true,
+                    title: 'Inventory Data Import',
+                    layout: {
+                        type: 'vbox',
+                        align: 'stretch'
+                    },
                     items: [
                         {
-                            xtype: 'container',
-                            itemId: 'cntUnitOfMeasurement',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
+                            xtype: 'panel',
+                            height: 596,
+                            animCollapse: true,
+                            bodyPadding: 10,
+                            collapsed: false,
+                            collapsible: true,
+                            title: 'Common',
+                            titleCollapse: true,
                             items: [
                                 {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportUnitOfMeasurement',
-                                    width: 150,
-                                    text: 'Import Units of Measurement'
-                                },
-                                {
                                     xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
+                                    itemId: 'cntUnitOfMeasurement',
+                                    margin: '0 0 5 0',
                                     layout: {
                                         type: 'hbox',
                                         align: 'middle'
                                     },
                                     items: [
                                         {
-                                            xtype: 'label',
-                                            text: 'Import Units of Measurement from CSV'
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportUnitOfMeasurement',
+                                            width: 150,
+                                            text: 'Import Units of Measurement'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Units of Measurement from CSV'
+                                                }
+                                            ]
                                         }
                                     ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntFuelCategories',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportFuelCategories',
-                                    text: 'Import Fuel Categories'
                                 },
                                 {
                                     xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
+                                    itemId: 'cntFuelCategories',
+                                    margin: '0 0 5 0',
                                     layout: {
                                         type: 'hbox',
                                         align: 'middle'
                                     },
                                     items: [
                                         {
-                                            xtype: 'label',
-                                            text: 'Import Fuel Categories from CSV'
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportFuelCategories',
+                                            text: 'Import Fuel Categories'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Fuel Categories from CSV'
+                                                }
+                                            ]
                                         }
                                     ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntFeedStocks',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportFeedStocks',
-                                    width: 150,
-                                    text: 'Import Feed Stocks'
                                 },
                                 {
                                     xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
+                                    itemId: 'cntFeedStocks',
+                                    margin: '0 0 5 0',
                                     layout: {
                                         type: 'hbox',
                                         align: 'middle'
                                     },
                                     items: [
                                         {
-                                            xtype: 'label',
-                                            text: 'Import Feed Stocks from CSV'
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportFeedStocks',
+                                            width: 150,
+                                            text: 'Import Feed Stocks'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Feed Stocks from CSV'
+                                                }
+                                            ]
                                         }
                                     ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntFuelCodes',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportFuelCodes',
-                                    width: 150,
-                                    text: 'Import Fuel Codes'
                                 },
                                 {
                                     xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
+                                    itemId: 'cntFuelCodes',
+                                    margin: '0 0 5 0',
                                     layout: {
                                         type: 'hbox',
                                         align: 'middle'
                                     },
                                     items: [
                                         {
-                                            xtype: 'label',
-                                            text: 'Import Fuel Codes from CSV'
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportFuelCodes',
+                                            width: 150,
+                                            text: 'Import Fuel Codes'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Fuel Codes from CSV'
+                                                }
+                                            ]
                                         }
                                     ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntProcessCodes',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportProcessCodes',
-                                    width: 150,
-                                    text: 'Import Process Codes'
                                 },
                                 {
                                     xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
+                                    itemId: 'cntProcessCodes',
+                                    margin: '0 0 5 0',
                                     layout: {
                                         type: 'hbox',
                                         align: 'middle'
                                     },
                                     items: [
                                         {
-                                            xtype: 'label',
-                                            text: 'Import Process Codes from CSV'
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportProcessCodes',
+                                            width: 150,
+                                            text: 'Import Process Codes'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Process Codes from CSV'
+                                                }
+                                            ]
                                         }
                                     ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntFeedStockUOM',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportFeedStockUOM',
-                                    width: 150,
-                                    text: 'Import Feed Stock UOMs'
                                 },
                                 {
                                     xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
+                                    itemId: 'cntFeedStockUOM',
+                                    margin: '0 0 5 0',
                                     layout: {
                                         type: 'hbox',
                                         align: 'middle'
                                     },
                                     items: [
                                         {
-                                            xtype: 'label',
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportFeedStockUOM',
+                                            width: 150,
                                             text: 'Import Feed Stock UOMs'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntFuelTypes',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportFuelTypes',
-                                    width: 150,
-                                    text: 'Import Fuel Types'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
+                                        },
                                         {
-                                            xtype: 'label',
-                                            text: 'Import Fuel Types from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntStorageLocations',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportStorageLocations',
-                                    width: 150,
-                                    text: 'Import Storage Locations'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Storage Locations from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntStorageUnitTypes',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportStorageUnitTypes',
-                                    width: 150,
-                                    text: 'Import Storage Unit Types'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Storage Unit Types from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntLineOfBusiness',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportLineOfBusiness',
-                                    width: 150,
-                                    text: 'Import Line of Business'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Line of Business from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportManufacturers',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportManufacturers',
-                                    width: 150,
-                                    text: 'Import Manufacturers'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Manufacturers from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            height: 42,
-                            itemId: 'cntImportBrands',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportBrands',
-                                    width: 150,
-                                    text: 'Import Brands'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Brands from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    xtype: 'panel',
-                    height: 521,
-                    padding: '15 0 0 0',
-                    animCollapse: true,
-                    bodyPadding: 10,
-                    collapsed: false,
-                    collapsible: true,
-                    title: 'Items',
-                    titleCollapse: true,
-                    items: [
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportCategories',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportCategories',
-                                    width: 150,
-                                    text: 'Import Categories'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Categories from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportCommodities',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportCommodities',
-                                    width: 150,
-                                    text: 'Import Commodities'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Commodities from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportItems',
-                            margin: '0 0 5 0',
-                            padding: '',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle'
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportItems',
-                                    text: 'Import Items'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Items from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportItemAccountCategories',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportItemAccountCategories',
-                                    text: 'Import Item GL Account Categories'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Item GL Account Categories from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportItemUOM',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportItemUOM',
-                                    text: 'Import Item UOM'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Item UOM from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportItemAccounts',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportItemAccounts',
-                                    text: 'Import Item GL Accounts'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Item GL Accounts from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportItemContracts',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportItemContracts',
-                                    text: 'Import Contract Items'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Item Contracts from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportItemLocation',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportItemLocation',
-                                    text: 'Import Item Location'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Item Location from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportItemPricing',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportItemPricing',
-                                    text: 'Import Item Pricing'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Item Pricing from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportItemPricingLevels',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportItemPricingLevels',
-                                    text: 'Import Item Pricing Levels'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Item Pricing Levels from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportItemPricingLevels',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportItemPricingLevels',
-                                    text: 'Import Item Pricing Levels'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Item Pricing Levels from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    xtype: 'panel',
-                    height: 104,
-                    padding: '15 0 0 0',
-                    bodyPadding: 10,
-                    title: 'Inventory',
-                    items: [
-                        {
-                            xtype: 'container',
-                            itemId: 'cntImportInventoryCountDetails',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnImportInventoryCount',
-                                    text: 'Import Inventory Count'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    height: 40,
-                                    padding: 10,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'middle'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            text: 'Import Inventory Count from CSV'
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    xtype: 'panel',
-                    height: 881,
-                    padding: '15 0 0 0',
-                    bodyPadding: 10,
-                    title: 'Import Origin Data',
-                    items: [
-                        {
-                            xtype: 'container',
-                            frame: false,
-                            height: 60,
-                            itemId: 'cntOriginMergeItems',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'container',
-                                    flex: 2,
-                                    height: 60,
-                                    padding: 2,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            html: '',
-                                            padding: '0 0 0 10',
-                                            text: '"Items are created uniquely for each location in Origin. This can result in same item having different item number or different items having the same item number. Such items has to be identified and merged before importing to i21. In i21, an item is shared across locations."'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            frame: false,
-                            itemId: 'cntOriginLOB',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'combobox',
-                                    bind: {
-                                        disabled: '{disableLob}'
-                                    },
-                                    flex: 1,
-                                    itemId: 'cboLOB',
-                                    width: 361,
-                                    fieldLabel: 'Line of Business',
-                                    displayField: 'strName',
-                                    store: {
-                                        fields: [
-                                            'strName'
-                                        ],
-                                        data: [
-                                            {
-                                                strName: 'Petro'
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
                                             },
-                                            {
-                                                strName: 'Ag'
-                                            },
-                                            {
-                                                strName: 'Grain'
-                                            },
-                                            {
-                                                strName: 'C-Store'
-                                            }
-                                        ]
-                                    },
-                                    valueField: 'strName'
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Feed Stock UOMs'
+                                                }
+                                            ]
+                                        }
+                                    ]
                                 },
                                 {
                                     xtype: 'container',
-                                    flex: 2,
-                                    height: 25,
-                                    padding: 2,
+                                    itemId: 'cntFuelTypes',
+                                    margin: '0 0 5 0',
                                     layout: {
                                         type: 'hbox',
-                                        align: 'stretch'
+                                        align: 'middle'
                                     },
                                     items: [
                                         {
-                                            xtype: 'label',
-                                            height: 38,
-                                            padding: '0 0 0 10',
-                                            text: '"Select Line of Business to begin import"'
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportFuelTypes',
+                                            width: 150,
+                                            text: 'Import Fuel Types'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Fuel Types from CSV'
+                                                }
+                                            ]
                                         }
                                     ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            height: 49,
-                            itemId: 'cntOriginUOM',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    bind: {
-                                        disabled: '{disableUOM}'
-                                    },
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnOriginUOM',
-                                    width: 469,
-                                    text: 'Unit of Measures'
                                 },
                                 {
                                     xtype: 'container',
-                                    flex: 2,
+                                    itemId: 'cntStorageLocations',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportStorageLocations',
+                                            width: 150,
+                                            text: 'Import Storage Locations'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Storage Locations from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntStorageUnitTypes',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportStorageUnitTypes',
+                                            width: 150,
+                                            text: 'Import Storage Unit Types'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Storage Unit Types from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntLineOfBusiness',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportLineOfBusiness',
+                                            width: 150,
+                                            text: 'Import Line of Business'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Line of Business from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportManufacturers',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportManufacturers',
+                                            width: 150,
+                                            text: 'Import Manufacturers'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Manufacturers from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
                                     height: 42,
-                                    padding: 2,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            padding: '0 0 0 10',
-                                            text: '"Imports unit of measure setup. Users should verify the imported unit types and conversion factors before proceeding to next step."'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'ctnOriginLocations',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    bind: {
-                                        disabled: '{disableLocations}'
-                                    },
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnOriginLocations',
-                                    text: 'Sub Locations and Storage Locations'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 2,
-                                    height: 56,
-                                    padding: 2,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            padding: '0 0 0 10',
-                                            text: '"Imports storage location like elevators and bins. Origin does not have sub locations. System will create a sub location automatically for each company location."'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntOriginCommodity',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    bind: {
-                                        disabled: '{disableCommodity}'
-                                    },
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnOriginCommodity',
-                                    text: 'Commodity'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 2,
-                                    height: 97,
-                                    padding: 2,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            height: 36,
-                                            padding: '0 0 0 10',
-                                            text: '"Imports Commodity and GL Accounts. i21 requires category and item. System creates Category and Item data automatically after the import. All company locations will be added to the commodity by default. Manually remove what is not required after the import. Add AP Clearing account to Category → GL Accounts tab after import. AP Clearing account is not available in origin."'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            height: 49,
-                            itemId: 'cntOriginCategoryClass',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    bind: {
-                                        disabled: '{disableCategoryClass}'
-                                    },
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnOriginCategoryClass',
-                                    text: 'Category/Class'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 2,
-                                    height: 41,
-                                    padding: 2,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            padding: '0 0 0 10',
-                                            text: '"Imports Class data. Users should verify whether the Inventory types are correct before proceeding to next step."'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            height: 49,
-                            itemId: 'cntOriginAddInvGLAccts',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'container',
-                                    flex: 2,
-                                    height: 41,
-                                    padding: 2,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            padding: '0 0 0 10',
-                                            text: '"Create additional inventory GL accounts required by i21 in Chart of Accounts. Inventory Adjustment Inventory In-Transit AP Clearing (if not exists in origin)" This is a manual step by user'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            height: 62,
-                            itemId: 'cntOriginCategoryGLAccts',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    bind: {
-                                        disabled: '{disableCategoryGLAccts}'
-                                    },
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnOriginCategoryGLAccts',
-                                    text: 'GL Accounts for category'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 2,
-                                    height: 51,
-                                    padding: 2,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            height: 59,
-                                            padding: '0 0 0 10',
-                                            text: '"Imports GL accounts for categories. User should verify the imported gl accounts before proceeding to next step."'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntOriginAdditionalGLAccts',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    bind: {
-                                        disabled: '{disableAdditionalGLAccts}'
-                                    },
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnOriginAdditionalGLAccts',
-                                    text: 'Add additional GL Accounts'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 2,
-                                    height: 78,
-                                    padding: 2,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            height: 59,
-                                            padding: '0 0 0 10',
-                                            text: '"Additional inventory accounts required by i21 like AP Clearing, Inventory In-transit, Inventory Adjustment and Auto Variance has to be created in Chart of Accounts before doing this step. User should verify the imported gl accounts before proceeding to next step."'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntOriginItems',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    bind: {
-                                        disabled: '{disableItems}'
-                                    },
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnOriginItems',
-                                    text: 'Items, Locations and Pricing'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 2,
-                                    height: 45,
-                                    padding: 2,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            height: 59,
-                                            padding: '0 0 0 10',
-                                            text: '"Imports Items, Item Locations and Pricing. User should verify Item Type, Costing Method and Pricing data before proceeding to next step."'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            itemId: 'cntOriginItemGLAccts',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'button',
-                                    bind: {
-                                        disabled: '{disableItemGLAccts}'
-                                    },
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnOriginItemGLAccts',
-                                    text: 'GL Accounts for Items'
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 2,
-                                    height: 90,
-                                    layout: {
-                                        type: 'hbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'label',
-                                            height: 59,
-                                            padding: '0 0 0 10',
-                                            text: '"This step is optional. GL accounts are not required to be setup for each item. System uses the GL accounts setup for the category. However, if the accounts for the item are different from those setup for the category, use this button to import or manually change only the items which have different gl accounts than its category."'
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            height: 23,
-                            itemId: 'cntOriginPostTransaction',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
-                            items: [
-                                {
-                                    xtype: 'container',
-                                    flex: 2,
-                                    height: 24,
+                                    itemId: 'cntImportBrands',
+                                    margin: '0 0 5 0',
                                     layout: {
                                         type: 'hbox',
                                         align: 'middle'
                                     },
                                     items: [
                                         {
-                                            xtype: 'label',
-                                            height: 59,
-                                            padding: '0 0 0 10',
-                                            text: '"This step is done in origin. All inventory transactions has to be posted in origin before importing open balances."'
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportBrands',
+                                            width: 150,
+                                            text: 'Import Brands'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Brands from CSV'
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
                             ]
                         },
                         {
-                            xtype: 'container',
-                            height: 59,
-                            itemId: 'cntOriginBalance',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'middle',
-                                padding: ''
-                            },
+                            xtype: 'panel',
+                            height: 521,
+                            padding: '15 0 0 0',
+                            animCollapse: true,
+                            bodyPadding: 10,
+                            collapsed: false,
+                            collapsible: true,
+                            title: 'Items',
+                            titleCollapse: true,
                             items: [
                                 {
-                                    xtype: 'button',
-                                    bind: {
-                                        disabled: '{disableBalance}'
-                                    },
-                                    flex: 1,
-                                    height: 40,
-                                    itemId: 'btnOriginBalance',
-                                    text: 'Opening Balance'
-                                },
-                                {
                                     xtype: 'container',
-                                    flex: 2,
-                                    height: 45,
+                                    itemId: 'cntImportCategories',
+                                    margin: '0 0 5 0',
                                     layout: {
                                         type: 'hbox',
                                         align: 'middle'
                                     },
                                     items: [
                                         {
-                                            xtype: 'label',
-                                            height: 59,
-                                            padding: '0 0 0 10',
-                                            text: '"Imports opening stock for all items and locations. Grain opening balances must be entered manually after taking a physical reading."'
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportCategories',
+                                            width: 150,
+                                            text: 'Import Categories'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Categories from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportCommodities',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportCommodities',
+                                            width: 150,
+                                            text: 'Import Commodities'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Commodities from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportItems',
+                                    margin: '0 0 5 0',
+                                    padding: '',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportItems',
+                                            text: 'Import Items'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Items from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportItemAccountCategories',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportItemAccountCategories',
+                                            text: 'Import Item GL Account Categories'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Item GL Account Categories from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportItemUOM',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportItemUOM',
+                                            text: 'Import Item UOM'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Item UOM from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportItemAccounts',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportItemAccounts',
+                                            text: 'Import Item GL Accounts'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Item GL Accounts from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportItemContracts',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportItemContracts',
+                                            text: 'Import Contract Items'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Item Contracts from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportItemLocation',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportItemLocation',
+                                            text: 'Import Item Location'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Item Location from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportItemPricing',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportItemPricing',
+                                            text: 'Import Item Pricing'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Item Pricing from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportItemPricingLevels',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportItemPricingLevels',
+                                            text: 'Import Item Pricing Levels'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Item Pricing Levels from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportItemPricingLevels',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportItemPricingLevels',
+                                            text: 'Import Item Pricing Levels'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Item Pricing Levels from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'panel',
+                            height: 104,
+                            padding: '15 0 0 0',
+                            bodyPadding: 10,
+                            title: 'Inventory',
+                            items: [
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntImportInventoryCountDetails',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnImportInventoryCount',
+                                            text: 'Import Inventory Count'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1,
+                                            height: 40,
+                                            padding: 10,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Import Inventory Count from CSV'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'panel',
+                            height: 881,
+                            padding: '15 0 0 0',
+                            bodyPadding: 10,
+                            title: 'Import Origin Data',
+                            items: [
+                                {
+                                    xtype: 'container',
+                                    frame: false,
+                                    height: 60,
+                                    itemId: 'cntOriginMergeItems',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 60,
+                                            padding: 2,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    html: '',
+                                                    padding: '0 0 0 10',
+                                                    text: '"Items are created uniquely for each location in Origin. This can result in same item having different item number or different items having the same item number. Such items has to be identified and merged before importing to i21. In i21, an item is shared across locations."'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    frame: false,
+                                    itemId: 'cntOriginLOB',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'combobox',
+                                            bind: {
+                                                disabled: '{disableLob}'
+                                            },
+                                            flex: 1,
+                                            itemId: 'cboLOB',
+                                            width: 361,
+                                            fieldLabel: 'Line of Business',
+                                            displayField: 'strName',
+                                            store: {
+                                                fields: [
+                                                    'strName'
+                                                ],
+                                                data: [
+                                                    {
+                                                        strName: 'Petro'
+                                                    },
+                                                    {
+                                                        strName: 'Ag'
+                                                    },
+                                                    {
+                                                        strName: 'Grain'
+                                                    },
+                                                    {
+                                                        strName: 'C-Store'
+                                                    }
+                                                ]
+                                            },
+                                            valueField: 'strName'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 25,
+                                            padding: 2,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    height: 38,
+                                                    padding: '0 0 0 10',
+                                                    text: '"Select Line of Business to begin import"'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    height: 49,
+                                    itemId: 'cntOriginUOM',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            bind: {
+                                                disabled: '{disableUOM}'
+                                            },
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnOriginUOM',
+                                            width: 469,
+                                            text: 'Unit of Measures'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 42,
+                                            padding: 2,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    padding: '0 0 0 10',
+                                                    text: '"Imports unit of measure setup. Users should verify the imported unit types and conversion factors before proceeding to next step."'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'ctnOriginLocations',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            bind: {
+                                                disabled: '{disableLocations}'
+                                            },
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnOriginLocations',
+                                            text: 'Sub Locations and Storage Locations'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 56,
+                                            padding: 2,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    padding: '0 0 0 10',
+                                                    text: '"Imports storage location like elevators and bins. Origin does not have sub locations. System will create a sub location automatically for each company location."'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntOriginCommodity',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            bind: {
+                                                disabled: '{disableCommodity}'
+                                            },
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnOriginCommodity',
+                                            text: 'Commodity'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 97,
+                                            padding: 2,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    height: 36,
+                                                    padding: '0 0 0 10',
+                                                    text: '"Imports Commodity and GL Accounts. i21 requires category and item. System creates Category and Item data automatically after the import. All company locations will be added to the commodity by default. Manually remove what is not required after the import. Add AP Clearing account to Category → GL Accounts tab after import. AP Clearing account is not available in origin."'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    height: 49,
+                                    itemId: 'cntOriginCategoryClass',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            bind: {
+                                                disabled: '{disableCategoryClass}'
+                                            },
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnOriginCategoryClass',
+                                            text: 'Category/Class'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 41,
+                                            padding: 2,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    padding: '0 0 0 10',
+                                                    text: '"Imports Class data. Users should verify whether the Inventory types are correct before proceeding to next step."'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    height: 49,
+                                    itemId: 'cntOriginAddInvGLAccts',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 41,
+                                            padding: 2,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    padding: '0 0 0 10',
+                                                    text: '"Create additional inventory GL accounts required by i21 in Chart of Accounts. Inventory Adjustment Inventory In-Transit AP Clearing (if not exists in origin)" This is a manual step by user'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    height: 62,
+                                    itemId: 'cntOriginCategoryGLAccts',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            bind: {
+                                                disabled: '{disableCategoryGLAccts}'
+                                            },
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnOriginCategoryGLAccts',
+                                            text: 'GL Accounts for category'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 51,
+                                            padding: 2,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    height: 59,
+                                                    padding: '0 0 0 10',
+                                                    text: '"Imports GL accounts for categories. User should verify the imported gl accounts before proceeding to next step."'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntOriginAdditionalGLAccts',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            bind: {
+                                                disabled: '{disableAdditionalGLAccts}'
+                                            },
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnOriginAdditionalGLAccts',
+                                            text: 'Add additional GL Accounts'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 78,
+                                            padding: 2,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    height: 59,
+                                                    padding: '0 0 0 10',
+                                                    text: '"Additional inventory accounts required by i21 like AP Clearing, Inventory In-transit, Inventory Adjustment and Auto Variance has to be created in Chart of Accounts before doing this step. User should verify the imported gl accounts before proceeding to next step."'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntOriginItems',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            bind: {
+                                                disabled: '{disableItems}'
+                                            },
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnOriginItems',
+                                            text: 'Items, Locations and Pricing'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 45,
+                                            padding: 2,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    height: 59,
+                                                    padding: '0 0 0 10',
+                                                    text: '"Imports Items, Item Locations and Pricing. User should verify Item Type, Costing Method and Pricing data before proceeding to next step."'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    itemId: 'cntOriginItemGLAccts',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            bind: {
+                                                disabled: '{disableItemGLAccts}'
+                                            },
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnOriginItemGLAccts',
+                                            text: 'GL Accounts for Items'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 90,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    height: 59,
+                                                    padding: '0 0 0 10',
+                                                    text: '"This step is optional. GL accounts are not required to be setup for each item. System uses the GL accounts setup for the category. However, if the accounts for the item are different from those setup for the category, use this button to import or manually change only the items which have different gl accounts than its category."'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    height: 23,
+                                    itemId: 'cntOriginPostTransaction',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 24,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    height: 59,
+                                                    padding: '0 0 0 10',
+                                                    text: '"This step is done in origin. All inventory transactions has to be posted in origin before importing open balances."'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    height: 59,
+                                    itemId: 'cntOriginBalance',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle',
+                                        padding: ''
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            bind: {
+                                                disabled: '{disableBalance}'
+                                            },
+                                            flex: 1,
+                                            height: 40,
+                                            itemId: 'btnOriginBalance',
+                                            text: 'Opening Balance'
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 2,
+                                            height: 45,
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    height: 59,
+                                                    padding: '0 0 0 10',
+                                                    text: '"Imports opening stock for all items and locations. Grain opening balances must be entered manually after taking a physical reading."'
+                                                }
+                                            ]
                                         }
                                     ]
                                 }

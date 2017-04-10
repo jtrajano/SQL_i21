@@ -33,6 +33,8 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
         var form = button.up('form').getForm();
         var txtBrowseFile = win.down("#txtBrowseFile");
         var fileInput = txtBrowseFile.extractFileInput();
+        var chbOverwrite = win.down("#chbOverwrite");
+        
         if(fileInput && fileInput.files.length > 0) {
             if (txtBrowseFile.isValid()) {
                 if (form.isValid()) {
@@ -41,7 +43,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                         url: '../Inventory/api/ImportData/Import',
                         file: file,
                         importType: params.type,
-                        allowOverwrite: params.allowOverwrite,
+                        allowOverwrite: chbOverwrite.checked,
                         lineOfBusiness: params.lineOfBusiness,
                         params: params.params,
                         method: params.method,
