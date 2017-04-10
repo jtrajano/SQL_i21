@@ -217,6 +217,7 @@ BEGIN
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharge.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId	
+				AND ReceiptCharge.ysnAccrue = 1 -- Note: Tax is only available if there is a vendor entity (receipt vendor or 3rd party vendor). 
 		
 		-- Price Down Other Charge taxes
 		UNION ALL 
@@ -258,6 +259,7 @@ BEGIN
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharge.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+				AND ReceiptCharge.ysnAccrue = 1 -- Note: Tax is only available if there is a vendor entity (receipt vendor or 3rd party vendor). 
 				AND ReceiptCharge.ysnPrice = 1 
 	)
 	
