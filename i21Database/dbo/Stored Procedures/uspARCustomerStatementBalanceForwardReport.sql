@@ -368,19 +368,19 @@ INSERT INTO @temp_statement_table(
 	, dblBalance
 	, dblPayment
 )
-SELECT
-	  B.intEntityCustomerId
-	, B.strCustomerName
-	, B.strEntityNo
+SELECT DISTINCT
+	  STATEMENTFORWARD.intEntityCustomerId
+	, STATEMENTFORWARD.strCustomerName
+	, STATEMENTFORWARD.strCustomerNumber
 	, 'Balance Forward'
-	, B.dblCreditLimit
+	, STATEMENTFORWARD.dblCreditLimit
 	, @dtmDateFrom
 	, '01/01/1900'
 	, 1
-	, B.dblTotalAR
+	, ISNULL(BALANCEFORWARD.dblTotalAR, 0)
 	, 0
-FROM @temp_balanceforward_table B
-	WHERE B.intEntityCustomerId IN (SELECT DISTINCT intEntityCustomerId FROM @temp_statement_table)
+FROM @temp_statement_table STATEMENTFORWARD
+	LEFT JOIN @temp_balanceforward_table BALANCEFORWARD ON STATEMENTFORWARD.intEntityCustomerId = BALANCEFORWARD.intEntityCustomerId	
 
 MERGE INTO tblARStatementOfAccount AS Target
 USING (SELECT strCustomerNumber, @dtmDateTo, SUM(ISNULL(dblBalance, 0))
