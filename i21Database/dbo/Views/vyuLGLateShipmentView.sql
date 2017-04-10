@@ -27,6 +27,8 @@ SELECT L.strLoadNumber
 	,L.dtmScheduledDate
 	,C.strCommodityCode
 	,L.dtmBLDate
+	,OG.strCountry AS strOrigin
+	,CD.strRemark AS strRemarks 
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -40,5 +42,7 @@ LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReas
 LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReasonCodeId
 LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 WHERE L.dtmScheduledDate > CD.dtmEndDate
 	AND L.intShipmentType = 1
