@@ -506,6 +506,15 @@ if(_url.indexOf('version=TF') < 1) {
                                 group: 'DirectInventoryReceipt',
                                 items: [
                                     {
+                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/PreSetup.js?v=' + version,
+                                        title: 'PreSetup',
+                                        preload: [
+                                            functionalTest,
+                                            commonIC
+
+                                        ]
+                                    },
+                                    {
                                         url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR1-2.js?v=' + version,
                                         title: 'DirectIR-Scen.1-2',
                                         preload: [
