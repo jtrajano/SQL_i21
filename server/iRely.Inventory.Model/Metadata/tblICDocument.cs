@@ -19,6 +19,8 @@ namespace iRely.Inventory.Model
         public int? intCommodityId { get; set; }
         public bool ysnStandard { get; set; }
         public int? intCertificationId { get; set; }
+        public int? intOriginal { get; set; }
+        public int? intCopies { get; set; }
 
         public ICollection<tblICItemContractDocument> tblICItemContractDocuments { get; set; }
         public tblICCommodity tblICCommodity { get; set; }
