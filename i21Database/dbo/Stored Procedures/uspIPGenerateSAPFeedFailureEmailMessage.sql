@@ -60,6 +60,7 @@ Begin
 						<th>&nbsp;Sequence No</th>
 						<th>&nbsp;Type</th>
 						<th>&nbsp;PO No</th>
+						<th>&nbsp;Commodity</th>
 						<th>&nbsp;Ack Message</th>
 					</tr>'
 	
@@ -69,6 +70,7 @@ Begin
 		+ '<td>&nbsp;' + ISNULL(CONVERT(VARCHAR,intContractSeq),'') + '</td>'
 		+ '<td>&nbsp;' + CASE WHEN UPPER(strRowState)='ADDED' THEN 'Create' When UPPER(strRowState)='DELETE' THEN 'Delete' Else 'Update' End + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strERPPONumber,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strCommodityCode,'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strMessage,'') + '</td>
 	</tr>'
 	From tblCTContractFeed 
@@ -85,6 +87,7 @@ Begin
 						<th>&nbsp;Shipment No</th>
 						<th>&nbsp;Type</th>
 						<th>&nbsp;Delivery No</th>
+						<th>&nbsp;Commodity</th>
 						<th>&nbsp;Ack Message</th>
 					</tr>'
 	
@@ -93,9 +96,10 @@ Begin
 		   <td>&nbsp;'  + ISNULL(strShippingInstructionNumber,'') + '</td>'
 		+ '<td>&nbsp;' + CASE WHEN UPPER(strMessageState)='ADDED' THEN 'Create' When UPPER(strMessageState)='DELETE' THEN 'Delete' Else 'Update' End + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strExternalShipmentNumber,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL((select TOP 1 strCommodityCode from tblLGLoadDetailStg Where intLoadStgId=lg.intLoadStgId),'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strMessage,'') + '</td>
 	</tr>'
-	From tblLGLoadStg 
+	From tblLGLoadStg lg
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
 	AND ISNULL(ysnMailSent,0)=0
 
@@ -107,15 +111,18 @@ If @strMessageType='Receipt'
 Begin
 	SET @strHeader = '<tr>
 						<th>&nbsp;Receipt No</th>
+						<th>&nbsp;Commodity</th>
 						<th>&nbsp;Ack Message</th>
 					</tr>'
 	
 	Select @strDetail=@strDetail + 
 	'<tr>
 		   <td>&nbsp;'  + ISNULL(strExternalRefNo,'') + '</td>'
+		   + '<td>&nbsp;' + ISNULL((select TOP 1 strCommodityCode from tblICCommodity c Join tblICItem i on c.intCommodityId=i.intCommodityId 
+		   Join tblICInventoryReceiptItem ri on i.intItemId=ri.intItemId  Where ri.intInventoryReceiptId=r.strDeliveryNo),'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strErrorMessage,'') + '</td>
 	</tr>'
-	From tblIPReceiptError
+	From tblIPReceiptError r
 	Where strPartnerNo='i212SAP' AND GETDATE() > DATEADD(MI,@intDuration,dtmTransactionDate)
 	AND ISNULL(ysnMailSent,0)=0
 
