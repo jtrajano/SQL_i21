@@ -4,21 +4,22 @@ AS
 
 	SELECT	CH.*,
 			
-			intPriceFixationId,
-			intPriceContractId,
-			ysnSpreadAvailable,
-			dblCommodityUOMConversionFactor,
-			strPrepaidIds,
-			ysnExchangeTraded,
-			strEntityName,
-			strPosition,
-			strGrade,
-			strWeight,
-			strTerm,
-			strINCOLocationType,
-			strCommodityUOM,
-			ysnPrepaid,
-			strContractBasis
+			NM.intPriceFixationId,
+			NM.intPriceContractId,
+			NM.ysnSpreadAvailable,
+			NM.dblCommodityUOMConversionFactor,
+			NM.strPrepaidIds,
+			NM.ysnExchangeTraded,
+			NM.strEntityName,
+			NM.strPosition,
+			NM.strGrade,
+			NM.strWeight,
+			NM.strTerm,
+			NM.strINCOLocationType,
+			NM.strCommodityUOM,
+			NM.ysnPrepaid,
+			NM.strContractBasis,
+			NM.intUnitMeasureId
 
 	FROM	tblCTContractHeader				CH
 	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId

@@ -27,7 +27,8 @@ AS
 						TM.strTerm,
 						CB.strINCOLocationType,
 						U2.strUnitMeasure			AS	strCommodityUOM,
-						CB.strContractBasis
+						CB.strContractBasis,
+						CM.intUnitMeasureId
 
 				FROM	tblCTContractHeader			CH	
 				JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CH.intEntityId			LEFT
