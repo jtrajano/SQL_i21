@@ -32,6 +32,7 @@ BEGIN TRY
 			@ysnFairtrade			BIT = 0,
 			@ysnFeedOnApproval		BIT = 0,
 			@strCommodityCode		NVARCHAR(MAX),
+			@dtmApproved			DATETIME,
 
 			@intLastApprovedContractId INT,
 			@intPrevApprovedContractId INT,
@@ -155,7 +156,7 @@ BEGIN TRY
 		SET @ysnFairtrade = 1
 	END
 
-	SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId,@intContractDetailId = intContractDetailId 
+	SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId,@intContractDetailId = intContractDetailId,@dtmApproved = dtmApproved 
     FROM   tblCTApprovedContract 
     WHERE  intContractHeaderId = @intContractHeaderId AND strApprovalType IN ('Contract','Contract Amendment ')
     ORDER BY intApprovedContractId DESC
@@ -255,7 +256,7 @@ BEGIN TRY
 	        CASE WHEN LEN(LTRIM(RTRIM(@strAmendedColumns))) = 0 THEN
 			'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition and the particular conditions mentioned below.' 
 		    ELSE
-				'Subject - Contract Amendment' + CHAR(13) + CHAR(10) + 'The field/s highlighted in bold have been amended.'
+				'Subject - Contract Amendment as of '+ CONVERT(NVARCHAR(15),@dtmApproved,106) + CHAR(13) + CHAR(10) + 'The field/s highlighted in bold have been amended.'
 			END strCondition,
 			PO.strPosition +' ('+SQ.strPackingDescription +') ' AS strPositionWithPackDesc,
 			TX.strText+' '+CH.strPrintableRemarks AS strText,
