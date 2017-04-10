@@ -497,7 +497,10 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	D.intAccountId,
+		[intAccountId]					=	CASE WHEN B.intInventoryReceiptItemId IS NOT NULL OR B.intInventoryReceiptChargeId IS NOT NULL
+												 THEN  dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing')
+												 ELSE D.intAccountId
+											END, --AP-3227 always use the AP Clearing Account,
 		--[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
 		--[dblDebit]						=	CASE WHEN B.dblOldCost IS NOT NULL THEN 0 ELSE 
 		--												(CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) 
@@ -558,6 +561,12 @@ BEGIN
 				ON B.intBillDetailId = D.intBillDetailId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 				ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+			INNER JOIN tblICItem B2
+				ON B.intItemId = B2.intItemId
+			INNER JOIN tblICItemLocation loc
+				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+			LEFT JOIN tblICItem F
+				ON B.intItemId = F.intItemId
 			OUTER APPLY (
 				SELECT 
 					SUM(D.dblTax) dblTotalTax
@@ -569,8 +578,8 @@ BEGIN
 	AND A.intTransactionType IN (1,3)
 	AND D.dblTax != 0
 	AND 1 = (
-		--create tax only from item receipt if it is adjusted / Cost is Adjusted  / third party vendor tax in other charge of receipt (AP-3227)
-		CASE WHEN B.intInventoryReceiptItemId IS NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL AND B.intInventoryReceiptChargeId IS NULL --Commented for AP-3461 
+		--create tax only from item receipt if it is adjusted / Cost is Adjusted  / third party vendor tax in other charge of receipt (AP-3227) // third party inv shipment vendor tax
+		CASE WHEN B.intInventoryReceiptItemId IS NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL AND B.intInventoryReceiptChargeId IS NULL AND B.intInventoryShipmentChargeId IS NULL --Commented for AP-3461 
 				THEN 0 --AP-2792
 		ELSE 1 END
 	)
@@ -588,6 +597,10 @@ BEGIN
 	,G.strCurrencyExchangeRateType
 	,B.dblOldCost
 	,dblTotalTax
+	,F.intItemId
+	,loc.intItemLocationId
+	,B.intInventoryReceiptItemId
+	,B.intInventoryReceiptChargeId
 
 	UPDATE A
 		SET A.strDescription = B.strDescription
