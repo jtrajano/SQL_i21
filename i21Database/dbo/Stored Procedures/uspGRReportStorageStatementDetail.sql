@@ -19,12 +19,12 @@ BEGIN TRY
 
 	SELECT @strStorageType=strStorageTypeDescription FROM tblGRStorageType WHERE intStorageScheduleTypeId=@intStorageTypeId	
 	SELECT @dblThereAfterCharge=ISNULL(dblStorageRate,0) FROM tblGRStorageSchedulePeriod WHERE intStorageScheduleRule=@intStorageScheduleId AND strPeriodType='Thereafter'
-	SELECT TOP 1 @dtmTerminationOfReceipt=ISNULL(dtmEndingDate,0) FROM tblGRStorageSchedulePeriod WHERE intStorageScheduleRule=@intStorageScheduleId AND strPeriodType='Date Range'
+	SELECT TOP 1 @dtmTerminationOfReceipt=dtmEndingDate FROM tblGRStorageSchedulePeriod WHERE intStorageScheduleRule=@intStorageScheduleId AND strPeriodType='Date Range'
 	SELECT @strItemNo=strItemNo FROM tblICItem WHERE intItemId=@intItemId
 	SELECT @strLicenseNumber=[strLicenseNumber] FROM [tblGRCompanyPreference]
-	SELECT @strPrefix=[strPrefix],@intNumber=intNumber FROM tblSMStartingNumber WHERE [strTransactionType]	= N'Storage Statement FormNo'
+	SELECT @strPrefix=[strPrefix],@intNumber=intNumber-1 FROM tblSMStartingNumber WHERE [strTransactionType]	= N'Storage Statement FormNo'
 
-	IF ISNULL(@strFormNumber,'')=''
+	IF ISNULL(@intEntityId,0) >0 AND ISNULL(@intItemId,0) >0 AND ISNULL(@intStorageTypeId,0) >0 AND ISNULL(@intStorageScheduleId,0) >0
 	BEGIN
 		SELECT	CS.intCustomerStorageId,
 			CS.strStorageTicketNumber,
@@ -109,7 +109,7 @@ BEGIN TRY
 	)
 	
 	UPDATE SST
-	SET strFormNumber=@strPrefix+LTRIM(@intNumber+CAST(rowNum / 15 AS INT)+ CASE WHEN rowNum % 15=0 THEN 0 ELSE 1 END)
+	SET strFormNumber=@strPrefix+LTRIM(@intNumber+CASE WHEN rowNum>14 THEN CAST(rowNum / 15 AS INT)+ CASE WHEN rowNum % 15=0 THEN 0 ELSE 1 END ELSE 0 END)
 	FROM tblGRStorageStatement SST
 	JOIN CTE C ON C.intStorageStatementId=SST.intStorageStatementId
 
