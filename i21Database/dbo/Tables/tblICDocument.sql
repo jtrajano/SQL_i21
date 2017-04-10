@@ -19,6 +19,8 @@ Type the overview for the table here.
 		[intCommodityId] INT NOT NULL, 
 		[ysnStandard] BIT NOT NULL, 
 		[intCertificationId] INT,
+		[intOriginal] INT,
+		[intCopies] INT,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [AK_tblICDocument_strDocumentName] UNIQUE ([strDocumentName],[intCommodityId]), 
 		CONSTRAINT [PK_tblICDocument] PRIMARY KEY ([intDocumentId]), 
