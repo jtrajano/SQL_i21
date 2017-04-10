@@ -257,10 +257,10 @@ BEGIN
 	,[ysnAccrue]						= 0
 	,[ysnPrice]							= 1
 	FROM @ShipmentStagingTable SE
-	INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = SE.intSourceId
-	INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
-	INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
-	INNER JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
+	LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = SE.intSourceId
+	LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
+	LEFT JOIN tblICItem IC ON IC.intItemId = GR.intItemId
+	LEFT JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
 	WHERE SE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0
 
 	--Insert record for fee
