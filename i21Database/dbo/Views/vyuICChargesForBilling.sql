@@ -159,10 +159,6 @@ SELECT
 	,[strItemNo]								=	Item.strItemNo
 	,[strDescription]							=	Item.strDescription
 	,[dblOrderQty]								=	CASE 
-														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
-														--	THEN 1
-														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
-														--	THEN -1
 														WHEN ReceiptCharge.dblAmount > 0 
 															THEN -1 --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
 														ELSE 
@@ -170,20 +166,12 @@ SELECT
 													END  
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=	CASE 
-														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
-														--	THEN 1
-														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
-														--	THEN -1
 														WHEN ReceiptCharge.dblAmount > 0 
 															THEN -1 --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
 														ELSE 
 															1 
 													END 
 	,[dblQuantityToBill]						=	CASE 
-														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount > 0 
-														--	THEN 1
-														--WHEN Receipt.strReceiptType = 'Inventory Return' AND ReceiptCharge.dblAmount < 0 
-														--	THEN -1
 														WHEN ReceiptCharge.dblAmount > 0 
 															THEN -1 --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
 														ELSE 
@@ -193,7 +181,7 @@ SELECT
 	,[intLineNo]								=	1
 	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId  --add for strSource reference
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
-	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN -1 * (ReceiptCharge.dblAmount * 100)  ELSE -1 * ReceiptCharge.dblAmount END /* Negate the cost if other charge is set as price; this is only for script computation for total cost in voucher; Cost will still be seen as positive value in Voucher screen*/  
+	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN (ABS(ReceiptCharge.dblAmount) * 100) ELSE ABS(ReceiptCharge.dblAmount) END -- CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN -1 * (ReceiptCharge.dblAmount * 100)  ELSE -1 * ReceiptCharge.dblAmount END /* Negate the cost if other charge is set as price; this is only for script computation for total cost in voucher; Cost will still be seen as positive value in Voucher screen*/  
 	,[dblTax]									=	ISNULL(ReceiptCharge.dblTax,0)
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
