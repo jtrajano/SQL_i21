@@ -99,7 +99,7 @@
     [intInventoryTransferId] INT NULL, 
     [intInventoryReceiptId] INT NULL, 
     [intInventoryShipmentId] INT NULL, 
-	[dblScheduleQty] DECIMAL(13, 5) NULL,
+	[dblScheduleQty] DECIMAL(13, 6) NULL,
 	[dblConvertedUOMQty] NUMERIC(38, 20) NULL,
 	[intItemUOMIdFrom] INT NULL, 
 	[intItemUOMIdTo] INT NULL,
