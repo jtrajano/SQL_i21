@@ -226,9 +226,19 @@ BEGIN TRY
 		IF @intNewStatusId IN (2,3,5) AND @intOldStatusId NOT IN (2,3,5) AND dbo.fnAPContractHasUnappliedPrepaid(@intContractHeaderId) = 1
 		BEGIN
 			SELECT	@strNumber = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId	=	@intNewStatusId
-			SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+'. As prepaid balance is associated with the contract.'
+			SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+' as prepaid balance is associated with the contract.'
 			RAISERROR(@ErrMsg,16,1) 
 		END
+
+		IF @intNewStatusId IN (3) AND @intOldStatusId NOT IN (3) AND 
+		EXISTS(	SELECT * FROM tblLGLoadDetail LD JOIN tblLGLoad LO ON LO.intLoadId = LD.intLoadId 
+				WHERE (LD.intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND ISNULL(LO.ysnCancelled,0) <> 1)
+		BEGIN
+			SELECT	@strNumber = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId	=	@intNewStatusId
+			SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+' as loads are associated with the sequence.'
+			RAISERROR(@ErrMsg,16,1) 
+		END
+
 	END
 
 	IF @RowState  = 'Delete'
