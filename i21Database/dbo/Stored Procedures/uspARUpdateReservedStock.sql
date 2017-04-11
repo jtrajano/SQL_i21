@@ -3,6 +3,7 @@
 	,@Negate		BIT	= 0
 	,@UserId		INT = NULL
 	,@FromPosting	BIT = 0     
+	,@Post			BIT = 0     
 AS
 BEGIN
 
@@ -13,6 +14,7 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @TransactionTypeId AS INT = 33
+			,@Ownership_Own AS INT = 1
 	SELECT @TransactionTypeId = [intTransactionTypeId] FROM dbo.tblICInventoryTransactionType WHERE [strName] = 'Invoice'
 	DECLARE @items ItemReservationTableType
 
@@ -37,13 +39,13 @@ BEGIN
 		,[intLotId]				= NULL
 		,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
 		,[intStorageLocationId]	= ARID.[intStorageLocationId]
-		,[dblQty]				= ARID.[dblQtyShipped]
+		,[dblQty]				= ARID.[dblQtyShipped] * (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 		,[intTransactionId]		= @InvoiceId
 		,[strTransactionId]		= ARI.[strInvoiceNumber]
 		,[intTransactionTypeId]	= @TransactionTypeId
-		,[intOwnershipTypeId]	= 1
+		,[intOwnershipTypeId]	= @Ownership_Own
 	FROM 
-		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped] 
+		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId]
 		 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 	INNER JOIN
 		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
@@ -58,15 +60,20 @@ BEGIN
 	WHERE [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
 		AND ARI.[intInvoiceId] = @InvoiceId
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
-		
-	UPDATE
-		@items
-	SET
-		dblQty = dblQty * (CASE WHEN @Negate = 1 THEN -1 ELSE 1 END)			
+		AND ARID.[intInventoryShipmentItemId] IS NULL
+		AND ARID.[intLotId] IS NULL
 
-	EXEC [uspICIncreaseReservedQty] 
-		 @ItemsToIncreaseReserve		= @items
+	IF NOT (ISNULL(@FromPosting, 0 ) = 1 AND ISNULL(@Post, 0 ) = 0)
+		EXEC [uspICCreateStockReservation]
+			 @ItemsToReserve		= @items
+			,@intTransactionId		= @InvoiceId
+			,@intTransactionTypeId	= @TransactionTypeId
+
+	IF ISNULL(@FromPosting, 0 ) = 1
+		EXEC [dbo].[uspICPostStockReservation]
+			 @intTransactionId		= @InvoiceId
+			,@intTransactionTypeId	= @TransactionTypeId
+			,@ysnPosted				= @Post
 	 
 END
 
