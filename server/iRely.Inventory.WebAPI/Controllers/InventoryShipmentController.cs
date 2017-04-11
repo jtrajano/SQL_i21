@@ -156,34 +156,9 @@ namespace iRely.Inventory.WebApi
 
         [HttpGet]
         [ActionName("GetCustomerCurrency")]
-        public async Task<HttpResponseMessage> GetCustomerCurrency(int customerId)
+        public async Task<HttpResponseMessage> GetCustomerCurrency(GetParameter param, int? entityId)
         {
-            InventoryRepository repo = new InventoryRepository();
-            var query = @"  SELECT c.intEntityCustomerId, c.strCustomerNumber, c.intCurrencyId, cr.strCurrency, cr.strDescription, cr.ysnSubCurrency, cr.intMainCurrencyId, cr.intCent
-	                            , def.intDefaultCurrencyId, def.strDefaultCurrency
-                            FROM tblARCustomer c
-                                INNER JOIN tblSMCurrency cr ON cr.intCurrencyID = c.intCurrencyId
-	                            OUTER APPLY (
-		                            SElECT TOP 1 p.intDefaultCurrencyId, pc.strCurrency strDefaultCurrency
-		                            FROM tblSMCompanyPreference p
-			                            INNER JOIN tblSMCurrency pc ON pc.intCurrencyID = p.intDefaultCurrencyId
-	                            ) def
-                            WHERE c.intEntityCustomerId = @customerId";
-            System.Data.SqlClient.SqlParameter p = new System.Data.SqlClient.SqlParameter("@customerId", customerId);
-            p.SqlDbType = System.Data.SqlDbType.Int;
-            var ctx = repo.ContextManager.Database.SqlQuery<Customer>(query, new object[] { p });
-            var customer = await ctx.ToListAsync();
-            return Request.CreateResponse(HttpStatusCode.OK, customer.AsQueryable());
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchCustomerCurrency(param, entityId));
         }
-    }
-
-    class Customer
-    {
-        public int intEntityCustomerId { get; set; }
-        public string strCustomerNumber { get; set; }
-        public int intCurrencyId { get; set; }
-        public string strCurrency { get; set; }
-        public int? intDefaultCurrencyId { get; set; }
-        public string strDefaultCurrency { get; set; }
     }
 }

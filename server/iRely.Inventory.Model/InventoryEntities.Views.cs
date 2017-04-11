@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets7be653beae7c1f68525b31e787d53ae1bf61fa98da2b1e3944ec7cf509dd1e87))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsa5f80ddb939e90e620456cf00a81605c39cb04c6c20c5625e636148bbf1ba44f))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets7be653beae7c1f68525b31e787d53ae1bf61fa98da2b1e3944ec7cf509dd1e87 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsa5f80ddb939e90e620456cf00a81605c39cb04c6c20c5625e636148bbf1ba44f : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "7be653beae7c1f68525b31e787d53ae1bf61fa98da2b1e3944ec7cf509dd1e87"; }
+            get { return "a5f80ddb939e90e620456cf00a81605c39cb04c6c20c5625e636148bbf1ba44f"; }
         }
 
         /// <summary>
@@ -2005,6 +2005,16 @@ namespace Edm_EntityMappingGeneratedViews
             if (extentName == "InventoryEntities.vyuICGetItemSubLocations")
             {
                 return GetView391();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuICGetCustomerCurrency")
+            {
+                return GetView392();
+            }
+
+            if (extentName == "InventoryEntities.vyuICGetCustomerCurrencies")
+            {
+                return GetView393();
             }
 
             return null;
@@ -16014,6 +16024,58 @@ namespace Edm_EntityMappingGeneratedViews
             T.intCountryId AS vyuICGetItemSubLocations_intCountryId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetItemSubLocations AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetCustomerCurrency.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView392()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetCustomerCurrency
+        [CodeFirstDatabaseSchema.vyuICGetCustomerCurrency](T1.vyuICGetCustomerCurrency_intEntityId, T1.vyuICGetCustomerCurrency_strCustomerNumber, T1.vyuICGetCustomerCurrency_intCurrencyId, T1.vyuICGetCustomerCurrency_strCurrency, T1.vyuICGetCustomerCurrency_strDescription, T1.vyuICGetCustomerCurrency_ysnSubCurrency, T1.vyuICGetCustomerCurrency_intMainCurrencyId, T1.vyuICGetCustomerCurrency_intCent, T1.vyuICGetCustomerCurrency_intDefaultCurrencyId, T1.vyuICGetCustomerCurrency_strDefaultCurrency)
+    FROM (
+        SELECT 
+            T.intEntityId AS vyuICGetCustomerCurrency_intEntityId, 
+            T.strCustomerNumber AS vyuICGetCustomerCurrency_strCustomerNumber, 
+            T.intCurrencyId AS vyuICGetCustomerCurrency_intCurrencyId, 
+            T.strCurrency AS vyuICGetCustomerCurrency_strCurrency, 
+            T.strDescription AS vyuICGetCustomerCurrency_strDescription, 
+            T.ysnSubCurrency AS vyuICGetCustomerCurrency_ysnSubCurrency, 
+            T.intMainCurrencyId AS vyuICGetCustomerCurrency_intMainCurrencyId, 
+            T.intCent AS vyuICGetCustomerCurrency_intCent, 
+            T.intDefaultCurrencyId AS vyuICGetCustomerCurrency_intDefaultCurrencyId, 
+            T.strDefaultCurrency AS vyuICGetCustomerCurrency_strDefaultCurrency, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetCustomerCurrencies AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetCustomerCurrencies.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView393()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetCustomerCurrencies
+        [iRely.Inventory.Model.vyuICGetCustomerCurrency](T1.vyuICGetCustomerCurrency_intEntityId, T1.vyuICGetCustomerCurrency_strCustomerNumber, T1.vyuICGetCustomerCurrency_intCurrencyId, T1.vyuICGetCustomerCurrency_strCurrency, T1.vyuICGetCustomerCurrency_strDescription, T1.vyuICGetCustomerCurrency_ysnSubCurrency, T1.vyuICGetCustomerCurrency_intMainCurrencyId, T1.vyuICGetCustomerCurrency_intCent, T1.vyuICGetCustomerCurrency_intDefaultCurrencyId, T1.vyuICGetCustomerCurrency_strDefaultCurrency)
+    FROM (
+        SELECT 
+            T.intEntityId AS vyuICGetCustomerCurrency_intEntityId, 
+            T.strCustomerNumber AS vyuICGetCustomerCurrency_strCustomerNumber, 
+            T.intCurrencyId AS vyuICGetCustomerCurrency_intCurrencyId, 
+            T.strCurrency AS vyuICGetCustomerCurrency_strCurrency, 
+            T.strDescription AS vyuICGetCustomerCurrency_strDescription, 
+            T.ysnSubCurrency AS vyuICGetCustomerCurrency_ysnSubCurrency, 
+            T.intMainCurrencyId AS vyuICGetCustomerCurrency_intMainCurrencyId, 
+            T.intCent AS vyuICGetCustomerCurrency_intCent, 
+            T.intDefaultCurrencyId AS vyuICGetCustomerCurrency_intDefaultCurrencyId, 
+            T.strDefaultCurrency AS vyuICGetCustomerCurrency_strDefaultCurrency, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetCustomerCurrency AS T
     ) AS T1");
         }
     }

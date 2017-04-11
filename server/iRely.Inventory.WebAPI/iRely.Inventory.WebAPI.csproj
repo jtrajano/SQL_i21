@@ -530,6 +530,7 @@
     <None Include="Properties\PublishProfiles\1630.pubxml" />
     <None Include="Properties\PublishProfiles\1640.pubxml" />
     <None Include="Properties\PublishProfiles\1710.pubxml" />
+    <None Include="Properties\PublishProfiles\1720.pubxml" />
     <None Include="Scripts\jquery-1.7.1.intellisense.js" />
     <Content Include="Scripts\jquery-1.7.1.js" />
     <Content Include="Scripts\jquery-1.7.1.min.js" />
@@ -651,7 +652,6 @@
   <Target Name="AfterBuild">
   </Target> -->
   <Target Name="AfterPackage" AfterTargets="CopyAllFilesToSingleFolderForPackage" />
-  
   <ItemGroup>
     <FluentValidationExcludedCultures Include="cs;da;de;es;fa;fi;fr;it;ko;mk;nl;pl;pt;ru;sv;tr;zh-CN">
       <InProject>false</InProject>

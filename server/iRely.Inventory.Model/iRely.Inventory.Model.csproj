@@ -147,6 +147,7 @@
   <ItemGroup>
     <Compile Include="Configuration\tblICItemSubLocationMap.cs" />
     <Compile Include="Configuration\tblICM2MComputationMap.cs" />
+    <Compile Include="Configuration\vyuICGetCustomerCurrency.cs" />
     <Compile Include="Configuration\vyuICItemUOMMap.cs" />
     <Compile Include="Configuration\vyuICLotHistoryMap.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
@@ -277,6 +278,7 @@
     <Compile Include="Metadata\tblPATPatronageCategory.cs" />
     <Compile Include="Metadata\vyuICGetInventoryReceiptItemLot2.cs" />
     <Compile Include="Metadata\tblSMCompanyLocationPricingLevel.cs" />
+    <Compile Include="Metadata\vyuICGetCustomerCurrency.cs" />
     <Compile Include="Metadata\vyuICGetItemUOM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stored Procedures\ConvertToStockUnit.cs" />

@@ -260,6 +260,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetItemSubLocationsMap());
 
             modelBuilder.Configurations.Add(new vyuICCommodityLookUpMap());
+            modelBuilder.Configurations.Add(new vyuICGetCustomerCurrencyMap());
         }
     }
 }

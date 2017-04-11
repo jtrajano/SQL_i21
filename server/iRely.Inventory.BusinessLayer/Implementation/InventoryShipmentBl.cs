@@ -426,5 +426,19 @@ namespace iRely.Inventory.BusinessLayer
             }
             return saveResult;
         }
+
+        public async Task<SearchResult> SearchCustomerCurrency(GetParameter param, int? entityId)
+        {
+            var query = _db.GetQuery<vyuICGetCustomerCurrency>()
+                .Where(p => p.intEntityId == entityId);
+
+            var data = await query.ExecuteProjection(param, "intEntityId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }

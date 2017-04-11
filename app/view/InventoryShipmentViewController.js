@@ -84,7 +84,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },            
             cboCustomer: {
                 value: '{current.strCustomerName}',
-                origValueField: 'intEntityCustomerId',
+                origValueField: 'intEntityId',
+                origUpdateField: 'intEntityCustomerId',
                 store: '{customer}',
                 readOnly: '{current.ysnPosted}',
                 fieldLabel: '{setCustomerFieldLabel}',
@@ -603,7 +604,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'strVendorName',
                     editor: {
                         readOnly: '{readOnlyAccrue}',
-                        origValueField: 'intEntityVendorId',
+                        origValueField: 'intEntityId',
                         origUpdateField: 'intEntityVendorId',
                         store: '{vendor}'
                     }
@@ -836,7 +837,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 url: '../Inventory/api/InventoryShipment/GetCustomerCurrency',
                 method: 'GET',
                 params: {
-                    customerId: customerId
+                    entityId: customerId
                 }
             })
                 .subscribe(
@@ -898,7 +899,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var current = win.viewModel.data.current;
 
         if (current){
-            current.set('intEntityCustomerId', records[0].get('intEntityCustomerId'));
+            current.set('intEntityCustomerId', records[0].get('intEntityId'));
             current.set('strCustomerName', records[0].get('strName'));
         }
 
