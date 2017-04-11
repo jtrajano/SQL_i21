@@ -107,7 +107,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intAccountId]			= A.[intAccumulatedAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.[strAssetId]
-			,[dtmTransactionDate]	= A.[dtmDateAcquired]
+			,[dtmTransactionDate]	= A.[dtmDispositionDate]
 			,[dblDebit]				= A.[dblCost]
 			,[dblCredit]			= 0
 			,[dblDebitForeign]		= 0
@@ -118,7 +118,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblForeignRate]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[dtmDate]				= ISNULL(A.[dtmDateAcquired], GETDATE())
+			,[dtmDate]				= ISNULL(A.[dtmDispositionDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
@@ -179,7 +179,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intAccountId]			= A.[intAccumulatedAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.[strAssetId]
-			,[dtmTransactionDate]	= A.[dtmDateAcquired]
+			,[dtmTransactionDate]	= A.[dtmDispositionDate]
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.[dblCost]
 			,[dblDebitForeign]		= 0
@@ -190,7 +190,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblForeignRate]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[dtmDate]				= ISNULL(A.[dtmDateAcquired], GETDATE())
+			,[dtmDate]				= ISNULL(A.[dtmDispositionDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
@@ -227,6 +227,14 @@ UPDATE tblFAFixedAsset
 	SET [ysnDisposed] = 1
 	WHERE [intAssetId] IN (SELECT intAssetId From #AssetID)
 
+IF @@ERROR <> 0	GOTO Post_Rollback;
+
+IF EXISTS(SELECT TOP 1 1 FROM (SELECT TOP 1 A.intAssetId FROM tblFAFixedAsset A 
+						WHERE A.[intAssetId] IN (SELECT intAssetId From #AssetID) 
+								AND ISNULL([dbo].isOpenAccountingDate(A.dtmDispositionDate), 0) = 0) TBL)
+BEGIN
+	GOTO Post_Rollback
+END
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
