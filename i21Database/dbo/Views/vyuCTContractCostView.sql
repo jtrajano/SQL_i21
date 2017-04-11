@@ -25,8 +25,8 @@ AS
 				CD.intContractSeq, 
 				CY.strCurrency,
 				CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
-				CAST(ISNULL((SELECT intBillDetailId FROM tblAPBillDetail WHERE intContractCostId = CC.intContractCostId),0) AS BIT) ysnBilled
-
+				CAST(ISNULL((SELECT intBillDetailId FROM tblAPBillDetail WHERE intContractCostId = CC.intContractCostId),0) AS BIT) ysnBilled,
+				CH.intTermId
 	FROM		tblCTContractCost	CC
 	JOIN		tblCTContractDetail CD ON CD.intContractDetailId	=	CC.intContractDetailId
 	JOIN		tblCTContractHeader CH ON CH.intContractHeaderId	=	CD.intContractHeaderId

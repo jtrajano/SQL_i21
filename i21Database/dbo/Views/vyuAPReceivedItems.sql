@@ -42,6 +42,7 @@ FROM
 		,[strName]					=	D2.strName
 		,[strVendorId]				=	D1.strVendorId
 		,[strShipVia]				=	E.strShipVia
+		,[intTermId]				=	A.intTermsId
 		,[strTerm]					=	F.strTerm
 		,[strContractNumber]		=	G1.strContractNumber
 		,[strBillOfLading]			=	tblReceived.strBillOfLading
@@ -239,6 +240,7 @@ FROM
 	,[strVendorId]				=	D1.strVendorId
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	F.strTerm
+	,[intTermId]				=	A.intTermsId
 	,[strContractNumber]		=	NULL
 	,[strBillOfLading]			=	NULL
 	,[intContractHeaderId]		=	NULL
@@ -336,6 +338,7 @@ FROM
 	,[strVendorId]				=	D1.strVendorId
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
+	,[intTermId]				=	NULL
 	,[strContractNumber]		=	F1.strContractNumber
 	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	F1.intContractHeaderId
@@ -469,6 +472,7 @@ FROM
 		,[strVendorId]								=	A.strVendorId
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
+		,[intTermId]								=	NULL
 		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
@@ -571,6 +575,7 @@ FROM
 		,[strVendorId]								=	LTRIM(A.intVendorEntityId)
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
+		,[intTermId]								=	NULL
 		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	A.strBLNumber
 		,[intContractHeaderId]						=	A.intContractHeaderId
@@ -658,6 +663,7 @@ FROM
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
+		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
@@ -757,6 +763,7 @@ FROM
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
+		,[intTermId]								=	CC.intTermId
 		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
@@ -852,6 +859,7 @@ FROM
 		,[strVendorId]								=	LTRIM(A.intVendorEntityId)
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
+		,[intTermId]								=	NULL
 		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	A.strBLNumber
 		,[intContractHeaderId]						=	A.intContractHeaderId
@@ -936,6 +944,7 @@ FROM
 		,[strVendorId]								=	A.strVendorId
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
+		,[intTermId]								=	NULL
 		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
