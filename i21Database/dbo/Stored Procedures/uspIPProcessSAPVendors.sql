@@ -138,6 +138,8 @@ Begin
 
 	Select @intEntityLocationId=SCOPE_IDENTITY()
 
+	Update tblEMEntity set intDefaultLocationId=@intEntityLocationId Where intEntityId=@intEntityId
+
 	--Vendor
 	Insert Into tblAPVendor(intEntityVendorId,intCurrencyId,strVendorId,ysnPymtCtrlActive,strTaxNumber,intBillToId,intShipFromId,strFLOId,intVendorType,ysnWithholding,dblCreditLimit,strVendorAccountNum,intTermsId)
 	Select @intEntityId,@intCurrencyId,@strEntityNo,1,strTaxNo,@intEntityLocationId,@intEntityLocationId,strFLOId,0,0,0.0,strAccountNo,@intTermId
