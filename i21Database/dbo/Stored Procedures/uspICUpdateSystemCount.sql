@@ -28,6 +28,63 @@ FROM tblICInventoryCountDetail cd
 		AND s.intLocationId = c.intLocationId
 WHERE c.intImportFlagInternal = 1
 
+-- Cleanup
+-- Delete invalid details
+-- Delete empty headers
+DELETE c
+FROM tblICInventoryCount c
+	LEFT JOIN tblICInventoryCountDetail d ON c.intInventoryCountId = d.intInventoryCountId
+WHERE c.intImportFlagInternal = 1
+	AND d.intInventoryCountDetailId IS NULL
+
+-- Update count numbers
+DECLARE @Id INT
+DECLARE @Prefix NVARCHAR(50)
+DECLARE cur CURSOR FOR
+
+SELECT DISTINCT c.intInventoryCountId
+FROM tblICInventoryCount c
+WHERE c.intImportFlagInternal = 1
+
+OPEN cur
+
+FETCH NEXT FROM cur INTO @Id
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+	SELECT @Prefix = strPrefix + CAST(intNumber + 1 AS NVARCHAR(50))
+	FROM tblSMStartingNumber
+	WHERE strTransactionType = 'Inventory Count'
+
+	UPDATE tblICInventoryCount
+	SET strCountNo = @Prefix
+	WHERE intInventoryCountId = @Id
+
+	;WITH rows_num AS
+	(
+		SELECT CAST(ROW_NUMBER() OVER(PARTITION BY d.intInventoryCountId ORDER BY intInventoryCountDetailId ASC) AS NVARCHAR(50)) strRowNum,
+			d.intInventoryCountDetailId
+		FROM tblICInventoryCountDetail d
+			INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = d.intInventoryCountId
+		WHERE c.intInventoryCountId = @Id 
+	)
+	UPDATE d
+	SET d.strCountLine = c.strCountNo + '-' + rn.strRowNum
+	FROM tblICInventoryCountDetail d
+		INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = d.intInventoryCountId
+		INNER JOIN rows_num rn ON rn.intInventoryCountDetailId = d.intInventoryCountDetailId
+	WHERE c.intInventoryCountId = @Id
+
+	UPDATE tblSMStartingNumber
+	SET intNumber = intNumber + 1
+	WHERE strTransactionType = 'Inventory Count'
+
+	FETCH NEXT FROM cur	INTO @Id
+END
+
+CLOSE cur
+DEALLOCATE cur
+
 -- Auto-create Lot
 -- Create the temp table 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#GeneratedLotItems')) 
