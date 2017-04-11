@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets580587c7f06108be2f4fdeb676cfb28bc682d04fc2ea29b4d18daeae992e7f97))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets7460d38afe8371ec6c4bf7eea0ff3f7d56998e9989de82640dc37c81ff13062b))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets580587c7f06108be2f4fdeb676cfb28bc682d04fc2ea29b4d18daeae992e7f97 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets7460d38afe8371ec6c4bf7eea0ff3f7d56998e9989de82640dc37c81ff13062b : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "580587c7f06108be2f4fdeb676cfb28bc682d04fc2ea29b4d18daeae992e7f97"; }
+            get { return "7460d38afe8371ec6c4bf7eea0ff3f7d56998e9989de82640dc37c81ff13062b"; }
         }
 
         /// <summary>
@@ -2646,7 +2646,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICDocument
-        [CodeFirstDatabaseSchema.tblICDocument](T1.tblICDocument_intDocumentId, T1.tblICDocument_strDocumentName, T1.tblICDocument_strDescription, T1.tblICDocument_intDocumentType, T1.tblICDocument_intCommodityId, T1.tblICDocument_ysnStandard, T1.tblICDocument_intCertificationId, T1.tblICDocument_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICDocument](T1.tblICDocument_intDocumentId, T1.tblICDocument_strDocumentName, T1.tblICDocument_strDescription, T1.tblICDocument_intDocumentType, T1.tblICDocument_intCommodityId, T1.tblICDocument_ysnStandard, T1.tblICDocument_intCertificationId, T1.tblICDocument_intOriginal, T1.tblICDocument_intCopies, T1.tblICDocument_intConcurrencyId)
     FROM (
         SELECT 
             T.intDocumentId AS tblICDocument_intDocumentId, 
@@ -2656,6 +2656,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.intCommodityId AS tblICDocument_intCommodityId, 
             T.ysnStandard AS tblICDocument_ysnStandard, 
             T.intCertificationId AS tblICDocument_intCertificationId, 
+            T.intOriginal AS tblICDocument_intOriginal, 
+            T.intCopies AS tblICDocument_intCopies, 
             T.intConcurrencyId AS tblICDocument_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICDocuments AS T
@@ -6059,7 +6061,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICDocuments
-        [iRely.Inventory.Model.tblICDocument](T1.tblICDocument_intDocumentId, T1.tblICDocument_strDocumentName, T1.tblICDocument_strDescription, T1.tblICDocument_intDocumentType, T1.tblICDocument_intCommodityId, T1.tblICDocument_ysnStandard, T1.tblICDocument_intCertificationId, T1.tblICDocument_intConcurrencyId)
+        [iRely.Inventory.Model.tblICDocument](T1.tblICDocument_intDocumentId, T1.tblICDocument_strDocumentName, T1.tblICDocument_strDescription, T1.tblICDocument_intDocumentType, T1.tblICDocument_intCommodityId, T1.tblICDocument_ysnStandard, T1.tblICDocument_intCertificationId, T1.tblICDocument_intOriginal, T1.tblICDocument_intCopies, T1.tblICDocument_intConcurrencyId)
     FROM (
         SELECT 
             T.intDocumentId AS tblICDocument_intDocumentId, 
@@ -6069,6 +6071,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.intCommodityId AS tblICDocument_intCommodityId, 
             T.ysnStandard AS tblICDocument_ysnStandard, 
             T.intCertificationId AS tblICDocument_intCertificationId, 
+            T.intOriginal AS tblICDocument_intOriginal, 
+            T.intCopies AS tblICDocument_intCopies, 
             T.intConcurrencyId AS tblICDocument_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICDocument AS T

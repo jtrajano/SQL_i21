@@ -52,7 +52,9 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
             cboCertification: {
                 value: '{current.intCertificationId}',
                 store: '{certification}'
-            }
+            },
+            txtOriginal: '{current.intOriginal}',
+            txtCopies: '{current.intCopies}'
         }
     },
 

@@ -18,6 +18,8 @@ Ext.define('Inventory.model.Document', {
         { name: 'intCommodityId', type: 'int', allowNull: true},
         { name: 'ysnStandard', type: 'boolean'},
         { name: 'intCertificationId', type: 'int', allowNull: true},
+        { name: 'intOriginal', type: 'int', allowNull: true},
+        { name: 'intCopies', type: 'int', allowNull: true},
 
         { name: 'strCommodityCode', type: 'string'}
     ],

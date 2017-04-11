@@ -524,8 +524,17 @@ if(_url.indexOf('version=TF') < 1) {
                                         ]
                                     },
                                     {
-                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR3-7.js?v=' + version,
-                                        title: 'DirectIR-Scen.3-7',
+                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR3-5.js?v=' + version,
+                                        title: 'DirectIR-Scen.3-5',
+                                        preload: [
+                                            functionalTest,
+                                            commonIC
+
+                                        ]
+                                    },
+                                    {
+                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR6-7.js?v=' + version,
+                                        title: 'DirectIR-Scen.6-7',
                                         preload: [
                                             functionalTest,
                                             commonIC
