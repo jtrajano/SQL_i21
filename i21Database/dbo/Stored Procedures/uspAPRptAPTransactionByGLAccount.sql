@@ -70,7 +70,7 @@ IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
@@ -144,14 +144,15 @@ SET @query = 'SELECT [intEntityVendorId]
 	  ,[strCompanyAddress]
 	  ,[ysnPaid] FROM [vyuAPRptAPTransactionByGLAccount]'
 
-IF ISNULL(@filter,'') != ''
-BEGIN
-	SET @query = @query + ' WHERE ' + @filter
-END
-
+	  
 IF ISNULL(@innerQuery,'') != ''
 BEGIN
-	SET @query = @query + ' AND ' + @innerQuery
+	SET @query = @query + ' WHERE ' + @innerQuery
+END
+
+IF ISNULL(@filter,'') != ''
+BEGIN
+	SET @query = @query + ' AND ' + @filter
 END
 PRINT @filter
 PRINT @query
