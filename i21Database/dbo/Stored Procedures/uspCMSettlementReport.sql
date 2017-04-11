@@ -108,7 +108,7 @@ BEGIN
 	--Vendor Account Number
 	strDate = CONVERT(VARCHAR(10),GETDATE(),110),
 	strTime = CONVERT(VARCHAR(8),GETDATE(),108),
-	strAccountNumber = EFT.strAccountNumber,
+	strAccountNumber = dbo.fnAESDecryptASym(EFT.strAccountNumber),
 	BNKTRN.strReferenceNo,
 
 	--Vendor Address
@@ -249,7 +249,7 @@ BEGIN
 	--Vendor Account Number
 	strDate = CONVERT(VARCHAR(10),GETDATE(),110),
 	strTime = CONVERT(VARCHAR(8),GETDATE(),108),
-	strAccountNumber = EFT.strAccountNumber,
+	strAccountNumber = dbo.fnAESDecryptASym(EFT.strAccountNumber),
 	BNKTRN.strReferenceNo,
 
 	--Vendor Address
@@ -412,7 +412,7 @@ BEGIN
 	--Vendor Account Number
 	strDate = CONVERT(VARCHAR(10),GETDATE(),110),
 	strTime = CONVERT(VARCHAR(8),GETDATE(),108),
-	strAccountNumber = EFT.strAccountNumber,
+	strAccountNumber = dbo.fnAESDecryptASym(EFT.strAccountNumber),
 	BNKTRN.strReferenceNo,
 
 	--Vendor Address
@@ -553,7 +553,7 @@ BEGIN
 	--Vendor Account Number
 	strDate = CONVERT(VARCHAR(10),GETDATE(),110),
 	strTime = CONVERT(VARCHAR(8),GETDATE(),108),
-	strAccountNumber = EFT.strAccountNumber,
+	strAccountNumber = dbo.fnAESDecryptASym(EFT.strAccountNumber),
 	BNKTRN.strReferenceNo,
 
 	--Vendor Address
