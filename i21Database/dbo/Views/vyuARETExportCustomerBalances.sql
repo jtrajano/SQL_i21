@@ -12,7 +12,7 @@ SELECT
 																	ON EL.[intWarehouseId] = CL.[intCompanyLocationId]
 																	AND ISNULL(EL.[intWarehouseId],0) <> 0
 															WHERE
-																EL.[intEntityId] = ARCI.[intEntityId]
+																EL.[intEntityId] = ARCI.[intEntityCustomerId]
 															)
 								)
 	,blterm				= SMT.[strTermCode]
@@ -27,7 +27,7 @@ FROM
 	vyuARCustomerInquiry ARCI
 INNER JOIN
 	vyuARCustomer ARC
-		ON ARCI.[intEntityId] = ARC.[intEntityId]
+		ON ARCI.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN 
 	tblEMEntityLocation EMEL
 		ON ARC.[intEntityId] = EMEL.intEntityId AND EMEL.ysnDefaultLocation = 1

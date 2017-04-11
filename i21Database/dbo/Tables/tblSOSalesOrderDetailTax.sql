@@ -12,6 +12,7 @@
     [intSalesTaxAccountId] INT NULL, 
     [dblTax] NUMERIC(18, 6) NULL, 
     [dblAdjustedTax] NUMERIC(18, 6) NULL, 
+	[dblBaseAdjustedTax] NUMERIC(18, 6) NULL, 
 	[ysnTaxAdjusted] BIT NULL DEFAULT ((0)), 
 	[ysnSeparateOnInvoice] BIT NULL DEFAULT ((0)), 
 	[ysnCheckoffTax] BIT NULL DEFAULT ((0)), 

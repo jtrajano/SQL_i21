@@ -10,7 +10,7 @@ FROM
 	vyuARCustomerInquiry ARCI
 INNER JOIN
 	vyuARCustomerSearch ARC
-		ON ARCI.[intEntityId] = ARC.[intEntityId]
+		ON ARCI.[intEntityCustomerId] = ARC.[intEntityId]
 INNER JOIN
     tblSMTerm TERM
 		ON ARC.intTermsId = TERM.intTermID
