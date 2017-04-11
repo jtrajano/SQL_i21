@@ -131,7 +131,7 @@ BEGIN
 			,intCostUOMId = CAST(NULL AS INT)
 			,strCostUOM = CAST(NULL AS NVARCHAR(50)) 
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
-				ON entity.intEntityId = vendor.intEntityVendorId
+				ON entity.intEntityId = vendor.intEntityId
 			CROSS APPLY (
 				SELECT	* 
 				FROM	vyuICGetInventoryReceiptVoucherPriceCharges prices

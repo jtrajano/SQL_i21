@@ -77,7 +77,7 @@ BEGIN
 	
 	SELECT TOP 1 @strFullName = E.strName
 	FROM tblSMUserSecurity US
-	JOIN tblEMEntity E ON US.intEntityUserSecurityId = E.intEntityId
+	JOIN tblEMEntity E ON US.intEntityId = E.intEntityId
 	JOIN tblEMEntityCredential EC ON EC.intEntityId = E.intEntityId
 	WHERE E.strExternalERPId = @strUserName
 	ORDER BY E.intEntityId DESC
