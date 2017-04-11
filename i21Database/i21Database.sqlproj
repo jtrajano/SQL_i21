@@ -2672,7 +2672,7 @@
     <Build Include="dbo\Tables\tblPATTransferDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
     <Build Include="dbo\Functions\fnGLGetMTDActivity.sql" />
-	<Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Stored Procedures\uspPATProcessVoid.sql" />
     <Build Include="dbo\Functions\fnIsAllowUserSelfPost.sql" />
@@ -4678,6 +4678,7 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostInTransitCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateSystemCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFProcessBeforePreview.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
