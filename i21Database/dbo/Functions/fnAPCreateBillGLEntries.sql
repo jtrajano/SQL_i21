@@ -295,9 +295,9 @@ BEGIN
 				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 				ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId
-			INNER JOIN tblICItem B2
+			LEFT JOIN tblICItem B2
 				ON B.intItemId = B2.intItemId
-			INNER JOIN tblICItemLocation loc
+			LEFT JOIN tblICItemLocation loc
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
 			LEFT JOIN tblICItem F
 				ON B.intItemId = F.intItemId					
