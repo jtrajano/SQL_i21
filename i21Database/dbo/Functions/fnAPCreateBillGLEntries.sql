@@ -211,7 +211,9 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	B.intAccountId,
+		[intAccountId]					=	CASE WHEN B.intInventoryShipmentChargeId IS NOT NULL THEN dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') --AP-3492 use AP Clearing if tansaction is From IS
+											ELSE B.intAccountId
+											END,
 		[dblDebit]						=	CAST(
 												
 												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal /*- CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2))*/ --IC Tax Commented AP-3485
@@ -292,7 +294,13 @@ BEGIN
 			LEFT JOIN tblICInventoryReceiptItem E
 				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
-				ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId	
+				ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId
+			INNER JOIN tblICItem B2
+				ON B.intItemId = B2.intItemId
+			INNER JOIN tblICItemLocation loc
+				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+			LEFT JOIN tblICItem F
+				ON B.intItemId = F.intItemId					
 			OUTER APPLY (
 				--Add the tax from IR
 				SELECT 
