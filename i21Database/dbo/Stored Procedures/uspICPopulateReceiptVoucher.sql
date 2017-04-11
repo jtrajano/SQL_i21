@@ -91,7 +91,7 @@ BEGIN
 			CROSS APPLY (
 				SELECT	* 
 				FROM	vyuICGetInventoryReceiptVoucherItems items
-				WHERE	items.intEntityVendorId = vendor.[intEntityId]
+				WHERE	items.intEntityVendorId = vendor.intEntityId
 			) receiptItem
 
 	-- Insert the price down charges (against the receipt vendor)
@@ -135,7 +135,7 @@ BEGIN
 			CROSS APPLY (
 				SELECT	* 
 				FROM	vyuICGetInventoryReceiptVoucherPriceCharges prices
-				WHERE	prices.intEntityVendorId = vendor.intEntityVendorId
+				WHERE	prices.intEntityVendorId = vendor.intEntityId
 			) receiptPriceCharges
 
 	-- Insert the accrue other charges. 
@@ -179,6 +179,6 @@ BEGIN
 			CROSS APPLY (
 				SELECT	* 
 				FROM	vyuICGetInventoryReceiptVoucherCharges charges
-				WHERE	charges.intEntityVendorId = vendor.[intEntityId]
+				WHERE	charges.intEntityVendorId = vendor.intEntityId
 			) receiptCharges
 END 
