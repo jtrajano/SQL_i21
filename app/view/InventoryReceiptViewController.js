@@ -742,7 +742,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strVendorName',
                     editor: {
                         readOnly: '{readOnlyAccrue}',
-                        origValueField: 'intEntityVendorId',
+                        origValueField: 'intEntityId',
                         origUpdateField: 'intEntityVendorId',
                         store: '{vendor}'
                     }
