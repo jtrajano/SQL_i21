@@ -47,7 +47,7 @@ AS
 	,APD.dblDiscount AS dblDetailDiscount
 	,strDetailAccountID = (SELECT strAccountId  FROM tblGLAccount WHERE intAccountId = APD.intAccountId)
 	,strDetailDescription = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = APD.intAccountId)
-	,strtPrepaidAccountId = (SELECT
+	,strtPrepaidAccountId = (SELECT TOP 1
 									(SELECT strDescription FROM tblGLAccount WHERE intAccountId = C.intAccountId) 
 							 FROM tblAPAppliedPrepaidAndDebit B
 							 INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
