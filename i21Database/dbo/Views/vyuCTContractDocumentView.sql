@@ -8,6 +8,8 @@ AS
 			ID.strDescription,
 			ID.ysnStandard,
 			ID.intCommodityId,
+			ISNULL(ID.intOriginal,0) intOriginal,
+			ISNULL(ID.intCopies,0) intCopies,
 			CASE	WHEN ID.intDocumentType = 1	THEN 'Contract'
 					WHEN ID.intDocumentType = 2	THEN 'Bill Of Lading'
 					WHEN ID.intDocumentType = 3	THEN 'Container'
