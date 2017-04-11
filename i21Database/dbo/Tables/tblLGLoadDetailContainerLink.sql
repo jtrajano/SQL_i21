@@ -9,9 +9,9 @@
 [intItemUOMId] INT NOT NULL,
 [dblReceivedQty] NUMERIC(18, 6) NULL,
 
-[dblGrossWt] NUMERIC(38,20) NULL,
-[dblTareWt] NUMERIC(38,20) NULL,
-[dblNetWt] NUMERIC(38,20) NULL,
+[dblLinkGrossWt] NUMERIC(38,20) NULL,
+[dblLinkTareWt] NUMERIC(38,20) NULL,
+[dblLinkNetWt] NUMERIC(38,20) NULL,
 
 [dblUnitCost] NUMERIC(18, 6) NULL,
 [intCostUOMId] [int] NULL,
