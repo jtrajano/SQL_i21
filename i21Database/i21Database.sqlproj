@@ -5188,6 +5188,7 @@
     <Build Include="dbo\Views\vyuICItemStock.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSaveTestInTemplates.sql" />
     <Build Include="dbo\Functions\fnTMComputeNewBurnRateZeroDeliveryTable.sql" />
+    <Build Include="dbo\Views\vyuICGetCustomerCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
