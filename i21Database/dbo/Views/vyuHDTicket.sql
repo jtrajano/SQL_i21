@@ -25,7 +25,7 @@ AS
 		,intAssignToEntity = tic.intAssignedToEntity
 		,strContactName = contact.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerContactId)
 		,tic.intCustomerContactId
-		,intContactRank = contact.intEntityRank
+		,intContactRank = ISNULL(contact.intEntityRank,1)
 		,strDateCreated = convert(nvarchar,tic.dtmCreated, 101)
 		,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101)
 		,tic.strJiraKey
