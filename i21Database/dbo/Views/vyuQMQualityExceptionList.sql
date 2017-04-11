@@ -39,6 +39,7 @@ SELECT TR.intTestResultId
 	,S.dtmBusinessDate
 	,SHI.strShiftName
 	,WO.strWorkOrderNo
+	,TR.intSequenceNo
 FROM dbo.tblQMTestResult AS TR
 JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
 JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
