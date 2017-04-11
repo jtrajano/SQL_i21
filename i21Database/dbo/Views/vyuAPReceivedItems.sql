@@ -42,8 +42,8 @@ FROM
 		,[strName]					=	D2.strName
 		,[strVendorId]				=	D1.strVendorId
 		,[strShipVia]				=	E.strShipVia
-		,[intTermId]				=	A.intTermsId
 		,[strTerm]					=	F.strTerm
+		,[intTermId]				=	A.intTermsId
 		,[strContractNumber]		=	G1.strContractNumber
 		,[strBillOfLading]			=	tblReceived.strBillOfLading
 		,[intContractHeaderId]		=	G1.intContractHeaderId
