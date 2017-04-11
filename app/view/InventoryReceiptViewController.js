@@ -55,7 +55,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 disabled: '{isOriginOrInventoryReturn}'
             },
             cboVendor: {
-                origValueField: 'intEntityVendorId',
+                origValueField: 'intEntityId',
                 origUpdateField: 'intEntityVendorId',
                 value: '{current.strVendorName}',
                 store: '{vendor}',
@@ -118,7 +118,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{isReceiptReadonly}'
             },
             cboShipVia: {
-                origValueField: 'intEntityShipViaId',
+                origValueField: 'intEntityId',
                 origUpdateField: 'intShipViaId',
                 value: '{current.strShipVia}',
                 store: '{shipvia}',

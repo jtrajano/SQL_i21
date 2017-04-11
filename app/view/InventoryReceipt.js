@@ -270,7 +270,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         xtype: 'gridcombobox',
                                                         columns: [
                                                             {
-                                                                dataIndex: 'intEntityVendorId',
+                                                                dataIndex: 'intEntityId',
                                                                 dataType: 'numeric',
                                                                 text: 'Vendor Id',
                                                                 hidden: true
@@ -595,7 +595,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
-                                                                                dataIndex: 'intEntityShipViaId',
+                                                                                dataIndex: 'intEntityId',
                                                                                 dataType: 'numeric',
                                                                                 text: 'Ship Via Id',
                                                                                 hidden: true
@@ -2762,7 +2762,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intEntityVendorId',
+                                                                                    dataIndex: 'intEntityId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Vendor Id',
                                                                                     hidden: true

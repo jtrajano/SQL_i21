@@ -571,7 +571,7 @@
                                                 "columns": [
                                                     "[",
                                                     "{",
-                                                    "dataIndex: 'intEntityVendorId',",
+                                                    "dataIndex: 'intEntityId',",
                                                     "dataType: 'numeric',",
                                                     "text: 'Vendor Id',",
                                                     "hidden: true",
@@ -1197,7 +1197,7 @@
                                                                 "columns": [
                                                                     "[",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'intEntityShipViaId',",
+                                                                    "\t\tdataIndex: 'intEntityId',",
                                                                     "\t\tdataType: 'numeric',",
                                                                     "\t\ttext: 'Ship Via Id',",
                                                                     "\t\thidden: true",
@@ -6041,7 +6041,7 @@
                                                                         "columns": [
                                                                             "[",
                                                                             "{",
-                                                                            "dataIndex: 'intEntityVendorId',",
+                                                                            "dataIndex: 'intEntityId',",
                                                                             "dataType: 'numeric',",
                                                                             "text: 'Vendor Id',",
                                                                             "hidden: true",
