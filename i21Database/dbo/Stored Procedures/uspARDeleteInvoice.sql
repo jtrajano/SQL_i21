@@ -15,10 +15,14 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 	DECLARE @UserEntityID INT
 	SET @UserEntityID = ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @UserId),@UserId) 
+	
+	IF(@InvoiceId IS NULL)
+		RETURN;
 		
 	IF(EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId AND ISNULL(ysnPosted,0) = 1))
 		RAISERROR(120036, 16, 1);		
-		
+	
+
 	EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID		
 
 	DELETE FROM tblARInvoiceDetailTax 

@@ -168,7 +168,8 @@ SELECT DISTINCT LC.strContainerNumber,
 		LC.dblGrossWt AS dblContainerGrossWt,
 		LC.dblNetWt AS dblContainerNetWt,
 		LC.dblTareWt AS dblContainerTareWt,
-		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq
+		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq,
+		CD.strCommodityCode
 FROM vyuLGLoadDetailView LDV
 JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
@@ -309,7 +310,8 @@ SELECT DISTINCT LC.strContainerNumber,
 		(LC.dblGrossWt/LC.dblQuantity)*LDCL.dblQuantity AS dblContainerGrossWt,
 		(LC.dblNetWt/LC.dblQuantity)*LDCL.dblQuantity AS dblContainerNetWt,
 		(LC.dblTareWt/LC.dblQuantity)*LDCL.dblQuantity AS dblContainerTareWt,
-		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq
+		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq,
+		CD.strCommodityCode
 FROM vyuLGLoadDetailView LDV
 JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId

@@ -372,7 +372,8 @@ BEGIN TRY
 	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 	LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
-	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+	LEFT JOIN tblICItemContract IC ON IC.intItemId = I.intItemId  AND IC.intItemContractId = CD.intItemContractId
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = ISNULL(I.intOriginId,IC.intCountryId)
 	LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
 		AND CTCQ.intContainerTypeId = CT.intContainerTypeId
 	WHERE CD.intContractHeaderId = @intContractHeaderId
@@ -384,7 +385,8 @@ BEGIN TRY
 	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 	LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
-	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+	LEFT JOIN tblICItemContract IC ON IC.intItemId = I.intItemId  AND IC.intItemContractId = CD.intItemContractId
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = ISNULL(I.intOriginId,IC.intCountryId)
 	LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
 		AND CTCQ.intContainerTypeId = CT.intContainerTypeId
 	WHERE CD.intContractHeaderId = @intContractHeaderId

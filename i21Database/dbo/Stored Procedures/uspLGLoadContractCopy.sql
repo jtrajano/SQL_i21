@@ -289,6 +289,45 @@ BEGIN TRY
 	FROM tblLGLoadDetail
 	WHERE intLoadDetailId = @intOldLoadDetailId
 
+	IF EXISTS(SELECT 1 FROM tblLGLoadWarehouse WHERE intLoadId = @intOldLoadId)
+	BEGIN
+		INSERT INTO tblLGLoadWarehouse (
+			 intLoadId
+			,strDeliveryNoticeNumber
+			,dtmDeliveryNoticeDate
+			,intSubLocationId
+			,intStorageLocationId
+			,intHaulerEntityId
+			,dtmPickupDate
+			,dtmDeliveryDate
+			,dtmLastFreeDate
+			,dtmStrippingReportReceivedDate
+			,dtmSampleAuthorizedDate
+			,strStrippingReportComments
+			,strFreightComments
+			,strSampleComments
+			,strOtherComments
+			,intWarehouseRateMatrixHeaderId
+			)
+		SELECT @intNewLoadId
+			,strDeliveryNoticeNumber
+			,dtmDeliveryNoticeDate
+			,intSubLocationId
+			,intStorageLocationId
+			,intHaulerEntityId
+			,dtmPickupDate
+			,dtmDeliveryDate
+			,dtmLastFreeDate
+			,dtmStrippingReportReceivedDate
+			,dtmSampleAuthorizedDate
+			,strStrippingReportComments
+			,strFreightComments
+			,strSampleComments
+			,strOtherComments
+			,intWarehouseRateMatrixHeaderId
+		FROM tblLGLoadWarehouse WHERE intLoadId = @intOldLoadId
+	END
+
 	EXEC uspLGCreateLoadIntegrationLog @intNewLoadId,'Added',2
 
 END TRY

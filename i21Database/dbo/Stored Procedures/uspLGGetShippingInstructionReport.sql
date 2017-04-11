@@ -143,36 +143,39 @@ SELECT TOP 1 L.intLoadId
 	,L.dtmISFReceivedDate
 	,FLNP.strText AS strFirstNotifyText
 	,SLNP.strText AS strSecondNotifyText
-	,CLNP.strText AS strConsigneeText
+	,ISNULL(CLNP.strText,'') AS strConsigneeText
 	,CASE FLNP.strType
 		WHEN 'Bank'
-			THEN FirstNotifyBank.strBankName
+			THEN ISNULL(FirstNotifyBank.strBankName,'')
 		WHEN 'Company'
-			THEN FirstNotifyCompany.strCompanyName
+			THEN ISNULL(FirstNotifyCompany.strCompanyName,'')
 		WHEN 'Vendor'
-			THEN FirstNotify.strName
+			THEN ISNULL(FirstNotify.strName,'')
 		WHEN 'Customer'
-			THEN FirstNotify.strName
+			THEN ISNULL(FirstNotify.strName,'')
+		ELSE ''
 		END strFirstNotify
 	,CASE FLNP.strType
 		WHEN 'Bank'
-			THEN FirstNotifyBank.strEmail
+			THEN ISNULL(FirstNotifyBank.strEmail,'')
 		WHEN 'Company'
-			THEN FirstNotifyCompany.strEmail
+			THEN ISNULL(FirstNotifyCompany.strEmail,'')
 		WHEN 'Vendor'
-			THEN FirstNotify.strEmail
+			THEN ISNULL(FirstNotify.strEmail,'')
 		WHEN 'Customer'
-			THEN FirstNotify.strEmail
+			THEN ISNULL(FirstNotify.strEmail,'')
+		ELSE ''
 		END strFirstNotifyMail
 	,CASE FLNP.strType
 		WHEN 'Bank'
-			THEN FirstNotifyBank.strFax
+			THEN ISNULL(FirstNotifyBank.strFax,'')
 		WHEN 'Company'
-			THEN FirstNotifyCompany.strFax
+			THEN ISNULL(FirstNotifyCompany.strFax,'')
 		WHEN 'Vendor'
-			THEN FirstNotify.strFax
+			THEN ISNULL(FirstNotify.strFax,'')
 		WHEN 'Customer'
-			THEN FirstNotify.strFax
+			THEN ISNULL(FirstNotify.strFax,'')
+		ELSE ''
 		END strFirstNotifyFax
 	,CASE FLNP.strType
 		WHEN 'Bank'
@@ -180,99 +183,109 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN ''
 		WHEN 'Vendor'
-			THEN FirstNotify.strMobile
+			THEN ISNULL(FirstNotify.strMobile,'')
 		WHEN 'Customer'
-			THEN FirstNotify.strMobile
+			THEN ISNULL(FirstNotify.strMobile,'')
+		ELSE ''
 		END strFirstNotifyMobile
 	,CASE FLNP.strType
 		WHEN 'Bank'
-			THEN FirstNotifyBank.strPhone
+			THEN ISNULL(FirstNotifyBank.strPhone,'')
 		WHEN 'Company'
-			THEN FirstNotifyCompany.strPhone
+			THEN ISNULL(FirstNotifyCompany.strPhone,'')
 		WHEN 'Vendor'
-			THEN FirstNotifyContactEntity.strPhone
+			THEN ISNULL(FirstNotifyContactEntity.strPhone,'')
 		WHEN 'Customer'
-			THEN FirstNotifyContactEntity.strPhone
+			THEN ISNULL(FirstNotifyContactEntity.strPhone,'')
+		ELSE ''
 		END strFirstNotifyPhone
 	,CASE FLNP.strType
 		WHEN 'Bank'
-			THEN FirstNotifyBank.strAddress
+			THEN ISNULL(FirstNotifyBank.strAddress,'')
 		WHEN 'Company'
-			THEN FirstNotifyCompany.strAddress
+			THEN ISNULL(FirstNotifyCompany.strAddress,'')
 		WHEN 'Vendor'
-			THEN FNLocation.strAddress
+			THEN ISNULL(FNLocation.strAddress,'')
 		WHEN 'Customer'
-			THEN FNLocation.strAddress
+			THEN ISNULL(FNLocation.strAddress,'')
+		ELSE ''
 		END strFirstNotifyAddress
 	,CASE FLNP.strType
 		WHEN 'Bank'
-			THEN FirstNotifyBank.strCity
+			THEN ISNULL(FirstNotifyBank.strCity,'')
 		WHEN 'Company'
-			THEN FirstNotifyCompany.strCity
+			THEN ISNULL(FirstNotifyCompany.strCity,'')
 		WHEN 'Vendor'
-			THEN FNLocation.strCity
+			THEN ISNULL(FNLocation.strCity,'')
 		WHEN 'Customer'
-			THEN FNLocation.strCity
+			THEN ISNULL(FNLocation.strCity,'')
+		ELSE ''
 		END strFirstNotifyCity
 	,CASE FLNP.strType
 		WHEN 'Bank'
-			THEN FirstNotifyBank.strCountry
+			THEN ISNULL(FirstNotifyBank.strCountry,'')
 		WHEN 'Company'
-			THEN FirstNotifyCompany.strCountry
+			THEN ISNULL(FirstNotifyCompany.strCountry,'')
 		WHEN 'Vendor'
-			THEN FNLocation.strCountry
+			THEN ISNULL(FNLocation.strCountry,'')
 		WHEN 'Customer'
-			THEN FNLocation.strCountry
+			THEN ISNULL(FNLocation.strCountry,'')
+		ELSE ''
 		END strFirstNotifyCountry
 	,CASE FLNP.strType
 		WHEN 'Bank'
-			THEN FirstNotifyBank.strState
+			THEN ISNULL(FirstNotifyBank.strState,'')
 		WHEN 'Company'
-			THEN FirstNotifyCompany.strState
+			THEN ISNULL(FirstNotifyCompany.strState,'')
 		WHEN 'Vendor'
-			THEN FNLocation.strState
+			THEN ISNULL(FNLocation.strState,'')
 		WHEN 'Customer'
-			THEN FNLocation.strState
+			THEN ISNULL(FNLocation.strState,'')
+		ELSE ''
 		END strFirstNotifyState
 	,CASE FLNP.strType
 		WHEN 'Bank'
-			THEN FirstNotifyBank.strZipCode
+			THEN ISNULL(FirstNotifyBank.strZipCode,'')
 		WHEN 'Company'
-			THEN FirstNotifyCompany.strZip
+			THEN ISNULL(FirstNotifyCompany.strZip,'')
 		WHEN 'Vendor'
-			THEN FNLocation.strZipCode
+			THEN ISNULL(FNLocation.strZipCode,'')
 		WHEN 'Customer'
-			THEN FNLocation.strZipCode
+			THEN ISNULL(FNLocation.strZipCode,'')
+		ELSE ''
 		END strFirstNotifyZipCode
 	,CASE SLNP.strType
 		WHEN 'Bank'
-			THEN SecondNotifyBank.strBankName
+			THEN ISNULL(SecondNotifyBank.strBankName,'')
 		WHEN 'Company'
-			THEN SecondNotifyCompany.strCompanyName
+			THEN ISNULL(SecondNotifyCompany.strCompanyName,'')
 		WHEN 'Vendor'
-			THEN SecondNotify.strName
+			THEN ISNULL(SecondNotify.strName,'')
 		WHEN 'Customer'
-			THEN SecondNotify.strName
+			THEN ISNULL(SecondNotify.strName,'')
+		ELSE ''
 		END strSecondNotify
 	,CASE SLNP.strType
 		WHEN 'Bank'
-			THEN SecondNotifyBank.strEmail
+			THEN ISNULL(SecondNotifyBank.strEmail,'')
 		WHEN 'Company'
-			THEN SecondNotifyCompany.strEmail
+			THEN ISNULL(SecondNotifyCompany.strEmail,'')
 		WHEN 'Vendor'
-			THEN SecondNotify.strEmail
+			THEN ISNULL(SecondNotify.strEmail,'')
 		WHEN 'Customer'
-			THEN SecondNotify.strEmail
+			THEN ISNULL(SecondNotify.strEmail,'')
+		ELSE ''
 		END strSecondNotifyMail
 	,CASE SLNP.strType
 		WHEN 'Bank'
-			THEN SecondNotifyBank.strFax
+			THEN ISNULL(SecondNotifyBank.strFax,'')
 		WHEN 'Company'
-			THEN SecondNotifyCompany.strFax
+			THEN ISNULL(SecondNotifyCompany.strFax,'')
 		WHEN 'Vendor'
-			THEN SecondNotify.strFax
+			THEN ISNULL(SecondNotify.strFax,'')
 		WHEN 'Customer'
-			THEN SecondNotify.strFax
+			THEN ISNULL(SecondNotify.strFax,'')
+		ELSE ''
 		END strSecondNotifyFax
 	,CASE SLNP.strType
 		WHEN 'Bank'
@@ -280,99 +293,109 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN ''
 		WHEN 'Vendor'
-			THEN SecondNotify.strMobile
+			THEN ISNULL(SecondNotify.strMobile,'')
 		WHEN 'Customer'
-			THEN SecondNotify.strMobile
+			THEN ISNULL(SecondNotify.strMobile,'')
+		ELSE ''
 		END strSecondNotifyMobile
 	,CASE SLNP.strType
 		WHEN 'Bank'
-			THEN SecondNotifyBank.strPhone
+			THEN ISNULL(SecondNotifyBank.strPhone,'')
 		WHEN 'Company'
-			THEN SecondNotifyCompany.strPhone
+			THEN ISNULL(SecondNotifyCompany.strPhone,'')
 		WHEN 'Vendor'
-			THEN SecondNotifyContactEntity.strPhone
+			THEN ISNULL(SecondNotifyContactEntity.strPhone,'')
 		WHEN 'Customer'
-			THEN SecondNotifyContactEntity.strPhone
+			THEN ISNULL(SecondNotifyContactEntity.strPhone,'')
+		ELSE ''
 		END strSecondNotifyPhone
 	,CASE SLNP.strType
 		WHEN 'Bank'
-			THEN SecondNotifyBank.strAddress
+			THEN ISNULL(SecondNotifyBank.strAddress,'')
 		WHEN 'Company'
-			THEN SecondNotifyCompany.strAddress
+			THEN ISNULL(SecondNotifyCompany.strAddress,'')
 		WHEN 'Vendor'
-			THEN SNLocation.strAddress
+			THEN ISNULL(SNLocation.strAddress,'')
 		WHEN 'Customer'
-			THEN SNLocation.strAddress
+			THEN ISNULL(SNLocation.strAddress,'')
+		ELSE ''
 		END strSecondNotifyAddress
 	,CASE SLNP.strType
 		WHEN 'Bank'
-			THEN SecondNotifyBank.strCity
+			THEN ISNULL(SecondNotifyBank.strCity,'')
 		WHEN 'Company'
-			THEN SecondNotifyCompany.strCity
+			THEN ISNULL(SecondNotifyCompany.strCity,'')
 		WHEN 'Vendor'
-			THEN SNLocation.strCity
+			THEN ISNULL(SNLocation.strCity,'')
 		WHEN 'Customer'
-			THEN SNLocation.strCity
+			THEN ISNULL(SNLocation.strCity,'')
+		ELSE ''
 		END strSecondNotifyCity
 	,CASE SLNP.strType
 		WHEN 'Bank'
-			THEN SecondNotifyBank.strCountry
+			THEN ISNULL(SecondNotifyBank.strCountry,'')
 		WHEN 'Company'
-			THEN SecondNotifyCompany.strCountry
+			THEN ISNULL(SecondNotifyCompany.strCountry,'')
 		WHEN 'Vendor'
-			THEN SNLocation.strCountry
+			THEN ISNULL(SNLocation.strCountry,'')
 		WHEN 'Customer'
-			THEN SNLocation.strCountry
+			THEN ISNULL(SNLocation.strCountry,'')
+		ELSE ''
 		END strSecondNotifyCountry
 	,CASE SLNP.strType
 		WHEN 'Bank'
-			THEN SecondNotifyBank.strState
+			THEN ISNULL(SecondNotifyBank.strState,'')
 		WHEN 'Company'
-			THEN SecondNotifyCompany.strState
+			THEN ISNULL(SecondNotifyCompany.strState,'')
 		WHEN 'Vendor'
-			THEN SNLocation.strState
+			THEN ISNULL(SNLocation.strState,'')
 		WHEN 'Customer'
-			THEN SNLocation.strState
+			THEN ISNULL(SNLocation.strState,'')
+		ELSE ''
 		END strSecondNotifyState
 	,CASE SLNP.strType
 		WHEN 'Bank'
-			THEN SecondNotifyBank.strZipCode
+			THEN ISNULL(SecondNotifyBank.strZipCode,'')
 		WHEN 'Company'
-			THEN SecondNotifyCompany.strZip
+			THEN ISNULL(SecondNotifyCompany.strZip,'')
 		WHEN 'Vendor'
-			THEN SNLocation.strZipCode
+			THEN ISNULL(SNLocation.strZipCode,'')
 		WHEN 'Customer'
-			THEN SNLocation.strZipCode
+			THEN ISNULL(SNLocation.strZipCode,'')
+		ELSE ''
 		END strSecondNotifyZipCode
 	,CASE CLNP.strType
 		WHEN 'Bank'
-			THEN ConsigneeNotifyBank.strBankName
+			THEN ISNULL(ConsigneeNotifyBank.strBankName,'')
 		WHEN 'Company'
-			THEN ConsigneeNotifyCompany.strCompanyName
+			THEN ISNULL(ConsigneeNotifyCompany.strCompanyName,'')
 		WHEN 'Vendor'
-			THEN ConsigneeNotify.strName
+			THEN ISNULL(ConsigneeNotify.strName,'')
 		WHEN 'Customer'
-			THEN ConsigneeNotify.strName
+			THEN ISNULL(ConsigneeNotify.strName,'')
+		ELSE ''
 		END strConsignee
 	,CASE CLNP.strType
 		WHEN 'Bank'
-			THEN ConsigneeNotifyBank.strEmail
+			THEN ISNULL(ConsigneeNotifyBank.strEmail,'')
 		WHEN 'Company'
-			THEN ConsigneeNotifyCompany.strEmail
+			THEN ISNULL(ConsigneeNotifyCompany.strEmail,'')
 		WHEN 'Vendor'
-			THEN ConsigneeNotify.strEmail
+			THEN ISNULL(ConsigneeNotify.strEmail,'')
 		WHEN 'Customer'
-			THEN ConsigneeNotify.strEmail
+			THEN ISNULL(ConsigneeNotify.strEmail,'')
+		ELSE ''
 		END strConsigneeMail
 	,CASE CLNP.strType
 		WHEN 'Bank'
-			THEN ConsigneeNotifyBank.strFax
+			THEN ISNULL(ConsigneeNotifyBank.strFax,'')
 		WHEN 'Company'
-			THEN ConsigneeNotifyCompany.strFax
+			THEN ISNULL(ConsigneeNotifyCompany.strFax,'')
 		WHEN 'Vendor'
-			THEN ConsigneeNotify.strFax
+			THEN ISNULL(ConsigneeNotify.strFax,'')
 		WHEN 'Customer'
-			THEN ConsigneeNotify.strFax
+			THEN ISNULL(ConsigneeNotify.strFax,'')
+		ELSE ''
 		END strConsigneeFax
 	,CASE CLNP.strType
 		WHEN 'Bank'
@@ -380,69 +403,76 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Company'
 			THEN ''
 		WHEN 'Vendor'
-			THEN ConsigneeNotify.strMobile
+			THEN ISNULL(ConsigneeNotify.strMobile,'')
 		WHEN 'Customer'
-			THEN ConsigneeNotify.strMobile
+			THEN ISNULL(ConsigneeNotify.strMobile,'')
+		ELSE ''
 		END strConsigneeMobile
 	,CASE CLNP.strType
 		WHEN 'Bank'
-			THEN ConsigneeNotifyBank.strPhone
+			THEN ISNULL(ConsigneeNotifyBank.strPhone,'')
 		WHEN 'Company'
-			THEN ConsigneeNotifyCompany.strPhone
+			THEN ISNULL(ConsigneeNotifyCompany.strPhone,'')
 		WHEN 'Vendor'
-			THEN ConsigneeNotifyContactEntity.strPhone
+			THEN ISNULL(ConsigneeNotifyContactEntity.strPhone,'')
 		WHEN 'Customer'
-			THEN ConsigneeNotifyContactEntity.strPhone
+			THEN ISNULL(ConsigneeNotifyContactEntity.strPhone,'')
+		ELSE ''
 		END strConsigneePhone
 	,CASE CLNP.strType
 		WHEN 'Bank'
-			THEN ConsigneeNotifyBank.strAddress
+			THEN ISNULL(ConsigneeNotifyBank.strAddress,'')
 		WHEN 'Company'
-			THEN ConsigneeNotifyCompany.strAddress
+			THEN ISNULL(ConsigneeNotifyCompany.strAddress,'')
 		WHEN 'Vendor'
-			THEN CNLocation.strAddress
+			THEN ISNULL(CNLocation.strAddress,'')
 		WHEN 'Customer'
-			THEN CNLocation.strAddress
+			THEN ISNULL(CNLocation.strAddress,'')
+		ELSE ''
 		END strConsigneeAddress
 	,CASE CLNP.strType
 		WHEN 'Bank'
-			THEN ConsigneeNotifyBank.strCity
+			THEN ISNULL(ConsigneeNotifyBank.strCity,'')
 		WHEN 'Company'
-			THEN ConsigneeNotifyCompany.strCity
+			THEN ISNULL(ConsigneeNotifyCompany.strCity,'')
 		WHEN 'Vendor'
-			THEN CNLocation.strCity
+			THEN ISNULL(CNLocation.strCity,'')
 		WHEN 'Customer'
-			THEN CNLocation.strCity
+			THEN ISNULL(CNLocation.strCity,'')
+		ELSE ''
 		END strConsigneeCity
 	,CASE CLNP.strType
 		WHEN 'Bank'
-			THEN ConsigneeNotifyBank.strCountry
+			THEN ISNULL(ConsigneeNotifyBank.strCountry,'')
 		WHEN 'Company'
-			THEN ConsigneeNotifyCompany.strCountry
+			THEN ISNULL(ConsigneeNotifyCompany.strCountry,'')
 		WHEN 'Vendor'
-			THEN CNLocation.strCountry
+			THEN ISNULL(CNLocation.strCountry,'')
 		WHEN 'Customer'
-			THEN CNLocation.strCountry
+			THEN ISNULL(CNLocation.strCountry,'')
+		ELSE ''
 		END strConsigneeCountry
 	,CASE CLNP.strType
 		WHEN 'Bank'
-			THEN ConsigneeNotifyBank.strState
+			THEN ISNULL(ConsigneeNotifyBank.strState,'')
 		WHEN 'Company'
-			THEN ConsigneeNotifyCompany.strState
+			THEN ISNULL(ConsigneeNotifyCompany.strState,'')
 		WHEN 'Vendor'
-			THEN CNLocation.strState
+			THEN ISNULL(CNLocation.strState,'')
 		WHEN 'Customer'
-			THEN CNLocation.strState
+			THEN ISNULL(CNLocation.strState,'')
+		ELSE ''
 		END strConsigneeState
 	,CASE CLNP.strType
 		WHEN 'Bank'
-			THEN ConsigneeNotifyBank.strZipCode
+			THEN ISNULL(ConsigneeNotifyBank.strZipCode,'')
 		WHEN 'Company'
-			THEN ConsigneeNotifyCompany.strZip
+			THEN ISNULL(ConsigneeNotifyCompany.strZip,'')
 		WHEN 'Vendor'
-			THEN CNLocation.strZipCode
+			THEN ISNULL(CNLocation.strZipCode,'')
 		WHEN 'Customer'
-			THEN CNLocation.strZipCode
+			THEN ISNULL(CNLocation.strZipCode,'')
+		ELSE ''
 		END strConsigneeZipCode
 	,LC.strMarks
 	,L.strMarkingInstructions
