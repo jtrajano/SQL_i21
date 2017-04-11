@@ -220,7 +220,7 @@ BEGIN TRY
 	,strSiteAddress
 	,strSiteCity
 	,strPrintTimeStamp
-	,strEmailDistributionOption
+	,ISNULL(strEmailDistributionOption,'') 
 	,strEmail
 	,strDepartmentDescription
 	,strShortName
