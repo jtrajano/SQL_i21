@@ -167,7 +167,6 @@ IF ISNULL(@ysnRecap, 0) = 0
 					(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset)),
 					(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset))
 		END
-
 		
 		DELETE FROM @GLEntries
 		INSERT INTO @GLEntries (
@@ -210,7 +209,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intAccountId]			= A.[intDepreciationAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.[strAssetId]
-			,[dtmTransactionDate]	= A.[dtmDateAcquired]
+			,[dtmTransactionDate]	= (SELECT TOP 1 B.[dtmDepreciationToDate] FROM tblFAFixedAssetDepreciation B WHERE B.intAssetId = A.[intAssetId] ORDER BY B.intAssetDepreciationId DESC)
 			,[dblDebit]				= ISNULL(A.[dblCost], 0) - ISNULL(A.[dblSalvageValue], 0)
 			,[dblCredit]			= 0
 			,[dblDebitForeign]		= 0
@@ -221,7 +220,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblForeignRate]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[dtmDate]				= ISNULL(A.[dtmDateAcquired], GETDATE())
+			,[dtmDate]				= (SELECT TOP 1 B.[dtmDepreciationToDate] FROM tblFAFixedAssetDepreciation B WHERE B.intAssetId = A.[intAssetId] ORDER BY B.intAssetDepreciationId DESC)
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
@@ -240,7 +239,6 @@ IF ISNULL(@ysnRecap, 0) = 0
 		
 		FROM tblFAFixedAsset A
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
-
 
 		INSERT INTO @GLEntries (
 			 [strTransactionId]
@@ -282,7 +280,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intAccountId]			= A.[intDepreciationAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.[strAssetId]
-			,[dtmTransactionDate]	= A.[dtmDateAcquired]
+			,[dtmTransactionDate]	= (SELECT TOP 1 B.[dtmDepreciationToDate] FROM tblFAFixedAssetDepreciation B WHERE B.intAssetId = A.[intAssetId] ORDER BY B.intAssetDepreciationId DESC)
 			,[dblDebit]				= 0
 			,[dblCredit]			= ISNULL(A.[dblCost], 0) - ISNULL(A.[dblSalvageValue], 0)
 			,[dblDebitForeign]		= 0
@@ -293,7 +291,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblForeignRate]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[dtmDate]				= ISNULL(A.[dtmDateAcquired], GETDATE())
+			,[dtmDate]				= (SELECT TOP 1 B.[dtmDepreciationToDate] FROM tblFAFixedAssetDepreciation B WHERE B.intAssetId = A.[intAssetId] ORDER BY B.intAssetDepreciationId DESC)
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
@@ -312,10 +310,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 		
 		FROM tblFAFixedAsset A
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
-
 		
-		EXEC uspGLBookEntries @GLEntries, @ysnPost
-		
+		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost		
 
 		DELETE #FAAsset
 		DROP TABLE #FAAsset
@@ -336,6 +332,15 @@ UPDATE tblFAFixedAsset
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
+
+IF EXISTS(SELECT TOP 1 1 FROM (SELECT TOP 1 A.intAssetDepreciationId FROM tblFAFixedAssetDepreciation A 
+						WHERE A.[intAssetId] IN (SELECT intAssetId From #AssetID) 
+								AND ISNULL([dbo].isOpenAccountingDate(A.[dtmDepreciationToDate]), 0) = 0 ORDER BY A.intAssetDepreciationId DESC ) TBL)
+BEGIN
+	GOTO Post_Rollback
+END
+
+IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --=====================================================================================================================================
 -- 	RETURN TOTAL NUMBER OF VALID FIXEDASSETS
