@@ -99,7 +99,7 @@ namespace iRely.Inventory.BusinessLayer
                                 fh.ysnRecountMismatch = false;
                                 fh.ysnRecount = false;
                                 fh.ysnExternal = false;
-                                fh.strCountNo = Common.GetStartingNumber(Common.StartingNumber.InventoryCount);
+                                //fh.strCountNo = Common.GetStartingNumber(Common.StartingNumber.InventoryCount);
                                 fh.dtmCountDate = DateTime.Today;
                                 fh.intLocationId = intLocationId;
                                 context.AddNew<tblICInventoryCount>(fh);
@@ -375,7 +375,7 @@ namespace iRely.Inventory.BusinessLayer
 
             if (fc != null && fh != null)
             {
-                var strCountLine = fh.strCountNo + '-' + row.ToString();
+                var strCountLine = row.ToString(); //fh.strCountNo + '-' + row.ToString();
                 fc.strCountLine = strCountLine;
                 fh.tblICInventoryCountDetails.Add(fc);
             }
