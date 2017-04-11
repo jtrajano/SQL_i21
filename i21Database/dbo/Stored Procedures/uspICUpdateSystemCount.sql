@@ -60,7 +60,7 @@ FETCH NEXT FROM cur INTO @Id
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
-	SELECT @Prefix = strPrefix + CAST(intNumber + 1 AS NVARCHAR(50))
+	SELECT @Prefix = strPrefix + CAST(intNumber AS NVARCHAR(50))
 	FROM tblSMStartingNumber
 	WHERE strTransactionType = 'Inventory Count'
 
