@@ -32,7 +32,7 @@ BEGIN TRY
 			intPurchasingGroupId,	intApprovedById,		dtmApproved,
 			strOrigin,				dblNetWeight,			intNetWeightUOMId,
 			intItemContractId,		strApprovalType,		strVendorLotID,
-			dblNoOfLots,			intCertificationId
+			dblNoOfLots,			intCertificationId,		intLoadingPortId
 	)
 	OUTPUT	inserted.intApprovedContractId INTO @SCOPE_IDENTITY
 	SELECT	CD.intContractHeaderId,
@@ -69,7 +69,8 @@ BEGIN TRY
 			@strScreenName,
 			CD.strVendorLotID,
 			CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 1 THEN CH.dblNoOfLots  ELSE CD.dblNoOfLots END,
-			CF.intCertificationId
+			CF.intCertificationId,
+			intLoadingPortId
 
 	FROM	tblCTContractDetail		CD 
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
