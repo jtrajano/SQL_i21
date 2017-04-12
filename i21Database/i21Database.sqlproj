@@ -5172,6 +5172,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql" />
     <Build Include="dbo\Functions\fnTMComputeNewBurnRateZeroDeliveryTable.sql" />
     <Build Include="dbo\Views\vyuQMDashboardJDE.sql" />
+    <Build Include="dbo\Views\vyuLGGetContractSubLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

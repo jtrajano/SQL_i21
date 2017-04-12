@@ -456,17 +456,17 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 		LEFT JOIN	tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 		LEFT JOIN	tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
-		--LEFT JOIN   tblEMEntityToContact VEC ON VEC.intEntityId = Vendor.intEntityId
 		LEFT JOIN	tblEMEntity Via ON Via.intEntityId = LW .intHaulerEntityId
 		LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
 		LEFT JOIN   tblEMEntity WHVendor ON WHVendor.intEntityId = WH.intVendorId
 		LEFT JOIN	tblEMEntityLocation WHVendorLoc ON WHVendorLoc.intEntityLocationId = WHVendor.intDefaultLocationId
-
 		LEFT JOIN   tblEMEntityToContact WEC ON WEC.intEntityId = WH.intVendorId
 		LEFT JOIN   tblEMEntity WETC ON WETC .intEntityId = WEC.intEntityContactId
 		LEFT JOIN	tblEMEntityPhoneNumber WETCP ON WETCP.intEntityId = WETC .intEntityId
 		LEFT JOIN	tblEMEntityMobileNumber WETCM ON WETCM.intEntityId = WETC .intEntityId
-
+		LEFT JOIN	tblEMContactDetail WETCD ON WETCD.intEntityId = WETC.intEntityId 
+		LEFT JOIN	tblEMContactDetailType WETCDT ON WETCDT.intContactDetailTypeId = WETCDT.intContactDetailTypeId
+				AND WETCDT.strField = 'Fax'
 		LEFT JOIN   tblEMEntityToContact SLEC ON SLEC.intEntityId = SLEntity.intEntityId
 		LEFT JOIN   tblEMEntity SLETC ON SLETC .intEntityId = SLEC.intEntityContactId
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
