@@ -1555,6 +1555,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        lookUpField: true,
                                                                         itemId: 'cboPhysicalItem',
                                                                         fieldLabel: 'Physical Item',
                                                                         labelWidth: 125,

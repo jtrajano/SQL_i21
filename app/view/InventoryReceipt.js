@@ -309,6 +309,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         ],
                                                         enableDrillDown: true,
                                                         flex: 1,
+                                                        lookUpField: true,
                                                         itemId: 'cboVendor',
                                                         margin: '0 5 0 0',
                                                         fieldLabel: 'Vendor<font color="red"> *</font>',
