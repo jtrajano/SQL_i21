@@ -1,30 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].uspMFGetStagedLot (@intLocationId INT)
 AS
 BEGIN
-	--DECLARE @intStagingLocationId INT
-	--	,@intProductionStageLocationId INT
-	--	SELECT @intStagingLocationId=strAttributeValue
-	--		FROM tblMFManufacturingProcessAttribute
-	--		WHERE intLocationId = @intLocationId
-	--			AND intAttributeId IN (
-	--				SELECT intAttributeId
-	--				FROM tblMFAttribute
-	--				WHERE strAttributeName IN (
-	--						'Staging Location'
-	--						)
-	--					AND strAttributeValue <> ''
-	--				)
-	--		SELECT @intProductionStageLocationId=strAttributeValue
-	--		FROM tblMFManufacturingProcessAttribute
-	--		WHERE intLocationId = @intLocationId
-	--			AND intAttributeId IN (
-	--				SELECT intAttributeId
-	--				FROM tblMFAttribute
-	--				WHERE strAttributeName IN (
-	--						'Production Staging Location'
-	--						)
-	--					AND strAttributeValue <> ''
-	--				)
 	SELECT L.intLotId
 		,L.strLotNumber
 		,L.strLotAlias
@@ -38,7 +14,11 @@ BEGIN
 		,L.dblQty
 		,UM.intUnitMeasureId
 		,UM.strUnitMeasure
-		,L.dblWeight
+		,CASE 
+			WHEN L.intWeightUOMId IS NULL
+				THEN L.dblQty
+			ELSE L.dblWeight
+			END AS dblWeight
 		,UM1.intUnitMeasureId AS intWeightUnitMeasureId
 		,UM1.strUnitMeasure AS strWeightUnitMeasure
 		,L.dblWeightPerQty
@@ -52,8 +32,16 @@ BEGIN
 		,OH.strOrderNo AS strReturnNo
 		,OS.intOrderStatusId
 		,OS.strOrderStatus
-		,MIN(W.dtmExpectedDate) AS dtmRequiredDate
-		,MIN(WC.dblIssuedQuantity) AS dblRequiredQty
+		,MIN(W1.dtmPlannedDate) AS dtmRequiredDate
+		,CASE 
+			WHEN MIN(W1.dtmPlannedDate) IS NOT NULL
+				THEN MIN(IsNULL(CASE 
+								WHEN L.intWeightUOMId IS NULL
+									THEN L.dblQty
+								ELSE L.dblWeight
+								END, LI1.dblRequiredQty))
+			ELSE NULL
+			END AS dblRequiredQty
 	FROM dbo.tblICLot L
 	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 		AND L.dblQty > 0
@@ -66,18 +54,12 @@ BEGIN
 	JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 	JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
 	JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-	--AND SL.intStorageLocationId IN (@intStagingLocationId 
-	--,@intProductionStageLocationId 
-	--	)
 	JOIN dbo.tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 		AND UT.strInternalCode IN (
 			'STAGING'
 			,'PROD_STAGING'
 			)
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
-	LEFT JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = L.intLotId
-	LEFT JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WC.intWorkOrderId
-		AND W.intStatusId <> 13
 	LEFT OUTER JOIN dbo.tblEMEntity E ON E.intEntityId = IO1.intOwnerId
 	LEFT JOIN dbo.tblMFOrderManifest M ON M.intLotId = L.intLotId
 	LEFT JOIN dbo.tblMFOrderDetail LI ON LI.intOrderDetailId = M.intOrderDetailId
@@ -88,6 +70,17 @@ BEGIN
 			,10
 			)
 	LEFT JOIN dbo.tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
+	LEFT JOIN dbo.tblMFOrderManifest M1 ON M1.intLotId = L.intLotId
+	LEFT JOIN dbo.tblMFOrderDetail LI1 ON (
+			LI1.intOrderDetailId = M1.intOrderDetailId
+			OR (
+				LI1.intItemId = L.intItemId
+				AND LI1.dblQty = 0
+				)
+			)
+	LEFT JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = LI1.intOrderHeaderId
+	LEFT JOIN dbo.tblMFWorkOrder W1 ON W1.intWorkOrderId = SW.intWorkOrderId
+		AND W1.intStatusId <> 13
 	GROUP BY L.intLotId
 		,L.strLotNumber
 		,L.strLotAlias
@@ -116,4 +109,5 @@ BEGIN
 		,OH.strOrderNo
 		,OS.intOrderStatusId
 		,OS.strOrderStatus
+		,L.intWeightUOMId
 END
