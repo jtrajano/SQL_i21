@@ -308,6 +308,7 @@ BEGIN TRY
 			,strSampleComments
 			,strOtherComments
 			,intWarehouseRateMatrixHeaderId
+			,intConcurrencyId
 			)
 		SELECT @intNewLoadId
 			,strDeliveryNoticeNumber
@@ -325,6 +326,7 @@ BEGIN TRY
 			,strSampleComments
 			,strOtherComments
 			,intWarehouseRateMatrixHeaderId
+			,intConcurrencyId
 		FROM tblLGLoadWarehouse WHERE intLoadId = @intOldLoadId
 	END
 
