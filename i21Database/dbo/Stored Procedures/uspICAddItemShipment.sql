@@ -373,7 +373,7 @@ FETCH NEXT FROM cur INTO
 WHILE @@FETCH_STATUS = 0
 BEGIN
 	-- Generate Starting Number
-	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryShipment, @ShipmentNumber OUTPUT
+	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryShipment, @ShipmentNumber OUTPUT, @intShipFromLocationId
 	
 	-- Insert New Shipment
 	INSERT INTO tblICInventoryShipment(

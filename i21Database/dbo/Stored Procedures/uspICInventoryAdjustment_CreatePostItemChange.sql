@@ -230,7 +230,7 @@ END
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Create the starting number for the inventory adjustment. 
 ------------------------------------------------------------------------------------------------------------------------------------
-EXEC dbo.uspSMGetStartingNumber @InventoryAdjustment_Batch_Id, @strAdjustmentNo OUTPUT 
+EXEC dbo.uspSMGetStartingNumber @InventoryAdjustment_Batch_Id, @strAdjustmentNo OUTPUT, @intLocationId
 IF @@ERROR <> 0 GOTO _Exit
 
 ------------------------------------------------------------------------------------------------------------------------------------

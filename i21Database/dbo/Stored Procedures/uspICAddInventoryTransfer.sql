@@ -14,7 +14,8 @@ DECLARE @inventoryTransferNumber AS NVARCHAR(50);
 DECLARE @inventoryTransferId AS INT
 		,@strSourceId AS NVARCHAR(50)
 		,@strSourceScreenName AS NVARCHAR(50)
-		,@strTransferId AS NVARCHAR(50)		
+		,@strTransferId AS NVARCHAR(50)	
+		,@intLocationId AS INT 
 
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult')) 
@@ -86,11 +87,13 @@ BEGIN
 	BEGIN 
 		SET @inventoryTransferNumber = NULL 
 		SET @inventoryTransferId = NULL 
+		SET @intLocationId = NULL 
 
 		-- Check if there is an existing Inventory Transfer 
 		SELECT	@inventoryTransferId = RawData.intInventoryTransferId
 				,@strSourceScreenName = RawData.strSourceScreenName
 				,@strSourceId = RawData.strSourceId
+				,@intLocationId = RawData.intFromLocationId
 		FROM	@TransferEntries RawData INNER JOIN @DataForInventoryTransferHeader RawHeaderData
 					ON RawHeaderData.TransferType = RawData.strTransferType
 					AND RawHeaderData.SourceType = RawData.intSourceType
@@ -117,7 +120,7 @@ BEGIN
 			-- Generate the transfer starting number
 			-- If @inventoryTransferNumber IS NULL, uspSMGetStartingNumber will throw an error. 
 			-- Error is 'Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.'
-			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryTransfer, @inventoryTransferNumber OUTPUT 
+			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryTransfer, @inventoryTransferNumber OUTPUT, @intLocationId
 			IF @@ERROR <> 0 OR @inventoryTransferNumber IS NULL GOTO _BreakLoop;
 		END 
 
