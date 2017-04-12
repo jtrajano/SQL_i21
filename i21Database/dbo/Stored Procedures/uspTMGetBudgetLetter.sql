@@ -98,6 +98,28 @@ BEGIN
 			END
 		END
 		
+		IF (ISNULL(@strStartMonth,'') != '')
+		BEGIN
+			IF (@strWhereClause = '')
+			BEGIN
+				SET @strWhereClause = ' WHERE MONTH(D.dtmBudgetBeginDate) = ' + @strStartMonth 
+			END
+			ELSE
+			BEGIN
+				SET @strWhereClause = @strWhereClause + ' AND MONTH(D.dtmBudgetBeginDate) =' + @strStartMonth 
+			END
+		END
+
+		--Budget Amount checking
+		IF (@strWhereClause = '')
+		BEGIN
+			SET @strWhereClause = ' WHERE ISNULL(D.dblMonthlyBudget,0) <> 0 ' 
+		END
+		ELSE
+		BEGIN
+			SET @strWhereClause = @strWhereClause + ' AND ISNULL(D.dblMonthlyBudget,0) <> 0'
+		END
+		
 		---@dtmFirstPaymentDue
 		SELECT @strFirstPaymentDue = [from] 
 		FROM @temp_params where [fieldname] = 'dtmFirstPaymentDue'
