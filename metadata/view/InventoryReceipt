@@ -617,6 +617,7 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
+                                                "lookUpField": true,
                                                 "margin": "0 5 0 0",
                                                 "name": null,
                                                 "valueField": "intEntityVendorId",
@@ -625,7 +626,8 @@
                                             "name": "MyComboBox3",
                                             "configAlternates": {
                                                 "columns": "array",
-                                                "enableDrillDown": "boolean"
+                                                "enableDrillDown": "boolean",
+                                                "lookUpField": "boolean"
                                             },
                                             "designerId": "8a65ead9-b3b7-4c7a-b924-31963d6d349f",
                                             "customConfigs": [
@@ -637,6 +639,11 @@
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "enableDrillDown",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "lookUpField",
                                                     "type": "string"
                                                 }
                                             ]

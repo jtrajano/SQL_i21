@@ -547,6 +547,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                         }
                                                     ],
                                                     enableDrillDown: true,
+                                                    lookUpField: true,
                                                     itemId: 'cboItem',
                                                     fieldLabel: 'Item',
                                                     labelWidth: 105,
