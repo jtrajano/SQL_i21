@@ -119,7 +119,7 @@ BEGIN
 		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
 		[apivc_status_ind]		=	A.[apivc_status_ind]	,
 		[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
-		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL 
+		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL AND (A.apivc_status_ind = 'P' OR ISNULL(A.apivc_chk_no,'') != '') 
 										THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
 									ELSE A.[apivc_chk_no] END,
 		[apivc_trans_type]		=	A.[apivc_trans_type]	,
@@ -202,7 +202,7 @@ BEGIN
 		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
 		[apivc_status_ind]		=	A.[apivc_status_ind]	,
 		[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
-		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL 
+		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL AND (A.apivc_status_ind = 'P' OR ISNULL(A.apivc_chk_no,'') != '')
 										THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
 									ELSE A.[apivc_chk_no] END,
 		[apivc_trans_type]		=	A.[apivc_trans_type]	,
