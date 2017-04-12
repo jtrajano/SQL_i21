@@ -368,8 +368,8 @@ BEGIN TRY
 	UPDATE L
 	SET intNumberOfContainers = CEILING(LD.dblNet / ISNULL(CTCQ.dblBulkQuantity, LD.dblNet))
 	FROM tblCTContractDetail CD
-	LEFT JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
-	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+	JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+	JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 	LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
@@ -378,11 +378,9 @@ BEGIN TRY
 	WHERE CD.intContractHeaderId = @intContractHeaderId
 
 	UPDATE CD
-	SET intNumberOfContainers = CEILING(LD.dblNet / ISNULL(CTCQ.dblBulkQuantity, LD.dblNet))
+	SET intNumberOfContainers = CEILING(CD.dblNetWeight / ISNULL(CTCQ.dblBulkQuantity, CD.dblNetWeight))
 	FROM tblCTContractDetail CD
-	LEFT JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
-	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-	LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+	LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CD.intContainerTypeId
 	LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
