@@ -28,6 +28,7 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
                 {dataIndex: 'intDocumentId',text: "Document Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strDocumentName', text: 'Document Name', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strCommodity', text: 'Commodity', flex: 1,  dataType: 'string'},
                 {dataIndex: 'ysnStandard',text: 'Standard', flex: 1,  dataType: 'boolean', xtype: 'checkcolumn'},
                 {dataIndex: 'strCertificationName', text: 'Certification Name', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strCertificationCode', text: 'Certification Code', flex: 1,  dataType: 'string'},
