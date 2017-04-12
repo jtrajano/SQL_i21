@@ -114,6 +114,16 @@ BEGIN
 				SET @strWhereClause = @strWhereClause + ' AND MONTH(D.dtmBudgetBeginDate) =' + @strStartMonth 
 			END
 		END
+
+		--Budget Amount checking
+		IF (@strWhereClause = '')
+		BEGIN
+			SET @strWhereClause = ' WHERE ISNULL(D.dblMonthlyBudget,0) <> 0 ' 
+		END
+		ELSE
+		BEGIN
+			SET @strWhereClause = @strWhereClause + ' AND ISNULL(D.dblMonthlyBudget,0) <> 0'
+		END
 		
 		---@dtmFirstPaymentDue
 		SELECT @strFirstPaymentDue = [from] 
