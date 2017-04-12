@@ -761,7 +761,7 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
-                                                "margin": "0 5 0 0",
+                                                "margin": "0 5 0 5",
                                                 "name": null,
                                                 "valueField": "strLocationName",
                                                 "width": null
@@ -1768,62 +1768,6 @@
                                                                             "designerId": "0eb6f32a-a5ce-48e9-b10a-a8a8ee4900eb"
                                                                         },
                                                                         {
-                                                                            "type": "Ext.container.Container",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "border": null,
-                                                                                "container|align": "stretch",
-                                                                                "designer|displayName": "weight loss msg",
-                                                                                "layout": "hbox",
-                                                                                "layout|flex": null
-                                                                            },
-                                                                            "name": "MyContainer4",
-                                                                            "designerId": "bb937937-c95f-4d6e-a62b-99902107d1ca",
-                                                                            "cn": [
-                                                                                {
-                                                                                    "type": "Ext.form.field.Number",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "fieldLabel": "Wgt or Vol Gain/Loss:",
-                                                                                        "fieldStyle": null,
-                                                                                        "inputWrapCls": null,
-                                                                                        "itemId": "txtWeightLossMsgValue",
-                                                                                        "labelWidth": 120,
-                                                                                        "layout|flex": null,
-                                                                                        "quantityField": true,
-                                                                                        "readOnly": true,
-                                                                                        "readOnlyCls": null,
-                                                                                        "tabIndex": -1,
-                                                                                        "value": [
-                                                                                            "0.00",
-                                                                                            ""
-                                                                                        ],
-                                                                                        "width": null
-                                                                                    },
-                                                                                    "name": "MyNumberField1",
-                                                                                    "configAlternates": {
-                                                                                        "quantityField": "boolean"
-                                                                                    },
-                                                                                    "designerId": "db399a20-19e2-4ee7-a199-addee148f115",
-                                                                                    "customConfigs": [
-                                                                                        {
-                                                                                            "group": "(Custom Properties)",
-                                                                                            "name": "quantityField",
-                                                                                            "type": "string"
-                                                                                        }
-                                                                                    ]
-                                                                                }
-                                                                            ]
-                                                                        },
-                                                                        {
                                                                             "type": "linkedinstance",
                                                                             "reference": {
                                                                                 "name": "items",
@@ -1833,7 +1777,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter11",
+                                                                            "name": "filter1",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3685,7 +3629,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter12",
+                                                                            "name": "filter11",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -5156,6 +5100,62 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "border": null,
+                                                                "container|align": "stretch",
+                                                                "designer|displayName": "weight loss msg",
+                                                                "layout": "vbox",
+                                                                "layout|flex": null,
+                                                                "margin": "0 10 20 0"
+                                                            },
+                                                            "name": "MyContainer4",
+                                                            "designerId": "bb937937-c95f-4d6e-a62b-99902107d1ca",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Gain/Loss:",
+                                                                        "fieldStyle": null,
+                                                                        "inputWrapCls": null,
+                                                                        "itemId": "txtWeightLossMsgValue",
+                                                                        "layout|flex": null,
+                                                                        "quantityField": true,
+                                                                        "readOnly": true,
+                                                                        "readOnlyCls": null,
+                                                                        "tabIndex": -1,
+                                                                        "value": [
+                                                                            "0.00",
+                                                                            ""
+                                                                        ],
+                                                                        "width": null
+                                                                    },
+                                                                    "name": "MyNumberField1",
+                                                                    "configAlternates": {
+                                                                        "quantityField": "boolean"
+                                                                    },
+                                                                    "designerId": "db399a20-19e2-4ee7-a199-addee148f115",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "quantityField",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.container.Container",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
                                                                 "container|align": "stretch",
                                                                 "designer|displayName": "container",
                                                                 "layout": "vbox",
@@ -5442,7 +5442,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter13",
+                                                                    "name": "filter12",
                                                                     "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6712,7 +6712,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter14",
+                                                    "name": "filter13",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -7192,7 +7192,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter14",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

@@ -308,8 +308,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             }
                                                         ],
                                                         enableDrillDown: true,
-                                                        flex: 1,
                                                         lookUpField: true,
+                                                        flex: 1,
                                                         itemId: 'cboVendor',
                                                         margin: '0 5 0 0',
                                                         fieldLabel: 'Vendor<font color="red"> *</font>',
@@ -384,7 +384,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         ],
                                                         flex: 1,
                                                         itemId: 'cboTransferor',
-                                                        margin: '0 5 0 0',
+                                                        margin: '0 5 0 5',
                                                         fieldLabel: 'From Location',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
@@ -823,25 +823,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         itemId: 'btnTaxDetails',
                                                                                         iconCls: 'small-open',
                                                                                         text: 'View Tax Details'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'container',
-                                                                                        layout: {
-                                                                                            type: 'hbox',
-                                                                                            align: 'stretch'
-                                                                                        },
-                                                                                        items: [
-                                                                                            {
-                                                                                                xtype: 'numberfield',
-                                                                                                quantityField: true,
-                                                                                                tabIndex: -1,
-                                                                                                itemId: 'txtWeightLossMsgValue',
-                                                                                                fieldLabel: 'Wgt or Vol Gain/Loss:',
-                                                                                                labelWidth: 120,
-                                                                                                value: 0.00,
-                                                                                                readOnly: true
-                                                                                            }
-                                                                                        ]
                                                                                     },
                                                                                     {
                                                                                         xtype: 'filter1'
@@ -2381,6 +2362,25 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 xtype: 'numberfield',
                                                                                 itemId: 'txtNetDiff',
                                                                                 fieldLabel: 'Net Diff',
+                                                                                readOnly: true
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        xtype: 'container',
+                                                                        margin: '0 10 20 0',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                quantityField: true,
+                                                                                tabIndex: -1,
+                                                                                itemId: 'txtWeightLossMsgValue',
+                                                                                fieldLabel: 'Gain/Loss:',
+                                                                                value: 0.00,
                                                                                 readOnly: true
                                                                             }
                                                                         ]
