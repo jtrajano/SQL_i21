@@ -35,7 +35,8 @@ SELECT
 	CASE WHEN E.intTaxGroupId IS NOT NULL THEN E.strTaxGroup ELSE F.strTaxGroup END AS strTaxGroup,
 	IR.strReceiptNumber,
 	ISNULL(IR.intInventoryReceiptId,0) AS intInventoryReceiptId,
-	SC.strTicketNumber
+	SC.strTicketNumber,
+	CH.strContractNumber
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
@@ -46,6 +47,8 @@ LEFT JOIN dbo.tblICInventoryReceiptItem IRE
 	ON B.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 LEFT JOIN dbo.tblICInventoryReceipt IR 
 	ON IR.intInventoryReceiptId = IRE.intInventoryReceiptId
+LEFT JOIN dbo.tblCTContractHeader CH
+	ON CH.intContractHeaderId = B.intContractHeaderId
 LEFT JOIN dbo.tblGLAccount H 
 	ON B.intAccountId = H.intAccountId
 LEFT JOIN dbo.tblICItem C 
