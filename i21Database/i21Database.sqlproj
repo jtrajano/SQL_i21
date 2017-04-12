@@ -5171,6 +5171,7 @@
     <Build Include="dbo\Views\vyuICItemStock.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql" />
     <Build Include="dbo\Functions\fnTMComputeNewBurnRateZeroDeliveryTable.sql" />
+    <Build Include="dbo\Views\vyuQMDashboardJDE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
