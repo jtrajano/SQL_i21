@@ -2376,8 +2376,8 @@ IF @post = 1
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 			WHERE
-				B.dblTotal <> @ZeroDecimal 
-				AND ((B.intItemId IS NULL OR B.intItemId = 0)
+				--B.dblTotal <> @ZeroDecimal AND 
+				((B.intItemId IS NULL OR B.intItemId = 0)
 					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
 				AND (A.strTransactionType <> 'Debit Memo' OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
@@ -2825,9 +2825,9 @@ IF @post = 1
 				(SELECT intInvoiceId, intInvoiceDetailId, intItemId, strItemDescription, intItemUOMId, intSalesAccountId, dblQtyShipped, dblDiscount, dblPrice, dblTotal,
 						intCurrencyExchangeRateTypeId, dblBaseTotal, dblBasePrice, dblCurrencyExchangeRate
 				 FROM tblARInvoiceDetail WITH (NOLOCK)
-				 WHERE (intItemId IS NOT NULL OR intItemId <> 0) AND dblQtyShipped <> @ZeroDecimal ) B
+				 WHERE (intItemId IS NOT NULL OR intItemId <> 0)) B
 			INNER JOIN
-				(SELECT intInvoiceId, strInvoiceNumber, intEntityCustomerId, intCompanyLocationId, strTransactionType, strComments, intCurrencyId, dtmPostDate, dtmDate, intPeriodsToAccrue
+				(SELECT intInvoiceId, strInvoiceNumber, intEntityCustomerId, intCompanyLocationId, strTransactionType, strComments, intCurrencyId, dtmPostDate, dtmDate, intPeriodsToAccrue, dblInvoiceTotal
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
@@ -2857,7 +2857,11 @@ IF @post = 1
 				AND ISNULL(I.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
-				AND B.dblQtyShipped <> @ZeroDecimal 
+				AND (
+                        B.dblQtyShipped <> @ZeroDecimal
+                    OR
+                        (B.dblQtyShipped = @ZeroDecimal AND A.dblInvoiceTotal = @ZeroDecimal)
+                    )
 
 			--CREDIT SALES - Debit Memo
 			UNION ALL 
