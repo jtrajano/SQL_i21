@@ -5189,8 +5189,6 @@
     <Build Include="dbo\Stored Procedures\uspQMSaveTestInTemplates.sql" />
     <Build Include="dbo\Functions\fnTMComputeNewBurnRateZeroDeliveryTable.sql" />
     <Build Include="dbo\Views\vyuICGetCustomerCurrency.sql" />
-    <Build Include="dbo\Tables\tblSTTransLogPMMorris.sql" />
-    <Build Include="dbo\Tables\tblSTTransLogPMReynolds.sql" />
     <Build Include="dbo\Tables\tblSMDocument.sql" />
     <Build Include="dbo\Tables\tblSMDocumentType.sql" />
     <Build Include="dbo\Tables\tblSMDocumentTypeField.sql" />
@@ -5200,15 +5198,10 @@
     <Build Include="dbo\Stored Procedures\uspICRepostBillCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
-    <Build Include="dbo\Tables\tblARSearchStatementCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdatePricebookItem.sql" />
-    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
-    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\28_UpdateBaseAmounts.sql" />
     <Build Include="dbo\Views\vyuCTItemCertification.sql" />
-    <Build Include="dbo\Stored Procedures\uspLGUpdateLoadShipmentOnInvoicePost.sql" />
     <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
-    <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
     <Build Include="dbo\Views\vyuLGNotificationCount.sql" />
     <Build Include="dbo\Views\vyuSMDocumentSourceFolder.sql" />
   </ItemGroup>
