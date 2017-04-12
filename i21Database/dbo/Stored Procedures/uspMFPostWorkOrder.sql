@@ -26,6 +26,8 @@ BEGIN TRY
 		,@intPhysicalItemUOMId INT
 		,@str3rdPartyPalletsMandatory NVARCHAR(50)
 		,@str3rdPartyPalletsItemId NVARCHAR(50)
+		,@dblProduceQty1 DECIMAL(38, 24)
+		,@dblPhysicalCount1 DECIMAL(38, 24)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -148,6 +150,7 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblProduceQty = NULL
 						,@intItemUOMId = NULL
+						,@dblProduceQty1 = NULL
 
 					SELECT @dblProduceQty = SUM(dblQuantity)
 						,@intItemUOMId = MIN(intItemUOMId)
@@ -163,23 +166,7 @@ BEGIN TRY
 								AND intWorkOrderId = @intWorkOrderId
 							)
 
-					IF @dblProduceQty > 0
-					BEGIN
-						EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-							,@dblProduceQty = @dblProduceQty
-							,@intProduceUOMId = @intItemUOMId
-							,@intBatchId = @intBatchId
-							,@intUserId = @intUserId
-							,@strPickPreference = 'Substitute Item'
-							,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
-							,@dblUnitQty = NULL
-					END
-
-					SELECT @dblProduceQty = NULL
-						,@intItemUOMId = NULL
-
-					SELECT @dblProduceQty = SUM(dblQuantity)
-						,@intItemUOMId = MIN(intItemUOMId)
+					SELECT @dblProduceQty1 = SUM(dblQuantity)
 					FROM dbo.tblMFWorkOrderProducedLot WP
 					WHERE WP.intWorkOrderId = @intWorkOrderId
 						AND WP.ysnProductionReversed = 0
@@ -202,7 +189,7 @@ BEGIN TRY
 							,@strPickPreference = 'Substitute Item'
 							,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
 							,@dblUnitQty = NULL
-							,@ysnFillPartialPallet = 1
+							,@dblProducePartialQty = @dblProduceQty1
 					END
 				END
 				ELSE
@@ -215,6 +202,7 @@ BEGIN TRY
 						,@strPickPreference = 'Substitute Item'
 						,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
 						,@dblUnitQty = NULL
+						,@dblProducePartialQty = 0
 				END
 
 				EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
@@ -239,6 +227,7 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblPhysicalCount = NULL
 						,@intPhysicalItemUOMId = NULL
+						,@dblPhysicalCount1 = NULL
 
 					SELECT @dblPhysicalCount = SUM(dblPhysicalCount)
 						,@intPhysicalItemUOMId = MIN(intPhysicalItemUOMId)
@@ -254,23 +243,7 @@ BEGIN TRY
 								AND intWorkOrderId = @intWorkOrderId
 							)
 
-					IF @dblPhysicalCount > 0
-					BEGIN
-						EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-							,@dblProduceQty = @dblPhysicalCount
-							,@intProduceUOMId = @intPhysicalItemUOMId
-							,@intBatchId = @intBatchId
-							,@intUserId = @intUserId
-							,@strPickPreference = 'Substitute Item'
-							,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
-							,@dblUnitQty = NULL
-					END
-
-					SELECT @dblPhysicalCount = NULL
-						,@intPhysicalItemUOMId = NULL
-
-					SELECT @dblPhysicalCount = SUM(dblPhysicalCount)
-						,@intPhysicalItemUOMId = MIN(intPhysicalItemUOMId)
+					SELECT @dblPhysicalCount1 = SUM(dblPhysicalCount)
 					FROM dbo.tblMFWorkOrderProducedLot WP
 					WHERE WP.intWorkOrderId = @intWorkOrderId
 						AND WP.ysnProductionReversed = 0
@@ -293,7 +266,7 @@ BEGIN TRY
 							,@strPickPreference = 'Substitute Item'
 							,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
 							,@dblUnitQty = NULL
-							,@ysnFillPartialPallet = 1
+							,@dblProducePartialQty = @dblPhysicalCount1
 					END
 				END
 				ELSE
@@ -306,6 +279,7 @@ BEGIN TRY
 						,@strPickPreference = 'Substitute Item'
 						,@ysnExcessConsumptionAllowed = @ysnExcessConsumptionAllowed
 						,@dblUnitQty = NULL
+						,@dblProducePartialQty = 0
 				END
 
 				EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
@@ -413,11 +387,11 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		IF @strYieldCostValue = 'True' 
-		--and exists(SELECT *
-		--	FROM tblMFWorkOrderProducedLotTransaction PL
-		--	WHERE intWorkOrderId = @intWorkOrderId
-		--		AND PL.dblQuantity < 0)
+		IF @strYieldCostValue = 'True'
+			--and exists(SELECT *
+			--	FROM tblMFWorkOrderProducedLotTransaction PL
+			--	WHERE intWorkOrderId = @intWorkOrderId
+			--		AND PL.dblQuantity < 0)
 		BEGIN
 			INSERT INTO dbo.tblMFWorkOrderConsumedLot (
 				intWorkOrderId
@@ -462,7 +436,8 @@ BEGIN TRY
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND PL.dblQuantity < 0
 
-			delete from @ItemsForPost
+			DELETE
+			FROM @ItemsForPost
 
 			--Lot Tracking
 			INSERT INTO @ItemsForPost (
@@ -697,38 +672,39 @@ BEGIN TRY
 		DELETE
 		FROM @GLEntries
 
-		INSERT INTO @GLEntries([dtmDate]
-	,[strBatchId]
-	,[intAccountId]
-	,[dblDebit]
-	,[dblCredit]
-	,[dblDebitUnit]
-	,[dblCreditUnit]
-	,[strDescription]
-	,[strCode]
-	,[strReference]
-	,[intCurrencyId]
-	,[dblExchangeRate]
-	,[dtmDateEntered]
-	,[dtmTransactionDate]
-	,[strJournalLineDescription]
-	,[intJournalLineNo]
-	,[ysnIsUnposted]
-	,[intUserId]
-	,[intEntityId]
-	,[strTransactionId]
-	,[intTransactionId]
-	,[strTransactionType]
-	,[strTransactionForm]
-	,[strModuleName]
-	,[intConcurrencyId]
-	,[dblDebitForeign]
-	,[dblDebitReport]
-	,[dblCreditForeign]
-	,[dblCreditReport]
-	,[dblReportingRate]
-	,[dblForeignRate]
-)
+		INSERT INTO @GLEntries (
+			[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			)
 		EXEC uspICPostCostAdjustment @adjustedEntries
 			,@strBatchId
 			,@userId

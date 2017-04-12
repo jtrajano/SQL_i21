@@ -89,6 +89,7 @@ BEGIN TRY
 			,[dblCreditReport]
 			,[dblReportingRate]
 			,[dblForeignRate]
+			,strRateType
 			)
 		EXEC dbo.uspICUnpostCostAdjustment @intTransactionId
 			,@strTransactionId

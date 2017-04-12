@@ -5,15 +5,15 @@ BEGIN TRY
 	DECLARE @intCycleCountSessionId INT
 		,@strErrMsg NVARCHAR(MAX)
 
-	SELECT @intCycleCountSessionId = intCycleCountSessionId
-	FROM tblMFProcessCycleCountSession
-	WHERE intWorkOrderId = @intWorkOrderId
-
 	BEGIN TRAN
 
 	DELETE
 	FROM tblMFProcessCycleCount
-	WHERE intCycleCountSessionId = @intCycleCountSessionId
+	WHERE intCycleCountSessionId IN (
+			SELECT intCycleCountSessionId
+			FROM tblMFProcessCycleCountSession
+			WHERE intWorkOrderId = @intWorkOrderId
+			)
 
 	DELETE
 	FROM tblMFProcessCycleCountSession
@@ -33,7 +33,7 @@ BEGIN TRY
 		,dblCountQuantity = 0
 		,dblCountOutputQuantity = 0
 		,dblCountConversionQuantity = 0
-		,dblYieldQuantity=0
+		,dblYieldQuantity = 0
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	COMMIT TRAN
