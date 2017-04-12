@@ -411,11 +411,7 @@ BEGIN TRY
 				,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 				,dblQty = @dblNetUnits 
 				,dblUOMQty = ItemUOM.dblUnitQty
-				,dblCost = 
-				CASE 
-					WHEN ISNULL(@intDPContractId,0) > 0 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(ScaleTicket.intCommodityId,ScaleTicket.intProcessingLocationId,ScaleTicket.dtmTicketDateTime,3,0),0)
-					WHEN ISNULL(@intDPContractId,0) = 0 THEN 0
-				END
+				,dblCost = 0
 				,dblSalesPrice = 0
 				,intCurrencyId = ScaleTicket.intCurrencyId
 				,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
