@@ -4988,7 +4988,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetDetailedInventory.sql" />
     <Build Include="dbo\Views\vyuTMLastLeakGasCheckTable.sql" />
     <Build Include="dbo\Views\vyuCTDocument.sql" />
-    <Build Include="dbo\Views\vyuLGDashboardJDE.sql" />
     <Build Include="dbo\Functions\fnGetDebitForeign.sql" />
     <Build Include="dbo\Functions\fnGetCreditForeign.sql" />
     <Build Include="dbo\Tables\tblSMOfflineMenu.sql" />
@@ -5173,6 +5172,7 @@
     <Build Include="dbo\Functions\fnTMComputeNewBurnRateZeroDeliveryTable.sql" />
     <Build Include="dbo\Views\vyuQMDashboardJDE.sql" />
     <Build Include="dbo\Views\vyuLGGetContractSubLocation.sql" />
+    <Build Include="dbo\Views\vyuCTLoadView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
