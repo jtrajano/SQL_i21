@@ -548,7 +548,7 @@ END CATCH
 					AND ISNULL(ARI.strImportFormat, '') <> 'CarQuest'
 					AND (
 						NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId AND ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0)
-						OR (SELECT SUM(ABS(tblARInvoiceDetail.dblQtyShipped)) FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId AND ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0) = @ZeroDecimal
+						--OR (SELECT SUM(ABS(tblARInvoiceDetail.dblQtyShipped)) FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId AND ISNULL(tblARInvoiceDetail.intItemId, 0) <> 0) = @ZeroDecimal
 						)
 								
 					
@@ -2194,8 +2194,8 @@ IF @post = 1
 			LEFT OUTER JOIN 
 				(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS ON B.intItemId = ICIS.intItemId AND A.intCompanyLocationId = ICIS.intLocationId 				
 			WHERE
-				B.dblTotal <> @ZeroDecimal 
-				AND ((B.intItemId IS NULL OR B.intItemId = 0)
+				--B.dblTotal <> @ZeroDecimal AND 
+				((B.intItemId IS NULL OR B.intItemId = 0)
 					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
 				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
@@ -2453,9 +2453,9 @@ IF @post = 1
 			FROM
 				(SELECT intInvoiceId, intInvoiceDetailId, intItemId, strItemDescription, intItemUOMId, intSalesAccountId, dblQtyShipped, dblDiscount, dblPrice, dblTotal 
 				 FROM tblARInvoiceDetail WITH (NOLOCK)
-				 WHERE (intItemId IS NOT NULL OR intItemId <> 0) AND dblQtyShipped <> @ZeroDecimal ) B
+				 WHERE (intItemId IS NOT NULL OR intItemId <> 0)) B
 			INNER JOIN
-				(SELECT intInvoiceId, strInvoiceNumber, intEntityCustomerId, intCompanyLocationId, strTransactionType, strComments, intCurrencyId, dtmPostDate, dtmDate, intPeriodsToAccrue
+				(SELECT intInvoiceId, strInvoiceNumber, intEntityCustomerId, intCompanyLocationId, strTransactionType, strComments, intCurrencyId, dtmPostDate, dtmDate, intPeriodsToAccrue, dblInvoiceTotal
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
@@ -2476,7 +2476,12 @@ IF @post = 1
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
-				AND B.dblQtyShipped <> @ZeroDecimal 
+				AND (
+						B.dblQtyShipped <> @ZeroDecimal
+					OR
+						(B.dblQtyShipped = @ZeroDecimal AND A.dblInvoiceTotal = @ZeroDecimal)
+					)
+
 
 			--CREDIT SALES - Debit Memo
 			UNION ALL 
