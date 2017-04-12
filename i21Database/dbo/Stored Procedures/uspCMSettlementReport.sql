@@ -198,20 +198,40 @@ BEGIN
 	PYMT.intPaymentId,
 
 	--Settlement Total
-	BillDtl.dblQtyOrdered as InboundNetWeight,
+	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
+		0
+		ELSE
+		BillDtl.dblQtyOrdered
+		END as InboundNetWeight,
 	0 as OutboundNetWeight,
-	BillDtl.dblTotal as InboundGrossDollars,
+	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
+		0
+		ELSE
+		BillDtl.dblTotal
+		END as InboundGrossDollars,
 	0 as OutboundGrossDollars,
-	BillDtl.dblTax as InboundTax,
+	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
+		0
+		ELSE
+		BillDtl.dblTax
+		END as InboundTax,
 	0 as OutboundTax,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
 	0 as OutboundDiscount,
-	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as InboundNetDue,
+	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
+		0
+		ELSE
+		(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0))
+		END as InboundNetDue,
 	0 as OutboundNetDue,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
 	0 as SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount,
-	'False' as IsAdjustment
+	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
+		'True'
+		ELSE
+		'False'
+		END as IsAdjustment
 	 
 	FROM tblCMBankTransaction BNKTRN
 	INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
@@ -221,8 +241,8 @@ BEGIN
 	INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 	INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId is null
 	INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
-	INNER JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
-	INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
+	LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
+	LEFT JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
 	--INNER JOIN tblSCTicket TICKET ON INVRCPTITEM.intSourceId = TICKET.intTicketId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
@@ -502,20 +522,40 @@ BEGIN
 	PYMT.intPaymentId,
 
 	--Settlement Total
-	BillDtl.dblQtyOrdered as InboundNetWeight,
+	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
+		0
+		ELSE
+		BillDtl.dblQtyOrdered
+		END as InboundNetWeight,
 	0 as OutboundNetWeight,
-	BillDtl.dblTotal as InboundGrossDollars,
+	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
+		0
+		ELSE
+		BillDtl.dblTotal
+		END as InboundGrossDollars,
 	0 as OutboundGrossDollars,
-	BillDtl.dblTax as InboundTax,
+	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
+		0
+		ELSE
+		BillDtl.dblTax
+		END as InboundTax,
 	0 as OutboundTax,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
 	0 as OutboundDiscount,
-	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as InboundNetDue,
+	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
+		0
+		ELSE
+		(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0))
+		END as InboundNetDue,
 	0 as OutboundNetDue,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
 	0 as SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount,
-	'False' as IsAdjustment
+	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
+		'True'
+		ELSE
+		'False'
+		END as IsAdjustment
 	 
 	FROM tblCMBankTransaction BNKTRN
 	--INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
@@ -525,8 +565,8 @@ BEGIN
 	INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 	INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId AND BillDtl.intInventoryReceiptChargeId is null
 	INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
-	INNER JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
-	INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
+	LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
+	LEFT JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
 	--INNER JOIN tblSCTicket TICKET ON INVRCPTITEM.intSourceId = TICKET.intTicketId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
