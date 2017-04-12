@@ -695,6 +695,7 @@
                                                 "labelWidth": 65,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
+                                                "margin": "0 5 0 0",
                                                 "name": null,
                                                 "valueField": "strLocationName"
                                             },
@@ -761,7 +762,7 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
-                                                "margin": "0 5 0 5",
+                                                "margin": "0 5 0 0",
                                                 "name": null,
                                                 "valueField": "strLocationName",
                                                 "width": null
