@@ -57,7 +57,8 @@ namespace iRely.Inventory.BusinessLayer
 
         public override void Add(tblICBuildAssembly entity)
         {
-            entity.strBuildNo = Common.GetStartingNumber(Common.StartingNumber.BuildAssembly);
+            var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+            entity.strBuildNo = db.GetStartingNumber((int)Common.StartingNumber.BuildAssembly, entity.intLocationId);
             entity.intCreatedUserId = iRely.Common.Security.GetUserId();
             entity.intEntityId = iRely.Common.Security.GetEntityId();
             base.Add(entity);

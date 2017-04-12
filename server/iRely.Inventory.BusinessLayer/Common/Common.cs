@@ -45,36 +45,43 @@ namespace iRely.Inventory.BusinessLayer
             public string strBatchId { get; set; }
         }
 
-        public static string GetStartingNumber(StartingNumber transaction)
-        {
-            var _db = new Repository(new Inventory.Model.InventoryEntities());
-            tblSMStartingNumber startingNumber = _db.GetQuery<tblSMStartingNumber>().Find((int)transaction);
-            string strTransactionId = string.Empty;
-            if (startingNumber != null)
-            {
-                strTransactionId = string.Concat(startingNumber.strPrefix.ToString(), startingNumber.intNumber.ToString());
-                startingNumber.intNumber += 1;
-                _db.Save();
-                _db.Dispose();
-            }
-            return strTransactionId;
-        }
+        //public static string GetStartingNumber(StartingNumber transaction)
+        //{
+        //    var _db = new Repository(new Inventory.Model.InventoryEntities());
+        //    tblSMStartingNumber startingNumber = _db.GetQuery<tblSMStartingNumber>().Find((int)transaction);
+        //    string strTransactionId = string.Empty;
+        //    if (startingNumber != null)
+        //    {
+        //        strTransactionId = string.Concat(startingNumber.strPrefix.ToString(), startingNumber.intNumber.ToString());
+        //        startingNumber.intNumber += 1;
+        //        _db.Save();
+        //        _db.Dispose();
+        //    }
+        //    return strTransactionId;
+        //}
 
-        public static async Task<string> GetStartingNumberAsync(StartingNumber transaction)
-        {
-            var _db = new Repository(new Inventory.Model.InventoryEntities());
-            tblSMStartingNumber startingNumber = await _db.GetQuery<tblSMStartingNumber>().FindAsync((int)transaction);
-            string strTransactionId = string.Empty;
-            if (startingNumber != null)
-            {
-                strTransactionId = string.Concat(startingNumber.strPrefix.ToString(), startingNumber.intNumber.ToString());
-                startingNumber.intNumber += 1;
-                await _db.SaveAsync(false);
+        //public static async Task<string> GetStartingNumberAsync(StartingNumber transaction)
+        //{
+        //    var _db = new Repository(new Inventory.Model.InventoryEntities());
+        //    tblSMStartingNumber startingNumber = await _db.GetQuery<tblSMStartingNumber>().FindAsync((int)transaction);
+        //    string strTransactionId = string.Empty;
+        //    if (startingNumber != null)
+        //    {
+        //        strTransactionId = string.Concat(startingNumber.strPrefix.ToString(), startingNumber.intNumber.ToString());
+        //        startingNumber.intNumber += 1;
+        //        await _db.SaveAsync(false);
 
-                _db.Dispose();
-            }
-            return strTransactionId;
-        }
+        //        _db.Dispose();
+        //    }
+        //    return strTransactionId;
+        //}
 
+        //public static string GetStartingNumber(StartingNumber transaction, int? locationId)
+        //{
+        //    var _db = new Repository(new Inventory.Model.InventoryEntities());
+        //    var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+
+        //    return (db.GetStartingNumber((int)transaction, locationId));
+        //}
     }
 }

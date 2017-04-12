@@ -201,7 +201,8 @@ namespace iRely.Inventory.BusinessLayer
 
         public override void Add(tblICInventoryShipment entity)
         {
-            entity.strShipmentNumber = Common.GetStartingNumber(Common.StartingNumber.InventoryShipment);
+            var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+            entity.strShipmentNumber = db.GetStartingNumber((int)Common.StartingNumber.InventoryShipment, entity.intShipFromLocationId);
             entity.intCreatedUserId = iRely.Common.Security.GetUserId();
             entity.intEntityId = iRely.Common.Security.GetEntityId();
             base.Add(entity);

@@ -91,7 +91,9 @@ namespace iRely.Inventory.BusinessLayer
 
         public override void Add(tblICStorageMeasurementReading entity)
         {
-            entity.strReadingNo = Common.GetStartingNumber(Common.StartingNumber.StorageMeasurementReading);
+            var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+            
+            entity.strReadingNo = db.GetStartingNumber((int)Common.StartingNumber.StorageMeasurementReading, entity.intLocationId);
             base.Add(entity);
         }
     }

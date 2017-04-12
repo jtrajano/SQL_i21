@@ -188,10 +188,11 @@ namespace iRely.Inventory.BusinessLayer
         public override async Task<BusinessResult<tblICInventoryReceipt>> SaveAsync(bool continueOnConflict)
         {
             SaveResult result = new SaveResult();
+            var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
 
             var addedReceipts = _db.ContextManager.ChangeTracker.Entries<tblICInventoryReceipt>().Where(w => w.State == EntityState.Added);
             foreach (var receipt in addedReceipts) {
-                receipt.Entity.strReceiptNumber = await Common.GetStartingNumberAsync(Common.StartingNumber.InventoryReceipt);
+                receipt.Entity.strReceiptNumber = db.GetStartingNumber((int)Common.StartingNumber.InventoryReceipt, receipt.Entity.intLocationId);
             }
 
             using (var transaction = _db.ContextManager.Database.BeginTransaction())

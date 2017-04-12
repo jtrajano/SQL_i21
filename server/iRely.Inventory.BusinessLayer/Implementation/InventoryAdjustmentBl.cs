@@ -92,7 +92,8 @@ namespace iRely.Inventory.BusinessLayer
 
         public override void Add(tblICInventoryAdjustment entity)
         {
-            entity.strAdjustmentNo = Common.GetStartingNumber(Common.StartingNumber.InventoryAdjustment);
+            var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+            entity.strAdjustmentNo = db.GetStartingNumber((int)Common.StartingNumber.InventoryAdjustment, entity.intLocationId);
             entity.intEntityId = iRely.Common.Security.GetEntityId();
             base.Add(entity);
         }

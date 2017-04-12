@@ -58,7 +58,8 @@ namespace iRely.Inventory.BusinessLayer
 
         public override void Add(tblICInventoryTransfer entity)
         {
-            entity.strTransferNo = Common.GetStartingNumber(Common.StartingNumber.InventoryTransfer);
+            var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+            entity.strTransferNo = db.GetStartingNumber((int)Common.StartingNumber.InventoryTransfer, entity.intFromLocationId);
             entity.intCreatedUserId = iRely.Common.Security.GetUserId();
             entity.intEntityId = iRely.Common.Security.GetEntityId();
             base.Add(entity);

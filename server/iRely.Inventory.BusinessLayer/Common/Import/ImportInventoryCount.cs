@@ -9,6 +9,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportInventoryCount : ImportDataLogic<tblICInventoryCount>
     {
+
         protected override string[] GetRequiredFields()
         {
             return new string[] { "location" };
@@ -23,8 +24,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             tblICInventoryCount fc = new tblICInventoryCount();
             fc.ysnPosted = false;
-            fc.intStatus = 1;
-            fc.strCountNo = Common.GetStartingNumber(Common.StartingNumber.InventoryCount);
+            fc.intStatus = 1;            
             fc.dtmCountDate = DateTime.Today;
 
             bool valid = true;
@@ -226,6 +226,9 @@ namespace iRely.Inventory.BusinessLayer
                         break;
                 }
             }
+
+            var db = (Inventory.Model.InventoryEntities)context.ContextManager;
+            fc.strCountNo = db.GetStartingNumber((int)Common.StartingNumber.InventoryCount, fc.intLocationId);
 
             if (!valid)
                 return null;

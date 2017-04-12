@@ -285,6 +285,7 @@
     <Compile Include="Stored Procedures\CopyItemLocation.cs" />
     <Compile Include="Stored Procedures\DuplicateCategory.cs" />
     <Compile Include="Stored Procedures\DuplicateStorageLocation.cs" />
+    <Compile Include="Stored Procedures\GetStartingNumber.cs" />
     <Compile Include="Stored Procedures\ValidateReceiptForReturn.cs" />
     <Compile Include="Stored Procedures\PopulateReceiptVoucher.cs" />
     <Compile Include="Stored Procedures\LockInventory.cs" />

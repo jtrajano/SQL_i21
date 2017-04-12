@@ -59,7 +59,8 @@ namespace iRely.Inventory.BusinessLayer
 
         public override void Add(tblICInventoryCount entity)
         {
-            entity.strCountNo = Common.GetStartingNumber(Common.StartingNumber.InventoryCount);
+            var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+            entity.strCountNo = db.GetStartingNumber((int)Common.StartingNumber.InventoryCount, entity.intLocationId);
             base.Add(entity);
         }
 
