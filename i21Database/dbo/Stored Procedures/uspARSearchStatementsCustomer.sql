@@ -108,12 +108,12 @@ ELSE IF (@tmpstrStatementFormat = 'Running Balance')
 BEGIN
 	SET @xmlParam =N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>dtmDate</fieldname><condition>Between</condition><from>01/01/1900</from><to>'	
 	SET @xmlParam = @xmlParam + @tmpDate + '</to><join /><begingroup /><endgroup /><datatype>DateTime</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>strStatementFormat</fieldname><condition>Equal To</condition><from>Running Balance</from><join /><begingroup /><endgroup /><datatype>String</datatype></filter>'	
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintZeroBalance</fieldname><condition>Equal To</condition><from>0</from><to>False</to><join /><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintCreditBalance</fieldname><condition>Equal To</condition><from>1</from><to>True</to><join /><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnIncludeBudget</fieldname><condition>Equal To</condition><from>0</from><to>False</to><join /><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintOnlyPastDue</fieldname><condition>Equal To</condition><from>1</from><to>True</to><join /><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
-	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnReportDetail</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter></filters></xmlparam>'	
+	SET @xmlParam = @xmlParam + '<filter><fieldname>strStatementFormat</fieldname><condition>Equal To</condition><from>Running Balance</from><join>AND</join><begingroup /><endgroup /><datatype>String</datatype></filter>'
+	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintZeroBalance</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
+	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintCreditBalance</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
+	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnIncludeBudget</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
+	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnPrintOnlyPastDue</fieldname><condition>Equal To</condition><from>False</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter>'
+	SET @xmlParam = @xmlParam + '<filter><fieldname>ysnReportDetail</fieldname><condition>Equal To</condition><from>True</from><join>AND</join><begingroup /><endgroup /><datatype>Boolean</datatype></filter></filters></xmlparam>'
 	SET @strQuery  = 'EXEC uspARCustomerStatementReport ' + '''' +  @xmlParam + ''''	
 	EXEC(@strQuery)	
 END
