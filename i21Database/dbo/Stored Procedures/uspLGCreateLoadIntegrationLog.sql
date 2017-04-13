@@ -82,6 +82,10 @@ BEGIN TRY
 				,strExternalShipmentNumber
 				,strDateQualifier
 				,dtmScheduledDate
+				,strMVessel
+				,strMVoyageNumber
+				,strFVessel
+				,strFVoyageNumber
 				,dtmETAPOD
 				,dtmETAPOL
 				,dtmETSPOL
@@ -127,6 +131,10 @@ BEGIN TRY
 				,L.strExternalShipmentNumber
 				,'015' AS strDateQualifier
 				,L.dtmScheduledDate
+				,L.strMVessel
+				,L.strMVoyageNumber
+				,L.strFVessel
+				,L.strFVoyageNumber
 				,L.dtmETAPOD
 				,L.dtmETAPOL
 				,L.dtmETSPOL
@@ -326,6 +334,10 @@ BEGIN TRY
 				,strExternalShipmentNumber
 				,strDateQualifier
 				,dtmScheduledDate
+				,strMVessel
+				,strMVoyageNumber
+				,strFVessel
+				,strFVoyageNumber
 				,dtmETAPOD
 				,dtmETAPOL
 				,dtmETSPOL
@@ -368,6 +380,10 @@ BEGIN TRY
 				,L.strExternalShipmentNumber
 				,'015' AS strDateQualifier
 				,L.dtmScheduledDate
+				,L.strMVessel
+				,L.strMVoyageNumber
+				,L.strFVessel
+				,L.strFVoyageNumber
 				,L.dtmETAPOD
 				,L.dtmETAPOL
 				,L.dtmETSPOL

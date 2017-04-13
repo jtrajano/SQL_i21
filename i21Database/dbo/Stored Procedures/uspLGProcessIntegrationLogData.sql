@@ -261,6 +261,10 @@ INSERTDATE:
 			,strExternalShipmentNumber
 			,strDateQualifier
 			,dtmScheduledDate
+			,strMVessel
+			,strMVoyageNumber
+			,strFVessel
+			,strFVoyageNumber
 			,dtmETAPOD
 			,dtmETAPOL
 			,dtmETSPOL
@@ -306,6 +310,10 @@ INSERTDATE:
 			,L.strExternalShipmentNumber
 			,'015' AS strDateQualifier
 			,L.dtmScheduledDate
+			,L.strMVessel
+			,L.strMVoyageNumber
+			,L.strFVessel
+			,L.strFVoyageNumber
 			,L.dtmETAPOD
 			,L.dtmETAPOL
 			,L.dtmETSPOL
