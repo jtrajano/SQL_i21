@@ -30,6 +30,7 @@ SELECT TR.intTestResultId
 	,S.intSampleId
 	,S.intLocationId
 	,S.strComment
+	,S.dtmSampleReceivedDate
 	,TR.dtmLastModified
 FROM tblQMTestResult AS TR
 JOIN tblQMSample AS S ON S.intSampleId = TR.intSampleId
