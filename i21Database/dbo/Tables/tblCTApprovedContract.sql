@@ -40,6 +40,7 @@
 	[intLoadingPortId] INT,
 	[intApprovedById]	INT,
 	[dtmApproved]	DATETIME,
+	[ysnApproved]	BIT,
 
 	CONSTRAINT [PK_tblCTApprovedContract_intApprovedContractId] PRIMARY KEY CLUSTERED (intApprovedContractId ASC)
 )

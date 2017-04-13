@@ -33,6 +33,7 @@ BEGIN TRY
 			@ysnFeedOnApproval		BIT = 0,
 			@strCommodityCode		NVARCHAR(MAX),
 			@dtmApproved			DATETIME,
+			@ysnPrinted				BIT,
 
 			@intLastApprovedContractId INT,
 			@intPrevApprovedContractId INT,
@@ -78,7 +79,8 @@ BEGIN TRY
 	SELECT @intScreenId=intScreenId FROM tblSMScreen WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'--ContractManagement.view.ContractAmendment
 	SELECT @intTransactionId=intTransactionId FROM tblSMTransaction WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
 
-	SELECT	@strCommodityCode	=	CM.strCommodityCode
+	SELECT	@strCommodityCode	=	CM.strCommodityCode,
+			@ysnPrinted			=	CH.ysnPrinted
 	FROM	tblCTContractHeader CH
 	JOIN	tblICCommodity		CM	ON	CM.intCommodityId		=	CH.intCommodityId
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
@@ -158,23 +160,24 @@ BEGIN TRY
 
 	SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId,@intContractDetailId = intContractDetailId,@dtmApproved = dtmApproved 
     FROM   tblCTApprovedContract 
-    WHERE  intContractHeaderId = @intContractHeaderId AND strApprovalType IN ('Contract','Contract Amendment ')
+    WHERE  intContractHeaderId = @intContractHeaderId AND strApprovalType IN ('Contract Amendment ') AND ysnApproved = 1
     ORDER BY intApprovedContractId DESC
 
 	SELECT TOP 1 @intPrevApprovedContractId =  intApprovedContractId
     FROM   tblCTApprovedContract 
-    WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId <> @intLastApprovedContractId 
+    WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId < @intLastApprovedContractId AND ysnApproved = 1
     ORDER BY intApprovedContractId DESC
 
 	IF @intPrevApprovedContractId IS NOT NULL AND @intLastApprovedContractId IS NOT NULL
 	BEGIN
 		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intLastApprovedContractId,'intApprovedById,dtmApproved,
 		intContractBasisId,dtmPlannedAvailabilityDate,strOrigin,dblNetWeight,intNetWeightUOMId,
-		intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType,strVendorLotID', @strAmendedColumns OUTPUT
+		intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType,strVendorLotID,ysnApproved,intCertificationId,intLoadingPortId', @strAmendedColumns OUTPUT
 	END
 
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
-
+	IF ISNULL(@ysnPrinted,0) = 0 SELECT @strAmendedColumns = ''
+	 
 	SELECT	CH.intContractHeaderId,
 
 			TP.strContractType + ' Contract:- ' + CH.strContractNumber AS strCaption,

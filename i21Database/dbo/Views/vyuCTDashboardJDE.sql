@@ -10,7 +10,7 @@ SELECT 	 SQ.intContractDetailId
 		,CD.strLoadingPointType				
 		,LP.strCity								AS strLoadingPoint
 		,CD.strDestinationPointType			
-		,LP.strCity								AS strDestinationPoint
+		,DP.strCity								AS strDestinationPoint
 		,DC.strCity								AS strDestinationCity
 		,CD.strShippingTerm					
 		,ES.strName								AS strShippingLine
@@ -98,6 +98,16 @@ SELECT 	 SQ.intContractDetailId
 				THEN 'N'
 				ELSE 'Y' 
 		 END	AS ysnDocsReceived
+		,CD.strVendorLotID
+		,SQ.strContractItemName
+		,SQ.strContractItemNo
+		,CASE 	WHEN CD.dblBalance <> CD.dblQuantity	
+				THEN 'Y'
+				ELSE 'N' 
+		 END	AS ysnQtyReceived
+		,SQ.dblAppliedQty
+		,dtmETAPOL
+		,dtmETAPOD
 
 	FROM 		vyuCTContractSequence			 	SQ			
 	JOIN 		tblCTContractDetail				 	CD	ON	CD.intContractDetailId				=	SQ.intContractDetailId
@@ -106,6 +116,7 @@ SELECT 	 SQ.intContractDetailId
 	LEFT JOIN	tblICItem						 	IM	ON	IM.intItemId						=	SQ.intItemId
 	LEFT JOIN 	tblEMEntity						 	PR	ON	PR.intEntityId						=	CH.intProducerId
 	LEFT JOIN 	tblSMCity						 	LP	ON	LP.intCityId						=	CD.intLoadingPortId
+	LEFT JOIN 	tblSMCity						 	DP	ON	DP.intCityId						=	CD.intDestinationPortId
 	LEFT JOIN 	tblSMCity						 	DC	ON	DC.intCityId						=	CD.intDestinationCityId
 	LEFT JOIN 	tblICItemContract				 	IC	ON	IC.intItemContractId				=	CD.intItemContractId
 	LEFT JOIN 	tblSMCountry					 	RY	ON	RY.intCountryID						=	IC.intCountryId
