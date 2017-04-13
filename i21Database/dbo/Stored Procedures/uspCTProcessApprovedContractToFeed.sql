@@ -83,7 +83,7 @@ BEGIN TRY
         ORDER BY intApprovedContractId DESC
 
               
-        EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intApprovedContractId,'intApprovedById,dtmApproved', @strModifiedColumns OUTPUT
+        EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intApprovedContractId,'intApprovedById,dtmApproved,ysnApproved,strApprovalType', @strModifiedColumns OUTPUT
 
         IF ISNULL(@strModifiedColumns,'') <> ''
         BEGIN  

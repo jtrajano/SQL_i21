@@ -16,6 +16,8 @@ AS
 				,LD.dblQuantity
 				,LD.intPContractDetailId intContractDetailId
 				,LO.intShipmentType
+				,LO.dtmETAPOL
+				,LO.dtmETAPOD
 				,CAST((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId) AS BIT) ysnDocsReceived
 				,STUFF(
 					(
@@ -47,6 +49,8 @@ AS
 			,intShipmentType
 			,strContainerNumber
 			,ysnDocsReceived
+			,dtmETAPOL
+			,dtmETAPOD
 
 	FROM
 	(
@@ -66,6 +70,8 @@ AS
 				,LD.dblQuantity 
 				,LD.intPContractDetailId intContractDetailId
 				,LO.intShipmentType
+				,LO.dtmETAPOL
+				,LO.dtmETAPOD
 				,CAST((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId) AS BIT) ysnDocsReceived
 				,STUFF(
 					(
@@ -95,3 +101,5 @@ AS
 			,intShipmentType
 			,strContainerNumber
 			,ysnDocsReceived
+			,dtmETAPOL
+			,dtmETAPOD

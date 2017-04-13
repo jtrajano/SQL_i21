@@ -1,20 +1,31 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTContractApproved]
 	@intContractHeaderId	INT,
 	@intApprovedById		INT,
-	@intContractDetailId	INT = NULL
+	@intContractDetailId	INT = NULL,
+	@ysnApproved			BIT = 0
 AS
 
 BEGIN TRY
 
-	DECLARE @ErrMsg	NVARCHAR(MAX),
+	DECLARE @ErrMsg					NVARCHAR(MAX),
 			@intApprovedContractId	INT,
-			@intTransactionId INT, 
-			@intScreenId INT,
-			@strScreenName NVARCHAR(100)
+			@intTransactionId		INT, 
+			@intScreenId			INT,
+			@intContractScreenId	INT,
+			@intAmendmentScreenId	INT,
+			@strScreenName			NVARCHAR(100)
 
-	SELECT	@intScreenId = intScreenId from tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
-	SELECT  @intTransactionId	=	intTransactionId FROM tblSMTransaction WHERE intRecordId = @intContractHeaderId AND intScreenId = @intScreenId
-	SELECT	TOP 1	@intScreenId	=	intScreenId FROM tblSMApproval WHERE strStatus = 'Approved'  AND intTransactionId  = @intTransactionId ORDER BY intApprovalId DESC
+	SELECT	@intContractScreenId = intScreenId from tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
+	SELECT	@intAmendmentScreenId = intScreenId from tblSMScreen WHERE strNamespace = 'ContractManagement.view.Amendments'
+	SELECT  @intTransactionId	=	intTransactionId FROM tblSMTransaction WHERE intRecordId = @intContractHeaderId AND intScreenId = @intContractScreenId
+	IF EXISTS(SELECT * FROM tblSMApproval WHERE intTransactionId  = @intTransactionId AND intScreenId = @intAmendmentScreenId)
+	BEGIN
+		SELECT @intScreenId = @intAmendmentScreenId
+	END
+	ELSE
+	BEGIN
+		SELECT @intScreenId = @intContractScreenId
+	END
 	SELECT	@strScreenName = strScreenName FROM tblSMScreen WHERE  @intScreenId = intScreenId
 
 	DECLARE	@SCOPE_IDENTITY TABLE (intApprovedContractId INT)
@@ -32,7 +43,8 @@ BEGIN TRY
 			intPurchasingGroupId,	intApprovedById,		dtmApproved,
 			strOrigin,				dblNetWeight,			intNetWeightUOMId,
 			intItemContractId,		strApprovalType,		strVendorLotID,
-			dblNoOfLots,			intCertificationId,		intLoadingPortId
+			dblNoOfLots,			intCertificationId,		intLoadingPortId,
+			ysnApproved
 	)
 	OUTPUT	inserted.intApprovedContractId INTO @SCOPE_IDENTITY
 	SELECT	CD.intContractHeaderId,
@@ -70,7 +82,8 @@ BEGIN TRY
 			CD.strVendorLotID,
 			CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 1 THEN CH.dblNoOfLots  ELSE CD.dblNoOfLots END,
 			CF.intCertificationId,
-			intLoadingPortId
+			intLoadingPortId,
+			@ysnApproved
 
 	FROM	tblCTContractDetail		CD 
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
