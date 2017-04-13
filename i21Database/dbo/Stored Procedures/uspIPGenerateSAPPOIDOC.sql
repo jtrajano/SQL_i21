@@ -235,7 +235,7 @@ Begin
 		If @strContractBasis IN ('FOB','CFR')
 			Set @strDocType='ZHUB'
 
-		If @strSubLocation IN ('L953','L954')
+		If @strSubLocation IN ('L953')
 			Set @strDocType='ZB2B'
 		
 		If ISNULL(@strDocType,'')='' Set @strDocType='ZHUB'
