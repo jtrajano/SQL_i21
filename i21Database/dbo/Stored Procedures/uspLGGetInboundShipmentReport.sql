@@ -16,6 +16,8 @@ BEGIN
 			@strCountry					NVARCHAR(25),
 			@strPhone					NVARCHAR(50),
 			@strFullName				NVARCHAR(100),
+			@strUserPhoneNo				NVARCHAR(100),
+			@strUserEmailId				NVARCHAR(100),
 			@strUserName				NVARCHAR(100),
 			@strLogisticsCompanyName	NVARCHAR(MAX),
 			@strLogisticsPrintSignOff	NVARCHAR(MAX),
@@ -91,12 +93,14 @@ BEGIN
 				,@strPhone = strPhone
 	FROM tblSMCompanySetup
 
-	SELECT TOP 1 @strFullName = E.strName
-	FROM tblSMUserSecurity US
-	JOIN tblEMEntity E ON US.intEntityUserSecurityId = E.intEntityId
-	JOIN tblEMEntityCredential EC ON EC.intEntityId = E.intEntityId
-	WHERE E.strExternalERPId = @strUserName
-	ORDER BY E.intEntityId DESC
+	SELECT @strFullName = E.strName,
+		   @strUserEmailId = ETC.strEmail,
+		   @strUserPhoneNo = EPN.strPhone  FROM tblSMUserSecurity S
+	JOIN tblEMEntity E ON E.intEntityId = S.intEntityUserSecurityId 
+	JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId
+	JOIN tblEMEntity ETC ON ETC.intEntityId = EC.intEntityContactId
+	JOIN tblEMEntityPhoneNumber EPN ON EPN.intEntityId = ETC.intEntityId
+	WHERE strUserName = @strUserName
 
 	SELECT @strWarehouseEntityName = CASE 
 			WHEN ISNULL(E.strName, '') = ''
@@ -258,9 +262,17 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				'' AS strWarehouseVendorCountry,
 				'' AS strPhone,
 				'' AS strMobile,
-				'' AS  strWarehouseAddressInfo,
-				'' AS  strWarehouseContractInfo
+				'' AS strWarehouseVendorContract,
+				'' AS strWarehouseVendorContactPhone,
+				'' AS strWarehouseVendorContactEmail,
 
+				'' AS  strWarehouseAddressInfo,
+				'' AS  strWarehouseContractInfo,
+				'' AS intContractBasisId,
+				'' AS strContractBasis,
+				'' AS strContractBasisDescription,
+				'' AS strUserEmailId,
+				'' AS strUserPhoneNo
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -421,12 +433,15 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				WHVendorLoc.strAddress AS strWarehouseVendorAddress,
 				WHVendorLoc.strCity AS strWarehouseVendorCity,
 				WHVendorLoc.strState AS strWarehouseVendorState,
-				WHVendorLoc.strZipCode AS strWarehouseVendorZipCode,
+				WHVendorLoc.strZipCode + ' ' + WHVendorLoc.strCity AS strWarehouseVendorZipCode,
 				WHVendorLoc.strCountry AS strWarehouseVendorCountry,
 				WETCP.strPhone,
 				WETCM.strPhone strMobile,
+				WETC.strName AS strWarehouseVendorContract,
+				'Phone: ' + WETCP.strPhone AS strWarehouseVendorContactPhone,
+				'E-Mail: ' + WETC.strEmail AS strWarehouseVendorContactEmail,
 
-				WHVendor.strName + ' ' + ISNULL(WHVendorLoc.strLocationName,'') + CHAR(13) + 
+				WHVendor.strName + CHAR(13) + 
 				RTRIM(LTRIM(ISNULL(WHVendorLoc.strAddress,''))) + CHAR(13) + 
 				ISNULL(WHVendorLoc.strZipCode,'') + ' ' + 
 				CASE WHEN ISNULL(WHVendorLoc.strCity,'') = '' THEN '' ELSE WHVendorLoc.strCity END + CHAR(13) + 
@@ -435,12 +450,17 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 
 				WETC.strName + CHAR(13) + 
 				'Phone: ' + WETCP.strPhone + CHAR(13) + 
-				'FAX: ' + WETCM.strPhone + CHAR(13) + 
-				'E-Mail: ' + WETC.strEmail strWarehouseContractInfo
+				'E-Mail: ' + WETC.strEmail strWarehouseContractInfo,
+				CH.intContractBasisId,
+				Basis.strContractBasis,
+				Basis.strDescription AS strContractBasisDescription,
+				@strUserEmailId AS strUserEmailId,
+				@strUserPhoneNo AS strUserPhoneNo
 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN		tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN	tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
@@ -471,6 +491,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN   tblEMEntity SLETC ON SLETC .intEntityId = SLEC.intEntityContactId
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
+		LEFT JOIN	tblCTContractBasis Basis ON Basis.intContractBasisId = CH.intContractBasisId
 		WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 	END
 END
