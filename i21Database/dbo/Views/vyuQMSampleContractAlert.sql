@@ -14,6 +14,8 @@ FROM (
 			,ST.strSampleTypeName
 			,SS.strStatus
 			,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
+			,0.0 AS dblQuantity
+			,0.0 AS dblApprovedQty
 			,I.strItemNo
 			,I.strDescription
 			,CD.strERPPONumber
@@ -23,6 +25,8 @@ FROM (
 			,C.strCountry AS strItemOrigin
 			,CA1.strDescription AS strItemProductType
 			,S.intSampleStatusId
+			,CD.intContractDetailId
+			,CD.intContractHeaderId
 		FROM tblQMSample S
 		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 		JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -53,9 +57,11 @@ FROM (
 			,CD.intContractDetailId
 			,ST.intSampleTypeId
 			,S.intSampleStatusId
+			,CD.intContractHeaderId
 		) a
 	WHERE a.intRowNum = 1
 		AND a.intSampleStatusId <> 3
+		AND a.intSampleStatusId <> 4
 	) t
 	,tblCTEvent EV
 WHERE EV.strEventName = 'Unapproved Contract Samples'

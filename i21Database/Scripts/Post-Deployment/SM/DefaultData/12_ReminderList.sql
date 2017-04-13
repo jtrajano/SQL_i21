@@ -741,7 +741,7 @@ BEGIN
 	SELECT [strReminder]        =        N'Unapproved Contract',
 			[strType]        	=        N'Quality Sample',
 			[strMessage]		=        N'{0} {1} {2} unapproved.',
-			[strQuery]  		=        N'	SELECT CA.intSampleId
+			[strQuery]  		=        N'	SELECT CA.intContractDetailId
 											FROM vyuQMSampleContractAlert CA
 											JOIN tblCTEventRecipient ER ON ER.intEventId = CA.intEventId
 											WHERE ER.intEntityId = {0}',
@@ -751,7 +751,11 @@ END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET	[strMessage] = N'{0} {1} {2} unapproved.'
+	SET	[strMessage] = N'{0} {1} {2} unapproved.',
+			[strQuery]  		=        N'	SELECT CA.intContractDetailId
+											FROM vyuQMSampleContractAlert CA
+											JOIN tblCTEventRecipient ER ON ER.intEventId = CA.intEventId
+											WHERE ER.intEntityId = {0}'
 	WHERE [strReminder] = N'Unapproved Contract' AND [strType] = N'Quality Sample' 
 END
 GO
@@ -763,7 +767,7 @@ BEGIN
 	SELECT [strReminder]        =        N'Unapproved FOB Contract',
 			[strType]        	=        N'Quality Sample',
 			[strMessage]		=        N'{0} {1} {2} unapproved.',
-			[strQuery]  		=        N'	SELECT CA.intSampleId
+			[strQuery]  		=        N'	SELECT CA.intContractDetailId
 											FROM vyuQMSampleFOBContractAlert CA
 											JOIN tblCTEventRecipient ER ON ER.intEventId = CA.intEventId
 											WHERE ER.intEntityId = {0}',
@@ -773,7 +777,11 @@ END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET	[strMessage] = N'{0} {1} {2} unapproved.'
+	SET	[strMessage] = N'{0} {1} {2} unapproved.',
+			[strQuery]  		=        N'	SELECT CA.intContractDetailId
+											FROM vyuQMSampleFOBContractAlert CA
+											JOIN tblCTEventRecipient ER ON ER.intEventId = CA.intEventId
+											WHERE ER.intEntityId = {0}'
 	WHERE [strReminder] = N'Unapproved FOB Contract' AND [strType] = N'Quality Sample' 
 END
 GO
