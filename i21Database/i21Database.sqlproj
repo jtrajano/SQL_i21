@@ -5173,6 +5173,7 @@
     <Build Include="dbo\Views\vyuQMDashboardJDE.sql" />
     <Build Include="dbo\Views\vyuLGGetContractSubLocation.sql" />
     <Build Include="dbo\Views\vyuCTLoadView.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetAvgHistoricalPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
