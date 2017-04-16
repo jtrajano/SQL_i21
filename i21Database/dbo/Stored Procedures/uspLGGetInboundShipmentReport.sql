@@ -119,7 +119,7 @@ BEGIN
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 
 
-	SELECT @strReleaseOrderText = 'Attn '+ ISNULL(@strShippingLineName,'') +' : Please release the the cargo in favour of ' + @strWarehouseEntityName
+	SELECT @strReleaseOrderText = 'Attn '+ ISNULL(@strShippingLineName,'') +' : Please release the cargo in favour of ' + @strWarehouseEntityName
 	
 	SELECT @strLogisticsCompanyName = strLogisticsCompanyName,
 		   @strLogisticsPrintSignOff = strLogisticsPrintSignOff
