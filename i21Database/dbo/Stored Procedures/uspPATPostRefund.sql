@@ -48,6 +48,7 @@ BEGIN
 		ON R.intRefundId = RC.intRefundId
 	INNER JOIN tblPATCustomerVolume CV
 		ON CV.intRefundCustomerId = RC.intRefundCustomerId
+	WHERE R.intRefundId = @intRefundId
 
 	IF EXISTS(SELECT 1 FROM @validateRefundCustomer)
 	BEGIN
