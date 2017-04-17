@@ -779,8 +779,8 @@ if(_url.indexOf('version=TF') < 1) {
                             ]
                         },
                         {
-                            url: 'BusinessDomain/TaxesAndCharges/IRTaxesAndChargesCheckOffIsN.js?v=' + version,
-                            title: 'IRTaxesAndChargesCheckOffIsN',
+                            url: 'BusinessDomain/TaxesAndCharges/IRTaxesAndChargesCheckOffIsN_A-YReceiptV_P-N_IC-N.js?v=' + version,
+                            title: 'IRTaxesAndChargesCheckOffIsN_A-YReceiptV_P-N_IC-N',
                             preload: [
                                 functionalTest,
                                 commonIC,
