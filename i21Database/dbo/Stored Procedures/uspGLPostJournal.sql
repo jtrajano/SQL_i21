@@ -21,6 +21,7 @@ BEGIN TRANSACTION;
 -- 	POPULATE JOURNALS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
 DECLARE @tmpPostJournals JournalIDTableType
+DECLARE @currentDateTime DATETIME =  GETDATE()
 
 IF (ISNULL(@Param, '') <> '') 
 	INSERT INTO @tmpPostJournals EXEC (@Param)
@@ -195,14 +196,14 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblForeignRate]		= dblDebitRate
 			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)
 			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0)
-			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
+			,[dtmDate]				= ISNULL(B.[dtmDate], @currentDateTime)
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= B.intCurrencyId
 			,[dblExchangeRate]		= dblDebitRate
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
-			,[dtmDateEntered]		= GETDATE()
+			,[dtmDateEntered]		= @currentDateTime
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN REPLACE(B.[strSourceType],' ','')
 											ELSE 'GJ' END 
@@ -270,13 +271,13 @@ ELSE
 			,[dblCreditForeign]		
 			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)
 			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0)
-			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
+			,[dtmDate]				= ISNULL(B.[dtmDate], @currentDateTime)
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[dblExchangeRate]		= dblDebitRate
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
-			,[dtmDateEntered]		= GETDATE()
+			,[dtmDateEntered]		= @currentDateTime
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN REPLACE(B.[strSourceType],' ','')
 											ELSE 'GJ' END 
