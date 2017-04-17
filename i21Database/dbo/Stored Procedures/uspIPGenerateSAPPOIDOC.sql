@@ -58,7 +58,8 @@ Declare @intMinSeq					INT,
 		@strSeq						NVARCHAR(MAX),
 		@strProductType				NVARCHAR(100),
 		@strVendorBatch				NVARCHAR(100),
-		@str10Zeros					NVARCHAR(50)='0000000000'
+		@str10Zeros					NVARCHAR(50)='0000000000',
+		@strLoadingPoint			NVARCHAR(200)
 
 Declare @tblOutput AS Table
 (
@@ -208,7 +209,8 @@ Begin
 			@strRowState				= strRowState ,
 			@strFeedStatus				= strFeedStatus,
 			@strContractItemNo			= strContractItemNo,
-			@strOrigin					= strOrigin	
+			@strOrigin					= strOrigin,
+			@strLoadingPoint			= strLoadingPoint	
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
 
 		Set @strSeq=ISNULL(@strSeq,'') + CONVERT(VARCHAR,@intContractSeq) + ','
@@ -302,7 +304,7 @@ Begin
 				Set @strXmlHeaderStart += '<VPER_END>'		+ ISNULL(CONVERT(VARCHAR(10),@dtmEndDate,112),'')	+ '</VPER_END>'
 				Set @strXmlHeaderStart += '<REF_1>'			+ ISNULL(@strContractNumber,'')		+ '</REF_1>'
 				Set @strXmlHeaderStart += '<INCOTERMS1>'	+ dbo.fnEscapeXML(ISNULL(@strContractBasis,''))		+ '</INCOTERMS1>'
-				Set @strXmlHeaderStart += '<INCOTERMS2>'	+ dbo.fnEscapeXML(ISNULL(@strContractBasisDesc,''))	+ '</INCOTERMS2>'
+				Set @strXmlHeaderStart += '<INCOTERMS2>'	+ dbo.fnEscapeXML(ISNULL(@strLoadingPoint,''))	+ '</INCOTERMS2>'
 				Set @strXmlHeaderStart +=	'</E1BPMEPOHEADER>'
 
 				--HeaderX
