@@ -410,6 +410,6 @@
     <None Include="dbo\Stored Procedures\uspSMImportTax.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportTaxRate.sql" />
     <Build Include="dbo\Tables\tblARagordmst.sql" />
-
+    <None Include="dbo\Stored Procedures\uspTMRecreateImportTankMonitorSP.sql" />
   </ItemGroup>
 </Project>

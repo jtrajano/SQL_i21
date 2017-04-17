@@ -5174,6 +5174,7 @@
     <Build Include="dbo\Views\vyuLGGetContractSubLocation.sql" />
     <Build Include="dbo\Views\vyuCTLoadView.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetAvgHistoricalPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMImportTankMonitorReading.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
