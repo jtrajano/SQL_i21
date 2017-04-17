@@ -1674,14 +1674,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }
                         current.set('strLocationName', records[0].get('strLocationName'));
 
-                        var valFOBPoint = current.get('strFobPoint').trim();
+                        var valFOBPoint = current.get('strFobPoint');
+                        valFOBPoint = valFOBPoint ? valFOBPoint.trim().toLowerCase() : valFOBPoint;
 
                         //Calculate Item Taxes
                         if (current.tblICInventoryReceiptItems()) {
                             Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
                                 if (!item.dummy) {
                                     //Assign Tax Group Id from Location FOB Point is Destination
-                                    if (valFOBPoint.toLowerCase() === 'destination') {
+                                    if (valFOBPoint === 'destination') {
                                         item.set('intTaxGroupId', records[0].get('intTaxGroupId'));
                                         item.set('strTaxGroup', records[0].get('strTaxGroup'));
                                     }
@@ -5765,7 +5766,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (strUnitType == "Packed") {
                 addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
                 lastQty = Math.ceil(lastQty);
-            //Process Excess Lot
+                
+                //Process Excess Lot
                 //Add another line for excess lot if the last replicated lot is more than one
                 if (addedTareWeight > 0 && lastQty > 1) {
                     //Compute Tare Weight for the Excess Lot
@@ -5777,11 +5779,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
                 //Just add tare if the last replicated lot is equal to 1
                 addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
-                // addedTareWeight = i21.ModuleMgr.Inventory.roundDecimalValue(addedTareWeight, 6);
             }
-            /* else {
-                 lastQty = i21.ModuleMgr.Inventory.roundDecimalValue(lastQty, 6);
-             }*/
 
             // Calculate how many times to loop.
             var totalLot = 0;
@@ -5812,67 +5810,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
 
             if (replicaCount == 0) {
-                iRely.Functions.showErrorDialog('The lots for ' + currentReceiptItem.get('strItemNo') +
-                    ' are fully replicated.');
-            // When item is already fully replicated, it should not generate lots anymore but should show an error message IC-1888
-            /*  iRely.Msg.showQuestion('The lots for ' + currentReceiptItem.get('strItemNo') +
-                    ' is fully replicated. Are you sure you want to continue?',
-                    function (p) {
-                        if (p === 'no') {
-                            grdLotTracking.resumeEvents(true);
-                            return;
-                        } else {
-                            var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
-                                strUnitMeasure: currentLot.get('strUnitMeasure'),
-                                intItemUnitMeasureId: currentLot.get('intItemUnitMeasureId'),
-                                dblNetWeight: lotNetWgt,
-                                dblStatedNetPerUnit: currentLot.get('dblStatedNetPerUnit'),
-                                dblPhyVsStated: currentLot.get('dblPhyVsStated'),
-                                strOrigin: currentLot.get('strOrigin'),
-                                intSubLocationId: currentLot.get('intSubLocationId'),
-                                intStorageLocationId: currentLot.get('intStorageLocationId'),
-                                dblQuantity: lotQty,
-                                dblGrossWeight: lotGrossWgt,
-                                dblTareWeight: lotTareWgt,
-                                dblCost: currentLot.get('dblCost'),
-                                intUnitPallet: currentLot.get('intUnitPallet'),
-                                dblStatedGrossPerUnit: currentLot.get('dblStatedGrossPerUnit'),
-                                dblStatedTarePerUnit: currentLot.get('dblStatedTarePerUnit'),
-                                strContainerNo: currentLot.get('strContainerNo'),
-                                intEntityVendorId: currentLot.get('intEntityVendorId'),
-                                strGarden: currentLot.get('strGarden'),
-                                strMarkings: currentLot.get('strMarkings'),
-                                strGrade: currentLot.get('strGrade'),
-                                intOriginId: currentLot.get('intOriginId'),
-                                intSeasonCropYear: currentLot.get('intSeasonCropYear'),
-                                strVendorLotId: currentLot.get('strVendorLotId:'),
-                                dtmManufacturedDate: currentLot.get('dtmManufacturedDate'),
-                                strRemarks: currentLot.get('strRemarks'),
-                                strCondition: currentLot.get('strCondition'),
-                                dtmCertified: currentLot.get('dtmCertified'),
-                                dtmExpiryDate: currentLot.get('dtmExpiryDate'),
-                                intSort: currentLot.get('intSor:'),
-                                strWeightUOM: currentLot.get('strWeightUOM'),
-                                intParentLotId: currentLot.get('intParentLotId'),
-                                strParentLotNumber: currentLot.get('strParentLotNumber'),
-                                strParentLotAlias: currentLot.get('strParentLotAlias'),
-                                strStorageLocation: currentLot.get('strStorageLocation'),
-                                strSubLocationName: currentLot.get('strSubLocationName'),
-                                dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor')
-                            });
-
-                            grdLotTracking.suspendEvents(true);
-                            currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
-                            grdLotTracking.resumeEvents(true);
-                            //Calculate Gross/Net
-                            me.calculateGrossNet(currentReceiptItem, 1);
-
-                            //Calculate Line Total
-                            var currentReceipt = win.viewModel.data.current;
-                            currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
-                        }
-                    }, Ext.MessageBox.YESNO, win);
-                */
+                iRely.Functions.showErrorDialog('The lots for ' + currentReceiptItem.get('strItemNo') + ' are fully replicated.');
             }
 
             var countReplicateLot = 0;
@@ -5882,6 +5820,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             else {
                 countReplicateLot = replicaCount;
             }
+            
+            // If replicate lot count is equal or less than zero, exit immediately. There is nothing to process. 
+            if (countReplicateLot <= 0) {
+                return;
+            }
+
             // Show a progress message box.
             Ext.MessageBox.show({
                 title: "Please wait.",
@@ -5890,8 +5834,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 width: 300,
                 progress: true,
                 closable: false
-            }
-            );
+            });
 
             // Function generator for the setTimeout.
             // Used to update the progress of the message box and hide it when done with the loop.
@@ -5907,7 +5850,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             };
 
             // This function will do a loop to replicate the lots.
-
             var doReplicateLot = function () {
                 for (var ctr = 0; ctr <= replicaCount - 1; ctr++) {
                     var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
@@ -6549,15 +6491,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             search.scope = me;
                             search.url = '../Inventory/api/InventoryReceipt/GetChargeTaxDetails?ChargeId=' + ChargeId + '&ReceiptId=' + ReceiptId;
                             search.columns = [
-                                { dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                                { dataIndex: 'intInventoryReceiptChargeTaxId', text: "Receipt Charge Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                                { dataIndex: 'intChargeId', text: "Charge Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                                { dataIndex: 'strItemNo', text: 'Item No', width: 200, dataType: 'string'},
-                                { dataIndex: 'strTaxGroup', text: 'Tax Group', width: 150, dataType: 'string' },
-                                { dataIndex: 'strTaxCode', text: 'Tax Code', width: 150, dataType: 'string' },
-                                { dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 200, dataType: 'string' },
-                                { xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
-                                { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float' }
+                                { itemId: 'colKey', dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                                { itemId: 'colInventoryReceiptChargeTaxId', dataIndex: 'intInventoryReceiptChargeTaxId', text: "Receipt Charge Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                                { itemId: 'colChargeId', dataIndex: 'intChargeId', text: "Charge Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                                { itemId: 'colItemNo', dataIndex: 'strItemNo', text: 'Item No', width: 200, dataType: 'string'},
+                                { itemId: 'colTaxGroup', dataIndex: 'strTaxGroup', text: 'Tax Group', width: 150, dataType: 'string' },
+                                { itemId: 'colTaxCode', dataIndex: 'strTaxCode', text: 'Tax Code', width: 150, dataType: 'string' },
+                                { itemId: 'colCalculationMethod', dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 200, dataType: 'string' },
+                                { itemId: 'colRate', xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
+                                { itemId: 'colTax', xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float' }
                             ];
                             search.title = "Charge Tax Details";
                             search.showNew = false;

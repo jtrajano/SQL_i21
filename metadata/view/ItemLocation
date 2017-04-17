@@ -402,13 +402,15 @@
                                                                         "labelAlign": null,
                                                                         "labelWidth": 50,
                                                                         "layout|flex": 1,
+                                                                        "lookUpField": true,
                                                                         "margin": "0 5",
                                                                         "valueField": "intEntityVendorId"
                                                                     },
                                                                     "name": "MyComboBox1",
                                                                     "configAlternates": {
                                                                         "columns": "array",
-                                                                        "enableDrillDown": "boolean"
+                                                                        "enableDrillDown": "boolean",
+                                                                        "lookUpField": "boolean"
                                                                     },
                                                                     "designerId": "965e5a47-304a-430a-8d97-ed850d3d9227",
                                                                     "customConfigs": [
@@ -420,6 +422,11 @@
                                                                         {
                                                                             "group": "(Custom Properties)",
                                                                             "name": "enableDrillDown",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "lookUpField",
                                                                             "type": "string"
                                                                         }
                                                                     ]
@@ -2185,7 +2192,7 @@
                         "itemId": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging16",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

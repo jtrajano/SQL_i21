@@ -959,27 +959,51 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         action(record);
     },
     
-    statics: {
-        getCustomerCurrency: function(customerId, action) {
-            if(customerId) {
-                ic.utils.ajax({
-                    timeout: 120000,
-                    url: '../Inventory/api/InventoryShipment/GetCustomerCurrency',
-                    method: 'GET',
-                    params: {
-                        customerId: customerId
+    // statics: {
+    //     getCustomerCurrency: function(customerId, action) {
+    //         if(customerId) {
+    //             ic.utils.ajax({
+    //                 timeout: 120000,
+    //                 url: '../Inventory/api/InventoryShipment/GetCustomerCurrency',
+    //                 method: 'GET',
+    //                 params: {
+    //                     customerId: customerId
+    //                 }
+    //             })
+    //                 .subscribe(
+    //                     function(response) {
+    //                         var json = Ext.decode(response.responseText);
+    //                         action(true, json);
+    //                     },
+    //                     function(response) {
+    //                         action(false, response);
+    //                     }
+    //                 );
+    //         }
+    //     }
+    // },
+
+    getCustomerCurrency: function(customerId, action) {
+        action = (typeof action === "function") ? action : function(){};
+
+        if(customerId) {
+            ic.utils.ajax({
+                timeout: 120000,
+                url: '../Inventory/api/InventoryShipment/GetCustomerCurrency',
+                method: 'GET',
+                params: {
+                    customerId: customerId
+                }
+            })
+                .subscribe(
+                    function(response) {
+                        var json = Ext.decode(response.responseText);
+                        action(true, json);
+                    },
+                    function(response) {
+                        action(false, response);
                     }
-                })
-                    .subscribe(
-                        function(response) {
-                            var json = Ext.decode(response.responseText);
-                            action(true, json);
-                        },
-                        function(response) {
-                            action(false, response);
-                        }
-                    );
-            }
+                );
         }
     },
 
@@ -987,22 +1011,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var win = config.grid.up('window');
         var record = Ext.create('Inventory.model.ShipmentCharge');
         record.set('strAllocatePriceBy', 'Unit');
-        if(config.dummy.intInventoryShipment.data.intEntityCustomerId) {
-            Inventory.view.InventoryShipmentViewController.getCustomerCurrency(config.dummy.intInventoryShipment.data.intEntityCustomerId, function(success, json) {
-                if(success) {
-                    if(json.length > 0) {
-                        record.set('intCurrencyId', !iRely.Functions.isEmpty(json[0].intCurrencyId) ? json[0].intCurrencyId : json[0].intDefaultCurrencyId);
-                        record.set('strCurrency', !iRely.Functions.isEmpty(json[0].intCurrencyId) ? json[0].strCurrency : json[0].strDefaultCurrency);
-                    } else {
-                        var defaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
-                        record.set('intCurrencyId', defaultCurrencyId);
-                    }
-                    action(record);   
-                } else
-                    action(record);
-            });
-        } else
-            action(record);
+
+        action(record);
     },
 
     currentRecordChanged: function(current) {
@@ -1078,6 +1088,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     },
 
     onCustomerSelect: function(combo, records, eOpts) {
+        var me = this; 
+
         if (records.length <= 0)
             return;
 
@@ -1120,7 +1132,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 }
                 break;
             default :
-                Inventory.view.InventoryShipmentViewController.getCustomerCurrency(current.get('intEntityCustomerId'), function(success, json) {
+                me.getCustomerCurrency(current.get('intEntityCustomerId'), function(success, json) {
                     if(success) {
                         if(json.length > 0) {
                             current.set('intCurrencyId', !iRely.Functions.isEmpty(json[0].intCurrencyId) ? json[0].intCurrencyId : json[0].intDefaultCurrencyId);
@@ -2329,8 +2341,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var plugin = grid.getPlugin('cepCharges');
         var current = plugin.getActiveRecord();
         var masterRecord = win.viewModel.data.current;
+        var cboCurrency = win.down('#cboCurrency');
         
         if (combo.itemId === 'cboOtherCharge') {
+            // Get the default Forex Rate Type from the Company Preference. 
+            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
+
+            // Get the functional currency:
+            var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+            var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
+
+            // Get the transaction currency
+            var chargeCurrencyId = cboCurrency.getValue();
+
             current.set('intChargeId', record.get('intItemId'));
             current.set('intCostUOMId', record.get('intCostUOMId'));
             current.set('strCostMethod', record.get('strCostMethod'));
@@ -2338,33 +2361,72 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strOnCostType', record.get('strOnCostType'));
             current.set('ysnPrice', record.get('ysnPrice'));
             current.set('ysnAccrue', record.get('ysnAccrue'));
+            current.set('intCurrencyId', chargeCurrencyId);
+            current.set('strCurrency', cboCurrency.getRawValue());
+
             if (!iRely.Functions.isEmpty(record.get('strOnCostType'))) {
                 current.set('strCostMethod', 'Percentage');
             }
 
-            Inventory.view.InventoryShipmentViewController.getCustomerCurrency(current.intInventoryShipment.data.intEntityCustomerId, function(success, json) {
-                if(success) {
-                    if(json.length > 0) {
-                        current.set('intCurrencyId', !iRely.Functions.isEmpty(json[0].intCurrencyId) ? json[0].intCurrencyId : json[0].intDefaultCurrencyId);
-                        current.set('strCurrency', !iRely.Functions.isEmpty(json[0].intCurrencyId) ? json[0].strCurrency : json[0].strDefaultCurrency);
-                    } else {
-                        var defaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
-                        current.set('intCurrencyId', defaultCurrencyId);
-                    }
+            var dblAmount = record.get('dblAmount');
+            dblAmount = Ext.isNumeric(dblAmount) ? dblAmount : 0;
+
+            if(record.get('strCostMethod') === 'Amount') {
+                current.set('dblAmount', dblAmount);
+            }
+            else {
+                current.set('dblRate', dblAmount);
+            }
+
+            // function variable to process the default forex rate. 
+            var processForexRateOnSuccess = function(successResponse){
+                if (successResponse && successResponse.length > 0 ){
+                    var dblForexRate = successResponse[0].dblRate;
+                    var strRateType = successResponse[0].strRateType;             
+
+                    dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+
+                    // Convert the last cost to the transaction currency.
+                    // and round it to six decimal places.  
+                    if (chargeCurrencyId != functionalCurrencyId){
+                        dblAmount = dblForexRate != 0 ?  dblAmount / dblForexRate : 0;
+                        dblAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(dblAmount, 6);
+
+                        if(record.get('strCostMethod') === 'Amount') {                           
+                            current.set('dblAmount', dblAmount);
+                        }
+                        else {
+                            current.set('dblRate', dblAmount);
+                        }                           
+                    }                 
+                    
+                    current.set('intForexRateTypeId', intRateType);
+                    current.set('strForexRateType', strRateType);
+                    current.set('dblForexRate', dblForexRate);
                 }
-            });
+            }
+
+            // If transaction currency is a foreign currency, get the default forex rate type, forex rate, and convert the last cost to the transaction currency. 
+            if (chargeCurrencyId != functionalCurrencyId && intRateType){
+                iRely.Functions.getForexRate(
+                    chargeCurrencyId,
+                    intRateType,
+                    masterRecord.get('dtmShipDate'),
+                    function(successResponse){
+                        processForexRateOnSuccess(successResponse);
+                    },
+                    function(failureResponse){
+                        var jsonData = Ext.decode(failureResponse.responseText);
+                        //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                        iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
+                    }
+                );                      
+            }
         }
 
         if (combo.itemId === 'cboChargeCurrency') { 
             current.set('intCurrencyId', record.get('intCurrencyID'));
             current.set('strCurrency', record.get('strCurrency'));
-        }
-
-        if(record.get('strCostMethod') === 'Amount') {
-            current.set('dblAmount', record.get('dblAmount'));
-        }
-        else {
-            current.set('dblRate', record.get('dblAmount'));
         }
 
         if (combo.itemId === 'cboChargeForexRateType') {
@@ -2383,7 +2445,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 },
                 function(failureResponse){
                     var jsonData = Ext.decode(failureResponse.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                    //iRely.Functions.showErrorDialog(jsonData.message.statusText);      
+                    iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');                                  
                 }
             );                
         }           

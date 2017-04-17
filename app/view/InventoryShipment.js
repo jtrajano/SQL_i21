@@ -307,6 +307,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 ],
                                                                 enableDrillDown: true,
                                                                 flex: 1.5,
+                                                                lookUpField: true,
                                                                 itemId: 'cboCustomer',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Customer',
