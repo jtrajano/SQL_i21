@@ -88,51 +88,7 @@ BEGIN
 				, [begingroup] NVARCHAR(MAX)
 				, [endgroup] NVARCHAR(MAX)
 				, [datatype] NVARCHAR(MAX))
-
-
-
-			DECLARE @intCounter INT
-			DECLARE @strField	NVARCHAR(MAX)
-
-			WHILE (EXISTS(SELECT 1 FROM @tblCFFieldList))
-			BEGIN
-				SELECT @intCounter = [intFieldId] FROM @tblCFFieldList
-				SELECT @strField = [strFieldId] FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
-				
-			--MAIN LOOP			
-			SELECT TOP 1
-				 @From = [from]
-				,@To = [to]
-				,@Condition = [condition]
-				,@Fieldname = [fieldname]
-			FROM @temp_params WHERE [fieldname] = @strField
-			IF (UPPER(@Condition) = 'BETWEEN')
-			BEGIN
-					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-			END
-			ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','='))
-			BEGIN
-					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
-			END
-			ELSE IF (UPPER(@Condition) = 'IN')
-			BEGIN
-					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
-			END
-
-			SET @From = ''
-			SET @To = ''
-			SET @Condition = ''
-			SET @Fieldname = ''
-
-
-
-			--MAIN LOOP
-
-				DELETE FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
-			END
+		
 
 			DECLARE @ysnInvoiceBillingCycleFee	BIT = 0
 
@@ -193,6 +149,23 @@ BEGIN
 			SET @Condition = ''
 			SET @Fieldname = ''
 
+
+			--DECLARE @dtmInvoiceDate		DATETIME
+
+			--SELECT TOP 1
+			--	 @From = [from]
+			--	,@To = [to]
+			--	,@Condition = [condition]
+			--	,@Fieldname = [fieldname]
+			--FROM @temp_params WHERE [fieldname] = 'InvoiceDate'
+
+			--SET @dtmInvoiceDate = @From
+
+			--SET @From = ''
+			--SET @To = ''
+			--SET @Condition = ''
+			--SET @Fieldname = ''
+
 		
 
 			DECLARE @SQL NVARCHAR(MAX)
@@ -240,6 +213,7 @@ BEGIN
 				 ,strGroupName				NVARCHAR(MAX)
 				 ,strInvoiceNumber			NVARCHAR(MAX)
 				 ,strInvoiceReportNumber	NVARCHAR(MAX)
+				 ,strTempInvoiceReportNumber NVARCHAR(MAX)
 				 ,dtmDiscountDate			DATETIME
 				 ,dtmDueDate				DATETIME
 				 ,dtmTransactionDate		DATETIME
@@ -311,19 +285,22 @@ BEGIN
 
 
 			-----------------MAIN QUERY------------------
-			EXEC('SELECT * 
-			INTO ##tmpInvoiceFee
-			FROM vyuCFInvoiceFee '+ @whereClause)
+			--SELECT * FROM tblCFInvoiceStagingTable AS cfInv
+			--INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount ON cfInv.intCardId = cfCardAccount.intCardId
+
+			--EXEC('SELECT * 
+			--INTO ##tmpInvoiceFee
+			--FROM tblCFInvoiceStagingTable ')
 			-----------------MAIN QUERY------------------
 
 			INSERT @tblCFInvoiceFeesTemp
 			SELECT
-			 intAccountId			
-			,intCardId				
+			 cfInv.intAccountId			
+			,cfInv.intCardId				
 			,intFeeProfileId		
-			,intSalesPersonId		
+			,cfInv.intSalesPersonId		
 			,dtmInvoiceDate		
-			,intCustomerId			
+			,cfInv.intCustomerId			
 			,intInvoiceId			
 			,intTransactionId		
 			,intCustomerGroupId	
@@ -335,21 +312,22 @@ BEGIN
 			,intSort				
 			,intConcurrencyId		
 			,ysnAllowEFT			
-			,ysnActive				
+			,cfInv.ysnActive				
 			,ysnEnergyTrac			
 			,dblQuantity			
 			,dblTotalAmount		
 			,dblDiscountEP			
 			,dblAPR				
 			,strTerm				
-			,strType				
+			,cfCardAccount.strType				
 			,strTermCode			
-			,strNetwork			
+			,cfInv.strNetwork			
 			,strCustomerName		
-			,strInvoiceCycle		
+			,cfCardAccount.strInvoiceCycle		
 			,strGroupName			
 			,strInvoiceNumber		
 			,strInvoiceReportNumber
+			,strTempInvoiceReportNumber
 			,dtmDiscountDate		
 			,dtmDueDate			
 			,dtmTransactionDate	
@@ -357,7 +335,8 @@ BEGIN
 			,strTransactionType	
 			,intNetworkId
 			,intARLocationId
-			FROM ##tmpInvoiceFee
+			FROM tblCFInvoiceStagingTable AS cfInv
+			INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount ON cfInv.intCardId = cfCardAccount.intCardId
 
 			-------------SET GROUP VOLUME TO OUTPUT---------------
 			DECLARE @dblTotalQuantity		NUMERIC(18,6)
@@ -384,7 +363,7 @@ BEGIN
 				 @intLoopId					= intAccountId 
 				,@intFeeProfileId			= intFeeProfileId
 				,@dtmInvoiceDate			= dtmInvoiceDate
-				,@strInvoiceReportNumber	= strInvoiceReportNumber
+				,@strInvoiceReportNumber	= strTempInvoiceReportNumber
 				,@intCustomerId				= intCustomerId
 				,@intTermID					= intTermID
 				,@intSalesPersonId			= intSalesPersonId
@@ -911,32 +890,68 @@ BEGIN
 			----------------------------------
 			---**END DISCOUNT CALCULATION**---
 			----------------------------------
+			--SELECT * FROM ##tblCFInvoiceFeeOutput
 
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------
-			SELECT 
-			 intFeeLoopId			
-			,intAccountId			
-			,strCalculationType	
-			,dblFeeRate			
-			,intTransactionId		
-			,dtmTransactionDate	
-			,dtmStartDate			
-			,dtmEndDate			
-			,dblQuantity			
-			,intCardId				
-			,dblFeeAmount			
-			,strFeeDescription		
-			,strFee				
-			,strInvoiceFormat		
-			,strInvoiceReportNumber
-			,intCustomerId			
-			,intTermID				
-			,intSalesPersonId		
-			,dtmInvoiceDate
-			,dblFeeTotalAmount = (SELECT ROUND(SUM(dblFeeAmount),2) FROM ##tblCFInvoiceFeeOutput) 
-			,intItemId
-			,intARLocationId
-			FROM ##tblCFInvoiceFeeOutput
+			INSERT INTO tblCFInvoiceFeeStagingTable
+			(
+				 intFeeLoopId			
+				,intAccountId			
+				,intTransactionId		
+				,intCardId				
+				,intCustomerId			
+				,intTermID				
+				,intSalesPersonId		
+				,intItemId				
+				,intARLocationId		
+				,dblFeeRate				
+				,dblQuantity			
+				,dblFeeAmount			
+				,dblFeeTotalAmount 		
+				,strFeeDescription		
+				,strFee					
+				,strInvoiceFormat		
+				,strInvoiceReportNumber	
+				,strCalculationType		
+				,dtmTransactionDate		
+				,dtmInvoiceDate			
+				,dtmStartDate			
+				,dtmEndDate				
+			)
+			SELECT
+			 tbl1.intFeeLoopId			
+			,tbl1.intAccountId			
+			,tbl1.intTransactionId		
+			,tbl1.intCardId				
+			,tbl1.intCustomerId			
+			,tbl1.intTermID				
+			,tbl1.intSalesPersonId		
+			,tbl1.intItemId				
+			,tbl1.intARLocationId		
+			,tbl1.dblFeeRate				
+			,tbl1.dblQuantity			
+			,tbl1.dblFeeAmount			
+			,tbl2.dblFeeTotalAmount 
+			,tbl1.strFeeDescription		
+			,tbl1.strFee					
+			,tbl1.strInvoiceFormat		
+			,tbl1.strInvoiceReportNumber	
+			,tbl1.strCalculationType		
+			,tbl1.dtmTransactionDate		
+			,tbl1.dtmInvoiceDate			
+			,tbl1.dtmStartDate			
+			,tbl1.dtmEndDate
+			FROM ##tblCFInvoiceFeeOutput AS tbl1
+			inner join 
+			(
+			SELECT dblFeeTotalAmount = (SELECT ROUND(SUM(dblFeeAmount),2))  , intAccountId
+			FROM ##tblCFInvoiceFeeOutput 
+			GROUP BY intAccountId	
+			,intAccountId	
+			) AS tbl2
+			ON tbl1.intAccountId = tbl2.intAccountId
+
+			--SELECT * FROM tblCFInvoiceFeeStagingTable
 					
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------
 

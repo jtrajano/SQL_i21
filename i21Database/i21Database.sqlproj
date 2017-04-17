@@ -5141,6 +5141,12 @@
     <Build Include="dbo\Views\vyuHDTicketHoursWorkedReport.sql" />
     <Build Include="dbo\Views\vyuHDTicketDetailsReport.sql" />
     <Build Include="dbo\Views\vyuAPBillDetailTax.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceSummaryTempTable.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceReportTempTable.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceDiscountTempTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceToStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceFeeStagingTable.sql" />
     <Build Include="dbo\Views\vyuARPaymentACHSearch.sql" />
     <Build Include="dbo\Tables\tblGRStorageStatement.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageEntity.sql" />
@@ -5175,6 +5181,9 @@
     <Build Include="dbo\Views\vyuCTLoadView.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetAvgHistoricalPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspTMImportTankMonitorReading.sql" />
+    <Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRollCostDetail.sql" />
+    <Build Include="dbo\Views\vyuCFCalculatedInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

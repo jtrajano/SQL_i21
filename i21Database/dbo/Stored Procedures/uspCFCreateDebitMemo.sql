@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFCreateDebitMemo](
-	 @xmlParam					NVARCHAR(MAX)  
-	,@entityId					INT			   = NULL
+	 @entityId					INT			   = NULL
 	,@ErrorMessage				NVARCHAR(250)  = NULL OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL OUTPUT
 	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL OUTPUT
@@ -19,78 +18,9 @@ BEGIN
 		----------------------------------------
 
 		---------CREATE TEMPORARY TABLE---------
+		
+		
 		SET @executedLine = 1
-		CREATE TABLE #tblCFInvoiceDiscount	
-(
-		 intAccountId					INT
-		,intSalesPersonId				INT
-		,dtmInvoiceDate					DATETIME
-		,intCustomerId					INT
-		,intInvoiceId					INT
-		,intTransactionId				INT
-		,intCustomerGroupId				INT
-		,intTermID						INT
-		,intBalanceDue					INT
-		,intDiscountDay					INT	
-		,intDayofMonthDue				INT
-		,intDueNextMonth				INT
-		,intSort						INT
-		,intConcurrencyId				INT
-		,ysnAllowEFT					BIT
-		,ysnActive						BIT
-		,ysnEnergyTrac					BIT
-		,dblQuantity					NUMERIC(18,6)
-		,dblTotalQuantity				NUMERIC(18,6)
-		,dblDiscountRate				NUMERIC(18,6)
-		,dblDiscount					NUMERIC(18,6)
-		,dblTotalAmount					NUMERIC(18,6)
-		,dblAccountTotalAmount			NUMERIC(18,6)
-		,dblAccountTotalDiscount		NUMERIC(18,6)
-		,dblAccountTotalLessDiscount	NUMERIC(18,6)
-		,dblDiscountEP					NUMERIC(18,6)
-		,dblAPR							NUMERIC(18,6)	
-		,strTerm						NVARCHAR(MAX)
-		,strType						NVARCHAR(MAX)
-		,strTermCode					NVARCHAR(MAX)	
-		,strNetwork						NVARCHAR(MAX)	
-		,strCustomerName				NVARCHAR(MAX)
-		,strInvoiceCycle				NVARCHAR(MAX)
-		,strGroupName					NVARCHAR(MAX)
-		,strInvoiceNumber				NVARCHAR(MAX)
-		,strInvoiceReportNumber			NVARCHAR(MAX)
-		,dtmDiscountDate				DATETIME
-		,dtmDueDate						DATETIME
-		,dtmTransactionDate				DATETIME
-		,dtmPostedDate					DATETIME
-)
-
-		CREATE TABLE #tblCFInvoiceFee
-		(
-			 intFeeLoopId				INT
-			,intAccountId				INT
-			,strCalculationType			NVARCHAR(MAX)
-			,dblFeeRate					NUMERIC(18,6)
-			,intTransactionId			INT
-			,dtmTransactionDate			DATETIME
-			,dtmStartDate				DATETIME
-			,dtmEndDate					DATETIME
-			,dblQuantity				NUMERIC(18,6)
-			,intCardId					INT
-			,dblFeeAmount				NUMERIC(18,6)
-			,strFeeDescription			NVARCHAR(MAX)
-			,strFee						NVARCHAR(MAX)
-			,strInvoiceFormat			NVARCHAR(MAX)
-			,strInvoiceReportNumber		NVARCHAR(MAX)
-			,intCustomerId				INT
-			,intTermID					INT
-			,intSalesPersonId			INT
-			,dtmInvoiceDate				DATETIME
-			,dblFeeTotalAmount 			NUMERIC(18,6)
-			,intItemId					INT
-			,intARLocationId			INT
-		)
-
-		SET @executedLine = 2
 		CREATE TABLE #tblCFInvoiceResult	
 		(
 			 intId							INT
@@ -99,7 +29,7 @@ BEGIN
 		----------------------------------------
 
 		-----------COMPANY PREFERENCE-----------
-		SET @executedLine = 3
+		SET @executedLine = 2
 		SELECT TOP 1 
 		 @companyLocationId = intARLocationId 
 		,@accountId = intGLAccountId
@@ -107,15 +37,13 @@ BEGIN
 		----------------------------------------
 
 		--------------INVOICE LIST--------------
-		SET @executedLine = 4
-		INSERT INTO #tblCFInvoiceDiscount
-		EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
+		SET @executedLine = 3
+		
 		----------------------------------------
 
 		--------------INVOICE FEE LIST--------------
 		SET @executedLine = 4
-		INSERT INTO #tblCFInvoiceFee
-		EXEC "dbo"."uspCFInvoiceReportFee" @xmlParam=@xmlParam
+		
 		----------------------------------------
 
 		----------ENTRIES FOR INVOICE-----------
@@ -210,7 +138,7 @@ BEGIN
 			,[intSalesAccountId]					= @accountId
 			,[strSourceTransaction]					= 'CF Invoice'
 			,[intSourceId]							= 1											-- TEMPORARY
-			,[strSourceId]							= strInvoiceReportNumber
+			,[strSourceId]							= strTempInvoiceReportNumber
 			,[intInvoiceId]							= NULL 
 			,[intEntityCustomerId]					= intCustomerId
 			,[intCompanyLocationId]					= @companyLocationId						--CF Company Configuration
@@ -223,7 +151,7 @@ BEGIN
 			,[intFreightTermId]						= NULL 
 			,[intShipViaId]							= NULL 
 			,[intPaymentMethodId]					= NULL
-			,[strInvoiceOriginId]					= strInvoiceReportNumber
+			,[strInvoiceOriginId]					= strTempInvoiceReportNumber
 			,[ysnUseOriginIdAsInvoiceNumber]		= 1
 			,[strPONumber]							= NULL
 			,[strBOLNumber]							= ''
@@ -286,13 +214,12 @@ BEGIN
 			,[ysnUpdateAvailableDiscount]			= 1
 			,[strItemTermDiscountBy]				= 'Amount'
 			,[dblItemTermDiscount]					= dblAccountTotalDiscount
-			,[strDocumentNumber]					= strInvoiceReportNumber
-		FROM #tblCFInvoiceDiscount
+			,[strDocumentNumber]					= strTempInvoiceReportNumber
+		FROM tblCFInvoiceStagingTable
 		GROUP BY 
 		intCustomerId
-		,strInvoiceReportNumber
+		,strTempInvoiceReportNumber
 		,dblAccountTotalAmount
-		,dblTotalQuantity
 		,dblAccountTotalDiscount
 		,intTermID
 		,dtmInvoiceDate
@@ -471,10 +398,10 @@ BEGIN
 			,[strItemTermDiscountBy]				= ''
 			,[dblItemTermDiscount]					= 0
 			,[strDocumentNumber]					= strInvoiceReportNumber
-		FROM #tblCFInvoiceFee
+		FROM tblCFInvoiceFeeStagingTable
 		--GROUP BY 
 		--intCustomerId
-		--,strInvoiceReportNumber
+		--,strTempInvoiceReportNumber
 		--,dblAccountTotalAmount
 		--,dblTotalQuantity
 		--,dblAccountTotalDiscount
@@ -500,7 +427,15 @@ BEGIN
 
 		
 
-		DECLARE @intInvoiceResultId	INT
+		DECLARE @intInvoiceResultId			INT
+		DECLARE @dblTotalQuantity			NUMERIC(18,6)
+		DECLARE @strInvoiceReportNumber		NVARCHAR(MAX)
+		DECLARE @strInvoiceNumber			NVARCHAR(MAX)
+		DECLARE @intEntityCustomerId		INT
+		DECLARE @dblAccountTotalDiscount	NUMERIC(18,6)
+		DECLARE @dblAccountTotalAmount		NUMERIC(18,6)
+		DECLARE @dblFeeAmount				NUMERIC(18,6)
+
 		---------INVOICE PROCESS RESULT---------
 		SET @executedLine = 7
 		INSERT INTO #tblCFInvoiceResult
@@ -522,24 +457,52 @@ BEGIN
 			SELECT	TOP 1 
 			@intInvoiceResultId = intDebitMemoId
 			FROM #tblCFInvoiceResult
+
+
+			SELECT TOP 1 
+			 @strInvoiceNumber = strInvoiceNumber
+			,@intEntityCustomerId = intEntityCustomerId	
+			FROM tblARInvoice 
+			WHERE intInvoiceId = @intInvoiceResultId
+
+			SELECT TOP 1 
+			 @strInvoiceReportNumber = strTempInvoiceReportNumber 
+			,@dblTotalQuantity = SUM(dblQuantity)
+			,@dblAccountTotalAmount = dblAccountTotalAmount
+			,@dblAccountTotalDiscount = dblAccountTotalDiscount
+		
+			FROM tblCFInvoiceStagingTable 
+			WHERE intCustomerId = @intEntityCustomerId
+			GROUP BY
+			 intCustomerId
+			,strTempInvoiceReportNumber
+			,dblAccountTotalAmount
+			,dblAccountTotalDiscount
+			,intTermID
+			,dtmInvoiceDate
+			,intSalesPersonId
+
+
+			SELECT TOP 1 
+			@dblFeeAmount = dblFeeTotalAmount
+			FROM tblCFInvoiceFeeStagingTable 
+			WHERE intCustomerId = @intEntityCustomerId
 			
 			SET @executedLine = 10
-			INSERT INTO tblCFInvoiceProcessResult(
-				 strInvoiceProcessResultId
-				,intTransactionProcessId
-				,ysnStatus
-				,strRunProcessId
-				,intCustomerId
-				,strInvoiceReportNumber
-			)
-			SELECT TOP 1 
-			(SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intInvoiceResultId)
-			,@intInvoiceResultId
-			,1
-			,''
-			,intEntityCustomerId
-			,(SELECT TOP 1 strInvoiceReportNumber FROM #tblCFInvoiceDiscount WHERE intCustomerId = arInv.intEntityCustomerId)
-			FROM tblARInvoice AS arInv WHERE intInvoiceId = @intInvoiceResultId
+			UPDATE tblCFInvoiceProcessResult
+			SET 
+			 strInvoiceId				= @strInvoiceNumber
+			,intInvoiceId				= @intInvoiceResultId
+			,ysnStatus					= 1
+			,strRunProcessId			= ''
+			,intCustomerId				= @intEntityCustomerId
+			,strInvoiceReportNumber		= @strInvoiceReportNumber
+			,dblInvoiceQuantity			= @dblTotalQuantity
+			,dblInvoiceDiscount			= @dblAccountTotalDiscount
+			,dblInvoiceAmount			= (@dblAccountTotalAmount + @dblFeeAmount)
+			,dblInvoiceFee				= @dblFeeAmount
+			WHERE intCustomerId = @intEntityCustomerId
+			
 
 			SET @executedLine = 11
 			DELETE FROM #tblCFInvoiceResult 
@@ -551,7 +514,6 @@ BEGIN
 		
 		----------DROP TEMPORARY TABLE----------
 		SET @executedLine = 12
-		DROP TABLE #tblCFInvoiceDiscount
 		----------------------------------------
 
 	END TRY
@@ -578,7 +540,7 @@ BEGIN
 
 		----------DROP TEMPORARY TABLE----------
 		SET @executedLine = 15
-		DROP TABLE #tblCFInvoiceDiscount
+		DROP TABLE tblCFInvoiceStagingTable
 		----------------------------------------
 	
 	END CATCH
