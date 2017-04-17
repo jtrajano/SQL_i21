@@ -716,14 +716,11 @@ namespace iRely.Inventory.BusinessLayer
                 dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage && w.strItemNo == itemFromPreviousPage).Sum(s => s.dblQuantityInStockUOM); // Calculate the Qty using the Stock Qty. 
             }
 
-            // Get the beginning balances before the date filter. 
+            // Create the filter for the Prior Balance Query
+            List<SearchFilter> priorBalanceFilter = new List<SearchFilter>();
+            var itemExists = false;
+            var locationExists = false;
             {
-                // Create a new filter. 
-                List<SearchFilter> priorBalanceFilter = new List<SearchFilter>();
-                var dateExists = false;
-                var itemExists = false;
-                var locationExists = false; 
-
                 foreach (var pf in param.filter)
                 {
                     switch (pf.c.ToString().ToLower())
@@ -745,7 +742,6 @@ namespace iRely.Inventory.BusinessLayer
                                             }
                                         );
                                     }
-                                    dateExists = true;                                
                                     break;
                                 case "gt":                                
                                     if (pf.v.ToString() != "")
@@ -760,12 +756,14 @@ namespace iRely.Inventory.BusinessLayer
                                             }
                                         );
                                     }
-                                    dateExists = true;
                                     break;
                                 default:
                                     break;
                             }
                             break;
+                        case "stritemno":
+                        case "strlocationname":
+                            break; 
                         default:
                             priorBalanceFilter.Add(
                                 new SearchFilter()
@@ -776,64 +774,8 @@ namespace iRely.Inventory.BusinessLayer
                                     cj = pf.cj
                                 }
                             );
-
-                            if (pf.c.ToString().ToLower() == "stritemno") {
-                                itemExists = true; 
-                            }
-
-                            if (pf.c.ToString().ToLower() == "strlocationname")
-                            {
-                                locationExists = true;
-                            }
-
                             break;
                     }
-                }
-
-                // Add the item filter if it does not exists. 
-                if (!itemExists && itemFromPreviousPage != "")
-                {
-                    priorBalanceFilter.Add(
-                        new SearchFilter()
-                        {
-                            c = "strItemNo",
-                            v = itemFromPreviousPage,
-                            cj = "And"
-                        }
-                    );
-                    itemExists = true; 
-                }
-
-                // Add the location filter if it does not exists. 
-                if (!locationExists && locationFromPreviousPage != "")
-                {
-                    priorBalanceFilter.Add(
-                        new SearchFilter()
-                        {
-                            c = "strLocationName",
-                            v = locationFromPreviousPage,
-                            cj = "And"
-                        }
-                    );
-                }
-
-                // Get the previous Qty and Balance if date and item exists. 
-                if (dateExists && itemExists) {                    
-                    // Create a new param 
-                    var priorBalanceParam = new GetParameter()
-                    {
-                        filter = priorBalanceFilter
-                    };
-
-                    // Create a new query for the Prior Balance
-                    var priorBalanceQuery = (
-                        from v in _db.GetQuery<vyuICGetInventoryValuation>()
-                        select v
-                    ).Filter(priorBalanceParam, true);
-
-                    // Get the beginning qty and balances
-                    dblBeginningBalance = priorBalanceQuery.Sum(s => s.dblValue);
-                    dblBeginningQty = priorBalanceQuery.Sum(s => s.dblQuantityInStockUOM); // Calculate the Qty using the Stock Qty. 
                 }
             }
 
@@ -843,18 +785,60 @@ namespace iRely.Inventory.BusinessLayer
             // Loop thru the List, calculate, and assign the running qty and balance for each record. 
             string currentLocation = locationFromPreviousPage;
             string lastLocation = locationFromPreviousPage;
+            string currentItem =  itemFromPreviousPage;
+            string lastItem = itemFromPreviousPage;
             foreach (var row in paged_data)
             {
                 if (row.intInventoryTransactionId != 0)
-                {
-                    // Check if we need to rest the beginning qty and balance. It will reset if the location changed. 
+                {                    
                     currentLocation = row.strLocationName;
-                    if (lastLocation != currentLocation && param.start > 0 )
+                    currentItem = row.strItemNo;
+                    if (lastItem == "" || lastLocation == "" || currentItem != lastItem || currentLocation != lastLocation)
                     {
                         // Reset the qty and balances back to zero. 
                         dblBeginningBalance = 0;
                         dblBeginningQty = 0;
+
+                        itemExists = false;
+                        locationExists = false;
+
+                        priorBalanceFilter.RemoveAll(p => p.c == "strItemNo" || p.c == "strLocationName"); 
+                    }
+
+                    // Check if we need to rest the beginning qty and balance. It will reset if the item or location changes. 
+                    if (!itemExists || !locationExists) {
+                        if (!itemExists)
+                        {
+                            priorBalanceFilter.Add(
+                                new SearchFilter()
+                                {
+                                    c = "strItemNo",
+                                    v = currentItem,
+                                    cj = "And"
+                                }
+                            );
+                            itemExists = true;
+                        }
+
+                        if (!locationExists) {
+                            priorBalanceFilter.Add(
+                                new SearchFilter()
+                                {
+                                    c = "strLocationName",
+                                    v = currentLocation,
+                                    cj = "And"
+                                }
+                            );
+                            locationExists = true; 
+                        }                        
+
+                        var priorBalanceQuery = GetOpeningBalances(priorBalanceFilter);
+
+                        // Get the beginning qty and balances
+                        dblBeginningBalance = priorBalanceQuery.Sum(s => s.dblValue);
+                        dblBeginningQty = priorBalanceQuery.Sum(s => s.dblQuantityInStockUOM); // Calculate the Qty using the Stock Qty. 
                         lastLocation = currentLocation;
+                        lastItem = currentItem;
                     }
 
                     // Calculate beginning and running balance
@@ -879,6 +863,20 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        private IQueryable<vyuICGetInventoryValuation> GetOpeningBalances(List<SearchFilter> priorBalanceFilter) {
+            var priorBalanceParam = new GetParameter()
+            {
+                filter = priorBalanceFilter
+            };
+
+            // Create a new query for the Prior Balance
+            var priorBalanceQuery = (
+                from v in _db.GetQuery<vyuICGetInventoryValuation>()
+                select v
+            ).Filter(priorBalanceParam, true);
+
+            return priorBalanceQuery; 
+        }
 
         /// <summary>
         /// Return Inventory Valuation of Item and some of its details
@@ -906,35 +904,6 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        /// <summary>
-        /// Duplicate Item
-        /// </summary>
-        /// <param name="intItemId">Specify the Item Id of the Item to duplicate</param>
-        /// <returns>Returns the Item Id of the newly duplicated Item</returns>
-        /*public int? DuplicateItem(int intItemId)
-        {
-            int? newItemId = null;
-
-            using (SqlConnection conn = new SqlConnection(_db.ContextManager.Database.Connection.ConnectionString))
-            {
-                conn.Open();
-                using (SqlCommand command = new SqlCommand("uspICDuplicateItem", conn))
-                {
-                    command.Parameters.Add(new SqlParameter("@ItemId", intItemId));
-                    var outParam = new SqlParameter("@NewItemId", newItemId);
-                    outParam.Direction = System.Data.ParameterDirection.Output;
-                    outParam.DbType = System.Data.DbType.Int32;
-                    outParam.SqlDbType = System.Data.SqlDbType.Int;
-                    command.Parameters.Add(outParam);
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
-                    command.ExecuteNonQuery();
-                    newItemId = (int)outParam.Value;
-                }
-                conn.Close();
-            }
-
-            return newItemId;
-        }*/
         public class DuplicateItemSaveResult : SaveResult
         {
             public int? Id { get; set; }
