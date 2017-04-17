@@ -63,6 +63,7 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 			THEN
 				CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 			ELSE 1 END)
+AND A.apivc_trans_type IN ('I', 'C', 'A')
 AND NOT EXISTS(
 		SELECT 1 FROM tblAPapivcmst H
 		WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
@@ -149,6 +150,7 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 			CASE WHEN ISDATE(B.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 				AND B.apivc_comment = 'CCD Reconciliation' AND B.apivc_status_ind = 'U' THEN 1 ELSE 0 END
 		ELSE 1 END)
+AND B.apivc_trans_type IN ('I', 'C', 'A')
 AND NOT EXISTS(
 		SELECT 1 FROM tblAPapivcmst H
 		WHERE B.apivc_ivc_no = H.apivc_ivc_no AND B.apivc_vnd_no = H.apivc_vnd_no
@@ -181,6 +183,7 @@ BEGIN
 			CASE WHEN ISDATE(C.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(C.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 				AND C.apivc_comment = 'CCD Reconciliation' AND C.apivc_status_ind = 'U' THEN 1 ELSE 0 END
 		ELSE 1 END)
+	AND C.apivc_trans_type IN ('I', 'C', 'A')
 	AND NOT EXISTS(
 		SELECT 1 FROM tblAPapivcmst H
 		WHERE C.apivc_ivc_no = H.apivc_ivc_no AND C.apivc_vnd_no = H.apivc_vnd_no
@@ -221,6 +224,7 @@ WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 			CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 				AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END
 		ELSE 1 END)
+AND A.apivc_trans_type IN ('I', 'C', 'A')
 AND NOT EXISTS(
 		SELECT 1 FROM tblAPapivcmst H
 		WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
@@ -238,6 +242,7 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 					THEN
 						CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 					ELSE 1 END)
+AND A.apivc_trans_type IN ('I', 'C', 'A')
 AND NOT EXISTS(
 		SELECT 1 FROM tblAPapivcmst H
 		WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
