@@ -4,7 +4,7 @@ SELECT	E.intEntityId,
 		E.strName,
 		E.strType 				AS strEntity
 FROM	vyuEMEntity				E
-WHERE strType IN ('Vendor', 'Customer','Forwarding Agent')
+WHERE strType IN ('Vendor', 'Customer','Forwarding Agent','Shipping Line')
 
 UNION ALL
 
