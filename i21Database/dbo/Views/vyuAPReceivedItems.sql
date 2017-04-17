@@ -459,7 +459,7 @@ FROM
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblUnitCost
-		,[dblTax]									=	ISNULL(A.dblTax,0)
+		,[dblTax]									=	ISNULL((CASE WHEN A.intEntityVendorId != IR.intEntityVendorId AND IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) ELSE A.dblTax END),0)
 		,[dblRate]									=	ISNULL(A.dblForexRate,0)
 		,[strRateType]								=	RT.strCurrencyExchangeRateType
 		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
@@ -523,6 +523,8 @@ FROM
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = A.intForexRateTypeId
+	LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
+	LEFT JOIN dbo.tblICInventoryReceiptChargeTax IRCT ON IRCT.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 	OUTER APPLY 
 	(
 		SELECT intEntityVendorId FROM tblAPBillDetail BD
