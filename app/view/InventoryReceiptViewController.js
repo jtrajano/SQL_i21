@@ -1674,14 +1674,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }
                         current.set('strLocationName', records[0].get('strLocationName'));
 
-                        var valFOBPoint = current.get('strFobPoint').trim();
+                        var valFOBPoint = current.get('strFobPoint');
+                        valFOBPoint = valFOBPoint ? valFOBPoint.trim().toLowerCase() : valFOBPoint;
 
                         //Calculate Item Taxes
                         if (current.tblICInventoryReceiptItems()) {
                             Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
                                 if (!item.dummy) {
                                     //Assign Tax Group Id from Location FOB Point is Destination
-                                    if (valFOBPoint.toLowerCase() === 'destination') {
+                                    if (valFOBPoint === 'destination') {
                                         item.set('intTaxGroupId', records[0].get('intTaxGroupId'));
                                         item.set('strTaxGroup', records[0].get('strTaxGroup'));
                                     }
@@ -6490,15 +6491,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             search.scope = me;
                             search.url = '../Inventory/api/InventoryReceipt/GetChargeTaxDetails?ChargeId=' + ChargeId + '&ReceiptId=' + ReceiptId;
                             search.columns = [
-                                { dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                                { dataIndex: 'intInventoryReceiptChargeTaxId', text: "Receipt Charge Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                                { dataIndex: 'intChargeId', text: "Charge Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                                { dataIndex: 'strItemNo', text: 'Item No', width: 200, dataType: 'string'},
-                                { dataIndex: 'strTaxGroup', text: 'Tax Group', width: 150, dataType: 'string' },
-                                { dataIndex: 'strTaxCode', text: 'Tax Code', width: 150, dataType: 'string' },
-                                { dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 200, dataType: 'string' },
-                                { xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
-                                { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float' }
+                                { itemId: 'colKey', dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                                { itemId: 'colInventoryReceiptChargeTaxId', dataIndex: 'intInventoryReceiptChargeTaxId', text: "Receipt Charge Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                                { itemId: 'colChargeId', dataIndex: 'intChargeId', text: "Charge Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                                { itemId: 'colItemNo', dataIndex: 'strItemNo', text: 'Item No', width: 200, dataType: 'string'},
+                                { itemId: 'colTaxGroup', dataIndex: 'strTaxGroup', text: 'Tax Group', width: 150, dataType: 'string' },
+                                { itemId: 'colTaxCode', dataIndex: 'strTaxCode', text: 'Tax Code', width: 150, dataType: 'string' },
+                                { itemId: 'colCalculationMethod', dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 200, dataType: 'string' },
+                                { itemId: 'colRate', xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
+                                { itemId: 'colTax', xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float' }
                             ];
                             search.title = "Charge Tax Details";
                             search.showNew = false;

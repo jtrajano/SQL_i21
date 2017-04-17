@@ -37,6 +37,8 @@ Ext.define('Inventory.view.RebuildInventoryViewModel', {
 
     formulas: {
         description: function(get) {
+            if(!get('current.dtmDate'))
+                return;
             var month = get('current.strMonth');
             var order = get('current.strPostOrder');
             var item = 'all items';
@@ -48,6 +50,9 @@ Ext.define('Inventory.view.RebuildInventoryViewModel', {
             return 'Rebuild inventory for ' + item + ' in a ' + order.toLowerCase() + ' order from ' + month + ' ' + year + ' onwards including item(s) that are used for production.';
         },
         prompt: function(get) {
+            if(!get('current.dtmDate'))
+                return;
+                
             var month = get('current.strMonth');
             var order = get('current.strPostOrder');
             var item = 'all items';
