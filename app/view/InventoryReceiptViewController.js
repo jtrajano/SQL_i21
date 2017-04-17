@@ -5903,14 +5903,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                         }
 
-                        var valFOBPoint = current.get('strFobPoint').trim();
+                        var valFOBPoint = current.get('strFobPoint');
+                        valFOBPoint = valFOBPoint ? valFOBPoint.trim().toLowerCase() : valFOBPoint;
 
                         //Calculate Item Taxes
                         if (current.tblICInventoryReceiptItems()) {
                             Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
                                 if (!item.dummy) {
                                     //Assign Tax Group Id from Location FOB Point is Destination
-                                    if (valFOBPoint.toLowerCase() === 'destination') {
+                                    if (valFOBPoint === 'destination') {
                                         item.set('intTaxGroupId', current.get('intTaxGroupId'));
                                         item.set('strTaxGroup', current.get('strTaxGroup'));
                                     }
