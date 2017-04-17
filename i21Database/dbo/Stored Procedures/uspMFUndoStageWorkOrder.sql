@@ -93,6 +93,17 @@ BEGIN TRY
 			AND ri.intItemId = @intInputItemId
 			AND ri.intRecipeItemTypeId = 1
 
+		IF @intConsumptionMethodId IS NULL
+		BEGIN
+			SELECT @intStorageLocationId = ri.intStorageLocationId
+				,@intConsumptionMethodId = ri.intConsumptionMethodId
+			FROM dbo.tblMFWorkOrderRecipeSubstituteItem rs
+			JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
+			WHERE rs.intWorkOrderId = @intWorkOrderId
+				AND rs.intSubstituteItemId = @intInputItemId
+				AND rs.intRecipeItemTypeId = 1
+		END
+
 		SELECT @strNewLotNumber = strLotNumber
 			,@dblWeightPerQty = dblWeightPerQty
 			,@intItemUOMId = intItemUOMId
