@@ -53,7 +53,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
 
     onMonthSelect: function (combo, record) {
         var current = this.getView().viewModel.data.current;
-        current.set('intMonth', record[0].data.intMonth);
+        current.set('intMonth', record[0].data.intStartMonth);
         current.set('dtmDate', record[0].data.dtmStartDate);
     },
 
@@ -235,14 +235,46 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
             me.setupAdditionalBinding({ window: win, context: context, viewModel: vm });
             context.data.addRecord();
         }
+
+        //var cboFiscalMonth = win.down("#cboFiscalMonth");
+        var d = new Date();
+        var intMonth = d.getMonth() + 1;
+        var strMonth = months[d.getMonth()].strMonth;
+        var dtmDate = new Date(d.getFullYear(), d.getMonth(), 1);
+        
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryValuation/GetFiscalMonths',
+            method: 'GET',
+            params: {
+                page: 1,
+                limit: 1    
+            }
+        }).subscribe(function(success) {
+            if(success.responseText !== "") {
+                var res = JSON.parse(success.responseText);
+                if(res && res.success === true) {
+                    var fy = _.filter(res.data, function(x) {
+                        return x.intStartMonth === intMonth && d.getFullYear().toString() === x.strFiscalYear;
+                    });
+                    if(fy) {
+                        var current = vm.data.current;
+                        current.set('intMonth', fy[0].intStartMonth);
+                        current.set('dtmDate', fy[0].dtmStartDate);
+                        current.set('strMonth', fy[0].strStartMonth);
+                    }
+                }
+            }
+        }, function(failure) {
+
+        });
     },
 
     createRecord: function (config, action) {
         var record = Ext.create('Inventory.model.RebuildInventory');
         var d = new Date();
-        record.set('intMonth', d.getMonth() + 1);
-        record.set('strMonth', months[d.getMonth()].strMonth);
-        record.set('dtmDate', new Date(d.getFullYear(), d.getMonth(), 1));
+        // record.set('intMonth', d.getMonth() + 1);
+        // record.set('strMonth', months[d.getMonth()].strMonth);
+        // record.set('dtmDate', new Date(d.getFullYear(), d.getMonth(), 1));
         record.set('strPostOrder', 'Periodic');
         action(record);
     },
@@ -262,7 +294,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
             win = config.window,
             store = Ext.create('Inventory.store.RebuildInventory', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
             createRecord: me.createRecord,
