@@ -289,7 +289,6 @@
     <None Include="dbo\Functions\fnTMGetSpecialPricingPrice.sql" />
     <Build Include="dbo\Tables\tblAPapeglmst.sql" />
     <Build Include="dbo\Tables\tblAPaphglmst.sql" />
-    <Build Include="dbo\Tables\tblAPapivcmst.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportBillsFromAPIVCMST.sql" />
     <Build Include="dbo\Functions\fnValidateBillsImport.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>

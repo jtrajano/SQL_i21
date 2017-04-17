@@ -312,4 +312,7 @@
     <None Include="Scripts\Pre-Deployment\12_EM\21_CleanAPBillMissingContact.sql" />
 
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\8_AP\tblAPapivcmst.sql" />
+  </ItemGroup>
 </Project>
