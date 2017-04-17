@@ -549,6 +549,15 @@ if(_url.indexOf('version=TF') < 1) {
                                             commonIC
 
                                         ]
+                                    },
+                                    {
+                                        url: 'BusinessDomain/InventoryReceipt/DirectInventoryReceipt/DirectIR10-11.js?v=' + version,
+                                        title: 'DirectIR-Scen.10-11',
+                                        preload: [
+                                            functionalTest,
+                                            commonIC
+
+                                        ]
                                     }
 
                                 ]

@@ -109,6 +109,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Save')
             .waitUntilLoaded()
             .clickButton('Close')
+            .waitUntilLoaded()
             .clickMenuFolder('Inventory','Folder')
             .displayText('===== Item Created =====')
             .done();

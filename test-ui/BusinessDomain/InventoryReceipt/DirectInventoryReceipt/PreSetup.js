@@ -102,7 +102,6 @@ StartTest (function (t) {
         .clickButton('Close')
         .waitUntilLoaded()
         .clickMenuFolder('Inventory','Folder')
-        .waitUntilLoaded()
 
 
         .displayText('===== Add Commodity KG Stock Unit =====')
@@ -161,6 +160,7 @@ StartTest (function (t) {
         .clickTab('Location')
         .clickButton('AddLocation')
         .waitUntilLoaded('')
+        .waitUntilLoaded('')
         .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
         .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',0)
         .selectComboBoxRowValue('IssueUom', 'KG', 'IssueUom',0)
@@ -169,6 +169,7 @@ StartTest (function (t) {
         .clickButton('Close')
 
         .clickButton('AddLocation')
+        .waitUntilLoaded('')
         .waitUntilLoaded('')
         .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
         .selectComboBoxRowValue('SubLocation', 'Indy', 'SubLocation',0)
