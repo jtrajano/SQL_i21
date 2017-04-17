@@ -39,8 +39,8 @@
 		DECLARE @Quantity			NUMERIC(18,6)
 		DECLARE @TaxGroupId		INT	
 		DECLARE @TotalItemTax	NUMERIC(18,6) = 0.00 	
-        
         DECLARE @SiteTaxable    BIT
+		DECLARE @CustomerEntityId INT
 	
 		SET @rpt_date_ti = @str_rpt_date_ti
  
@@ -455,7 +455,7 @@
 						,@ItemPrice = A.[dblPrice]
 						,@Quantity = A.[dblQuantityToUse]
 						,@TaxGroupId = A.intTaxStateID
-                        ,@CustomerId = B.intCustomerNumber
+                        ,@CustomerEntityId = B.intCustomerNumber
                         ,@SiteTaxable = ISNULL(C.ysnTaxable,0)
 					FROM #tmpDispatchInsert A
                     INNER JOIN tblTMSite C
@@ -465,7 +465,7 @@
 					
 					SET @TotalItemTax = dbo.[fnTMGetItemTotalTaxForCustomer](
                                             @ItemId
-                                            ,@CustomerId
+                                            ,@CustomerEntityId
                                             ,@TransactionDate
                                             ,@ItemPrice
                                             ,@Quantity
