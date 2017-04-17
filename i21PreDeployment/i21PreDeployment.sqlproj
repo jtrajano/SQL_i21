@@ -310,4 +310,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\Remove_Unused_Shipment_Item_Fields.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\21_CleanAPBillMissingContact.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\8_AP\tblAPapivcmst.sql" />
+  </ItemGroup>
 </Project>
