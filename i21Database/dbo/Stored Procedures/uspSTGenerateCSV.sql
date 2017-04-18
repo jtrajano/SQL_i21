@@ -8,7 +8,8 @@
 @strCSV NVARCHAR(MAX) OUTPUT
 AS
 BEGIN
-	
+	Begin Try
+
 	--Get Vendor Name
 	DECLARE @strVendorName NVARCHAR(200)
 	SELECT @strVendorName = strName FROM tblEMEntity WHERE intEntityId = @intVendorId
@@ -564,4 +565,9 @@ BEGIN
 	SET @SQL = 'DELETE FROM ' + @strTableName
 	EXEC sp_executesql @SQL
 
+	End Try
+
+	Begin Catch
+		SET @strStatusMsg = ERROR_MESSAGE()
+	End Catch
 END

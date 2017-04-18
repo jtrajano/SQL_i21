@@ -4,6 +4,7 @@
 @intCountRows int OUTPUT
 AS
 BEGIN
+	Begin Try
 
 	DECLARE @intStoreId Int
 	Select @intStoreId = intStoreId from dbo.tblSTCheckoutHeader Where intCheckoutId = @intCheckoutId
@@ -58,4 +59,11 @@ BEGIN
 
 	SET @intCountRows = 1
 	SET @strStatusMsg = 'Success'
+
+	End Try
+
+	Begin Catch
+		SET @intCountRows = 0
+		SET @strStatusMsg = ERROR_MESSAGE()
+	End Catch
 END
