@@ -91,7 +91,7 @@ SET ANSI_WARNINGS OFF
 	BEGIN TRANSACTION
 
 	UPDATE tblARCustomer SET dtmLastActivityDate = GETDATE() 
-	WHERE intEntityCustomerId IN (SELECT intCustomerPatronId FROM #tempPatronageVolumes)
+	WHERE intEntityId IN (SELECT intCustomerPatronId FROM #tempPatronageVolumes)
 
 	BEGIN TRY
 	MERGE tblPATCustomerVolume AS PAT
