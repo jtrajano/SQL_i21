@@ -118,7 +118,9 @@ SELECT
 	Item.intTonnageTaxUOMId,
 	strTonnageTaxUOM = TonnageUOM.strUnitMeasure,
 	Item.intModuleId,
-	m.strModule
+	m.strModule,
+	Item.ysnUseWeighScales
+
 FROM	
 	tblICItem Item 
 	LEFT JOIN (
