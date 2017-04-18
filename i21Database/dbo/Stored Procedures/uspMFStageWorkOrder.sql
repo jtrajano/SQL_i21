@@ -152,6 +152,20 @@ BEGIN TRY
 		FROM tblICLot
 		WHERE intLotId = @intInputLotId
 
+
+		IF @dblInputWeight > @dblWeight
+		BEGIN
+			IF @ysnExcessConsumptionAllowed = 0
+			BEGIN
+				RAISERROR (
+						51116
+						,14
+						,1
+						)
+			END 
+		END
+
+
 		IF @intInputLotId IS NULL
 			OR @intInputLotId = 0
 		BEGIN
