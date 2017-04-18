@@ -18,7 +18,7 @@ Ext.define('Inventory.model.MaterialNMFC', {
         { name: 'ysnDefault', type: 'boolean'},
         { name: 'ysnLocked', type: 'boolean'},
         { name: 'strLastUpdateBy', type: 'string'},
-        { name: 'dtmLastUpdateOn', type: 'date'},
+        { name: 'dtmLastUpdateOn', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intSort', type: 'int'}
     ]
 });

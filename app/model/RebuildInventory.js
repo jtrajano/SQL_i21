@@ -9,7 +9,7 @@ Ext.define('Inventory.model.RebuildInventory', {
 
     fields: [
         { name: 'intId', type: 'int' },
-        { name: 'dtmDate', type: 'date' },
+        { name: 'dtmDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'strPostOrder', type: 'string' },
         { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'intMonth', type: 'int' },
