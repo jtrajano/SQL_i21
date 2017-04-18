@@ -21,7 +21,7 @@ SELECT   A.intAccountId, A.intCustomerId, A.intDiscountDays, A.intDiscountSchedu
                          Cus.ysnActive AS EXPR13, Cus.intSalespersonId AS EXPR14, Cus.intCurrencyId, Cus.intTermsId, Cus.intShipViaId, Cus.strShipToLocationName, Cus.strShipToAddress, 
                          Cus.strShipToCity, Cus.strShipToState, Cus.strShipToZipCode, Cus.strShipToCountry, Cus.strBillToLocationName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState,
                           Cus.strBillToZipCode, Cus.strBillToCountry, I.strInvoiceCycle, arCustCon.strEmailDistributionOption, arCustCon.strEmail, arCustCon.ysnPortalAccess, arCustCon.ysnDefaultContact
-FROM         dbo.tblCFAccount AS A INNER JOIN
+FROM         dbo.tblCFAccount AS A LEFT JOIN
                          dbo.tblCFCard AS C ON A.intAccountId = C.intAccountId LEFT OUTER JOIN
                          dbo.tblCFNetwork AS N ON N.intNetworkId = C.intNetworkId LEFT OUTER JOIN
                          dbo.tblCFDepartment AS D ON D.intDepartmentId = C.intDepartmentId LEFT JOIN
