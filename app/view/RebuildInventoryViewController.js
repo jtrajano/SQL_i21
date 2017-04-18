@@ -242,31 +242,43 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         var strMonth = months[d.getMonth()].strMonth;
         var dtmDate = new Date(d.getFullYear(), d.getMonth(), 1);
         
-        ic.utils.ajax({
-            url: '../Inventory/api/InventoryValuation/GetFiscalMonths',
-            method: 'GET',
-            params: {
-                page: 1,
-                limit: 1    
-            }
-        }).subscribe(function(success) {
-            if(success.responseText !== "") {
-                var res = JSON.parse(success.responseText);
-                if(res && res.success === true) {
-                    var fy = _.filter(res.data, function(x) {
-                        return x.intStartMonth === intMonth && d.getFullYear().toString() === x.strFiscalYear;
+        var store = Ext.create('Inventory.store.FiscalPeriod');
+        store.load({
+            callback: function(record) {
+                if(record) {
+                    var fy = _.filter(record, function(x) {
+                        return x.data.intStartMonth === intMonth && d.getFullYear().toString() === x.data.strFiscalYear;
                     });
                     if(fy) {
                         var current = vm.data.current;
-                        current.set('intMonth', fy[0].intStartMonth);
-                        current.set('dtmDate', fy[0].dtmStartDate);
-                        current.set('strMonth', fy[0].strStartMonth);
+                        current.set('intMonth', fy[0].data.intStartMonth);
+                        current.set('dtmDate', fy[0].data.dtmStartDate);
+                        current.set('strMonth', fy[0].data.strStartMonth);
                     }
                 }
             }
-        }, function(failure) {
-
         });
+        // ic.utils.ajax({
+        //     url: '../Inventory/api/InventoryValuation/GetFiscalMonths',
+        //     method: 'GET'
+        // }).subscribe(function(success) {
+        //     if(success.responseText !== "") {
+        //         var res = JSON.parse(success.responseText);
+        //         if(res && res.success === true) {
+        //             var fy = _.filter(res.data, function(x) {
+        //                 return x.intStartMonth === intMonth && d.getFullYear().toString() === x.strFiscalYear;
+        //             });
+        //             if(fy) {
+        //                 var current = vm.data.current;
+        //                 current.set('intMonth', fy[0].intStartMonth);
+        //                 current.set('dtmDate', fy[0].dtmStartDate);
+        //                 current.set('strMonth', fy[0].strStartMonth);
+        //             }
+        //         }
+        //     }
+        // }, function(failure) {
+
+        // });
     },
 
     createRecord: function (config, action) {
