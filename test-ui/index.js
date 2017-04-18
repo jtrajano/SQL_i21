@@ -152,7 +152,7 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'Category',
                     items: [
                         {
-                            url: 'CRUDScripts/Category/17xAddCategory.js?v='+version,
+                            url: 'CRUDScripts/Category/AddCategory.js?v='+version,
                             title: 'AddCategory',
                             preload: [
                                 functionalTest
