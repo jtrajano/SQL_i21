@@ -36,7 +36,7 @@ StartTest (function (t) {
 
         //region Scenario 3: Delete Multiple Storage Location
         .displayText('=====  Scenario 3: Delete Multiple Storage Location =====')
-        .selectSearchRowNumber([45,46])
+        .selectSearchRowNumber([72,73])
         .clickButton('OpenSelected')
         .waitUntilLoaded('icstorageunit')
         .clickButton('Delete')

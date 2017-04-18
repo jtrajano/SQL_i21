@@ -46,14 +46,10 @@ StartTest (function (t) {
 
         //region Scenario 3: Delete Multiple UnUsed Category
         .displayText('=====  Scenario 3: Delete Multiple UnUsed Category =====')
-        .selectSearchRowNumber([77,78,79,80,81,82,83,84])
+        .selectSearchRowNumber([78,79,80,81,82,83,84])
         .clickButton('OpenSelected')
         .waitUntilLoaded('iccategory')
         .waitUntilLoaded()
-        .clickButton('Delete')
-        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
-        .clickMessageBoxButton('yes')
-        .waitUntilLoaded('')
         .clickButton('Delete')
         .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno','question')
         .clickMessageBoxButton('yes')

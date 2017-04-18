@@ -1,5 +1,5 @@
 StartTest (function (t) {
-    new iRely.FunctionalTest().start(t)
+new iRely.FunctionalTest().start(t)
 
         //region Scenario 1: Add New Category - Inventory Type
         .displayText('===== Scenario 1: Add New Category - Inventory Type =====')
@@ -260,7 +260,7 @@ StartTest (function (t) {
         //region Scenario 10: Update Category
         .displayText('===== Scenario 10: Update Category =====')
         .clickMenuScreen('Categories','Screen')
-        .doubleClickSearchRowValue('001 - Inventory Category', 'strCategoryCode', 1)
+        .doubleClickSearchRowValue('Inventory Category', 'strCategoryCode', 1)
         .waitUntilLoaded('iccategory')
         .enterData('Text Field','Description','Updated Test Category Code')
         .selectComboBoxRowNumber('CostingMethod',2,0)
