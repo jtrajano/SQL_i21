@@ -306,6 +306,8 @@ Begin
 		Begin
 			Update tblICInventoryReceiptItem  Set ysnExported=1 Where intInventoryReceiptId=@intReceiptId
 
+			Update tblIPReceiptError Set strErrorMessage='Success' Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP'
+
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 			Values(@strMesssageType,'Success',@strRefNo,@strParam)
 		End
@@ -315,11 +317,11 @@ Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
 			--Log for sending mails
-			If Exists (Select 1 From tblIPReceiptError Where strDeliveryNo=@intReceiptId AND strPartnerNo='i212SAP')
-				Update tblIPReceiptError Set strErrorMessage=@strMessage Where strDeliveryNo=@intReceiptId
+			If Exists (Select 1 From tblIPReceiptError Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP')
+				Update tblIPReceiptError Set strErrorMessage=@strMessage Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP'
 			Else
-				Insert Into tblIPReceiptError(strDeliveryNo,strExternalRefNo,strErrorMessage,strPartnerNo,strImportStatus)
-				Values(@intReceiptId,@strRefNo,@strMessage,'i212SAP','Ack Sent')
+				Insert Into tblIPReceiptError(strExternalRefNo,strErrorMessage,strPartnerNo,strImportStatus)
+				Values(@strRefNo,@strMessage,'i212SAP','Ack Sent')
 
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
@@ -339,6 +341,8 @@ Begin
 		Begin
 			Update tblICInventoryReceiptItem  Set ysnExported=1 Where intInventoryReceiptId=@intReceiptId
 
+			Update tblIPReceiptError Set strErrorMessage='Success' Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP'
+
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 			Values(@strMesssageType,'Success',@strRefNo,'')
 		End
@@ -348,11 +352,11 @@ Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
 			--Log for sending mails
-			If Exists (Select 1 From tblIPReceiptError Where strDeliveryNo=@intReceiptId AND strPartnerNo='i212SAP')
-				Update tblIPReceiptError Set strErrorMessage=@strMessage Where strDeliveryNo=@intReceiptId
+			If Exists (Select 1 From tblIPReceiptError Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP')
+				Update tblIPReceiptError Set strErrorMessage=@strMessage Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP'
 			Else
-				Insert Into tblIPReceiptError(strDeliveryNo,strExternalRefNo,strErrorMessage,strPartnerNo,strImportStatus)
-				Values(@intReceiptId,@strRefNo,@strMessage,'i212SAP','Ack Sent')
+				Insert Into tblIPReceiptError(strExternalRefNo,strErrorMessage,strPartnerNo,strImportStatus)
+				Values(@strRefNo,@strMessage,'i212SAP','Ack Sent')
 
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 			Values(@strMesssageType,@strMessage,@strRefNo,'')

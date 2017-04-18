@@ -119,15 +119,16 @@ Begin
 	'<tr>
 		   <td>&nbsp;'  + ISNULL(strExternalRefNo,'') + '</td>'
 		   + '<td>&nbsp;' + ISNULL((select TOP 1 strCommodityCode from tblICCommodity c Join tblICItem i on c.intCommodityId=i.intCommodityId 
-		   Join tblICInventoryReceiptItem ri on i.intItemId=ri.intItemId  Where ri.intInventoryReceiptId=r.strDeliveryNo),'') + '</td>'
+		   Join tblICInventoryReceiptItem ri on i.intItemId=ri.intItemId
+		   Join tblICInventoryReceipt rh on ri.intInventoryReceiptId=rh.intInventoryReceiptId Where rh.strReceiptNumber=r.strExternalRefNo),'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strErrorMessage,'') + '</td>
 	</tr>'
 	From tblIPReceiptError r
 	Where strPartnerNo='i212SAP' AND GETDATE() > DATEADD(MI,@intDuration,dtmTransactionDate)
-	AND ISNULL(ysnMailSent,0)=0
+	AND ISNULL(ysnMailSent,0)=0 AND ISNULL(strErrorMessage,'') <>'Success'
 
 	Update tblIPReceiptError Set ysnMailSent=1
-	Where strPartnerNo='i212SAP' AND GETDATE() > DATEADD(MI,@intDuration,dtmTransactionDate)
+	Where strPartnerNo='i212SAP' AND GETDATE() > DATEADD(MI,@intDuration,dtmTransactionDate) AND ISNULL(strErrorMessage,'') <>'Success'
 End
 
 Set @strHtml=REPLACE(@strHtml,'@header',@strHeader)
