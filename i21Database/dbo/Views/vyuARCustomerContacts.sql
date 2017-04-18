@@ -15,7 +15,8 @@ D.strEmailDistributionOption,
 C.ysnPortalAccess,
 D.ysnActive,
 D.ysnReceiveEmail,
-C.ysnDefaultContact 
+C.ysnDefaultContact,
+E.strCheckPayeeName
 FROM dbo.tblARCustomer AS A INNER JOIN
 	dbo.tblEMEntity AS B ON A.intEntityCustomerId = B.intEntityId INNER JOIN
 	dbo.[tblEMEntityToContact] AS C ON A.intEntityCustomerId = C.intEntityId INNER JOIN
