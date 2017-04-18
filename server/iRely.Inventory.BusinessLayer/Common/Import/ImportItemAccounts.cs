@@ -12,7 +12,7 @@ namespace iRely.Inventory.BusinessLayer
     {
         protected override string[] GetRequiredFields()
         {
-            return new string[] { "item no", "account category", "account id" };
+            return new string[] { "item no", "gl account category", "gl account id" };
         }
 
         protected override tblICItemAccount ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
@@ -20,6 +20,7 @@ namespace iRely.Inventory.BusinessLayer
             tblICItemAccount fc = new tblICItemAccount();
 
             bool valid = true;
+            string category = null, account = null;
 
             for (var i = 0; i < fieldCount; i++)
             {
@@ -71,6 +72,7 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         break;
                     case "account category":
+                    case "gl account category":
                         if (string.IsNullOrEmpty(value))
                         {
                             valid = false;
@@ -80,7 +82,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Status = STAT_REC_SKIP,
-                                Message = "Account Category should not be blank."
+                                Message = "GL Account Category should not be blank."
                             });
                             dr.Info = INFO_WARN;
                             break;
@@ -92,6 +94,7 @@ namespace iRely.Inventory.BusinessLayer
                         if (lu != null)
                         {
                             fc.intAccountCategoryId = (int) lu;
+                            category = value;
                         }
                         else
                         {
@@ -102,12 +105,13 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Status = STAT_REC_SKIP,
-                                Message = "The Account Category " + value + " does not exist."
+                                Message = "The GL Account Category " + value + " does not exist."
                             });
                             dr.Info = INFO_WARN;
                         }
                         break;
                     case "account id":
+                    case "gl account id":
                         if (string.IsNullOrEmpty(value))
                         {
                             valid = false;
@@ -117,7 +121,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Status = STAT_REC_SKIP,
-                                Message = "Account Id should not be blank."
+                                Message = "GL Account Id should not be blank."
                             });
                             dr.Info = INFO_WARN;
                             break;
@@ -129,6 +133,7 @@ namespace iRely.Inventory.BusinessLayer
                         if (lu != null)
                         {
                             fc.intAccountId = (int) lu;
+                            account = value;
                         }
                         else
                         {
@@ -139,13 +144,16 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Status = STAT_REC_SKIP,
-                                Message = "The Account Id " + value + " does not exist."
+                                Message = "The GL Account Id " + value + " does not exist."
                             });
                             dr.Info = INFO_WARN;
                         }
                         break;
                 }
             }
+
+            if(fc != null && account != null && category != null)
+                valid = IsAccountMatchedForCategory(category, account, dr, "GL Account Id", row);
 
             if (!valid)
                 return null;
@@ -184,7 +192,7 @@ namespace iRely.Inventory.BusinessLayer
                     {
                         ActionIcon = ICON_ACTION_EDIT,
                         Description = "Updated GL Account",
-                        ToValue = string.Format("Account Category: {0}, Account Id: {1}",
+                        ToValue = string.Format("GL Account Category: {0}, GL Account Id: {1}",
                             entry.Property(e => e.strAccountCategory).CurrentValue,
                             entry.Property(e => e.strAccountId).CurrentValue)
                     });
@@ -198,10 +206,57 @@ namespace iRely.Inventory.BusinessLayer
                     ActionIcon = ICON_ACTION_NEW,
                     Description = "Created GL Account",
                     FromValue = "",
-                    ToValue = string.Format("Account Category: {0}, Account Id: {1}", fc.strAccountCategory, fc.strAccountId)
+                    ToValue = string.Format("GL Account Category: {0}, GL Account Id: {1}", fc.strAccountCategory, fc.strAccountId)
                 });
             }
             return fc;
+        }
+
+        class vyuGLAccountDetail
+        {
+            public int? intAccountId { get; set; }
+        }
+
+        private bool IsAccountMatchedForCategory(string category, string account, ImportDataResult dr, string header, int row)
+        {
+            var p2 = new System.Data.SqlClient.SqlParameter("@p2", account.Trim().Replace("-", ""));
+            p2.DbType = System.Data.DbType.String;
+            var p1 = new System.Data.SqlClient.SqlParameter("@p1", category.Trim());
+            p1.DbType = System.Data.DbType.String;
+            var query = "SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = @p1 AND strAccountId1 = @p2";
+            IEnumerable<vyuGLAccountDetail> ships = context.ContextManager.Database.SqlQuery<vyuGLAccountDetail>(query, p1, p2);
+            try
+            {
+                vyuGLAccountDetail ship = ships.FirstOrDefault();
+                
+                if (ship != null)
+                    return true;
+                else
+                {
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Column = header,
+                        Row = row,
+                        Type = TYPE_INNER_ERROR,
+                        Message = "Invalid Account Id: " + account + '.',
+                        Status = STAT_REC_SKIP
+                    });
+                    dr.Info = INFO_ERROR;
+                }
+            }
+            catch (Exception e)
+            {
+                dr.Messages.Add(new ImportDataMessage()
+                {
+                    Column = header,
+                    Row = row,
+                    Type = TYPE_INNER_EXCEPTION,
+                    Message = "Error validating Account Id: " + account + ". " + e.Message,
+                    Status = STAT_REC_SKIP
+                });
+                dr.Info = INFO_ERROR;
+            }
+            return false;
         }
 
         protected override int GetPrimaryKeyId(ref tblICItemAccount entity)

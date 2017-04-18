@@ -10452,15 +10452,16 @@
             "fee564cf-f104-42ee-9b49-f11f6be0bf67",
             "4c8bcd03-8b60-4f37-ae7c-1a05db5452be",
             "fce4eccc-52e6-4176-8dc8-67140c5bb31a",
-            "fa67247d-7427-454a-9772-9371f6e5d623"
+            "fa67247d-7427-454a-9772-9371f6e5d623",
+            "467f343c-c005-4700-bed6-351559b316d7"
         ]
     },
     "canvasState": {
-        "topInstance": "fa67247d-7427-454a-9772-9371f6e5d623"
+        "topInstance": "467f343c-c005-4700-bed6-351559b316d7"
     },
     "inspectorState": {
-        "topInstance": "fa67247d-7427-454a-9772-9371f6e5d623",
-        "selectedInstance": "104d8e04-975e-4794-8465-53b416c421fc"
+        "topInstance": "467f343c-c005-4700-bed6-351559b316d7",
+        "selectedInstance": "8a131473-8db8-43f0-81e2-0ad73f86a97c"
     },
     "editMode": "design",
     "userSettings": {
