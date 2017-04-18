@@ -99,10 +99,10 @@ WHERE
 	[intPaymentId] = @PaymentId
 
 SELECT
-	 @InvoiceTotal			= [dblInvoiceTotal] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
-	,@BaseInvoiceTotal		= [dblBaseInvoiceTotal] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
-	,@InvoiceAmountDue		= [dblAmountDue] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
-	,@BaseInvoiceAmountDue	= [dblBaseAmountDue] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
+	 @InvoiceTotal			= [dblInvoiceTotal] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment') THEN -1 ELSE 1 END)
+	,@BaseInvoiceTotal		= [dblBaseInvoiceTotal] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment') THEN -1 ELSE 1 END)
+	,@InvoiceAmountDue		= [dblAmountDue] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment') THEN -1 ELSE 1 END)
+	,@BaseInvoiceAmountDue	= [dblBaseAmountDue] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment') THEN -1 ELSE 1 END)
 	,@TermDiscount			= [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 	,@BaseTermDiscount		= [dbo].fnRoundBanker([dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 	,@InvoiceNumber			= [strInvoiceNumber]
@@ -146,7 +146,7 @@ IF ISNULL(@AllowOverpayment,0) = 0 AND (@PaymentTotal + @Payment) > (@AmountPaid
 		RETURN 0;
 	END
 
-IF @TransactionType IN ('Credit Memo','Overpayment','Customer Prepayment') AND @Payment > 0
+IF @TransactionType IN ('Credit Memo','Overpayment') AND @Payment > 0
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120061, 16, 1, @TransactionType);

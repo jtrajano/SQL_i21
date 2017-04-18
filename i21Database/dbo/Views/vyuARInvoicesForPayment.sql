@@ -55,6 +55,7 @@ SELECT
 	,[strCurrencyExchangeRateType]		= DFR.[strCurrencyExchangeRateType]
 	,[intCurrencyExchangeRateId]		= DFR.[intCurrencyExchangeRateId]
 	,[dblCurrencyExchangeRate]			= DFR.[dblCurrencyExchangeRate]
+	,[ysnInvoicePrepayment]				= ARIFP.ysnInvoicePrepayment
 FROM
 	(
 		SELECT 
@@ -103,6 +104,7 @@ FROM
 										 END)
 			,intPaymentMethodId				= ARC.intPaymentMethodId	
 			,strPaymentMethod				= SMP.strPaymentMethod
+			,ysnInvoicePrepayment			=  ARP.ysnInvoicePrepayment
 		FROM
 			[tblARInvoice] ARI
 		INNER JOIN
@@ -124,6 +126,15 @@ FROM
 				strPaymentMethod
 			 FROM
 				dbo.tblSMPaymentMethod) AS SMP ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
+		LEFT OUTER JOIN
+			(
+				SELECT
+					intPaymentId
+					,ysnInvoicePrepayment
+				FROM
+					tblARPayment
+			) ARP
+				ON ARI.intPaymentId = ARP.intPaymentId 
 		LEFT OUTER JOIN 
 			(
 			SELECT
@@ -181,6 +192,7 @@ FROM
 			,[ysnExcludeForPayment]		= CONVERT(BIT, 0)
 			,intPaymentMethodId			= APV.intPaymentMethodId	
 			,strPaymentMethod			= SMP.strPaymentMethod
+			,ysnInvoicePrepayment			=  NULL
 		FROM
 			tblAPBill APB
 		INNER JOIN

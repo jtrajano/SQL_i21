@@ -8,13 +8,6 @@ AS
 
 BEGIN
 
-
-
-
-
-
-
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -131,7 +124,7 @@ BEGIN TRY
 		,@BankAccountId		= CASE WHEN ARI.[strTransactionType] = 'Customer Prepayment' THEN 
 									(SELECT TOP 1 intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId IN (SELECT TOP 1 intDepositAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = ARI.intCompanyLocationId))
 								ELSE NULL END
-		,@AmountPaid		= ARI.[dblAmountDue] * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
+		,@AmountPaid		= ARI.[dblAmountDue] * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Overpayment') THEN -1 ELSE 1 END)
 		,@PaymentMethodId	=  ISNULL(@PaymentMethodId, ARI.[intPaymentMethodId])
 		,@PaymentInfo		= ''
 		,@ApplytoBudget		= 0
@@ -139,7 +132,7 @@ BEGIN TRY
 		,@Notes				= ''
 		,@AllowPrepayment	= 0
 		,@AllowOverpayment	= 0
-		,@Payment			= ARI.[dblAmountDue] * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
+		,@Payment			= ARI.[dblAmountDue] * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Overpayment') THEN -1 ELSE 1 END)
 		,@ApplyTermDiscount	= @ZeroDecimal
 		,@Discount			= @ZeroDecimal
 		,@Interest			= @ZeroDecimal
