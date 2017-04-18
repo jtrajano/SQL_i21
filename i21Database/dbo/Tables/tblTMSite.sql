@@ -14,7 +14,7 @@
     [dblDegreeDayBetweenDelivery] NUMERIC (18, 6) DEFAULT 0 NULL,
     [dblSummerDailyUse]           NUMERIC (18, 6) DEFAULT 0 NOT NULL,
     [dblWinterDailyUse]           NUMERIC (18, 6) DEFAULT 0 NOT NULL,
-    [ysnTaxable]                  BIT             DEFAULT 0 NULL,
+    [ysnTaxable]                  BIT             DEFAULT 0 NOT NULL,
     [intTaxStateID]               INT             DEFAULT 0 NULL,
     [ysnPrintDeliveryTicket]      BIT             DEFAULT 0 NOT NULL,
     [ysnAdjustBurnRate]           BIT             DEFAULT 0 NULL,
