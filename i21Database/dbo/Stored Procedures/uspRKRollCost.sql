@@ -2,7 +2,6 @@
 	@dtmFromDate datetime = null,
 	@dtmToDate datetime = null
 AS
-
 DECLARE @RollCost AS TABLE 
 (intRowNumber INT IDENTITY(1,1) PRIMARY KEY, 
 strFutMarketName  nvarchar(50),
@@ -126,13 +125,13 @@ SELECT distinct ft.intFutOptTransactionId,strInternalTradeNo,ft.intFutureMarketI
 			JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intSFutOptTransactionId
 			WHERE fut.intFutOptTransactionId=ft.intFutOptTransactionId) intSellMatchId
 
-			,(		SELECT distinct top 1					
-						m.intMatchFuturesPSDetailId intMatchFuturesPSDetailId
-					FROM tblRKFutOptTransaction t
-					JOIN tblRKFutOptTransaction ft1 on ft1.intRollingMonthId=t.intRollingMonthId  and isnull(ft1.intRollingMonthId,0) <>0
-					JOIN tblRKMatchFuturesPSDetail m on m.intSFutOptTransactionId=ft1.intFutOptTransactionId  
-					JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intLFutOptTransactionId  
-					WHERE fut.intFutOptTransactionId=ft.intFutOptTransactionId) intBuyMatchId
+		,(SELECT distinct top 1					
+					m.intMatchFuturesPSDetailId intMatchFuturesPSDetailId
+				FROM tblRKFutOptTransaction t
+				JOIN tblRKFutOptTransaction ft1 on ft1.intRollingMonthId=t.intRollingMonthId  and isnull(ft1.intRollingMonthId,0) <>0
+				JOIN tblRKMatchFuturesPSDetail m on m.intSFutOptTransactionId=ft1.intFutOptTransactionId  
+				JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intLFutOptTransactionId  
+				WHERE fut.intFutOptTransactionId=ft.intFutOptTransactionId) intBuyMatchId
 
 		,isnull((SELECT sum(intNoOfContract) from tblRKFutOptTransaction foot  where strBuySell='Buy'
 				and  foot.intFutOptTransactionId =ft.intFutOptTransactionId ),0) intNoOfContract
@@ -229,12 +228,13 @@ FROM @RollCostDetail
 FROM(
   SELECT intRowNumber,strFutMarketName,strCommodityCode,strFutureMonth,dblWtAvgOpenLongPosition,dblSumBuy,dblSellMinusBuy,
 		dblSumBuy+ case when isnull(dblSellMinusBuy,0) < 0 then  abs(dblSellMinusBuy) else -dblSellMinusBuy end dblAdjustedSpent,
-		((dblSumBuy+ case when isnull(dblSellMinusBuy,0) < 0 then  abs(dblSellMinusBuy) else -dblSellMinusBuy end)/case when isnull(dblSumQty,0) = 0 then 1 else dblSumQty end/dblContractSize)
-		*case when isnull(ysnSubCurrency,0)= 0 then 1 else 100 end
+		case when isnull(dblSellMinusBuy,0)= 0 then dblSumBuyForHistorical else 
+		
+		(((dblSumBuy+ case when isnull(dblSellMinusBuy,0) < 0 then  abs(dblSellMinusBuy) else -dblSellMinusBuy end)
+			/case when isnull(dblSumQty,0) = 0 then 1 else dblSumQty end/dblContractSize)
+		*case when isnull(ysnSubCurrency,0)= 0 then 1 else 100 end) end
 		 dblWtAvgPosition1,		  
 		 dblSumBuyForHistorical dblSumAvgLong,dblSumQty,ysnSubCurrency,dblContractSize,dblAvgLongQty,dblNoOfContractAvg  from #temp
 )t
 )t1
 		ORDER BY strFutMarketName, CONVERT(DATETIME,'01 '+strFutureMonth) ASC 
- 
- 
