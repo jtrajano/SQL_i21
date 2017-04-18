@@ -1,6 +1,4 @@
-﻿
-IF (SELECT ysnLegacyIntegration FROM tblSMCompanyPreference) > 0
-BEGIN
+﻿BEGIN
 	IF NOT EXISTS(select top 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tblAPapivcmst')
 	BEGIN
 	EXEC('CREATE TABLE [dbo].[tblAPapivcmst](
@@ -39,5 +37,5 @@ BEGIN
 		[dtmDateImported] DATETIME NULL DEFAULT GETDATE(),
 		[intId] INT IDENTITY(1,1) NOT NULL PRIMARY KEY
 	) ON [PRIMARY] ') 
-END    
+	END    
 END
