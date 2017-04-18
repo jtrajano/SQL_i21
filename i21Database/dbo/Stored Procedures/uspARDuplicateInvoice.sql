@@ -367,9 +367,12 @@ BEGIN TRY
 		,[dblDiscount]
 		,[dblItemTermDiscount]
 		,[dblPrice]
+		,[dblBasePrice]
 		,[strPricing]
 		,[dblTotalTax]
+		,[dblBaseTotalTax]
 		,[dblTotal]
+		,[dblBaseTotal]
 		,[intSubCurrencyId]
 		,[dblSubCurrencyRate]
 		,[intAccountId]
@@ -381,7 +384,9 @@ BEGIN TRY
 		,[strFrequency]
 		,[dtmMaintenanceDate]
 		,[dblMaintenanceAmount]
+		,[dblBaseMaintenanceAmount]
 		,[dblLicenseAmount]
+		,[dblBaseLicenseAmount]
 		,[intTaxGroupId]
 		,[intSCInvoiceId]
 		,[intSCBudgetId]
@@ -420,7 +425,9 @@ BEGIN TRY
 		,[intPrepayTypeId]
 		,[intStorageLocationId]
 		,[strVFDDocumentNumber]
-		,[intCompanyLocationSubLocationId])
+		,[intCompanyLocationSubLocationId]
+		,[intCurrencyExchangeRateTypeId]
+		,[dblCurrencyExchangeRate])
 	SELECT 
 		 [intInvoiceId]					= @CreatedInvoiceId
 		,[strDocumentNumber]			= ''
@@ -440,9 +447,12 @@ BEGIN TRY
 		,[dblDiscount]					= ARID.[dblDiscount]
 		,[dblItemTermDiscount]			= ARID.[dblItemTermDiscount]
 		,[dblPrice]						= ARID.[dblPrice]
+		,[dblBasePrice]					= ARID.[dblBasePrice]
 		,[strPricing]					= ARID.[strPricing]
 		,[dblTotalTax]					= ARID.[dblTotalTax]
+		,[dblBaseTotalTax]				= ARID.[dblBaseTotalTax]
 		,[dblTotal]						= ARID.[dblTotal]
+		,[dblBaseTotal]					= ARID.[dblBaseTotal]
 		,[intSubCurrencyId]				= ARID.[intSubCurrencyId]
 		,[dblSubCurrencyRate]			= ARID.[dblSubCurrencyRate]
 		,[intAccountId]					= ARID.[intAccountId]
@@ -454,7 +464,9 @@ BEGIN TRY
 		,[strFrequency]					= ARID.[strFrequency]
 		,[dtmMaintenanceDate]			= ARID.[dtmMaintenanceDate]
 		,[dblMaintenanceAmount]			= ARID.[dblMaintenanceAmount]
+		,[dblBaseMaintenanceAmount]		= ARID.[dblBaseMaintenanceAmount]
 		,[dblLicenseAmount]				= ARID.[dblLicenseAmount]
+		,[dblBaseLicenseAmount]			= ARID.[dblBaseLicenseAmount]
 		,[intTaxGroupId]				= ARID.[intTaxGroupId]
 		,[intSCInvoiceId]				= NULL
 		,[intSCBudgetId]				= NULL
@@ -494,6 +506,8 @@ BEGIN TRY
 		,[intStorageLocationId]			= ARID.intStorageLocationId
 		,[strVFDDocumentNumber]			= ARID.strVFDDocumentNumber
 		,[intCompanyLocationSubLocationId] = ARID.intCompanyLocationSubLocationId
+		,[intCurrencyExchangeRateTypeId]	= ARID.[intCurrencyExchangeRateTypeId]
+		,[dblCurrencyExchangeRate]		= ARID.[dblCurrencyExchangeRate]
 	FROM
 		tblARInvoiceDetail ARID
 	LEFT OUTER JOIN
