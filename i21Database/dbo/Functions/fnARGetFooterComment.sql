@@ -12,7 +12,8 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @footerComment = B.strMessage --strCommentDesc
 			FROM [tblSMDocumentMaintenance] A
-			INNER JOIN (SELECT intDocumentMaintenanceId, strMessage 
+			INNER JOIN (SELECT intDocumentMaintenanceId
+						     , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
 						FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 			WHERE [strSource] = @strTransactionType
 				AND intCompanyLocationId = @intCompanyLocationId
@@ -23,7 +24,8 @@ BEGIN
 				BEGIN
 					SELECT TOP 1 @footerComment = B.strMessage --strCommentDesc
 					FROM [tblSMDocumentMaintenance] A
-					INNER JOIN (SELECT intDocumentMaintenanceId, strMessage 
+					INNER JOIN (SELECT intDocumentMaintenanceId
+									 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
 								FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 					WHERE [strSource] = @strTransactionType
 					  AND intCompanyLocationId = @intCompanyLocationId
@@ -35,7 +37,8 @@ BEGIN
 				BEGIN
 					SELECT TOP 1 @footerComment = B.strMessage --strCommentDesc
 					FROM [tblSMDocumentMaintenance]	A
-					INNER JOIN (SELECT intDocumentMaintenanceId, strMessage 
+					INNER JOIN (SELECT intDocumentMaintenanceId
+									 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
 								FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 					WHERE [strSource] = @strTransactionType
 					  AND intCompanyLocationId IS NULL
@@ -47,7 +50,8 @@ BEGIN
 				BEGIN
 					SELECT TOP 1 @footerComment = B.strMessage--strCommentDesc
 					FROM [tblSMDocumentMaintenance] A
-					INNER JOIN (SELECT intDocumentMaintenanceId, strMessage 
+					INNER JOIN (SELECT intDocumentMaintenanceId
+									 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
 								FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 					WHERE [strSource] = @strTransactionType
 					  AND intCompanyLocationId IS NULL
