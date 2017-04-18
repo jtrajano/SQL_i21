@@ -4,6 +4,7 @@
 @intCountRows int OUTPUT
 AS
 BEGIN
+	Begin Try
 
 	--Get StoreId
 	DECLARE @intStoreId int
@@ -202,4 +203,11 @@ BEGIN
 	    SET @strStatusMsg = 'XML file is already been exported'
 		SET @intCountRows = 0
 	END
+
+	End Try
+
+	Begin Catch
+		SET @intCountRows = 0
+		SET @strStatusMsg = ERROR_MESSAGE()
+	End Catch
 END
