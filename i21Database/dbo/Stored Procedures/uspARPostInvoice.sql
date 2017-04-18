@@ -3865,7 +3865,8 @@ IF @post = 1
 
 		IF @recap = 0
 		BEGIN
-			BEGIN TRY 
+			BEGIN TRY
+				UPDATE @GLEntries SET [dtmDateEntered] = @PostDate 
 				EXEC dbo.uspGLBookEntries @GLEntries, @post
 			END TRY
 			BEGIN CATCH
