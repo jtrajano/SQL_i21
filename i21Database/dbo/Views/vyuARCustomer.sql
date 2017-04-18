@@ -37,6 +37,7 @@ SELECT
 ,Loc.strCountry
 ,Loc.strLocationName
 ,ysnHasBudgetSetup = cast(case when (select top 1 1 from tblARCustomerBudget where intEntityCustomerId = Cus.[intEntityId]) = 1 then 1 else 0 end as bit)
+,strDisplayName = Loc.strCheckPayeeName
 FROM tblEMEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 INNER JOIN [tblEMEntityToContact] as CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
