@@ -401,6 +401,17 @@ BEGIN
 					OR
 					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 				)
+
+			IF EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptticmst')
+				BEGIN
+					SELECT @Total = ISNULL(@Total, 0) + COUNT(pttic_ivc_no)
+					FROM ptticmst
+					WHERE (
+							((CASE WHEN ISDATE(pttic_rev_dt) = 1 THEN CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+							OR
+							((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+						  )
+				END
 		 END		 
 		
 	END
