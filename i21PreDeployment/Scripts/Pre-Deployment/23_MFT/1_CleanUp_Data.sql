@@ -1,4 +1,49 @@
-﻿IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFReportingComponentProductCode' AND COLUMN_NAME = 'intProductCodeId')
+﻿IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidProductCode' AND COLUMN_NAME = 'intReportingComponentDetailId')
+BEGIN
+	IF NOT EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidProductCode' AND COLUMN_NAME = 'intReportingComponentId')
+	BEGIN
+		EXEC('ALTER TABLE tblTFValidProductCode ADD intReportingComponentId INT NULL DEFAULT(0)')
+		
+		EXEC('UPDATE tblTFValidProductCode SET intReportingComponentId = intReportingComponentDetailId')
+	END
+END
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidProductCode' AND COLUMN_NAME = 'intProductCode')
+BEGIN
+	EXEC('UPDATE tblTFValidProductCode
+		SET tblTFValidProductCode.intProductCode = tblPatch.intProductCodeId
+		FROM (SELECT DISTINCT RCPC.intValidProductCodeId, RCPC.strProductCode, PC.intProductCodeId
+			FROM tblTFValidProductCode RCPC
+			LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCPC.intReportingComponentDetailId
+			LEFT JOIN tblTFProductCode PC ON PC.intTaxAuthorityId = RC.intTaxAuthorityId AND PC.strProductCode = RCPC.strProductCode
+			) tblPatch
+		WHERE tblPatch.intValidProductCodeId = tblTFValidProductCode.intValidProductCodeId
+			AND ISNULL(tblTFValidProductCode.intProductCode, '''') = ''''
+			AND ISNULL(tblTFValidProductCode.strProductCode, '''') <> ''''')
+
+	IF NOT EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidProductCode' AND COLUMN_NAME = 'intProductCodeId')
+	BEGIN
+		EXEC('ALTER TABLE tblTFValidProductCode ADD intProductCodeId INT NULL DEFAULT(0)')
+		
+		EXEC('UPDATE tblTFValidProductCode SET intProductCodeId = intProductCode')
+	END
+END
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFTransactions' AND COLUMN_NAME = 'intReportingComponentDetailId')
+BEGIN
+	EXEC('UPDATE tblTFTransactions
+		SET tblTFTransactions.intProductCodeId = tblPatch.intProductCodeId
+		FROM (SELECT DISTINCT Trans.intTransactionId, Trans.strProductCode, PC.intProductCodeId
+			FROM tblTFTransactions Trans
+			LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = Trans.intReportingComponentDetailId
+			LEFT JOIN tblTFProductCode PC ON PC.intTaxAuthorityId = RC.intTaxAuthorityId AND PC.strProductCode = Trans.strProductCode
+			) tblPatch
+		WHERE tblPatch.intTransactionId = tblTFTransactions.intTransactionId
+			AND ISNULL(tblTFTransactions.intProductCodeId, '''') = ''''
+			AND ISNULL(tblTFTransactions.strProductCode, '''') <> ''''')
+END
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFReportingComponentProductCode' AND COLUMN_NAME = 'intProductCodeId')
 		BEGIN
 			EXEC('DELETE FROM tblTFReportingComponentProductCode
 			WHERE intProductCodeId IS NULL')
