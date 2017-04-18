@@ -146,8 +146,9 @@ StartTest (function (t) {
         .verifyGridData('Charges', 1, 'colChargeTax', '0')
         .clickButton('CalculateCharges')
         .waitUntilLoaded('')
-        .verifyGridData('Charges', 1, 'colChargeAmount', '150')
+        .verifyGridData('Charges', 1, 'colChargeAmount', '150.00')
         .verifyGridData('Charges', 1, 'colChargeTax', '0.4')
+
         //.selectGridRowNumber('Charges',1)
         //.clickButton('ChargeTaxDetails')
         //.waitUntilLoaded('search',3000)
@@ -236,12 +237,8 @@ StartTest (function (t) {
         })
         .clickTab('Post Preview')
         .waitUntilLoaded('',3000)
-        .clickTab('Post Preview',3000)
-        .clickTab('Details')
-        .waitUntilLoaded('')
-        .clickTab('Post Preview',3000)
-        .clickTab('Post Preview',3000)
-        .waitUntilLoaded('')
+        .waitUntilLoaded('',3000)
+        .waitUntilLoaded('',3000)
         .displayText('===== Verify To Post entries =====')
         .verifyGridData('RecapTransaction', 1, 'colAccountId', '59012-0001-001')//Other Charge Expense
         .verifyGridData('RecapTransaction', 1, 'colDebit', '150')
@@ -269,17 +266,16 @@ StartTest (function (t) {
         .clickTab('Post Preview')
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
-        .clickTab('Post Preview')
         .waitUntilLoaded('',3000)
         .displayText('===== Verify after Post > To UnPost entries =====')
-        .verifyGridData('RecapTransaction', 3, 'colAccountId', '15012-0001-001')//Inventory
-        .verifyGridData('RecapTransaction', 3, 'colCredit', '1000')
-        .verifyGridData('RecapTransaction', 4, 'colAccountId', '20022-0001-001')//AP Clearing - Item A1
-        .verifyGridData('RecapTransaction', 4, 'colDebit', '1000')
-        .verifyGridData('RecapTransaction', 1, 'colAccountId', '59012-0001-001')//Other Charge Expense
-        .verifyGridData('RecapTransaction', 1, 'colCredit', '150')
-        .verifyGridData('RecapTransaction', 2, 'colAccountId', '20022-0001-001')//AP Clearing - Freight1
-        .verifyGridData('RecapTransaction', 2, 'colDebit', '150')
+        .verifyGridData('RecapTransaction', 1, 'colAccountId', '15012-0001-001')//Inventory
+        .verifyGridData('RecapTransaction', 1, 'colCredit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colAccountId', '20022-0001-001')//AP Clearing - Item A1
+        .verifyGridData('RecapTransaction', 2, 'colDebit', '1000')
+        .verifyGridData('RecapTransaction', 3, 'colAccountId', '59012-0001-001')//Other Charge Expense
+        .verifyGridData('RecapTransaction', 3, 'colCredit', '150')
+        .verifyGridData('RecapTransaction', 4, 'colAccountId', '20022-0001-001')//AP Clearing - Freight1
+        .verifyGridData('RecapTransaction', 4, 'colDebit', '150')
         .verifyGridData('RecapTransaction', 5, 'colAccountId', '72512-0001-001')//Tax Expense - Item A1
         .verifyGridData('RecapTransaction', 5, 'colCredit', '40')
         .verifyGridData('RecapTransaction', 6, 'colAccountId', '72512-0001-001')//Tax Expense - Freight1
@@ -294,7 +290,9 @@ StartTest (function (t) {
         .addResult('Successfully Unposted',3000)
         .clickTab('Details')
         .waitUntilLoaded('',3000)
+        .waitUntilLoaded('',3000)
         .clickTab('Post Preview')
+        .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
         .displayText('===== Verify after Unpost > To Post entries =====')
@@ -314,8 +312,11 @@ StartTest (function (t) {
         .verifyGridData('RecapTransaction', 7, 'colCredit', '40')
         .verifyGridData('RecapTransaction', 8, 'colAccountId', '20022-0001-001')//AP Clearing - Freight1
         .verifyGridData('RecapTransaction', 8, 'colCredit', '0.4')
-
-
+        .clickButton('Post')
+        .waitUntilLoaded('')
+        .addResult('Successfully Posted',3000)
+        .waitUntilLoaded('',3000)
+        .clickButton('Close')
         .displayText('===== Inventory Receipt Posted =====')
 
 
