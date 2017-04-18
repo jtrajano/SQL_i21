@@ -49,8 +49,8 @@ StartTest (function (t) {
 //    20012, 'Accounts Payable', 'Payables', 'AP Account'
 //    49012, 'Other Charge Income', 'Other Income', 'Other Charge Income'
 //    59012, 'Other Charge Expense', 'Other Expense', 'Other Charge Expense'
-//    25001, 'Sales Tax Liability','Sales Tax Payables','Sales Tax Account'
-//    72501, 'Tax Expense','Other Expenses','Purchase Tax Account'
+//    25012, 'Sales Tax Liability','Sales Tax Payables','Sales Tax Account'
+//    72512, 'Tax Expense','Other Expenses','Purchase Tax Account'
 
 
         .displayText('===== 2. Add GL Accounts =====')
