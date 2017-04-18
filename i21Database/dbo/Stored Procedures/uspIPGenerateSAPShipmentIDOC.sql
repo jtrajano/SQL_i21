@@ -355,6 +355,8 @@ Begin
 				Set @strItemXml += '<VOLUM>'  +  '1' + '</VOLUM>' 
 			If ISNULL(@ysnBatchSplit,0)=1 AND UPPER(@strHeaderRowState)='MODIFIED'
 				Set @strItemXml += '<HIPOS>'  +  ISNULL(@strDeliveryItemNo,'') + '</HIPOS>'
+			If ISNULL(@ysnBatchSplit,0)=0 AND UPPER(@strCommodityCode)='COFFEE'
+				Set @strItemXml += '<LICHN>' + ISNULL(@strContainerNo,'') + '</LICHN>'
 
 			If UPPER(@strHeaderRowState)='MODIFIED'
 			Begin
