@@ -2152,7 +2152,39 @@ IF @recap = 1
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Credit
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) CreditUnit
-			
+
+		DECLARE @tmpBatchId NVARCHAR(100)
+		SELECT @tmpBatchId = [strBatchId] 
+		FROM @GLEntries A
+		INNER JOIN dbo.tblGLAccount B 
+			ON A.intAccountId = B.intAccountId
+		INNER JOIN dbo.tblGLAccountGroup C
+			ON B.intAccountGroupId = C.intAccountGroupId
+		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Credit
+		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) CreditUnit
+
+		UPDATE tblGLPostRecap SET strDescription = ABC.strDescription
+		FROM 
+			tblGLPostRecap
+		INNER JOIN
+		(
+			SELECT GLA.intAccountId, GLA.strDescription 
+			FROM 
+				(SELECT intAccountId, strDescription, strBatchId FROM tblGLPostRecap) GLPR
+				INNER JOIN 
+				(SELECT intAccountId, strDescription FROM tblGLAccount) GLA ON GLPR.intAccountId = GLPR.intAccountId
+				WHERE
+					ISNULL(GLPR.strDescription, '') = ''
+					AND GLPR.strBatchId = @tmpBatchId
+		) ABC ON tblGLPostRecap.intAccountId = ABC.intAccountId
+		WHERE 
+			ISNULL(tblGLPostRecap.strDescription, '') = ''
+			AND tblGLPostRecap.strBatchId = @tmpBatchId
+
+		--EXEC uspGLPostRecap @GLEntries, @UserEntityID 
+					
 	END TRY
 	BEGIN CATCH
 		SELECT @ErrorMerssage = ERROR_MESSAGE()
