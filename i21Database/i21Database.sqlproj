@@ -5184,6 +5184,7 @@
     <Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRollCostDetail.sql" />
     <Build Include="dbo\Views\vyuCFCalculatedInvoice.sql" />
+    <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
