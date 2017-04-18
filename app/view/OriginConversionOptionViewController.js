@@ -451,9 +451,9 @@ function getTemplateColumns(name) {
         case "Items":
             return ["Item No","Type","Short Name","Description","Manufacturer","Status","Commodity","Lot Tracking","Brand","Model No","Category","Stocked Item","Dyed Fuel","Barcode Print","MSDS Required","EPA Number","Inbound Tax","Outbound Tax","Restricted Chemical","Fuel Item","List Bundle Items Separately","Fuel Inspect Fee","RIN Required","Fuel Category","Denaturant Percentage","Tonnage Tax","Load Tracking","Mix Order","Hand Add Ingredients","Medication Tag","Ingredient Tag","Volume Rebate Group","Physical Item","Extend Pick Ticket","Export EDI","Hazard Material","Material Fee","Auto Blend","User Group Fee Percentage","Wgt Tolerance Percentage","Over Receive Tolerance Percentage","Maintenance Calculation Method","Rate","NACS Category","WIC Code","Receipt Comment Req","Count Code","Landed Cost","Lead Time","Taxable","Keywords","Case Qty","Date Ship","Tax Exempt","Drop Ship","Commissionable","Special Commission","Tank Required","Available for TM","Default Percentage Full","Patronage Category","Direct Sale"];
         case "Item GL Account Categories":
-            return ["Category", "Group", "Restricted"];
+            return ["Category Code", "GL Account Category", "GL Account Id"];
         case "Item GL Accounts":
-            return ["Item No", "Account Category", "Account Id"];
+            return ["Item No", "GL Account Category", "GL Account Id"];
         case "Item UOM":
             return ["Item No", "UOM", "Unit Qty", "Weight UOM", "UPC Code", "Short UPC Code", "Is Stock Unit",
                 "Allow Purchase", "Allow Sale", "Length", "Width", "Height", "Dimension UOM",
