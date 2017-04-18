@@ -1179,6 +1179,16 @@ GO
 	       [intSort]						=		113,
 		   [strPrefix]						=		N'FA'
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Document Management')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
+	SELECT [intModuleId]					=		114,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Document Management',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		114,
+		   [strPrefix]						=		N'DM'
+
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO
