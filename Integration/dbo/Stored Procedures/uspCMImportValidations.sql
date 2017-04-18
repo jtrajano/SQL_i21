@@ -69,8 +69,7 @@ BEGIN
 		--			ON accnt.intAccountGroupId = grp.intAccountGroupId
 		--WHERE	grp.strAccountGroup <> @CASH_ACCOUNT
 		--		OR grp.strAccountType <> @ASSET
-		SELECT	TOP 1 
-				@Invalid_GL_Account_Id_Found = 1  
+		SELECT	@Invalid_GL_Account_Id_Found = 1  
 		FROM	apcbkmst o INNER JOIN vyuGLAccountDetail accnt
 					ON dbo.fnGetGLAccountIdFromOriginToi21(o.apcbk_gl_cash) = accnt.intAccountId
 		WHERE	accnt.strAccountCategory <> @CASH_ACCOUNT
