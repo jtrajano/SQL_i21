@@ -177,7 +177,8 @@ Ext.define('Inventory.model.Item', {
         { name: 'intLotStatusId', type: 'int', allowNull: true },
         { name: 'strRequired', type: 'string' },
         { name: 'ysnBasisContract', type: 'boolean' },
-        { name: 'intTonnageTaxUOMId', type: 'int', allowNull: true }
+        { name: 'intTonnageTaxUOMId', type: 'int', allowNull: true },
+        { name: 'ysnUseWeighScales', type: 'boolean' }
     ],
 
     validators: [

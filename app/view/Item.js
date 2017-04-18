@@ -25,6 +25,7 @@ Ext.define('Inventory.view.Item', {
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.form.field.TextArea',
+        'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
         'Ext.form.field.Number',
@@ -33,7 +34,6 @@ Ext.define('Inventory.view.Item', {
         'Ext.grid.plugin.CellEditing',
         'Ext.selection.CheckboxModel',
         'Ext.form.Label',
-        'Ext.form.field.Checkbox',
         'Ext.form.field.Date',
         'Ext.grid.column.Date',
         'Ext.grid.feature.Summary',
@@ -305,6 +305,11 @@ Ext.define('Inventory.view.Item', {
                                                                 fieldLabel: 'Lot Tracking',
                                                                 displayField: 'strLotTracking',
                                                                 valueField: 'strLotTracking'
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkUseWeighScales',
+                                                                fieldLabel: 'Use Weigh Scales'
                                                             }
                                                         ]
                                                     },

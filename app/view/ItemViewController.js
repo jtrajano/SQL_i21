@@ -74,6 +74,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 store: '{invTracking}',
                 readOnly: '{checkLotTracking}'
             },
+            chkUseWeighScales: '{current.ysnUseWeighScales}',
 
             cfgStock: {
                 hidden: '{pgeStockHide}'

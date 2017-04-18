@@ -156,6 +156,8 @@ namespace iRely.Inventory.Model
         public string strRequired { get; set; }
         public bool? ysnBasisContract { get; set; }
         public int? intTonnageTaxUOMId { get; set; }
+        public bool? ysnUseWeighScales { get; set; }
+
         private string _strM2MComputation;
         [NotMapped]
         public string strM2MComputation
@@ -761,6 +763,7 @@ namespace iRely.Inventory.Model
         public string strTonnageTaxUOM { get; set; }
         public int? intModuleId { get; set; }
         public string strModule { get; set; }
+        public bool? ysnUseWeighScales { get; set; }
 
         public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
         public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }

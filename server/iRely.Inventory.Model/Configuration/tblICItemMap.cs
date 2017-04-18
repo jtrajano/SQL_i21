@@ -155,6 +155,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intLotStatusId).HasColumnName("intLotStatusId");
             this.Property(t => t.ysnBasisContract).HasColumnName("ysnBasisContract");
             this.Property(t => t.intTonnageTaxUOMId).HasColumnName("intTonnageTaxUOMId");
+            this.Property(t => t.ysnUseWeighScales).HasColumnName("ysnUseWeighScales");
 
             this.HasOptional(p => p.tblICBrand)
                 .WithMany(p => p.tblICItems)
@@ -489,6 +490,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strTonnageTaxUOM).HasColumnName("strTonnageTaxUOM");
             this.Property(t => t.intModuleId).HasColumnName("intModuleId");
             this.Property(t => t.strModule).HasColumnName("strModule");
+            this.Property(t => t.ysnUseWeighScales).HasColumnName("ysnUseWeighScales");
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)

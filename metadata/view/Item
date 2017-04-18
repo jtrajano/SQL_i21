@@ -595,6 +595,22 @@
                                                     },
                                                     "name": "MyComboBox6",
                                                     "designerId": "3a43a43f-e0cb-4c25-8d07-ede2f4b76de2"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Use Weigh Scales",
+                                                        "itemId": "chkUseWeighScales",
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox42",
+                                                    "designerId": "8539225c-1091-471f-bd3d-d3df859c6be2"
                                                 }
                                             ]
                                         },
@@ -15472,7 +15488,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging13",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
