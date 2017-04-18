@@ -223,5 +223,12 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchItemSubLocations(param));
         }
 
+        [HttpGet]
+        [ActionName("GetItemMotorFuelTax")]
+        public async Task<HttpResponseMessage> GetItemMotorFuelTax(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemMotorFuelTax(param));
+        }
+
     }
 }

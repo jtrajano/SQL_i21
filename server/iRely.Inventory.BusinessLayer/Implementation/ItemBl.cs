@@ -1067,5 +1067,28 @@ namespace iRely.Inventory.BusinessLayer
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
+
+        /// <summary>
+        /// Get Item Motor Fuel Tax 
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetItemMotorFuelTax(GetParameter param)
+        {
+            var query = (
+                from v in _db.GetQuery<vyuICGetItemMotorFuelTax>()
+                select v
+            ).Filter(param, true);
+
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+                //summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+
+        }
     }
 }
