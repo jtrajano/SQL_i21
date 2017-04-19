@@ -54,9 +54,9 @@ StartTest (function (t) {
         .addFunction(function(next){
             commonIC.addInventoryItem
             (t,next,
-                'DNLTI - 01'
+                'DNLTI - 02'
                 , 'Test Non Lotted Item Description'
-                , 'Grains'
+                , 'TestGrains'
                 , 'TestCorn'
                 , 4
                 , 'LB'
@@ -71,9 +71,9 @@ StartTest (function (t) {
         .addFunction(function(next){
             commonIC.addInventoryItem
             (t,next,
-                'DLTI - 01'
+                'DLTI - 02'
                 , 'Test Lotted Item Description'
-                , 'Grains'
+                , 'TestGrains'
                 , 'TestCorn'
                 , 3
                 , 'LB'
