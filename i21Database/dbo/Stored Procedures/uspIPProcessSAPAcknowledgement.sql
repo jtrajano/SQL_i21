@@ -31,6 +31,7 @@ DECLARE @intReceiptId INT
 DECLARE @strDeliveryType NVARCHAR(50)
 DECLARE @strPartnerNo NVARCHAR(100)
 DECLARE @strContractSeq NVARCHAR(50)
+DECLARE @intLoadStgId INT
 
 Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -209,9 +210,13 @@ Begin
 	Begin
 		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
 
+		--Get Last sent StgId
+		Select TOP 1 @intLoadStgId=intLoadStgId From tblLGLoadStg Where intLoadId=@intLoadId AND strFeedStatus='Awt Ack' Order By intLoadStgId Desc
+
 		If @strStatus IN (52,53) --Success
 			Begin
-				Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+				Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId 
+				AND Exists (Select 1 From tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId) 
 
 				Update tblLGLoad  Set strExternalShipmentNumber=@strParam,intConcurrencyId=intConcurrencyId+1
 				Where intLoadId=@intLoadId
@@ -270,9 +275,14 @@ Begin
 		If ISNULL(@intLoadId,0)=0
 			Select @intLoadId=intLoadId From tblLGLoadStg Where strLoadNumber=@strRefNo
 
+		--Get Last sent StgId
+		Select TOP 1 @intLoadStgId=intLoadStgId From tblLGLoadStg Where intLoadId=@intLoadId AND strFeedStatus='Awt Ack' Order By intLoadStgId Desc
+
 		If @strStatus IN (52,53) --Success
 		Begin
-			Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+			Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId 
+			AND Exists (Select 1 From tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId) 
+
 			Update tblLGLoad Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
 
 			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success'

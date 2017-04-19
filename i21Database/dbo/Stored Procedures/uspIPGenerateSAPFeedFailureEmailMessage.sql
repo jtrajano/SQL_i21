@@ -93,7 +93,7 @@ Begin
 	
 	Select @strDetail=@strDetail + 
 	'<tr>
-		   <td>&nbsp;'  + ISNULL(strShippingInstructionNumber,'') + '</td>'
+		   <td>&nbsp;'  + ISNULL(strLoadNumber,'') + '</td>'
 		+ '<td>&nbsp;' + CASE WHEN UPPER(strMessageState)='ADDED' THEN 'Create' When UPPER(strMessageState)='DELETE' THEN 'Delete' Else 'Update' End + '</td>'
 		+ '<td>&nbsp;' + ISNULL(strExternalShipmentNumber,'') + '</td>'
 		+ '<td>&nbsp;' + ISNULL((select TOP 1 strCommodityCode from tblLGLoadDetailStg Where intLoadStgId=lg.intLoadStgId),'') + '</td>'
