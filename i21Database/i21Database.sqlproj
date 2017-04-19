@@ -5209,6 +5209,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRollCostDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetAvgHistoricalPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspTMImportTankMonitorReading.sql" />
+    <Build Include="dbo\Views\vyuCRMCampaignContactSource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
