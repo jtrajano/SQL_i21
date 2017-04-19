@@ -19,7 +19,14 @@ BEGIN
 			@strLogisticsPrintSignOff	NVARCHAR(MAX),
 			@intCompanyLocationId		INT,
 			@strPrintableRemarks		NVARCHAR(MAX),
-			@strContractText			NVARCHAR(MAX)
+			@strContractText			NVARCHAR(MAX),
+			@strBOLInstructionText		NVARCHAR(MAX),
+			@strContainerPackType		NVARCHAR(100),
+			@strPackingDescription		NVARCHAR(100),
+			@strUserPhoneNo				NVARCHAR(100),
+			@strUserEmailId				NVARCHAR(100),
+			@strContainerQtyUOM			NVARCHAR(100),
+			@strPackingUOM				NVARCHAR(100)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -75,12 +82,14 @@ BEGIN
 			,@strPhone = strPhone
 	FROM tblSMCompanySetup
 	
-	SELECT TOP 1 @strFullName = E.strName
-	FROM tblSMUserSecurity US
-	JOIN tblEMEntity E ON US.intEntityUserSecurityId = E.intEntityId
-	JOIN tblEMEntityCredential EC ON EC.intEntityId = E.intEntityId
-	WHERE E.strExternalERPId = @strUserName
-	ORDER BY E.intEntityId DESC
+	SELECT @strFullName = E.strName,
+		   @strUserEmailId = ETC.strEmail,
+		   @strUserPhoneNo = EPN.strPhone  FROM tblSMUserSecurity S
+	JOIN tblEMEntity E ON E.intEntityId = S.intEntityUserSecurityId 
+	JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId
+	JOIN tblEMEntity ETC ON ETC.intEntityId = EC.intEntityContactId
+	JOIN tblEMEntityPhoneNumber EPN ON EPN.intEntityId = ETC.intEntityId
+	WHERE strUserName = @strUserName
 	
 	SELECT @strLogisticsCompanyName = strLogisticsCompanyName,
 		   @strLogisticsPrintSignOff = strLogisticsPrintSignOff
@@ -89,6 +98,8 @@ BEGIN
 	
 	SELECT TOP 1 @strPrintableRemarks = CH.strPrintableRemarks
 				,@strContractText = CT.strText
+				,@strContainerPackType = LTRIM(ISNULL(L.intNumberOfContainers,0)) + ' ' + L.strPackingDescription
+				,@strPackingDescription = L.strPackingDescription
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -99,6 +110,27 @@ BEGIN
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblCTContractText CT ON CT.intContractTextId = CH.intContractTextId
 	WHERE L.intLoadId = @intLoadId
+
+	SELECT TOP 1 @strContainerQtyUOM = LTRIM(dbo.fnRemoveTrailingZeroes(SUM(dblQuantity))) + ' ' + strItemUOM
+	FROM vyuLGLoadDetailViewSearch
+	WHERE intLoadId = @intLoadId
+	GROUP BY strItemUOM
+
+	SELECT TOP 1 @strPackingUOM =  CASE UPPER(strPackingDescription)
+			WHEN UPPER('Bulk')
+				THEN strPackingDescription
+			ELSE UM.strUnitMeasure
+			END
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	WHERE L.intLoadId = @intLoadId
+
+	SELECT @strBOLInstructionText = '- All shipment details and purchase contract details as stated above' + CHAR(13) +
+								'- Gross-, Net- & Tare Weight' + CHAR(13) +
+								'- Service contract no. of shipping line' + CHAR(13) +
+								'- In the B/L Description of goods: "' + @strContainerPackType + ' container(s) equivalent to ' + @strContainerQtyUOM + ' each of clean Green coffee in '+ @strPackingUOM +' for any limitation of liability purposes."'
 
 
 SELECT *
@@ -225,6 +257,11 @@ SELECT *
 					THEN ''
 				ELSE 'E-mail: ' + strSecondNotifyMail
 				END)) strSecondNotifyInfo
+	,strBOLInstructionText = @strBOLInstructionText
+	,strContainerTypePackingDescription = strContainerType + ' in ' + strPackingDescription
+	,strFullName = @strFullName
+	,strUserPhoneNo = @strUserPhoneNo 
+	,strUserEmailId = @strUserEmailId
 FROM (
 	SELECT TOP 1 L.intLoadId
 		,L.dtmScheduledDate
@@ -704,6 +741,8 @@ FROM (
 			WHERE strCity = L.strDestinationPort
 			) AS strContractText
 		,CD.strERPPONumber
+		,Basis.strContractBasis
+		,Basis.strDescription AS strContractBasisDescription
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -760,6 +799,7 @@ FROM (
 	LEFT JOIN tblSMCurrency DesCurrency ON DesCurrency.intCurrencyID = L.intDespatchCurrencyId
 	LEFT JOIN tblICUnitMeasure LoadUnit ON LoadUnit.intUnitMeasureId = L.intLoadingUnitMeasureId
 	LEFT JOIN tblICUnitMeasure DisUnit ON DisUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
+	LEFT JOIN tblCTContractBasis Basis ON Basis.intContractBasisId = CH.intContractBasisId
 	WHERE L.intLoadId = @intLoadId
 	) tbl
 END
