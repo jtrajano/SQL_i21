@@ -27,7 +27,7 @@ END
 
 
 DECLARE @intUserId INT, @intNumber INT, @strPrefix NVARCHAR(10),@intStartingNumberId INT
-SELECT @intUserId =[intEntityId] from tblSMUserSecurity WHERE [intEntityId] = @intEntityId
+SELECT @intUserId =[intEntityUserSecurityId] from tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intEntityId
 DECLARE @strJournalId NVARCHAR(100)
 EXEC uspGLGetNewID 5, @strJournalId OUTPUT
 

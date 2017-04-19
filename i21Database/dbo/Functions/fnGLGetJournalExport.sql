@@ -43,4 +43,3 @@ BEGIN
 	WHERE intJournalId = @intJournalId
 	RETURN
 END
-	
