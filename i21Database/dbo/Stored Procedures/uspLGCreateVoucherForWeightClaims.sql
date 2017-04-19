@@ -143,7 +143,7 @@ BEGIN TRY
 		--					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
 		--				), AD.intSeqPriceUOMId, AD.dblSeqPrice)
 		--	END AS dblCost
-		,AD.dblSeqPrice
+		,WCD.dblUnitPrice --.dblSeqPrice
 		,1 AS dblCostUnitQty
 		,1 AS dblWeightUnitQty
 		,dblClaimAmount 
