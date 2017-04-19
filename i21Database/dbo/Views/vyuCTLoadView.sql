@@ -18,6 +18,8 @@ AS
 				,LO.intShipmentType
 				,LO.dtmETAPOL
 				,LO.dtmETAPOD
+				,LO.dtmStuffingDate
+				,LO.dtmETSPOL
 				,CAST((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId) AS BIT) ysnDocsReceived
 				,STUFF(
 					(
@@ -51,6 +53,8 @@ AS
 			,ysnDocsReceived
 			,dtmETAPOL
 			,dtmETAPOD
+			,dtmStuffingDate
+			,dtmETSPOL
 
 	FROM
 	(
@@ -72,6 +76,8 @@ AS
 				,LO.intShipmentType
 				,LO.dtmETAPOL
 				,LO.dtmETAPOD
+				,LO.dtmStuffingDate
+				,LO.dtmETSPOL
 				,CAST((SELECT COUNT(1) FROM tblLGLoadDocuments WHERE intLoadId = LO.intLoadId) AS BIT) ysnDocsReceived
 				,STUFF(
 					(
@@ -103,3 +109,5 @@ AS
 			,ysnDocsReceived
 			,dtmETAPOL
 			,dtmETAPOD
+			,dtmStuffingDate
+			,dtmETSPOL

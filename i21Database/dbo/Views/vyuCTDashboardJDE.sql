@@ -94,6 +94,10 @@ SELECT 	 SQ.intContractDetailId
 		,LV.dblLoadQuantity
 		,LV.intShipmentType
 		,LV.strContainerNumber
+		,LV.dtmStuffingDate
+		,LV.dtmETSPOL
+		,LV.dtmETAPOL
+		,LV.dtmETAPOD
 		,CASE 	WHEN ISNULL(LV.ysnDocsReceived, 0) = 0 	
 				THEN 'N'
 				ELSE 'Y' 
@@ -106,8 +110,7 @@ SELECT 	 SQ.intContractDetailId
 				ELSE 'N' 
 		 END	AS ysnQtyReceived
 		,SQ.dblAppliedQty
-		,dtmETAPOL
-		,dtmETAPOD
+		,CD.strRemark
 
 	FROM 		vyuCTContractSequence			 	SQ			
 	JOIN 		tblCTContractDetail				 	CD	ON	CD.intContractDetailId				=	SQ.intContractDetailId
@@ -140,7 +143,7 @@ SELECT 	 SQ.intContractDetailId
 	LEFT JOIN 	tblICItemUOM					 	WU	ON	WU.intItemUOMId						=	SQ.intNetWeightUOMId
 	LEFT JOIN 	tblICUnitMeasure				 	U7	ON	U7.intUnitMeasureId					=	WU.intUnitMeasureId
 	LEFT JOIN 	tblICUnitMeasure				 	U8	ON	1 = 1
-														AND U8.strUnitMeasure					=	'Metric Ton'
+														AND U8.strUnitMeasure					=	'Ton'
 	LEFT JOIN 	
 	(
 		SELECT 	intPContractDetailId,
