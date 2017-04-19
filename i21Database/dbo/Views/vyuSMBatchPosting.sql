@@ -22,7 +22,7 @@ FROM
 	UNION ALL
 	SELECT strTransactionType, intBillId, strBillId, dblTotal, strVendorOrderNumber, intEntityVendorId, intEntityId, dtmDate, strReference, intCompanyLocationId FROM vyuAPBatchPostTransaction
 	UNION ALL
-	SELECT strTransactionType, intInvoiceId, strInvoiceNumber, dblInvoiceTotal, strPONumber, intEntityCustomerId, intEntityId, dtmDate, strComments, intCompanyLocationId FROM tblARInvoice WHERE strTransactionType IN ('Invoice', 'Credit Memo') AND ysnPosted = 0  AND (ISNULL(intDistributionHeaderId, 0) = 0 AND ISNULL(intLoadDistributionHeaderId, 0) = 0) AND ISNULL(ysnRecurring,0) = 0 AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
+	SELECT CASE strTransactionType WHEN 'Debit Memo' THEN 'Debit Memo (Sales)' ELSE strTransactionType END, intInvoiceId, strInvoiceNumber, dblInvoiceTotal, strPONumber, intEntityCustomerId, intEntityId, dtmDate, strComments, intCompanyLocationId FROM tblARInvoice WHERE strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') AND ysnPosted = 0  AND (ISNULL(intDistributionHeaderId, 0) = 0 AND ISNULL(intLoadDistributionHeaderId, 0) = 0) AND ISNULL(ysnRecurring,0) = 0 AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
 	UNION ALL
 	SELECT 'Payment', intPaymentId, strRecordNumber, dblAmountPaid, strPaymentInfo as strVendorInvoiceNumber, intEntityCustomerId, intEntityId, dtmDatePaid, strNotes, NULL AS intCompanyLocationId FROM tblARPayment WHERE ysnPosted = 0
 	UNION ALL
@@ -37,7 +37,7 @@ FROM
 	SELECT 'Meter Reading', intMeterReadingId, strTransactionId, Total.dblNetPrice, '' AS strVendorInvoiceNumber, intEntityCustomerId, intEntityId, dtmTransaction, '' AS strDescription,NULL AS intCompanyLocationId FROM vyuMBGetMeterReading Header CROSS APPLY(SELECT SUM(dblNetPrice) dblNetPrice FROM tblMBMeterReadingDetail Detail WHERE Detail.intMeterReadingId = Header.intMeterReadingId) Total WHERE ISNULL(ysnPosted, 0) = 0
 ) BatchPosting
 LEFT JOIN tblEMEntity Entity ON BatchPosting.intEntityVendorId = Entity.intEntityId
-LEFT JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.[intEntityId]
+LEFT JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.intEntityUserSecurityId
 LEFT JOIN tblGLForBatchPosting Fiscal on BatchPosting.intJournalId = Fiscal.intTransactionId
 LEFT JOIN tblSMForBatchPosting ForBatchPosting on BatchPosting.intJournalId = ForBatchPosting.intTransactionId
 LEFT JOIN tblSMCompanyLocation CompanyLocation On BatchPosting.intCompanyLocationId = CompanyLocation.intCompanyLocationId
