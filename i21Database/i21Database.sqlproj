@@ -5210,6 +5210,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetAvgHistoricalPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspTMImportTankMonitorReading.sql" />
     <Build Include="dbo\Views\vyuCRMCampaignContactSource.sql" />
+    <Build Include="dbo\Views\vyuMFGetMachinesByCell.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
