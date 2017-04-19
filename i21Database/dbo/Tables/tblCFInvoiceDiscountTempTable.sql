@@ -7,6 +7,7 @@
     [intDueNextMonth]             INT             NULL,
     [intSort]                     INT             NULL,
     [strTerm]                     NVARCHAR (MAX)  NULL,
+    [strTermType]                 NVARCHAR (MAX)  NULL,
     [strTermCode]                 NVARCHAR (MAX)  NULL,
     [dtmDiscountDate]             DATETIME        NULL,
     [dtmDueDate]                  DATETIME        NULL,
@@ -22,6 +23,8 @@
     [intTransactionId]            INT             NULL,
     [dblEligableGallon]           NUMERIC (18, 6) NULL
 );
+
+
 
 
 

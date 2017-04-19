@@ -835,6 +835,7 @@ BEGIN
 			,intSort
 			,strTerm
 			,strTermCode
+			,strTermType
 			,dtmDiscountDate
 			,dtmDueDate
 			,dtmInvoiceDate
@@ -858,6 +859,7 @@ BEGIN
 			,intSort
 			,strTerm
 			,strTermCode
+			,strType
 			,dtmDiscountDate
 			,dtmDueDate
 			,dtmInvoiceDate
