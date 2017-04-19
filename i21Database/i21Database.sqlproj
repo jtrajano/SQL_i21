@@ -5239,6 +5239,7 @@
     <Build Include="dbo\Views\vyuRKFuturesPSHeaderNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspEMGetEntityTypeHasData.sql" />
     <Build Include="dbo\Stored Procedures\uspAREntityTypeConversion.sql" />
+    <Build Include="dbo\Triggers\trgCustomJDESAPReceiptUpdateExportFlag.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
