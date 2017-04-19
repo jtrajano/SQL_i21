@@ -1057,7 +1057,11 @@
     <Build Include="..\i21Database\dbo\Stored Procedures\uspTRUpdateSentQuote.sql">
       <Link>Stored Procedures\uspTRUpdateSentQuote.sql</Link>
     </Build>
-    <Build Include="User Defined Types\ReceiptItemTableType.sql" />
-    <Build Include="User Defined Types\ShipmentItemTableType.sql" />
+    <Build Include="..\i21Database\dbo\User Defined Types\ReceiptItemTableType.sql">
+      <Link>User Defined Types\ReceiptItemTableType.sql</Link>
+    </Build>
+    <Build Include="..\i21Database\dbo\User Defined Types\ShipmentItemTableType.sql">
+      <Link>User Defined Types\ShipmentItemTableType.sql</Link>
+    </Build>
   </ItemGroup>
 </Project>
