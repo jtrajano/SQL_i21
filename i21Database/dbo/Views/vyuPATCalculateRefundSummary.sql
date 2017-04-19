@@ -11,12 +11,18 @@ WITH Refunds AS (
 			RR.ysnQualified,
 			dblVolume = SUM(Total.dblVolume),
 			dblRefundAmount = CASE WHEN SUM(Total.dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(Total.dblRefundAmount) ELSE 0 END,
-			dblNonRefundAmount = CASE WHEN SUM(Total.dblRefundAmount) >= ComPref.dblMinimumRefund THEN 0 ELSE SUM(Total.dblRefundAmount) END
+			dblNonRefundAmount = CASE WHEN SUM(Total.dblRefundAmount) >= ComPref.dblMinimumRefund THEN 0 ELSE SUM(Total.dblRefundAmount) END,
+			dblCashRefund = CASE WHEN SUM(Total.dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(Total.dblCashRefund) ELSE 0 END,
+			dblEquityRefund = CASE WHEN SUM(Total.dblRefundAmount) >= ComPref.dblMinimumRefund THEN 
+								(CASE WHEN (SUM(Total.dblRefundAmount) - SUM(Total.dblCashRefund)) <= 0 THEN 0 
+									ELSE (SUM(Total.dblRefundAmount) - SUM(Total.dblCashRefund)) END)
+								ELSE 0 END
 			FROM (SELECT	B.intCustomerPatronId AS intCustomerId,
 							RR.intRefundTypeId,
 							B.intFiscalYear,
 							dblVolume = B.dblVolume,
-							dblRefundAmount = ROUND(RRD.dblRate * dblVolume,2)
+							dblRefundAmount = ROUND(RRD.dblRate * dblVolume,2),
+							dblCashRefund = ROUND((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100),2)
 				FROM tblPATCustomerVolume B
 				INNER JOIN tblPATRefundRateDetail RRD
 						ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
@@ -30,7 +36,7 @@ WITH Refunds AS (
 					ON RR.intRefundTypeId = Total.intRefundTypeId
 			INNER JOIN tblARCustomer AC
 					ON AC.[intEntityId] = Total.intCustomerId
-			CROSS APPLY (SELECT TOP 1 dblMinimumRefund FROM tblPATCompanyPreference) ComPref
+			CROSS APPLY tblPATCompanyPreference ComPref
 			GROUP BY RR.intRefundTypeId,
 			RR.strRefundType,
 			Total.intCustomerId,
@@ -41,7 +47,6 @@ WITH Refunds AS (
 			RR.ysnQualified,
 			ComPref.dblMinimumRefund
 )
-
 SELECT	id = NEWID(),
 		intRefundTypeId,
 		strRefundType,
@@ -53,13 +58,42 @@ SELECT	id = NEWID(),
 		dblVolume = SUM(dblVolume),
 		dblRefundAmount = SUM(dblRefundAmount),
 		dblNonRefundAmount = SUM(dblNonRefundAmount),
-		dblCashRefund = SUM(dblRefundAmount * (dblCashPayout/100)),
-		dblEquityRefund = SUM(dblRefundAmount - (dblRefundAmount * (dblCashPayout/100))) 
-	FROM Refunds
-	GROUP BY intRefundTypeId,
-		strRefundType,
-		strStockStatus,
-		intFiscalYearId,
-		strRefundDescription,
-		dblCashPayout,
-		ysnQualified
+		dblCashRefund = SUM(dblCashRefund),
+		dblEquityRefund = SUM(dblEquityRefund)
+	FROM (SELECT	intRefundTypeId,
+					intCustomerId,
+					strRefundType,
+					strStockStatus,
+					intFiscalYearId,
+					strRefundDescription,
+					dblCashPayout,
+					ysnQualified,
+					dblVolume = SUM(dblVolume),
+					dblRefundAmount = SUM(dblRefundAmount),
+					dblNonRefundAmount = SUM(dblNonRefundAmount),
+					dblCashRefund = CASE WHEN SUM(dblCashRefund) <= ComPref.dblCutoffAmount THEN 
+										(CASE WHEN ComPref.strCutoffTo = 'Cash' THEN SUM(dblCashRefund) + SUM(dblEquityRefund) ELSE 0 END)
+									ELSE SUM(dblCashRefund) END,
+					dblEquityRefund = CASE WHEN SUM(dblCashRefund) <= ComPref.dblCutoffAmount THEN 
+										(CASE WHEN ComPref.strCutoffTo = 'Equity' THEN SUM(dblCashRefund) + SUM(dblEquityRefund) ELSE 0 END)
+									ELSE SUM(dblCashRefund) END
+			FROM Refunds
+			CROSS APPLY tblPATCompanyPreference ComPref
+			GROUP BY	intRefundTypeId,
+						intCustomerId,
+						ComPref.strCutoffTo,
+						ComPref.dblCutoffAmount,
+						strRefundType,
+						strStockStatus,
+						intFiscalYearId,
+						strRefundDescription,
+						dblCashPayout,
+						ysnQualified
+		) CalculatedRefunds
+		GROUP BY	intRefundTypeId,
+					strRefundType,
+					strStockStatus,
+					intFiscalYearId,
+					strRefundDescription,
+					dblCashPayout,
+					ysnQualified

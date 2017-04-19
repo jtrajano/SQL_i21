@@ -5,10 +5,11 @@ WITH ComPref AS (
 	strRefund,
 	dblMinimumRefund,
 	dblServiceFee,
-	dblCutoffAmount
+	dblCutoffAmount,
+	strCutoffTo
 	FROM tblPATCompanyPreference
 ),
-FiscalSum AS (
+CalculatedRefunds AS (
 SELECT		Total.intFiscalYear,
 			Total.intCustomerPatronId,
 			Total.strStockStatus,
@@ -18,19 +19,7 @@ SELECT		Total.intFiscalYear,
 			dblNonRefundAmount = SUM(CASE WHEN Total.ysnEligibleRefund = 1 THEN 0 ELSE Total.dblRefundAmount END),
 			dblCashRefund = SUM(CASE WHEN Total.ysnEligibleRefund = 1 THEN (Total.dblRefundAmount * (RR.dblCashPayout/100)) ELSE 0 END),
 			dblEquityRefund = SUM(CASE WHEN Total.ysnEligibleRefund = 1 THEN (Total.dblRefundAmount - (Total.dblRefundAmount * (RR.dblCashPayout/100))) ELSE 0 END),
-			dblLessFWT = SUM(CASE WHEN Total.ysnEligibleRefund = 1 AND APV.ysnWithholding = 1 THEN (((Total.dblRefundAmount) * (RR.dblCashPayout/100)) * (CompLoc.dblWithholdPercent/100)) ELSE 0 END),
-			dblLessServiceFee =  CASE WHEN ysnEligibleRefund = 1 THEN ComPref.dblServiceFee ELSE 0 END,
-			dblCheckAmount =  SUM(CASE WHEN ysnEligibleRefund = 1 THEN 
-									(
-										CASE WHEN APV.ysnWithholding = 1 THEN
-												(Total.dblRefundAmount * (RR.dblCashPayout/100)) - ComPref.dblServiceFee -
-												(((Total.dblRefundAmount) * (RR.dblCashPayout/100)) * (CompLoc.dblWithholdPercent/100))
-										ELSE (Total.dblRefundAmount * (RR.dblCashPayout/100)) - ComPref.dblServiceFee END
-									) ELSE 0 END),
-			intVoting = [dbo].[fnPATCountStockStatus]('Voting', default),
-			intNonVoting = [dbo].[fnPATCountStockStatus]('Non-Voting', default),
-			intProducers = [dbo].[fnPATCountStockStatus]('Producer', default),
-			intOthers = [dbo].[fnPATCountStockStatus]('Other', default)
+			dblLessFWTPercentage = CASE WHEN Total.ysnEligibleRefund = 1 AND APV.ysnWithholding = 1 THEN CompLoc.dblWithholdPercent ELSE 0 END
 		    FROM (
 				SELECT	B.intCustomerPatronId,
 						RRD.intRefundTypeId,
@@ -66,10 +55,13 @@ SELECT		Total.intFiscalYear,
 	GROUP BY Total.intFiscalYear,
 			Total.intCustomerPatronId,
 			Total.strStockStatus,
+			APV.ysnWithholding,
+			CompLoc.dblWithholdPercent,
 			CompLoc.intCompanyLocationId,
 			Total.dblVolume,
 			Total.intRefundTypeId,
 			Total.ysnEligibleRefund,
+			ComPref.dblCutoffAmount,
 			ComPref.dblServiceFee
 )
 
@@ -89,5 +81,45 @@ SELECT	NEWID() AS id,
 		intNonVoting,
 		intProducers,
 		intOthers
-FROM FiscalSum
+FROM (
+SELECT intFiscalYear,
+		strStockStatus,
+		intCompanyLocationId,
+		dblVolume, 
+		dblRefundAmount,
+		dblNonRefundAmount,
+		dblCashRefund,
+		dblEquityRefund,
+		dblLessFWT = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN ROUND(dblCashRefund * (dblLessFWTPercentage/100), 2) ELSE 0 END,
+		dblLessServiceFee = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund AND dblCashRefund > ComPref.dblCutoffAmount THEN ComPref.dblServiceFee ELSE 0 END,
+		dblCheckAmount = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN 
+								ROUND(dblCashRefund - ROUND(dblCashRefund * (dblLessFWTPercentage/100), 2) - 
+								(CASE WHEN dblRefundAmount >= ComPref.dblServiceFee AND dblCashRefund > ComPref.dblCutoffAmount THEN ComPref.dblServiceFee ELSE 0 END), 2)
+							ELSE 0 END,
+		intVoting,
+		intNonVoting,
+		intProducers,
+		intOthers
+		FROM (SELECT	intFiscalYear,
+						strStockStatus,
+						intCompanyLocationId,
+						dblVolume,
+						dblRefundAmount,
+						dblNonRefundAmount,
+						dblCashRefund = CASE WHEN dblCashRefund <= ComPref.dblCutoffAmount THEN
+											(CASE WHEN ComPref.strCutoffTo = 'Cash' THEN dblEquityRefund + dblCashRefund ELSE 0 END)
+											ELSE dblCashRefund END,
+						dblEquityRefund = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN (CASE WHEN dblCashRefund <= ComPref.dblCutoffAmount THEN 
+												(CASE WHEN ComPref.strCutoffTo = 'Equity' THEN dblEquityRefund + dblCashRefund ELSE 0 END) 
+											ELSE dblEquityRefund END) ELSE 0 END,
+						dblLessFWTPercentage,
+						intVoting = [dbo].[fnPATCountStockStatus]('Voting', default),
+						intNonVoting = [dbo].[fnPATCountStockStatus]('Non-Voting', default),
+						intProducers = [dbo].[fnPATCountStockStatus]('Producer', default),
+						intOthers = [dbo].[fnPATCountStockStatus]('Other', default)
+				FROM CalculatedRefunds
+				CROSS APPLY ComPref
+		) FiscalSum
+		CROSS APPLY ComPref
+) CalculatedFiscalSum
 GROUP BY intFiscalYear, strStockStatus, intCompanyLocationId, intVoting, intNonVoting, intProducers, intOthers
