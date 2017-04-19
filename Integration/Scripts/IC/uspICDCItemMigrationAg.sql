@@ -330,9 +330,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	) (
 SELECT inv.intItemId
 	,iloc.intItemLocationId
-	,(select strPricingLevelName from tblSMCompanyLocationPricingLevel PL 
-	where PL.intCompanyLocationId = iloc.intLocationId and PL.intSort = 1
-	) strPricingLevel
+	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
 	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS) uom
@@ -349,7 +347,8 @@ SELECT inv.intItemId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
-	 where agitm_un_prc1 > 0
+	 join tblSMCompanyLocationPricingLevel PL on PL.intCompanyLocationId = iloc.intLocationId 
+	 where PL.intSort = 1 and agitm_un_prc1 > 0
 )
 
 --price level 2
@@ -366,9 +365,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	) (
 SELECT inv.intItemId
 	,iloc.intItemLocationId
-	,(select strPricingLevelName from tblSMCompanyLocationPricingLevel PL 
-	where PL.intCompanyLocationId = iloc.intLocationId and PL.intSort = 2
-	) strPricingLevel
+	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
 	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS) uom
@@ -385,7 +382,8 @@ SELECT inv.intItemId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
-	 where agitm_un_prc2 > 0 and agitm_un_prc2 <> agitm_un_prc1
+	 join tblSMCompanyLocationPricingLevel PL on PL.intCompanyLocationId = iloc.intLocationId 
+	 where PL.intSort = 2 and agitm_un_prc2 > 0 and agitm_un_prc2 <> agitm_un_prc1 
 )
 --price level 3
 INSERT INTO [dbo].[tblICItemPricingLevel] (
@@ -401,9 +399,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	) (
 SELECT inv.intItemId
 	,iloc.intItemLocationId
-	,(select strPricingLevelName from tblSMCompanyLocationPricingLevel PL 
-	where PL.intCompanyLocationId = iloc.intLocationId and PL.intSort = 3
-	) strPricingLevel
+	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
 	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS) uom
@@ -420,7 +416,8 @@ SELECT inv.intItemId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
-	 where agitm_un_prc3 > 0 and agitm_un_prc3 not in (agitm_un_prc1,agitm_un_prc2)
+	 join tblSMCompanyLocationPricingLevel PL on PL.intCompanyLocationId = iloc.intLocationId 
+	 where PL.intSort = 3 and agitm_un_prc3 > 0 and agitm_un_prc3 not in (agitm_un_prc1,agitm_un_prc2)
 )
 --price level 4
 INSERT INTO [dbo].[tblICItemPricingLevel] (
@@ -436,9 +433,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	) (
 SELECT inv.intItemId
 	,iloc.intItemLocationId
-	,(select strPricingLevelName from tblSMCompanyLocationPricingLevel PL 
-	where PL.intCompanyLocationId = iloc.intLocationId and PL.intSort = 4
-	) strPricingLevel
+	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
 	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS) uom
@@ -455,7 +450,8 @@ SELECT inv.intItemId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
-	 where agitm_un_prc4 > 0 and agitm_un_prc4 not in (agitm_un_prc1,agitm_un_prc2,agitm_un_prc3)
+	 join tblSMCompanyLocationPricingLevel PL on PL.intCompanyLocationId = iloc.intLocationId 
+	 where PL.intSort = 4 and agitm_un_prc4 > 0 and agitm_un_prc4 not in (agitm_un_prc1,agitm_un_prc2,agitm_un_prc3)
 )
 
 --price 5
@@ -472,9 +468,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	) (
 SELECT inv.intItemId
 	,iloc.intItemLocationId
-	,(select strPricingLevelName from tblSMCompanyLocationPricingLevel PL 
-	where PL.intCompanyLocationId = iloc.intLocationId and PL.intSort = 5
-	) strPricingLevel
+	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
 	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS) uom
@@ -491,7 +485,8 @@ SELECT inv.intItemId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
-	 where agitm_un_prc5 > 0 and agitm_un_prc5 not in (agitm_un_prc1,agitm_un_prc2,agitm_un_prc3,agitm_un_prc4)
+	 join tblSMCompanyLocationPricingLevel PL on PL.intCompanyLocationId = iloc.intLocationId 
+	 where PL.intSort = 5 and agitm_un_prc5 > 0 and agitm_un_prc5 not in (agitm_un_prc1,agitm_un_prc2,agitm_un_prc3,agitm_un_prc4)
 )
 
 --------------------------------------------------------------------------------------------------------------
