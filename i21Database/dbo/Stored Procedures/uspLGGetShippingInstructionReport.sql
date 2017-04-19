@@ -129,8 +129,7 @@ BEGIN
 
 	SELECT @strBOLInstructionText = '- All shipment details and purchase contract details as stated above' + CHAR(13) +
 								'- Gross-, Net- & Tare Weight' + CHAR(13) +
-								'- Service contract no. of shipping line' + CHAR(13) +
-								'- In the B/L Description of goods: "' + @strContainerPackType + ' container(s) equivalent to ' + @strContainerQtyUOM + ' each of clean Green coffee in '+ @strPackingUOM +' for any limitation of liability purposes."'
+								'- In the B/L description of goods: "' + @strContainerPackType + ' container(s) equivalent to ' + @strContainerQtyUOM + ' each of clean green coffee in '+ @strPackingUOM +' for any limitation of liability purposes."'
 
 
 SELECT *
