@@ -10,16 +10,32 @@ END
 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidProductCode' AND COLUMN_NAME = 'intProductCode')
 BEGIN
-	EXEC('UPDATE tblTFValidProductCode
-		SET tblTFValidProductCode.intProductCode = tblPatch.intProductCodeId
-		FROM (SELECT DISTINCT RCPC.intValidProductCodeId, RCPC.strProductCode, PC.intProductCodeId
-			FROM tblTFValidProductCode RCPC
-			LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCPC.intReportingComponentDetailId
-			LEFT JOIN tblTFProductCode PC ON PC.intTaxAuthorityId = RC.intTaxAuthorityId AND PC.strProductCode = RCPC.strProductCode
-			) tblPatch
-		WHERE tblPatch.intValidProductCodeId = tblTFValidProductCode.intValidProductCodeId
-			AND ISNULL(tblTFValidProductCode.intProductCode, '''') = ''''
-			AND ISNULL(tblTFValidProductCode.strProductCode, '''') <> ''''')
+	IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidProductCode' AND COLUMN_NAME = 'intReportingComponentDetailId')
+	BEGIN
+		EXEC('UPDATE tblTFValidProductCode
+			SET tblTFValidProductCode.intProductCode = tblPatch.intProductCodeId
+			FROM (SELECT DISTINCT RCPC.intValidProductCodeId, RCPC.strProductCode, PC.intProductCodeId
+				FROM tblTFValidProductCode RCPC
+				LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCPC.intReportingComponentDetailId
+				LEFT JOIN tblTFProductCode PC ON PC.intTaxAuthorityId = RC.intTaxAuthorityId AND PC.strProductCode = RCPC.strProductCode
+				) tblPatch
+			WHERE tblPatch.intValidProductCodeId = tblTFValidProductCode.intValidProductCodeId
+				AND ISNULL(tblTFValidProductCode.intProductCode, '''') = ''''
+				AND ISNULL(tblTFValidProductCode.strProductCode, '''') <> ''''')
+	END
+	ELSE IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidProductCode' AND COLUMN_NAME = 'intReportingComponentId')
+	BEGIN
+		EXEC('UPDATE tblTFValidProductCode
+			SET tblTFValidProductCode.intProductCode = tblPatch.intProductCodeId
+			FROM (SELECT DISTINCT RCPC.intValidProductCodeId, RCPC.strProductCode, PC.intProductCodeId
+				FROM tblTFValidProductCode RCPC
+				LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCPC.intReportingComponentId
+				LEFT JOIN tblTFProductCode PC ON PC.intTaxAuthorityId = RC.intTaxAuthorityId AND PC.strProductCode = RCPC.strProductCode
+				) tblPatch
+			WHERE tblPatch.intValidProductCodeId = tblTFValidProductCode.intValidProductCodeId
+				AND ISNULL(tblTFValidProductCode.intProductCode, '''') = ''''
+				AND ISNULL(tblTFValidProductCode.strProductCode, '''') <> ''''')
+	END	
 
 	IF NOT EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidProductCode' AND COLUMN_NAME = 'intProductCodeId')
 	BEGIN
