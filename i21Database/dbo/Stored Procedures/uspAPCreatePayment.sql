@@ -55,6 +55,7 @@ BEGIN
 	DECLARE @bills AS Id;
 	DECLARE @autoPay BIT = 0; --Automatically compute the payment
 	DECLARE @paymentRecordNum NVARCHAR(50)
+	DECLARE @defaultPaymentInfo NVARCHAR(500)
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -65,6 +66,7 @@ BEGIN
 		TOP 1 @vendorId = C.[intEntityVendorId] 
 		,@vendorWithhold = C.ysnWithholding
 		,@location = A.intShipToId
+		,@paymentMethodId = CASE WHEN @paymentMethodId IS NULL THEN C.intPaymentMethodId ELSE @paymentMethodId END
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
@@ -176,6 +178,11 @@ BEGIN
 	END
 
 	EXEC uspSMGetStartingNumber 8, @paymentRecordNum OUT
+	IF @paymentMethodId = 6
+	BEGIN
+		EXEC uspSMGetStartingNumberSubType 8, 1, 6, @defaultPaymentInfo OUT
+		SET @paymentInfo = @defaultPaymentInfo
+	END
 
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(
