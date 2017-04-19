@@ -25,7 +25,7 @@ BEGIN TRY
 		,@dblPhysicalCount DECIMAL(38, 24)
 		,@intPhysicalItemUOMId INT
 		,@str3rdPartyPalletsMandatory NVARCHAR(50)
-		,@str3rdPartyPalletsItemId NVARCHAR(50)
+		,@str3rdPartyPalletsItemId NVARCHAR(MAX)
 		,@dblProduceQty1 DECIMAL(38, 24)
 		,@dblPhysicalCount1 DECIMAL(38, 24)
 
@@ -298,13 +298,8 @@ BEGIN TRY
 			IF @str3rdPartyPalletsMandatory = 'False'
 				AND @str3rdPartyPalletsItemId <> ''
 			BEGIN
-				DECLARE @int3rdPartyPalletsItemId INT
-					,@intRecordId INT
+				DECLARE @intRecordId INT
 					,@intLotId INT
-
-				SELECT @int3rdPartyPalletsItemId = intItemId
-				FROM tblICItem
-				WHERE strItemNo = @str3rdPartyPalletsItemId
 
 				DECLARE @tblMFWorkOrderConsumedLot TABLE (
 					intRecordId INT
@@ -315,7 +310,10 @@ BEGIN TRY
 				SELECT intLotId
 				FROM tblMFWorkOrderConsumedLot
 				WHERE intWorkOrderId = @intWorkOrderId
-					AND intItemId = @int3rdPartyPalletsItemId
+					AND intItemId IN (
+									SELECT Item Collate Latin1_General_CI_AS
+									FROM [dbo].[fnSplitString](@str3rdPartyPalletsItemId, ',')
+									)
 
 				SELECT @intRecordId = Min(intRecordId)
 				FROM @tblMFWorkOrderConsumedLot
