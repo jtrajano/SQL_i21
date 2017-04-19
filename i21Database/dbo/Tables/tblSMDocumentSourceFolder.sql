@@ -10,5 +10,6 @@
 	CONSTRAINT [FK_tblSMDocumentSourceFolder_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [dbo].[tblSMScreen] ([intScreenId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSMDocumentSourceFolder_tblSMDocumentType] FOREIGN KEY ([intDocumentTypeId]) REFERENCES [dbo].[tblSMDocumentType] ([intDocumentTypeId]),
 	CONSTRAINT [FK_tblSMDocumentSourceFolder_tblSMDocumentSourceFolder] FOREIGN KEY ([intDocumentFolderParentId]) REFERENCES [dbo].[tblSMDocumentSourceFolder] ([intDocumentSourceFolderId]),
-    CONSTRAINT [PK_dbo.tblSMDocumentSourceFolder] PRIMARY KEY CLUSTERED ([intDocumentSourceFolderId] ASC)
+    CONSTRAINT [PK_dbo.tblSMDocumentSourceFolder] PRIMARY KEY CLUSTERED ([intDocumentSourceFolderId] ASC), 
+    CONSTRAINT [AK_tblSMDocumentSourceFolder_intScreenId_strName_intDocumentFolderParentId] UNIQUE ([intScreenId], [strName], [intDocumentFolderParentId])
 )
