@@ -5186,6 +5186,8 @@
     <Build Include="dbo\Views\vyuCFCalculatedInvoice.sql" />
     <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
     <Build Include="dbo\Views\vyuMFGetMachinesByCell.sql" />
+    <Build Include="dbo\Views\vyuRKM2MGetContractDetailView.sql" />
+    <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -2,6 +2,7 @@
 AS
 SELECT 
 	    LD.intPCompanyLocationId intCompanyLocationId,
+
 		PCT.strLocationName,
 		PCT.strCommodityDescription as strCommodity,
 		PCT.intItemId,
@@ -16,7 +17,7 @@ SELECT
 		PCT.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,intCommodityUnitMeasureId as intUnitMeasureId 
 FROM tblLGLoad L 
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId and ysnPosted=1 AND L.intShipmentStatus = 3
-JOIN vyuCTContractDetailView PCT ON PCT.intContractDetailId = LD.intPContractDetailId
+JOIN vyuRKM2MGetContractDetailView PCT ON PCT.intContractDetailId = LD.intPContractDetailId
 JOIN tblEMEntity e on e.intEntityId=PCT.intEntityId
 
 GO
