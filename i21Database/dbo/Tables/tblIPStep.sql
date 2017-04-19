@@ -17,7 +17,7 @@
 	[intRowsToSkip] INT NULL DEFAULT 0,
 	[ysnDeleteFileAfterTransfer] bit DEFAULT 0,
 	[strFileName] NVARCHAR(256) COLLATE Latin1_General_CI_AS NULL,
-	[strSheetName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strSheetName] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnGenerateHeader] BIT DEFAULT 0,
 	[ysnSuccessFailureStep] BIT NULL DEFAULT 0,
 	[strDestinationFolder] NVARCHAR(256) COLLATE Latin1_General_CI_AS NULL,
