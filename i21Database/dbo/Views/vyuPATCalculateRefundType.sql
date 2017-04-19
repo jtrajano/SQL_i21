@@ -1,7 +1,11 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateRefundType]
 	AS
 WITH ComPref AS(
-	SELECT TOP(1) dblMinimumRefund = ISNULL(dblMinimumRefund,0) FROM tblPATCompanyPreference
+	SELECT	TOP(1) 
+			dblMinimumRefund = ISNULL(dblMinimumRefund,0),
+			strCutoffTo,
+			dblCutoffAmount
+	FROM tblPATCompanyPreference
 ), Refunds AS (
 SELECT	Total.intCustomerId,
 		intFiscalYearId = Total.intFiscalYear,
@@ -56,8 +60,12 @@ SELECT  id = NEWID(),
 		ysnQualified,
 		dtmLastActivityDate,
 		dblRefundAmount = SUM(dblRefundAmount),
-		dblCashRefund = SUM(dblCashRefund),
-		dblEquityRefund = SUM(dblEquityRefund)
+		dblCashRefund = CASE WHEN SUM(dblCashRefund) <= ComPref.dblCutoffAmount THEN 
+							(CASE WHEN ComPref.strCutoffTo = 'Cash' THEN SUM(dblCashRefund) + SUM(dblEquityRefund) ELSE 0 END)
+						ELSE SUM(dblCashRefund) END,
+		dblEquityRefund = CASE WHEN SUM(dblCashRefund) <= ComPref.dblCutoffAmount THEN 
+							(CASE WHEN ComPref.strCutoffTo = 'Equity' THEN SUM(dblCashRefund) + SUM(dblEquityRefund) ELSE 0 END)
+						ELSE SUM(dblCashRefund) END
 	FROM Refunds
 	CROSS APPLY ComPref
 	GROUP BY intCustomerId,
@@ -65,6 +73,8 @@ SELECT  id = NEWID(),
 		strCustomerName,
 		strStockStatus,
 		ComPref.dblMinimumRefund,
+		ComPref.dblCutoffAmount,
+		ComPref.strCutoffTo,
 		strTaxCode,
 		intRefundTypeId,
 		strRefundType,
