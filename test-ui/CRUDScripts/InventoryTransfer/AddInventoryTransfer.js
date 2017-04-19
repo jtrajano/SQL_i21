@@ -14,7 +14,7 @@ StartTest (function (t) {
         .selectComboBoxRowValue('ToLocation', '0002 - Indianapolis', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','001 - CNLTI','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','ITNLTI - 01','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -23,8 +23,9 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
 
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
+        .clickButton('PostPreview')
+        .waitUntilLoaded('')
+        .addResult('Successfully Opened',2000)
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
         .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
@@ -52,7 +53,7 @@ StartTest (function (t) {
         .selectComboBoxRowValue('ToLocation', '0002 - Indianapolis', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','002 - CLTI','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','ITLTI - 01','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -62,8 +63,9 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
+        .addResult('Successfully Opened',2000)
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
         .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
@@ -91,7 +93,7 @@ StartTest (function (t) {
         .selectComboBoxRowValue('ToLocation', '0002 - Indianapolis', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','001 - CNLTI','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','ITNLTI - 01','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -100,8 +102,9 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
+        .addResult('Successfully Opened',2000)
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
         .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
@@ -129,7 +132,7 @@ StartTest (function (t) {
         .selectComboBoxRowValue('ToLocation', '0002 - Indianapolis', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','002 - CLTI','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','ITLTI - 01','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -139,8 +142,9 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
+        .addResult('Successfully Opened',2000)
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
         .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
@@ -167,18 +171,18 @@ StartTest (function (t) {
         .selectComboBoxRowValue('ToLocation', '0002 - Indianapolis', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','001 - CNLTI','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','ITNLTI - 01','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
         .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
-        .enterGridData('InventoryTransfer', 1, 'colTransferQty', '1000000')
+        .enterGridData('InventoryTransfer', 1, 'colTransferQty', '100000000')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded()
-        .verifyMessageBox('iRely i21','Negative stock quantity is not allowed for 001 - CNLTI on 0001 - Fort Wayne, Raw Station, and RM Storage.','ok','error')
+//        .verifyMessageBox('iRely i21','Negative stock quantity is not allowed for ITNLTI - 01 on 0001 - Fort Wayne, Raw Station, and RM Storage.','ok','error')
         .clickMessageBoxButton('ok')
         .waitUntilLoaded()
         .clickButton('Close')
@@ -198,13 +202,14 @@ StartTest (function (t) {
         .selectComboBoxRowValue('ToLocation', '0002 - Indianapolis', 'ToLocation',1)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','002 - CNLTI','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','ITNLTI - 02','strItemNo')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
         .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
         .enterGridData('InventoryTransfer', 1, 'colTransferQty', '500000')
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
+        .addResult('Successfully Opened',2000)
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
         .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '0')
@@ -235,7 +240,7 @@ StartTest (function (t) {
         .clickCheckBox('ShipmentRequired', true)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','001 - CNLTI','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','ITNLTI - 01','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -244,8 +249,9 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
 
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
+        .clickButton('PostPreview')
+        .waitUntilLoaded('')
+        .addResult('Successfully Opened',2000)
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
         .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
@@ -264,43 +270,30 @@ StartTest (function (t) {
         .waitUntilLoaded('icinventoryreceipt')
         .selectComboBoxRowNumber('ReceiptType',3,0)
         .selectComboBoxRowValue('Transferor', '0001 - Fort Wayne', 'Transferor',0)
-        .doubleClickSearchRowValue('001 - CNLTI', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ITNLTI - 01', 'strItemNo', 1)
         .waitUntilLoaded('icinventoryreceipt')
         .verifyData('Combo Box','ReceiptType','Transfer Order')
         .verifyData('Combo Box','Transferor','0001 - Fort Wayne')
         .verifyData('Combo Box','Location','0002 - Indianapolis')
         .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', '001 - CNLTI')
-        .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
-        .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
         .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Indy')
         .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'Indy Storage')
 
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                grid = win.down('#grdInventoryReceipt'),
-                total = grid.down('#lblTotal').text;
-            if (total == 'Total: 1,000.00') {
-                t.ok(true, 'Total is correct.');
-            }
-            else {
-                t.ok(false, 'Total is incorrect.');
-            }
-            next();
-        })
 
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
+        .clickTab('Post Preview')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0002-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
+        .waitUntilLoaded('')
+        .clickTab('Details')
+        .waitUntilLoaded('')
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0002-000')
+        .verifyGridData('RecapTransaction', 1, 'colDebit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colCredit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',2000)
@@ -324,7 +317,7 @@ StartTest (function (t) {
         .clickCheckBox('ShipmentRequired', true)
         .enterData('Text Field','Description','Test Transfer')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','002 - CLTI','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','ITLTI - 01','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -334,8 +327,9 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
+        .addResult('Successfully Opened',2000)
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
         .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
@@ -354,17 +348,13 @@ StartTest (function (t) {
         .waitUntilLoaded('icinventoryreceipt')
         .selectComboBoxRowNumber('ReceiptType',3,0)
         .selectComboBoxRowValue('Transferor', '0001 - Fort Wayne', 'Transferor',0)
-        .doubleClickSearchRowValue('002 - CLTI', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ITLTI - 01', 'strItemNo', 1)
         .waitUntilLoaded('icinventoryreceipt')
         .verifyData('Combo Box','ReceiptType','Transfer Order')
         .verifyData('Combo Box','Transferor','0001 - Fort Wayne')
         .verifyData('Combo Box','Location','0002 - Indianapolis')
         .verifyData('Combo Box','Currency','USD')
-        .verifyGridData('InventoryReceipt', 1, 'colItemNo', '002 - CLTI')
-        .verifyGridData('InventoryReceipt', 1, 'colOrderUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyOrdered', '100')
-        .verifyGridData('InventoryReceipt', 1, 'colUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colQtyToReceive', '100')
+        .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'ITLTI - 01')
         .verifyGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
@@ -384,26 +374,17 @@ StartTest (function (t) {
         .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'Indy Storage')
 
 
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                grid = win.down('#grdInventoryReceipt'),
-                total = grid.down('#lblTotal').text;
-            if (total == 'Total: 1,000.00') {
-                t.ok(true, 'Total is correct.');
-            }
-            else {
-                t.ok(false, 'Total is incorrect.');
-            }
-            next();
-        })
-
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
+        .clickTab('Post Preview')
         .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0002-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '1000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '16050-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '1000')
+        .waitUntilLoaded('')
+        .clickTab('Details')
+        .waitUntilLoaded('')
+        .clickTab('Post Preview')
+        .waitUntilLoaded('')
+        .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0002-000')
+        .verifyGridData('RecapTransaction', 1, 'colDebit', '1000')
+        .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+        .verifyGridData('RecapTransaction', 2, 'colCredit', '1000')
         .clickButton('Post')
         .waitUntilLoaded('')
         .addResult('Successfully Posted',2000)
@@ -421,7 +402,7 @@ StartTest (function (t) {
         .doubleClickSearchRowValue('Storage to Storage', 'strTransferType', 1)
         .waitUntilLoaded('')
         .addResult('Successfully Opened',2000)
-        .clickButton('Post')
+        .clickButton('Unpost')
         .waitUntilLoaded('')
         .enterData('Text Field','Description','Test Transfer Updated')
         .selectGridRowNumber('InventoryTransfer', [1])
@@ -431,7 +412,7 @@ StartTest (function (t) {
         .clickMessageBoxButton('yes')
         .waitUntilLoaded('')
 
-        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','001 - CNLTI','strItemNo')
+        .selectGridComboBoxRowValue('InventoryTransfer',1,'strItemNo','ITNLTI - 01','strItemNo')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromSubLocationName','Raw Station','strFromSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strFromStorageLocationName','RM Storage','strFromStorageLocationName')
         .verifyGridData('InventoryTransfer', 1, 'colOwnershipType', 'Own')
@@ -440,8 +421,9 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToSubLocationName','Indy','strToSubLocationName')
         .selectGridComboBoxRowValue('InventoryTransfer',1,'strToStorageLocationName','Indy Storage','strToStorageLocationName')
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
+        .addResult('Successfully Opened',2000)
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
         .verifyGridData('RecapTransaction', 1, 'colRecapCredit', '1000')
@@ -458,7 +440,7 @@ StartTest (function (t) {
         .verifyData('Combo Box','FromLocation','0001 - Fort Wayne')
         .verifyData('Combo Box','ToLocation ','0002 - Indianapolis')
         .verifyData('Text Field','Description','Test Transfer Updated')
-        .verifyGridData('InventoryTransfer', 1, 'colItemNumber', '001 - CNLTI')
+        .verifyGridData('InventoryTransfer', 1, 'colItemNumber', 'ITNLTI - 01')
         .verifyGridData('InventoryTransfer', 1, 'colFromSubLocation', 'Raw Station')
         .verifyGridData('InventoryTransfer', 1, 'colFromStorage', 'RM Storage')
         .verifyGridData('InventoryTransfer', 1, 'colAvailableUOM', 'LB')
