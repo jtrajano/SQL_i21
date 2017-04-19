@@ -5389,4 +5389,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\25_DocumentSource.sql" />
+  </ItemGroup>
 </Project>
