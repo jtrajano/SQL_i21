@@ -5185,6 +5185,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRollCostDetail.sql" />
     <Build Include="dbo\Views\vyuCFCalculatedInvoice.sql" />
     <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
+    <Build Include="dbo\Views\vyuMFGetMachinesByCell.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
