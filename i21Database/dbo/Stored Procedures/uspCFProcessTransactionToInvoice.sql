@@ -150,6 +150,7 @@ INSERT INTO @EntriesForInvoice(
 	,[ysnUpdateAvailableDiscount]
 	,[strItemTermDiscountBy]
 	,[dblItemTermDiscount]
+	,[dtmPostDate]
 )
 SELECT
 	 [strTransactionType]					= (case
@@ -246,6 +247,7 @@ SELECT
 	,[ysnUpdateAvailableDiscount]			= @UpdateAvailableDiscount
 	,[strItemTermDiscountBy]				= @strItemTermDiscountBy
 	,[dblItemTermDiscount]					= @Discount
+	,[dtmPostedDate]						= cfTrans.dtmPostedDate
 	
 FROM tblCFTransaction cfTrans
 INNER JOIN tblCFNetwork cfNetwork

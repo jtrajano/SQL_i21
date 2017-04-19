@@ -141,6 +141,7 @@ END
 					,[ysnClearDetailTaxes]					
 					,[intTempDetailIdForTaxes]
 					,[strType]	
+					,[dtmPostDate]
 				)
 				SELECT
 					[strTransactionType]		= (case
@@ -231,6 +232,7 @@ END
 					,[ysnClearDetailTaxes]					= 0
 					,[intTempDetailIdForTaxes]				= @strRecord
 					,[strType]								= 'CF Tran'
+					,[dtmPostDate]							= cfTrans.dtmPostedDate
 				FROM tblCFTransaction cfTrans
 				INNER JOIN tblCFNetwork cfNetwork
 				ON cfTrans.intNetworkId = cfNetwork.intNetworkId

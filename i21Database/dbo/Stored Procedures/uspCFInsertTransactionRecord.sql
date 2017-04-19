@@ -2,6 +2,7 @@
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
+	,@strPostedDate					NVARCHAR(MAX)
 	,@strCardId						NVARCHAR(MAX)
 	,@strVehicleId					NVARCHAR(MAX)
 	,@strProductId					NVARCHAR(MAX)
@@ -766,6 +767,7 @@ BEGIN
 			,[intContractId]				
 			,[dblQuantity]				
 			,[dtmBillingDate]			
+			,[dtmPostedDate]
 			,[dtmTransactionDate]		
 			,[intTransTime]				
 			,[strSequenceNumber]		
@@ -808,7 +810,8 @@ BEGIN
 			,@intARItemLocationId			
 			,@intContractId			
 			,@dblQuantity				
-			,@dtmBillingDate			
+			,@dtmBillingDate		
+			,@strPostedDate	
 			,@dtmTransactionDate		
 			,@intTransTime				
 			,@strSequenceNumber	
