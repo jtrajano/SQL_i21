@@ -645,17 +645,3 @@ LEFT JOIN (SELECT intEntityId
 				 , strEntityNo 
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 ) E ON C.intEntityCustomerId = E.intEntityId
-LEFT JOIN (SELECT intInvoiceId
-				, dblInvoiceTotal 
-		   FROM dbo.tblARInvoice WITH (NOLOCK)
-)INVOICE ON AGING.intInvoiceId = INVOICE.intInvoiceId
-LEFT JOIN (SELECT dblPayment = SUM(PD.dblPayment) + SUM(PD.dblDiscount) - SUM(PD.dblInterest)
-				, PD.intInvoiceId 
-		   FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN (SELECT intPaymentId 
-																	FROM dbo.tblARPayment WITH (NOLOCK)
-																	WHERE ysnPosted = 1 
-																	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-																	) P ON PD.intPaymentId = P.intPaymentId 
-			GROUP BY PD.intInvoiceId
-) TOTALPAYMENT ON AGING.intInvoiceId = TOTALPAYMENT.intInvoiceId
-WHERE INVOICE.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0 
