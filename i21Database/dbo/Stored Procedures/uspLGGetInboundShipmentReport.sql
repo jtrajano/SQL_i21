@@ -272,7 +272,12 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				'' AS strContractBasis,
 				'' AS strContractBasisDescription,
 				'' AS strUserEmailId,
-				'' AS strUserPhoneNo
+				'' AS strUserPhoneNo,
+				L.strShippingMode,
+				strCertificationName = (SELECT TOP 1 strCertificationName
+										FROM tblICCertification CER
+										JOIN tblCTContractCertification CTCER ON CTCER.intCertificationId = CER.intCertificationId
+										WHERE CTCER.intContractDetailId = CD.intContractDetailId) 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -455,8 +460,12 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				Basis.strContractBasis,
 				Basis.strDescription AS strContractBasisDescription,
 				@strUserEmailId AS strUserEmailId,
-				@strUserPhoneNo AS strUserPhoneNo
-
+				@strUserPhoneNo AS strUserPhoneNo,
+				L.strShippingMode,
+				strCertificationName = (SELECT TOP 1 strCertificationName
+										FROM tblICCertification CER
+										JOIN tblCTContractCertification CTCER ON CTCER.intCertificationId = CER.intCertificationId
+										WHERE CTCER.intContractDetailId = CD.intContractDetailId) 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
