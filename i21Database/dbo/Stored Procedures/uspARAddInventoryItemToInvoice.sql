@@ -403,7 +403,7 @@ SET @NewId = SCOPE_IDENTITY()
 		
 BEGIN TRY
 	IF @RecomputeTax = 1
-		EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
+		EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId, @DetailId = @NewId
 	ELSE
 		EXEC dbo.[uspARReComputeInvoiceAmounts] @InvoiceId = @InvoiceId
 END TRY
