@@ -1,17 +1,17 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerInquiry]
 AS 
 SELECT C.intEntityCustomerId
-	 , strCustomerName				= C.strName
+	 , strCustomerName				= E.strName
 	 , CI.strTerm
 	 , C.strCustomerNumber
-	 , C.strAddress
-	 , C.strZipCode
-	 , C.strCity
-	 , C.strState
-	 , strCountry					= C.strCountry
-	 , strPhone1					= C.strPhone1
-	 , strPhone2					= C.strPhone2
-	 , strBusinessLocation			= C.strLocationName
+	 , strAddress					= LOCATION.strAddress
+	 , strZipCode					= LOCATION.strZipCode
+	 , strCity						= LOCATION.strCity
+	 , strState						= LOCATION.strState
+	 , strCountry					= LOCATION.strCountry
+	 , strPhone1					= CONTACT2.strPhone
+	 , strPhone2					= CONTACT.strPhone2
+	 , strBusinessLocation			= LOCATION.strLocationName
 	 , CI.strBudgetStatus
 	 , dblYTDSales					= ISNULL(CI.dblYTDSales, CONVERT(NUMERIC(18,6), 0))
 	 , dblLastPayment				= ISNULL(CI.dblLastPayment, CONVERT(NUMERIC(18,6), 0))
@@ -39,6 +39,33 @@ SELECT C.intEntityCustomerId
 	 , dtmLastPaymentDate			= CI.dtmLastPaymentDate
 	 , dtmLastStatementDate			= CI.dtmLastStatementDate
 	 , dtmBudgetMonth				= CI.dtmBudgetMonth
-FROM vyuARCustomer C
-LEFT JOIN vyuARCustomerInquiryReport CI
+FROM dbo.tblARCustomer C WITH (NOLOCK)
+LEFT JOIN (SELECT intEntityId
+				, strName 
+		   FROM dbo.tblEMEntity WITH (NOLOCK)
+) E ON C.intEntityCustomerId = E.intEntityId
+LEFT JOIN (SELECT intEntityId
+				, strAddress
+				, strLocationName
+				, strZipCode
+				, strCity
+				, strState
+				, strCountry
+		   FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+		   WHERE ysnDefaultLocation = 1
+) LOCATION ON C.intEntityCustomerId = LOCATION.intEntityId
+LEFT JOIN (SELECT intEntityId
+				, intEntityContactId
+		   FROM dbo.tblEMEntityToContact WITH (NOLOCK)
+		   WHERE ysnDefaultContact = 1
+) ETC ON C.intEntityCustomerId = ETC.intEntityId
+LEFT JOIN (SELECT intEntityId
+				, strPhone2
+		   FROM dbo.tblEMEntity WITH (NOLOCK)
+) CONTACT ON ETC.intEntityContactId = CONTACT.intEntityId
+LEFT JOIN (SELECT intEntityId
+				, strPhone
+		   FROM dbo.tblEMEntityPhoneNumber WITH (NOLOCK)
+) CONTACT2 ON ETC.intEntityContactId = CONTACT2.intEntityId
+LEFT JOIN dbo.vyuARCustomerInquiryReport CI WITH (NOLOCK)
 	ON C.intEntityCustomerId = CI.intEntityCustomerId
