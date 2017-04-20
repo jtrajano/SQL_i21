@@ -737,7 +737,7 @@ BEGIN
 		[int1099Category]
 	)
 	OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
-	SELECT
+	SELECT DISTINCT
 		[intBillId]					=	@generatedBillId,
 		[intItemId]					=	A.intItemId,
 		[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
@@ -777,11 +777,14 @@ BEGIN
 	FROM [vyuICChargesForBilling] A
 	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
 	AND A.intInventoryReceiptId = B.intInventoryReceiptId
-	INNER JOIN dbo.tblICInventoryReceiptCharge C ON B.intInventoryReceiptId = C.intInventoryReceiptId
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
 											--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = C.intCurrencyId)
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 	--LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
+	OUTER APPLY(
+		SELECT ysnPrice FROM tblICInventoryReceiptCharge RC
+		WHERE RC.intInventoryReceiptId = A.intInventoryReceiptId AND RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	) C   
 	WHERE A.intInventoryReceiptId = @receiptId
 
 	
