@@ -2060,34 +2060,25 @@ BEGIN
         ,0
         ,'SELECT CONVERT(nvarchar,intProductTypeId) AS ValueMember,strProductTypeName AS DisplayMember FROM tblQMProductType WHERE intProductTypeId IN (6,11,12)'
 END
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 95
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 95
+        ,'PickByUpperToleranceQty'
+        ,5
+        ,1
+        ,0
+        ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END

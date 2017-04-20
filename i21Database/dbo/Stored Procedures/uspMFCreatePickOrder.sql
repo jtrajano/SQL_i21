@@ -51,6 +51,7 @@ BEGIN TRY
 		,@intPMCategoryId int
 		,@intPMStageLocationId int
 		,@intStagingLocationId int
+		,@strPickByUpperToleranceQty nvarchar(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -127,6 +128,16 @@ BEGIN TRY
 	SELECT @intBlendProductionStagingUnitId = intBlendProductionStagingUnitId
 	FROM tblSMCompanyLocation
 	WHERE intCompanyLocationId = @intLocationId
+
+	SELECT @strPickByUpperToleranceQty = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+
+	IF @strPickByUpperToleranceQty IS NULL
+	BEGIN
+		SELECT @strPickByUpperToleranceQty='False'
+	END
 
 	SELECT @strUserName = strUserName
 	FROM tblSMUserSecurity
@@ -327,21 +338,21 @@ BEGIN TRY
 			,ri.intItemId
 			,CASE 
 				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN CAST(CEILING((ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
-				ELSE (ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))
+					THEN CAST(CEILING(((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
+				ELSE ((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))
 				END
 			,ri.intItemUOMId
 			,CASE 
 				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN CAST(CEILING((ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
-				ELSE (ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))
+					THEN CAST(CEILING(((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
+				ELSE ((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))
 				END
 			,ri.intItemUOMId
 			,IU.dblUnitQty
 			,CASE 
 				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN CAST(CEILING((ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
-				ELSE (ri.dblCalculatedQuantity * (W.dblPlannedQty / r.dblQuantity))
+					THEN CAST(CEILING(((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
+				ELSE ((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))
 				END
 			,ISNULL(NULL, I.intUnitPerLayer)
 			,ISNULL(NULL, I.intLayerPerPallet)
