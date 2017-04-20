@@ -31,7 +31,10 @@ BEGIN
 	WHERE	ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
 			AND ItemOtherCharges.ysnInventoryCost = 1
 
-	SELECT	@units = ReceiptItems.dblOpenReceive
+	SELECT	@units = 
+					CASE	WHEN ReceiptItems.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItems.dblNet, 0)
+							ELSE ISNULL(ReceiptItems.dblOpenReceive, 0)
+					END 
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItems 
 	WHERE	ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
 
