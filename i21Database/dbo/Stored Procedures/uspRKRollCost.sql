@@ -223,10 +223,10 @@ FROM @RollCostDetail
   from  @RollCost t
   
 
-  select *,isnull(dblWtAvgPosition,0)-isnull(dblSumAvgLong,0) dblRollCost from (
-  select * ,isnull(dblWtAvgPosition1,dblNoOfContractAvg) dblWtAvgPosition
+SELECT *,round(isnull(dblWtAvgPosition,0)-isnull(dblSumAvgLong1,0),2) dblRollCost from (
+SELECT * ,round(isnull(dblWtAvgPosition1,dblNoOfContractAvg),2) dblWtAvgPosition
 FROM(
-  SELECT intRowNumber,strFutMarketName,strCommodityCode,strFutureMonth,dblWtAvgOpenLongPosition,dblSumBuy,dblSellMinusBuy,
+  SELECT intRowNumber,strFutMarketName,strCommodityCode,strFutureMonth,round(dblWtAvgOpenLongPosition,2) dblWtAvgOpenLongPosition,dblSumBuy,dblSellMinusBuy,
 		dblSumBuy+ case when isnull(dblSellMinusBuy,0) < 0 then  abs(dblSellMinusBuy) else -dblSellMinusBuy end dblAdjustedSpent,
 		case when isnull(dblSellMinusBuy,0)= 0 then dblSumBuyForHistorical else 
 		
@@ -234,7 +234,8 @@ FROM(
 			/case when isnull(dblSumQty,0) = 0 then 1 else dblSumQty end/dblContractSize)
 		*case when isnull(ysnSubCurrency,0)= 0 then 1 else 100 end) end
 		 dblWtAvgPosition1,		  
-		 dblSumBuyForHistorical dblSumAvgLong,dblSumQty,ysnSubCurrency,dblContractSize,dblAvgLongQty,dblNoOfContractAvg  from #temp
+		 dblSumBuyForHistorical dblSumAvgLong1,
+		 round(dblSumBuyForHistorical,2) as dblSumAvgLong,dblSumQty,ysnSubCurrency,dblContractSize,dblAvgLongQty,dblNoOfContractAvg  from #temp
 )t
 )t1
 		ORDER BY strFutMarketName, CONVERT(DATETIME,'01 '+strFutureMonth) ASC 
