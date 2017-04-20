@@ -152,7 +152,7 @@ END
 
 IF ISNULL(@filter,'') != ''
 BEGIN
-	SET @query = @query + ' AND ' + @filter
+	SET @query = @query + (CASE WHEN ISNULL(@innerQuery,'') != '' THEN ' AND ' ELSE ' WHERE ' END) + @filter
 END
 PRINT @filter
 PRINT @query
