@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿
+
+CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -1613,9 +1615,62 @@ BEGIN
 			VALUES ('Import',@runDate,@guid, @intTransactionId, 'Duplicate transaction history found.')
 		END
 	END
+
+
 	---------------------------------------------------
 	--				LOG DUPLICATE TRANS				 --
 	---------------------------------------------------
+	DECLARE @ysnVehicleRequire BIT = 0
+
+	IF (@intCardId = 0)
+	BEGIN
+		SET @intCardId = NULL
+	END
+	ELSE
+	BEGIN
+		SELECT TOP 1 
+			@ysnVehicleRequire = a.ysnVehicleRequire
+		FROM tblCFCard as c
+		INNER JOIN tblCFAccount as a
+		ON c.intAccountId = a.intAccountId
+		WHERE intCardId = @intCardId
+	END
+
+	IF(@intProductId = 0 OR @intProductId IS NULL)
+	BEGIN
+		SET @ysnInvalid = 1
+	END
+	IF(@intCardId = 0 OR @intCardId IS NULL)
+	BEGIN
+		SET @ysnInvalid = 1
+	END
+	IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
+	BEGIN
+		SET @intNetworkId = NULL
+		SET @ysnInvalid = 1
+	END
+	IF(@intSiteId = 0 OR @intSiteId IS NULL)
+	BEGIN
+		SET @intSiteId = NULL
+		SET @ysnInvalid = 1
+	END
+	IF(@intCardId = 0 OR @intCardId IS NULL)
+	BEGIN
+		SET @intCardId = NULL
+		SET @ysnInvalid = 1
+	END
+	IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
+	BEGIN
+		SET @ysnInvalid = 1
+	END
+	IF(@intVehicleId = 0 OR @intVehicleId IS NULL)
+	BEGIN
+		SET @intVehicleId = NULL
+		IF(@ysnVehicleRequire = 1)
+		BEGIN
+			SET @ysnInvalid = 1
+		END
+	END
 
 	---------------------------------------------------
 	--					ZERO PRICING				 --
