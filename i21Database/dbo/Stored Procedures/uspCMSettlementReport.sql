@@ -164,11 +164,11 @@ BEGIN
 		(SELECT TOP 1 SC.strTicketComment FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END AS strTicketComment,
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
-		(SELECT strFarmNumber + '\' + strFieldNumber FROM tblEMEntityFarm WHERE intEntityId = VENDOR.intEntityVendorId AND intFarmFieldId = (SELECT TOP 1 ISNULL(SC.intFarmFieldId,0) FROM tblGRCustomerStorage GR 
+		(SELECT strFarmNumber + '\' + strFieldNumber FROM tblEMEntityFarm WHERE intEntityId = VENDOR.intEntityId AND intFarmFieldId = (SELECT TOP 1 ISNULL(SC.intFarmFieldId,0) FROM tblGRCustomerStorage GR 
 			INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId 
 			WHERE intCustomerStorageId = INVRCPTITEM.intSourceId))
 		ELSE
-		(SELECT strFarmNumber + '\' + strFieldNumber FROM tblEMEntityFarm WHERE intEntityId = VENDOR.intEntityVendorId AND intFarmFieldId = (SELECT TOP 1 ISNULL(SC.intFarmFieldId,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId))
+		(SELECT strFarmNumber + '\' + strFieldNumber FROM tblEMEntityFarm WHERE intEntityId = VENDOR.intEntityId AND intFarmFieldId = (SELECT TOP 1 ISNULL(SC.intFarmFieldId,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId))
 		END AS strFarmField,
 	Bill.dtmDate,
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
@@ -325,11 +325,11 @@ BEGIN
 		(SELECT TOP 1 SC.strTicketComment FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
 		END AS strTicketComment,
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
-		(SELECT strFarmNumber + '\' + strFieldNumber FROM tblEMEntityFarm WHERE intEntityId = VENDOR.intEntityVendorId AND intFarmFieldId = (SELECT TOP 1 ISNULL(SC.intFarmFieldId,0) FROM tblGRCustomerStorage GR 
+		(SELECT strFarmNumber + '\' + strFieldNumber FROM tblEMEntityFarm WHERE intEntityId = VENDOR.intEntityId AND intFarmFieldId = (SELECT TOP 1 ISNULL(SC.intFarmFieldId,0) FROM tblGRCustomerStorage GR 
 			INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId 
 			WHERE intCustomerStorageId = INVSHIPITEM.intSourceId))
 		ELSE
-		(SELECT strFarmNumber + '\' + strFieldNumber FROM tblEMEntityFarm WHERE intEntityId = VENDOR.intEntityVendorId AND intFarmFieldId = (SELECT TOP 1 ISNULL(SC.intFarmFieldId,0) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId))
+		(SELECT strFarmNumber + '\' + strFieldNumber FROM tblEMEntityFarm WHERE intEntityId = VENDOR.intEntityId AND intFarmFieldId = (SELECT TOP 1 ISNULL(SC.intFarmFieldId,0) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId))
 		END AS strFarmField,
 	INV.dtmDate,
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
