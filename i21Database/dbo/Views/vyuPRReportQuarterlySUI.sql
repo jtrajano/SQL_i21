@@ -5,11 +5,14 @@ SELECT
 	,tblPREmployee.strSocialSecurity
 	,tblPREmployee.strFirstName
 	,tblPREmployee.strMiddleName
+	,strMiddleInitial = CASE WHEN (LEN(LTRIM(tblPREmployee.strMiddleName)) > 0) THEN UPPER(SUBSTRING(tblPREmployee.strMiddleName, 1, 1)) ELSE '' END
 	,tblPREmployee.strLastName
 	,tblPRPaycheck.intYear
 	,tblPRPaycheck.intQuarter
-	,SUM(tblPRPaycheck.dblGross) AS dblGross
-	,MAX(tblPRPaycheck.dblAdjustedGrossYTD) AS dblGrossYTD
+	,dblGross = SUM(tblPRPaycheck.dblGross)
+	,dblPretax = SUM(tblPRPaycheck.dblGross) - SUM(tblPRPaycheck.dblAdjustedGross)
+	,dblAdjustedGross = SUM(tblPRPaycheck.dblAdjustedGross)
+	,dblGrossYTD = MAX(tblPRPaycheck.dblAdjustedGrossYTD)
 	,dblTaxable = CASE WHEN (dblLimit - (dblLimit - ISNULL((SELECT MAX (dblAdjustedGrossYTD) FROM vyuPRPaycheckYTD 
 												   WHERE YEAR(vyuPRPaycheckYTD.dtmPayDate) = tblPRPaycheck.intYear
 												   AND DATEPART(QQ, vyuPRPaycheckYTD.dtmPayDate) = tblPRPaycheck.intQuarter
@@ -35,12 +38,12 @@ SELECT
 						ELSE
 							  (dblLimit - (dblLimit - SUM (tblPRPaycheck.dblAdjustedGross)))
 					END
-	,vyuPRPaycheckTax.dblLimit AS dblLimit
-	,SUM(vyuPRPaycheckTax.dblTotal) AS dblTotal
+	,dblLimit = vyuPRPaycheckTax.dblLimit
+	,dblTotal = SUM(vyuPRPaycheckTax.dblTotal)
 	,vyuPRPaycheckTax.intTypeTaxId
 	,vyuPRPaycheckTax.intTypeTaxStateId
-	,MAX(tblPRPaycheck.dblTotalHoursYTD) dblTotalHours
-	,COUNT(tblPRPaycheck.intPaycheckId) AS intPaychecks
+	,dblTotalHours = MAX(tblPRPaycheck.dblTotalHoursYTD)
+	,intPaychecks = COUNT(tblPRPaycheck.intPaycheckId)
 FROM
 	(tblPREmployee 
 		INNER JOIN (SELECT PC.*
