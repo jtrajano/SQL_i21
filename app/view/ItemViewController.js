@@ -1492,97 +1492,59 @@ Ext.define('Inventory.view.ItemViewController', {
         var win = config.window,
             current = win.viewModel.data.current;
 
-        var pricings = config.viewModel.data.current.tblICItemPricings();
-        if(pricings) {
-            var items = pricings.data.items;
-            for(var i = 0; i < items.length; i++) {
-                var p = items[i];
+        // scope of 'this' here is the iRely.data.Validator. 
+        this.validateRecord(config, function (result){
+            if (!result) return;
 
-                if((iRely.Functions.isEmpty(p.data.strLocationName, false) || p.data.intItemLocationId === null
-                    || iRely.Functions.isEmpty(p.data.strPricingMethod, false)) && !p.dummy) {
-                    var tabItem = win.down('#tabItem');
-                    tabItem.setActiveTab('pgePricing');
-                    var grid = win.down('#grdPricing');
-                     var gridColumns = grid.headerCt.getGridColumns();
-                    for (var i = 0; i < gridColumns.length; i++) {
-                        if (gridColumns[i].itemId == 'colPricingLocation' || gridColumns[i].itemId == 'colPricingMethod') {
-                            grid.columnManager.columns[i].setVisible(true);
-                        }
+            var itemType = current.get('strType'); 
+
+            // Validate the Unit of Measure. 
+            // Make sure Unit Qty value of 1 is only used once.  
+            var uomStore = config.viewModel.data.current.tblICItemUOMs();   
+            var stockKeepingTypes = ['Inventory', 'Finished Good', 'Raw Material'];     
+            if(uomStore) {
+                if (stockKeepingTypes.includes(itemType))
+                {
+                    // Validate Unique Unit Qty == 1
+                    var duplicateCount = 0;
+                    for (var i = 0; i < uomStore.data.items.length; i++) {
+                        var u = uomStore.data.items[i];
+                        duplicateCount += (!u.dummy && u.data.dblUnitQty == 1) ? 1 : 0; 
+                        if (duplicateCount > 1) break; 
                     }
-                    action(false);
-                    //iRely.Msg.showError('The Location in Pricing must not be blank.', Ext.MessageBox.OK, win);
-                    //return;
-                }
-            }
-        }
 
-        this.validateRecord(config, function (result) {
-            if (result) {
-                var uomStore = config.viewModel.data.current.tblICItemUOMs();
-                
-                if(uomStore) {
-                    var uoms = uomStore.data.items;
-                    var cnt = false;
-                    for(var i = 0; i < uoms.length; i++) {
-                        var u = uoms[i];
-                        if (!u.dummy) {
-                            if (cnt > 1)
-                                break;
-                           // if (u.data.dblUnitQty === 1) {
-                           //     cnt++;
-                           // }
-                            else {
-                                //Check if all the Unit Quanitities have Unique values
-                                var currentUnitQty = u.data.dblUnitQty;
+                    if (duplicateCount > 1){
+                        iRely.Msg.showError('Please check the Unit of Measure. Only one Unit with Unit Qty equals to one is allowed.', Ext.MessageBox.OK, win);
+                        action(false);
+                        return;
+                    }
 
-                                for(var j = 0; j < uoms.length; j++) {
-                                    var eachUOM = uoms[j];
-                                    if (!eachUOM.dummy) {
-                                        if (j !== i && eachUOM.data.dblUnitQty === currentUnitQty) {
-                                            cnt++;
-                                        }
+                    // Show duplicates of Unit Qty where Unit Qty <> 1.                     
+                    for (var i = 0; i < uomStore.data.items.length; i++) {
+                        duplicateCount = 1; // In each iteration, initialize the duplicate counter as 1. 
+                        var u = uomStore.data.items[i];
+                        for (var ii = i + 1; (!u.dummy && ii < uomStore.data.items.length); ii++){
+                            var uu = uomStore.data.items[ii];
+                            duplicateCount += (!uu.dummy && u.data.dblUnitQty == uu.data.dblUnitQty) ? 1 : 0; 
+                            if (duplicateCount > 1) {
+                                var msgAction = function (button) {
+                                    if (button === 'no') {
+                                        action(false);
                                     }
-                                }
+                                    else {
+                                        action(true);
+                                    }
+                                };
+                                var msg = 'Is it intended for ' + u.get('strUnitMeasure') + " and " + uu.get('strUnitMeasure') + ' to be the same Unit Qty?'
+                                iRely.Functions.showCustomDialog('question', 'yesno', msg, msgAction);
+                                return;
                             }
                         }
                     }
-                    if(cnt > 1 && (current.get('strType') === 'Inventory' || current.get('strType') === 'Finished Good' || current.get('strType') === 'Raw Material')) {
-                        var tabItem = win.down('#tabItem');
-                        tabItem.setActiveTab('pgeDetails');
-                        var grid = win.down('#grdUnitOfMeasure');
-                        iRely.Msg.showError('UOMs must not have the same Unit Qty.', Ext.MessageBox.OK, win);
-                        action(false);
-                    } else
-                        action(true);
-                } else
-                    action(true);
-            }
-            else {
-                var tabItem = win.down('#tabItem');
-                var tabSetup = win.down('#tabSetup');
-                if (config.viewModel.data.current.get('strType') === 'Finished Good' || config.viewModel.data.current.get('strType') === 'Raw Material') {
-                    if (iRely.Functions.isEmpty(config.viewModel.data.current.get('strLifeTimeType'))) {
-                        tabItem.setActiveTab('pgeSetup');
-                        tabSetup.setActiveTab('pgeManufacturing');
-                        action(false);
-                    }
-                    else if (config.viewModel.data.current.get('intLifeTime') <= 0) {
-                        tabItem.setActiveTab('pgeSetup');
-                        tabSetup.setActiveTab('pgeManufacturing');
-                        action(false);
-                    }
-                    else if (config.viewModel.data.current.get('intReceiveLife') <= 0) {
-                        tabItem.setActiveTab('pgeSetup');
-                        tabSetup.setActiveTab('pgeManufacturing');
-                        action(false);
-                    }
-                }
-                else {
-//                    tabItem.setActiveTab('pgePricing');
-                    action(false);
                 }
             }
-        });
+            action(true);                    
+        });        
     },
 
     // <editor-fold desc="Details Tab Methods and Event Handlers">
