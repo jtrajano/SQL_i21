@@ -11,6 +11,8 @@ Ext.define('Inventory.view.InventoryValuationSummaryViewController', {
                 { dataIndex: 'strItemDescription', text: 'Description', allowSort: false, flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                 { dataIndex: 'strLocationName', text: 'Location', allowSort: false, flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocation' },
                 { dataIndex: 'strSubLocationName', text: 'Sub Location', allowSort: false, flex: 1, dataType: 'string' },
+                { dataIndex: 'strCategoryCode', text: 'Category', allowSort: false, flex: 1, dataType: 'string' },
+                { dataIndex: 'strCommodityCode', text: 'Commodity', allowSort: false, flex: 1, dataType: 'string' },
                 { dataIndex: 'strStockUOM', text: 'Stock UOM', allowSort: false, flex: 1, dataType: 'string' },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblQuantityInStockUOM', text: 'Stock Quantity', allowSort: false, flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblValue', text: 'Value', allowSort: false, flex: 1, dataType: 'float' },
