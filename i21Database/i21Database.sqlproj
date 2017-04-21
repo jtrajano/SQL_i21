@@ -5189,6 +5189,7 @@
     <Build Include="dbo\Triggers\trgCustomJDESAPReceiptUpdateExportFlag.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MS_Mississippi.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateContractShippingInstructionQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSaveTestInTemplates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
