@@ -99,6 +99,7 @@
 --:r "..\dbo\Views\vyuECCFCardTransaction.sql"
 
 -- TANK MANAGEMENT
+:r "..\Scripts\TM\CheckOriginTableAndTMPreference.sql"
 :r "..\dbo\Views\vwclsmst.sql"
 :r "..\dbo\Views\vwpyemst.sql"
 :r "..\dbo\Views\vwticmst.sql"
