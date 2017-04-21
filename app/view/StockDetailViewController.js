@@ -7,6 +7,7 @@ Ext.define('Inventory.view.StockDetailViewController', {
     ],
     config: {
         searchConfig: {
+            mainTitle: 'Stock Details',
             title: 'Locations YTD',
             url: '../Inventory/api/Item/GetItemStocks',
             groupedOnLoad: true,
