@@ -5211,6 +5211,7 @@
     <Build Include="dbo\Stored Procedures\uspTMImportTankMonitorReading.sql" />
     <Build Include="dbo\Views\vyuCRMCampaignContactSource.sql" />
     <Build Include="dbo\Views\vyuMFGetMachinesByCell.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateContractShippingInstructionQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
