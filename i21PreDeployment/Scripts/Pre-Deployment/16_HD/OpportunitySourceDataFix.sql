@@ -3,6 +3,26 @@ GO
 	PRINT N'Start fixing HD Opportunity Source existing data.'
 GO
 
+	IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_NAME='tblHDSalesPipeStatus')
+	begin
+		exec('
+			if exists (select * from tblHDSalesPipeStatus where strOrder is null or ltrim(rtrim(strOrder)) = '''')
+			begin
+				update tblHDSalesPipeStatus set strOrder = convert(nvarchar(20),intSalesPipeStatusId);
+			end
+		')
+	end
+
+	IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_NAME='tblCRMSalesPipeStatus')
+	begin
+		exec('
+			if exists (select * from tblCRMSalesPipeStatus where strOrder is null or ltrim(rtrim(strOrder)) = '''')
+			begin
+				update tblCRMSalesPipeStatus set strOrder = convert(nvarchar(20),intSalesPipeStatusId);
+			end
+		')
+	end
+
 	IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_NAME='tblHDOpportunitySource')
 	begin
 		exec('update tblHDOpportunitySource set tblHDOpportunitySource.strSource = tblHDOpportunitySource.strSource+''_''+convert(nvarchar(20),tblHDOpportunitySource.intOpportunitySourceId) where tblHDOpportunitySource.strSource in (
