@@ -48,10 +48,10 @@ BEGIN TRY
 		,@intProductId INT
 		,@intSubstituteItemId INT
 		,@intSubstituteItemUOMId INT
-		,@intPMCategoryId int
-		,@intPMStageLocationId int
-		,@intStagingLocationId int
-		,@strPickByUpperToleranceQty nvarchar(50)
+		,@intPMCategoryId INT
+		,@intPMStageLocationId INT
+		,@intStagingLocationId INT
+		,@strPickByUpperToleranceQty NVARCHAR(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -121,9 +121,9 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intPackagingCategoryId
 
-	Select @intPMCategoryId=intCategoryId 
-	From tblICCategory
-	Where strCategoryCode =@strPackagingCategory
+	SELECT @intPMCategoryId = intCategoryId
+	FROM tblICCategory
+	WHERE strCategoryCode = @strPackagingCategory
 
 	SELECT @intBlendProductionStagingUnitId = intBlendProductionStagingUnitId
 	FROM tblSMCompanyLocation
@@ -136,7 +136,7 @@ BEGIN TRY
 
 	IF @strPickByUpperToleranceQty IS NULL
 	BEGIN
-		SELECT @strPickByUpperToleranceQty='False'
+		SELECT @strPickByUpperToleranceQty = 'False'
 	END
 
 	SELECT @strUserName = strUserName
@@ -190,7 +190,7 @@ BEGIN TRY
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
-		AND intAttributeId = 90--PM Staging Location
+		AND intAttributeId = 90 --PM Staging Location
 
 	DECLARE @tblMFStageLocation TABLE (intStageLocationId INT)
 
@@ -207,7 +207,9 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 76
+	
 	UNION
+	
 	SELECT @intPMStageLocationId
 
 	BEGIN TRANSACTION
@@ -336,24 +338,72 @@ BEGIN TRY
 			)
 		SELECT @intOrderHeaderId
 			,ri.intItemId
-			,CASE 
-				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN CAST(CEILING(((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
-				ELSE ((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))
-				END
+			,SUM(CASE 
+					WHEN C.strCategoryCode = @strPackagingCategory
+						THEN CAST(CEILING((
+										(
+											CASE 
+												WHEN @strPickByUpperToleranceQty = 'True'
+													THEN ri.dblCalculatedUpperTolerance
+												ELSE ri.dblCalculatedQuantity
+												END
+											) * (W.dblPlannedQty / r.dblQuantity)
+										)) AS NUMERIC(38, 2))
+					ELSE (
+							(
+								CASE 
+									WHEN @strPickByUpperToleranceQty = 'True'
+										THEN ri.dblCalculatedUpperTolerance
+									ELSE ri.dblCalculatedQuantity
+									END
+								) * (W.dblPlannedQty / r.dblQuantity)
+							)
+					END)
 			,ri.intItemUOMId
-			,CASE 
-				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN CAST(CEILING(((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
-				ELSE ((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))
-				END
+			,SUM(CASE 
+					WHEN C.strCategoryCode = @strPackagingCategory
+						THEN CAST(CEILING((
+										(
+											CASE 
+												WHEN @strPickByUpperToleranceQty = 'True'
+													THEN ri.dblCalculatedUpperTolerance
+												ELSE ri.dblCalculatedQuantity
+												END
+											) * (W.dblPlannedQty / r.dblQuantity)
+										)) AS NUMERIC(38, 2))
+					ELSE (
+							(
+								CASE 
+									WHEN @strPickByUpperToleranceQty = 'True'
+										THEN ri.dblCalculatedUpperTolerance
+									ELSE ri.dblCalculatedQuantity
+									END
+								) * (W.dblPlannedQty / r.dblQuantity)
+							)
+					END)
 			,ri.intItemUOMId
-			,IU.dblUnitQty
-			,CASE 
-				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN CAST(CEILING(((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))) AS NUMERIC(38, 2))
-				ELSE ((Case When @strPickByUpperToleranceQty='True' Then ri.dblCalculatedUpperTolerance Else ri.dblCalculatedQuantity End) * (W.dblPlannedQty / r.dblQuantity))
-				END
+			,MAX(IU.dblUnitQty)
+			,SUM(CASE 
+					WHEN C.strCategoryCode = @strPackagingCategory
+						THEN CAST(CEILING((
+										(
+											CASE 
+												WHEN @strPickByUpperToleranceQty = 'True'
+													THEN ri.dblCalculatedUpperTolerance
+												ELSE ri.dblCalculatedQuantity
+												END
+											) * (W.dblPlannedQty / r.dblQuantity)
+										)) AS NUMERIC(38, 2))
+					ELSE (
+							(
+								CASE 
+									WHEN @strPickByUpperToleranceQty = 'True'
+										THEN ri.dblCalculatedUpperTolerance
+									ELSE ri.dblCalculatedQuantity
+									END
+								) * (W.dblPlannedQty / r.dblQuantity)
+							)
+					END)
 			,ISNULL(NULL, I.intUnitPerLayer)
 			,ISNULL(NULL, I.intLayerPerPallet)
 			,(
@@ -361,11 +411,15 @@ BEGIN TRY
 				FROM tblMFPickListPreference
 				)
 			,Row_Number() OVER (
-				ORDER BY ri.intRecipeItemId
+				ORDER BY MAX(ri.intRecipeItemId)
 				)
 			,NULL
 			,''
-			,Case When C.intCategoryId=@intPMCategoryId Then @intPMStageLocationId Else NULL End
+			,CASE 
+				WHEN C.intCategoryId = @intPMCategoryId
+					THEN @intPMStageLocationId
+				ELSE NULL
+				END
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.ysnActive = 1
@@ -388,7 +442,15 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND ri.intConsumptionMethodId in (1,2)
+			AND ri.intConsumptionMethodId IN (
+				1
+				,2
+				)
+		GROUP BY ri.intItemId
+			,ri.intItemUOMId
+			,I.intUnitPerLayer
+			,I.intLayerPerPallet
+			,C.intCategoryId
 
 		DECLARE @tblMFRequiredQty TABLE (
 			intItemId INT
@@ -400,11 +462,16 @@ BEGIN TRY
 			,dblRequiredQty
 			)
 		SELECT OD1.intItemId
-			,IsNULL(sum(OD.dblRequiredQty),0)
-		From @OrderDetail OD1 
-		LEFT JOIN tblMFOrderDetail OD ON OD1.intItemId = OD.intItemId 
-		and OD.intOrderHeaderId in (Select OH.intOrderHeaderId from tblMFOrderHeader OH Where OH.intOrderTypeId =1 and OH.intOrderStatusId <>10)
-		Group by OD1.intItemId
+			,IsNULL(sum(OD.dblRequiredQty), 0)
+		FROM @OrderDetail OD1
+		LEFT JOIN tblMFOrderDetail OD ON OD1.intItemId = OD.intItemId
+			AND OD.intOrderHeaderId IN (
+				SELECT OH.intOrderHeaderId
+				FROM tblMFOrderHeader OH
+				WHERE OH.intOrderTypeId = 1
+					AND OH.intOrderStatusId <> 10
+				)
+		GROUP BY OD1.intItemId
 
 		DECLARE @tblMFStagedQty TABLE (
 			intItemId INT
@@ -441,8 +508,8 @@ BEGIN TRY
 		SELECT R.intItemId
 			,(
 				CASE 
-					WHEN IsNULL(dblStagedQty,0) - IsNULL(dblRequiredQty,0) > 0
-						THEN IsNULL(dblStagedQty,0) - IsNULL(dblRequiredQty,0)
+					WHEN IsNULL(dblStagedQty, 0) - IsNULL(dblRequiredQty, 0) > 0
+						THEN IsNULL(dblStagedQty, 0) - IsNULL(dblRequiredQty, 0)
 					ELSE 0
 					END
 				)
@@ -450,8 +517,16 @@ BEGIN TRY
 		LEFT JOIN @tblMFStagedQty S ON S.intItemId = R.intItemId
 
 		UPDATE OD
-		SET dblQty = Case When dblQty - R.dblRemainingQty<0 Then 0 Else dblQty - R.dblRemainingQty End
-			,dblWeight = Case When dblWeight - R.dblRemainingQty<0 Then 0 Else dblWeight - R.dblRemainingQty End
+		SET dblQty = CASE 
+				WHEN dblQty - R.dblRemainingQty < 0
+					THEN 0
+				ELSE dblQty - R.dblRemainingQty
+				END
+			,dblWeight = CASE 
+				WHEN dblWeight - R.dblRemainingQty < 0
+					THEN 0
+				ELSE dblWeight - R.dblRemainingQty
+				END
 		FROM @OrderDetail OD
 		LEFT JOIN @tblMFRemainingQty R ON R.intItemId = OD.intItemId
 
@@ -475,7 +550,7 @@ BEGIN TRY
 			,intLineNo
 			,intSanitizationOrderDetailsId
 			,strLineItemNote
-			,intStagingLocationId 
+			,intStagingLocationId
 			)
 		SELECT intOrderHeaderId
 			,intItemId
@@ -491,7 +566,7 @@ BEGIN TRY
 			,intLineNo
 			,intSanitizationOrderDetailsId
 			,strLineItemNote
-			,intStagingLocationId 
+			,intStagingLocationId
 		FROM @OrderDetail
 
 		SELECT @dblMinQtyCanBeProduced = - 1
@@ -505,13 +580,13 @@ BEGIN TRY
 				,@dblQty = NULL
 				,@dblRequiredQty = NULL
 				,@intItemUOMId = NULL
-				,@intStagingLocationId=NULL
+				,@intStagingLocationId = NULL
 
 			SELECT @intItemId = intItemId
 				,@dblQty = dblQty
 				,@dblRequiredQty = dblRequiredQty
 				,@intItemUOMId = intItemUOMId
-				,@intStagingLocationId =intStagingLocationId 
+				,@intStagingLocationId = intStagingLocationId
 			FROM @OrderDetailInformation
 			WHERE intLineNo = @intLineNo
 
@@ -527,15 +602,14 @@ BEGIN TRY
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
 				AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
-				And L.intStorageLocationId NOT IN (
-				SELECT intStageLocationId
-				FROM @tblMFStageLocation
-				)
+				AND L.intStorageLocationId NOT IN (
+					SELECT intStageLocationId
+					FROM @tblMFStageLocation
+					)
 
 			--Select @dblAvailableQty=@dblAvailableQty- IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(OD.intItemUOMId, @intItemUOMId, OD.dblRequiredQty )), 0)
 			--from tblMFOrderDetail OD 
 			--Where OD.intItemId = @intItemId and OD.intOrderHeaderId in (Select OH.intOrderHeaderId from tblMFOrderHeader OH Where OH.intOrderStatusId <>10)
-
 			IF @dblAvailableQty IS NULL
 				OR @dblAvailableQty < 0
 			BEGIN
@@ -543,7 +617,8 @@ BEGIN TRY
 
 				DELETE
 				FROM @OrderDetailInformation
-				WHERE intLineNo = @intLineNo and dblQty=dblRequiredQty 
+				WHERE intLineNo = @intLineNo
+					AND dblQty = dblRequiredQty
 			END
 
 			IF @dblQty - @dblAvailableQty > 0
@@ -553,7 +628,7 @@ BEGIN TRY
 				UPDATE @OrderDetailInformation
 				SET dblQty = @dblAvailableQty
 					,dblWeight = @dblAvailableQty
-					,dblRequiredQty =dblRequiredQty -dblQty+@dblAvailableQty
+					,dblRequiredQty = dblRequiredQty - dblQty + @dblAvailableQty
 				WHERE intLineNo = @intLineNo
 
 				DECLARE @tblSubstituteItem TABLE (
@@ -605,30 +680,27 @@ BEGIN TRY
 
 					SELECT @dblAvailableQty = 0
 
-					SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)) 
+					SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
 					FROM dbo.tblICLot L
 					JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					JOIN dbo.tblICRestriction R ON R.intRestrictionId = SL.intRestrictionId
 						AND R.strInternalCode = 'STOCK'
 					JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 					JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
-					AND BS.strPrimaryStatus = 'Active'
+						AND BS.strPrimaryStatus = 'Active'
 					JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 					WHERE L.intItemId = @intSubstituteItemId
 						AND L.intLocationId = @intLocationId
 						AND LS.strPrimaryStatus = 'Active'
 						AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
-						And L.intStorageLocationId NOT IN (
-											SELECT intStageLocationId
-											FROM @tblMFStageLocation
-											)
-
+						AND L.intStorageLocationId NOT IN (
+							SELECT intStageLocationId
+							FROM @tblMFStageLocation
+							)
 
 					--Select @dblAvailableQty=@dblAvailableQty- IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(OD.intItemUOMId, @intItemUOMId, OD.dblRequiredQty )), 0)
 					--from tblMFOrderDetail OD 
 					--Where OD.intItemId = @intItemId and OD.intOrderHeaderId in (Select OH.intOrderHeaderId from tblMFOrderHeader OH Where OH.intOrderStatusId <>10)
-
-
 					IF @dblAvailableQty IS NULL
 					BEGIN
 						SELECT @dblAvailableQty = 0
@@ -648,7 +720,7 @@ BEGIN TRY
 							,dblWeight
 							,intWeightUOMId
 							,dblWeightPerUnit
-							,dblRequiredQty 
+							,dblRequiredQty
 							,intUnitsPerLayer
 							,intLayersPerPallet
 							,intPreferenceId
@@ -695,7 +767,7 @@ BEGIN TRY
 							,dblWeight
 							,intWeightUOMId
 							,dblWeightPerUnit
-							,dblRequiredQty 
+							,dblRequiredQty
 							,intUnitsPerLayer
 							,intLayersPerPallet
 							,intPreferenceId
@@ -811,7 +883,6 @@ BEGIN TRY
 	--DELETE
 	--FROM @OrderDetailInformation
 	--WHERE dblQty <= 0
-
 	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
 
 	INSERT INTO tblMFStageWorkOrder (
