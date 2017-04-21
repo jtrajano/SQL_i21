@@ -89,7 +89,7 @@ BEGIN TRY
 		BEGIN
 			IF ISNULL(@ysnAutoCreateDP ,0) = 1
 			BEGIN
-				EXEC uspCTCreateContract @intTicketId,'Scale',@intUserId,null,@intNewContractHeaderId OUTPUT
+				EXEC uspCTCreateContract @intTicketId,'Scale',@intUserId,null,@intNewContractHeaderId OUTPUT,@intEntityId
 				SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = @intNewContractHeaderId
 			END
 			IF	ISNULL(@intContractDetailId,0) = 0
