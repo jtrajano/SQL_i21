@@ -11,6 +11,8 @@ DECLARE @intSeqNo INT
 	,@intPropertyId INT
 	,@strIsMandatory NVARCHAR(20)
 	,@intProductId INT
+	,@intRowNo INT
+	,@intTemplateProductId INT
 DECLARE @NewProperty TABLE (
 	intSeqNo INT IDENTITY(1, 1)
 	,intPropertyId INT
@@ -18,6 +20,20 @@ DECLARE @NewProperty TABLE (
 DECLARE @ExistingTemplates TABLE (
 	intSeqNo INT IDENTITY(1, 1)
 	,intProductId INT
+	,intSequenceNo INT
+	)
+DECLARE @TestProperty TABLE (
+	intRowNo INT IDENTITY(1, 1)
+	,intTestPropertyId INT
+	,intSequenceNo INT
+	)
+DECLARE @ExistingTemplatesSeqNo TABLE (
+	intRowNo INT IDENTITY(1, 1)
+	,intProductId INT
+	)
+DECLARE @ProductProperty TABLE (
+	intProductRowNo INT IDENTITY(1, 1)
+	,intProductPropertyId INT
 	,intSequenceNo INT
 	)
 
@@ -31,15 +47,16 @@ WHERE intTestId = @intTestId
 		WHERE intTestId = @intTestId
 		)
 
+-- Insert the properties which are added in Test and not available in template
 INSERT INTO @NewProperty
 SELECT intPropertyId
 FROM tblQMTestProperty
 WHERE intTestId = @intTestId
-	AND intPropertyId NOT IN (
-		SELECT DISTINCT intPropertyId
-		FROM tblQMProductProperty
-		WHERE intTestId = @intTestId
-		)
+--AND intPropertyId NOT IN (
+--	SELECT DISTINCT intPropertyId
+--	FROM tblQMProductProperty
+--	WHERE intTestId = @intTestId
+--	)
 ORDER BY intSequenceNo
 
 SELECT @intSeqNo = MIN(intSeqNo)
@@ -196,4 +213,61 @@ BEGIN
 	SELECT @intSeqNo = MIN(intSeqNo)
 	FROM @NewProperty
 	WHERE intSeqNo > @intSeqNo
+END
+
+-- Updating seq no in Test starting from 1
+INSERT INTO @TestProperty
+SELECT intTestPropertyId
+	,ROW_NUMBER() OVER (
+		PARTITION BY intTestId ORDER BY intTestId
+			,intSequenceNo
+		)
+FROM tblQMTestProperty
+WHERE intTestId = @intTestId
+
+UPDATE tblQMTestProperty
+SET intSequenceNo = a.intSequenceNo
+FROM @TestProperty a
+JOIN tblQMTestProperty TP ON TP.intTestPropertyId = a.intTestPropertyId
+
+-- Updating seq no in Template starting from 1(taking order from Test)
+INSERT INTO @ExistingTemplatesSeqNo
+SELECT DISTINCT intProductId
+FROM tblQMProductProperty PP
+WHERE PP.intTestId = @intTestId
+ORDER BY PP.intProductId
+
+SELECT @intRowNo = MIN(intRowNo)
+FROM @ExistingTemplatesSeqNo
+
+WHILE (@intRowNo > 0)
+BEGIN
+	SELECT @intTemplateProductId = intProductId
+	FROM @ExistingTemplatesSeqNo
+	WHERE intRowNo = @intRowNo
+
+	DELETE
+	FROM @ProductProperty
+
+	INSERT INTO @ProductProperty
+	SELECT PP.intProductPropertyId
+		,ROW_NUMBER() OVER (
+			ORDER BY PT.intProductTestId
+				,TP.intSequenceNo
+			) AS intSequenceNo
+	FROM tblQMProductProperty PP
+	JOIN tblQMProductTest PT ON PT.intProductId = PP.intProductId
+		AND PT.intTestId = PP.intTestId
+	JOIN tblQMTestProperty TP ON TP.intTestId = PP.intTestId
+		AND TP.intPropertyId = PP.intPropertyId
+	WHERE PP.intProductId = @intTemplateProductId
+
+	UPDATE tblQMProductProperty
+	SET intSequenceNo = a.intSequenceNo
+	FROM @ProductProperty a
+	JOIN tblQMProductProperty TP ON TP.intProductPropertyId = a.intProductPropertyId
+
+	SELECT @intRowNo = MIN(intRowNo)
+	FROM @ExistingTemplatesSeqNo
+	WHERE intRowNo > @intRowNo
 END
