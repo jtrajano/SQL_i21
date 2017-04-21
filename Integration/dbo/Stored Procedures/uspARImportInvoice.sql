@@ -234,7 +234,11 @@ BEGIN
 				ROUND(ISNULL(ptivc_sold_by_tot, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblInvoiceTotal]
 				ROUND(ISNULL(ptivc_disc_amt, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblDiscount]
 				ROUND(ISNULL(ptivc_bal_due, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblAmountDue]
-				ROUND(ISNULL(ptivc_amt_applied, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblPayment]
+				(CASE 
+					WHEN ptivc_type = 'C' 
+					THEN ptivc_amt_applied * -1
+					ELSE ptivc_amt_applied
+				 END),--[dblPayment]
 				(CASE 
 					WHEN ptivc_type = 'I' 
 						THEN 'Invoice' 
@@ -296,9 +300,17 @@ BEGIN
 				ITM.intItemId,
 				ITM.strDescription,
 				NULL,
-				agstm_un,
+				(CASE 
+					WHEN INV.strTransactionType = 'Credit Memo' 
+					THEN agstm_un * -1
+					ELSE agstm_un
+				 END),
 				agstm_un_prc,
-				agstm_sls								
+				(CASE 
+					WHEN INV.strTransactionType = 'Credit Memo' 
+					THEN agstm_sls * -1
+					ELSE agstm_sls
+				 END)								
 			FROM agstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(agstm_itm_no  COLLATE Latin1_General_CI_AS)
@@ -325,9 +337,17 @@ BEGIN
 				ITM.intItemId,
 				ITM.strDescription,
 				NULL,
-				ptstm_un,
+				(CASE 
+					WHEN INV.strTransactionType = 'Credit Memo' 
+					THEN ptstm_un * -1
+					ELSE ptstm_un
+				 END),
 				ptstm_un_prc,
-				ptstm_net
+				(CASE 
+					WHEN INV.strTransactionType = 'Credit Memo' 
+					THEN ptstm_net * -1
+					ELSE ptstm_net
+				 END) 
 			FROM ptstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(ptstm_itm_no  COLLATE Latin1_General_CI_AS)
