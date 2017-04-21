@@ -37,6 +37,7 @@ AS
 				,[dblExemptionPercent]
 				,[dblTax]
 				,[dblAdjustedTax]
+				,[dblAdjustedTax]				AS [dblBaseAdjustedTax]
 				,[intTaxAccountId]				AS [intSalesTaxAccountId]
 				,[ysnSeparateOnInvoice]
 				,[ysnCheckoffTax]
