@@ -200,12 +200,12 @@ SELECT @intTimeOffRequestId = @intTransactionId
 					,EL.dblRateAmount
 					,dblTotal = CASE WHEN (EL.strCalculationType IN ('Rate Factor', 'Overtime') AND EL.intEmployeeEarningLinkId IS NOT NULL) THEN 
 									CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = EL.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
-										TOR.dblRequest * EL.dblRateAmount
+										CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END * EL.dblRateAmount
 									ELSE
 										EL.dblRateAmount
 									END
 								WHEN (EL.strCalculationType = 'Hourly Rate') THEN
-									TOR.dblRequest * EL.dblRateAmount
+									CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END * EL.dblRateAmount
 								ELSE
 									EL.dblRateAmount
 								END
