@@ -23,6 +23,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [dblBalance] NUMERIC(18, 6) NULL, 
     [dblIntransitQty] NUMERIC(18, 6) NULL, 
     [dblScheduleQty] NUMERIC(18, 6) NULL, 
+    [dblShippingInstructionQty] NUMERIC(18, 6) NULL, 
 	[dblNetWeight] NUMERIC(18, 6) NULL, 
 	[intNetWeightUOMId] [int] NULL,	
 	[intUnitMeasureId] [int] NULL,

@@ -161,6 +161,36 @@ BEGIN TRY
 				RAISERROR ('Shipment has already been created for the shipping instruction. Cannot cancel.',11,1)
 			END
 
+			SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
+			FROM @tblLoadDetail
+
+			SELECT @intLoadShippingInstructionId = intLoadShippingInstructionId
+			FROM tblLGLoad
+			WHERE intLoadId = @intLoadId
+
+			WHILE (@intMinLoadDetailId IS NOT NULL)
+			BEGIN
+				SET @intContractDetailId = NULL
+				SET @dblQuantityToUpdate = NULL
+				SET @intExternalId = NULL
+				SET @strScreenName = NULL
+
+				SELECT @intContractDetailId = intContractDetailId
+					,@dblQuantityToUpdate = - dblLoadDetailQuantity
+					,@intExternalId = @intMinLoadDetailId
+					,@strScreenName = 'Load Schedule'
+				FROM @tblLoadDetail
+				WHERE intLoadDetailId = @intMinLoadDetailId
+
+				EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intContractDetailId
+					,@dblQuantityToUpdate = @dblQuantityToUpdate
+					,@intUserId = @intEntityUserSecurityId
+
+				SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
+				FROM @tblLoadDetail
+				WHERE intLoadDetailId > @intMinLoadDetailId
+			END
+
 			UPDATE tblLGLoad
 			SET intShipmentStatus = 10
 				,ysnCancelled = @ysnCancel
@@ -198,6 +228,10 @@ BEGIN TRY
 				BEGIN
 					RAISERROR('Adequate qty is not there for the contract. Cannot reverse cancel.',16,1)
 				END
+
+				EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intContractDetailId
+					,@dblQuantityToUpdate = @dblQuantityToUpdate
+					,@intUserId = @intEntityUserSecurityId
 
 				SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
 				FROM @tblLoadDetail
