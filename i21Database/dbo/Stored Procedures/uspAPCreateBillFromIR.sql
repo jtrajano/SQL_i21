@@ -129,16 +129,16 @@ BEGIN
 				INNER JOIN dbo.tblAPBillDetail B ON A.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 				WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds))
 				BEGIN 
-					SET @ChargeQty = 0
+					SET @chargeQty = 0
 				END
 	ELSE
 				BEGIN
-					SET @ChargeQty = 1
+					SET @chargeQty = 1
 				END              
 		
 	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryReceiptCharge WHERE intInventoryReceiptId IN ((SELECT intInventoryReceiptId FROM #tmpReceiptIds)))
 	BEGIN
-		IF(@availableQty = 0 AND  @ChargeQty = 0)
+		IF(@availableQty = 0 AND  @chargeQty = 0)
 		BEGIN 
 			-- Debit Memo is no longer needed. All items have Debit Memo.
 			IF(@rtype = 'Inventory Return')
