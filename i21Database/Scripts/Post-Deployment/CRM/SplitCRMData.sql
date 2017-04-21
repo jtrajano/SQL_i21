@@ -88,7 +88,7 @@ BEGIN
 			intSalesPipeStatusId
 			,strStatus
 			,strDescription
-			,strOrder = convert(nvarchar(20),intSalesPipeStatusId)
+			,strOrder
 			,strProjectStatus
 			,dblProbability
 			,intStatusId = null
