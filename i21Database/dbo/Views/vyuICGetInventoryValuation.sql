@@ -94,4 +94,4 @@ FROM 	tblICItem i
 			AND bill.strBillId = t.strTransactionId
 		LEFT JOIN tblEMEntity e 
 			ON e.intEntityId = COALESCE(receipt.intEntityVendorId, shipment.intEntityCustomerId, invoice.intEntityCustomerId, bill.intEntityVendorId)  
-WHERE	i.strType != 'Comment'
+WHERE	i.strType NOT IN ('Other Charge', 'Non-Inventory', 'Service', 'Software', 'Comment')
