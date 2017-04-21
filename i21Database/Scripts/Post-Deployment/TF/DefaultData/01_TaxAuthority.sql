@@ -35,10 +35,10 @@ UNION ALL SELECT intTaxAuthorityId = 20, strTaxAuthorityCode = 'MD', strDescript
 UNION ALL SELECT intTaxAuthorityId = 21, strTaxAuthorityCode = 'MA', strDescription = 'Massachusetts', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 0, ysnFilingForThisTA = 0
 UNION ALL SELECT intTaxAuthorityId = 22, strTaxAuthorityCode = 'MI', strDescription = 'Michigan', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 0
 UNION ALL SELECT intTaxAuthorityId = 23, strTaxAuthorityCode = 'MN', strDescription = 'Minnesota', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 0
-UNION ALL SELECT intTaxAuthorityId = 24, strTaxAuthorityCode = 'MS', strDescription = 'Mississippi', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 0
+UNION ALL SELECT intTaxAuthorityId = 24, strTaxAuthorityCode = 'MS', strDescription = 'Mississippi', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 1
 UNION ALL SELECT intTaxAuthorityId = 25, strTaxAuthorityCode = 'MO', strDescription = 'Missouri', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 0
 UNION ALL SELECT intTaxAuthorityId = 26, strTaxAuthorityCode = 'MT', strDescription = 'Montana', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 0
-UNION ALL SELECT intTaxAuthorityId = 27, strTaxAuthorityCode = 'NE', strDescription = 'Nebraska', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 0
+UNION ALL SELECT intTaxAuthorityId = 27, strTaxAuthorityCode = 'NE', strDescription = 'Nebraska', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 1
 UNION ALL SELECT intTaxAuthorityId = 28, strTaxAuthorityCode = 'NV', strDescription = 'Nevada', ysnPaperVersionAvailable = 0, ysnElectronicVersionAvailable = 0, ysnFilingForThisTA = 0
 UNION ALL SELECT intTaxAuthorityId = 29, strTaxAuthorityCode = 'NH', strDescription = 'New Hampshire', ysnPaperVersionAvailable = 0, ysnElectronicVersionAvailable = 0, ysnFilingForThisTA = 0
 UNION ALL SELECT intTaxAuthorityId = 30, strTaxAuthorityCode = 'NJ', strDescription = 'New Jersey', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 0, ysnFilingForThisTA = 0
@@ -53,7 +53,7 @@ UNION ALL SELECT intTaxAuthorityId = 38, strTaxAuthorityCode = 'PA', strDescript
 UNION ALL SELECT intTaxAuthorityId = 39, strTaxAuthorityCode = 'RI', strDescription = 'Rhode Island', ysnPaperVersionAvailable = 0, ysnElectronicVersionAvailable = 0, ysnFilingForThisTA = 0
 UNION ALL SELECT intTaxAuthorityId = 40, strTaxAuthorityCode = 'SC', strDescription = 'South Carolina', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 0
 UNION ALL SELECT intTaxAuthorityId = 41, strTaxAuthorityCode = 'SD', strDescription = 'South Dakota', ysnPaperVersionAvailable = 0, ysnElectronicVersionAvailable = 0, ysnFilingForThisTA = 0
-UNION ALL SELECT intTaxAuthorityId = 42, strTaxAuthorityCode = 'TN', strDescription = 'Tennessee', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 0
+UNION ALL SELECT intTaxAuthorityId = 42, strTaxAuthorityCode = 'TN', strDescription = 'Tennessee', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 1
 UNION ALL SELECT intTaxAuthorityId = 43, strTaxAuthorityCode = 'TX', strDescription = 'Texas', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 0
 UNION ALL SELECT intTaxAuthorityId = 44, strTaxAuthorityCode = 'UT', strDescription = 'Utah', ysnPaperVersionAvailable = 1, ysnElectronicVersionAvailable = 1, ysnFilingForThisTA = 0
 UNION ALL SELECT intTaxAuthorityId = 45, strTaxAuthorityCode = 'VT', strDescription = 'Vermont', ysnPaperVersionAvailable = 0, ysnElectronicVersionAvailable = 0, ysnFilingForThisTA = 0

@@ -56,7 +56,7 @@ BEGIN TRY
 		VALUES (
 			SOURCE.intReportingComponentId
 			, SOURCE.intOriginDestinationStateId
-			, SOURCE.strType
+			, SOURCE.strStatus
 		);
 
 	-- Delete existing Valid Destination States that is not within Source
