@@ -888,6 +888,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost").HasPrecision(38, 20);
             this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
             this.Property(t => t.dblQuantityInStockUOM).HasColumnName("dblQuantityInStockUOM").HasPrecision(38, 20);
+            this.Property(t => t.strCategoryCode).HasColumnName("strCategoryCode");
+            this.Property(t => t.strCommodityCode).HasColumnName("strCommodityCode");
         }
     }
 
