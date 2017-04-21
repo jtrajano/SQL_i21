@@ -2975,7 +2975,6 @@
     <Build Include="dbo\Tables\tblTRLoadReceipt.sql" />
     <Build Include="dbo\Views\vyuTRLoadHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiry.sql" />
     <None Include="Scripts\Utility\IC\Query tools\Compare On Hand Qty vs Posted Transactions.sql" />
     <None Include="Scripts\Utility\IC\Query tools\Query to debug Stock UOM Quantities.sql" />
@@ -3011,7 +3010,6 @@
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
@@ -5189,6 +5187,7 @@
     <Build Include="dbo\Views\vyuRKM2MGetContractDetailView.sql" />
     <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
     <Build Include="dbo\Triggers\trgCustomJDESAPReceiptUpdateExportFlag.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\MS_Mississippi.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

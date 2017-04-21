@@ -388,6 +388,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\01_TaxAuthority.sql
 :r .\TF\DefaultData\IN_Indiana.sql
 :r .\TF\DefaultData\NE_Nebraska.sql
+:r .\TF\DefaultData\MS_Mississippi.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql
