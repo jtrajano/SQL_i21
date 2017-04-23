@@ -62,7 +62,7 @@ AS
 			CU.strCurrency,					
 			LP.strCity						AS	strLoadingPoint,
 			DP.strCity						AS	strDestinationPoint,
-			OG.strCountry					AS	strOrigin,
+			ISNULL(IG.strCountry,OG.strCountry)					AS	strOrigin,
 			CA.strDescription				AS	strProductType,
 			dbo.fnCTGetApprovedSampleQuantity(CD.intContractDetailId) AS dblApprovedQty,
 			SB.strSubLocationName,
@@ -118,6 +118,7 @@ AS
 	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intDestinationPortId		LEFT
 	JOIN	tblSMCountry					OG	ON	OG.intCountryID				=	IM.intOriginId				LEFT
+	JOIN	tblSMCountry					IG	ON	IG.intCountryID				=	IC.intCountryId				LEFT
 	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= CD.intSubLocationId 	LEFT
 	JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
 												AND	CA.strType					=	'ProductType'				LEFT
