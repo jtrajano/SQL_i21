@@ -19,6 +19,8 @@ namespace iRely.Inventory.BusinessLayer
         {
             tblICCategoryAccount fc = new tblICCategoryAccount();
             fc.intConcurrencyId = 1;
+            string category = "";
+            string accountId = "";
             bool valid = true;
             for (var i = 0; i < fieldCount; i++)
             {
@@ -87,6 +89,7 @@ namespace iRely.Inventory.BusinessLayer
                             context,
                             m => m.strAccountCategory == value,
                             e => e.intAccountCategoryId);
+                        category = value;
                         if (lu != null)
                         {
                             fc.intAccountCategoryId = (int)lu;
@@ -125,6 +128,7 @@ namespace iRely.Inventory.BusinessLayer
                             context,
                             m => m.strAccountId == value,
                             e => e.intAccountId);
+                        accountId = value;
                         if (lu != null)
                         {
                             fc.intAccountId = (int)lu;
@@ -156,9 +160,9 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     Type = TYPE_INNER_WARN,
                     Status = REC_SKIP,
-                    Column = headers[0],
+                    Column = headers[1] + "/"  + headers[2],
                     Row = row,
-                    Message = "The record already exists: " + fc.strAccountCategory + " - " + fc.strAccountId + " . Record skipped."
+                    Message = "The record already exists: " + category + " - " + accountId + " . Record skipped."
                 });
             }
             else
