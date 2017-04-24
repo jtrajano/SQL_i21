@@ -48,6 +48,27 @@ BEGIN
 	END
 END
 
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFTransactions' AND COLUMN_NAME = 'intReportingComponentId')
+BEGIN
+	EXEC('UPDATE tblTFTransactions
+		SET tblTFTransactions.intReportingComponentId = tblPatch.intReportingComponentId
+		FROM (
+			SELECT DISTINCT Trans.intTransactionId, RC.intReportingComponentId
+			FROM tblTFTransactions Trans
+			LEFT JOIN tblTFReportingComponent RC ON Trans.strFormCode = RC.strFormCode
+				AND Trans.strScheduleCode = RC.strScheduleCode
+				AND Trans.strType = RC.strType
+				AND Trans.intTaxAuthorityId = RC.intTaxAuthorityId
+		) tblPatch
+		WHERE tblTFTransactions.intTransactionId = tblPatch.intTransactionId
+			AND ISNULL(tblTFTransactions.intReportingComponentId, '''') = ''''')
+END
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFTransactions' AND COLUMN_NAME = 'intReportingComponentId')
+BEGIN
+	EXEC('DELETE FROM tblTFTransactions WHERE ISNULL(intReportingComponentId, '''') = ''''')
+END
+
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFTransactions' AND COLUMN_NAME = 'intReportingComponentDetailId')
 BEGIN
 	EXEC('UPDATE tblTFTransactions
@@ -55,6 +76,20 @@ BEGIN
 		FROM (SELECT DISTINCT Trans.intTransactionId, Trans.strProductCode, PC.intProductCodeId
 			FROM tblTFTransactions Trans
 			LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = Trans.intReportingComponentDetailId
+			LEFT JOIN tblTFProductCode PC ON PC.intTaxAuthorityId = RC.intTaxAuthorityId AND PC.strProductCode = Trans.strProductCode
+			) tblPatch
+		WHERE tblPatch.intTransactionId = tblTFTransactions.intTransactionId
+			AND ISNULL(tblTFTransactions.intProductCodeId, '''') = ''''
+			AND ISNULL(tblTFTransactions.strProductCode, '''') <> ''''')
+END
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFTransactions' AND COLUMN_NAME = 'intReportingComponentId')
+BEGIN	
+	EXEC('UPDATE tblTFTransactions
+		SET tblTFTransactions.intProductCodeId = tblPatch.intProductCodeId
+		FROM (SELECT DISTINCT Trans.intTransactionId, Trans.strProductCode, PC.intProductCodeId
+			FROM tblTFTransactions Trans
+			LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = Trans.intReportingComponentId
 			LEFT JOIN tblTFProductCode PC ON PC.intTaxAuthorityId = RC.intTaxAuthorityId AND PC.strProductCode = Trans.strProductCode
 			) tblPatch
 		WHERE tblPatch.intTransactionId = tblTFTransactions.intTransactionId
