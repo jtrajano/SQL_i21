@@ -27,7 +27,7 @@ BEGIN TRY
 	INSERT INTO @tblLoadDetail
 	SELECT intLoadDetailId
 		,CASE 
-			WHEN @intPurchaseSale = 1
+			WHEN @intPurchaseSale IN (1,3)
 				THEN intPContractDetailId
 			ELSE intSContractDetailId
 			END
