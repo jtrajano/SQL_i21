@@ -76,4 +76,9 @@ LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryRecei
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN tblLGLoadDetail LD ON LD.intPickLotDetailId = PL.intPickLotDetailId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-WHERE PL.intPickLotDetailId NOT IN (SELECT IsNull(LD.intPickLotDetailId, 0) FROM tblLGLoadDetail LD)
+WHERE PL.intPickLotDetailId NOT IN (
+		SELECT IsNull(LD.intPickLotDetailId, 0)
+		FROM tblLGLoadDetail LD
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			AND ISNULL(L.ysnCancelled, 0) = 0
+		)
