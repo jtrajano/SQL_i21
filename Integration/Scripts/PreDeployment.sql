@@ -224,10 +224,6 @@
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
 :r "..\dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql"
 
---Inventory Control
-:r "..\Scripts\IC\uspICDCItemMigrationAg.sql"
-:r "..\Scripts\IC\uspICDCItemMigrationPt.sql"
-
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
 
