@@ -799,8 +799,11 @@ END
 -- Get the batch post id. 
 IF (@ysnPost = 1 AND @strBatchNo IS NULL)
 BEGIN
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchNo OUTPUT 
-	IF @@ERROR <> 0	GOTO Post_Rollback
+	IF (@ysnRecap = 1)
+		SET @strBatchNo = @strTransactionId
+	ELSE
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchNo OUTPUT 
+		IF @@ERROR <> 0	GOTO Post_Rollback
 END
 
 IF @ysnPost = 1
