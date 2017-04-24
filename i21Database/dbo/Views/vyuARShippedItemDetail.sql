@@ -38,7 +38,7 @@ SELECT
 	,[intSalesAccountId]					= ARIA.[intSalesAccountId]
 	,[intInventoryAccountId]				= ARIA.[intInventoryAccountId]
 	,[intStorageLocationId]					= NULL
-	,[strStorageLocationName]				= NULL	
+	,[strStorageLocationName]				= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS	
 	,[intTaxGroupId]						= NULL
 	,[strTaxGroup]							= NULL
 	,[dblWeight]							= [dbo].[fnCalculateQtyBetweenUOM](ICUOM2.[intItemUOMId],ICUOM.[intItemUOMId],1) --ICUOM.[dblWeight]

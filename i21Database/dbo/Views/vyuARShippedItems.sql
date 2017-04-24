@@ -54,7 +54,7 @@ SELECT
 	,[dblTotalTax]						= SOD.[dblTotalTax]
 	,[dblTotal]							= SOD.[dblTotal]
 	,[intStorageLocationId]				= SOD.[intStorageLocationId]
-	,[strStorageLocationName]			= SL.[strName]
+	,[strStorageLocationName]			= CAST(ISNULL(SL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
@@ -284,7 +284,7 @@ SELECT
 	,[dblTotalTax]						= SOD.[dblTotalTax]
 	,[dblTotal]							= SOD.[dblTotal]
 	,[intStorageLocationId]				= SOD.[intStorageLocationId]
-	,[strStorageLocationName]			= SL.[strName]
+	,[strStorageLocationName]			= CAST(ISNULL(SL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId]
@@ -516,7 +516,7 @@ SELECT
 	,[dblTotalTax]						= SOD.[dblTotalTax]
 	,[dblTotal]							= SOD.[dblTotal]
 	,[intStorageLocationId]				= ISNULL(SHP.intStorageLocationId, SOD.[intStorageLocationId])
-	,[strStorageLocationName]			= SL.[strName]
+	,[strStorageLocationName]			= CAST(ISNULL(SL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
@@ -885,7 +885,7 @@ SELECT
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) * ISNULL(ARCC.[dblCashPrice], ICISI.[dblUnitPrice])
 	,[intStorageLocationId]				= ICISI.[intStorageLocationId]
-	,[strStorageLocationName]			= ICSL.[strName]
+	,[strStorageLocationName]			= CAST(ISNULL(ICSL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -1162,7 +1162,7 @@ SELECT
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= 1 * ICISC.[dblAmount]
 	,[intStorageLocationId]				= ICISI.[intStorageLocationId]
-	,[strStorageLocationName]			= NULL
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -1351,7 +1351,7 @@ SELECT
 	,[dblTotalTax]						= 0.00
 	,[dblTotal]							= 0.00
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= NULL
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -1511,7 +1511,7 @@ SELECT
 	,[dblTotalTax]						= 0.00
 	,[dblTotal]							= MFG.[dblLineTotal]
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= ''
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
@@ -1697,7 +1697,7 @@ SELECT DISTINCT
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= MFG.[dblLineTotal]
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= NULL
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -1885,7 +1885,7 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), ISNULL(LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId])), ISNULL(LD.[dblQuantity], 0)) * ARCC.[dblCashPrice]
 	,[intStorageLocationId]				= SL.[intStorageLocationId]
-	,[strStorageLocationName]			= SL.[strName]
+	,[strStorageLocationName]			= CAST(ISNULL(SL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -1943,6 +1943,12 @@ JOIN (SELECT intLoadId,
 			intPContractDetailId,
 			dblQuantity
 	  FROM tblLGLoadDetail WITH (NOLOCK)) LD ON L.intLoadId  = LD.intLoadId
+JOIN (SELECT intLoadDetailId,
+			intLotId,
+			dblGross,
+			dblTare,
+			dblNet
+	  FROM tblLGLoadDetailLot WITH (NOLOCK)) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 INNER JOIN 
 	(SELECT [intEntityCustomerId],
 			[intCurrencyId]
@@ -1952,12 +1958,6 @@ INNER JOIN
 		[strItemNo],
 		[strDescription]
 	 FROM tblICItem WITH (NOLOCK)) ICI ON LD.intItemId = ICI.intItemId
-LEFT JOIN (SELECT intLoadDetailId,
-			intLotId,
-			dblGross,
-			dblTare,
-			dblNet
-	  FROM tblLGLoadDetailLot WITH (NOLOCK)) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 LEFT JOIN 
 	(SELECT intLotId,
 			intStorageLocationId
@@ -2090,7 +2090,7 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= LWS.[dblTotal]
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= NULL
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -2246,7 +2246,7 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= LC.[dblTotal]
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= NULL
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -2420,7 +2420,7 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= LC.[dblTotal]
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= NULL
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
