@@ -8,6 +8,19 @@ BEGIN
 	END
 END
 
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidOriginDestinationState' AND COLUMN_NAME = 'intValidDestinationStateId')
+BEGIN
+	IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidDestinationState' AND COLUMN_NAME = 'intOriginDestinationStateId')
+	BEGIN
+		EXEC('DELETE FROM tblTFValidDestinationState WHERE intOriginDestinationStateId NOT IN (SELECT intValidDestinationStateId FROM tblTFValidOriginDestinationState)')
+	END
+
+	IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidOriginState' AND COLUMN_NAME = 'intOriginDestinationStateId')
+	BEGIN
+		EXEC('DELETE FROM tblTFValidOriginState WHERE intOriginDestinationStateId NOT IN (SELECT intOriginDestinationStateId FROM tblTFValidOriginDestinationState)')
+	END
+END
+
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidProductCode' AND COLUMN_NAME = 'intProductCode')
 BEGIN
 	IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblTFValidProductCode' AND COLUMN_NAME = 'intValidProductCodeId')
