@@ -22,8 +22,8 @@ StartTest (function (t) {
         .selectComboBoxRowValue('UserNumberFormat', '1,234,567.89', 'UserNumberFormat',1)
         .clickTab('User Roles')
         .waitUntilLoaded('',3000)
-        .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 3, 'strLocationName', '0002 - Indianapolis', 'strLocationName')
-        .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 3, 'strUserRole', 'ADMIN', 'strUserRole')
+        .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 7, 'strLocationName', '0002 - Indianapolis', 'strLocationName')
+        .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 7, 'strUserRole', 'ADMIN', 'strUserRole')
         .clickButton('Save')
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
@@ -308,7 +308,7 @@ StartTest (function (t) {
         .enterData('Text Field','ZipCode','47374')
         .enterData('Text Field','City','Richmond')
         .enterData('Text Field','State','IN')
-        .selectComboBoxRowValue('Country', 'Philippines', 'Country',1)
+        .selectComboBoxRowValue('Country', 'United States', 'Country',1)
         .selectComboBoxRowValue('SalesTaxAccount', '25012-0001-001','SalesTaxAccount',1)
         .selectComboBoxRowValue('PurchaseTaxAccount', '72512-0001-001','PurchaseTaxAccount',1)
         .addFunction (function (next){
@@ -334,7 +334,7 @@ StartTest (function (t) {
         .enterData('Text Field','ZipCode','47374')
         .enterData('Text Field','City','Richmond')
         .enterData('Text Field','State','IN')
-        .selectComboBoxRowValue('Country', 'Philippines', 'Country',1)
+        .selectComboBoxRowValue('Country', 'United States', 'Country',1)
         .selectComboBoxRowValue('SalesTaxAccount', '25012-0001-001','SalesTaxAccount',1)
         .selectComboBoxRowValue('PurchaseTaxAccount', '72512-0001-001','PurchaseTaxAccount',1)
         .addFunction (function (next){
@@ -360,7 +360,7 @@ StartTest (function (t) {
         .enterData('Text Field','ZipCode','47374')
         .enterData('Text Field','City','Richmond')
         .enterData('Text Field','State','IN')
-        .selectComboBoxRowValue('Country', 'Philippines', 'Country',1)
+        .selectComboBoxRowValue('Country', 'United States', 'Country',1)
         .selectComboBoxRowValue('SalesTaxAccount', '25012-0001-001','SalesTaxAccount',1)
         .selectComboBoxRowValue('PurchaseTaxAccount', '72512-0001-001','PurchaseTaxAccount',1)
         .addFunction (function (next){
