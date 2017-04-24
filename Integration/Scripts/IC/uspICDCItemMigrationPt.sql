@@ -194,11 +194,12 @@ DECLARE @unitvalue INT
 
 DECLARE itm_cursor CURSOR
 FOR
-SELECT DISTINCT ptitm_itm_no
-	,ptitm_unit
-	,ptitm_pak_desc
-	,ptitm_pak_qty
-FROM ptitmmst
+SELECT ptitm_itm_no
+	  ,ptitm_unit
+	  ,ptitm_pak_desc
+	  ,min(ptitm_pak_qty)
+FROM   ptitmmst
+group by ptitm_itm_no,ptitm_unit,ptitm_pak_desc
 
 OPEN itm_cursor
 
