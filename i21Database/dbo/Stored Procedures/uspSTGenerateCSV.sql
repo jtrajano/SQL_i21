@@ -289,31 +289,32 @@ BEGIN
 
 
 	--Convert table to CSV
-	--Get Column names
 	IF(@CreateCSV = 1)
-	BEGIN
-			DECLARE @tblColumnTemp TABLE (strTableName nvarchar(50), strColumnName nvarchar(50), intOrdinalPosition int, strIsNullable nvarchar(10), strDataType nvarchar(50))
-
-			INSERT INTO @tblColumnTemp
-			(
-				strTableName
-				, strColumnName
-				, intOrdinalPosition
-				, strIsNullable
-				, strDataType
-			)
-			SELECT TABLE_NAME
-				   , COLUMN_NAME
-				   , ORDINAL_POSITION
-				   , IS_NULLABLE
-				   , DATA_TYPE
-			FROM INFORMATION_SCHEMA.COLUMNS
-			WHERE TABLE_NAME = @strTableName
-
+	BEGIN			
 			DECLARE @intMin int, @intMax int
 
-			SELECT @intMin = MIN(intOrdinalPosition), @intMax = MAX(intOrdinalPosition)
-			FROM @tblColumnTemp
+			----Start Get Column names
+			--DECLARE @tblColumnTemp TABLE (strTableName nvarchar(50), strColumnName nvarchar(50), intOrdinalPosition int, strIsNullable nvarchar(10), strDataType nvarchar(50))
+
+			--INSERT INTO @tblColumnTemp
+			--(
+			--	strTableName
+			--	, strColumnName
+			--	, intOrdinalPosition
+			--	, strIsNullable
+			--	, strDataType
+			--)
+			--SELECT TABLE_NAME
+			--	   , COLUMN_NAME
+			--	   , ORDINAL_POSITION
+			--	   , IS_NULLABLE
+			--	   , DATA_TYPE
+			--FROM INFORMATION_SCHEMA.COLUMNS
+			--WHERE TABLE_NAME = @strTableName
+
+			--SELECT @intMin = MIN(intOrdinalPosition), @intMax = MAX(intOrdinalPosition)
+			--FROM @tblColumnTemp
+			----END Get Column names
 
 			SET @strCSV = ''
 
@@ -333,34 +334,34 @@ BEGIN
 				--Get sum of the final sales price field
 				SELECT @dblFinalSales = SUM(dblFinalSalesPrice) FROM tblSTstgRebatesPMMorris
 
-				SET @strCSV = CAST(@intNumberOfRecords as NVARCHAR(50)) + '|' + CAST(@intSoldQuantity as NVARCHAR(50)) + '|' + CAST(@dblFinalSales as NVARCHAR(50)) + CHAR(13)
+				SET @strCSV = CAST(@intNumberOfRecords as NVARCHAR(50)) + '|' + CAST(@intSoldQuantity as NVARCHAR(50)) + '|' + CAST(@dblFinalSales as NVARCHAR(50))
 			END
 			---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
 
 			DECLARE @intLoopCount int = 0
 
-			DECLARE @strTableNameVal NVARCHAR(50), @strColumnNameVal NVARCHAR(50), @intOrdinalPositionVal int, @strIsNullableVal NVARCHAR(10), @strDataTypeVal NVARCHAR(50)
+			--DECLARE @strTableNameVal NVARCHAR(50), @strColumnNameVal NVARCHAR(50), @intOrdinalPositionVal int, @strIsNullableVal NVARCHAR(10), @strDataTypeVal NVARCHAR(50)
 
-			WHILE(@intMin <= @intMax)
-			BEGIN
-				IF EXISTS (SELECT * FROM @tblColumnTemp WHERE intOrdinalPosition = @intMin AND intOrdinalPosition <> 1 AND strIsNullable <> 'NO')
-				BEGIN
-					SELECT @strTableNameVal = strTableName, @strColumnNameVal = strColumnName, @intOrdinalPositionVal = intOrdinalPosition, @strIsNullableVal = strIsNullable, @strDataTypeVal = strDataType FROM @tblColumnTemp WHERE intOrdinalPosition = @intMin
+			--WHILE(@intMin <= @intMax)
+			--BEGIN
+			--	IF EXISTS (SELECT * FROM @tblColumnTemp WHERE intOrdinalPosition = @intMin AND intOrdinalPosition <> 1 AND strIsNullable <> 'NO')
+			--	BEGIN
+			--		SELECT @strTableNameVal = strTableName, @strColumnNameVal = strColumnName, @intOrdinalPositionVal = intOrdinalPosition, @strIsNullableVal = strIsNullable, @strDataTypeVal = strDataType FROM @tblColumnTemp WHERE intOrdinalPosition = @intMin
 
-					IF(@intLoopCount = 0)
-					BEGIN
-						SET @strCSV = @strCSV + RIGHT(@strColumnNameVal, LEN(@strColumnNameVal) - 3)
-					END
-					ELSE IF(@intLoopCount >= 1)
-					BEGIN
-						SET @strCSV = @strCSV + ', ' + RIGHT(@strColumnNameVal, LEN(@strColumnNameVal) - 3)
-					END
+			--		IF(@intLoopCount = 0)
+			--		BEGIN
+			--			SET @strCSV = @strCSV + RIGHT(@strColumnNameVal, LEN(@strColumnNameVal) - 3)
+			--		END
+			--		ELSE IF(@intLoopCount >= 1)
+			--		BEGIN
+			--			SET @strCSV = @strCSV + ', ' + RIGHT(@strColumnNameVal, LEN(@strColumnNameVal) - 3)
+			--		END
 
-					SET @intLoopCount = @intLoopCount + 1
-				END
+			--		SET @intLoopCount = @intLoopCount + 1
+			--	END
 
-				SET @intMin = @intMin + 1
-			END
+			--	SET @intMin = @intMin + 1
+			--END
 
 			--START tblSTstgRebatesPMMorris
 			IF(@strTableName = 'tblSTstgRebatesPMMorris')
@@ -448,6 +449,8 @@ BEGIN
 													+ ', ' + CAST(@intMultiPackRequiredQuantity as NVARCHAR(50)) + ', ' + CAST(@dblMultiPackDiscountAmount as NVARCHAR(50)) + ', ' + @strRetailerFundedDIscountName 
 													+ ', ' + CAST(@dblRetailerFundedDiscountAmount as NVARCHAR(50)) + ', ' + @strMFGDealNameONE + ', ' + CAST(@dblMFGDealDiscountAmountONE as NVARCHAR(50)) + ', ' + @strMFGDealNameTWO
 													+ ', ' + CAST(@dblMFGDealDiscountAmountTWO as NVARCHAR(50)) + ', ' + @strMFGDealNameTHREE + ', ' + CAST(@dblMFGDealDiscountAmountTHREE as NVARCHAR(50)) + ', ' + CAST(@dblFinalSalesPrice as NVARCHAR(50))
+													--For fields (32-37)
+													+ ', ' + '' + ', ' + '' + ', ' + '' + ', ' + '' + ', ' + '' + ', ' + ''
 
 						SET @intLoopCount = @intLoopCount + 1
 					END
