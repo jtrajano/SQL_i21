@@ -1943,12 +1943,6 @@ JOIN (SELECT intLoadId,
 			intPContractDetailId,
 			dblQuantity
 	  FROM tblLGLoadDetail WITH (NOLOCK)) LD ON L.intLoadId  = LD.intLoadId
-JOIN (SELECT intLoadDetailId,
-			intLotId,
-			dblGross,
-			dblTare,
-			dblNet
-	  FROM tblLGLoadDetailLot WITH (NOLOCK)) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 INNER JOIN 
 	(SELECT [intEntityCustomerId],
 			[intCurrencyId]
@@ -1958,6 +1952,12 @@ INNER JOIN
 		[strItemNo],
 		[strDescription]
 	 FROM tblICItem WITH (NOLOCK)) ICI ON LD.intItemId = ICI.intItemId
+LEFT JOIN (SELECT intLoadDetailId,
+			intLotId,
+			dblGross,
+			dblTare,
+			dblNet
+	  FROM tblLGLoadDetailLot WITH (NOLOCK)) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 LEFT JOIN 
 	(SELECT intLotId,
 			intStorageLocationId
