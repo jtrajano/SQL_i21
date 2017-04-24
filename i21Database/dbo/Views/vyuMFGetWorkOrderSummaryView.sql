@@ -28,11 +28,13 @@ SELECT W.strWorkOrderNo
 					THEN (MAX(W.dblProducedQuantity) * I.dblWeight) / (
 							CASE 
 								WHEN (
-										SELECT SUM(dblConsumedQuantity+(dblYieldQuantity*-1))
-										FROM tblMFProductionSummary PS
-										JOIN dbo.tblICItem II1 ON II1.intItemId = PS.intItemId
+										SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WC.intItemUOMId, I2.intWeightUOMId, WC.dblQuantity))
+										FROM tblMFWorkOrderConsumedLot WC
+										JOIN dbo.tblICItem II1 ON II1.intItemId = WC.intItemId
 										JOIN dbo.tblICCategory C1 ON C1.intCategoryId = II1.intCategoryId
-										WHERE PS.intWorkOrderId = W.intWorkOrderId
+										JOIN dbo.tblMFWorkOrder W1 ON W1.intWorkOrderId = WC.intWorkOrderId
+										JOIN dbo.tblICItem I2 ON I2.intItemId = W1.intItemId
+										WHERE WC.intWorkOrderId = W.intWorkOrderId
 											AND C1.strCategoryCode NOT IN (
 												SELECT TOP 1 strAttributeValue
 												FROM tblMFManufacturingProcessAttribute
@@ -42,11 +44,13 @@ SELECT W.strWorkOrderNo
 										) = 0
 									THEN 1
 								ELSE (
-										SELECT SUM(dblConsumedQuantity+(dblYieldQuantity*-1))
-										FROM tblMFProductionSummary PS
-										JOIN dbo.tblICItem II1 ON II1.intItemId = PS.intItemId
+										SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WC.intItemUOMId, I2.intWeightUOMId, WC.dblQuantity))
+										FROM tblMFWorkOrderConsumedLot WC
+										JOIN dbo.tblICItem II1 ON II1.intItemId = WC.intItemId
 										JOIN dbo.tblICCategory C1 ON C1.intCategoryId = II1.intCategoryId
-										WHERE PS.intWorkOrderId = W.intWorkOrderId
+										JOIN dbo.tblMFWorkOrder W1 ON W1.intWorkOrderId = WC.intWorkOrderId
+										JOIN dbo.tblICItem I2 ON I2.intItemId = W1.intItemId
+										WHERE WC.intWorkOrderId = W.intWorkOrderId
 											AND C1.strCategoryCode NOT IN (
 												SELECT TOP 1 strAttributeValue
 												FROM tblMFManufacturingProcessAttribute
@@ -169,4 +173,3 @@ GROUP BY W.strWorkOrderNo
 	,IUM.strUnitMeasure
 	,W.strComment
 	,WP.strParentLotNumber
-
