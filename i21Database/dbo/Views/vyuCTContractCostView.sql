@@ -31,7 +31,8 @@ AS
 				CC.strPayToReceiveFrom,
 				CC.dtmDueDate,
 				CC.strReferenceNo,
-				CC.strRemarks
+				CC.strRemarks,
+				IM.strCostType
 
 	FROM		tblCTContractCost	CC
 	JOIN		tblCTContractDetail CD ON CD.intContractDetailId	=	CC.intContractDetailId
