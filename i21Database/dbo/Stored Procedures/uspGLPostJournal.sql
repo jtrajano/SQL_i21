@@ -256,7 +256,6 @@ ELSE
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]			
-			,strRateType
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
