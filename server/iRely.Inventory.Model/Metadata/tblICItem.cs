@@ -783,6 +783,8 @@ namespace iRely.Inventory.Model
         public decimal? dblAverageCost { get; set; }
         public decimal? dblQuantityInStockUOM { get; set; }
         public string strStockUOM { get; set; }
+        public string strCategoryCode { get; set; }
+        public string strCommodityCode { get; set; }
     }
 
     public class vyuSMGetCompanyLocationSearchList

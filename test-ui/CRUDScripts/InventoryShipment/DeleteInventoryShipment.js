@@ -1,4 +1,5 @@
 StartTest (function (t) {
+    var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
         //region Scenario 1. Create Direct Inventory Shipment for Non Lotted Item then Delete IS
