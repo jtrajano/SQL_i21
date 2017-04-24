@@ -129,8 +129,15 @@ SET ANSI_WARNINGS OFF
 		END
 		ELSE 
 		BEGIN
-			UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
-			UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
+			IF NOT EXISTS(SELECT 1
+						  FROM tblICInventoryReceipt R
+						  JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptId = R.intInventoryReceiptId
+						  JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = RI.intSourceId
+						  WHERE R.ysnPosted = 1 AND LD.intLoadId = @intLoadId)
+			BEGIN
+				UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
+			END
 		END
 
 		SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId
