@@ -9,11 +9,11 @@
 AS
 BEGIN
 
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+	SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+	SET ANSI_WARNINGS OFF
 
 
 	CREATE TABLE #tempRefundCustomer(
@@ -43,8 +43,8 @@ SET ANSI_WARNINGS OFF
 		FROM tblPATRefund R
 		INNER JOIN tblPATRefundCustomer RC
 			ON R.intRefundId = RC.intRefundId
-		WHERE R.intRefundId = @refundId AND RC.intBillId IS NULL AND RC.ysnEligibleRefund = 1
-	END
+		WHERE R.intRefundId = @refundId AND RC.intBillId IS NULL AND RC.ysnEligibleRefund = 1 AND RC.dblCashRefund > 0
+	END 
 	ELSE
 	BEGIN
 		INSERT INTO #tempRefundCustomer
@@ -62,6 +62,7 @@ SET ANSI_WARNINGS OFF
 			ON R.intRefundId = RC.intRefundId
 		WHERE RC.intRefundCustomerId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@refundCustomerIds)) AND RC.ysnEligibleRefund = 1
 	END
+	
 
 	DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
 	DECLARE @dtmDate DATETIME = GETDATE();
@@ -87,8 +88,16 @@ SET ANSI_WARNINGS OFF
 
 	SELECT @dblServiceFee = dblServiceFee FROM #tempRefundCustomer GROUP BY dblServiceFee;
 
-	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT 1 FROM #tempRefundCustomer where dblCashRefund = 0)
+	BEGIN
+		SET @strErrorMessage = 'Zero Cash Refund cannot be vouchered.';
+		RAISERROR(@strErrorMessage, 16, 1);
+		GOTO Post_Exit;
+	END
 	
+	BEGIN TRANSACTION
+
 	BEGIN TRY
 	WHILE EXISTS(SELECT 1 FROM @refundProcessed)
 	BEGIN
@@ -100,11 +109,13 @@ SET ANSI_WARNINGS OFF
 			@dbl1099Amount = CASE WHEN tempRC.ysnQualified = 1 THEN tempRC.dblRefundAmount ELSE tempRC.dblCashRefund END
 		FROM @refundProcessed rp INNER JOIN #tempRefundCustomer tempRC ON rp.intId = tempRC.intRefundCustomerId
 
+
 		INSERT INTO @voucherDetailNonInventory
 			([intAccountId], [intItemId], [strMiscDescription], [dblQtyReceived], [dblDiscount], [dblCost], [intTaxGroupId])
 		VALUES
 			(@intAPClearingGLAccount, 0, 'Patronage Refund', 1, 0, ROUND(@dblCashRefund, 2), NULL),
 			(@intServiceFeeIncomeId, 0, 'Service Fee', 1, 0, (@dblServiceFee * -1), NULL)
+		
 
 		EXEC [dbo].[uspAPCreateBillData]
 			@userId	= @intUserId
@@ -136,6 +147,7 @@ SET ANSI_WARNINGS OFF
 		DELETE FROM @voucherDetailNonInventory;
 		SET @intCreatedBillId = NULL;
 		SET @totalRecords = @totalRecords + 1;
+
 	END
 
 	END TRY
@@ -162,7 +174,9 @@ Post_Commit:
 	GOTO Post_Exit
 
 Post_Rollback:
-	ROLLBACK TRANSACTION	
+	IF(@@TRANCOUNT > 0)
+		ROLLBACK TRANSACTION	
+
 	SET @bitSuccess = 0
 	GOTO Post_Exit
 Post_Exit:

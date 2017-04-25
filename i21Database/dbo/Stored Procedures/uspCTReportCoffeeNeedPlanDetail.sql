@@ -38,6 +38,7 @@ BEGIN
 		,[intItemId] INT NULL
 		,[strItemName] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
 		,[strItemDescription] NVARCHAR(400) COLLATE Latin1_General_CI_AS  NULL
+		,[strProductType] NVARCHAR(400) COLLATE Latin1_General_CI_AS  NULL
 		,[intSubLocationId] INT NULL
 		,[strSubLocationName] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL		
 	)
@@ -233,23 +234,25 @@ BEGIN
 		
 		EXEC (@SqlALTER)		
 		
-		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan(intItemId,strItemName,strItemDescription,[intSubLocationId],[strSubLocationName],[First'+ @strColumnName + '],[End'+ @strColumnName + '])
-							 SELECT Item.intItemId,Item.strItemNo,Item.strDescription,SLOC.intCompanyLocationSubLocationId,ISNULL(SLOC.strSubLocationName,''''),
+		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan(intItemId,strItemName,strItemDescription,strProductType,[intSubLocationId],[strSubLocationName],[First'+ @strColumnName + '],[End'+ @strColumnName + '])
+							 SELECT Item.intItemId,Item.strItemNo,Item.strDescription,ProductType.strDescription,SLOC.intCompanyLocationSubLocationId,ISNULL(SLOC.strSubLocationName,''''),
 							 CASE WHEN DATEPART(dd,dtmNeedDate)<16 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity1 
 							,CASE WHEN DATEPART(dd,dtmNeedDate)>15 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity2 
 							FROM tblRKStgBlendDemand Stg
 							JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId=Stg.intUOMId AND ItemUOM.intItemId=Stg.intItemId
 							JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId='+LTRIM(@IntCommodityId)+'
-							JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=Stg.intSubLocationId							
+							JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=Stg.intSubLocationId
+							LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId							
 							WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)='''+@strNeedPlan+''' AND Stg.dblQuantity >0 AND MONTH(dtmNeedDate)='+LTRIM(@intMonthKey)+' AND YEAR(dtmNeedDate)='+LTRIM(@intYearKey)+'
 							UNION ALL
-							SELECT Item.intItemId,Item.strItemNo,Item.strDescription,SLOC.intCompanyLocationSubLocationId,ISNULL(SLOC.strSubLocationName,''''),
+							SELECT Item.intItemId,Item.strItemNo,Item.strDescription,ProductType.strDescription,SLOC.intCompanyLocationSubLocationId,ISNULL(SLOC.strSubLocationName,''''),
 							 CASE WHEN DATEPART(dd,dtmNeedDate)<16 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity1 
 							,CASE WHEN DATEPART(dd,dtmNeedDate)>15 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity2 
 							FROM tblRKArchBlendDemand Stg
 							JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId=Stg.intUOMId AND ItemUOM.intItemId=Stg.intItemId
 							JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId='+LTRIM(@IntCommodityId)+'
-							JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=Stg.intSubLocationId							
+							JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=Stg.intSubLocationId
+							LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId							
 							WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)='''+@strNeedPlan+''' AND Stg.dblQuantity >0 AND MONTH(dtmNeedDate)='+LTRIM(@intMonthKey)+' AND YEAR(dtmNeedDate)='+LTRIM(@intYearKey)
 
 		EXEC (@SqlInsert)
@@ -257,8 +260,8 @@ BEGIN
 		--SELECT @SqlInsert
 
 		SET @SqlInsert=NULL
-		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan(intItemId,strItemName,strItemDescription,[intSubLocationId],[strSubLocationName],[First'+ @strColumnName + '],[End'+ @strColumnName + '])
-						  SELECT intItemId,'' '','' '',0,'' '',NULL,SUM(ISNULL([First'+ @strColumnName + '],0))+SUM(ISNULL([End'+ @strColumnName + '],0))  
+		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan(intItemId,strItemName,strItemDescription,strProductType,[intSubLocationId],[strSubLocationName],[First'+ @strColumnName + '],[End'+ @strColumnName + '])
+						  SELECT intItemId,'' '','' '','' '',0,'' '',NULL,SUM(ISNULL([First'+ @strColumnName + '],0))+SUM(ISNULL([End'+ @strColumnName + '],0))  
 						  FROM #tblCoffeeNeedPlan
 						  GROUP BY intItemId'
 						  
@@ -275,48 +278,49 @@ BEGIN
 						 [intItemId]
 						,RIGHT([strItemName],8) AS [strItemName]
 						,[strItemDescription]
+						,[strProductType]
 						,[intSubLocationId]
 						,[strSubLocationName]'
 
 		IF 	@FirstMonth  IS NOT NULL
-		SET @SqlSelect=@SqlSelect+', CASE WHEN  @FirstMonth  IS NOT NULL THEN CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' + @FirstMonth + '],0))) END ELSE NULL END AS Column1
-									,CASE WHEN  @FirstMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @FirstMonth + '],0))) ELSE NULL END AS Column2'
+		SET @SqlSelect=@SqlSelect+', CASE WHEN  @FirstMonth  IS NOT NULL THEN CASE WHEN [intSubLocationId]=0 THEN NULL ELSE CAST(SUM(ISNULL([First' + @FirstMonth + '],0))AS FLOAT) END ELSE NULL END AS Column1
+									,CASE WHEN  @FirstMonth  IS NOT NULL THEN CAST(SUM(ISNULL([End' + @FirstMonth + '],0)) AS FLOAT) ELSE NULL END AS Column2'
 		
 		IF 	@SecondMonth  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+', CASE WHEN  @SecondMonth  IS NOT NULL THEN CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' + @SecondMonth + '],0))) END ELSE NULL END AS Column3
-									,CASE WHEN  @SecondMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @SecondMonth + '],0))) ELSE NULL END AS Column4'
+		SET @SqlSelect=@SqlSelect+', CASE WHEN  @SecondMonth  IS NOT NULL THEN CASE WHEN [intSubLocationId]=0 THEN NULL ELSE CAST(SUM(ISNULL([First' + @SecondMonth + '],0))AS FLOAT) END ELSE NULL END AS Column3
+									,CASE WHEN  @SecondMonth  IS NOT NULL THEN CAST(SUM(ISNULL([End' + @SecondMonth + '],0)) AS FLOAT) ELSE NULL END AS Column4'
 		
 		IF 	@ThirdMonth  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+', CASE WHEN  @ThirdMonth  IS NOT NULL THEN CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' + @ThirdMonth + '],0))) END ELSE NULL END AS Column5
-									,CASE WHEN  @ThirdMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @ThirdMonth + '],0))) ELSE NULL END AS Column6'
+		SET @SqlSelect=@SqlSelect+', CASE WHEN  @ThirdMonth  IS NOT NULL THEN CASE WHEN [intSubLocationId]=0 THEN NULL ELSE CAST(SUM(ISNULL([First' + @ThirdMonth + '],0))AS FLOAT) END ELSE NULL END AS Column5
+									,CASE WHEN  @ThirdMonth  IS NOT NULL THEN CAST(SUM(ISNULL([End' + @ThirdMonth + '],0)) AS FLOAT) ELSE NULL END AS Column6'
 		
 		IF 	@FourthMonth  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+', CASE WHEN  @FourthMonth  IS NOT NULL THEN CASE WHEN [intSubLocationId]=0 THEN NULL ELSE  dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' + @FourthMonth + '],0))) END ELSE NULL END AS Column7
-									,CASE WHEN  @FourthMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @FourthMonth + '],0))) ELSE NULL END AS Column8'
+		SET @SqlSelect=@SqlSelect+', CASE WHEN  @FourthMonth  IS NOT NULL THEN CASE WHEN [intSubLocationId]=0 THEN NULL ELSE  CAST(SUM(ISNULL([First' + @FourthMonth + '],0))AS FLOAT) END ELSE NULL END AS Column7
+									,CASE WHEN  @FourthMonth  IS NOT NULL THEN CAST(SUM(ISNULL([End' + @FourthMonth + '],0))AS FLOAT) ELSE NULL END AS Column8'
 		
 		IF 	@FifthMonth  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+', CASE WHEN  @FifthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' + @FifthMonth + '],0))) END ELSE NULL END AS Column9
-									,CASE WHEN  @FifthMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @FifthMonth + '],0))) ELSE NULL END AS Column10'
+		SET @SqlSelect=@SqlSelect+', CASE WHEN  @FifthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE CAST(SUM(ISNULL([First' + @FifthMonth + '],0))AS FLOAT) END ELSE NULL END AS Column9
+									,CASE WHEN  @FifthMonth  IS NOT NULL THEN CAST(SUM(ISNULL([End' + @FifthMonth + '],0))AS FLOAT) ELSE NULL END AS Column10'
 		
 		IF 	@SixthMonth  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+',CASE WHEN   @SixthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' + @SixthMonth + '],0))) END ELSE NULL END AS Column11
-									,CASE WHEN  @SixthMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @SixthMonth + '],0))) ELSE NULL END AS Column12'
+		SET @SqlSelect=@SqlSelect+',CASE WHEN   @SixthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE CAST(SUM(ISNULL([First' + @SixthMonth + '],0))AS FLOAT) END ELSE NULL END AS Column11
+									,CASE WHEN  @SixthMonth  IS NOT NULL THEN CAST(SUM(ISNULL([End' + @SixthMonth + '],0))AS FLOAT) ELSE NULL END AS Column12'
         IF 	@SeventhMonth  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+',CASE WHEN   @SeventhMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' + @SeventhMonth + '],0))) END ELSE NULL END AS Column13
-									,CASE WHEN  @SeventhMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @SeventhMonth + '],0))) ELSE NULL END AS Column14'
+		SET @SqlSelect=@SqlSelect+',CASE WHEN   @SeventhMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE CAST(SUM(ISNULL([First' + @SeventhMonth + '],0))AS FLOAT) END ELSE NULL END AS Column13
+									,CASE WHEN  @SeventhMonth  IS NOT NULL THEN CAST(SUM(ISNULL([End' + @SeventhMonth + '],0))AS FLOAT) ELSE NULL END AS Column14'
 		
 		IF 	@EighthMonth  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+',CASE WHEN   @EighthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' +@EighthMonth + '],0))) END ELSE NULL END AS Column15
-									,CASE WHEN  @EighthMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @EighthMonth + '],0))) ELSE NULL END AS Column16'
+		SET @SqlSelect=@SqlSelect+',CASE WHEN   @EighthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE CAST(SUM(ISNULL([First' +@EighthMonth + '],0))AS FLOAT) END ELSE NULL END AS Column15
+									,CASE WHEN  @EighthMonth  IS NOT NULL THEN CAST(SUM(ISNULL([End' + @EighthMonth + '],0))AS FLOAT) ELSE NULL END AS Column16'
 		IF 	@NinthMonth  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+',CASE WHEN   @NinthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' +@NinthMonth + '],0))) END ELSE NULL END AS Column17
-									,CASE WHEN  @NinthMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @NinthMonth + '],0))) ELSE NULL END AS Column18'
+		SET @SqlSelect=@SqlSelect+',CASE WHEN   @NinthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE CAST(SUM(ISNULL([First' +@NinthMonth + '],0))AS FLOAT) END ELSE NULL END AS Column17
+									,CASE WHEN  @NinthMonth  IS NOT NULL THEN CAST(SUM(ISNULL([End' + @NinthMonth + '],0))AS FLOAT) ELSE NULL END AS Column18'
 		IF 	@TenthMonth  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+',CASE WHEN   @TenthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE dbo.fnRemoveTrailingZeroes(SUM(ISNULL([First' +@TenthMonth + '],0))) END ELSE NULL END AS Column19
-									,CASE WHEN  @TenthMonth  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(SUM(ISNULL([End' + @TenthMonth + '],0))) ELSE NULL END AS Column20'
+		SET @SqlSelect=@SqlSelect+',CASE WHEN   @TenthMonth  IS NOT NULL THEN  CASE WHEN [intSubLocationId]=0 THEN NULL ELSE CAST(SUM(ISNULL([First' +@TenthMonth + '],0))AS FLOAT) END ELSE NULL END AS Column19
+									,CASE WHEN  @TenthMonth  IS NOT NULL THEN CAST(SUM(ISNULL([End' + @TenthMonth + '],0))AS FLOAT) ELSE NULL END AS Column20'
 
 		SET @SqlSelect=@SqlSelect+'  FROM #tblCoffeeNeedPlan
-									 GROUP BY intItemId,strItemName,strItemDescription,[intSubLocationId],[strSubLocationName] ORDER BY intItemId,[intSubLocationId] DESC '
+									 GROUP BY intItemId,strItemName,strItemDescription,strProductType,[intSubLocationId],[strSubLocationName] ORDER BY intItemId,[intSubLocationId] DESC '
 		
 		EXEC sp_executesql @SqlSelect,N'@FirstMonth nvarchar(MAX),@SecondMonth nvarchar(MAX),@ThirdMonth nvarchar(MAX),@FourthMonth nvarchar(MAX),@FifthMonth nvarchar(MAX),@SixthMonth nvarchar(MAX),@SeventhMonth nvarchar(MAX),@EighthMonth nvarchar(MAX),@NinthMonth nvarchar(MAX),@TenthMonth nvarchar(MAX)'						
 										,@FirstMonth=@FirstMonth

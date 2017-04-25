@@ -399,7 +399,7 @@ END
 -- Get the next batch number
 BEGIN	
 	SET @strBatchId = NULL 
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId
 	IF @@ERROR <> 0 GOTO Post_Exit;
 END
 

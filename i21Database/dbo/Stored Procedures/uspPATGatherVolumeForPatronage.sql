@@ -16,73 +16,71 @@ SET ANSI_WARNINGS OFF
 	DECLARE @error NVARCHAR(MAX);
 
 	SELECT [intID] 
-	INTO #tempTranscationIds
-	FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
+	INTO #tempTransactionIds
+	FROM [dbo].[fnGetRowsFromDelimitedValues](@transactionIds)
+
+	CREATE TABLE #tempPatronageVolumes(
+		 [intCustomerPatronId] INT NULL,
+		 [intPatronageCategoryId] INT NULL,
+		 [ysnPosted] BIT NULL,
+		 [intFiscalYearId] INT NULL,
+		 [dblVolume] NUMERIC(18,6) NULL
+	)
 
 	IF(@type = 1)
 	BEGIN
-		SELECT	intCustomerPatronId = AB.intEntityVendorId,
-				IC.intPatronageCategoryId,
-				ysnPosted = @post,
-				FY.intFiscalYearId,
-				dblVolume = SUM(CASE WHEN PC.strUnitAmount = 'Amount' THEN (CASE WHEN ABD.dblQtyReceived <= 0 THEN 0 ELSE (ABD.dblQtyReceived * ABD.dblCost) END) 
-							ELSE ABD.dblQtyReceived * UOM.dblUnitQty END)
-				INTO #tempPatronageVolumes
-				FROM tblAPBill AB
-				INNER JOIN tblAPBillDetail ABD
-						ON ABD.intBillId = AB.intBillId
-				INNER JOIN tblARCustomer ARC
-						ON ARC.[intEntityId] = AB.intEntityVendorId AND ARC.strStockStatus != ''
-				INNER JOIN tblICItem IC
-						ON IC.intItemId = ABD.intItemId
-				INNER JOIN (SELECT	dblUnitQty = CASE WHEN dblUnitQty <= 0 THEN 1 ELSE dblUnitQty END,
-									intItemId,
-									intItemUOMId,
-									ysnStockUnit
-									FROM tblICItemUOM WHERE ysnStockUnit = 1
-									UNION
-							SELECT	dblUnitQty = CASE WHEN A.dblUnitQty <= 0 THEN 1 ELSE A.dblUnitQty END,
-									A.intItemId,
-									A.intItemUOMId,
-									A.ysnStockUnit
-									FROM tblICItemUOM A
-									INNER JOIN tblAPBillDetail B ON B.intUnitOfMeasureId = A.intItemUOMId) UOM
-						ON UOM.intItemId = ABD.intItemId
-				INNER JOIN tblPATPatronageCategory PC
-					ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = 'Purchase'
-				CROSS APPLY tblGLFiscalYear FY
-		WHERE AB.intBillId IN (SELECT intID FROM #tempTranscationIds) AND AB.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
-		AND IC.intPatronageCategoryId IS NOT NULL
-		GROUP BY AB.intEntityVendorId,
-		IC.intPatronageCategoryId,
-		FY.intFiscalYearId,
-		AB.ysnPosted
+			INSERT INTO #tempPatronageVolumes
+			SELECT	intCustomerPatronId = ARC.intEntityId,
+			IC.intPatronageCategoryId,
+			ysnPosted = @post,
+			FY.intFiscalYearId,
+			dblVolume = SUM(CASE WHEN PC.strUnitAmount = 'Amount' THEN (CASE WHEN ABD.dblQtyReceived <= 0 THEN 0 ELSE (ABD.dblQtyReceived * ABD.dblCost) END) 
+						ELSE [dbo].[fnICConvertUOMtoStockUnit](ABD.intItemId, ABD.intUnitOfMeasureId, ABD.dblQtyReceived) END)
+			FROM tblAPBill AB
+			INNER JOIN tblAPBillDetail ABD
+					ON ABD.intBillId = AB.intBillId
+			INNER JOIN tblARCustomer ARC
+					ON ARC.intEntityId = AB.intEntityId AND ARC.strStockStatus != ''
+			INNER JOIN tblICItem IC
+					ON IC.intItemId = ABD.intItemId
+			INNER JOIN tblPATPatronageCategory PC
+				ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = 'Purchase'
+			CROSS APPLY tblGLFiscalYear FY
+			WHERE AB.intBillId IN (SELECT intID FROM #tempTransactionIds) AND AB.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
+				AND IC.intPatronageCategoryId IS NOT NULL
+			GROUP BY	AB.intEntityId,
+						IC.intPatronageCategoryId,
+						FY.intFiscalYearId,
+						AB.ysnPosted
 	END
 	ELSE IF(@type = 2)
 	BEGIN
-			SELECT	intCustomerPatronId = AR.intEntityCustomerId,
-					IC.intPatronageCategoryId,
-					ysnPosted = @post,
-					dblVolume =	SUM(CASE WHEN PC.strUnitAmount = 'Amount' THEN (CASE WHEN ARD.dblQtyShipped <= 0 THEN 0 ELSE (ARD.dblQtyShipped * ARD.dblPrice) END)
-								ELSE (CASE WHEN ICU.dblUnitQty <= 0 THEN ARD.dblQtyShipped ELSE (ARD.dblQtyShipped * ICU.dblUnitQty) END ) END),
-					FY.intFiscalYearId
-				INTO #tempItem
-				FROM tblARInvoice AR
-				INNER JOIN tblARInvoiceDetail ARD
-						ON ARD.intInvoiceId = AR.intInvoiceId
-				INNER JOIN tblICItem IC
-						ON IC.intItemId = ARD.intItemId
-				INNER JOIN tblICItemUOM ICU
-						ON ICU.intItemId = IC.intItemId
-						AND ICU.intItemUOMId = ARD.intItemUOMId
-				INNER JOIN tblPATPatronageCategory PC
-						ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = 'Sale'
-				CROSS APPLY tblGLFiscalYear FY
-	WHERE AR.intInvoiceId IN (SELECT intID FROM #tempTranscationIds) AND AR.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
-		   AND IC.intPatronageCategoryId IS NOT NULL
-		   GROUP BY AR.intEntityCustomerId,
-			   IC.intPatronageCategoryId,
-			   AR.ysnPosted
+			INSERT INTO #tempPatronageVolumes
+			SELECT	intCustomerPatronId = ARC.intEntityId,
+				IC.intPatronageCategoryId,
+				ysnPosted = @post,
+				FY.intFiscalYearId,
+				dblVolume =	SUM(CASE WHEN PC.strUnitAmount = 'Amount' THEN (CASE WHEN ARD.dblQtyShipped <= 0 THEN 0 ELSE (ARD.dblQtyShipped * ARD.dblPrice) END)
+							ELSE [dbo].[fnICConvertUOMtoStockUnit](ARD.intItemId, ARD.intItemUOMId, ARD.dblQtyShipped) END)
+			FROM tblARInvoice AR
+			INNER JOIN tblARInvoiceDetail ARD
+					ON ARD.intInvoiceId = AR.intInvoiceId
+			INNER JOIN tblARCustomer ARC
+					ON ARC.intEntityId = AR.intEntityId AND ARC.strStockStatus != ''
+			INNER JOIN tblICItem IC
+					ON IC.intItemId = ARD.intItemId
+			INNER JOIN tblICItemUOM ICU
+					ON ICU.intItemId = IC.intItemId
+					AND ICU.intItemUOMId = ARD.intItemUOMId
+			INNER JOIN tblPATPatronageCategory PC
+					ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = 'Sale'
+			CROSS APPLY tblGLFiscalYear FY
+			WHERE AR.intInvoiceId IN (SELECT intID FROM #tempTransactionIds) AND AR.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
+				   AND IC.intPatronageCategoryId IS NOT NULL
+				   GROUP BY AR.intEntityId,
+					   IC.intPatronageCategoryId,
+					   FY.intFiscalYearId,
+					   AR.ysnPosted
 	END
 
 	IF NOT EXISTS(SELECT * FROM #tempPatronageVolumes)
@@ -93,7 +91,7 @@ SET ANSI_WARNINGS OFF
 	BEGIN TRANSACTION
 
 	UPDATE tblARCustomer SET dtmLastActivityDate = GETDATE() 
-	WHERE [intEntityId] IN (SELECT intCustomerPatronId FROM #tempPatronageVolumes)
+	WHERE intEntityId IN (SELECT intCustomerPatronId FROM #tempPatronageVolumes)
 
 	BEGIN TRY
 	MERGE tblPATCustomerVolume AS PAT

@@ -36,6 +36,7 @@ DECLARE @inventoryReceiptId AS INT
 		,@strSourceId AS NVARCHAR(50)
 		,@strSourceScreenName AS NVARCHAR(50)
 		,@strReceiptNumber AS NVARCHAR(50)
+		,@intLocationId AS INT 
 		
 -- Get the entity id
 SELECT	@intEntityId = [intEntityId]
@@ -173,6 +174,7 @@ BEGIN
 		
 		SET @receiptNumber = NULL 
 		SET @inventoryReceiptId = NULL 
+		SET @intLocationId = NULL 
 
 		------------------------------------------
 		----- Validate Receipt Header Fields -----
@@ -299,6 +301,7 @@ BEGIN
 		SELECT	@inventoryReceiptId = RawData.intInventoryReceiptId
 				,@strSourceScreenName = RawData.strSourceScreenName
 				,@strSourceId = RawData.strSourceId
+				,@intLocationId = RawData.intLocationId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -326,7 +329,7 @@ BEGIN
 			-- Generate the receipt starting number
 			-- If @receiptNumber IS NULL, uspSMGetStartingNumber will throw an error. 
 			-- Error is 'Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.'
-			EXEC dbo.uspSMGetStartingNumber @startingNumberId_InventoryReceipt, @receiptNumber OUTPUT 
+			EXEC dbo.uspSMGetStartingNumber @startingNumberId_InventoryReceipt, @receiptNumber OUTPUT, @intLocationId
 			IF @@ERROR <> 0 OR @receiptNumber IS NULL GOTO _BreakLoop;
 		END 
 		

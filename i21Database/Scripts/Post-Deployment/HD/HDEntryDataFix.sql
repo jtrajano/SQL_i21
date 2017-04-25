@@ -422,4 +422,16 @@ GO
 
 GO
 	PRINT N'End updating HD Ticket Sequence in Project.'
+	PRINT N'Start dropping Help Desk Conatraint.'
+GO
+
+	update a set a.strTicketNumber = b.strTicketNumber from tblHDTicketWatcher a, tblHDTicket b where a.intTicketId = b.intTicketId and a.strTicketNumber is null;
+
+	IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UNQ_tblHDTicketWatcher]'))
+	begin
+		ALTER TABLE tblHDTicketWatcher DROP CONSTRAINT UNQ_tblHDTicketWatcher;
+	end
+
+GO
+	PRINT N'End dropping Help Desk Conatraint.'
 GO

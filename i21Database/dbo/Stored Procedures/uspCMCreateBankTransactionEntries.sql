@@ -70,7 +70,7 @@ BEGIN
 		[strState],
 		[strCountry],
 		[dblAmount],
-		[strAmountInWords],
+		dbo.fnConvertNumberToWord([dblAmount]),
 		[strMemo],
 		[strReferenceNo],
 		[ysnCheckToBePrinted],

@@ -37,9 +37,10 @@
 	[intCertificationId] INT,
 
 	[strApprovalType]	NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
-
+	[intLoadingPortId] INT,
 	[intApprovedById]	INT,
 	[dtmApproved]	DATETIME,
+	[ysnApproved]	BIT,
 
 	CONSTRAINT [PK_tblCTApprovedContract_intApprovedContractId] PRIMARY KEY CLUSTERED (intApprovedContractId ASC)
 )

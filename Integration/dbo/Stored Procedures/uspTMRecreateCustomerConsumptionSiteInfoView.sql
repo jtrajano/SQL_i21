@@ -49,6 +49,10 @@ BEGIN
 				,strSiteComment = B.strComment
 				,strSiteInstruction = B.strInstruction
 				,B.ysnActive
+				,strDriverNumber = M.vwsls_slsmn_id
+				,strDriverName = M.vwsls_name
+				,B.intRouteId 
+				,strRoute = K.strRouteId
 			FROM tblTMSite B
 			INNER JOIN tblTMCustomer C
 				ON B.intCustomerID = C.intCustomerID
@@ -58,6 +62,10 @@ BEGIN
 				ON B.intLocationId = I.A4GLIdentity
 			LEFT JOIN tblSMCompanyLocation J
 				ON I.vwloc_loc_no  COLLATE Latin1_General_CI_AS = J.strLocationNumber
+			LEFT JOIN vwslsmst M
+				ON B.intDriverID = M.A4GLIdentity
+			LEFT JOIN tblTMRoute K
+				ON B.intRouteId = K.intRouteId
 		')
 	END
 	ELSE
@@ -85,6 +93,10 @@ BEGIN
 					,strSiteComment = B.strComment
 					,strSiteInstruction = B.strInstruction
 					,B.ysnActive
+					,strDriverNumber = J.strEntityNo
+					,strDriverName = J.strName
+					,B.intRouteId 
+					,strRoute = K.strRouteId
 				FROM tblTMSite B
 				INNER JOIN tblTMCustomer C
 					ON B.intCustomerID = C.intCustomerID
@@ -92,6 +104,10 @@ BEGIN
 					ON C.intCustomerNumber = D.intEntityId
 				LEFT JOIN tblSMCompanyLocation I
 					ON B.intLocationId = I.intCompanyLocationId
+				LEFT JOIN tblEMEntity J
+					ON B.intDriverID = J.intEntityId
+				LEFT JOIN tblTMRoute K
+					ON B.intRouteId = K.intRouteId
 		')
 	END
 END

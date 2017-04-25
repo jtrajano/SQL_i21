@@ -296,6 +296,18 @@ BEGIN
 		)
 		AND apchk_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
 
+	
+	declare @compare_table table(
+		strId nvarchar(100)
+	)
+	insert into @compare_table
+	select distinct trhst_pur_vnd_no from trhstmst
+	union
+	select distinct trvpr_vnd_no from trvprmst
+	union
+	select distinct trprc_vnd_no from trprcmst
+	delete from @compare_table where strId is null
+
 
 	WHILE (EXISTS(SELECT 1 FROM #tmpssvndmst))
 	BEGIN
@@ -580,7 +592,7 @@ BEGIN
 					NULL,
 					0
 	 from ssvndmst  where ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to and rtrim(ltrim(ssvnd_pay_to)) = @originVendor
-
+	 	 	 
 	 --INSERT Vendor Location to Origin Pay to Vendor		
 		INSERT [dbo].[tblEMEntityLocation]    
 		([intEntityId], 
@@ -597,10 +609,14 @@ BEGIN
 		 [ysnDefaultLocation])
 		select 				
 					ENT.intEntityId, 
-					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+					SUBSTRING ( 
+						RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
 						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
 									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-								END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR),
+								END,'''')) + ''_'' + SUBSTRING(CONVERT(VARCHAR(MAX), CONVERT(VARBINARY,CURRENT_TIMESTAMP), 1) ,11,8)
+					, 0 , 100),
+								
+								--+ CAST(A4GLIdentity AS NVARCHAR),
 					dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
 					ssvnd_city,
 					''United States'',
@@ -625,19 +641,26 @@ BEGIN
 	 inner join tblEMEntity ENT on ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 	 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
 	 where ssvnd_vnd_no = @originVendor and ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to AND ETYP.strType = ''Vendor''
-
-	 -- Enable ysnTransportTerminal for the Vendors with Transport Terminal
-	  UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityId
-      WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trhstmst
-	  INNER JOIN ssvndmst on ssvnd_vnd_no = trhst_pur_vnd_no)
 	  
-	  UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityId
-	  WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trvprmst
-	  INNER JOIN ssvndmst on ssvnd_vnd_no = trvpr_vnd_no)
+	 -- Enable ysnTransportTerminal for the Vendors with Transport Terminal
+	 
+	 
+	 IF EXISTS(select top 1 strId from @compare_table INNER JOIN ssvndmst on ssvnd_vnd_no = strId where strId = @originVendor)
+	 BEGIN
+		UPDATE tblAPVendor set ysnTransportTerminal = 1 where strVendorId = @originVendor
+	 END
 
-	  UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityId
-	  WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trprcmst
-	  INNER JOIN ssvndmst on ssvnd_vnd_no = trprc_vnd_no)
+	  --UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityVendorId
+   --   WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trhstmst
+	  --INNER JOIN ssvndmst on ssvnd_vnd_no = trhst_pur_vnd_no)
+	  
+	  --UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityVendorId
+	  --WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trvprmst
+	  --INNER JOIN ssvndmst on ssvnd_vnd_no = trvpr_vnd_no)
+
+	  --UPDATE  VND SET VND.ysnTransportTerminal = 1 FROM tblAPVendor VND INNER JOIN tblEMEntity ENT ON ENT.intEntityId = VND.intEntityVendorId
+	  --WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trprcmst
+	  --INNER JOIN ssvndmst on ssvnd_vnd_no = trprc_vnd_no)
 
 		EXEC uspAPImportVendorContact @originVendor
 

@@ -51,7 +51,8 @@ Declare @intMinHeader				INT,
 		@dtmETAPOD					DATETIME,
 		@intNoOfContainer			INT,
 		@intExternalContainerNo		INT,
-		@str10Zeros					NVARCHAR(50)='0000000000'
+		@str10Zeros					NVARCHAR(50)='0000000000',
+		@strMVessel					NVARCHAR(200)
 
 Declare @tblDetail AS Table
 (
@@ -126,6 +127,7 @@ Begin
 		@dtmScheduledDate			=   dtmScheduledDate,
 		@strFeedStatus				=	strFeedStatus,
 		@dtmETAPOD					=	dtmETAPOD,
+		@strMVessel					=	strMVessel,
 		@strHeaderRowState			=	strRowState
 	From tblLGLoadStg Where intLoadStgId=@intMinHeader
 
@@ -184,7 +186,7 @@ Begin
 	Begin
 		Set @strXml += '<E1EDL20 SEGMENT="1">'
 		Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
-		Set @strXml += '<LIFEX>'	+ ISNULL(@strLoadNumber,'')				+ '</LIFEX>'
+		Set @strXml += '<LIFEX>'	+ LTRIM(RTRIM(ISNULL(@strLoadNumber,'') + ' ' + dbo.fnEscapeXML(ISNULL(@strMVessel,'')))) + '</LIFEX>'
 
 		Set @strXml += '<E1EDL18 SEGMENT="1">'
 		Set @strXml += '<QUALF>' + 'DEL' + '</QUALF>'
@@ -198,7 +200,7 @@ Begin
 	Set @strXml += '<VBELN>'	+ ISNULL(@strExternalDeliveryNumber,'')	+ '</VBELN>'
 	Set @strXml += '<BOLNR>'	+ ISNULL(@strBillOfLading,'')			+ '</BOLNR>'
 	Set @strXml += '<TRAID>'	+ ISNULL(@strShippingLine,'')			+ '</TRAID>'
-	Set @strXml += '<LIFEX>'	+ ISNULL(@strLoadNumber,'')				+ '</LIFEX>'
+	Set @strXml += '<LIFEX>'	+ LTRIM(RTRIM(ISNULL(@strLoadNumber,'') + ' ' + dbo.fnEscapeXML(ISNULL(@strMVessel,'')))) + '</LIFEX>'
 
 	Set @strXml += '<E1EDL18 SEGMENT="1">'
 	Set @strXml += '<QUALF>'	
@@ -353,6 +355,8 @@ Begin
 				Set @strItemXml += '<VOLUM>'  +  '1' + '</VOLUM>' 
 			If ISNULL(@ysnBatchSplit,0)=1 AND UPPER(@strHeaderRowState)='MODIFIED'
 				Set @strItemXml += '<HIPOS>'  +  ISNULL(@strDeliveryItemNo,'') + '</HIPOS>'
+			If ISNULL(@ysnBatchSplit,0)=0 AND UPPER(@strCommodityCode)='COFFEE'
+				Set @strItemXml += '<LICHN>' + ISNULL(@strContainerNo,'') + '</LICHN>'
 
 			If UPPER(@strHeaderRowState)='MODIFIED'
 			Begin
@@ -422,6 +426,7 @@ Begin
 							+ '<LFIMG>'  +  ISNULL(LTRIM(CONVERT(NUMERIC(38,2),lc.dblNetWt)),'') + '</LFIMG>' 
 							+ '<VRKME>'  +  dbo.fnIPConverti21UOMToSAP(ISNULL(lc.strWeightUOM,'')) + '</VRKME>' 
 							+ '<HIPOS>' + ISNULL(@strDeliveryItemNo,'') + '</HIPOS>' 
+							+ '<LICHN>' + ISNULL(lc.strContainerNo,'') + '</LICHN>' 
 
 							+ '<E1EDL19 SEGMENT="1">'
 							+ '<QUALF>'  + CASE WHEN UPPER(lc.strRowState)='DELETE' Then 'DEL' ELSE 'QUA' END + '</QUALF>' 

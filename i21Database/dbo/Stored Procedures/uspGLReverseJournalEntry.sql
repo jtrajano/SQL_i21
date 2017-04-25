@@ -26,8 +26,8 @@ END
 	
 
 
-DECLARE @intUserId INT, @intNumber INT, @strPrefix NVARCHAR(10),@intStartingNumberId INT
-SELECT @intUserId =[intEntityId] from tblSMUserSecurity WHERE [intEntityId] = @intEntityId
+DECLARE @intNumber INT, @strPrefix NVARCHAR(10),@intStartingNumberId INT
+
 DECLARE @strJournalId NVARCHAR(100)
 EXEC uspGLGetNewID 5, @strJournalId OUTPUT
 
@@ -63,7 +63,7 @@ INSERT INTO [tblGLJournal]
            ,0
            ,[intConcurrencyId]
            ,[dtmDateEntered]
-           ,@intUserId
+           ,@intEntityId
            ,@intEntityId
            ,[strSourceId]
            ,'Reversal Journal'

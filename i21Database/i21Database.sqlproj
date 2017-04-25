@@ -4987,7 +4987,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetDetailedInventory.sql" />
     <Build Include="dbo\Views\vyuTMLastLeakGasCheckTable.sql" />
     <Build Include="dbo\Views\vyuCTDocument.sql" />
-    <Build Include="dbo\Views\vyuLGDashboardJDE.sql" />
     <Build Include="dbo\Functions\fnGetDebitForeign.sql" />
     <Build Include="dbo\Functions\fnGetCreditForeign.sql" />
     <Build Include="dbo\Tables\tblSMOfflineMenu.sql" />
@@ -5204,6 +5203,16 @@
     <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
     <Build Include="dbo\Views\vyuLGNotificationCount.sql" />
     <Build Include="dbo\Views\vyuSMDocumentSourceFolder.sql" />
+    <Build Include="dbo\Views\vyuQMDashboardJDE.sql" />
+    <Build Include="dbo\Views\vyuLGGetContractSubLocation.sql" />
+    <Build Include="dbo\Views\vyuCTLoadView.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRollCostDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetAvgHistoricalPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMImportTankMonitorReading.sql" />
+    <Build Include="dbo\Views\vyuCRMCampaignContactSource.sql" />
+    <Build Include="dbo\Views\vyuMFGetMachinesByCell.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateContractShippingInstructionQty.sql" />
+    <Build Include="dbo\Functions\fnSMHideOriginMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5399,5 +5408,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\24_OfflineMenu.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\25_DocumentSource.sql" />
   </ItemGroup>
 </Project>

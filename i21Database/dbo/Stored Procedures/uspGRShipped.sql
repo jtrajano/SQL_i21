@@ -113,6 +113,7 @@ BEGIN
 		,[dblCharge] DECIMAL(24, 10)
 		,[intInventoryShipmentId] INT NULL 
 		,[intInventoryShipmentItemId] INT NULL 
+		,[intEntityVendorId] INT NULL 
 	)
 
 	DECLARE @intEntityCustomerId AS INT
@@ -170,6 +171,7 @@ BEGIN
 			UPDATE	@StorageTicketInfoByFIFO
 			SET		intInventoryShipmentId = @intInventoryShipmentId
 					,intInventoryShipmentItemId = @intInventoryShipmentItemId
+					,intEntityVendorId=@intEntityCustomerId
 			WHERE	intInventoryShipmentId IS NULL 
 		END 
 		
@@ -202,7 +204,7 @@ BEGIN
 			,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- uspGRUpdateGrainOpenBalanceByFIFO is not returning a currency id. Use the default functional currency. 
 			,[dblAmount]				= grainCharge.dblCharge * grainCharge.dblOpenBalance
 			,[ysnAccrue]				= charge.ysnAccrue
-			,[intEntityVendorId]		= NULL -- uspGRUpdateGrainOpenBalanceByFIFO is not returning a vendor id. So I assume all storage charges are meant to increase the receivable from shipment customer. 
+			,[intEntityVendorId]		= grainCharge.intEntityVendorId -- uspGRUpdateGrainOpenBalanceByFIFO is not returning a vendor id. So I assume all storage charges are meant to increase the receivable from shipment customer. 
 			,[ysnPrice]					= charge.ysnPrice
 		FROM @StorageTicketInfoByFIFO grainCharge INNER JOIN tblICItem charge
 				ON grainCharge.intItemId = charge.intItemId

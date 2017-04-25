@@ -21,6 +21,8 @@ BEGIN TRY
 	DECLARE @dblSplitAndPickQty NUMERIC(18,6)
 	DECLARE @dblWeightPerQty NUMERIC(18,6)
 	DECLARE @strErrMsg NVARCHAR(MAX)
+			,@strMask1 nvarchar(MAX)
+			,@intStorageLocationId int
 
 	SELECT @strTaskNo = strOrderNo, 
 	    @intToStorageLocationId = intStagingLocationId
@@ -29,16 +31,24 @@ BEGIN TRY
 
 	SELECT @dblSplitAndPickQty = dblQty
 		  ,@intItemUOMId = intItemUOMId
-		  ,@intWeightUOMId = intWeightUOMId
-		  ,@dblWeightPerQty = dblWeightPerQty
+		  ,@intWeightUOMId = IsNULL(intWeightUOMId,intItemUOMId)
+		  ,@dblWeightPerQty = Case When intWeightUOMId is null Then 1 Else dblWeightPerQty End
 		  ,@intFromStorageLocationId = intStorageLocationId
 		  ,@dblLotQty = dblQty
 		  ,@intItemId = intItemId
-		  ,@dblLotWeight = dblWeight
+		  ,@dblLotWeight = Case When intWeightUOMId is null Then dblQty Else dblWeight End
 		  ,@intItemUOMId = intItemUOMId
-		  ,@intWeightUOMId = intWeightUOMId
+		  ,@intWeightUOMId = IsNULL(intWeightUOMId,intItemUOMId)
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
+	Select @strMask1 =strMask1 
+	from dbo.tblICItem
+	Where intItemId=@intItemId
+
+	Select @intStorageLocationId =intStorageLocationId 
+	From tblICStorageLocation
+	Where strName Like @strMask1
 
 	INSERT INTO tblMFTask (
 		intConcurrencyId
@@ -64,7 +74,8 @@ BEGIN TRY
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
-		,dtmLastModified)
+		,dtmLastModified
+		,dblPickQty)
 	VALUES 
 		(0
 		,@strTaskNo
@@ -80,7 +91,7 @@ BEGIN TRY
 		,2
 		,ISNULL(@dtmReleaseDate, GETDATE())
 		,@intFromStorageLocationId
-		,@intToStorageLocationId
+		,IsNUll(@intStorageLocationId,@intToStorageLocationId)
 		,@intItemId
 		,@intLotId
 		,@dblSplitAndPickQty
@@ -91,7 +102,8 @@ BEGIN TRY
 		,@intEntityUserSecurityId
 		,GETDATE()
 		,@intEntityUserSecurityId
-		,GETDATE())
+		,GETDATE()
+		,@dblLotWeight)
 
 
 END TRY

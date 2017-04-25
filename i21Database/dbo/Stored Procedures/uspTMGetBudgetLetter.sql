@@ -33,6 +33,7 @@ BEGIN
 		DECLARE @strBudgetLetterId NVARCHAR(10)
 		DECLARE @strPrintCompanyHeading NVARCHAR(1)
 		DECLARE @query NVARCHAR(MAX)
+		DECLARE @strStartMonth NVARCHAR(10)
 		
 		SET @strWhereClause = ''
 		
@@ -97,6 +98,32 @@ BEGIN
 				SET @strWhereClause = @strWhereClause + ' AND (ISNULL(G.intDeliveryTermID,D.intTermsId)) IN (' + @strTermIds + ') '
 			END
 		END
+
+		--Start Month
+		SELECT @strStartMonth = [from]
+		FROM @temp_params where [fieldname] = 'intStartMonth'
+		
+		IF (ISNULL(@strStartMonth,'') != '')
+		BEGIN
+			IF (@strWhereClause = '')
+			BEGIN
+				SET @strWhereClause = ' WHERE MONTH(D.dtmBudgetBeginDate) = ' + @strStartMonth 
+			END
+			ELSE
+			BEGIN
+				SET @strWhereClause = @strWhereClause + ' AND MONTH(D.dtmBudgetBeginDate) =' + @strStartMonth 
+			END
+		END
+
+		--Budget Amount checking
+		IF (@strWhereClause = '')
+		BEGIN
+			SET @strWhereClause = ' WHERE ISNULL(D.dblMonthlyBudget,0) <> 0 ' 
+		END
+		ELSE
+		BEGIN
+			SET @strWhereClause = @strWhereClause + ' AND ISNULL(D.dblMonthlyBudget,0) <> 0'
+		END
 		
 		---@dtmFirstPaymentDue
 		SELECT @strFirstPaymentDue = [from] 
@@ -127,25 +154,23 @@ BEGIN
 			,strCustomerCity = E.strCity
 			,strCustomerState = E.strState
 			,strCustomerZip = E.strZipCode
-			,intEntityCustomerId = B.intEntityCustomerId
+			,intEntityCustomerId = B.intEntityId
 			,dblBudget = B.dblMonthlyBudget
 			,dtmFirstDueDate = CAST(''' + @strFirstPaymentDue + ''' AS DATETIME)
-			,blbLetterBody = E.blbMessage 
+			,blbLetterBody = H.blbMessage 
 			,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
-			,intDeliveryTermId = D.intTermsId
+			,intDeliveryTermId = B.intTermsId
 		FROM (SELECT TOP 1 * FROM tblSMCompanySetup) A, tblARCustomer B
 		INNER JOIN tblEMEntity C
-			ON B.intEntityCustomerId = C.intEntityId
+			ON B.intEntityId = C.intEntityId
 		INNER JOIN tblTMCustomer F
 			ON C.intEntityId = F.intCustomerNumber
 		INNER JOIN tblTMSite G
 			ON F.intCustomerID = G.intCustomerID
-		INNER JOIN tblARCustomer D
-			ON C.intEntityId = D.intEntityCustomerId
 		INNER JOIN tblEMEntityLocation E
-			ON D.intEntityCustomerId = E.intEntityId
+			ON D.intEntityId = E.intEntityId
 				AND ysnDefaultLocation = 1
-		,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') E
+		,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') H
 		' + @strWhereClause
 		)
 	END

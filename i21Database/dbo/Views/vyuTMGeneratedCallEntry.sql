@@ -39,6 +39,8 @@ AS
 		,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 		,dblCustomerBalance = ISNULL(K.dblTotalDue, 0.0)
 		,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
+		,intFillMethodId = B.intFillMethodId
+		,strFillMethod = L.strFillMethod
 	FROM tblTMDispatch A
 	INNER JOIN tblTMSite B
 		ON A.intSiteID = B.intSiteID
@@ -58,5 +60,7 @@ AS
 		ON B.intLocationId = I.intCompanyLocationId
 	LEFT JOIN vyuARCustomerInquiryReport K
 		ON D.intEntityId = K.intEntityCustomerId
+	LEFT JOIN tblTMFillMethod L
+		ON B.intFillMethodId = L.intFillMethodId
 	WHERE ISNULL(A.strOrderNumber,'') <> ''
 GO

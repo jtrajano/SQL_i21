@@ -14,6 +14,7 @@ DECLARE @strReceiptNumber AS NVARCHAR(50)
 		,@ysnPosted AS BIT 
 		,@strReceiptType AS NVARCHAR(50)
 		,@intReturnValue AS INT
+		,@intLocationId AS INT
 
 -- Validate if the Inventory Receipt exists   
 IF @intReceiptId IS NULL  
@@ -27,6 +28,7 @@ SELECT TOP 1
 		@strReceiptNumber = r.strReceiptNumber
 		,@ysnPosted = r.ysnPosted
 		,@strReceiptType = r.strReceiptType 
+		,@intLocationId = r.intLocationId
 FROM	tblICInventoryReceipt r
 WHERE	r.intInventoryReceiptId = @intReceiptId
 
@@ -59,7 +61,7 @@ BEGIN
 			,@receiptType AS NVARCHAR(50) = 'Inventory Return'
 			,@STARTING_NUMBER_BATCH AS INT = 107
 
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strInventoryReturnId OUTPUT  
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strInventoryReturnId OUTPUT, @intLocationId
 END 
 
 SET @intInventoryReturnId = NULL

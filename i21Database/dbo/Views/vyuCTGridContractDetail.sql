@@ -54,7 +54,7 @@ AS
 			dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)	AS	dblExchangeRate,
 			IM.intProductTypeId,
 			CQ.dblBulkQuantity ,
-			CQ.dblQuantity AS dblBagQuantity,
+			CQ.dblBagQuantity,
 			CAST(1 AS BIT) ysnItemUOMIdExist,
 			RM.strUnitMeasure strContainerUOM,
 			SB.strSubLocationName,
@@ -116,16 +116,26 @@ LEFT JOIN	tblICCategoryUOM			GU	ON	GU.intCategoryId				=		CD.intCategoryId
 											AND	GU.intUnitMeasureId				=		CH.intCategoryUnitMeasureId		
 LEFT JOIN	tblCTPriceFixation			PF	ON	CD.intContractDetailId			=		PF.intContractDetailId		
 LEFT JOIN	(
-			SELECT	 intPriceFixationId,
-					 COUNT(intPriceFixationDetailId) intPFDCount,
-					 SUM(dblQuantity) dblQuantityPriceFixed,
-					 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
-			FROM	 tblCTPriceFixationDetail
-			GROUP BY intPriceFixationId
+				SELECT	 intPriceFixationId,
+						 COUNT(intPriceFixationDetailId) intPFDCount,
+						 SUM(dblQuantity) dblQuantityPriceFixed,
+						 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
+				FROM	 tblCTPriceFixationDetail
+				GROUP BY intPriceFixationId
 			)							PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
-LEFT JOIN	tblLGContainerTypeCommodityQty	CQ	ON	CQ.intCommodityId			=	CH.intCommodityId 
-												AND CQ.intContainerTypeId		=	CD.intContainerTypeId 
-												AND CQ.intCommodityAttributeId	=	IM.intOriginId
+LEFT JOIN	(
+				SELECT	CQ.intContainerTypeId,
+						CQ.intCommodityAttributeId,
+						CQ.intUnitMeasureId,
+						CQ.dblBulkQuantity ,
+						CQ.dblQuantity AS dblBagQuantity,
+						CQ.intCommodityId,
+						CA.intCountryID AS intCountryId
+				FROM	tblLGContainerTypeCommodityQty	CQ	
+				JOIN	tblICCommodityAttribute			CA	ON	CQ.intCommodityAttributeId	=	CA.intCommodityAttributeId
+			)							CQ	ON	CQ.intCommodityId			=	CH.intCommodityId 
+											AND CQ.intContainerTypeId		=	CD.intContainerTypeId 
+											AND CQ.intCountryId				=	ISNULL(IC.intCountryId,CA.intCountryID)
 LEFT JOIN	tblICUnitMeasure				RM	ON	RM.intUnitMeasureId			=	CQ.intUnitMeasureId
 LEFT JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			
 LEFT JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intDestinationPortId		
@@ -145,7 +155,7 @@ LEFT JOIN	(
 					WHERE intRowNum = 1
 			) AP ON AP.intRecordId = CD.intContractHeaderId		
 LEFT JOIN	(
-				SELECT ROW_NUMBER() OVER (PARTITION BY intLoadDetailId ORDER BY intLoadDetailId DESC) intRowNum,ISNULL(intPContractDetailId,intSContractDetailId)intContractDetailId,intLoadDetailId 
+				SELECT ROW_NUMBER() OVER (PARTITION BY ISNULL(intPContractDetailId,intSContractDetailId) ORDER BY intLoadDetailId DESC) intRowNum,ISNULL(intPContractDetailId,intSContractDetailId)intContractDetailId,intLoadDetailId 
 				FROM tblLGLoadDetail
 			)LG ON LG.intRowNum = 1 AND LG.intContractDetailId = CD.intContractDetailId
 OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA

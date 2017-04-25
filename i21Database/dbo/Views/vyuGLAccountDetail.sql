@@ -1,22 +1,23 @@
 ﻿CREATE VIEW [dbo].[vyuGLAccountDetail]
 AS
-	SELECT      TOP 1000000  dbo.tblGLAccount.strAccountId,replace(dbo.tblGLAccount.strAccountId,'-','') strAccountId1,tblGLCrossReferenceMapping.strOldAccountId, dbo.tblGLAccount.strDescription, dbo.tblGLAccountGroup.strAccountGroup, dbo.tblGLAccountGroup.strAccountType, dbo.tblGLAccountCategory.strAccountCategory, 
-                         dbo.tblGLAccount.strComments, dbo.tblGLAccount.strCashFlow, dbo.tblGLAccount.ysnActive, dbo.tblGLAccount.ysnSystem, dbo.tblGLAccount.ysnRevalue, dbo.tblGLAccountUnit.intAccountUnitId, 
-                         dbo.tblGLAccountUnit.strUOMCode, dbo.tblGLAccount.intAccountId, dbo.tblGLAccount.intCurrencyID, dbo.tblGLAccount.intCurrencyExchangeRateTypeId, dbo.tblGLAccount.strNote, dbo.tblSMCurrency.strCurrency, 
-                         dbo.tblSMCurrencyExchangeRateType.strCurrencyExchangeRateType, dbo.tblGLAccount.intAccountGroupId, dbo.tblGLAccountSegment.intAccountCategoryId,
-						 dbo.tblGLCOACrossReference.strExternalId,dbo.tblGLCOACrossReference.strCurrentExternalId, tblGLAccountSegment.strCode,
-						 cast(0.00 as numeric(18,2)) as dblBalance
-FROM            dbo.tblGLAccount INNER JOIN
-                         dbo.tblGLAccountSegmentMapping ON dbo.tblGLAccount.intAccountId = dbo.tblGLAccountSegmentMapping.intAccountId INNER JOIN
-                         dbo.tblGLAccountSegment ON dbo.tblGLAccountSegmentMapping.intAccountSegmentId = dbo.tblGLAccountSegment.intAccountSegmentId INNER JOIN
-                         dbo.tblGLAccountStructure ON dbo.tblGLAccountSegment.intAccountStructureId = dbo.tblGLAccountStructure.intAccountStructureId INNER JOIN
-                         dbo.tblGLAccountCategory ON dbo.tblGLAccountSegment.intAccountCategoryId = dbo.tblGLAccountCategory.intAccountCategoryId LEFT OUTER JOIN
-                         dbo.tblSMCurrencyExchangeRateType ON dbo.tblGLAccount.intCurrencyExchangeRateTypeId = dbo.tblSMCurrencyExchangeRateType.intCurrencyExchangeRateTypeId LEFT OUTER JOIN
-                         dbo.tblSMCurrency ON dbo.tblGLAccount.intCurrencyID = dbo.tblSMCurrency.intCurrencyID LEFT OUTER JOIN
-                         dbo.tblGLAccountUnit ON dbo.tblGLAccount.intAccountUnitId = dbo.tblGLAccountUnit.intAccountUnitId LEFT OUTER JOIN
-						 dbo.tblGLCOACrossReference ON dbo.tblGLAccount.intAccountId = dbo.tblGLCOACrossReference.inti21Id LEFT OUTER JOIN
-                         dbo.tblGLAccountGroup ON dbo.tblGLAccount.intAccountGroupId = dbo.tblGLAccountGroup.intAccountGroupId LEFT OUTER JOIN
-						 dbo.tblGLCrossReferenceMapping ON tblGLAccount.intAccountId = dbo.tblGLCrossReferenceMapping.intAccountId  
-						 and dbo.tblGLCrossReferenceMapping.intAccountSystemId in (select [intDefaultVisibleOldAccountSystemId] from tblGLCompanyPreferenceOption)
-WHERE        (dbo.tblGLAccountStructure.strType = 'Primary')
+	SELECT      TOP 1000000 
+				account.intConcurrencyId,account.strAccountId,replace(account.strAccountId,'-','') strAccountId1,
+				map.strOldAccountId, account.strDescription, grp.strAccountGroup, grp.strAccountType, cat.strAccountCategory, 
+                account.strComments, account.strCashFlow, account.ysnActive, account.ysnSystem, account.ysnRevalue, u.intAccountUnitId, 
+                u.strUOMCode, account.intAccountId, account.intCurrencyID, account.intCurrencyExchangeRateTypeId, account.strNote, 
+				curr.strCurrency, rtype.strCurrencyExchangeRateType, account.intAccountGroupId, segment.intAccountCategoryId,
+				coa.strExternalId, coa.strCurrentExternalId, segment.strCode, cast(0.00 as numeric(18,2)) as dblBalance
+FROM            dbo.tblGLAccount account INNER JOIN
+                dbo.tblGLAccountSegmentMapping ON account.intAccountId = dbo.tblGLAccountSegmentMapping.intAccountId INNER JOIN
+                dbo.tblGLAccountSegment segment ON dbo.tblGLAccountSegmentMapping.intAccountSegmentId = segment.intAccountSegmentId INNER JOIN
+                dbo.tblGLAccountStructure struc ON segment.intAccountStructureId = struc.intAccountStructureId INNER JOIN
+                dbo.tblGLAccountCategory cat ON segment.intAccountCategoryId = cat.intAccountCategoryId LEFT OUTER JOIN
+                dbo.tblSMCurrencyExchangeRateType rtype ON account.intCurrencyExchangeRateTypeId = rtype.intCurrencyExchangeRateTypeId LEFT OUTER JOIN
+                dbo.tblSMCurrency curr ON account.intCurrencyID = curr.intCurrencyID LEFT OUTER JOIN
+                dbo.tblGLAccountUnit u ON account.intAccountUnitId = u.intAccountUnitId LEFT OUTER JOIN
+				dbo.tblGLCOACrossReference coa ON account.intAccountId =coa.inti21Id LEFT OUTER JOIN
+                dbo.tblGLAccountGroup grp ON account.intAccountGroupId = grp.intAccountGroupId LEFT OUTER JOIN
+				dbo.tblGLCrossReferenceMapping map ON account.intAccountId = map.intAccountId  
+				and map.intAccountSystemId in (select [intDefaultVisibleOldAccountSystemId] from tblGLCompanyPreferenceOption)
+WHERE        (struc.strType = 'Primary')
 GO

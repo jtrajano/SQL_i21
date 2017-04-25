@@ -16,6 +16,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	
 	[intItemContractId] INT NULL,
 	[intItemId] [int] NULL,
+	[strItemSpecification] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intCategoryId] INT NULL,
 	[dblQuantity] [numeric](18, 6) NOT NULL,
 	[intItemUOMId] [int] NULL,	
@@ -23,6 +24,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [dblBalance] NUMERIC(18, 6) NULL, 
     [dblIntransitQty] NUMERIC(18, 6) NULL, 
     [dblScheduleQty] NUMERIC(18, 6) NULL, 
+    [dblShippingInstructionQty] NUMERIC(18, 6) NULL, 
 	[dblNetWeight] NUMERIC(18, 6) NULL, 
 	[intNetWeightUOMId] [int] NULL,	
 	[intUnitMeasureId] [int] NULL,
@@ -46,6 +48,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intCurrencyId] [int] NULL,
 	[intPriceItemUOMId]  INT NULL, 
 	[dblNoOfLots] NUMERIC(18, 6) NULL,
+	[dtmLCDate] DATETIME,
+	[dtmLastPricingDate] DATETIME,
 		
 	[intMarketZoneId] [int] NULL,
 	[intDiscountTypeId] [int] NULL ,

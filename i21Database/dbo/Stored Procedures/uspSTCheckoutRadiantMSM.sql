@@ -1,7 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantMSM]
-@intCheckoutId Int
+@intCheckoutId Int,
+@strStatusMsg NVARCHAR(250) OUTPUT,
+@intCountRows int OUTPUT
 AS
 BEGIN
+	Begin Try
 
     DECLARE @intStoreId int
     SELECT @intStoreId = intStoreId FROM dbo.tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId
@@ -185,6 +188,13 @@ BEGIN
             SET @intCnt = @intCnt + 1
     END
 
-END
-GO
+	SET @intCountRows = 1
+	SET @strStatusMsg = 'Success'
 
+	End Try
+
+	Begin Catch
+		SET @intCountRows = 0
+		SET @strStatusMsg = ERROR_MESSAGE()
+	End Catch
+END

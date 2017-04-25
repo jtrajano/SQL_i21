@@ -12,31 +12,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
----------------------------------------------------------------------------------------------------
-----update the account table with correct account category required for inventory to function
-
-
-UPDATE tgs SET intAccountCategoryId = tgc.intAccountCategoryId
---select tgs.strCode , t.code, tgc.strAccountCategory
-FROM dbo.tblGLAccountSegment tgs  
-JOIN 
-(--purchase
---select distinct(SUBSTRING(CAST(agitm_pur_acct AS VARCHAR), 0, CHARINDEX('.', agitm_pur_acct))) code,'Cost of Goods' cat from agitmmst  
---where agitm_ga_com_cd is not null or agitm_phys_inv_ynbo in ('Y','O','S','B','A')
---union
------Sales Account Category
---select distinct(SUBSTRING(CAST(agitm_sls_acct AS VARCHAR), 0, CHARINDEX('.', agitm_sls_acct))) code,'Sales Account'cat from agitmmst 
---where agitm_ga_com_cd is not null or agitm_phys_inv_ynbo in ('Y','O','S','B','A')
---union
----Inventory Category
-select distinct(SUBSTRING(CAST(agcls_inv_acct_no AS VARCHAR), 0, CHARINDEX('.', agcls_inv_acct_no))) code, 'Inventory' cat from agclsmst
-where agcls_cd in (select distinct agitm_class from agitmmst where agitm_ga_com_cd is not null or agitm_phys_inv_ynbo in ('Y','O','S','B','A'))
-union
----AP Clearing Category 
-select distinct(SUBSTRING(CAST(agcgl_pend_ap AS VARCHAR), 0, CHARINDEX('.', agcgl_pend_ap))) code, 'AP Clearing' cat from agctlmst
-) as t 
-ON tgs.strCode = t.code  COLLATE SQL_Latin1_General_CP1_CS_AS
-JOIN dbo.tblGLAccountCategory tgc ON t.cat  COLLATE SQL_Latin1_General_CP1_CS_AS = tgc.strAccountCategory 
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------
@@ -160,6 +135,23 @@ INSERT INTO tblICCategoryAccount (
 	WHERE coa.strExternalId = cls.agcls_pur_acct_no
 	and cat.strInventoryType = 'Other Charge'
 )
+
+---------------------------------------------------------------------------------------------------
+----update the account table with correct account category required for inventory & sales accounts to function
+
+UPDATE tgs SET intAccountCategoryId = act.intAccountCategoryId
+--select c.strDescription,ca.intCategoryId,ac.strAccountId,ac.strDescription, ca.intAccountCategoryId, tgs.intAccountCategoryId,act.intAccountCategoryId
+from tblICCategoryAccount ca 
+join tblGLAccount ac on ca.intAccountId = ac.intAccountId
+join tblICCategory c on ca.intCategoryId = c.intCategoryId
+join tblGLAccountCategory act on ca.intAccountCategoryId = act.intAccountCategoryId
+join tblGLAccountSegmentMapping sm on sm.intAccountId = ac.intAccountId
+join tblGLAccountSegment tgs on tgs.intAccountSegmentId = sm.intAccountSegmentId
+join tblGLAccountStructure ast on ast.intAccountStructureId = tgs.intAccountStructureId
+where act.strAccountCategory in ('Inventory', 'Sales Account')
+and c.strInventoryType in ('Inventory', 'Raw Material', 'Finished Goods')
+and ast.strType = 'Primary'
+
 
 GO
 

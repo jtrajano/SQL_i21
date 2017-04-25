@@ -3,7 +3,7 @@ AS
 SELECT ISNULL(intUserRoleID, RoleMenu.intUserRoleId)  as intUserRoleId
 ,RoleMenu.intMenuId
 ,Menu.intParentMenuID as intParentMenuId
-,CAST(MAX(CAST(RoleMenu.ysnVisible as INT)) as BIT) as ysnVisible
+,[dbo].[fnSMHideOriginMenus] (strMenuName, CAST(MAX(CAST(RoleMenu.ysnVisible as INT)) as BIT)) as ysnVisible
 ,MIN(RoleMenu.intSort) as intSort
 ,strMenuName
 ,strModuleName

@@ -3,8 +3,12 @@
 , @intCheckoutId Int
 , @strSPName nvarchar(100) 
 , @strXML nvarchar(max)
+, @strStatusMsg NVARCHAR(250) OUTPUT
+, @intCountRows int OUTPUT
 AS
 BEGIN
+Begin Try
+
 --GET ROOT TAG
 DECLARE @strRootTag nvarchar(200), @strRootCompressTag nvarchar(200), @intRootLevel int, @intRootImportFileHeaderId int, @intRootImportFileColumnDetailId int
 Select @intRootImportFileHeaderId = intImportFileHeaderId, @intRootImportFileColumnDetailId = intImportFileColumnDetailId, @strRootTag = REPLACE(strXMLTag, ' ', ''), @strRootCompressTag = REPLACE(REPLACE(REPLACE(strXMLTag, ' ', ''), ':', ''), '-', ''), @intRootLevel = intLevel 
@@ -258,9 +262,8 @@ BEGIN
 SET @intLevelMin = @intLevelMin + 1
 END
 
-
 SET @SQL =
-'
+N'
 If(OBJECT_ID(''tempdb..#tempCheckoutInsert'') Is Not Null)
 Begin
     Drop Table #tempCheckoutInsert
@@ -281,9 +284,21 @@ SELECT ' + CHAR(13)
 + ' FROM ' + CHAR(13)
 + @FROMNODES + CHAR(13)
 + ' SELECT * FROM #tempCheckoutInsert ' +  CHAR(13)
-+ ' EXEC ' + @strSPName + ' ' + CAST(@intCheckoutId as nvarchar(20))  + '' +  CHAR(13)
++ ' EXEC ' + @strSPName + ' ' + CAST(@intCheckoutId as nvarchar(20)) + ', ' + '@strStatusMsg OUTPUT, @intCountRows OUTPUT' +  CHAR(13)
 + ' DROP TABLE #tempCheckoutInsert ' +  CHAR(13)
 
-EXEC sp_executesql @SQL
 
+DECLARE @ParmDef nvarchar(max);
+
+SET @ParmDef = N'@strStatusMsg NVARCHAR(250) OUTPUT'
+             + ', @intCountRows INT OUTPUT';
+
+EXEC sp_executesql @SQL, @ParmDef, @strStatusMsg OUTPUT, @intCountRows OUTPUT
+
+End Try
+
+Begin Catch
+	SET @intCountRows = 0
+	SET @strStatusMsg = ERROR_MESSAGE()
+End Catch
 END

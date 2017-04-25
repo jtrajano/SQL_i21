@@ -167,8 +167,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 	DECLARE @contractTermId INT;
 	SELECT TOP 1 @contractTermId = ContractHeader.intTermId
 	FROM tblAPBillDetail VoucherDetail
-	INNER JOIN tblCTContractDetail ContractDetail ON VoucherDetail.intContractDetailId = VoucherDetail.intContractDetailId
-	INNER JOIN tblCTContractHeader ContractHeader ON ContractDetail.intContractHeaderId = ContractHeader.intContractHeaderId
+	--INNER JOIN tblCTContractDetail ContractDetail ON VoucherDetail.intContractDetailId = VoucherDetail.intContractDetailId
+	INNER JOIN tblCTContractHeader ContractHeader ON VoucherDetail.intContractHeaderId = ContractHeader.intContractHeaderId
 	WHERE VoucherDetail.intBillId = @billId AND VoucherDetail.intContractDetailId > 0
 
 	IF @contractTermId > 0

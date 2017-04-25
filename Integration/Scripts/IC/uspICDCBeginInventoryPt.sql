@@ -38,8 +38,11 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 
 -- Create the Adjustment header and detail record. 
 BEGIN 
+	DECLARE @intLocationId AS INT 
+	SELECT TOP 1 @intLocationId = intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @adjLoc
+
 	--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
-	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT
+	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT, @intLocationId
 
 	select @strAvgLast = ptctl_sa_lst_or_avg_cost from ptctlmst where ptctl_key = 1
 
@@ -54,7 +57,7 @@ BEGIN
 		, intConcurrencyId
 	)
 	VALUES (
-		(SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @adjLoc)
+		@intLocationId
 		, @adjdt
 		, @ADJUSTMENT_TYPE_QuantityChange
 		, @strAdjustmentNo

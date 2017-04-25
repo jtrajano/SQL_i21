@@ -289,7 +289,6 @@
     <None Include="dbo\Functions\fnTMGetSpecialPricingPrice.sql" />
     <Build Include="dbo\Tables\tblAPapeglmst.sql" />
     <Build Include="dbo\Tables\tblAPaphglmst.sql" />
-    <Build Include="dbo\Tables\tblAPapivcmst.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportBillsFromAPIVCMST.sql" />
     <Build Include="dbo\Functions\fnValidateBillsImport.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
@@ -410,5 +409,7 @@
     <None Include="dbo\Stored Procedures\uspSMImportTax.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportTaxRate.sql" />
     <Build Include="dbo\Tables\tblARagordmst.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateImportTankMonitorSP.sql" />
+    <None Include="Scripts\TM\CheckOriginTableAndTMPreference.sql" />
   </ItemGroup>
 </Project>

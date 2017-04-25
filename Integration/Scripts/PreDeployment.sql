@@ -99,6 +99,7 @@
 --:r "..\dbo\Views\vyuECCFCardTransaction.sql"
 
 -- TANK MANAGEMENT
+:r "..\Scripts\TM\CheckOriginTableAndTMPreference.sql"
 :r "..\dbo\Views\vwclsmst.sql"
 :r "..\dbo\Views\vwpyemst.sql"
 :r "..\dbo\Views\vwticmst.sql"
@@ -146,13 +147,14 @@
 :r "..\dbo\Functions\fnTMGetContractForCustomer.sql"
 :r "..\dbo\Functions\fnTMGetSpecialPricing.sql"
 :r "..\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
-:r "..\dbo\Stored Procedures\uspTMImportTankMonitorReading.sql"
+--:r "..\dbo\Stored Procedures\uspTMImportTankMonitorReading.sql"
 --:r "..\dbo\Views\vyuTMLeaseCode.sql"
 :r "..\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
 --:r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
 :r "..\dbo\Stored Procedures\uspTMUpdateCustomerBudgetOrigin.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateImportTankMonitorSP.sql" 
 :r "..\dbo\Stored Procedures\uspTMRecreateOpenCallEntryView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateOpenWorkOrderView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateConsumptionSiteSearchView.sql"

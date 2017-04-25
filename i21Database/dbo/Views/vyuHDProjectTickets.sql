@@ -26,6 +26,7 @@
 			,ts.strStatus
 			,strTicketType = tt.strType
 			,t.intSequenceInProject
+			,task.intProjectId
 		from
 			tblHDTicket t
 			/*
@@ -38,3 +39,5 @@
 			left outer join tblHDMilestone ms on ms.intMilestoneId = t.intMilestoneId
 			left outer join tblHDTicketStatus ts on ts.intTicketStatusId = t.intTicketStatusId
 			left outer join tblHDTicketType tt on tt.intTicketTypeId = t.intTicketTypeId
+			left outer join tblHDProjectTask task on task.intTicketId = t.intTicketId
+		where t.intTicketTypeId <> (select top 1 intTicketTypeId from tblHDTicketType where strType = 'Template')

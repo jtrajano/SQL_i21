@@ -395,7 +395,13 @@ BEGIN TRY
 	WHERE intOrderHeaderId = @intOrderHeaderId
 		AND intTaskStateId <> 4
 
-	IF @intRemainingTasks = 0
+	IF @intRemainingTasks = 0 and @strOrderType='WO PROD RETURN'
+	BEGIN
+		UPDATE tblMFOrderHeader
+		SET intOrderStatusId = 10
+		WHERE intOrderHeaderId = @intOrderHeaderId
+	END
+	Else IF @intRemainingTasks = 0 
 	BEGIN
 		UPDATE tblMFOrderHeader
 		SET intOrderStatusId = 6

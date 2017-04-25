@@ -85,6 +85,7 @@ BEGIN TRY
 	DECLARE @dblUnits DECIMAL(24, 10)
 	DECLARE @intShipFromId INT
 	DECLARE @dblUOMQty NUMERIC(38,20)
+	DECLARE @detailCreated AS Id
 
 	SET @dtmDate = GETDATE()
 	SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROm tblSMCompanyPreference
@@ -1101,19 +1102,21 @@ BEGIN TRY
 			JOIN @SettleVoucherCreate SV  ON SV.intItemId=bd.intItemId
 			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 			JOIN tblSCTicket SC ON SC.intTicketId=CS.intTicketId		
-			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 
-			AND   b.intBillId = @intBillId
-			
-			UPDATE	bd
-			SET  bd.intContractHeaderId= CASE WHEN @strOrderType='Direct' THEN NULL ELSE bd.intContractHeaderId END
-				,bd.intContractDetailId=CASE  WHEN @strOrderType='Direct' THEN NULL ELSE bd.intContractDetailId END
-			FROM	tblAPBill b 
-			JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
-			JOIN @SettleVoucherCreate SV  ON SV.intItemId=bd.intItemId
-			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort=1
 			AND   b.intBillId = @intBillId
 			
+			UPDATE	bd
+			SET  bd.intContractHeaderId= CASE WHEN @strOrderType='Direct' THEN NULL ELSE SV.intContractHeaderId END
+				,bd.intContractDetailId=CASE  WHEN @strOrderType='Direct' THEN NULL ELSE SV.intContractDetailId END
+			FROM	tblAPBill b 
+			JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
+			JOIN @SettleVoucherCreate SV  ON SV.intItemId=bd.intItemId			
+			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort=1
+			AND   b.intBillId = @intBillId
+			
+			DELETE tblAPBillDetail WHERE intBillId = @intBillId AND intItemId <> @ItemId  
+			DELETE FROM @detailCreated
+
 			INSERT INTO tblAPBillDetail
 			(
 			 intBillId
@@ -1127,7 +1130,7 @@ BEGIN TRY
 			,dblRate
 			,dblCost
 			,intCurrencyId
-			)
+			)			
 			SELECT 
 			 intBillId = @intBillId 
 			,intAccountId = dbo.[fnGetItemGLAccount](SV.intItemId, @intItemLocationId, 'Other Charge Expense')
@@ -1142,8 +1145,12 @@ BEGIN TRY
 			,intCurrencyId = @intCurrencyId
 			FROM   @SettleVoucherCreate SV
 			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort <> 1
-			AND   SV.intItemId NOT IN (SELECT intItemId FROM tblAPBillDetail Where intBillId=@intBillId)
-
+			--AND   SV.intItemId NOT IN (SELECT intItemId FROM tblAPBillDetail Where intBillId=@intBillId)
+			
+			INSERT INTO @detailCreated
+			SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId=@intBillId
+			
+			EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 										
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
 
@@ -1154,10 +1161,14 @@ BEGIN TRY
 			WHERE	bd.intBillId = @intBillId
 
 			-- Update the vendor order number and voucher total. 
+			SET @strStorageTicketNumber=NULL
+			SELECT @strStorageTicketNumber= strStorageTicketNumber FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId 			
+			
 			UPDATE	tblAPBill 
-			SET		strVendorOrderNumber = @TicketNo 
+			SET		strVendorOrderNumber = 'STR-'+@strStorageTicketNumber+'/'+strBillId
 					,dblTotal = (SELECT SUM(bd.dblTotal) FROM tblAPBillDetail bd WHERE bd.intBillId = @intBillId)
 			WHERE	intBillId = @intBillId
+
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
 		END 
 
@@ -1179,13 +1190,31 @@ BEGIN TRY
 		-- 2. Add any other charges involved with the settlement. 
 
 		-- Update the grain history. Link the history to the Voucher. 
-		BEGIN 
+		BEGIN --CASE WHEN @strOrderType='Direct' THEN NULL ELSE bd.intContractHeaderId END
+			IF @strOrderType='Direct'
+			BEGIN
+			UPDATE SH
+			SET		SH.intBillId = @intBillId
+			FROM	tblGRStorageHistory SH
+			WHERE	SH.strType = 'Settlement' AND SH.intCustomerStorageId = @intCustomerStorageId 
+					AND SH.strSettleTicket = @TicketNo
+					AND SH.intBillId IS NULL					
+					AND SH.intContractHeaderId IS NULL
+					  
+			END
+			ELSE
+			BEGIN
 			UPDATE SH
 			SET		SH.intBillId = @intBillId
 			FROM	tblGRStorageHistory SH 
-			WHERE	SH.strType = 'Settlement' 
-					AND SH.strSettleTicket = @TicketNo 
-				
+			JOIN    tblAPBillDetail BD ON BD.intContractHeaderId=SH.intContractHeaderId
+			WHERE	SH.strType = 'Settlement' AND SH.intCustomerStorageId = @intCustomerStorageId
+					AND SH.strSettleTicket = @TicketNo
+					AND SH.intBillId IS NULL
+					AND BD.intBillId=@intBillId
+					AND SH.intContractHeaderId > 0
+					
+			END	
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
 		END 
 		

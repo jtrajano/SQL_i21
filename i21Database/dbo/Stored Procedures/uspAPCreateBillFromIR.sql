@@ -464,8 +464,12 @@ BEGIN
 											 (CASE WHEN B.dblNet > 0 THEN B.dblUnitCost * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1)AS DECIMAL(18,6))) 
 												   WHEN B.intCostUOMId > 0 THEN B.dblUnitCost * ( CAST(ItemUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1)AS DECIMAL(18,6))) ELSE B.dblUnitCost END) / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,1) ELSE 1 END
 											) ELSE 0.00 END,0),
-			[dblNetWeight]				=	CASE WHEN B.intWeightUOMId > 0 THEN ABS(B.dblOpenReceive - B.dblBillQty)
-											* (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)) ELSE 0 END,
+			[dblNetWeight]				=	CASE WHEN B.intWeightUOMId > 0 THEN  
+													(CASE WHEN B.dblBillQty > 0 
+															THEN ABS(B.dblOpenReceive - B.dblBillQty) * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)) --THIS IS FOR PARTIAL
+														ELSE B.dblNet --THIS IS FOR NO RECEIVED QTY YET BUT HAS NET WEIGHT DIFFERENT FROM GROSS
+											END)
+											ELSE 0 END,
 			[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0),
 			[dblWeightLoss]				=	ISNULL(B.dblGross - B.dblNet,0),
 			[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END,
@@ -686,7 +690,7 @@ BEGIN
 		[int1099Category]
 	)
 	OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
-	SELECT
+	SELECT DISTINCT
 		[intBillId]					=	@generatedBillId,
 		[intItemId]					=	A.intItemId,
 		[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
@@ -728,6 +732,10 @@ BEGIN
 											--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = C.intCurrencyId)
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 	--LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
+	OUTER APPLY(
+		SELECT ysnPrice FROM tblICInventoryReceiptCharge RC
+		WHERE RC.intInventoryReceiptId = A.intInventoryReceiptId AND RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	) C   
 	WHERE A.intInventoryReceiptId = @receiptId
 
 	DELETE FROM #tmpReceiptIds WHERE intInventoryReceiptId = @receiptId  

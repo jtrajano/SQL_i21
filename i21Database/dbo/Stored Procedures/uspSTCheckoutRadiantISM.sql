@@ -1,7 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutRadiantISM]
-@intCheckoutId Int
+@intCheckoutId Int,
+@strStatusMsg NVARCHAR(250) OUTPUT,
+@intCountRows int OUTPUT
 AS
 BEGIN
+	Begin Try
 
 	DECLARE @intStoreId Int, @strAllowRegisterMarkUpDown nvarchar(50), @intShiftNo int, @intMarkUpDownId int
 	Select @intStoreId = intStoreId, @intShiftNo = intShiftNo from dbo.tblSTCheckoutHeader Where intCheckoutId = @intCheckoutId
@@ -102,4 +105,13 @@ BEGIN
 
 	END
 
+	SET @intCountRows = 1
+	SET @strStatusMsg = 'Success'
+
+	End Try
+
+	Begin Catch
+		SET @intCountRows = 0
+		SET @strStatusMsg = ERROR_MESSAGE()
+	End Catch
 END

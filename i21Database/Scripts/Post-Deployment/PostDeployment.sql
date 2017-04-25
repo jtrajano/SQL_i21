@@ -41,6 +41,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\21_CommentMigration.sql
 :r .\SM\DefaultData\22_TypeValue.sql
 :r .\SM\DefaultData\23_ApproverConfigurationApprovalFor.sql
+:r .\SM\DefaultData\25_DocumentSource.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL
@@ -168,6 +169,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\ReportData\TrialBalance.sql
 :r .\GL\ReportData\TrialBalanceDetail.sql
 :r .\GL\ReportData\BalanceSheetStandard.sql
+:r .\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql

@@ -265,9 +265,9 @@ OPEN intListCursor;
 				END
 			IF @ysnIsStorage = 1
 			BEGIN
-				SET @strReceiptType = 'Delayed Price'
 				IF @ysnDPStorage = 1 AND ISNULL(@intLoopContractId,0) = 0
 					BEGIN
+					SET @strReceiptType = 'Delayed Price'
 					INSERT INTO @LineItems (
 					intContractDetailId,
 					dblUnitsDistributed,
@@ -321,7 +321,7 @@ OPEN intListCursor;
 							,ysnIsStorage
 							,strSourceTransactionId  
 							)
-							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId
+							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits;
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
