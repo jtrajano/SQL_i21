@@ -73,6 +73,8 @@ Type the overview for the table here.
 		[ysnHandAddIngredient] BIT NULL DEFAULT ((0)), 
 		[intMedicationTag] INT NULL, 
 		[intIngredientTag] INT NULL, 
+		[intHazmatMessage] INT NULL,
+		[intItemMessage] INT NULL,
 		[strVolumeRebateGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intPhysicalItem] INT NULL, 
 		[ysnExtendPickTicket] BIT NULL DEFAULT ((0)), 
