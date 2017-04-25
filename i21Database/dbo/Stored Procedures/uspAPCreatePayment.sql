@@ -126,7 +126,7 @@ BEGIN
 	UPDATE A
 		SET dblDiscount = CAST(dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmBillDate, A.intTermsId, A.dblTotal) AS DECIMAL(18,2))
 	FROM tblAPBill A
-	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId) AND A.intTransactionType = 1
 
 	SELECT
 		@discount = SUM(ISNULL(A.dblDiscount,0))
@@ -137,7 +137,7 @@ BEGIN
 	UPDATE A
 		SET dblInterest = dbo.fnGetInterestBasedOnTerm(A.dblTotal, A.dtmBillDate, ISNULL(@datePaid, GETDATE()), A.intTermsId)
 	FROM tblAPBill A
-	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId) AND A.intTransactionType = 1
 
 	SELECT
 		@interest = SUM(ISNULL(A.dblInterest,0))
