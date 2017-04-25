@@ -5247,6 +5247,7 @@
     <Build Include="dbo\Views\vyuDBPanel.sql" />
     <Build Include="dbo\Views\vyuSMCompanyLocation.sql" />
     <Build Include="dbo\Views\vyuRKMarketDetail.sql" />
+    <Build Include="dbo\Views\vyuLGGetInventoryDocumentList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
