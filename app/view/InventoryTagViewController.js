@@ -26,6 +26,7 @@ Ext.define('Inventory.view.InventoryTagViewController', {
             },
             columns: [
                 {dataIndex: 'intTagId',text: "Tag Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strType', text: 'Type', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strTagNumber', text: 'Tag Number', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'},
                 {dataIndex: 'ysnHazMat',text: 'HAZMAT', flex: 1,  dataType: 'boolean', xtype: 'checkcolumn'}
@@ -34,7 +35,11 @@ Ext.define('Inventory.view.InventoryTagViewController', {
         binding: {
             txtTagNumber: '{current.strTagNumber}',
             txtDescription: '{current.strDescription}',
-            chkHAZMATMessage: '{current.ysnHazMat}',
+            chkHAZMATMessage: '{ysnHazMat}',
+            cboType: {
+                value: '{current.strType}',
+                store: '{types}'
+            },
             txtMessage: '{current.strMessage}'
         }
     },

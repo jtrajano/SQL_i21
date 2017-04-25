@@ -15,6 +15,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intTagId).HasColumnName("intTagId");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.strMessage).HasColumnName("strMessage");
+            this.Property(t => t.strType).HasColumnName("strType");
             this.Property(t => t.strTagNumber).HasColumnName("strTagNumber");
             this.Property(t => t.ysnHazMat).HasColumnName("ysnHazMat");
         }

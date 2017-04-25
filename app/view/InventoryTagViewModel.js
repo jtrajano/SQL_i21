@@ -15,6 +15,23 @@
 
 Ext.define('Inventory.view.InventoryTagViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.icinventorytag'
+    alias: 'viewmodel.icinventorytag',
 
+    stores: {
+        types: {
+            autoLoad: true,
+            data: [
+                { strType: 'Medication Tag' },
+                { strType: 'Ingredient Tag' },
+                { strType: 'Hazmat Message' },
+                { strType: 'Item Message' },
+            ]
+        }
+    },
+
+    formulas: {
+        ysnHazMat: function (get) {
+            return get('current.strType') === 'Hazmat Message';
+        }
+    }
 });

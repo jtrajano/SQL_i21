@@ -350,10 +350,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         fuelCategory: {
             type: 'icbufferedfuelcategory'
         },
-        medicationTag: {
-            type: 'icbufferedtag'
-        },
-        ingredientTag: {
+        inventoryTags: {
             type: 'icbufferedtag'
         },
         physicalItem: {

@@ -22,7 +22,7 @@ Ext.define('Inventory.view.InventoryTag', {
         'Ext.form.Panel',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
-        'Ext.form.field.Checkbox',
+        'Ext.form.field.ComboBox',
         'Ext.form.field.TextArea',
         'Ext.toolbar.Paging'
     ],
@@ -141,18 +141,22 @@ Ext.define('Inventory.view.InventoryTag', {
                                             layout: 'hbox',
                                             items: [
                                                 {
+                                                    xtype: 'combobox',
+                                                    flex: 1,
+                                                    itemId: 'cboType',
+                                                    fieldLabel: 'Type',
+                                                    labelWidth: 90,
+                                                    displayField: 'strType',
+                                                    valueField: 'strType'
+                                                },
+                                                {
                                                     xtype: 'textfield',
+                                                    flex: 1,
                                                     itemId: 'txtTagNumber',
+                                                    padding: '0 0 0 8',
                                                     width: 300,
                                                     fieldLabel: 'Tag Number',
                                                     labelWidth: 90
-                                                },
-                                                {
-                                                    xtype: 'checkboxfield',
-                                                    itemId: 'chkHAZMATMessage',
-                                                    margin: '0 0 0 5',
-                                                    fieldLabel: 'HAZMAT Message',
-                                                    labelWidth: 110
                                                 }
                                             ]
                                         },

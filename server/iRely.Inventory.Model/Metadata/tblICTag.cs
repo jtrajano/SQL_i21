@@ -15,5 +15,6 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
         public string strMessage { get; set; }
         public bool ysnHazMat { get; set; }
+        public string strType { get; set; }
     }
 }

@@ -12,6 +12,7 @@ Ext.define('Inventory.model.InventoryTag', {
 
     fields: [
         { name: 'intTagId', type: 'int'},
+        { name: 'strType', type: 'string'},
         { name: 'strTagNumber', type: 'string'},
         { name: 'strDescription', type: 'string'},
         { name: 'strMessage', type: 'string'},

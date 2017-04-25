@@ -355,13 +355,49 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.strMedicationTag}',
                 origValueField: 'intTagId',
                 origUpdateField: 'intMedicationTag',
-                store: '{medicationTag}'
+                store: '{inventoryTags}',
+                defaultFilters: [
+                    {
+                        column: 'strType',
+                        value: 'Medication Tag'
+                    }
+                ]
             },
             cboIngredientTag: {
                 value: '{current.strIngredientTag}',
                 origValueField: 'intTagId',
                 origUpdateField: 'intIngredientTag',
-                store: '{ingredientTag}'
+                store: '{inventoryTags}',
+                defaultFilters: [
+                    {
+                        column: 'strType',
+                        value: 'Ingredient Tag'
+                    }
+                ]
+            },
+            cboHazmat: {
+                value: '{current.strHazmatMessage}',
+                origValueField: 'intTagId',
+                origUpdateField: 'intHazmatMessage',
+                store: '{inventoryTags}',
+                defaultFilters: [
+                    {
+                        column: 'strType',
+                        value: 'Hazmat Message'
+                    }
+                ]
+            },
+            cboEnergyTrac: {
+                value: '{current.strItemMessage}',
+                origValueField: 'intTagId',
+                origUpdateField: 'intItemMessage',
+                store: '{inventoryTags}',
+                defaultFilters: [
+                    {
+                        column: 'strType',
+                        value: 'Item Message'
+                    }
+                ]
             },
             txtVolumeRebateGroup: '{current.strVolumeRebateGroup}',
             cboPhysicalItem: {
@@ -3578,7 +3614,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onMedicationTaxDrilldown: function(combo) {
+    onMedicationTagDrilldown: function(combo) {
         if (iRely.Functions.isEmpty(combo.getValue())) {
             iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
         }
@@ -3588,6 +3624,24 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     onIngredientTagDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', combo.getValue());
+        }
+    },
+
+    onHazmatMessageTagDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', combo.getValue());
+        }
+    },
+
+    onItemMessageDrilldown: function(combo) {
         if (iRely.Functions.isEmpty(combo.getValue())) {
             iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
         }
@@ -3990,10 +4044,16 @@ Ext.define('Inventory.view.ItemViewController', {
                 select: this.onCommoditySelect
             },
             "#cboMedicationTag": {
-                drilldown: this.onMedicationTaxDrilldown
+                drilldown: this.onMedicationTagDrilldown
             },
             "#cboIngredientTag": {
                 drilldown: this.onIngredientTagDrilldown
+            },
+            "#cboHazmat": {
+                drilldown: this.onHazmatMessageTagDrilldown
+            },
+            "#cboEnergyTrac": {
+                drilldown: this.onItemMessageDrilldown
             },
             "#cboFuelCategory": {
                 drilldown: this.onFuelCategoryDrilldown
