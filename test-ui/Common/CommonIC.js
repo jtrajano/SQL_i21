@@ -1978,7 +1978,211 @@ Ext.define('Inventory.CommonIC', {
             .displayText('===== Other Charge Item Created =====')
             .done();
 
-    }
+    },
+////////////////////////////////////////////////////////////////////////    
+//Start Jerome Paul Fazon Codes
+////////////////////////////////////////////////////////////////////////    
+ getNextItemNumber: function (t,next) {
+        record=Math.floor((Math.random() * 1000000) + 1);
+        new iRely.FunctionalTest().start(t, next)
+        .enterData('Text Field','ItemNo', record)
+        .done();
+    },
+ getGeneratedItemNumber: function (t,next) {
+        new iRely.FunctionalTest().start(t, next)
+        .selectGridComboBoxRowValue('ItemNo',1,'strItemNo', '', 'ItemNo',1)    
+        .done();
+    },   
+ getGridComboColumnDefaults: function (t,next,gridID,itemID) {
+        var grid = gridID;
+        var column=itemID;
+        var currentCount =1;
+         //insertCategoryDefaultAccounts(currentCount,gridID,column);
+      for(i=1;i<=6;i){
+    
+            var insertCategoryDefaultAccounts = function(){
+                new iRely.FunctionalTest().start(t, next)
+                //.selectGridComboBoxRowNumber(gridID,currentCount,itemID,1)
+                .displayText(gridID)
+                .displayText(i)
+                .displayText(itemID)
+                .selectGridComboBoxRowNumber('GlAccounts',i, 'colGLAccountId', 2 )
+               
+                .done()
+            }
+            
+            setInterval(insertCategoryDefaultAccounts(t,next,i,'GlAccounts','colGLAccountId'),50000);  
+           i++;
+           
+         }    
+ },
+
+
+
+insertInventoryItem: function(t,next,productID){
+    new iRely.FunctionalTest().start(t, next)
+        .clickMenuScreen('Items')
+        .waitUntilLoaded()
+        .clickButton('New')
+        .waitUntilLoaded('icitem')
+            .enterData('Text Field','ItemNo', productID)
+            .enterData('Text Field','Description', 'Sample Description')
+            .selectComboBoxRowNumber('Commodity', 0)
+            .selectComboBoxRowNumber('Category', 6)
+            .selectComboBoxRowNumber('LotTracking', 0)
+            // .enterData('Text Field','FilterGrid', 'Bushels[ENTER]')
+            // .continueIf({
+            //         expected: 0,
+            //         actual: function(Integer){
+            //             return gridUnitOfMeasure.getStore().count();
+            //         },
+            //         success: function(next){
+            //             new iRely.FunctionalTest().start(t, next)
+            //                 .clickButton('InsertUOM')
+            //                 .done()
+            //         },
+            //         continueOnFail: true,
+            //         successMessage : 'Bushels UOM Added',
+            //         failMessage: 'Duplicate UOM (Not a Bug)'
+            //     })
+
+
+            .clickTab('Setup')    
+            .clickButton('AddRequiredAccounts')
+            .verifyGridData('GlAccounts', 1, 'colGLAccountCategory', 'AP Clearing')
+            .verifyGridData('GlAccounts', 2, 'colGLAccountCategory', 'Inventory')
+            .verifyGridData('GlAccounts', 3, 'colGLAccountCategory', 'Cost of Goods')
+            .verifyGridData('GlAccounts', 4, 'colGLAccountCategory', 'Sales Account')
+            .verifyGridData('GlAccounts', 5, 'colGLAccountCategory', 'Inventory In-Transit')
+            .verifyGridData('GlAccounts', 6, 'colGLAccountCategory', 'Inventory Adjustment')
+            .selectGridComboBoxRowValue('GlAccounts', 1, 'strAccountId', '21000-0000-000', 'strAccountId')
+            .selectGridComboBoxRowValue('GlAccounts', 2, 'strAccountId', '16000-0000-000', 'strAccountId')
+            .selectGridComboBoxRowValue('GlAccounts', 3, 'strAccountId', '50000-0000-000', 'strAccountId')
+            .selectGridComboBoxRowValue('GlAccounts', 4, 'strAccountId', '40010-0001-006', 'strAccountId')
+            .selectGridComboBoxRowValue('GlAccounts', 5, 'strAccountId', '16050-0000-000', 'strAccountId')
+            .selectGridComboBoxRowValue('GlAccounts', 6, 'strAccountId', '16040-0000-000', 'strAccountId')
+            .addResult('======== Setup GL Accounts Successful ========')
+            .clickTab('Location') 
+            .clickButton('AddLocation')
+            .waitUntilLoaded('icitemlocation')
+            .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)    
+            .selectComboBoxRowValue('CostingMethod', 'AVG', 'CostingMethod',1)    
+            .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',1)    
+            .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',1)
+            .selectComboBoxRowValue('IssueUom', 'Bushels', 'IssueUom',1)  
+            .selectComboBoxRowValue('ReceiveUom', 'Bushels', 'ReceiveUom',1)  
+            .selectComboBoxRowNumber('NegativeInventory',0)  
+            
+            .clickButton('Save')
+            .clickButton('Close')
+            .waitUntilLoaded('icitem')
+            .clickButton('Save')
+            .clickButton('Close')
+           // .waitUntilLoaded()
+            
+            .done()
+        
+},
+createPurchaseOrder: function (t,next,ProductID){
+                new iRely.FunctionalTest().start(t, next)
+                .displayText(ProductID)
+                .clickMenuFolder('Purchasing (Accounts Payable)')
+                .clickMenuScreen('Purchase Orders')
+                .waitUntilLoaded()
+                .clickButton('New')
+                .waitUntilLoaded('appurchaseorder')
+                .waitUntilLoaded()
+                .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)    
+                .selectComboBoxRowValue('ShipTo', '0001 - Fort Wayne', 'ShipTo',1)
+                .selectComboBoxRowValue('ShipFrom', 'Office', 'ShipFrom',1)
+                .selectComboBoxRowValue('ShipVia1', 'Trucks', 'ShipVia1',1)
+                
+                .selectGridComboBoxRowValue('Items',1,'strItemNo', ProductID ,'strItemNo') 
+                .enterGridData('Items',1,'dblQtyOrdered',100)
+                .enterGridData('Items',1,'dblCost',10)
+                .clickButton('Save')
+                .done()
+},
+
+ /**
+     * Add InventoryReceipt
+     *
+     * @param {Integer} itemQty - QTyOrdered
+     *
+     * @param {Bool} toPost - true or false
+     *
+     */
+
+createInventoryReceipt: function (t,next,itemQty,toPost) {
+                new iRely.FunctionalTest().start(t, next)
+                //.displayText(PONumber)
+                
+                .waitUntilLoaded()
+                .clickMenuScreen('Inventory Receipts')
+                .clickButton('New')
+                .waitUntilLoaded('icinventoryreceipt')
+                .selectComboBoxRowNumber('ReceiptType',2) 
+                .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1) 
+                .waitUntilLoaded()
+                .selectSearchRowNumber(1)
+                .clickButton('OpenSelected')
+                .waitUntilLoaded('icinventoryreceipt')
+                .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1) 
+                .selectGridRowNumber('InventoryReceipt', 1)
+                .selectGridComboBoxRowValue('InventoryReceipt',1,'colWeightUOM', 'Bushels' ,'strWeightUOM',1) 
+                .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure',itemQty, 'Bushels')
+                .enterGridData('LotTracking',1,'colLotId','Sample Parent Lot [TAB]')
+                .enterGridData('LotTracking',1,'colLotQuantity',itemQty)
+                .selectGridRowNumber('InventoryReceipt', 1)                  
+                .clickTab('PostPreview')
+                .waitUntilLoaded()
+                .clickButton('Save') 
+                .waitUntilLoaded()
+                .continueIf({
+                    expected: true,
+                    actual: function(Bool){
+                        return toPost;
+                    },
+                    success: function(next){
+                        new iRely.FunctionalTest().start(t, next)
+                            .clickButton('Post')
+                            .waitUntilLoaded('icinventoryreceipt')
+                            .done()
+                    },
+                    continueOnFail: true,
+                    successMessage : 'Transaction Posted.',
+                    failMessage: 'Transaction should not Post, Save only. (Not a Bug)'
+                })
+                .clickButton('Close')
+                .done() 
+},
+checkIfClosedPOShowsInIR: function (t,next,PONumber){
+                new iRely.FunctionalTest().start(t, next)
+                 .clickMenuFolder('Inventory')
+                 .clickMenuScreen('Inventory Receipts')
+                // .waitUntilLoaded()
+                .clickButton('New')
+                .waitUntilLoaded('icinventoryreceipt')
+                .selectComboBoxRowNumber('ReceiptType',2) 
+                .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
+                .waitUntilLoaded()
+                .enterData('Text Field','FilterGrid', PONumber)
+                .enterData('Text Field','FilterGrid', '[Enter]')
+                .verifyGridRecordCount('Search', 0)
+                .displayText('if grid count is correct, success!!!')
+                .clickButton('Close') 
+                .clickButton('Save')
+                .waitUntilLoaded()
+                .clickButton('Close') 
+                // .clickMenuFolder('Inventory')
+                // .clickMenuFolder('Purchasing (Accounts Payable)')
+                .done()
+}
+
+
+////////////////////////////////////////////////////////////////////////    
+//End Jerome Paul Fazon Codes
+////////////////////////////////////////////////////////////////////////
 
 
 
