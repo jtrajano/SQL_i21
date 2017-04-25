@@ -5213,6 +5213,7 @@
     <Build Include="dbo\Views\vyuMFGetMachinesByCell.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateContractShippingInstructionQty.sql" />
     <Build Include="dbo\Functions\fnSMHideOriginMenus.sql" />
+    <Build Include="dbo\Views\vyuICGetItemTags.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
