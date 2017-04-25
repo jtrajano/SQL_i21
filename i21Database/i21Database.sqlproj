@@ -5190,6 +5190,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MS_Mississippi.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateContractShippingInstructionQty.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSaveTestInTemplates.sql" />
+    <Build Include="dbo\Views\vyuLGGetInventoryDocumentList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
