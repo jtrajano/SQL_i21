@@ -497,10 +497,10 @@ BEGIN
 			,strRunProcessId			= ''
 			,intCustomerId				= @intEntityCustomerId
 			,strInvoiceReportNumber		= @strInvoiceReportNumber
-			,dblInvoiceQuantity			= @dblTotalQuantity
-			,dblInvoiceDiscount			= @dblAccountTotalDiscount
-			,dblInvoiceAmount			= (@dblAccountTotalAmount + @dblFeeAmount)
-			,dblInvoiceFee				= @dblFeeAmount
+			,dblInvoiceQuantity			= ISNULL(@dblTotalQuantity,0)
+			,dblInvoiceDiscount			= ISNULL(@dblAccountTotalDiscount,0)
+			,dblInvoiceAmount			= (ISNULL(@dblAccountTotalAmount,0) + ISNULL(@dblFeeAmount,0))
+			,dblInvoiceFee				= ISNULL(@dblFeeAmount,0)
 			WHERE intCustomerId = @intEntityCustomerId
 			
 
