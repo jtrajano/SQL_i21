@@ -38,3 +38,4 @@
 			left outer join tblHDMilestone ms on ms.intMilestoneId = t.intMilestoneId
 			left outer join tblHDTicketStatus ts on ts.intTicketStatusId = t.intTicketStatusId
 			left outer join tblHDTicketType tt on tt.intTicketTypeId = t.intTicketTypeId
+		where t.intTicketTypeId <> (select top 1 intTicketTypeId from tblHDTicketType where strType = 'Template')
