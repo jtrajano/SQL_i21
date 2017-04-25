@@ -31,7 +31,7 @@ SELECT
 	B.dblCreditLimit,
 	C.intShipViaId,
 	--C.intTaxCodeId,
-	C.intTermsId,
+	B.intTermsId,
 	--C.strContactName,
 	C.strAddress,
 	C.strCity,
