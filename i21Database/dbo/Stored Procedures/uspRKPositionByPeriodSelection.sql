@@ -191,7 +191,7 @@ BEGIN
 		isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer)) 
 		FROM vyuCTContractCostEnquiryCost cv
 		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and strCostType='Freight'
+		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
 		 where  cd.intContractDetailId=cv.intContractDetailId
 		 group by ccv.intCurrencyId,ccv.strCostMethod
 		 ),0)  dblRate,
@@ -267,7 +267,7 @@ BEGIN
 		isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer)) 
 		FROM vyuCTContractCostEnquiryCost cv
 		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and strCostType='Freight'
+		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
 		 where  cd.intContractDetailId=cv.intContractDetailId
 		 group by ccv.intCurrencyId,ccv.strCostMethod
 		 ),0)  dblRate,
@@ -342,7 +342,7 @@ case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then
 		isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer)) 
 		FROM vyuCTContractCostEnquiryCost cv
 		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and strCostType='Freight'
+		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
 		 where  cd.intContractDetailId=cv.intContractDetailId
 		 group by ccv.intCurrencyId,ccv.strCostMethod
 		 ),0)  dblRate,
@@ -416,7 +416,7 @@ case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then
 			isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer)) 
 		FROM vyuCTContractCostEnquiryCost cv
 		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and strCostType='Freight'
+		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
 		 where  cd.intContractDetailId=cv.intContractDetailId
 		 group by ccv.intCurrencyId,ccv.strCostMethod
 		 ),0)  dblRate,
@@ -492,7 +492,7 @@ BEGIN
 			isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer)) 
 		FROM vyuCTContractCostEnquiryCost cv
 		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and strCostType='Freight'
+		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
 		 where  cd.intContractDetailId=cv.intContractDetailId
 		 group by ccv.intCurrencyId,ccv.strCostMethod
 		 ),0)  dblRate,
@@ -565,7 +565,7 @@ BEGIN
 			isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer)) 
 		FROM vyuCTContractCostEnquiryCost cv
 		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and strCostType='Freight'
+		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
 		 where  cd.intContractDetailId=cv.intContractDetailId
 		 group by ccv.intCurrencyId,ccv.strCostMethod
 		 ),0)  dblRate,
@@ -641,7 +641,7 @@ BEGIN
 		isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer)) 
 		FROM vyuCTContractCostEnquiryCost cv
 		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and strCostType='Freight'
+		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
 		 where  cd.intContractDetailId=cv.intContractDetailId
 		 group by ccv.intCurrencyId,ccv.strCostMethod
 		 ),0)  dblRate,
@@ -716,7 +716,7 @@ BEGIN
 		isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer)) 
 		FROM vyuCTContractCostEnquiryCost cv
 		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and strCostType='Freight'
+		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
 		 where  cd.intContractDetailId=cv.intContractDetailId
 		 group by ccv.intCurrencyId,ccv.strCostMethod
 		 ),0)  dblRate,
