@@ -39,6 +39,16 @@ BEGIN
 	--SELECT	@intReferenceNumber = [from]
 	--FROM	@temp_xml_table   
 	--WHERE	[fieldname] = 'intReferenceNumber' 
+DECLARE @ysnLoadNumber BIT
+IF EXISTS(SELECT 1 FROM tblLGLoad WHERE strLoadNumber = @xmlParam)
+BEGIN
+	SET @ysnLoadNumber = 1
+END
+ELSE 
+BEGIN
+	SET @ysnLoadNumber = 0
+END
+
 SELECT DISTINCT LC.strContainerNumber,
 		LV.strBLNumber,
 		LC.strMarks,
@@ -319,6 +329,10 @@ JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId = LDV.intPContractDetailId
-WHERE LW.intLoadWarehouseId = @xmlParam	
+WHERE LW.intLoadWarehouseId = CASE 
+		WHEN @ysnLoadNumber = 1
+			THEN 0
+		ELSE @xmlParam
+		END
 
 END
