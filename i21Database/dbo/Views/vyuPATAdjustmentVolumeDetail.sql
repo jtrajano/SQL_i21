@@ -2,6 +2,7 @@
 	AS
 SELECT AVD.intAdjustmentDetailId,
 		AVD.intAdjustmentId,
+		AVD.intCustomerVolumeId,
 		AVD.intPatronageCategoryId,
 		AVD.intFiscalYearId,
 		FY.strFiscalYear,
