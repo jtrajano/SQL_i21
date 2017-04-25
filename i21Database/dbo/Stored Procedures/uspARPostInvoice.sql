@@ -3422,7 +3422,7 @@ IF @post = 1
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId
 			WHERE				
-				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND Detail.dblTotal <> 0) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
+				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND (Detail.dblTotal <> 0 OR dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) <> 0)) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
@@ -3465,7 +3465,7 @@ IF @post = 1
 			FROM
 				(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], strType FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 			INNER JOIN
-				(SELECT [intInvoiceId], [intInvoiceDetailId], intItemId, [dblQtyShipped], [dblPrice], intCompanyLocationSubLocationId, intStorageLocationId, [dblTotal] 
+				(SELECT [intInvoiceId], [intInvoiceDetailId], intItemId, intItemUOMId, [dblQtyShipped], [dblPrice], intCompanyLocationSubLocationId, intStorageLocationId, [dblTotal] 
 					,[intInventoryShipmentItemId] ,[intShipmentPurchaseSalesContractId] ,intStorageScheduleTypeId, intCurrencyExchangeRateTypeId, dblCurrencyExchangeRate
 				 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 					ON ARIC.[intItemId] = ARID.[intItemId]
@@ -3487,7 +3487,7 @@ IF @post = 1
 					ON ARIC.[intComponentItemId] = IST.intItemId 
 					AND ARI.[intCompanyLocationId] = IST.intLocationId 			 				 
 			WHERE
-				((ISNULL(ARI.[strImportFormat], '') <> 'CarQuest' AND ARID.[dblTotal] <> @ZeroDecimal) OR ISNULL(ARI.[strImportFormat], '') = 'CarQuest')
+				((ISNULL(ARI.strImportFormat, '') <> 'CarQuest' AND (ARID.dblTotal <> 0 OR dbo.fnGetItemAverageCost(ARID.intItemId, IST.intItemLocationId, ARID.intItemUOMId) <> 0)) OR ISNULL(ARI.strImportFormat, '') = 'CarQuest') 
 				AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 				AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
 				AND ISNULL(ARID.[intItemId],0) <> 0
