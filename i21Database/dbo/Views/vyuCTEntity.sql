@@ -16,9 +16,9 @@ AS
 					ELSE CAST(1 AS BIT)
 			END	AS	ysnActive,
 			CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShipVia,
-			CAST(ISNULL(V.[intEntityId]	,0) AS BIT) ysnVendor,
-			CASE	WHEN Y.strType = 'Vendor'	THEN	V.intTermsId
-					WHEN Y.strType = 'Customer'	THEN	U.intTermsId
+			CAST(ISNULL(V.intEntityVendorId	,0) AS BIT) ysnVendor,
+			CASE	WHEN Y.strType = 'Vendor'	THEN	CASE WHEN TM.ysnActive = 1 THEN V.intTermsId ELSE NULL END
+					WHEN Y.strType = 'Customer'	THEN	CASE WHEN TM.ysnActive = 1 THEN U.intTermsId ELSE NULL END
 					ELSE L.intTermsId 
 			END AS intTermId,
 			V.strVendorAccountNum
@@ -29,11 +29,15 @@ AS
 	JOIN	[tblEMEntityToContact]	C	ON	C.intEntityId			=	E.intEntityId 
 										AND C.ysnDefaultContact		=	1
 	JOIN	tblEMEntity				T	ON	T.intEntityId			=	C.intEntityContactId	LEFT 
-	JOIN	tblAPVendor				V	ON	V.[intEntityId]		=	E.intEntityId			LEFT
-	JOIN	tblARCustomer			U	ON	U.[intEntityId]	=	E.intEntityId			LEFT
+	JOIN	tblAPVendor				V	ON	V.intEntityVendorId		=	E.intEntityId			LEFT
+	JOIN	tblARCustomer			U	ON	U.intEntityCustomerId	=	E.intEntityId			LEFT
 	JOIN	(
 				SELECT	EY.intEntityId 
 				FROM	tblEMEntity			EY
 				JOIN	[tblEMEntityType]	ET	ON	ET.intEntityId	=	EY.intEntityId	
 												AND	ET.strType		=	'Ship Via'
 			)						S	ON	S.intEntityId			=	E.intEntityId
+LEFT JOIN	tblSMTerm				TM	ON TM.intTermID =	CASE	WHEN Y.strType = 'Vendor'	THEN	V.intTermsId
+																	WHEN Y.strType = 'Customer'	THEN	U.intTermsId
+																	ELSE L.intTermsId 
+															END 
