@@ -63,7 +63,7 @@ BEGIN
 			premp_state				= ISNULL(SUBSTRING(C.strState,1,2),''''),
 			premp_zip				= ISNULL(SUBSTRING(C.strZipCode,1,10),'''')
 
-
+			--
 
 
 
@@ -221,11 +221,12 @@ BEGIN
 	DECLARE @dblRegularHours		NVARCHAR(50)
 	DECLARE @dtmLastModified		NVARCHAR(50)
 	DECLARE @strType				NVARCHAR(100)
+	DECLARE @strDepartment			NVARCHAR(50)
 	
 	SELECT premp_emp INTO #tmpprempmst 
 	FROM prempmst
 		where premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) or premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)
-
+		 and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, DATEADD(YEAR,-1, getdate()), 102),''.'', '''') )
 	
 	WHILE (EXISTS(SELECT 1 FROM #tmpprempmst))
 	BEGIN
@@ -308,7 +309,8 @@ BEGIN
 				@dtmNextReview		= case when premp_next_review_dt = 0 then null else premp_next_review_dt end ,
 				@ysnRetirementPlan	= premp_pension_flag_9,
 				@dblRegularHours	= premp_std_hrs,
-				@dtmLastModified	= CASE WHEN ISNULL(premp_user_rev_dt,0) = 0 THEN NULL ELSE premp_user_rev_dt END
+				@dtmLastModified	= CASE WHEN ISNULL(premp_user_rev_dt,0) = 0 THEN NULL ELSE premp_user_rev_dt END,
+				@strDepartment		= premp_dept
 					
             FROM prempmst
             WHERE premp_emp = @originEmployee
@@ -371,7 +373,37 @@ BEGIN
 		end
 		
 		insert into tblPREmployee(intEntityId, strEmployeeId, strWorkPhone, intRank, dtmOriginalDateHired, dtmDateHired,	dtmBirthDate,	strGender,	strMaritalStatus,	strSpouse,	strEthnicity,	strEEOCCode,	strSocialSecurity,   	dtmTerminated,	strTerminatedReason,	strEmergencyContact,	strEmergencyPhone,	strEmergencyPhone2,	strPayPeriod,	dtmReviewDate,	dtmNextReview,	ysnRetirementPlan,	dblRegularHours,	dtmLastModified, strFirstName, strMiddleName, strLastName, strNameSuffix, strType)
-		values(@EntityId, @originEmployee, @strPhone, 1,@dtmOrigHireDate, @dtmLastHireDate,		 @dtmBirthDate,	 @strSex,	@strMaritalStatus,	@strSpouse, @strEthnicity,	 @strEEOCCode,	 @strSocialSecurity,  @dtmTerminated, @strTerminatedReason, @strEmergencyContact, @strEmergencyPhone,	  @strEmergencyPhone2, @strPayPeriod, @dtmReviewDate,	 @dtmNextReview,	 @ysnRetirementPlan,  @dblRegularHours,	 @dtmLastModified, @strFirstName, @strMiddleName, @strLastName, @strSuffix, @strType)
+		values(@EntityId, @originEmployee, @strPhone, 1,@dtmOrigHireDate, @dtmLastHireDate,		 @dtmBirthDate,	 @strSex,	@strMaritalStatus,	@strSpouse, @strEthnicity,	 @strEEOCCode,	 @strSocialSecurity,  @dtmTerminated, @strTerminatedReason, @strEmergencyContact, @strEmergencyPhone,	  @strEmergencyPhone2, @strPayPeriod, @dtmReviewDate,	 @dtmNextReview,	 @ysnRetirementPlan,  @dblRegularHours,	 @dtmLastModified, @strFirstName, @strMiddleName, @strLastName, @strSuffix, @strType)		
+		
+		insert into tblEMEntityNote(dtmDate,dtmTime,intDuration,strUser,strSubject,strNotes,intEntityId)
+		select 
+			cast(cast(99999999-prcmt_date as nvarchar) as date),
+			''00:00:01'',
+			1,
+			''ORIG'',
+			''ORIGIN CONV'',
+			 prcmt_line,
+			 c.intEntityId
+				from prempmst a 
+					join prcmtmst b
+						on a.premp_emp = b.prcmt_emp
+					join tblEMEntity c
+						on a.premp_emp COLLATE Latin1_General_CI_AS = c.strEntityNo COLLATE Latin1_General_CI_AS 
+							and c.strEntityNo = @originEmployee
+
+		if(@strDepartment <> '''' )
+		begin
+			if not exists(select top 1 1 from tblPRDepartment where strDepartment = @strDepartment)
+			begin
+				insert into tblPRDepartment(strDepartment, strDescription)
+				values (@strDepartment, @strDepartment + '' - from origin'')
+			end
+
+
+			insert into tblPREmployeeDepartment(intEntityEmployeeId, intDepartmentId)
+			select top 1 @EntityId, intDepartmentId from tblPRDepartment where strDepartment = @strDepartment
+		end
+		
 		 
 		
 		set @Total = @Total + 1
@@ -401,6 +433,8 @@ BEGIN
 	FROM prempmst
 	where premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) or premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)
 END
+
+
 
 
 
