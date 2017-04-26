@@ -130,12 +130,18 @@ SELECT DISTINCT
 		[strCalculationMethod]		= A.strCalculationMethod COLLATE Latin1_General_CI_AS,
 		[dblRate]					= A.dblRate,
 		[intAccountId]				= A.intTaxAccountId,
-		[dblTax]					= A.dblTax,
-		[dblAdjustedTax]			= A.dblAdjustedTax,
+		[dblTax]					= (CASE WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
+											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 THEN A.dblTax * -1
+											ELSE A.dblTax END),
+		[dblAdjustedTax]			= (CASE WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 0 THEN ABS(A.dblAdjustedTax) 
+											WHEN B.intEntityVendorId != C.intEntityVendorId AND ysnCheckoffTax = 1 THEN A.dblAdjustedTax * -1
+											ELSE A.dblAdjustedTax END) ,
 		[ysnTaxAdjusted]			= A.ysnTaxAdjusted,
 		[ysnSeparateOnBill]			= 'false',
 		[ysnCheckOffTax]			= A.ysnCheckoffTax,
 		[strTaxCode]				= A.strTaxCode
 	FROM tblICInventoryReceiptChargeTax A
+	LEFT JOIN dbo.tblICInventoryReceiptCharge B ON A.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+	LEFT JOIN dbo.tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
 ) Items
 GO
