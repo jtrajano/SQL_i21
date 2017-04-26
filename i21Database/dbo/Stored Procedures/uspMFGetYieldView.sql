@@ -347,7 +347,6 @@ BEGIN TRY
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND strTransactionType = 'dblOpeningQuantity'
 
-				--SELECT @dblInputOB
 				SELECT @dblOutputCC = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
@@ -496,8 +495,8 @@ BEGIN TRY
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
 			,CASE 
 				WHEN I.intCategoryId = @intCategoryId
-					THEN CEILING(CAST((
-									W.dblProducedQuantity - Isnull((
+					THEN CEILING(CAST(((Select Sum(dblOutputQuantity) from tblMFProductionSummary PS Where PS.intWorkOrderId=W.intWorkOrderId and PS.intItemTypeId in (2,4))
+									 - Isnull((
 											SELECT Sum(WP.dblPhysicalCount)
 											FROM tblMFWorkOrderProducedLot WP
 											WHERE WP.ysnFillPartialPallet = 1
@@ -512,7 +511,7 @@ BEGIN TRY
 										END
 									) AS NUMERIC(18, 6)))
 				ELSE CAST((
-							W.dblProducedQuantity - Isnull((
+							(Select Sum(dblOutputQuantity) from tblMFProductionSummary PS Where PS.intWorkOrderId=W.intWorkOrderId and PS.intItemTypeId in (2,4)) - Isnull((
 									SELECT Sum(WP.dblPhysicalCount)
 									FROM tblMFWorkOrderProducedLot WP
 									WHERE WP.ysnFillPartialPallet = 1
@@ -534,6 +533,7 @@ BEGIN TRY
 			,TR.intItemUOMId
 			,strTransactionType
 			,TR.intCategoryId
+			,RI.intRecipeItemTypeId
 		INTO ##tblMFInputItemYield
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
@@ -609,6 +609,7 @@ BEGIN TRY
 			,TR.intItemUOMId
 			,strTransactionType
 			,TR.intCategoryId
+			,RI.intRecipeItemTypeId
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = TR.intItemId
@@ -638,6 +639,7 @@ BEGIN TRY
 			,intItemUOMId
 			,strTransactionType
 			,intCategoryId
+			,intRecipeItemTypeId
 		INTO ##tblMFFinalInputItemYield
 		FROM ##tblMFInputItemYield
 		GROUP BY intWorkOrderId
@@ -654,6 +656,7 @@ BEGIN TRY
 			,intItemUOMId
 			,strTransactionType
 			,intCategoryId
+			,intRecipeItemTypeId
 
 		SELECT @intWorkOrderId = MIN(intWorkOrderId)
 		FROM ##tblMFFinalInputItemYield
@@ -702,7 +705,6 @@ BEGIN TRY
 						AND strTransactionType = 'Input'
 				END
 
-				--SELECT @dblInput = 0
 				SELECT @dblOutput = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
@@ -788,26 +790,7 @@ BEGIN TRY
 						END
 					AND strTransactionType = 'Empty Out Adj'
 
-				IF @intInputItemId = @intItemId
-				BEGIN
-					--SELECT @dblCalculatedQuantity = 100 * (
-					--		SELECT SUM(dblQuantity)
-					--		FROM dbo.tblMFWorkOrderRecipeItem
-					--		WHERE intWorkOrderId = @intWorkOrderId
-					--			AND intRecipeItemTypeId = 2
-					--			AND intItemId = @intItemId
-					--		) / (
-					--		SELECT SUM(dblCalculatedQuantity)
-					--		FROM dbo.tblMFWorkOrderRecipeItem
-					--		WHERE intWorkOrderId = @intWorkOrderId
-					--			AND intRecipeItemTypeId = 1
-					--		)
-					SELECT @dblCalculatedQuantity = 100
-				END
-				ELSE
-				BEGIN
-					SELECT @dblCalculatedQuantity = 100
-				END
+				SELECT @dblCalculatedQuantity = 100
 
 				SET @strCFormula = ''
 
@@ -827,11 +810,6 @@ BEGIN TRY
 
 				IF @intInputItemId = @intItemId
 				BEGIN
-					--SET @dblYieldP = @dblTOutput / CASE 
-					--		WHEN ISNULL(@dblTInput, 0) = 0
-					--			THEN 1
-					--		ELSE @dblTInput
-					--		END
 					SELECT @dblRequiredQty = 0
 
 					SELECT @dblRequiredQty = Sum(dblRequiredQty)
@@ -845,7 +823,7 @@ BEGIN TRY
 							ELSE @dblTInput
 							END
 					UPDATE ##tblMFFinalInputItemYield
-					SET dblActualYield = ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
+					SET dblActualYield = @dblYieldP * 100
 						,dblTotalInput = @dblTInput
 						,dblTotalOutput = @dblTOutput
 						,dblStandardYield = 100
@@ -867,15 +845,13 @@ BEGIN TRY
 							ELSE (@dblTInput - @dblTOutput)
 							END
 					UPDATE ##tblMFFinalInputItemYield
-					SET dblActualYield = ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
+					SET dblActualYield = @dblYieldP * 100
 						,dblTotalInput = @dblTInput
 						,dblTotalOutput = @dblTOutput
 						,dblStandardYield = Case When @dblRequiredQty=0 or @dblRequiredQty is null then 0 else 100 End
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intInputItemId = @intInputItemId
 				END
-
-
 
 				SELECT @intInputItemId = MIN(intInputItemId)
 				FROM ##tblMFFinalInputItemYield
@@ -915,7 +891,6 @@ BEGIN TRY
 				,ROUND(MIN(dblTotalInput), @dblDecimal) dblTotalInput
 				,ROUND(ABS(MIN(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
 				,ROUND(AVG(dblActualYield), @dblDecimal) dblActualYield
-				--,CONVERT(INT, 1) AS intConcurrencyId
 				,intWorkOrderId
 			FROM ##tblMFFinalInputItemYield
 			WHERE intInputItemId = intItemId
@@ -926,24 +901,13 @@ BEGIN TRY
 			,intManufacturingProcessId
 			,intLocationId
 
-		--SELECT @dtmFromDate AS dtmFromDate
-		--	,@dtmToDate AS dtmToDate
-		--	,@intManufacturingProcessId AS intManufacturingProcessId
-		--	,@intLocationId AS intLocationId
-		--	,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
-		--	,ROUND(SUM(dblTotalInput), @dblDecimal) dblTotalInput
-		--	,ROUND(ABS(SUM(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-		--	,ROUND(AVG(dblActualYield), 2) dblActualYield
-		--	,CONVERT(INT, 1) AS intConcurrencyId
-		--FROM ##tblMFInputItemYield
-		--WHERE intInputItemId = intItemId
 		SELECT CONVERT(INT, ROW_NUMBER() OVER (
 					ORDER BY IY.intWorkOrderId
 						,IY.dtmDate
 						,IY.intShiftId
 						,(
 							CASE 
-								WHEN I.strItemNo = II.strItemNo
+								WHEN intRecipeItemTypeId=2
 									THEN 'Output'
 								ELSE 'Input'
 								END
@@ -955,16 +919,8 @@ BEGIN TRY
 			,IY.strWorkOrderNo AS strRunNo
 			,IY.dtmDate AS dtmRunDate
 			,S.strShiftName AS strShift
-			,CASE 
-				WHEN I.strItemNo = II.strItemNo
-					THEN ''
-				ELSE II.strItemNo
-				END AS strInputItemNo
-			,CASE 
-				WHEN I.strDescription = II.strDescription
-					THEN ''
-				ELSE II.strDescription
-				END AS strInputItemDescription
+			,II.strItemNo AS strInputItemNo
+			,II.strDescription AS strInputItemDescription
 			,ROUND(IY.dblTotalOutput, @dblDecimal) dblTotalOutput
 			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
 			,ROUND(dblRequiredQty, @dblDecimal) dblRequiredQty
@@ -973,7 +929,7 @@ BEGIN TRY
 			,ROUND(IY.dblStandardYield, @dblDecimal) dblStandardYield
 			,ROUND(IY.dblActualYield - dblStandardYield, @dblDecimal) dblVariance
 			,CASE 
-				WHEN I.strItemNo = II.strItemNo
+				WHEN intRecipeItemTypeId=2
 					THEN 'Output'
 				ELSE 'Input'
 				END AS strTransaction
@@ -1174,16 +1130,6 @@ BEGIN TRY
 			WHERE intYieldId > @intYieldId
 		END
 
-		--SELECT @dtmFromDate AS dtmFromDate
-		--	,@dtmToDate AS dtmToDate
-		--	,@intManufacturingProcessId AS intManufacturingProcessId
-		--	,@intLocationId AS intLocationId
-		--	,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
-		--	,ROUND(SUM(dblTotalInput), @dblDecimal) dblTotalInput
-		--	,ROUND(ABS(SUM(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-		--	,ROUND(AVG(dblActualYield), 2) dblActualYield
-		--	,CONVERT(INT, 1) AS intConcurrencyId
-		--FROM ##tblMFYieldByDate
 		SELECT dtmFromDate
 			,dtmToDate
 			,intManufacturingProcessId
@@ -1202,7 +1148,6 @@ BEGIN TRY
 				,ROUND(MIN(dblTotalInput), @dblDecimal) dblTotalInput
 				,ROUND(ABS(MIN(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
 				,ROUND(AVG(dblActualYield), @dblDecimal) dblActualYield
-				--,CONVERT(INT, 1) AS intConcurrencyId
 				,dtmDate
 				,intShiftId
 				,intPrimaryItemId
@@ -1264,7 +1209,7 @@ BEGIN TRY
 			,CASE 
 				WHEN I.intCategoryId = @intCategoryId
 					THEN CEILING(CAST((
-									W.dblProducedQuantity - isnull((
+									(Select Sum(dblOutputQuantity) from tblMFProductionSummary PS Where PS.intWorkOrderId=W.intWorkOrderId and PS.intItemTypeId in (2,4)) - isnull((
 											SELECT SUM(dblPhysicalCount)
 											FROM tblMFWorkOrderProducedLot WP
 											WHERE WP.ysnFillPartialPallet = 1
@@ -1279,7 +1224,7 @@ BEGIN TRY
 									) AS NUMERIC(18, 6)))
 				ELSE (
 						CAST((
-								W.dblProducedQuantity - isnull((
+								(Select Sum(dblOutputQuantity) from tblMFProductionSummary PS Where PS.intWorkOrderId=W.intWorkOrderId and PS.intItemTypeId in (2,4)) - isnull((
 										SELECT SUM(dblPhysicalCount)
 										FROM tblMFWorkOrderProducedLot WP
 										WHERE WP.ysnFillPartialPallet = 1
@@ -1302,6 +1247,7 @@ BEGIN TRY
 			,W.intItemId AS intPrimaryItemId
 			,strTransactionType
 			,TR.intCategoryId
+			,RI.intRecipeItemTypeId
 		INTO ##tblMFInputItemYieldByDate
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
@@ -1317,13 +1263,6 @@ BEGIN TRY
 				,'dblOpeningQuantity'
 				)
 
-		--GROUP BY TR.intItemId
-		--	,TR.dtmDate
-		--	,TR.intShiftId
-		--	,TR.intInputItemId
-		--	,RI.intItemUOMId
-		--	,W.intItemId
-		--	,strTransactionType
 		INSERT INTO ##tblMFInputItemYieldByDate
 		SELECT DISTINCT Dense_Rank() OVER (
 				ORDER BY TR.intItemId
@@ -1384,6 +1323,7 @@ BEGIN TRY
 			,W.intItemId AS intPrimaryItemId
 			,strTransactionType
 			,TR.intCategoryId
+			,RI.intRecipeItemTypeId 
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
@@ -1398,13 +1338,6 @@ BEGIN TRY
 				,'dblOpeningQuantity'
 				)
 
-		--GROUP BY TR.intItemId
-		--	,TR.dtmDate
-		--	,TR.intShiftId
-		--	,TR.intInputItemId
-		--	,RI.intItemUOMId
-		--	,W.intItemId
-		--	,strTransactionType
 		SELECT intYieldId
 			,intItemId
 			,dtmDate
@@ -1420,6 +1353,7 @@ BEGIN TRY
 			,intPrimaryItemId
 			,strTransactionType
 			,intCategoryId
+			,intRecipeItemTypeId 
 		INTO ##tblMFFinalInputItemYieldByDate
 		FROM ##tblMFInputItemYieldByDate
 		GROUP BY intYieldId
@@ -1436,6 +1370,7 @@ BEGIN TRY
 			,intPrimaryItemId
 			,strTransactionType
 			,intCategoryId
+			,intRecipeItemTypeId
 
 		SELECT @intYieldId = MIN(intYieldId)
 		FROM ##tblMFFinalInputItemYieldByDate
@@ -1504,7 +1439,6 @@ BEGIN TRY
 						AND strTransactionType = 'Input'
 				END
 
-				--SELECT @dblInput = 0
 				SELECT @dblOutput = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intItemId = @intItemId
@@ -1604,24 +1538,6 @@ BEGIN TRY
 
 				IF @intInputItemId = @intItemId
 				BEGIN
-					--SELECT @intRecipeId = NULL
-					--SELECT @intRecipeId = intRecipeId
-					--FROM dbo.tblMFRecipe
-					--WHERE intItemId = @intPrimaryItemId
-					--	AND intLocationId = @intLocationId
-					--	AND ysnActive = 1
-					--SELECT @dblCalculatedQuantity = 100 * (
-					--		SELECT SUM(dblQuantity)
-					--		FROM dbo.tblMFRecipeItem
-					--		WHERE intRecipeId = @intRecipeId
-					--			AND intRecipeItemTypeId = 2
-					--			AND intItemId = @intItemId
-					--		) / (
-					--		SELECT SUM(dblCalculatedQuantity)
-					--		FROM dbo.tblMFRecipeItem
-					--		WHERE intRecipeId = @intRecipeId
-					--			AND intRecipeItemTypeId = 1
-					--		)
 					SELECT @dblCalculatedQuantity = 100
 				END
 				ELSE
@@ -1656,11 +1572,6 @@ BEGIN TRY
 						AND intShiftId = IsNULL(@intShiftId, intShiftId)
 						AND intCategoryId <> @intCategoryId
 
-					--SET @dblYieldP = @dblTOutput / CASE 
-					--		WHEN ISNULL(@dblTInput, 0) = 0
-					--			THEN 1
-					--		ELSE @dblTInput
-					--		END
 					SET @dblYieldP = @dblRequiredQty / CASE 
 							WHEN ISNULL(@dblTInput, 0) = 0
 								THEN 1
@@ -1707,8 +1618,6 @@ BEGIN TRY
 						AND intInputItemId = @intInputItemId
 				END
 
-				
-
 				SELECT @intInputItemId = MIN(intInputItemId)
 				FROM ##tblMFFinalInputItemYieldByDate
 				WHERE intYieldId = @intYieldId
@@ -1720,17 +1629,6 @@ BEGIN TRY
 			WHERE intYieldId > @intYieldId
 		END
 
-		--SELECT @dtmFromDate AS dtmFromDate
-		--	,@dtmToDate AS dtmToDate
-		--	,@intManufacturingProcessId AS intManufacturingProcessId
-		--	,@intLocationId AS intLocationId
-		--	,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
-		--	,ROUND(SUM(dblTotalInput), @dblDecimal) dblTotalInput
-		--	,ROUND(ABS(SUM(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-		--	,ROUND(AVG(dblActualYield), 2) dblActualYield
-		--	,CONVERT(INT, 1) AS intConcurrencyId
-		--FROM ##tblMFInputItemYieldByDate
-		--WHERE intInputItemId = intItemId
 		DELETE
 		FROM ##tblMFFinalInputItemYieldByDate
 		WHERE strTransactionType = 'dblOpeningQuantity'
@@ -1758,7 +1656,6 @@ BEGIN TRY
 				,ROUND(MIN(dblTotalInput), @dblDecimal) dblTotalInput
 				,ROUND(ABS(MIN(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
 				,ROUND(AVG(dblActualYield), @dblDecimal) dblActualYield
-				--,CONVERT(INT, 1) AS intConcurrencyId
 				,dtmDate
 				,intShiftId
 				,intPrimaryItemId
@@ -1778,7 +1675,7 @@ BEGIN TRY
 						,IY.intShiftId
 						,(
 							CASE 
-								WHEN I.strItemNo = II.strItemNo
+								WHEN intRecipeItemTypeId=2
 									THEN 'Output'
 								ELSE 'Input'
 								END
@@ -1790,16 +1687,8 @@ BEGIN TRY
 			,'' AS strRunNo
 			,IY.dtmDate AS dtmRunDate
 			,S.strShiftName AS strShift
-			,CASE 
-				WHEN I.strItemNo = II.strItemNo
-					THEN ''
-				ELSE II.strItemNo
-				END AS strInputItemNo
-			,CASE 
-				WHEN I.strDescription = II.strDescription
-					THEN ''
-				ELSE II.strDescription
-				END AS strInputItemDescription
+			,II.strItemNo AS strInputItemNo
+			,II.strDescription AS strInputItemDescription
 			,ROUND(IY.dblTotalOutput, @dblDecimal) dblTotalOutput
 			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
 			,ROUND(dblRequiredQty, @dblDecimal) dblRequiredQty
@@ -1808,7 +1697,7 @@ BEGIN TRY
 			,ROUND(IY.dblStandardYield, @dblDecimal) dblStandardYield
 			,ROUND(IY.dblActualYield - dblStandardYield, @dblDecimal) dblVariance
 			,CASE 
-				WHEN I.strItemNo = II.strItemNo
+				WHEN intRecipeItemTypeId=2
 					THEN 'Output'
 				ELSE 'Input'
 				END AS strTransaction

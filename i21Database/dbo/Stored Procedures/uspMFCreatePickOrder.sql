@@ -444,7 +444,7 @@ BEGIN TRY
 				)
 			AND ri.intConsumptionMethodId IN (
 				1
-				,2
+				--,2
 				)
 		GROUP BY ri.intItemId
 			,ri.intItemUOMId
