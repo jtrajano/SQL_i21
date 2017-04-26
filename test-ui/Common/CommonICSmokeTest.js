@@ -892,72 +892,89 @@ Ext.define('Inventory.CommonICSmokeTest', {
 
 
             //Inventory Storage Measurement Reading Screen
+
+
             .displayText('=====  1.6 Open Storage Measurement Reading and Check Screen Fields ====')
 
             .clickMenuScreen('Storage Measurement Reading','Screen')
             .waitUntilLoaded()
-            .clickButton('Close')
-            .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-            .clickMessageBoxButton('no')
-            .waitUntilLoaded()
-            .verifySearchToolbarButton({openselected: false, openall: false, close: false})
-            .verifyGridColumnNames('Search', [
-                {dataIndex: 'strLocationName',text: 'Location'},
-                {dataIndex: 'dtmDate', text: 'Date'},
-                {dataIndex: 'strReadingNo', text: 'Reading No'}
-            ])
-            .clickButton('New')
-            .waitUntilLoaded()
-            .isControlVisible('tlb',
-            [
-                'New'
-                ,'Save'
-                ,'Search'
-                ,'Delete'
-                ,'Undo'
-                ,'Close'
-            ], true)
-            .isControlVisible('txt',
-            [
-                'ReadingNumber'
-                ,'FilterGrid'
-            ], true)
-            .isControlVisible('cbo',
-            [
-                'Location'
-            ], true)
-            .isControlVisible('dtm',
-            [
-                ,'Date'
-            ], true)
-            .isControlVisible('btn',
-            [
-                'Insert'
-                ,'Remove'
-                ,'GridLayout'
-                ,'InsertCriteria'
-                ,'Help'
-                ,'Support'
-                ,'FieldName'
-                ,'EmailUrl'
-            ], true)
-            .isControlVisible('col',
-            [
-                'Commodity'
-                ,'Item'
-                ,'StorageLocation'
-                ,'SubLocation'
-                ,'EffectiveDepth'
-                ,'AirSpaceReading'
-                ,'CashPrice'
-                ,'DiscountSchedule'
-            ], true)
-            .clickButton('Close')
-            .waitUntilLoaded()
-            .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-            .clickMessageBoxButton('no')
-            .waitUntilLoaded()
-            .displayText('=====  1.6 Open Storage Measurement Reading and Check Screen Fields Done====')
+            .continueIf({
+                expected: 'storagemeasurementreading',
+                actual: function(win){
+                    return win.alias[0].replace('widget.', '');
+                },
+                success: function(next){
+                    new iRely.FunctionalTest().start(t, next)
+                        .clickButton('Close')
+                        .waitUntilLoaded()
+                        .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+                        .clickMessageBoxButton('no')
+                        .waitUntilLoaded()
+                        .verifySearchToolbarButton({openselected: false, openall: false, close: false})
+                        .verifyGridColumnNames('Search', [
+                            {dataIndex: 'strLocationName',text: 'Location'},
+                            {dataIndex: 'dtmDate', text: 'Date'},
+                            {dataIndex: 'strReadingNo', text: 'Reading No'}
+                        ])
+                        .clickButton('New')
+                        .waitUntilLoaded()
+                        .isControlVisible('tlb',
+                        [
+                            'New'
+                            ,'Save'
+                            ,'Search'
+                            ,'Delete'
+                            ,'Undo'
+                            ,'Close'
+                        ], true)
+                        .isControlVisible('txt',
+                        [
+                            'ReadingNumber'
+                            ,'FilterGrid'
+                        ], true)
+                        .isControlVisible('cbo',
+                        [
+                            'Location'
+                        ], true)
+                        .isControlVisible('dtm',
+                        [
+                            ,'Date'
+                        ], true)
+                        .isControlVisible('btn',
+                        [
+                            'Insert'
+                            ,'Remove'
+                            ,'GridLayout'
+                            ,'InsertCriteria'
+                            ,'Help'
+                            ,'Support'
+                            ,'FieldName'
+                            ,'EmailUrl'
+                        ], true)
+                        .isControlVisible('col',
+                        [
+                            'Commodity'
+                            ,'Item'
+                            ,'StorageLocation'
+                            ,'SubLocation'
+                            ,'EffectiveDepth'
+                            ,'AirSpaceReading'
+                            ,'CashPrice'
+                            ,'DiscountSchedule'
+                        ], true)
+                        .clickButton('Close')
+                        .waitUntilLoaded()
+                        .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+                        .clickMessageBoxButton('no')
+                        .waitUntilLoaded()
+                        .displayText('=====  1.6 Open Storage Measurement Reading and Check Screen Fields Done====')
+                        .done();
+                },
+                continueOnFail: true
+            })
+
+
+
 
 
 
@@ -1678,190 +1695,209 @@ Ext.define('Inventory.CommonICSmokeTest', {
 
             //Inventory Fuel Types Screen
             .displayText('=====  1.10 Open Fuel Types and Check Screen Fields ====')
+
+
             .clickMenuScreen('Fuel Types','Screen')
-            .waitUntilLoaded()
-            .clickButton('Close')
-            .waitUntilLoaded()
-            .verifySearchToolbarButton({openselected: false, openall: false, close: false})
-            .verifyGridColumnNames('Search', [
-                {dataIndex: 'strRinFuelTypeCodeId', text: 'Fuel Type'},
-                {dataIndex: 'strRinFeedStockId', text: 'Feed Stock'},
-                {dataIndex: 'strRinFuelId', text: 'Fuel Code'},
-                {dataIndex: 'strRinProcessId', text: 'Process Code'}
-            ])
-            .clickButton('New')
-            .waitUntilLoaded()
-            .isControlVisible('btn',
-            [
-                'New'
-                ,'Save'
-                ,'Search'
-                ,'Delete'
-                ,'Undo'
-                ,'Close'
-                ,'Help'
-                ,'Support'
-                ,'FieldName'
-                ,'EmailUrl'
-            ], true)
-            .isControlVisible('cbo',
-            [
-                'FuelCategory'
-                ,'FeedStock'
-                ,'FuelCode'
-                ,'ProductionProcess'
-                ,'FeedStockUom'
-            ], true)
-            .isControlVisible('txt',
-            [
-                'BatchNo'
-                ,'EndingRinGallonsForBatch'
-                ,'EquivalenceValue'
-                ,'FeedStockFactor'
-                ,'PercentOfDenaturant'
-                ,'FilterGrid'
-            ], true)
-            .clickButton('Close')
-            .waitUntilLoaded()
+            .continueIf({
+                expected: 'icfueltype',
+                actual: function(win){
+                    return win.alias[0].replace('widget.', '');
+                },
+                success: function(next){
+                    new iRely.FunctionalTest().start(t, next)
+                        .clickButton('Close')
+                        .waitUntilLoaded()
+                        .verifySearchToolbarButton({openselected: false, openall: false, close: false})
+                        .verifyGridColumnNames('Search', [
+                            {dataIndex: 'strRinFuelTypeCodeId', text: 'Fuel Type'},
+                            {dataIndex: 'strRinFeedStockId', text: 'Feed Stock'},
+                            {dataIndex: 'strRinFuelId', text: 'Fuel Code'},
+                            {dataIndex: 'strRinProcessId', text: 'Process Code'}
+                        ])
+                        .clickButton('New')
+                        .waitUntilLoaded()
+                        .isControlVisible('btn',
+                        [
+                            'New'
+                            ,'Save'
+                            ,'Search'
+                            ,'Delete'
+                            ,'Undo'
+                            ,'Close'
+                            ,'Help'
+                            ,'Support'
+                            ,'FieldName'
+                            ,'EmailUrl'
+                        ], true)
+                        .isControlVisible('cbo',
+                        [
+                            'FuelCategory'
+                            ,'FeedStock'
+                            ,'FuelCode'
+                            ,'ProductionProcess'
+                            ,'FeedStockUom'
+                        ], true)
+                        .isControlVisible('txt',
+                        [
+                            'BatchNo'
+                            ,'EndingRinGallonsForBatch'
+                            ,'EquivalenceValue'
+                            ,'FeedStockFactor'
+                            ,'PercentOfDenaturant'
+                            ,'FilterGrid'
+                        ], true)
+                        .clickButton('Close')
+                        .waitUntilLoaded()
 
 
-            //Inventory Fuel Category Screen
-            .displayText('=====  1.11 Open Fuel Category and Check Screen Fields ====')
-            .clickButton('FuelCategory')
-            .waitUntilLoaded('icfuelcategory')
-            .isControlVisible('btn',
-            [
-                'Save'
-                ,'Undo'
-                ,'Close'
-                ,'Insert'
-                ,'Delete'
-                ,'GridLayout'
-                ,'InsertCriteria'
-            ], true)
-            .isControlVisible('txt',
-            [
-                'FilterGrid'
-            ], true)
-            .isControlVisible('col',
-            [
-                'RinFuelCategoryCode'
-                ,'Description'
-                ,'EquivalenceValue'
-            ], true)
-            .clickButton('Close')
-            .waitUntilLoaded()
-            .displayText('=====  1.11 Open Fuel Category and Check Screen Fields Done ====')
+                        //Inventory Fuel Category Screen
+                        .displayText('=====  1.11 Open Fuel Category and Check Screen Fields ====')
+                        .clickButton('FuelCategory')
+                        .waitUntilLoaded('icfuelcategory')
+                        .isControlVisible('btn',
+                        [
+                            'Save'
+                            ,'Undo'
+                            ,'Close'
+                            ,'Insert'
+                            ,'Delete'
+                            ,'GridLayout'
+                            ,'InsertCriteria'
+                        ], true)
+                        .isControlVisible('txt',
+                        [
+                            'FilterGrid'
+                        ], true)
+                        .isControlVisible('col',
+                        [
+                            'RinFuelCategoryCode'
+                            ,'Description'
+                            ,'EquivalenceValue'
+                        ], true)
+                        .clickButton('Close')
+                        .waitUntilLoaded()
+                        .displayText('=====  1.11 Open Fuel Category and Check Screen Fields Done ====')
 
 
-            //Inventory Feed Stock Screen
-            .displayText('=====  1.12 Open Feed Stock and Check Screen Fields ====')
-            .clickButton('FeedStock')
-            .waitUntilLoaded('icfeedstockcode')
-            .isControlVisible('btn',
-            [
-                'Save'
-                ,'Undo'
-                ,'Close'
-                ,'Insert'
-                ,'Delete'
-                ,'GridLayout'
-                ,'InsertCriteria'
-            ], true)
-            .isControlVisible('txt',
-            [
-                'FilterGrid'
-            ], true)
-            .isControlVisible('col',
-            [
-                'RinFeedStockCode'
-                ,'Description'
-            ], true)
-            .clickButton('Close')
-            .waitUntilLoaded()
-            .displayText('=====  1.12 Open Feed Stock and Check Screen Fields Done ====')
+                        //Inventory Feed Stock Screen
+                        .displayText('=====  1.12 Open Feed Stock and Check Screen Fields ====')
+                        .clickButton('FeedStock')
+                        .waitUntilLoaded('icfeedstockcode')
+                        .isControlVisible('btn',
+                        [
+                            'Save'
+                            ,'Undo'
+                            ,'Close'
+                            ,'Insert'
+                            ,'Delete'
+                            ,'GridLayout'
+                            ,'InsertCriteria'
+                        ], true)
+                        .isControlVisible('txt',
+                        [
+                            'FilterGrid'
+                        ], true)
+                        .isControlVisible('col',
+                        [
+                            'RinFeedStockCode'
+                            ,'Description'
+                        ], true)
+                        .clickButton('Close')
+                        .waitUntilLoaded()
+                        .displayText('=====  1.12 Open Feed Stock and Check Screen Fields Done ====')
 
-            //Inventory Fuel Code Screen
-            .displayText('=====  1.13 Open Fuel Code and Check Screen Fields ====')
-            .clickButton('FuelCode')
-            .waitUntilLoaded('icfuelcode')
-            .isControlVisible('btn',
-            [
-                'Save'
-                ,'Undo'
-                ,'Close'
-                ,'Insert'
-                ,'Delete'
-                ,'GridLayout'
-                ,'InsertCriteria'
-            ], true)
-            .isControlVisible('txt',
-            [
-                'FilterGrid'
-            ], true)
-            .isControlVisible('col',
-            [
-                'RinFuelCode'
-                ,'Description'
-            ], true)
-            .clickButton('Close')
-            .waitUntilLoaded()
-            .displayText('=====  1.13 Open Fuel Code and Check Screen Fields Done ====')
+                        //Inventory Fuel Code Screen
+                        .displayText('=====  1.13 Open Fuel Code and Check Screen Fields ====')
+                        .clickButton('FuelCode')
+                        .waitUntilLoaded('icfuelcode')
+                        .isControlVisible('btn',
+                        [
+                            'Save'
+                            ,'Undo'
+                            ,'Close'
+                            ,'Insert'
+                            ,'Delete'
+                            ,'GridLayout'
+                            ,'InsertCriteria'
+                        ], true)
+                        .isControlVisible('txt',
+                        [
+                            'FilterGrid'
+                        ], true)
+                        .isControlVisible('col',
+                        [
+                            'RinFuelCode'
+                            ,'Description'
+                        ], true)
+                        .clickButton('Close')
+                        .waitUntilLoaded()
+                        .displayText('=====  1.13 Open Fuel Code and Check Screen Fields Done ====')
 
 
-            //Inventory Production Process Screen
-            .displayText('=====  1.14 Open Production Process and Check Screen Fields ====')
-            .clickButton('ProductionProcess')
-            .waitUntilLoaded('icprocesscode')
-            .isControlVisible('btn',
-            [
-                'Save'
-                ,'Undo'
-                ,'Close'
-                ,'Insert'
-                ,'Delete'
-                ,'GridLayout'
-                ,'InsertCriteria'
-            ], true)
-            .isControlVisible('txt',
-            [
-                'FilterGrid'
-            ], true)
-            .isControlVisible('col',
-            [
-                'RinProcessCode'
-                ,'Description'
-            ], true)
-            .clickButton('Close')
-            .waitUntilLoaded()
-            .displayText('=====  1.14 Open Production Process and Check Screen Fields Done====')
+                        //Inventory Production Process Screen
+                        .displayText('=====  1.14 Open Production Process and Check Screen Fields ====')
+                        .clickButton('ProductionProcess')
+                        .waitUntilLoaded('icprocesscode')
+                        .isControlVisible('btn',
+                        [
+                            'Save'
+                            ,'Undo'
+                            ,'Close'
+                            ,'Insert'
+                            ,'Delete'
+                            ,'GridLayout'
+                            ,'InsertCriteria'
+                        ], true)
+                        .isControlVisible('txt',
+                        [
+                            'FilterGrid'
+                        ], true)
+                        .isControlVisible('col',
+                        [
+                            'RinProcessCode'
+                            ,'Description'
+                        ], true)
+                        .clickButton('Close')
+                        .waitUntilLoaded()
+                        .displayText('=====  1.14 Open Production Process and Check Screen Fields Done====')
 
-            //Inventory Feed Stock UOM Screen
-            .displayText('=====  1.15 Open Feed Stock UOM and Check Screen Fields ====')
-            .clickButton('FeedStockUOM')
-            .waitUntilLoaded('icfeedstockuom')
-            .isControlVisible('btn',
-            [
-                'Save'
-                ,'Undo'
-                ,'Close'
-                ,'Insert'
-                ,'Delete'
-                ,'GridLayout'
-                ,'InsertCriteria'
-            ], true)
-            .isControlVisible('txt',
-            [
-                'FilterGrid'
-            ], true)
-            .isControlVisible('col',
-            [
-                'UOM'
-                ,'RinFeedStockUOMCode'
-            ], true)
-            .clickButton('Close')
-            .waitUntilLoaded()
-            .displayText('=====  1.15 Open Feed Stock UOM and Check Screen Fields ====')
+                        //Inventory Feed Stock UOM Screen
+                        .displayText('=====  1.15 Open Feed Stock UOM and Check Screen Fields ====')
+                        .clickButton('FeedStockUOM')
+                        .waitUntilLoaded('icfeedstockuom')
+                        .isControlVisible('btn',
+                        [
+                            'Save'
+                            ,'Undo'
+                            ,'Close'
+                            ,'Insert'
+                            ,'Delete'
+                            ,'GridLayout'
+                            ,'InsertCriteria'
+                        ], true)
+                        .isControlVisible('txt',
+                        [
+                            'FilterGrid'
+                        ], true)
+                        .isControlVisible('col',
+                        [
+                            'UOM'
+                            ,'RinFeedStockUOMCode'
+                        ], true)
+                        .clickButton('Close')
+                        .waitUntilLoaded()
+                        .displayText('=====  1.15 Open Feed Stock UOM and Check Screen Fields ====')
+
+                        .done();
+                },
+                continueOnFail: true
+            })
+
+            //endregion
+
+
+
+
 
 
             //Inventory Storage Locations Screen
@@ -2025,7 +2061,9 @@ Ext.define('Inventory.CommonICSmokeTest', {
                 { dataIndex: 'dblSalePrice', text: 'Retail Price'},
                 { dataIndex: 'dblExtendedCost', text: 'Extended Cost'}
             ])
-            .clickTab('Storage Bins')
+            .clickTab('Storage Locations YTD')
+            .waitUntilLoaded()
+            .clickTab('Storage Units YTD')
             .waitUntilLoaded()
             .displayText('=====  1.17 Open Stock Details and Check Screen Fields Done====')
 

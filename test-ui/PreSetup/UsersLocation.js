@@ -14,6 +14,7 @@ StartTest (function (t) {
         .selectComboBoxRowValue('UserNumberFormat', '1,234,567.89', 'UserNumberFormat',1)
         .clickTab('User Roles')
         .waitUntilLoaded()
+        .waitUntilLoaded()
         .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 7, 'strLocationName', '0002 - Indianapolis', 'strLocationName')
         .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 7, 'strUserRole', 'ADMIN', 'strUserRole')
         .clickButton('Save')
