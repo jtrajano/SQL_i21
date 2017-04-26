@@ -3,51 +3,51 @@ StartTest (function (t) {
     new iRely.FunctionalTest().start(t)
 
 
-        //region
-
-        //Add Category
-        .addFunction(function(next){
-            commonIC.addCategory (t,next, 'Category-1', 'Test Category Description', 2)
-        })
-
-        //Add Commodity
-        .addFunction(function(next){
-            commonIC.addCommodity (t,next, 'Commodity-1', 'Test Commodity Description')
-        })
-
-        //Add  Lotted Item
-        .addFunction(function(next){
-            commonIC.addInventoryItem
-            (t,next,
-                'Test - LTI - 01'
-                , 'Test Non Lotted Item Description'
-                , 'Category-1'
-                , 'Commodity-1'
-                , 3
-                , 'LB'
-                , 'LB'
-                , 10
-                , 10
-                , 40
-            )
-        })
-
-        //Add Non Lotted Item - Manual
-        .addFunction(function(next){
-            commonIC.addInventoryItem
-            (t,next,
-                'Test - NLTI - 01'
-                , 'Test Lotted Item Description'
-                , 'Category-1'
-                , 'Commodity-1'
-                , 4
-                , 'LB'
-                , 'LB'
-                , 10
-                , 10
-                , 40
-            )
-        })
+//        //region
+//
+//        //Add Category
+//        .addFunction(function(next){
+//            commonIC.addCategory (t,next, 'Category-1', 'Test Category Description', 2)
+//        })
+//
+//        //Add Commodity
+//        .addFunction(function(next){
+//            commonIC.addCommodity (t,next, 'Commodity-1', 'Test Commodity Description')
+//        })
+//
+//        //Add  Lotted Item
+//        .addFunction(function(next){
+//            commonIC.addInventoryItem
+//            (t,next,
+//                'Test - LTI - 01'
+//                , 'Test Non Lotted Item Description'
+//                , 'Category-1'
+//                , 'Commodity-1'
+//                , 3
+//                , 'LB'
+//                , 'LB'
+//                , 10
+//                , 10
+//                , 40
+//            )
+//        })
+//
+//        //Add Non Lotted Item - Manual
+//        .addFunction(function(next){
+//            commonIC.addInventoryItem
+//            (t,next,
+//                'Test - NLTI - 01'
+//                , 'Test Lotted Item Description'
+//                , 'Category-1'
+//                , 'Commodity-1'
+//                , 4
+//                , 'LB'
+//                , 'LB'
+//                , 10
+//                , 10
+//                , 40
+//            )
+//        })
 
         //Adding Stock to Items
         .displayText('===== Adding Stocks to Created items =====')

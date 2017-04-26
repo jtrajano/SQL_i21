@@ -34,75 +34,18 @@ if(_url.indexOf('version=TF') < 1) {
 
     Harness.start(
 
-        { group: 'PreSetup',
-            items: [
-                {
-                    url: 'PreSetup/UsersLocation.js?v='+version,
-                    title: 'UserLocation',
-                    preload: [
-                        functionalTest,
-                        commonIC
-                    ]
-                },
-                {
-                    url: 'PreSetup/StorageLocation.js?v='+version,
-                    title: 'StorageLocation',
-                    preload: [
-                        functionalTest,
-                        commonIC
-                    ]
-                },
-                {
-                    url: 'PreSetup/Items.js?v='+version,
-                    title: 'Items',
-                    preload: [
-                        functionalTest,
-                        commonIC
-                    ]
-                }
-
-            ]
-        },
-
         { group: 'SmokeTesting',
             items: [
+
                 {
-                    url: 'SmokeTesting/ICOpenScreens.js?v='+version,
-                    title: 'ICOpenScreens',
-                    preload: [
-                        functionalTest,
-                        commonIC,
-                        commonICST
-                    ]
-                },
-                {
-                    url: 'SmokeTesting/ICAddMaintenance.js?v='+version,
-                    title: 'ICAddMaintenance',
-                    preload: [
-                        functionalTest,
-                        commonIC,
-                        commonICST
-                    ]
-                },
-                {
-                    url: 'SmokeTesting/ICAddTransactions1.js?v='+version,
-                    title: 'ICAddTransactions1',
-                    preload: [
-                        functionalTest,
-                        commonIC,
-                        commonICST
-                    ]
-                },
-                {
-                    url: 'SmokeTesting/ICAddTransactions2.js?v='+version,
-                    title: 'ICAddTransactions2',
+                    url: 'SmokeTesting/ICSmokeTests.js?v='+version,
+                    title: 'ICSmokeTests',
                     preload: [
                         functionalTest,
                         commonIC,
                         commonICST
                     ]
                 }
-
             ]
         },
 
