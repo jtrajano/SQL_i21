@@ -81,6 +81,7 @@ SELECT
 	,D.intSiteID
 	,E.intCustomerID
 	,D.intLocationId
+	,intEntityIdBillTo = J.intEntityId
 FROM tblTMSiteDevice A
 INNER JOIN tblTMDevice B
 	ON A.intDeviceId = B.intDeviceId
