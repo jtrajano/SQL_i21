@@ -92,7 +92,7 @@ BEGIN
 	IF @intTransactionId IS NULL  
 	BEGIN   
 		-- Cannot find the transaction.  
-		RAISERROR(50004, 11, 1)  
+		RAISERROR('Cannot find the transaction.', 11, 1)  
 		GOTO Post_Exit  
 	END   
   
@@ -100,7 +100,7 @@ BEGIN
 	IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) = 0) 
 	BEGIN   
 		-- Unable to find an open fiscal year period to match the transaction date.  
-		RAISERROR(50005, 11, 1)  
+		RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)  
 		GOTO Post_Exit  
 	END  
   
@@ -108,7 +108,7 @@ BEGIN
 	IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1  
 	BEGIN   
 		-- The transaction is already posted.  
-		RAISERROR(50007, 11, 1)  
+		RAISERROR('The transaction is already posted.', 11, 1)  
 		GOTO Post_Exit  
 	END   
   
@@ -116,7 +116,7 @@ BEGIN
 	IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
 	BEGIN   
 		-- The transaction is already unposted.  
-		RAISERROR(50008, 11, 1)  
+		RAISERROR('The transaction is already unposted.', 11, 1)  
 		GOTO Post_Exit  
 	END   
 
@@ -128,13 +128,13 @@ BEGIN
 		-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 		IF @ysnPost = 1   
 		BEGIN   
-			RAISERROR(50013, 11, 1, 'Post')  
+			RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')  
 			GOTO Post_Exit  
 		END   
 
 		IF @ysnPost = 0  
 		BEGIN  
-			RAISERROR(50013, 11, 1, 'Unpost')  
+			RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Unpost')  
 			GOTO Post_Exit    
 		END  
 	END   
@@ -157,7 +157,7 @@ BEGIN
 		IF ISNULL(@strBillNumber, '') <> ''
 		BEGIN 
 			-- 'Unable to Unreceive. The inventory receipt is already billed in {Bill Id}.'
-			RAISERROR(80056, 11, 1, @strBillNumber)  
+			RAISERROR('Unable to Unreceive. The inventory receipt is already billed in %s.', 11, 1, @strBillNumber)  
 			GOTO Post_Exit    
 		END 
 
@@ -184,7 +184,7 @@ BEGIN
 		IF ISNULL(@strBillNumber, '') <> ''
 		BEGIN 
 			-- 'Unable to unpost. Charge {Other Charge Id} has a voucher in {Voucher Id}.'
-			RAISERROR(80099, 11, 1, @strChargeItem, @strBillNumber)  
+			RAISERROR('New Quantity for item %s is required.', 11, 1, @strChargeItem, @strBillNumber)  
 			GOTO Post_Exit    
 		END 
 
@@ -210,7 +210,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- 'The net quantity for item {Item Name} is missing.'
-			RAISERROR(80082, 11, 1, @strItemNo)  
+			RAISERROR('The net quantity for item %s is missing.', 11, 1, @strItemNo)  
 			GOTO Post_Exit    
 		END 
 	END 
@@ -229,7 +229,7 @@ BEGIN
 	IF @strItemNo IS NOT NULL
 	BEGIN
 		-- 'Lotted item {Item No} should should have lot(s) specified.'
-		RAISERROR(80090, 11, 1, @strItemNo)  
+		RAISERROR('Lotted item %s should have lot(s) specified.', 11, 1, @strItemNo)  
 		GOTO Post_Exit  
 	END
 
@@ -246,7 +246,7 @@ BEGIN
 		IF @strReturnId IS NOT NULL 
 		BEGIN 
 			-- Unable to unpost the Inventory Receipt. It has an Inventory Return in {return id}.
-			RAISERROR(80112, 11, 1, @strReturnId)  
+			RAISERROR('Unable to unpost the Inventory Receipt because it was returned. Please check %s.', 11, 1, @strReturnId)  
 			GOTO Post_Exit  
 		END 
 	END 
@@ -280,7 +280,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'
-			RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId)
+			RAISERROR('%s is using a foreign currency. Please check if %s has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from %s to %s.', 11, 1, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId)
 			RETURN -1; 
 		END 
 	END 
@@ -294,7 +294,7 @@ BEGIN
 	IF @ysnValidLocation = 0
 	BEGIN 
 		-- The sub location and storage location in {Item No} does not match.
-		RAISERROR(80087, 11, 1, @strItemNo)  
+		RAISERROR('The storage location and storage unit in %s does not match.', 11, 1, @strItemNo)  
 		GOTO Post_Exit
 	END 
 END

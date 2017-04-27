@@ -57,7 +57,7 @@ WHERE ARC.intTermsId IS NULL
 
 IF EXISTS(SELECT * FROM @NullTermsTable)
 BEGIN
-	RAISERROR(120042, 16, 1) 
+	RAISERROR('Some of the customers doesn''t have Terms setup.', 16, 1) 
 	RETURN 0
 END
 

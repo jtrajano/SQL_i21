@@ -15,7 +15,7 @@ BEGIN TRY
 	IF @strLotNumber = ''
 		OR @strLotNumber IS NULL
 	BEGIN
-		RAISERROR (80020, 11, 1)
+		RAISERROR ('Invalid Lot.', 11, 1)
 
 		RETURN
 	END
@@ -28,7 +28,7 @@ BEGIN TRY
 
 	IF @intLotId IS NULL
 	BEGIN
-		RAISERROR (80020, 11, 1)
+		RAISERROR ('Invalid Lot.', 11, 1)
 
 		RETURN
 	END
@@ -39,7 +39,7 @@ BEGIN TRY
 	--		WHERE intLotId = @intLotId
 	--		)
 	--BEGIN
-	--	RAISERROR (51054, 11, 1, @strLotNumber)
+	--	RAISERROR ('This lot %s was not produced through work order production process; hence this lot cannot be released from this screen. Try changing the lot status using the Lot Status Change screen available in the Inventory view screen.', 11, 1, @strLotNumber)
 
 	--	RETURN
 	--END
@@ -52,7 +52,7 @@ BEGIN TRY
 				AND intLotId = @intLotId
 			)
 	BEGIN
-		RAISERROR (51055, 11, 1)
+		RAISERROR ('Lot has already been released!.', 11, 1)
 
 		RETURN
 	END
@@ -63,7 +63,7 @@ BEGIN TRY
 
 	IF @intLotStatusId = 2
 	BEGIN
-		RAISERROR (51056, 11, 1)
+		RAISERROR ('Pallet Lot has been marked as a ghost and cannot be released. Please call Supervisor to reverse this!.', 11, 1)
 
 		RETURN
 	END
@@ -74,7 +74,7 @@ BEGIN TRY
 			AND @strPrimaryStatus = 'On_Hold'
 			)
 	BEGIN
-		RAISERROR (51055, 11, 1)
+		RAISERROR ('Lot has already been released!.', 11, 1)
 
 		RETURN
 	END

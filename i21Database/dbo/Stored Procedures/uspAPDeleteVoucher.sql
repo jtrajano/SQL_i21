@@ -17,7 +17,7 @@ BEGIN TRY
 	
 	--CHECK IF POSTED
 	IF(EXISTS(SELECT NULL FROM dbo.tblAPBill WHERE intBillId = @intBillId AND ISNULL(ysnPosted,0) = 1))
-		RAISERROR(50007,16,1)			
+		RAISERROR('The transaction is already posted.',16,1)			
 		
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)

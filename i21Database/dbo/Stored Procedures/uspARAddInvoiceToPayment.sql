@@ -32,35 +32,35 @@ SET @Interest = ROUND(@Interest, [dbo].[fnARGetDefaultDecimal]())
 IF NOT EXISTS(SELECT NULL FROM tblARPayment WHERE [intPaymentId] = @PaymentId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120010, 16, 1);
+			RAISERROR('The payment Id provided does not exists!', 16, 1);
 		RETURN 0;
 	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120011, 16, 1);
+			RAISERROR('The invoice Id provided does not exists!', 16, 1);
 		RETURN 0;
 	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND (([ysnPosted] = 1 AND [strTransactionType] <> 'Customer Prepayment') OR ([ysnPosted] = 0 AND [strTransactionType] = 'Customer Prepayment')))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120012, 16, 1);
+			RAISERROR('The invoice provided is not yet posted!', 16, 1);
 		RETURN 0;
 	END
 	
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [ysnPosted] = 1 AND [strTransactionType] = 'Cash')
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120013, 16, 1);
+			RAISERROR('Invoice of type Cash cannot be added!', 16, 1);
 		RETURN 0;
 	END
 	
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [ysnPosted] = 1 AND [strTransactionType] = 'Cash Refund')
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120014, 16, 1);
+			RAISERROR('Invoice of type Cash Refund cannot be added!', 16, 1);
 		RETURN 0;
 	END
 
@@ -103,7 +103,7 @@ WHERE
 IF (@InvoiceAmountDue + @Interest) < (@Payment + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120058, 16, 1, @InvoiceNumber);
+			RAISERROR('Payment on %s is over the transaction''s amount due.', 16, 1, @InvoiceNumber);
 		RETURN 0;
 	END
 
@@ -115,21 +115,21 @@ SET @ErrorMsg = CONVERT(NVARCHAR(100),CAST(ISNULL(@Payment,@ZeroDecimal) AS MONE
 IF (@PaymentTotal + @Payment) > (@AmountPaid + @Payment) AND @TransactionType <> 'Customer Prepayment'
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120059, 16, 1, @ErrorMsg);
+			RAISERROR('Payment of %s for invoice will cause an under payment.', 16, 1, @ErrorMsg);
 		RETURN 0;
 	END
 
 IF ISNULL(@AllowOverpayment,0) = 0 AND (@PaymentTotal + @Payment) > (@AmountPaid + @Payment)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120060, 16, 1, @ErrorMsg);
+			RAISERROR('Payment of %s for invoice will cause an overpayment.', 16, 1, @ErrorMsg);
 		RETURN 0;
 	END
 
 IF @TransactionType IN ('Credit Memo','Overpayment','Customer Prepayment') AND @Payment > 0
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120061, 16, 1, @TransactionType);
+			RAISERROR('Positive payment amount is not allowed for invoice of type %s.', 16, 1, @TransactionType);
 		RETURN 0;
 	END
 

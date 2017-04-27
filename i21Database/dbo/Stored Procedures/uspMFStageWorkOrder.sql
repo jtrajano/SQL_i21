@@ -124,7 +124,7 @@ BEGIN TRY
 			OR @intInputLotId = 0
 		BEGIN
 			RAISERROR (
-					51112
+					'Lot can not be blank.'
 					,14
 					,1
 					)
@@ -158,7 +158,7 @@ BEGIN TRY
 			IF @ysnExcessConsumptionAllowed = 0
 			BEGIN
 				RAISERROR (
-						51116
+						'The quantity to be consumed must not exceed the selected lot quantity.'
 						,14
 						,1
 						)
@@ -170,7 +170,7 @@ BEGIN TRY
 			OR @intInputLotId = 0
 		BEGIN
 			RAISERROR (
-					51113
+					'Please select a valid lot'
 					,14
 					,1
 					)
@@ -180,7 +180,7 @@ BEGIN TRY
 			AND @ysnNegativeQuantityAllowed = 0
 		BEGIN
 			RAISERROR (
-					51110
+					'Lot quantity should be greater than zero.'
 					,14
 					,1
 					)
@@ -210,7 +210,7 @@ BEGIN TRY
 			WHERE intItemId = @intItemId
 
 			RAISERROR (
-					51111
+					'No open runs for the target item ''%s''. Cannot consume.'
 					,14
 					,1
 					,@strItemNo
@@ -274,7 +274,7 @@ BEGIN TRY
 		WHERE intItemId = @intInputItemId
 
 		RAISERROR (
-				51114
+				'Input item ''%s'' does not belong to recipe of ''%s'' , Cannot proceed.'
 				,14
 				,1
 				,@strInputItemNo
@@ -289,7 +289,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51115
+				'No mapped staging location found, cannot stage.'
 				,14
 				,1
 				)
@@ -312,7 +312,7 @@ BEGIN TRY
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
 
 		RAISERROR (
-				51155
+				'Lot %s you are trying to consume for Work order %s is not associated with the selected process %s.'
 				,11
 				,1
 				,@strLotNumber
@@ -329,7 +329,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51079
+				'The work order that you clicked on is already completed.'
 				,11
 				,1
 				)
@@ -343,7 +343,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51080
+				'The work order has been paused. Please re-start the WO to resume.'
 				,11
 				,1
 				)
@@ -357,7 +357,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51081
+				'Work order is not in started state. Please start the work order.'
 				,11
 				,1
 				)
@@ -440,7 +440,7 @@ BEGIN TRY
 			IF @ysnExcessConsumptionAllowed = 0
 			BEGIN
 				RAISERROR (
-						51116
+						'The quantity to be consumed must not exceed the selected lot quantity.'
 						,14
 						,1
 						)

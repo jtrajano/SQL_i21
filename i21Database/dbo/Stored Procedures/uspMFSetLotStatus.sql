@@ -34,7 +34,7 @@ BEGIN TRY
 	IF ISNULL(@strLotNumber, '') = ''
 	BEGIN
 		RAISERROR (
-				51192
+				'Supplied lot is not available.'
 				,16
 				,1
 				)
@@ -43,7 +43,7 @@ BEGIN TRY
 	IF @intLotStatusId = @intNewLotStatusId
 	BEGIN
 		RAISERROR (
-				51181
+				'Old and new lot status cannot be same.'
 				,16
 				,1
 				)
@@ -75,7 +75,7 @@ BEGIN TRY
 					)
 			BEGIN
 				RAISERROR (
-						90021
+						'You do not have enough permission(s) to change the lot status to Active. Please contact your local system administrator.'
 						,16
 						,1
 						)

@@ -136,7 +136,7 @@ BEGIN TRY
 	IF ISNULL(@strLotNumber, '') = ''
 	BEGIN
 		RAISERROR (
-				51192
+				'Supplied lot is not available.'
 				,11
 				,1
 				)
@@ -145,7 +145,7 @@ BEGIN TRY
 	IF @intNewLotStatusId <> @intLotStatusId
 	BEGIN
 		RAISERROR (
-				51195
+				'The status of the source and the destination lot differs, cannot merge'
 				,11
 				,1
 				)

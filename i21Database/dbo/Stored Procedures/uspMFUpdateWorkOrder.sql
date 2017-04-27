@@ -114,7 +114,7 @@ BEGIN TRY
 	) and @strLotNumber<>''
 	BEGIN
 		RAISERROR (
-				51142
+				'Lot Id already exists. It should be unique'
 				,11
 				,1
 				)
@@ -135,7 +135,7 @@ BEGIN TRY
 		if @intExecutionOrder>@intMaxExecutionOrder or 0>@intExecutionOrder
 		Begin
 			RAISERROR (
-				51146
+				'Execution order entered is out of range.'
 				,11
 				,1
 				)

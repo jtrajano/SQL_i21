@@ -68,7 +68,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				90023
+				'There have been subsequent transactions on Lot %s. Unposting will not be allowed to proceed unless these subsequent transactions are each reversed (starting with the most recent).'
 				,14
 				,1
 				,@strLotNumber

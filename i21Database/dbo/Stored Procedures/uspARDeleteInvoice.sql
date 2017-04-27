@@ -17,8 +17,9 @@ BEGIN TRY
 	SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId) 
 		
 	IF(EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId AND ISNULL(ysnPosted,0) = 1))
-		RAISERROR(120036, 16, 1);		
-		
+		RAISERROR('Posted invoice cannot be deleted!', 16, 1);		
+	
+
 	EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID		
 
 	DELETE FROM tblARInvoiceDetailTax 

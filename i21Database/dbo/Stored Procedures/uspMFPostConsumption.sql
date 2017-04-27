@@ -360,7 +360,7 @@ BEGIN
 		BEGIN
 			-- {Item} is missing a GL account setup for {Account Category} account category.
 			RAISERROR (
-					80008
+					'%s is missing a GL account setup for %s account category.'
 					,11
 					,1
 					,@strItemNo1
@@ -590,7 +590,7 @@ BEGIN
 		BEGIN
 			-- {Item} is missing a GL account setup for {Account Category} account category.
 			RAISERROR (
-					80008
+					'%s is missing a GL account setup for %s account category.'
 					,11
 					,1
 					,@strItemNo1

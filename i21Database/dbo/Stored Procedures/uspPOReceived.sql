@@ -24,7 +24,7 @@ BEGIN
 		IF(@purchaseOrderNumber <> NULL)
 		BEGIN
 			-- 'Purchase Order does not exists.'
-			RAISERROR(51033, 11, 1); 
+			RAISERROR('Purchase Order does not exists.', 11, 1); 
 			RETURN;
 		END
 	END
@@ -46,7 +46,7 @@ BEGIN
 		IF(@strItemNo <> NULL)
 		BEGIN
 			-- 'Purchase Order item does not exists.'
-			RAISERROR(51034, 11, 1); 
+			RAISERROR('Purchase Order item does not exists.', 11, 1); 
 			RETURN;
 		END
 	END
@@ -286,7 +286,7 @@ END
 
 	--IF(@purchaseOrderNumber <> NULL)
 	--BEGIN
-	--	RAISERROR(51033, 11, 1); --Not Exists
+	--	RAISERROR('Purchase Order does not exists.', 11, 1); --Not Exists
 	--	RETURN;
 	--END
 
@@ -305,7 +305,7 @@ END
 	--IF(@strItemNo <> NULL)
 	--BEGIN
 	--	--PO item not exists
-	--	RAISERROR(51034, 11, 1); 
+	--	RAISERROR('Purchase Order item does not exists.', 11, 1); 
 	--	RETURN;
 	--END
 

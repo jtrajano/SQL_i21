@@ -26,7 +26,7 @@ SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreferen
 
 IF(@ARAccountId IS NULL OR @ARAccountId = 0)  
 	BEGIN			
-		RAISERROR(120005, 16, 1) 
+		RAISERROR('There is no setup for AR Account in the Company Configuration.', 16, 1) 
 		RETURN 0
 	END
 
@@ -74,7 +74,7 @@ BEGIN
    BEGIN 
 	-- Raise the error:
 	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
-	   RAISERROR(50030, 11, 1);
+	   RAISERROR('Unable to generate the Transaction Id. Please ask your local administrator to check the starting numbers setup.', 11, 1);
 	   RETURN;
    END 
    UPDATE @temp SET InvoiceNumber = @InvoiceNumber WHERE intId = @incval 
@@ -446,7 +446,7 @@ IF ISNULL(@intFreightItemId, 0) > 0
 
 		IF ISNULL(@intFreightItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblFreightRate, @ZeroDecimal) > @ZeroDecimal)
 			BEGIN
-				RAISERROR(120006, 16, 1) 
+				RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM!', 16, 1) 
 				RETURN 0
 			END
 	END
@@ -462,7 +462,7 @@ IF (@ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0)
 
 		IF ISNULL(@intSurchargeItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblSurcharge, @ZeroDecimal) > @ZeroDecimal)
 			BEGIN
-				RAISERROR(120007, 16, 1) 
+				RAISERROR('Surcharge doesn''t have default Sales UOM and stock UOM.', 16, 1) 
 				RETURN 0
 			END
 	END

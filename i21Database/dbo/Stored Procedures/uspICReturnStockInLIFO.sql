@@ -267,12 +267,12 @@ BEGIN
 			DECLARE @strReceiptDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmReceiptDate, 101) 
 			
 			-- 'Check the return date on the transaction. Return date is {Return date}, while {Item Id} in {Receipt Id} is dated {Receipt date}.'
-			RAISERROR(80108, 11, 1, @strReturnDate, @strItemNo, @strReceiptSourceNumber, @strReceiptDate)
+			RAISERROR('Check the return date on the transaction. Return date is %s, while %s in %s is dated %s.', 11, 1, @strReturnDate, @strItemNo, @strReceiptSourceNumber, @strReceiptDate)
 		END 
 		ELSE 
 		BEGIN 
 			-- 'Unable to do the return. All the stocks in {item id} from {receipt id} are fully returned already.'
-			RAISERROR(80109, 11, 1, @strItemNo, @strReceiptSourceNumber)
+			RAISERROR('Return is stopped. All of the stocks in %s that is received in %s are either sold, consumed, returned, or over-return is going to happen.', 11, 1, @strItemNo, @strReceiptSourceNumber)
 		END 
 		RETURN -1
 	END 

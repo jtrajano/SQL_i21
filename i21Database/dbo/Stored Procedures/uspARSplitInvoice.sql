@@ -32,13 +32,13 @@ BEGIN
 
 	IF ISNULL(@InvoiceId, 0) = 0
 		BEGIN
-			RAISERROR(120047, 16, 1)
+			RAISERROR('Invoice Id is required.', 16, 1)
 			RETURN 0
 		END
 
 	IF ISNULL(@EntityId, 0) = 0
 		BEGIN
-			RAISERROR(120048, 16, 1)
+			RAISERROR('Invalid User Id.', 16, 1)
 			RETURN 0
 		END
 	
@@ -52,13 +52,13 @@ BEGIN
 	--VALIDATE INVOICE TYPES
 	IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @InvoiceType <> 'Standard'  AND ISNULL(@SplitDetailId, 0) = 0
 		BEGIN			
-			RAISERROR(120072, 16, 1, @InvoiceType)
+			RAISERROR('Unable to duplicate %s Invoice Type.', 16, 1, @InvoiceType)
 			RETURN 0
 		END
 
 	IF ISNULL(@DistributionHeaderId, 0) > 0 OR @InvoiceType = 'Transport Delivery'
 		BEGIN
-			RAISERROR(120037, 16, 1)
+			RAISERROR('Duplicating of Transport Delivery Invoice type is not allowed.', 16, 1)
 			RETURN 0
 		END
 
@@ -70,7 +70,7 @@ BEGIN
 					AND CH.ysnUnlimitedQuantity = 0
 					AND ISNULL(CD.dblBalance, @ZeroDecimal) - ID.dblQtyShipped < @ZeroDecimal)
 		BEGIN
-			RAISERROR(120038, 16, 1)
+			RAISERROR('There are items that will exceed the contract quantity.', 16, 1)
 			RETURN 0
 		END
 
@@ -80,7 +80,7 @@ BEGIN
 				WHERE ID.intInvoiceId = @InvoiceId
 				  AND ((ID.dblQtyShipped + ID.dblQtyShipped) * @dblSplitPercent) > ISNULL(ISHI.dblQuantity, @ZeroDecimal)) AND ISNULL(@SplitDetailId, 0) = 0
 		BEGIN
-			RAISERROR(120039, 16, 1)
+			RAISERROR('There are items that will exceed the shipped quantity.', 16, 1)
 			RETURN 0
 		END
 

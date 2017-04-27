@@ -93,7 +93,7 @@ BEGIN
 	IF @intTransactionId IS NULL  
 	BEGIN   
 		-- Cannot find the transaction.  
-		RAISERROR(50004, 11, 1)  
+		RAISERROR('Cannot find the transaction.', 11, 1)  
 		GOTO Post_Exit  
 	END   
   
@@ -101,7 +101,7 @@ BEGIN
 	IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) = 0) 
 	BEGIN   
 		-- Unable to find an open fiscal year period to match the transaction date.  
-		RAISERROR(50005, 11, 1)  
+		RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)  
 		GOTO Post_Exit  
 	END  
   
@@ -109,7 +109,7 @@ BEGIN
 	IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1  
 	BEGIN   
 		-- The transaction is already posted.  
-		RAISERROR(50007, 11, 1)  
+		RAISERROR('The transaction is already posted.', 11, 1)  
 		GOTO Post_Exit  
 	END   
   
@@ -117,7 +117,7 @@ BEGIN
 	IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
 	BEGIN   
 		-- The transaction is already unposted.  
-		RAISERROR(50008, 11, 1)  
+		RAISERROR('The transaction is already unposted.', 11, 1)  
 		GOTO Post_Exit  
 	END   
 
@@ -129,13 +129,13 @@ BEGIN
 		-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 		IF @ysnPost = 1   
 		BEGIN   
-			RAISERROR(50013, 11, 1, 'Post')  
+			RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')  
 			GOTO Post_Exit  
 		END   
 
 		IF @ysnPost = 0  
 		BEGIN  
-			RAISERROR(50013, 11, 1, 'Unpost')  
+			RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Unpost')  
 			GOTO Post_Exit    
 		END  
 	END   
@@ -158,7 +158,7 @@ BEGIN
 
 		IF @strInvoiceNumber IS NOT NULL 
 		BEGIN 
-			RAISERROR(80089, 11, 1, @strInvoiceNumber)  
+			RAISERROR('The inventory shipment is already in %s. Remove the invoice first before you can unpost this shipment.', 11, 1, @strInvoiceNumber)  
 			GOTO Post_Exit    
 		END 
 	END 
@@ -183,7 +183,7 @@ BEGIN
 
 		IF @strInvoiceNumber IS NOT NULL 
 		BEGIN 
-			RAISERROR(80089, 11, 1, @strInvoiceNumber)  
+			RAISERROR('The inventory shipment is already in %s. Remove the invoice first before you can unpost this shipment.', 11, 1, @strInvoiceNumber)  
 			GOTO Post_Exit    
 		END 
 	END
@@ -209,7 +209,7 @@ BEGIN
 		IF @strBillNumber IS NOT NULL 
 		BEGIN 
 			-- 'Unable to unpost the Inventory Shipment. The {Other Charge} was billed.'
-			RAISERROR(80091, 11, 1, @strChargeItem)  
+			RAISERROR('Unable to unpost the Inventory Shipment. The %s was billed.', 11, 1, @strChargeItem)  
 			GOTO Post_Exit    
 		END 
 	END 
@@ -272,7 +272,7 @@ BEGIN
 			SET @FormattedDifference =  CAST(ABS(@dblQuantityShipped - @LotQtyInItemUOM) AS NVARCHAR(50))
 
 			-- 'The Qty to Ship for {Item} is {Ship Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
-			RAISERROR(80047, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+			RAISERROR('The Qty to Ship for %s is %s. Total Lot Quantity is %s. The difference is %s.', 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
 
 			RETURN -1; 
 		END 
@@ -307,7 +307,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'
-			RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId)
+			RAISERROR('%s is using a foreign currency. Please check if %s has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from %s to %s.', 11, 1, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId)
 			RETURN -1; 
 		END 
 	END 

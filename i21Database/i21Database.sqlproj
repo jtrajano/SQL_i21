@@ -403,7 +403,6 @@
     <Build Include="dbo\Stored Procedures\uspCMPostBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostBankTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostMiscChecks.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMErrorMessages.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
@@ -2360,10 +2359,6 @@
     <Build Include="dbo\User Defined Types\InTransitTableType.sql" />
     <Build Include="dbo\Views\vyuARInvoiceTaxDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitOutBoundQty.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMErrorMessages.sql" />
-    <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGErrorMessages.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLErrorMessages.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\1_MasterMenu.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\10_Screen.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\11_FreightTerms.sql" />
@@ -3264,7 +3259,6 @@
     <Build Include="dbo\Tables\tblEMContactDetailType.sql" />
     <Build Include="dbo\Tables\tblEMContactDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetUnscheduledShiftActivityLine.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTErrorMessages.sql" />
     <Build Include="dbo\Views\vyuMFGetItemSubstitutionView.sql" />
     <Build Include="dbo\Views\vyuMFGetBlendConsolidationView.sql" />
     <Build Include="dbo\Views\vyuMFGetItemConsumptionView.sql" />
@@ -4121,7 +4115,6 @@
     <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
     <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
     <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
-    <Build Include="dbo\Stored Procedures\uspARErrorMessages.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateItemComponent.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateItemComponent.sql" />
     <Build Include="dbo\Tables\tblARInvoiceDetailComponent.sql" />
@@ -5275,7 +5268,6 @@
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckOverflow.sql" />
     <None Include="Scripts\Post-Deployment\ST\1_FileFieldMapping_PricebookSale.sql" />
     <None Include="Scripts\Post-Deployment\IC\13_MoveCommodityAttributes.sql" />
-    <None Include="Scripts\Post-Deployment\Common\ErrorMessages.sql" />
     <None Include="i21Database_1.publish.xml" />
     <None Include="Scripts\Post-Deployment\EM\013_SetDefaultLocationToActive.sql" />
     <None Include="Scripts\Post-Deployment\AP\CreateVoucherPayable.sql" />

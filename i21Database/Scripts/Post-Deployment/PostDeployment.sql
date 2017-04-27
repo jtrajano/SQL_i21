@@ -390,7 +390,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\IP\1_MasterTables.sql
 
 -- Common
-:r .\Common\ErrorMessages.sql 
+--:r .\Common\ErrorMessages.sql 
 
 --Logistics
 :R .\LG\1_MasterTables.sql

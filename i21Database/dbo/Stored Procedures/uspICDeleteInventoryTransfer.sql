@@ -22,7 +22,7 @@ WHERE	intInventoryTransferId = @InventoryTransferId
 IF @strTransferNo IS NOT NULL 
 BEGIN 
 	-- 'Delete is not allowed. %s is posted.'
-	RAISERROR(80070, 11, 1, @strTransferNo)  
+	RAISERROR('Delete is not allowed. %s is posted.', 11, 1, @strTransferNo)  
 	RETURN -1; 
 END 
 

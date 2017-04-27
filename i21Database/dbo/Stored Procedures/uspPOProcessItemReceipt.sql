@@ -14,13 +14,13 @@ BEGIN
 	--Purchase order already closed.
 	IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND intOrderStatusId = 3)
 	BEGIN
-		RAISERROR(51036, 16, 1)
+		RAISERROR('Purchase Order already closed.', 16, 1)
 		RETURN;
 	END
 
 	IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND dblTotal = 0)
 	BEGIN
-		RAISERROR(51039, 16, 1)
+		RAISERROR('Cannot process Purchase Order with 0 amount.', 16, 1)
 		RETURN;
 	END
 

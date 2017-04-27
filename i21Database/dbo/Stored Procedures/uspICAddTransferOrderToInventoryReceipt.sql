@@ -19,7 +19,7 @@ IF @TransferOrderId IS NULL
 BEGIN 
     -- Raise the error:
     -- Unable to generate the Inventory Receipt. An error stopped the process from Transfer Order to Inventory Receipt.
-    RAISERROR(80044, 11, 1);
+    RAISERROR('Unable to generate the Inventory Receipt. An error stopped the process from Transfer Order to Inventory Receipt.', 11, 1);
     GOTO _Exit
 END
 

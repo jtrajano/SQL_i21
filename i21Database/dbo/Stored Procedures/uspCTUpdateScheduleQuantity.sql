@@ -61,7 +61,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			RAISERROR(110001,16,1,@strContractNumber,@strContractSeq,@strAvailableQty,@strQuantityToUpdate)
+			RAISERROR('Available quantity for the contract %s and sequence %s is %s, which is insufficient to Save/Post a quantity of %s therefore could not Save/Post this transaction.',16,1,@strContractNumber,@strContractSeq,@strAvailableQty,@strQuantityToUpdate)
 		END
 	END
 	

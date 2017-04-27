@@ -8,8 +8,8 @@
 GO
 
 	-- Add the SQL Server custom messages
-	EXEC dbo.uspSMErrorMessages
-	EXEC dbo.uspICErrorMessages
+	--EXEC dbo.uspSMErrorMessages
+	--EXEC dbo.uspICErrorMessages
 GO
 
 	-- Update User Role and User Security Menus

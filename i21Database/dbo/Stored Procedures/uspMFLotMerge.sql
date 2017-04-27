@@ -145,7 +145,7 @@ BEGIN TRY
 	IF ISNULL(@strLotNumber, '') = ''
 	BEGIN
 		RAISERROR (
-				51192
+				'Supplied lot is not available.'
 				,11
 				,1
 				)
@@ -154,7 +154,7 @@ BEGIN TRY
 	IF @intNewLotStatusId <> @intLotStatusId
 	BEGIN
 		RAISERROR (
-				51195
+				'The status of the source and the destination lot differs, cannot merge'
 				,11
 				,1
 				)
@@ -167,7 +167,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				90008
+				'This lot is being managed in warehouse. All transactions should be done in warehouse module. You can only change the lot status from inventory view.'
 				,11
 				,1
 				)
@@ -176,7 +176,7 @@ BEGIN TRY
 	IF @intDestinationLotWeightUOM <> @intSourceLotWeightUOM
 	BEGIN
 		RAISERROR (
-				90009
+				'Lots with different unit of measure cannot be merged.'
 				,11
 				,1
 				)

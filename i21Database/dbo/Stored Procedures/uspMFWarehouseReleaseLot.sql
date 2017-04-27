@@ -84,7 +84,7 @@ BEGIN TRY
 		OR @intLotId IS NULL
 	BEGIN
 		RAISERROR (
-				80020
+				'Invalid Lot.'
 				,11
 				,1
 				)
@@ -138,7 +138,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51058
+				'Invalid GTIN Case code.'
 				,11
 				,1
 				)
@@ -168,7 +168,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51055
+				'Lot has already been released!.'
 				,11
 				,1
 				)
@@ -184,7 +184,7 @@ BEGIN TRY
 	IF @intLotStatusId = 2
 	BEGIN
 		RAISERROR (
-				51056
+				'Pallet Lot has been marked as a ghost and cannot be released. Please call Supervisor to reverse this!.'
 				,11
 				,1
 				)
@@ -201,7 +201,7 @@ BEGIN TRY
 		--	)
 	BEGIN
 		RAISERROR (
-				51055
+				'The pallet lot quantity cannot exceed more than  item''s cases per pallet. Please check produce quantity.'
 				,11
 				,1
 				)
@@ -220,7 +220,7 @@ BEGIN TRY
 		AND @dblReleaseQty > @CasesPerPallet
 	BEGIN
 		RAISERROR (
-				51059
+				'The pallet lot quantity cannot exceed more than  item''s cases per pallet. Please check produce quantity.'
 				,11
 				,1
 				)
@@ -234,7 +234,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51060
+				'Item number for GTIN Case Code and Pallet Lot ID is not matching, please scan the appropriate case code.'
 				,11
 				,1
 				)
@@ -328,7 +328,7 @@ BEGIN TRY
 		IF @intStagingLocationId IS NULL
 		BEGIN
 			RAISERROR (
-					90007
+					'Default warehouse staging unit is not configured.'
 					,11
 					,1
 					)

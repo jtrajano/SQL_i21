@@ -19,7 +19,7 @@ IF @intLoadId IS NULL
 BEGIN 
     -- Raise the error:
     -- Unable to generate the Inventory Receipt. An error stopped the process from Inbound Shipment to Inventory Receipt.
-    RAISERROR(80046, 11, 1);
+    RAISERROR('Unable to generate the Inventory Receipt. An error stopped the process from Inbound Shipment to Inventory Receipt.', 11, 1);
     GOTO _Exit
 END
 

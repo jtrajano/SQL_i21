@@ -79,7 +79,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				90002
+				'Calendar name ''%s'' already exists.'
 				,11
 				,1
 				,@strCalendarName
@@ -333,7 +333,7 @@ BEGIN TRY
 				WHERE intShiftId = @intShiftId
 
 				RAISERROR (
-						90001
+						'Machine: %s is used in the schedule for %s and %s.'
 						,14
 						,1
 						,@strName

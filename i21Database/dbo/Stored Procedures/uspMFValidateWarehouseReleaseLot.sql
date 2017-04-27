@@ -19,7 +19,7 @@ BEGIN TRY
 		OR @strLotNumber IS NULL
 	BEGIN
 		RAISERROR (
-				80020
+				'Invalid Lot.'
 				,11
 				,1
 				)
@@ -39,7 +39,7 @@ BEGIN TRY
 	IF @intLotId IS NULL
 	BEGIN
 		RAISERROR (
-				80020
+				'Invalid Lot.'
 				,11
 				,1
 				)
@@ -72,7 +72,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51055
+				'Lot has already been released!.'
 				,11
 				,1
 				)
@@ -88,7 +88,7 @@ BEGIN TRY
 	IF @intLotStatusId = 2
 	BEGIN
 		RAISERROR (
-				51056
+				'Pallet Lot has been marked as a ghost and cannot be released. Please call Supervisor to reverse this!.'
 				,11
 				,1
 				)
@@ -107,7 +107,7 @@ BEGIN TRY
 		--	)
 	BEGIN
 		RAISERROR (
-				51055
+				'Lot has already been released!.'
 				,11
 				,1
 				)

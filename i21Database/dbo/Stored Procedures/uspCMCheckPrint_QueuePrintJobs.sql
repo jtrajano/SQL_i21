@@ -174,7 +174,7 @@ BEGIN
 	-- If there is NO more available check numbers to complete the print job, abort the process. 
 	IF (LTRIM(RTRIM(ISNULL(@loop_CheckNumber, ''))) = '')
 	BEGIN 
-		RAISERROR(70014, 11, 1)
+		RAISERROR('Not enough check numbers. Please generate new check numbers.', 11, 1)
 		
 		GOTO _ROLLBACK
 	END 

@@ -53,7 +53,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51172
+				'Shift name should be unique.'
 				,11
 				,1
 				)
@@ -77,7 +77,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51172
+				'Shift name should be unique.'
 				,11
 				,1
 				)
@@ -185,7 +185,7 @@ BEGIN TRY
 		WHERE x.strRowState = 'DELETE'
 
 		RAISERROR (
-				51171
+				'Transaction exists for the shift ''%s'', shift cannot be deleted.'
 				,11
 				,1
 				,@strShiftName
@@ -220,7 +220,7 @@ BEGIN TRY
 				)
 
 		RAISERROR (
-				51171
+				'Transaction exists for the shift ''%s'', shift cannot be deleted.'
 				,11
 				,1
 				,@strShiftName
@@ -285,7 +285,7 @@ BEGIN TRY
 			IF @dtmShiftEndTime + @intEndOffset > @dtmNextShiftStartTime + @intNextStartOffset
 			BEGIN
 				RAISERROR (
-						51170
+						'This shift configuration is overlapping with existing shifts, cannot be allowed.'
 						,11
 						,1
 						)

@@ -34,7 +34,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- 'Unable to unpost the Inventory Receipt. The {Other Charge} was billed.'
-		RAISERROR(80054, 11, 1, @strItemNo) 	
+		RAISERROR('Unable to unpost the Inventory Receipt. The %s was billed.', 11, 1, @strItemNo) 	
 		GOTO _Exit
 	END
 END 
@@ -123,7 +123,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR(80008, 11, 1, @strItemNo, @ACCOUNT_CATEGORY_Inventory) 	
+			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_Inventory) 	
 			RETURN;
 		END 
 	END 
@@ -144,7 +144,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR(80008, 11, 1, @strItemNo, @ACCOUNT_CATEGORY_APClearing) 	
+			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_APClearing) 	
 			RETURN;
 		END 
 	END 
@@ -165,7 +165,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR(80008, 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeExpense) 	
+			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeExpense) 	
 			RETURN;
 		END 
 	END 
@@ -186,7 +186,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR(80008, 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeIncome) 	
+			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeIncome) 	
 			RETURN;
 		END 
 	END 

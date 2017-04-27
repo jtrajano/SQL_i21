@@ -101,12 +101,12 @@ BEGIN
 	)
 	BEGIN 
 		-- Debit Memo is no longer needed. All items have Debit Memo.
-		RAISERROR(80110, 11, 1)  
+		RAISERROR('Debit Memo is no longer needed. All items have Debit Memo.', 11, 1)  
 	END 
 	ELSE 
 	BEGIN 
 		-- Voucher is no longer needed. All items have Voucher.
-		RAISERROR(80111, 11, 1)  
+		RAISERROR('Voucher is no longer needed. All items have Voucher.', 11, 1)  
 	END 
 END
 ELSE 
@@ -143,13 +143,13 @@ BEGIN
 			-- Debit Memo is no longer needed. All items have Debit Memo.
 			IF(@rtype = 'Inventory Return')
 				BEGIN
-					RAISERROR(80110, 11, 1)
+					RAISERROR('Debit Memo is no longer needed. All items have Debit Memo.', 11, 1)
 					GOTO Post_Exit           
 				END              
 			ELSE
 			-- Voucher is no longer needed. All items have Voucher.      
 				BEGIN
-					RAISERROR(80111, 11, 1) 
+					RAISERROR('Voucher is no longer needed. All items have Voucher.', 11, 1) 
 					GOTO Post_Exit
 				END   
 		END
@@ -161,13 +161,13 @@ BEGIN
 			-- Debit Memo is no longer needed. All items have Debit Memo.
 			IF(@rtype = 'Inventory Return')
 				BEGIN
-					RAISERROR(80110, 11, 1)
+					RAISERROR('Debit Memo is no longer needed. All items have Debit Memo.', 11, 1)
 					GOTO Post_Exit           
 				END              
 			ELSE
 			-- Voucher is no longer needed. All items have Voucher.      
 				BEGIN
-					RAISERROR(80111, 11, 1) 
+					RAISERROR('Voucher is no longer needed. All items have Voucher.', 11, 1) 
 					GOTO Post_Exit
 				END   
 		END  

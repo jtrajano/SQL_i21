@@ -111,7 +111,7 @@ BEGIN TRY
 		OR @intInputLotId = 0
 	BEGIN
 		RAISERROR (
-				51112
+				'Lot can not be blank.'
 				,14
 				,1
 				)
@@ -143,7 +143,7 @@ BEGIN TRY
 		OR @intInputLotId = 0
 	BEGIN
 		RAISERROR (
-				51113
+				'Please select a valid lot'
 				,14
 				,1
 				)
@@ -153,7 +153,7 @@ BEGIN TRY
 		AND @ysnNegativeQuantityAllowed = 0
 	BEGIN
 		RAISERROR (
-				51110
+				'Lot quantity should be greater than zero.'
 				,14
 				,1
 				)
@@ -162,7 +162,7 @@ BEGIN TRY
 	IF @intSourceStorageLocationId = @intDestinationStorageLocationId
 	BEGIN
 		RAISERROR (
-				90010
+				'Source storage location and destination storage location cannot be same.'
 				,14
 				,1
 				)
@@ -186,7 +186,7 @@ BEGIN TRY
 		IF @ysnExcessConsumptionAllowed = 0
 		BEGIN
 			RAISERROR (
-					51116
+					'The quantity to be consumed must not exceed the selected lot quantity.'
 					,14
 					,1
 					)
@@ -412,7 +412,7 @@ BEGIN TRY
 					)
 			BEGIN
 				RAISERROR (
-						90018
+						'The destination storage location is already used by other lot.'
 						,11
 						,1
 						)
@@ -434,7 +434,7 @@ BEGIN TRY
 					)
 			BEGIN
 				RAISERROR (
-						90019
+						'The destination storage location is already used by other lot for same item.'
 						,11
 						,1
 						)
@@ -456,7 +456,7 @@ BEGIN TRY
 					)
 			BEGIN
 				RAISERROR (
-						90020
+						'The destination storage location is already used by other item'
 						,11
 						,1
 						)

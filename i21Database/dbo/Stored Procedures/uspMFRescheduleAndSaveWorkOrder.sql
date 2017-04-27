@@ -162,7 +162,7 @@ BEGIN TRY
 			WHERE intItemId = @intItemId
 
 			RAISERROR (
-					51188
+					'Pack Type is not configured for the Item ''%s'' for the Work Order ''%s''.'
 					,11
 					,1
 					,@strItemNo
@@ -284,7 +284,7 @@ BEGIN TRY
 			WHERE intPackTypeId = @intPackTypeId
 
 			RAISERROR (
-					51186
+					'Pack Type ''%s'' for Work Order ''%s'' is not associated with the line ''%s''.'
 					,11
 					,1
 					,@strPackName
@@ -315,7 +315,7 @@ BEGIN TRY
 			WHERE intWorkOrderId = @intWorkOrderId
 
 			RAISERROR (
-					51187
+					'There is no Pack Type conversion factor that matches the Work Order ''%s''.'
 					,11
 					,1
 					,@strWorkOrderNo
@@ -1126,7 +1126,7 @@ BEGIN TRY
 			WHERE intWorkOrderId = @intWorkOrderId
 
 			RAISERROR (
-					51185
+					'There is no enough shift time to schedule the Work Order ''%s'' in the selected calendar.'
 					,11
 					,1
 					,@strWorkOrderNo

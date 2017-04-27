@@ -63,7 +63,7 @@ IF NOT EXISTS (
 )
 BEGIN
 	-- 'Internal Error. The source transaction type provided is invalid or not supported.' 
-	RAISERROR(80032, 11, 1)  
+	RAISERROR('Internal Error. The source transaction type provided is invalid or not supported.', 11, 1)  
 	GOTO _Exit;
 END 
 
@@ -71,7 +71,7 @@ END
 IF @intSourceId IS NULL 
 BEGIN
 	-- 'Internal Error. The source transaction id is invalid.'
-	RAISERROR(80033, 11, 1)  
+	RAISERROR('Internal Error. The source transaction id is invalid.', 11, 1)  
 	GOTO _Exit;
 END 
 
@@ -79,7 +79,7 @@ END
 IF dbo.fnGetItemLotType(@intItemId) = 0 
 BEGIN 
 	-- Invalid Item.
-	RAISERROR(80021, 11, 1); 
+	RAISERROR('Invalid Item.', 11, 1); 
 	GOTO _Exit;
 END 
 
@@ -87,7 +87,7 @@ END
 IF ISNULL(@strNewLotNumber, '') = '' 
 BEGIN 
 	-- 'Invalid Lot'
-	RAISERROR(80020, 11, 1)  
+	RAISERROR('Invalid Lot.', 11, 1)  
 	GOTO _Exit;
 END 
 
@@ -106,7 +106,7 @@ END
 IF @intLotId IS NULL 
 BEGIN 
 	-- Invalid Lot
-	RAISERROR(80020, 11, 1)  
+	RAISERROR('Invalid Lot.', 11, 1)  
 	GOTO _Exit
 END 
 
@@ -127,7 +127,7 @@ IF NOT EXISTS (
 ) AND @intNewSubLocationId IS NOT NULL 
 BEGIN 
 	-- 'Internal Error. The new sub-location is invalid.'
-	RAISERROR(80036, 11, 1)  
+	RAISERROR('Internal Error. The new sub-location is invalid.', 11, 1)  
 	GOTO _Exit
 END 
 
@@ -140,7 +140,7 @@ IF NOT EXISTS (
 ) AND @intNewStorageLocationId IS NOT NULL 
 BEGIN 
 	-- 'Internal Error. The new storage location is invalid.'
-	RAISERROR(80037, 11, 1)  
+	RAISERROR('Internal Error. The new storage location is invalid.', 11, 1)  
 	GOTO _Exit
 END 
 
@@ -153,7 +153,7 @@ IF NOT EXISTS (
 )
 BEGIN 
 	-- Item UOM is invalid or missing.
-	RAISERROR(80048, 11, 1)  
+	RAISERROR('Item UOM is invalid or missing.', 11, 1)  
 	GOTO _Exit
 END 
 
@@ -167,7 +167,7 @@ IF NOT EXISTS (
 )
 BEGIN 
 	-- Item UOM is invalid or missing.
-	RAISERROR(80048, 11, 1)  
+	RAISERROR('Item UOM is invalid or missing.', 11, 1)  
 	GOTO _Exit
 END
 

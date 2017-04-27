@@ -18,14 +18,14 @@ DECLARE	 @ShipmentId INT
 --VALIDATE IF SO IS ALREADY CLOSED
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 
 	BEGIN
-		RAISERROR(120051, 16, 1)
+		RAISERROR('Sales Order already closed.', 16, 1)
 		RETURN;
 	END
 
 --VALIDATE IF SO HAS ZERO TOTAL AMOUNT
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [dblSalesOrderTotal]  = 0 AND @Unship = 0)
 	BEGIN
-		RAISERROR(120073, 16, 1)
+		RAISERROR('Cannot process Sales Order with zero(0) amount.', 16, 1)
 		RETURN;
 	END
 
@@ -42,7 +42,7 @@ IF @Unship = 1
 
 		IF ISNULL(@shipmentNos, '') <> ''
 			BEGIN				
-				RAISERROR(120055, 16, 1, @shipmentNos)
+				RAISERROR('Failed to unship Sales Order. Unpost this Shipment Record first: %s', 16, 1, @shipmentNos)
 				RETURN
 			END
 		ELSE
@@ -76,7 +76,7 @@ IF NOT EXISTS(SELECT 1 FROM tblSOSalesOrderDetail SOD
 				FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
 				WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped))
 	BEGIN
-		RAISERROR(120054, 16, 1);
+		RAISERROR('Shipping Failed. There is no shippable item on this sales order.', 16, 1);
         RETURN
 	END
 ELSE

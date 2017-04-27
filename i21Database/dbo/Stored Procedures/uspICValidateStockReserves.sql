@@ -201,12 +201,12 @@ BEGIN
 		IF @intLotId IS NOT NULL 
 		BEGIN 
 			-- = 'There is not enough stocks for {Item}. Reserved stocks is {Reserved Lot Qty} while Lot Qty is {Lot Qty}.'
-			RAISERROR(51175, 11, 1, @strInvalidItemNo, @FormattedReservedQty, @FormattedOnHandQty) 
+			RAISERROR('There is not enough stocks for %s. Reserved stocks is %s while Lot Qty is %s.', 11, 1, @strInvalidItemNo, @FormattedReservedQty, @FormattedOnHandQty) 
 		END 
 		ELSE 
 		BEGIN 
 			-- 'Not enough stocks for {Item}. Reserved stocks is {Reserved Stock Qty} while On Hand Qty is {On Hand Qty}.'
-			RAISERROR(80007, 11, 1, @strInvalidItemNo, @FormattedReservedQty, @FormattedOnHandQty) 
+			RAISERROR('Not enough stocks for %s. Reserved stocks is %s while On Hand Qty is %s.', 11, 1, @strInvalidItemNo, @FormattedReservedQty, @FormattedOnHandQty) 
 		END 
 
 		RETURN -1;

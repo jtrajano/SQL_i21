@@ -121,7 +121,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				WHERE	ISNULL(d.strCbkNo, '''') <> ''''
 			)
 			BEGIN
-				RAISERROR(50016, 11, 1)	-- ''Unable to delete checkbook because it is used in the A/P Invoice file.''
+				RAISERROR(''Unable to delete checkbook because it is used in the A/P Invoice file.'', 11, 1)	-- ''Unable to delete checkbook because it is used in the A/P Invoice file.''
 				GOTO EXIT_TRIGGER
 			END
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
@@ -134,7 +134,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				WHERE	ISNULL(d.strCbkNo, '''') <> ''''
 			)
 			BEGIN
-				RAISERROR(50017, 11, 1)	-- ''Unable to delete checkbook because it is used in the Check History file.''
+				RAISERROR(''Unable to delete checkbook because it is used in the Check History file.'', 11, 1)	-- ''Unable to delete checkbook because it is used in the Check History file.''
 				GOTO EXIT_TRIGGER
 			END
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
@@ -147,7 +147,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				WHERE	ISNULL(d.strCbkNo, '''') <> ''''
 			)
 			BEGIN
-				RAISERROR(50018, 11, 1)	-- ''Unable to delete checkbook because it is used in the A/P Transaction file.''
+				RAISERROR(''Unable to delete checkbook because it is used in the A/P Transaction file.'', 11, 1)	-- ''Unable to delete checkbook because it is used in the A/P Transaction file.''
 				GOTO EXIT_TRIGGER
 			END
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
@@ -190,7 +190,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 			)
 			BEGIN 
 				-- The record being created already exists in origin. Remove the duplicate record from origin or do a conversion.
-				RAISERROR(50021, 11, 1)
+				RAISERROR(''The record being created already exists in origin. Remove the duplicate record from origin or do a conversion.'', 11, 1)
 				GOTO EXIT_TRIGGER
 			END		
 
@@ -452,7 +452,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 						)
 			)
 			BEGIN 
-				RAISERROR(50019, 11, 1)	-- ''Duplicate checkbook id found.''
+				RAISERROR(''Duplicate checkbook id found.'', 11, 1)	-- ''Duplicate checkbook id found.''
 				GOTO EXIT_TRIGGER
 			END 
 

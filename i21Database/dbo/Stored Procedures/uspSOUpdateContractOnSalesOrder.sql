@@ -237,12 +237,12 @@ BEGIN TRY
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
-			RAISERROR(120049,16,1)
+			RAISERROR('Contract does not exist.',16,1)
 		END
 
 		IF ISNULL(@dblQty,0) = 0
 		BEGIN
-			RAISERROR(120050,16,1)
+			RAISERROR('UOM does not exist.',16,1)
 		END
 					
 		EXEC	uspCTUpdateScheduleQuantity

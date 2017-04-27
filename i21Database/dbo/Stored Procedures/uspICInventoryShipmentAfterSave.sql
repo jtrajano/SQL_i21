@@ -45,7 +45,7 @@ BEGIN
 
 	IF @InvoiceNo IS NOT NULL
 	BEGIN
-		RAISERROR(80092, 11, 1, @strItemNo, @InvoiceNo)
+		RAISERROR('The item %s is already in %s. Remove it from the Invoice first before you can modify it from the Shipment.', 11, 1, @strItemNo, @InvoiceNo)
 		GOTO OnError_Exit;
 	END
 END 

@@ -55,7 +55,7 @@ BEGIN TRY
 		WHERE intItemId = @intItemId
 
 		RAISERROR (
-				51152
+				'The target item %s is Phased out or Discontinued, cannot start the work order.'
 				,11
 				,1
 				,@strItemNo
@@ -75,7 +75,7 @@ BEGIN TRY
 		WHERE intItemId = @intItemId
 
 		RAISERROR (
-				51147
+				'There is no active recipe found for item  %s Cannot proceed'
 				,11
 				,1
 				,@strItemNo
@@ -98,7 +98,7 @@ BEGIN TRY
 		WHERE intItemId = @intItemId
 
 		RAISERROR (
-				90006
+				'The UOM used in the work order %s is not added for the item %s in item maintenance.'
 				,11
 				,1
 				,@strWorkOrderNo
@@ -197,7 +197,7 @@ BEGIN TRY
 			WHERE intManufacturingCellId = @intManufacturingCellId
 
 			RAISERROR (
-					'%s is not taken for the line %s. Please take the sample and then start the work order'
+					'%s has failed the quality test. Cannot proceed further.'
 					,11
 					,1
 					,@strSampleTypeName
@@ -228,7 +228,7 @@ BEGIN TRY
 			WHERE intManufacturingCellId = @intManufacturingCellId
 
 			RAISERROR (
-					'%s is not taken for the line %s. Please take the sample and then start the work order'
+					'%s has failed the quality test. Cannot proceed further.'
 					,11
 					,1
 					,@strSampleTypeName
@@ -270,7 +270,7 @@ BEGIN TRY
 				WHERE intManufacturingCellId = @intManufacturingCellId
 
 				RAISERROR (
-						90027
+						'%s is not taken for the line %s. Please take the sample and then start the work order'
 						,11
 						,1
 						,@strSampleTypeName
@@ -304,7 +304,7 @@ BEGIN TRY
 				WHERE intManufacturingCellId = @intManufacturingCellId
 
 				RAISERROR (
-						90028
+						'%s is not taken for the line %s. Please take the sample and then start the work order'
 						,11
 						,1
 						,@strSampleTypeName,@strCellName

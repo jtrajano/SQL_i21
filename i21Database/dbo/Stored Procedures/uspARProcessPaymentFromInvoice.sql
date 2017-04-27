@@ -36,7 +36,7 @@ BEGIN
 		IF ISNULL(@RaiseError,0) = 0
 			ROLLBACK TRANSACTION		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120045, 16, 1);
+			RAISERROR('Cannot delete posted payment!', 16, 1);
 		RETURN 0;
 	END
 	
@@ -94,7 +94,7 @@ BEGIN
 	IF ISNULL(@RaiseError,0) = 0
 		ROLLBACK TRANSACTION	
 	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(120046, 16, 1);
+		RAISERROR('Payment has already been created for this Invoice!', 16, 1);
 	RETURN 0;
 END
 
