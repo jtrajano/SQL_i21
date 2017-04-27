@@ -27,6 +27,7 @@ DECLARE @error NVARCHAR(200)
 DECLARE @dateToday AS DATETIME = GETDATE();
 DECLARE @batchId NVARCHAR(40);
 
+
 IF(@batchId IS NULL)
 	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
@@ -190,12 +191,20 @@ SET @batchIdUsed = @batchId;
 		IF(@ysnPosted = 1)
 		BEGIN
 			INSERT INTO tblPATCustomerStock(intCustomerPatronId, intStockId, strCertificateNo, strStockStatus, dblSharesNo, dtmIssueDate, strActivityStatus, dblParValue, dblFaceValue, ysnPosted, intConcurrencyId)
-			SELECT intTransferorId, intToStockId, strToCertificateNo, strToStockStatus, dblQuantityTransferred, dtmToIssueDate, 'Open', dblToParValue, (dblQuantityTransferred * dblToParValue), 0, 0
+			SELECT intTransferorId, intToStockId, strToCertificateNo, strToStockStatus, dblQuantityTransferred, dtmToIssueDate, 'Open', dblToParValue, (dblQuantityTransferred * dblToParValue), 0, 1
 			FROM #tempTransferDetails WHERE intTransferType = 4;
 		END
 		ELSE
 		BEGIN
-			DELETE FROM tblPATCustomerStock WHERE strCertificateNo IN (SELECT strToCertificateNo FROM #tempTransferDetails where intTransferType = 4)
+			IF EXISTS(SELECT 1 FROM #tempTransferDetails tempTD INNER JOIN tblPATCustomerStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo WHERE CS.ysnPosted != 1)
+			BEGIN
+				DELETE FROM tblPATCustomerStock WHERE strCertificateNo IN (SELECT strToCertificateNo FROM #tempTransferDetails where intTransferType = 4)
+			END
+			ELSE
+			BEGIN
+				RAISERROR('Stock Issued is already posted.', 16, 1);
+				GOTO Post_Rollback;
+			END
 		END
 
 		UPDATE CE
