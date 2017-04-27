@@ -10,5 +10,5 @@
     [dblQuantityCancelled] NUMERIC(18, 6) NULL, 
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATCancelEquityDetail_intCancelEquityDetailId] PRIMARY KEY ([intCancelEquityDetailId]), 
-    CONSTRAINT [FK_tblPATCancelEquityDetail_tblPATCancelEquity_intCancelEquityId] FOREIGN KEY ([intCancelEquityId]) REFERENCES [tblPATCancelEquity]([intCancelEquityId]) 
+    CONSTRAINT [FK_tblPATCancelEquityDetail_tblPATCancelEquity_intCancelEquityId] FOREIGN KEY ([intCancelEquityId]) REFERENCES [tblPATCancelEquity]([intCancelEquityId]) ON DELETE CASCADE
 )
