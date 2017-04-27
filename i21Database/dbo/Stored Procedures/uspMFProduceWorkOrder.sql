@@ -302,7 +302,7 @@ BEGIN
 				,@intShiftId = @intShiftId
 				,@dtmDate = @dtmProductionDate
 
-			IF @strParentLotNumber1 <> @strParentLotNumber2
+			IF  Not (@strParentLotNumber2 Like '%'+@strParentLotNumber1+'%')
 			BEGIN
 				SELECT @strParentLotNumber = @strParentLotNumber1 + ' / ' + @strParentLotNumber2
 			END
