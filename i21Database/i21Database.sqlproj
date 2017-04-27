@@ -5215,6 +5215,8 @@
     <Build Include="dbo\Functions\fnSMHideOriginMenus.sql" />
     <Build Include="dbo\Views\vyuICGetItemTags.sql" />
     <Build Include="dbo\Views\vyuHDProjectLink.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceLinesOfBusiness.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceModule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

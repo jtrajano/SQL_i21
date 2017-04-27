@@ -38,7 +38,7 @@ BEGIN TRANSACTION
 	INSERT INTO #tempEquityPayment SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@equityPaymentIds)
 
 	DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM tblPATEquityPaySummary WHERE intEquityPaySummaryId IN (SELECT intId from #tempEquityPayment));
-	UPDATE tblPATEquityPaySummary SET ysnVouchered = 0, intBillId = NULL WHERE intEquityPaySummaryId IN (SELECT intId from #tempEquityPayment);
+	UPDATE tblPATEquityPaySummary SET intBillId = NULL WHERE intEquityPaySummaryId IN (SELECT intId from #tempEquityPayment);
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 

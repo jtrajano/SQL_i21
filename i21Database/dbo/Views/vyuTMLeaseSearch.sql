@@ -37,6 +37,10 @@ AS
 			,dtmLastLeaseBillingDate = A.dtmLastLeaseBillingDate
 			,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intLeaseId)) AS INT)
 			,strSiteNumber = RIGHT('000'+ CAST(F.intSiteNumber AS VARCHAR(4)),4)
+			,strAgreementLetter = M.strName
+			,A.ysnPrintDeviceValueInAgreement
+			,A.strEvaluationMethod
+			,strSiteLocation = N.strLocationName
 		FROM tblTMLease A
 		LEFT JOIN tblTMLeaseCode B
 			ON A.intLeaseCodeId = B.intLeaseCodeId
@@ -76,5 +80,9 @@ AS
 				WHERE ysnSeasonStart = 1
 				GROUP BY intClockID
 		) HH
-			ON F.intClockID = HH.intClockID 
+			ON F.intClockID = HH.intClockID
+		LEFT JOIN tblSMLetter M
+			ON A.intLetterId = M.intLetterId
+		LEFt JOIN tblSMCompanyLocation N
+			ON F.intLocationId = N.intCompanyLocationId   
 GO
