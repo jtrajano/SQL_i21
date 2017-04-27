@@ -3377,63 +3377,6 @@
                                                                     ]
                                                                 },
                                                                 {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "columns": [
-                                                                            "[",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intTagId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\ttext: 'Tag Id',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strTagNumber',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Tag Number',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strDescription',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Description',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t}",
-                                                                            "]"
-                                                                        ],
-                                                                        "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strDescription",
-                                                                        "enableDrillDown": "true",
-                                                                        "fieldLabel": "Item Message",
-                                                                        "itemId": "cboEnergyTrac",
-                                                                        "labelWidth": 115,
-                                                                        "layout|flex": null,
-                                                                        "valueField": "strDescription"
-                                                                    },
-                                                                    "name": "MyComboBox81",
-                                                                    "configAlternates": {
-                                                                        "columns": "array"
-                                                                    },
-                                                                    "designerId": "dbbb87dd-465e-42f6-acff-a7daec4f756c",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "columns",
-                                                                            "type": "string"
-                                                                        },
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "enableDrillDown",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
                                                                     "type": "Ext.form.field.Text",
                                                                     "reference": {
                                                                         "name": "items",
@@ -15602,7 +15545,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging1",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

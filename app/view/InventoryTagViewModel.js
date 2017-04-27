@@ -21,10 +21,9 @@ Ext.define('Inventory.view.InventoryTagViewModel', {
         types: {
             autoLoad: true,
             data: [
-                { strType: 'Medication Tag' },
-                { strType: 'Ingredient Tag' },
-                { strType: 'Hazmat Message' },
-                { strType: 'Item Message' },
+                { intId: 1, strType: 'Medication Tag' },
+                { intId: 2, strType: 'Ingredient Tag' },
+                { intId: 3, strType: 'Hazmat Message' }
             ]
         }
     },
@@ -32,6 +31,18 @@ Ext.define('Inventory.view.InventoryTagViewModel', {
     formulas: {
         ysnHazMat: function (get) {
             return get('current.strType') === 'Hazmat Message';
+        },
+
+        type: function(get) {
+            var t = get('current.strType');
+            switch(t) {
+                case "Hazmat Message":
+                    return get('current.intHazmatMessage');
+                case "Ingredient Tag":
+                    return get('current.intIngredientTag');
+                case "Medication Tag":
+                    return get('current.intMedicationTag');
+            }
         }
     }
 });

@@ -12,14 +12,16 @@ Ext.define('Inventory.model.InventoryTag', {
 
     fields: [
         { name: 'intTagId', type: 'int'},
-        { name: 'strType', type: 'string'},
+        { name: 'strType', type: 'string', allowNull: false },
         { name: 'strTagNumber', type: 'string'},
         { name: 'strDescription', type: 'string'},
         { name: 'strMessage', type: 'string'},
-        { name: 'ysnHazMat', type: 'boolean'}
+        { name: 'ysnHazMat', type: 'boolean'},
+        { name: 'intType', type: 'int' }
     ],
 
     validators: [
+        {type: 'presence', field: 'strType'},
         {type: 'presence', field: 'strTagNumber'}
     ]
 });

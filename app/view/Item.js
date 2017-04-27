@@ -1544,35 +1544,6 @@ Ext.define('Inventory.view.Item', {
                                                                                 valueField: 'strDescription'
                                                                             },
                                                                             {
-                                                                                xtype: 'gridcombobox',
-                                                                                columns: [
-                                                                                    {
-                                                                                        dataIndex: 'intTagId',
-                                                                                        dataType: 'numeric',
-                                                                                        text: 'Tag Id',
-                                                                                        hidden: true
-                                                                                    },
-                                                                                    {
-                                                                                        dataIndex: 'strTagNumber',
-                                                                                        dataType: 'string',
-                                                                                        text: 'Tag Number',
-                                                                                        flex: 1
-                                                                                    },
-                                                                                    {
-                                                                                        dataIndex: 'strDescription',
-                                                                                        dataType: 'string',
-                                                                                        text: 'Description',
-                                                                                        flex: 1
-                                                                                    }
-                                                                                ],
-                                                                                enableDrillDown: 'true',
-                                                                                itemId: 'cboEnergyTrac',
-                                                                                fieldLabel: 'Item Message',
-                                                                                labelWidth: 115,
-                                                                                displayField: 'strDescription',
-                                                                                valueField: 'strDescription'
-                                                                            },
-                                                                            {
                                                                                 xtype: 'textfield',
                                                                                 itemId: 'txtVolumeRebateGroup',
                                                                                 fieldLabel: 'Volume Rebate Group',

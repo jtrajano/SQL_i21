@@ -3615,39 +3615,23 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     onMedicationTagDrilldown: function(combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
-        }
-        else {
-            iRely.Functions.openScreen('Inventory.view.InventoryTag', combo.getValue());
-        }
+        this.showInventoryTag('intMedicationTag', "Medication Tag");
     },
 
     onIngredientTagDrilldown: function(combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
-        }
-        else {
-            iRely.Functions.openScreen('Inventory.view.InventoryTag', combo.getValue());
-        }
+        this.showInventoryTag('intIngredientTag', "Ingredient Tag");
     },
 
     onHazmatMessageTagDrilldown: function(combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
-        }
-        else {
-            iRely.Functions.openScreen('Inventory.view.InventoryTag', combo.getValue());
-        }
+        this.showInventoryTag('intHazmatMessage', "Hazmat Message");
     },
 
-    onItemMessageDrilldown: function(combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
-        }
-        else {
-            iRely.Functions.openScreen('Inventory.view.InventoryTag', combo.getValue());
-        }
+    showInventoryTag: function(fieldName, type) {
+        var id = this.getViewModel().get('current.' + fieldName);
+        if(iRely.Functions.isEmpty(id))
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', filters: [{ strType: type }], viewConfig: { modal: true }});
+        else
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', id);
     },
 
     onFuelCategoryDrilldown: function(combo) {
@@ -4051,9 +4035,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboHazmat": {
                 drilldown: this.onHazmatMessageTagDrilldown
-            },
-            "#cboEnergyTrac": {
-                drilldown: this.onItemMessageDrilldown
             },
             "#cboFuelCategory": {
                 drilldown: this.onFuelCategoryDrilldown
