@@ -185,7 +185,7 @@ BEGIN
 		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
-		,dblCost = ISNULL(l.dblLastCost, 0)+ISNULL((
+		,dblCost = ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId,cl.intItemUOMId,l.dblLastCost), 0)+ISNULL((
 				CASE 
 					WHEN intMarginById = 2
 						THEN ISNULL(RI.dblMargin, 0)/ R.dblQuantity
@@ -211,6 +211,7 @@ BEGIN
 	INNER JOIN dbo.tblMFWorkOrderRecipeItem RI On RI.intWorkOrderId=cl.intWorkOrderId and RI.intItemId=cl.intItemId
 	INNER JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
 		AND R.intRecipeId = RI.intRecipeId
+	INNER JOIN dbo.tblICItemUOM IU ON l.intItemId = IU.intItemId and IU.ysnStockUnit=1
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND cl.intBatchId = @intBatchId
 
