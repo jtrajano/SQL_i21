@@ -5218,6 +5218,7 @@
     <Build Include="dbo\Functions\fnCRMCoalesceLinesOfBusiness.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceModule.sql" />
     <Build Include="dbo\Stored Procedures\uspSMTransactionCheckIfRequiredApproval.sql" />
+    <Build Include="dbo\Tables\tblSMReportTranslation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
