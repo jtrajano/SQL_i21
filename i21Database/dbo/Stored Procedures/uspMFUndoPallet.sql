@@ -120,7 +120,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51138
+				'This lot is already reversed. You can''t undo.'
 				,11
 				,1
 				)
@@ -138,7 +138,7 @@ BEGIN TRY
 		AND @strLotTracking = 'Yes'
 	BEGIN
 		RAISERROR (
-				51139
+				'Pallet Lot has been marked as a ghost and cannot be Undone.'
 				,11
 				,1
 				)
@@ -156,7 +156,7 @@ BEGIN TRY
 		AND @strLotTracking = 'Yes'
 	BEGIN
 		RAISERROR (
-				90017
+				'Production reversal is not allowed for lots having zero qty.'
 				,11
 				,1
 				)
@@ -251,7 +251,7 @@ BEGIN TRY
 		BEGIN
 			-- {Item} is missing a GL account setup for {Account Category} account category.
 			RAISERROR (
-					80008
+					'%s is missing a GL account setup for %s account category.'
 					,11
 					,1
 					,@strItemNo1

@@ -15,7 +15,7 @@ BEGIN TRY
 		DECLARE @dateNow DATETIME
 		SELECT @dateNow = GETDATE()
 		IF EXISTS(SELECT TOP 1 1 FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId AND ysnPosted = 1)
-				RAISERROR (60006,11,1)
+				RAISERROR ('The transaction is already posted.',11,1)
 		
 		DECLARE @errorMsg NVARCHAR(300) = ''
 		IF EXISTS (SELECT TOP 1 1  FROM dbo.fnGLValidateRevaluePeriod(@intConsolidationId))

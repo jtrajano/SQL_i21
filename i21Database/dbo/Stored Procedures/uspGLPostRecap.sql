@@ -25,7 +25,7 @@ WHERE	dbo.fnDateLessThan(dtmDateEntered, GETDATE()) = 1
 IF NOT EXISTS (SELECT TOP 1 1 FROM @RecapTable)
 BEGIN 
 	-- G/L entries are expected. Cannot continue because it is missing.
-	RAISERROR(50032, 11, 1)
+	RAISERROR('G/L entries are expected. Cannot continue because it is missing.', 11, 1)
 	GOTO _Exit
 END
 

@@ -22,7 +22,7 @@ WHERE	intInventoryReceiptId = @InventoryReceiptId
 IF @strReceiptNumber IS NOT NULL 
 BEGIN 
 	-- 'Delete is not allowed. %s is posted.'
-	RAISERROR(80070, 11, 1, @strReceiptNumber)  
+	RAISERROR('Delete is not allowed. %s is posted.', 11, 1, @strReceiptNumber)  
 	RETURN -1; 
 END 
 

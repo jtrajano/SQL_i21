@@ -101,12 +101,12 @@ BEGIN
 	)
 	BEGIN 
 		-- Debit Memo is no longer needed. All items have Debit Memo.
-		RAISERROR(80110, 11, 1)  
+		RAISERROR('Debit Memo is no longer needed. All items have Debit Memo.', 11, 1)  
 	END 
 	ELSE 
 	BEGIN 
 		-- Voucher is no longer needed. All items have Voucher.
-		RAISERROR(80111, 11, 1)  
+		RAISERROR('Voucher is no longer needed. All items have Voucher.', 11, 1)  
 	END 
 END
 ELSE 
@@ -125,19 +125,42 @@ BEGIN
 						) bilLDetails
 					WHERE A.intInventoryReceiptItemId IN  (SELECT intInventoryReceiptItemId FROM #tmpReceiptDetailData WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds)))
 		
+	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryReceiptCharge WHERE intInventoryReceiptId IN ((SELECT intInventoryReceiptId FROM #tmpReceiptIds)))
+	BEGIN
+		IF(@availableQty = 0 AND  @chargeQty = 0)
+		BEGIN 
+			-- Debit Memo is no longer needed. All items have Debit Memo.
+			IF(@rtype = 'Inventory Return')
+				BEGIN
+					RAISERROR('Debit Memo is no longer needed. All items have Debit Memo.', 11, 1)
+					GOTO Post_Exit           
+				END              
+			ELSE
+			-- Voucher is no longer needed. All items have Voucher.      
+				BEGIN
+					RAISERROR('Voucher is no longer needed. All items have Voucher.', 11, 1) 
+					GOTO Post_Exit
+				END   
+		END
+	END
+	ELSE
+	BEGIN
 		IF(@availableQty = 0)
 		BEGIN 
 			-- Debit Memo is no longer needed. All items have Debit Memo.
 			IF(@rtype = 'Inventory Return')
 				BEGIN
-				    RAISERROR(80110, 11, 1)           
+					RAISERROR('Debit Memo is no longer needed. All items have Debit Memo.', 11, 1)
+					GOTO Post_Exit           
 				END              
 			ELSE
 			-- Voucher is no longer needed. All items have Voucher.      
 				BEGIN
-					RAISERROR(80111, 11, 1)     
-				END           
-		END   
+					RAISERROR('Voucher is no longer needed. All items have Voucher.', 11, 1) 
+					GOTO Post_Exit
+				END   
+		END  
+	END    
 END
 
 --removed first the constraint

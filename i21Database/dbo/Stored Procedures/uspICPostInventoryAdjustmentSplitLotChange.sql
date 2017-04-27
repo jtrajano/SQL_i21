@@ -55,7 +55,7 @@ BEGIN
 			WHERE intItemId = @intItemId		
 
 			-- 'The UOM is missing on {Item}.'
-			RAISERROR(80039, 11, 1, @strItemNo);
+			RAISERROR('The UOM is missing on %s.', 11, 1, @strItemNo);
 			RETURN -1
 		END
 
@@ -79,7 +79,7 @@ BEGIN
 			WHERE intItemId = @intItemId		
 
 			-- 'Split Lot requires a negative Adjust Qty on %s to split stocks from it.'
-			RAISERROR(80057, 11, 1, @strItemNo);
+			RAISERROR('Split Lot requires a negative Adjust Qty on %s to split stocks from it.', 11, 1, @strItemNo);
 			RETURN -1
 		END
 	END 
@@ -104,7 +104,7 @@ BEGIN
 		IF @intLotId IS NOT NULL 
 		BEGIN
 			-- 'Split Lot for %s is not allowed because it will be a split to the same lot number, location, sub location, and storage location.'
-			RAISERROR(80073, 11, 1, @strLotNumber)  
+			RAISERROR('Split Lot for %s is not allowed because it will be a split to the same lot number, location, storage location, and storage unit.', 11, 1, @strLotNumber)  
 			RETURN -1
 		END
 	END 
@@ -132,7 +132,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN
 			-- --'The new Item Location is invalid or missing for %s.'
-			RAISERROR(80083, 11, 1, @strItemNo)  
+			RAISERROR('The new Item Location is invalid or missing for %s.', 11, 1, @strItemNo)  
 			RETURN -1
 		END		
 	END 

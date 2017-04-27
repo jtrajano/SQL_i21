@@ -56,7 +56,7 @@ BEGIN
 			WHERE intItemId = @intItemId		
 
 			-- 'The UOM is missing on {Item}.'
-			RAISERROR(80039, 11, 1, @strItemNo);
+			RAISERROR('The UOM is missing on %s.', 11, 1, @strItemNo);
 			RETURN -1
 		END
 
@@ -80,7 +80,7 @@ BEGIN
 			WHERE intItemId = @intItemId		
 
 			-- 'Lot Move requires a negative Adjust Qty on %s as stock for the move.'
-			RAISERROR(80059, 11, 1, @strItemNo);
+			RAISERROR('Lot Move requires a negative Adjust Qty on %s as stock for the move.', 11, 1, @strItemNo);
 			RETURN -1
 		END
 	END 
@@ -105,7 +105,7 @@ BEGIN
 		IF @intLotId IS NOT NULL 
 		BEGIN
 			-- 'The lot {lot number} is assigned to the same item. Item change requires a different item.'
-			RAISERROR(80074, 11, 1, @strLotNumber)  
+			RAISERROR('The lot %s is assigned to the same item. Item change requires a different item.', 11, 1, @strLotNumber)  
 			RETURN -1
 		END
 	END 
@@ -129,7 +129,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN
 			-- 'Item %s is invalid. It must be lot tracked.'
-			RAISERROR(80075, 11, 1, @strNewItemNo); 
+			RAISERROR('Item %s is invalid. It must be lot tracked.', 11, 1, @strNewItemNo); 
 			RETURN -1
 		END
 	END 
@@ -157,7 +157,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN
 			-- --'The new Item Location is invalid or missing for %s.'
-			RAISERROR(80083, 11, 1, @strItemNo)  
+			RAISERROR('The new Item Location is invalid or missing for %s.', 11, 1, @strItemNo)  
 			RETURN -1
 		END		
 	END 

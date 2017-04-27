@@ -18,7 +18,7 @@ RETURN (
 	SELECT * FROM (
 		-- Failed. Invalid G/L account id found.
 		SELECT	strTransactionId
-				,strText = FORMATMESSAGE(60001)
+				,strText = 'Invalid G/L account id found.'
 				,intErrorCode = 60001
 				,strModuleName
 		FROM	@GLEntriesToValidate GLEntries 
@@ -27,7 +27,7 @@ RETURN (
 		-- Debit and credit amounts are not balanced.
 		UNION ALL 
 		SELECT	SubQuery.strTransactionId
-				,strText = FORMATMESSAGE(60003)
+				,strText = 'Debit and credit amounts are not balanced.'
 				,intErrorCode = 60003
 				,strModuleName
 		FROM	(
@@ -46,7 +46,7 @@ RETURN (
 		-- Allow audit adjustment transactions to be posted to a closed fiscal year period
 		UNION ALL 
 		SELECT	strTransactionId
-				,strText = FORMATMESSAGE(60004)
+				,strText = 'Unable to find an open fiscal year period to match the transaction date.'
 				,intErrorCode = 60004
 				,strModuleName
 		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate WHERE ISNULL(strCode, '') !='AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
@@ -56,7 +56,7 @@ RETURN (
 
 		-- G/L entries are expected. Cannot continue because it is missing.
 		SELECT	strTransactionId = NULL 
-				,strText = FORMATMESSAGE(60005)
+				,strText = 'G/L entries are expected. Cannot continue because it is missing.'
 				,intErrorCode = 60005
 				,strModuleName = NULL
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM @GLEntriesToValidate)
@@ -64,7 +64,7 @@ RETURN (
 		--Cannot continue if Module status in fiscal year period is closed (CM,AR,INV,AP)
 		UNION ALL 
 		SELECT	strTransactionId
-				,strText = FORMATMESSAGE(60009,strModuleName)
+				,strText = 'Unable to find an open fiscal year period for %s module to match the transaction date.'
 				,intErrorCode = 60009
 				,strModuleName
 		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate WHERE ISNULL(strCode, '') !='AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries

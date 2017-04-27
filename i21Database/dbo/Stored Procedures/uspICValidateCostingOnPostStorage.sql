@@ -61,14 +61,14 @@ FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostStorageErrors(I
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80001)
 BEGIN 
-	RAISERROR(80001, 11, 1)
+	RAISERROR('Item id is invalid or missing.', 11, 1)
 	RETURN -1
 END 
 
 -- Check for invalid location in the item-location setup. 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80002)
 BEGIN 
-	RAISERROR(80002, 11, 1)
+	RAISERROR('Item Location is invalid or missing for %s.', 11, 1)
 	RETURN -1
 END 
 
@@ -90,7 +90,7 @@ BEGIN
 				ON Errors.intItemId = Item.intItemId
 	WHERE	intErrorCode = 80003
 
-	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName)
+	RAISERROR('Negative stock quantity is not allowed for %s in %s.', 11, 1, @strItemNo, @strLocationName)
 	RETURN -1
 END 
 
@@ -104,7 +104,7 @@ WHERE	intErrorCode = 80023
 IF @strItemNo IS NOT NULL 
 BEGIN 
 	-- 'Missing costing method setup for item {Item}.'
-	RAISERROR(80023, 11, 1, @strItemNo)
+	RAISERROR('Missing costing method setup for item %s.', 11, 1, @strItemNo)
 	RETURN -1
 END 
 
@@ -118,7 +118,7 @@ WHERE	intErrorCode = 80022
 IF @strItemNo IS NOT NULL 
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
-	RAISERROR(80022, 11, 1, @strItemNo)
+	RAISERROR('The status of %s is Discontinued.', 11, 1, @strItemNo)
 	RETURN -1
 END 
 
@@ -137,7 +137,7 @@ WHERE	intErrorCode = 80066
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Inventory Count is ongoing for Item {Item Name} and is locked under Location {Location Name}.'
-	RAISERROR(80066, 11, 1, @strItemNo, @strLocationName)
+	RAISERROR('Inventory Count is ongoing for Item %s and is locked under Location %s.', 11, 1, @strItemNo, @strLocationName)
 	RETURN -1
 END 
 GO

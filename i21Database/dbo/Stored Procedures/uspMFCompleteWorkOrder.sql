@@ -373,7 +373,7 @@ BEGIN TRY
 			IF @ysnExcessConsumptionAllowed = 0
 			BEGIN
 				RAISERROR (
-						51116
+						'The quantity to be consumed must not exceed the selected lot quantity.'
 						,14
 						,1
 						)

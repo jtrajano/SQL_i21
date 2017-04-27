@@ -16,7 +16,7 @@ BEGIN
 	-- ## End Note. 
 
 	-- [Item, Qty, Cost]: {Item No}, {Qty}, {Cost}.
-	SET @result = FORMATMESSAGE(80159, @strItemNo, @strQty, @strCost)
+	SET @result = FORMATMESSAGE('Item: %s, Qty: %s, Cost: %s', @strItemNo, @strQty, @strCost)
 	
 	RETURN @result;
 END

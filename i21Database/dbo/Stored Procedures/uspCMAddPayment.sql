@@ -57,7 +57,7 @@ IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 -- Check for duplicate transaction id. 
 IF EXISTS (SELECT TOP 1 1 FROM [dbo].[tblCMBankTransaction] WHERE strTransactionId = @strTransactionId)
 BEGIN
-	RAISERROR(70015, 11, 1, @strTransactionId)
+	RAISERROR('The transaction id %s already exists. Please ask your local administrator to check the starting numbers setup.', 11, 1, @strTransactionId)
 	GOTO uspCMAddPayment_Rollback
 END
 

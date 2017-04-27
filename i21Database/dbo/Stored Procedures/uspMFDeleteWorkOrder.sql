@@ -37,7 +37,7 @@ BEGIN TRY
 	IF EXISTS(SELECT *FROM tblMFScheduleWorkOrder WHERE intWorkOrderId=@intWorkOrderId)
 	BEGIN
 		RAISERROR (
-			51183
+			'Transaction exists for this record, record cannot be deleted.'
 			,11
 			,1
 			)

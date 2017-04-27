@@ -53,7 +53,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51140
+				'The work order that you clicked on no longer exists. This is quite possible, if a packaging operator has deleted the work order and your iMake client is yet to refresh the screen.'
 				,11
 				,1
 				)
@@ -126,7 +126,7 @@ BEGIN TRY
 			SELECT @strCalculatedInputLotToleranceQty = @dblCalculatedInputLotToleranceQty
 
 			RAISERROR (
-					90004
+					'The quantity you are trying to produce ( %s %s ) is less than the quantity allowed ( %s %s ) for the lot %s.'
 					,14
 					,1
 					,@strProducedQuantity

@@ -64,7 +64,7 @@ BEGIN TRY
 	IF ISNULL(@strLotNumber, '') = ''
 	BEGIN
 		RAISERROR (
-				51192
+				'Supplied lot is not available.'
 				,11
 				,1
 				)
@@ -73,7 +73,7 @@ BEGIN TRY
 	IF @dtmLotExpiryDate = @dtmNewExpiryDate
 	BEGIN
 		RAISERROR (
-				51180
+				'Old and new expiry date cannot be same.'
 				,11
 				,1
 				)
@@ -82,7 +82,7 @@ BEGIN TRY
 	IF @dtmLotCreateDate > @dtmNewExpiryDate
 	BEGIN
 		RAISERROR (
-				51193
+				'Expiry date should be later than the create date.'
 				,11
 				,1
 				)
@@ -95,7 +95,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				90008
+				'This lot is being managed in warehouse. All transactions should be done in warehouse module. You can only change the lot status from inventory view.'
 				,11
 				,1
 				)

@@ -36,7 +36,7 @@ DECLARE
 /*
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 	BEGIN   
-		RAISERROR(50013, 11, 1, 'Post')  
+		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')  
 		GOTO Post_Exit  
 	END   
 */

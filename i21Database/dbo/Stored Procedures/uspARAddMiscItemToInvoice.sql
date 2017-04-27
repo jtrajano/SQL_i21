@@ -59,7 +59,7 @@ SET @ZeroDecimal = 0.000000
 IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120001, 16, 1);
+			RAISERROR('Invoice does not exists!', 16, 1);
 		RETURN 0;
 	END
 
@@ -76,8 +76,8 @@ WHERE
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120003, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120003)	
+			RAISERROR('The company location from the target Invoice does not exists!', 16, 1);
+		SET @ErrorMessage = 'The company location from the target Invoice does not exists!'	
 		RETURN 0;
 	END	
 

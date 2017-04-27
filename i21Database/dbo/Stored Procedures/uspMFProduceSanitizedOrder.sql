@@ -233,7 +233,7 @@ BEGIN TRY
 		IF @dblOutputWeightPerQty <> @dblWeightPerQty
 		BEGIN
 			RAISERROR (
-					90003
+					'Weight per unit does not match with the existing lot, cannot proceed.'
 					,14
 					,1
 					)

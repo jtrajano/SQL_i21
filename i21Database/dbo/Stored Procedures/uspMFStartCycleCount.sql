@@ -76,7 +76,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51108
+				'The run is already trued up. you cannot continue.'
 				,11
 				,1
 				)
@@ -98,7 +98,7 @@ BEGIN TRY
 		WHERE [intEntityUserSecurityId] = @intUserSecurityID
 
 		RAISERROR (
-				51109
+				'The cycle count for this run is already started by ''%s'' on ''%s''. you cannot continue. The current run already cyclecounted by another user. you cannot continue.'
 				,11
 				,1
 				,@strSessionStartDateTime
@@ -124,7 +124,7 @@ BEGIN TRY
 	IF @dtmPlannedDateTime > @dtmCurrentDateTime
 	BEGIN
 		RAISERROR (
-				51102
+				'Cannot do the cycle count for future production date.'
 				,11
 				,1
 				)
@@ -139,7 +139,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51103
+				'No machines are configured for cyclecount this process.'
 				,11
 				,1
 				)
@@ -165,7 +165,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51104
+				'No valid input item is configured against the selected run, in Recipe configuration.'
 				,11
 				,1
 				)
@@ -201,7 +201,7 @@ BEGIN TRY
 		AND @intPriorWorkOrderId IS NOT NULL
 	BEGIN
 		RAISERROR (
-				51105
+				'The run ''%s'' prior to the current run has no cycle count entries. Please do cycle count and close the previous run before starting the cycle count for the current run.'
 				,11
 				,1
 				,@strPriorWorkOrderNo
@@ -269,7 +269,7 @@ BEGIN TRY
 			,W.intPlannedShiftId DESC
 
 		RAISERROR (
-				51106
+				'A cycle count for the item ''%s'' is already started for work order %s on %s for the target item ''%s''. Please complete the prior cycle count to continue.'
 				,11
 				,1
 				,@strInputItem
@@ -357,7 +357,7 @@ BEGIN TRY
 			AND W.intWorkOrderId <> @intWorkOrderId
 
 		RAISERROR (
-				51107
+				'A run for ''%s'' already exists for work order %s on %s which is using the same ingredient item ''%s''. Please complete the prior run to continue.'
 				,11
 				,1
 				,@strProductItem

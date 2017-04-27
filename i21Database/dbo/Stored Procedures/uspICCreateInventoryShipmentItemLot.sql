@@ -29,7 +29,7 @@ DECLARE
 IF NOT EXISTS( SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId)
 BEGIN
 	-- Inventory Shipment Line Item does not exist.  
-	RAISERROR(80067, 11, 1)  
+	RAISERROR('Inventory Shipment Line Item does not exist.', 11, 1)  
 	GOTO Post_Exit  
 END
 ELSE
@@ -48,7 +48,7 @@ END
 IF (@LotTracked = 0)
 BEGIN
 	-- Item % is not a lot tracked item and cannot ship lots.  
-	RAISERROR(80068, 11, 1, @ItemNo)  
+	RAISERROR('Item % is not a lot tracked item and cannot ship lots.', 11, 1, @ItemNo)  
 	GOTO Post_Exit  
 END
 
@@ -56,7 +56,7 @@ END
 IF NOT EXISTS( SELECT TOP 1 1 FROM tblICLot WHERE intLotId = @intLotId)
 BEGIN
 	-- Invalid lot.  
-	RAISERROR(80020, 11, 1)  
+	RAISERROR('Invalid Lot.', 11, 1)  
 	GOTO Post_Exit  
 END
 ELSE
@@ -72,7 +72,7 @@ END
 IF (@dblShipQty > @AvailableQty)
 BEGIN
 	-- % has only % available quantity. Cannot ship more than the available qty.  
-	RAISERROR(80068, 11, 1, @LotNo, @AvailableQty)  
+	RAISERROR('Item % is not a lot tracked item and cannot ship lots.', 11, 1, @LotNo, @AvailableQty)  
 	GOTO Post_Exit  
 END
 

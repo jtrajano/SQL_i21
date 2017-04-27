@@ -47,7 +47,7 @@ BEGIN
 	IF @strRelatedTransactionId IS NOT NULL 
 	BEGIN 
 		-- 'Unable to unpost because {Item} has a cost adjustment from {Transaction Id}.'
-		RAISERROR(80063, 11, 1, @strItemNo, @strRelatedTransactionId)  
+		RAISERROR('Unable to unpost because %s has a cost adjustment from %s.', 11, 1, @strItemNo, @strRelatedTransactionId)  
 		RETURN -1;
 	END 
 END 

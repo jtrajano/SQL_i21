@@ -21,28 +21,28 @@ SELECT @intItemId = intItemId FROM tblICItem WHERE strItemNo = @strItemNo
 IF @intItemId IS NULL AND @strItemNo IS NOT NULL 
 BEGIN 
 	-- 'Item id is invalid or missing.'
-	RAISERROR(80001, 11, 1)
+	RAISERROR('Item id is invalid or missing.', 11, 1)
 	RETURN -1; 
 END
 
 -- 'Unable to find an open fiscal year period to match the transaction date.'
 IF (dbo.isOpenAccountingDate(@dtmStartDate) = 0) 
 BEGIN 
-	RAISERROR(50005, 11, 1)
+	RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)
 	RETURN -1; 
 END 
 
 -- Unable to find an open fiscal year period for %s module to match the transaction date.
 IF (dbo.isOpenAccountingDateByModule(@dtmStartDate,'Inventory') = 0)
 BEGIN 
-	RAISERROR(51189, 11, 1, 'Inventory')
+	RAISERROR('Unable to find an open fiscal year period for %s module to match the transaction date.', 11, 1, 'Inventory')
 	RETURN -1; 
 END 
 
 -- Unable to find an open fiscal year period for %s module to match the transaction date.
 IF (dbo.isOpenAccountingDateByModule(@dtmStartDate,'Accounts Receivable') = 0)
 BEGIN 
-	RAISERROR(51189, 11, 1, 'Accounts Receivable')
+	RAISERROR('Unable to find an open fiscal year period for %s module to match the transaction date.', 11, 1, 'Accounts Receivable')
 	RETURN -1; 
 END 
 
@@ -2281,7 +2281,7 @@ BEGIN
 			IF ISNULL(@intReturnCode, 0) <> 0 
 			BEGIN 
 				-- 'Unable to repost. Item id: {Item No}. Transaction id: {Trans Id}. Batch id: {Batch Id}. Account Category: {Account Category}.'
-				RAISERROR(80139, 11, 1, @strItemNo, @strTransactionId, @strBatchId, @strAccountToCounterInventory) 
+				RAISERROR('Unable to repost. Item id: %s. Transaction id: %s. Batch id: %s. Account Category: %s.', 11, 1, @strItemNo, @strTransactionId, @strBatchId, @strAccountToCounterInventory) 
 				GOTO _EXIT_WITH_ERROR
 			END 
 		END 
