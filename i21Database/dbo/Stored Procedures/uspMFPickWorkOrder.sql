@@ -1345,7 +1345,7 @@ BEGIN TRY
 				WHERE intUnitMeasureId = @intUnitMeasureId
 
 				RAISERROR (
-						51096
+						'Item %s is having %s%s quantity which is less than the required quantity %s%s.'
 						,11
 						,1
 						,@strItemNo
@@ -1834,7 +1834,7 @@ BEGIN TRY
 		WHERE intItemId = @intInputItemId
 
 		RAISERROR (
-				51095
+				'The input lots for the item %s are expired / inactive / unavailable. Cannot produce.'
 				,11
 				,1
 				,@strItemNo

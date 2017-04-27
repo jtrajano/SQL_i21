@@ -45,7 +45,7 @@ IF EXISTS (
 )
 BEGIN 
 	-- A failed check is misisng a reason.
-	RAISERROR(70011, 11, 1)
+	RAISERROR('A failed check is misisng a reason.', 11, 1)
 	GOTO _ROLLBACK
 END
 		

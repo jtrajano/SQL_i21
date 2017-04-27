@@ -81,7 +81,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				80020
+				'Invalid Lot.'
 				,11
 				,1
 				)

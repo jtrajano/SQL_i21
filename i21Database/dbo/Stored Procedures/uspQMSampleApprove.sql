@@ -207,7 +207,7 @@ BEGIN TRY
 				IF @intUserSampleApproval = 1 -- User Check
 				BEGIN
 					RAISERROR (
-							90025
+							'Sample is %s by different %s. You do not have permission to %s it.'
 							,11
 							,1
 							,'rejected'
@@ -231,7 +231,7 @@ BEGIN TRY
 					IF @intApproveRejectUserRoleID <> @intUserRoleID
 					BEGIN
 						RAISERROR (
-								90025
+								'Sample is %s by different %s. You do not have permission to %s it.'
 								,11
 								,1
 								,'rejected'

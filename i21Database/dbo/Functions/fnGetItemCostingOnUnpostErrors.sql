@@ -18,7 +18,7 @@ RETURN (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText =	FORMATMESSAGE(
-								80003
+								'Negative stock quantity is not allowed for %s in %s.'
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,dbo.fnFormatMsg80003(
 									@intItemLocationId
@@ -64,7 +64,7 @@ RETURN (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText =	FORMATMESSAGE(
-								80003
+								'Negative stock quantity is not allowed for %s in %s.'
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,dbo.fnFormatMsg80003(
 									@intItemLocationId
@@ -108,7 +108,7 @@ RETURN (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText = FORMATMESSAGE(
-								80066
+								'Inventory Count is ongoing for Item %s and is locked under Location %s.'
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,(
 									SELECT	tblSMCompanyLocation.strLocationName 

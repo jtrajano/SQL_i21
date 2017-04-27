@@ -101,7 +101,7 @@ SET @ZeroDecimal = 0.000000
 IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120001, 16, 1);
+			RAISERROR('Invoice does not exists!', 16, 1);
 		RETURN 0;
 	END
 
@@ -119,16 +119,16 @@ WHERE
 IF NOT EXISTS(SELECT NULL FROM tblICItem IC WHERE IC.[intItemId] = @ItemId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120002, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120002)
+			RAISERROR('Item does not exists!', 16, 1);
+		SET @ErrorMessage = 'Item does not exists!'
 		RETURN 0;
 	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120003, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120003)
+			RAISERROR('The company location from the target Invoice does not exists!', 16, 1);
+		SET @ErrorMessage = 'The company location from the target Invoice does not exists!'
 		RETURN 0;
 	END		
 	
@@ -137,8 +137,8 @@ IF NOT EXISTS(	SELECT NULL
 				WHERE IC.[intItemId] = @ItemId AND IL.[intLocationId] = @CompanyLocationId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120004, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120004)
+			RAISERROR('The item was not set up to be available on the specified location!', 16, 1);
+		SET @ErrorMessage = 'The item was not set up to be available on the specified location!'
 		RETURN 0;
 	END
 	

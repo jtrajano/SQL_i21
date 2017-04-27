@@ -40,7 +40,7 @@ FROM	@Items Item CROSS APPLY dbo.fnGetProcessToInventoryReceiptErrors(Item.intIt
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80001)
 BEGIN 
-	RAISERROR(80001, 11, 1)
+	RAISERROR('Item id is invalid or missing.', 11, 1)
 	GOTO _Exit
 END 
 

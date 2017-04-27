@@ -41,7 +41,7 @@ IF @ShipmentNumber IS NULL
 BEGIN 
 	-- Raise the error:
 	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
-	RAISERROR(50030, 11, 1);
+	RAISERROR('Unable to generate the Transaction Id. Please ask your local administrator to check the starting numbers setup.', 11, 1);
 	RETURN;
 END 
 
@@ -182,7 +182,7 @@ IF @InventoryShipmentId IS NULL
 BEGIN 
 	-- Raise the error:
 	-- Unable to generate the Inventory Shipment. An error stopped the process from Sales Order to Inventory Shipment.
-	RAISERROR(80029, 11, 1);
+	RAISERROR('Unable to generate the Inventory Shipment. An error stopped the process from Sales Order to Inventory Shipment.', 11, 1);
 	RETURN;
 END
 

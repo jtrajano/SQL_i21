@@ -69,7 +69,7 @@ BEGIN
 				SET @strItemNo = 'an item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
 
 			-- 'Please correct the unit qty in UOM {UOM} on {Item}.'
-			RAISERROR(80017, 11, 1, @strUnitMeasure, @strItemNo) 
+			RAISERROR('Please correct the unit qty in UOM %s on %s.', 11, 1, @strUnitMeasure, @strItemNo) 
 			RETURN -1; 			 
 		END 
 	END 
@@ -121,7 +121,7 @@ BEGIN
 		SET @FormattedDifference =  CAST(ABS(@OpenReceiveQty - @LotQtyInItemUOM) AS NVARCHAR(50))
 
 		-- 'The Qty to Receive for {Item} is {Open Receive Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
-		RAISERROR(80006, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+		RAISERROR('The Qty to Receive for %s is %s. Total Lot Quantity is %s. The difference is %s.', 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
 		RETURN -1; 
 	END 
 
@@ -182,7 +182,7 @@ BEGIN
 		SET @FormattedDifference =  CAST(ABS(@ReceiptItemNet - @LotQtyInItemUOM) AS NVARCHAR(50))
 
 		-- 'Net quantity mismatch. It is {@FormattedReceiptItemNet} on item {@strItemNo} but the total net from the lot(s) is {@FormattedLotQty}.'
-		RAISERROR(80081, 11, 1, @FormattedReceiptItemNet, @strItemNo, @FormattedLotQty)  
+		RAISERROR('Net quantity mismatch. It is %s on item %s but the total net from the lot(s) is %s.', 11, 1, @FormattedReceiptItemNet, @strItemNo, @FormattedLotQty)  
 		RETURN -1; 
 	END 
 END

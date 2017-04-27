@@ -138,7 +138,7 @@ GROUP BY RawData.intEntityVendorId
 IF NOT EXISTS (SELECT TOP 1 1 FROM @DataForReceiptHeader)
 BEGIN 
 	-- 'Data not found. Unable to create the Inventory Receipt.'
-	RAISERROR(80055, 11, 1);	
+	RAISERROR('Data not found. Unable to create the Inventory Receipt.', 11, 1);	
 	GOTO _Exit;
 END 
 
@@ -188,7 +188,7 @@ BEGIN
 		IF RTRIM(LTRIM(LOWER(@valueReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order')
 			BEGIN
 				--Receipt Type is invalid or missing.
-				RAISERROR(80134, 11, 1);
+				RAISERROR('Receipt Type is invalid or missing.', 11, 1);
 				GOTO _Exit_With_Rollback;
 			END
 			
@@ -202,7 +202,7 @@ BEGIN
 				  )
 			BEGIN
 				-- Vendor Id is invalid or missing.
-				RAISERROR(80135, 11, 1);
+				RAISERROR('Vendor Id is invalid or missing.', 11, 1);
 				GOTO _Exit_With_Rollback;
 			END
 
@@ -216,7 +216,7 @@ BEGIN
 				  )
 			BEGIN
 				-- Ship From Id is invalid or missing.
-				RAISERROR(80136, 11, 1);
+				RAISERROR('Ship From Id is invalid or missing.', 11, 1);
 				GOTO _Exit_With_Rollback;
 			END
 
@@ -230,7 +230,7 @@ BEGIN
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE intCompanyLocationId = @valueLocationId)
 			BEGIN
 				-- Location Id is invalid or missing.
-				RAISERROR(80137, 11, 1);
+				RAISERROR('Location Id is invalid or missing.', 11, 1);
 				GOTO _Exit_With_Rollback;
 			END
 
@@ -247,7 +247,7 @@ BEGIN
 				DECLARE @valueShipViaIdStr NVARCHAR(50)
 				SET @valueShipViaIdStr = CAST(@valueShipViaId AS NVARCHAR(50))
 				-- Ship Via Id {Ship Via Id} is invalid.
-				RAISERROR(80138, 11, 1, @valueShipViaIdStr);
+				RAISERROR('Ship Via Id %s is invalid.', 11, 1, @valueShipViaIdStr);
 				GOTO _Exit_With_Rollback;
 			END
 
@@ -277,7 +277,7 @@ BEGIN
 				DECLARE @valueFreightTermIdStr NVARCHAR(50)
 				SET @valueFreightTermIdStr = CAST(@valueFreightTermId AS NVARCHAR(50))
 				-- Freight Term Id {Freight Term Id} is invalid.
-				RAISERROR(80114, 11, 1, @valueFreightTermIdStr);
+				RAISERROR('Freight Term Id %s is invalid.', 11, 1, @valueFreightTermIdStr);
 				GOTO _Exit_With_Rollback;
 			END
 
@@ -291,7 +291,7 @@ BEGIN
 		IF @valueSourceTypeId IS NULL OR @valueSourceTypeId > 4 OR @valueSourceTypeId < 0
 			BEGIN
 				-- Source Type Id is invalid or missing.
-				RAISERROR(80115, 11, 1);
+				RAISERROR('Source Type Id is invalid or missing.', 11, 1);
 				GOTO _Exit_With_Rollback;
 			END
 
@@ -317,7 +317,7 @@ BEGIN
 			WHERE	intInventoryReceiptId = @inventoryReceiptId
 
 			-- 'Unable to update %s. It is posted. Please unpost it first.'
-			RAISERROR(80077, 11, 1, @receiptNumber);	
+			RAISERROR('Unable to update %s. It is posted. Please unpost it first.', 11, 1, @receiptNumber);	
 			GOTO _Exit_With_Rollback;
 		END
 				
@@ -473,7 +473,7 @@ BEGIN
 		IF @inventoryReceiptId IS NULL 
 		BEGIN 
 			-- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
-			RAISERROR(80004, 11, 1);
+			RAISERROR('Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.', 11, 1);
 			RETURN;
 		END
 
@@ -496,7 +496,7 @@ BEGIN
 			SET @valueItemIdStr = CAST(@valueItemId AS NVARCHAR(50))
 
 			-- Item Id {Item Id} invalid.
-			RAISERROR(80117, 11, 1, @valueItemIdStr);
+			RAISERROR('Item Id %s is invalid.', 11, 1, @valueItemIdStr);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -514,7 +514,7 @@ BEGIN
 			DECLARE @valueTaxGroupIdStr NVARCHAR(50)
 			SET @valueTaxGroupIdStr = CAST(@valueTaxGroupId AS NVARCHAR(50))
 			-- Tax Group Id {Tax Group Id} is invalid.
-			RAISERROR(80116, 11, 1, @valueTaxGroupIdStr);
+			RAISERROR('Tax Group Id %s is invalid.', 11, 1, @valueTaxGroupIdStr);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -533,7 +533,7 @@ BEGIN
 			DECLARE @valueContractHeaderIdStr NVARCHAR(50)
 			SET @valueContractHeaderIdStr = CAST(@valueContractHeaderId AS NVARCHAR(50))
 			-- Contract Header Id {Contract Header Id} is invalid.
-			RAISERROR(80118, 11, 1, @valueContractHeaderIdStr);
+			RAISERROR('Contract Header Id %s is invalid.', 11, 1, @valueContractHeaderIdStr);
 			GOTO _Exit_With_Rollback;
 		END
 			
@@ -551,7 +551,7 @@ BEGIN
 		BEGIN
 			SET @valueContractHeaderIdStr =  CAST(@valueContractHeaderId AS NVARCHAR(50));
 			-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
-			RAISERROR(80119, 11, 1, @valueContractHeaderIdStr);
+			RAISERROR('Contract Detail Id is invalid or missing for Contract Header Id %s.', 11, 1, @valueContractHeaderIdStr);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -572,7 +572,7 @@ BEGIN
 			WHERE intItemId = @getItemId
 
 			-- Item UOM Id is invalid or missing for lot {Item}.
-			RAISERROR(80120, 11, 1, @getItem);
+			RAISERROR('Item UOM Id is invalid or missing for item %s.', 11, 1, @getItem);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -597,7 +597,7 @@ BEGIN
 			WHERE	intItemId = @getItemId
 
 			-- Sub Location is invalid or missing for item {Item}.
-			RAISERROR(80097, 11, 1,@getItem);
+			RAISERROR('Storage Location is invalid or missing for item %s.', 11, 1,@getItem);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -621,7 +621,7 @@ BEGIN
 			WHERE intItemId = @getItemId
 
 			-- Storage Location is invalid for item {Item}.
-			RAISERROR(80098, 11, 1, @getItem);
+			RAISERROR('Storage Unit is invalid for item %s.', 11, 1, @getItem);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -643,7 +643,7 @@ BEGIN
 			WHERE	intItemId = @getItemId
 
 			-- Gross/Net UOM is invalid for item {Item}.
-			RAISERROR(80121, 11, 1, @getItem);
+			RAISERROR('Gross/Net UOM is invalid for item %s.', 11, 1, @getItem);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -665,7 +665,7 @@ BEGIN
 			WHERE intItemId = @getItemId
 
 			-- Cost UOM is invalid or missing for item {Item}.
-			RAISERROR(80122, 11, 1, @getItem);
+			RAISERROR('Cost UOM is invalid or missing for item %s.', 11, 1, @getItem);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -691,7 +691,7 @@ BEGIN
 			DECLARE @valueLotIdStr NVARCHAR(50)
 			SET @valueLotIdStr = CAST(@valueLotId AS NVARCHAR(50))
 			-- Lot ID {Lot Id} is invalid for item {Item}.
-			RAISERROR(80123, 11, 1, @valueLotIdStr, @getItem);
+			RAISERROR('Lot ID %s is invalid for item %s.', 11, 1, @valueLotIdStr, @getItem);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -886,7 +886,7 @@ BEGIN
 			WHERE	intItemId = @valueChargeId
 
 			-- Entity Id is invalid or missing for other charge item {Other Charge Item No.}.
-			RAISERROR(80140, 11, 1, @valueCharge);
+			RAISERROR('Entity Id is invalid or missing for other charge item %s.', 11, 1, @valueCharge);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -905,7 +905,7 @@ BEGIN
 			WHERE intItemId = @valueChargeId
 
 			-- Receipt type is invalid or missing for other charge item {Other Charge Item No.}.
-			RAISERROR(80141, 11, 1, @valueCharge);
+			RAISERROR('Receipt type is invalid or missing for other charge item %s.', 11, 1, @valueCharge);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -926,7 +926,7 @@ BEGIN
 			WHERE intItemId = @valueChargeId
 
 			-- Location Id is invalid or missing for other charge item {Other Charge Item No.}.
-			RAISERROR(80142, 11, 1, @valueCharge);
+			RAISERROR('Location Id is invalid or missing for other charge item %s.', 11, 1, @valueCharge);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -947,7 +947,7 @@ BEGIN
 			WHERE intItemId = @valueChargeId
 
 			-- Ship Via Id is invalid for other charge item {Other Charge Item No.}.
-			RAISERROR(80143, 11, 1, @valueCharge);
+			RAISERROR('Ship Via Id is invalid for other charge item %s.', 11, 1, @valueCharge);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -968,7 +968,7 @@ BEGIN
 			FROM tblICItem
 			WHERE intItemId = @valueChargeId
 			-- Ship From Id is invalid or missing for other charge item {Other Charge Item No.}.
-			RAISERROR(80144, 11, 1, @valueCharge);
+			RAISERROR('Ship From Id is invalid or missing for other charge item %s.', 11, 1, @valueCharge);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -1003,7 +1003,7 @@ BEGIN
 		)
 		BEGIN
 			-- Other Charge Item Id is invalid or missing.
-			RAISERROR(80124, 11, 1);
+			RAISERROR('Other Charge Item Id is invalid or missing.', 11, 1);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -1024,7 +1024,7 @@ BEGIN
 			WHERE intItemId = @valueChargeId
 
 			-- Cost Method for Other Charge item {Other Charge Item No.} is invalid or missing.
-			RAISERROR(80125, 11, 1, @valueCharge);
+			RAISERROR('Cost Method for Other Charge item %s is invalid or missing.', 11, 1, @valueCharge);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -1071,7 +1071,7 @@ BEGIN
 			WHERE intItemId = @valueChargeId
 
 			-- Cost UOM is invalid or missing for item {Charge Item No.}.
-			RAISERROR(80122, 11, 1, @valueCharge);
+			RAISERROR('Cost UOM is invalid or missing for item %s.', 11, 1, @valueCharge);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -1095,7 +1095,7 @@ BEGIN
 			WHERE intItemId = @valueChargeId
 
 			-- Vendor Id is invalid for other charge item {Other Charge Item No.}.
-			RAISERROR(80127, 11, 1, @valueCharge);
+			RAISERROR('Vendor Id is invalid for other charge item %s.', 11, 1, @valueCharge);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -1115,7 +1115,7 @@ BEGIN
 			WHERE intItemId = @valueChargeId
 
 			-- Allocate Cost By is invalid or missing for other charge item {Other Charge Item No.}.
-			RAISERROR(80128, 11, 1, @valueCharge);
+			RAISERROR('Allocate Cost By is invalid or missing for other charge item %s.', 11, 1, @valueCharge);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -1134,7 +1134,7 @@ BEGIN
 			DECLARE @valueOtherChargeContractHeaderIdStr AS NVARCHAR(50)
 			SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
 			-- Contract Header Id {Contract Header Id} is invalid.
-			RAISERROR(80118, 11, 1, @valueOtherChargeContractHeaderIdStr);
+			RAISERROR('Contract Header Id %s is invalid.', 11, 1, @valueOtherChargeContractHeaderIdStr);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -1153,7 +1153,7 @@ BEGIN
 		BEGIN
 			SET @valueOtherChargeContractHeaderIdStr = CAST(@valueOtherChargeContractHeaderId AS NVARCHAR(50))
 			-- Contract Detail Id is invalid or missing for Contract Header Id {Contract Header Id}.
-			RAISERROR(80119, 11, 1, @valueOtherChargeContractHeaderIdStr);
+			RAISERROR('Contract Detail Id is invalid or missing for Contract Header Id %s.', 11, 1, @valueOtherChargeContractHeaderIdStr);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -1172,7 +1172,7 @@ BEGIN
 			DECLARE @valueOtherChargeTaxGroupIdStr NVARCHAR(50)
 			SET @valueOtherChargeTaxGroupIdStr = CAST(@valueOtherChargeTaxGroupId AS NVARCHAR(50))
 			-- Tax Group Id {Tax Group Id} is invalid.
-			RAISERROR(80116, 11, 1, @valueOtherChargeTaxGroupIdStr);
+			RAISERROR('Tax Group Id %s is invalid.', 11, 1, @valueOtherChargeTaxGroupIdStr);
 			GOTO _Exit_With_Rollback;
 		END
 
@@ -1613,7 +1613,7 @@ BEGIN
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
 								-- Entity Id is invalid or missing for lot {Lot Number}.
-								RAISERROR(80146, 11, 1, @valueLotRecordNo);
+								RAISERROR('Entity Id is invalid or missing for lot %s.', 11, 1, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1627,7 +1627,7 @@ BEGIN
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
 								-- Receipt type is invalid or missing for lot {Lot Number}.
-								RAISERROR(80147, 11, 1, @valueLotRecordNo);
+								RAISERROR('Receipt type is invalid or missing for lot %s.', 11, 1, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1641,7 +1641,7 @@ BEGIN
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
 								-- Location Id is invalid or missing for lot {Lot Number}.
-								RAISERROR(80148, 11, 1, @valueLotRecordNo);
+								RAISERROR('Location Id is invalid or missing for lot %s.', 11, 1, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1655,7 +1655,7 @@ BEGIN
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
 								-- Ship Via Id is invalid for lot {Lot Number}.
-								RAISERROR(80149, 11, 1, @valueLotRecordNo);
+								RAISERROR('Ship Via Id is invalid for lot %s.', 11, 1, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1669,7 +1669,7 @@ BEGIN
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
 								-- Ship From Id is invalid or missing for lot {Lot Number}.
-								RAISERROR(80150, 11, 1, @valueLotRecordNo);
+								RAISERROR('Ship From Id is invalid or missing for lot %s.', 11, 1, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1697,7 +1697,7 @@ BEGIN
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
 								-- Source Type Id is invalid or missing for lot {Lot Number}.
-								RAISERROR(80152, 11, 1, @valueLotRecordNo);
+								RAISERROR('Source Type Id is invalid or missing for lot %s.', 11, 1, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1711,7 +1711,7 @@ BEGIN
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
 								-- Item Id is invalid or missing for lot {Lot Number}.
-								RAISERROR(80153, 11, 1, @valueLotRecordNo);
+								RAISERROR('Item Id is invalid or missing for lot %s.', 11, 1, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1725,7 +1725,7 @@ BEGIN
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
 								-- Sub Location is invalid or missing for {Lot Number}.
-								RAISERROR(80154, 11, 1, @valueLotRecordNo);
+								RAISERROR('Storage Location is invalid or missing for lot %s.', 11, 1, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1739,7 +1739,7 @@ BEGIN
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
 								-- 'Storage Location is invalid or missing for lot {Lot Number}.
-								RAISERROR(80155, 11, 1, @valueLotRecordNo);
+								RAISERROR('Storage Unit is invalid or missing for lot %s.', 11, 1, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1757,7 +1757,7 @@ BEGIN
 								DECLARE @valueLotRecordLotIdStr NVARCHAR(50)
 								SET @valueLotRecordLotIdStr = CAST(@valueLotRecordLotId AS NVARCHAR(50))
 								-- Lot ID {Lot Id} is invalid for lot {Lot Number}.
-								RAISERROR(80157, 11, 1, @valueLotRecordLotIdStr, @valueLotRecordNo);
+								RAISERROR('Lot ID %s is invalid for lot %s.', 11, 1, @valueLotRecordLotIdStr, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1779,7 +1779,7 @@ BEGIN
 								WHERE intItemId = @valueLotRecordItemId
 
 								-- Lot Number is invalid or missing for item {ItemNo.}.
-								RAISERROR(80130, 11, 1, @valueLotRecordItemNo);
+								RAISERROR('Lot Number is invalid or missing for item %s.', 11, 1, @valueLotRecordItemNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1795,7 +1795,7 @@ BEGIN
 							IF @valueLotRecordNo IS NOT NULL
 								BEGIN
 									-- Item UOM Id is invalid or missing for lot {Lot Number}.
-									RAISERROR(80156, 11, 1, @valueLotRecordNo);
+									RAISERROR('Item UOM Id is invalid or missing for lot %s.', 11, 1, @valueLotRecordNo);
 									GOTO _Exit_With_Rollback;
 								END
 
@@ -1812,7 +1812,7 @@ BEGIN
 							IF @valueLotRecordLotCondition IS NOT NULL
 								BEGIN
 									-- Lot Condition {Lot Condition} is invalid for lot {Lot Number}.
-									RAISERROR(80131, 11, 1, @valueLotRecordLotCondition, @valueLotRecordNo);
+									RAISERROR('Lot Condition %s is invalid for lot %s.', 11, 1, @valueLotRecordLotCondition, @valueLotRecordNo);
 									GOTO _Exit_With_Rollback;
 								END
 
@@ -1830,7 +1830,7 @@ BEGIN
 							BEGIN
 								SET @valueLotRecordParentLotIdStr = CAST(@valueLotRecordParentLotId AS NVARCHAR(50))
 								-- Parent Lot Id {Parent Lot Id} is invalid for lot {Lot Number}.
-								RAISERROR(80132, 11, 1, @valueLotRecordParentLotIdStr, @valueLotRecordNo);
+								RAISERROR('Parent Lot Id %s is invalid for lot %s.', 11, 1, @valueLotRecordParentLotIdStr, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 
@@ -1848,7 +1848,7 @@ BEGIN
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
 								-- Parent Lot Number is invalid or missing for lot {Lot Number}.
-								RAISERROR(80133, 11, 1, @valueLotRecordNo);
+								RAISERROR('Parent Lot Number is invalid or missing for lot %s.', 11, 1, @valueLotRecordNo);
 								GOTO _Exit_With_Rollback;
 							END
 

@@ -87,17 +87,17 @@ BEGIN
 	IF @intStartingNumberId = @STARTING_NUMBER_BATCH_LOT_NUMBER
 	BEGIN 
 		-- Unable to generate Lot Number. Please ask your local administrator to check the starting numbers setup.
-		RAISERROR(80031, 11, 1);
+		RAISERROR('Unable to generate Lot Number. Please ask your local administrator to check the starting numbers setup.', 11, 1);
 	END 
 	ELSE IF @intStartingNumberId = @STARTING_NUMBER_BATCH_ID
 	BEGIN 
 		-- 'Unable to generate the Batch Id. Please ask your local administrator to check the starting numbers setup.'
-		RAISERROR(51120, 11, 1);
+		RAISERROR('Unable to generate the Batch Id. Please ask your local administrator to check the starting numbers setup.', 11, 1);
 	END 
 	ELSE 
 	BEGIN 
 		-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
-		RAISERROR(50030, 11, 1);
+		RAISERROR('Unable to generate the Transaction Id. Please ask your local administrator to check the starting numbers setup.', 11, 1);
 	END 
 	RETURN;
 END 

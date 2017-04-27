@@ -16,5 +16,5 @@ BEGIN
 	-- Show the rebuild date as ODBC canonical (with milliseconds) 
 	SET @strRebuildDate = CONVERT(NVARCHAR(50), @dtmRebuildDate, 121)
 
-	RAISERROR(80084, 11, 1, @strRebuildDate)
+	RAISERROR('Check the Rebuild Valuation GL Snapshot. The original GL values changed when compared against the rebuild values. To check the discrepancies, run: SELECT * FROM vyuICCompareRebuildValuationSnapshot WHERE dtmRebuildDate = ''%s''', 11, 1, @strRebuildDate)
 END

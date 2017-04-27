@@ -42,19 +42,19 @@ BEGIN TRY
 
 	IF NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId	= @intCollateralUOMId)
 	BEGIN
-		RAISERROR(110002,16,1,@strUnitMeasure,@strTransNo,@strItemNo)
+		RAISERROR('UOM %s selected in Collateral %s is not configured for the item %s.',16,1,@strUnitMeasure,@strTransNo,@strItemNo)
 	END
 
 	SELECT @dblQuantityToUpdate = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intQtyUnitMeasureId,@intCollateralUOMId,@dblQuantityToUpdate)	
 
 	IF @dblRemainingQuantity - @dblQuantityToUpdate < 0
 	BEGIN
-		RAISERROR(110003,16,1,@strTransNo)
+		RAISERROR('Remaining quantity for Collateral %s cannot be negative.',16,1,@strTransNo)
 	END
 
 	IF @dblRemainingQuantity - @dblQuantityToUpdate > @dblCollateralQty
 	BEGIN
-		RAISERROR(110003,16,1,@strTransNo)
+		RAISERROR('Remaining quantity for Collateral %s cannot be negative.',16,1,@strTransNo)
 	END
 
 	SELECT	@strAdjustmentNo = @strTransNo + 'A' + LTRIM(CAST(ISNULL(MAX(RIGHT(strAdjustmentNo, CHARINDEX('A', REVERSE(strAdjustmentNo)) - 1)),0) AS INT) + 1)

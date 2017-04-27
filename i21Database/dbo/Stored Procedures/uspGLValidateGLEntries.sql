@@ -28,7 +28,7 @@ FROM	dbo.fnGetGLEntriesErrors(@GLEntriesToValidate) Errors;
 -- Failed. Invalid G/L account id found.
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60001)
 BEGIN 
-	RAISERROR(60001, 11, 1)
+	RAISERROR('Invalid G/L account id found.', 11, 1)
 	RETURN 60001
 	GOTO _Exit
 END;
@@ -36,7 +36,7 @@ END;
 -- Debit and credit amounts are not balanced.
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60003)
 BEGIN 
-	RAISERROR(60003, 11, 1)
+	RAISERROR('Debit and credit amounts are not balanced.', 11, 1)
 	RETURN 60003
 	GOTO _Exit
 END;
@@ -44,7 +44,7 @@ END;
 -- Unable to find an open fiscal year period to match the transaction date.
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60004)
 BEGIN 
-	RAISERROR(60004, 11, 1)
+	RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)
 	RETURN 60004
 	GOTO _Exit
 END 
@@ -52,7 +52,7 @@ END
 -- G/L entries are expected. Cannot continue because it is missing.
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60005)
 BEGIN 
-	RAISERROR(60005, 11, 1)
+	RAISERROR('G/L entries are expected. Cannot continue because it is missing.', 11, 1)
 	RETURN 60005
 	GOTO _Exit
 END 
@@ -62,7 +62,7 @@ END
 IF EXISTS(SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 60009)
 BEGIN 
 	DECLARE @strModuleName NVARCHAR(50) = (SELECT TOP 1 strModuleName FROM #FoundErrors WHERE intErrorCode = 60009)
-	RAISERROR(60009, 11, 1,@strModuleName)
+	RAISERROR('Unable to find an open fiscal year period for %s module to match the transaction date.', 11, 1,@strModuleName)
 	RETURN 60009
 	GOTO _Exit
 END 

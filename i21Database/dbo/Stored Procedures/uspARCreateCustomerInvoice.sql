@@ -173,16 +173,16 @@ ELSE
 IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120005, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120005)
+			RAISERROR('There is no setup for AR Account in the Company Configuration.', 16, 1);
+		SET @ErrorMessage = 'There is no setup for AR Account in the Company Configuration.'
 		RETURN 0;
 	END
 
 IF @ARAccountId IS NOT NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund') AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'AR Account' AND [intAccountId] =  @ARAccountId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120062, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120062)
+			RAISERROR('There account id provided is not a valid account of category "AR Account".', 16, 1);
+		SET @ErrorMessage = 'There account id provided is not a valid account of category "AR Account".'
 		RETURN 0;
 	END
 
@@ -191,16 +191,16 @@ IF @ARAccountId IS NULL AND @TransactionType IN ('Cash', 'Cash Refund')
 	BEGIN
 		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120063, 16, 1, @CompanyLocation);
-		SET @ErrorMessage = [dbo].[fnARGetSysMessage](120063, @CompanyLocation, DEFAULT)
+			RAISERROR('There is no Undeposited Funds account setup under Company Location - %s.', 16, 1, @CompanyLocation);
+		SET @ErrorMessage = [dbo].[fnARFormatMessage]('There is no Undeposited Funds account setup under Company Location - %s.', @CompanyLocation, DEFAULT)
 		RETURN 0;
 	END
 
 IF @ARAccountId IS NOT NULL AND @TransactionType IN ('Cash', 'Cash Refund') AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Undeposited Funds' AND [intAccountId] =  @ARAccountId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120064, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120064)
+			RAISERROR('There account id provided is not a valid account of category "Undeposited Funds".', 16, 1);
+		SET @ErrorMessage = 'There account id provided is not a valid account of category "Undeposited Funds".'
 		RETURN 0;
 	END
 
@@ -209,16 +209,16 @@ IF @ARAccountId IS NULL AND @TransactionType = 'Customer Prepayment'
 	BEGIN		
 		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120065, 16, 1, @CompanyLocation);
-		SET @ErrorMessage = [dbo].[fnARGetSysMessage](120065, @CompanyLocation, DEFAULT)
+			RAISERROR('There is no Customer Prepaid account setup under Company Location - %s.', 16, 1, @CompanyLocation);
+		SET @ErrorMessage = [dbo].[fnARFormatMessage]('There is no Customer Prepaid account setup under Company Location - %s.', @CompanyLocation, DEFAULT) 
 		RETURN 0;
 	END
 
 IF  @TransactionType = 'Customer Prepayment' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Customer Prepayments' AND [intAccountId] =  @ARAccountId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120066, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120066)
+			RAISERROR('There account id provided is not a valid account of category "Customer Prepayments".', 16, 1);
+		SET @ErrorMessage = 'There account id provided is not a valid account of category "Customer Prepayments".'
 		RETURN 0;
 	END
 
@@ -226,40 +226,40 @@ IF  @TransactionType = 'Customer Prepayment' AND NOT EXISTS (SELECT NULL FROM vy
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120025, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120025)
+			RAISERROR('The customer Id provided does not exists!', 16, 1);
+		SET @ErrorMessage = 'The customer Id provided does not exists!'
 		RETURN 0;
 	END
 
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId AND ysnActive = 1)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120026, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120026)
+			RAISERROR('The customer provided is not active!', 16, 1);
+		SET @ErrorMessage = 'The customer provided is not active!'
 		RETURN 0;
 	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120027, 16, 1);		
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120027)
+			RAISERROR('The company location Id provided does not exists!', 16, 1);		
+		SET @ErrorMessage = 'The company location Id provided does not exists!'
 		RETURN 0;
 	END	
 
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId AND ysnLocationActive = 1)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120028, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120028)
+			RAISERROR('The company location provided is not active!', 16, 1);
+		SET @ErrorMessage = 'The company location provided is not active!'
 		RETURN 0;
 	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120029, 16, 1);	
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120029)	
+			RAISERROR('The entity Id provided does not exists!', 16, 1);	
+		SET @ErrorMessage = 'The entity Id provided does not exists!'
 		RETURN 0;
 	END
 
@@ -272,40 +272,40 @@ ELSE
 IF ISNULL(@CurrencyId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM tblSMCurrency WHERE [intCurrencyID] = @CurrencyId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120030, 16, 1);
-		SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120030)	
+			RAISERROR('The currency Id provided does not exists!', 16, 1);
+		SET @ErrorMessage = 'The currency Id provided does not exists!'
 		RETURN 0;
 	END
  
 IF ISNULL(@DefaultCurrency,0) = 0
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120067, 16, 1);
-			SET @ErrorMessage = (SELECT [text] FROM sys.messages WHERE [message_id] = 120067)	
+			RAISERROR('There is no setup for default currency in the Company Configuration.', 16, 1);
+			SET @ErrorMessage = 'There is no setup for default currency in the Company Configuration.'
 		RETURN 0;
 	END
 
 IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment'))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120068, 16, 1, @TransactionType);
-		SET @ErrorMessage = [dbo].[fnARGetSysMessage](120068, @TransactionType, DEFAULT)
+			RAISERROR('%s is not a valid transaction type!', 16, 1, @TransactionType);
+		SET @ErrorMessage = [dbo].[fnARFormatMessage]('%s is not a valid transaction type!', @TransactionType, DEFAULT)
 		RETURN 0;
 	END
 
 IF (@Type NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice'))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120069, 16, 1, @TransactionType);
-		SET @ErrorMessage = [dbo].[fnARGetSysMessage](120069, @TransactionType, DEFAULT)
+			RAISERROR('%s is not a valid invoice type!', 16, 1, @TransactionType);
+		SET @ErrorMessage = [dbo].[fnARFormatMessage]('%s is not a valid invoice type!', @TransactionType, DEFAULT)
 		RETURN 0;
 	END
 
 IF (@UseOriginIdAsInvoiceNumber = 1 AND EXISTS (SELECT TOP 1 NULL FROM tblARInvoice WHERE strInvoiceNumber = @InvoiceOriginId))
 	BEGIN
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120075, 16, 1, @InvoiceOriginId);
-		SET @ErrorMessage = [dbo].[fnARGetSysMessage](120075, @InvoiceOriginId, DEFAULT)
+			RAISERROR('Transaction with Invoice Number - %s is already existing.', 16, 1, @InvoiceOriginId);
+		SET @ErrorMessage = [dbo].[fnARFormatMessage]('Transaction with Invoice Number - %s is already existing.', @InvoiceOriginId, DEFAULT)
 		RETURN 0;
 	END
 	

@@ -77,7 +77,7 @@ BEGIN TRY
 	IF @strLotNumber LIKE '%[@~$\`^&*()%?/<>!|\+;:",.{}'']%'
 	BEGIN
 		RAISERROR (
-				51061
+				'Special characters are not allowed for LotID.'
 				,11
 				,1
 				)
@@ -89,7 +89,7 @@ BEGIN TRY
 	If @ysnFillPartialPallet=0 and @ysnAddQtyOnExistingLot=0 and exists(Select *from dbo.tblICLot L JOIN dbo.tblMFWorkOrderProducedLot WP on L.intLotId=WP.intLotId Where strLotNumber =@strLotNumber and WP.ysnProductionReversed=0)
 	Begin
 		RAISERROR (
-				90030
+				'Pallet Id already exists'
 				,11
 				,1
 				)
@@ -100,7 +100,7 @@ BEGIN TRY
 		AND @intItemUOMId = @intItemUnitCountUOMId
 	BEGIN
 		RAISERROR (
-				51062
+				'Lot quantity and physical count should be equal when same UOM is selected.'
 				,11
 				,1
 				)
@@ -113,7 +113,7 @@ BEGIN TRY
 		AND @ysnNegativeQtyAllowed = 0
 	BEGIN
 		RAISERROR (
-				51063
+				'It is required to enter number of unit and weight to produce the lot.'
 				,11
 				,1
 				)
@@ -128,7 +128,7 @@ BEGIN TRY
 	IF @strItemNo IS NULL
 	BEGIN
 		RAISERROR (
-				51064
+				'Item is not available. It may have been deleted or inactive.'
 				,11
 				,1
 				)
@@ -137,7 +137,7 @@ BEGIN TRY
 	IF @strStatus = 'InActive'
 	BEGIN
 		RAISERROR (
-				51065
+				'The specified item ''%s'' is InActive. The transaction can not proceed.'
 				,11
 				,1
 				,@strItemNo
@@ -156,7 +156,7 @@ BEGIN TRY
 		WHERE intCompanyLocationId = @intLocationId
 
 		RAISERROR (
-				51092
+				'Please configure the location %s in the Item maintenance.'
 				,11
 				,1
 				,@strLocationName
@@ -167,7 +167,7 @@ BEGIN TRY
 	IF @intItemUnitCountUOMId IS NULL
 	BEGIN
 		RAISERROR (
-				51093
+				'Please configure the Packing UOM in the Item maintenance.'
 				,11
 				,1
 				)
@@ -194,7 +194,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51093
+				'Please configure the Packing UOM in the Item maintenance.'
 				,11
 				,1
 				)
@@ -207,7 +207,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51066
+				'Location is not available. It may have been deleted.'
 				,11
 				,1
 				)
@@ -221,7 +221,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51067
+				'Sub Location is not available. It may have been deleted.'
 				,11
 				,1
 				)
@@ -235,7 +235,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51068
+				'Storage Location is not available. It may have been deleted.'
 				,11
 				,1
 				)
@@ -248,7 +248,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51069
+				'Parent Storage Location is not allowed to hold a Lot.'
 				,11
 				,1
 				)
@@ -271,7 +271,7 @@ BEGIN TRY
 				)
 		BEGIN
 			RAISERROR (
-					51070
+					'The Storage Location is already used by other Lot.'
 					,11
 					,1
 					)
@@ -290,7 +290,7 @@ BEGIN TRY
 				)
 		BEGIN
 			RAISERROR (
-					51071
+					'The Storage Location is already used by other Lot for the Item ''%s'''
 					,11
 					,1
 					,@strItemNo
@@ -309,7 +309,7 @@ BEGIN TRY
 				)
 		BEGIN
 			RAISERROR (
-					51072
+					'The Storage Location is already used by other Item.'
 					,11
 					,1
 					)
@@ -338,7 +338,7 @@ BEGIN TRY
 		WHERE intStorageLocationId = @intExistingStorageLocationId
 
 		RAISERROR (
-				51073
+				'LotID ''%s'' already exists in this storage location ''%s''.'
 				,11
 				,1
 				,@strLotNumber
@@ -359,7 +359,7 @@ BEGIN TRY
 		WHERE intItemId = @intExistingiItemId
 
 		RAISERROR (
-				51074
+				'LotID ''%s'' has been configured with item ''%s'' in storage location ''%s''. Please select same item to proceed.'
 				,11
 				,1
 				,@strLotNumber
@@ -381,7 +381,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51076
+				'The Lot %s does not exist.'
 				,11
 				,1
 				,@strLotNumber
@@ -421,7 +421,7 @@ BEGIN TRY
 			AND @dtmCreated > @dtmCurrentDateTime
 		BEGIN
 			RAISERROR (
-					51075
+					'Lot cannot be produced in a future date or future shift.'
 					,11
 					,1
 					)
@@ -434,7 +434,7 @@ BEGIN TRY
 					AND RI.intRecipeItemTypeId = 2
 				)
 			RAISERROR (
-					80021
+					'Invalid Item.'
 					,11
 					,1
 					)
@@ -446,7 +446,7 @@ BEGIN TRY
 				)
 		BEGIN
 			RAISERROR (
-					51078
+					'The work order that you clicked on does not exist.'
 					,11
 					,1
 					)
@@ -460,7 +460,7 @@ BEGIN TRY
 				)
 		BEGIN
 			RAISERROR (
-					51079
+					'The work order that you clicked on is already completed.'
 					,11
 					,1
 					)
@@ -474,7 +474,7 @@ BEGIN TRY
 				)
 		BEGIN
 			RAISERROR (
-					51080
+					'The work order has been paused. Please re-start the WO to resume.'
 					,11
 					,1
 					)
@@ -491,7 +491,7 @@ BEGIN TRY
 				)
 		BEGIN
 			RAISERROR (
-					51081
+					'Work order is not in started state. Please start the work order.'
 					,11
 					,1
 					)
@@ -502,7 +502,7 @@ BEGIN TRY
 			AND @dblQuantity > @CasesPerPallet
 		BEGIN
 			RAISERROR (
-					51059
+					'The pallet lot quantity cannot exceed more than  item''s cases per pallet. Please check produce quantity.'
 					,11
 					,1
 					)
@@ -537,7 +537,7 @@ BEGIN TRY
 			SELECT @strUpperToleranceQuantity = @dblUpperToleranceQuantity
 
 			RAISERROR (
-					51083
+					'The attempted produce quantity of ''%s'' for material ''%s'' is more than the allowed production quantity with upper tolerance %s. The transaction will not be allowed to proceed.'
 					,11
 					,1
 					,@strQuantity
@@ -556,7 +556,7 @@ BEGIN TRY
 			SELECT @strLowerToleranceQuantity = @dblLowerToleranceQuantity
 
 			RAISERROR (
-					51084
+					'The attempted produce quantity of ''%s'' for material ''%s'' is more than the allowed production quantity with lower tolerance %s. The transaction will not be allowed to proceed.'
 					,11
 					,1
 					,@strQuantity
@@ -613,7 +613,7 @@ BEGIN TRY
 				)
 		BEGIN
 			RAISERROR (
-					51095
+					'The input lots for the item %s are expired / inactive / unavailable. Cannot produce.'
 					,11
 					,1
 					)
@@ -643,7 +643,7 @@ BEGIN TRY
 					AND @dblQuantity > @dblBatchSize
 				BEGIN
 					RAISERROR (
-							51121
+							'Entered quantity is greater than the configured batch size for the machine'
 							,11
 							,1
 							)
@@ -655,7 +655,7 @@ BEGIN TRY
 			AND @strLotAlias = ''
 		BEGIN
 			RAISERROR (
-					51122
+					'Lot Alias for Item ID ''%s'' Cannot be blank.'
 					,11
 					,1
 					,@strItemNo
@@ -686,7 +686,7 @@ BEGIN TRY
 			WHERE intManufacturingCellId = @intManufacturingCellId
 
 			RAISERROR (
-					90022
+					'%s has failed the quality test. Cannot proceed further.'
 					,11
 					,1
 					,@strCellName
@@ -728,7 +728,7 @@ BEGIN TRY
 				WHERE intManufacturingCellId = @intManufacturingCellId
 
 				RAISERROR (
-						90024
+						'Sample is not taken for the line %s for a while. Please take the sample and then produce the pallet'
 						,11
 						,1
 						,@strCellName

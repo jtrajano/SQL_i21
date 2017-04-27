@@ -302,7 +302,7 @@ BEGIN
 			SET @strLotNumber = ISNULL(@strLotNumber, '{Unknown lot}')
 
 			-- 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot %s in item %s that was posted in %s.'
-			RAISERROR(80071, 11, 1, @strLotNumber, @strItemNo, @strSourceTransactionId)  
+			RAISERROR('Cost adjustment cannot continue. Unable to find the cost bucket for the lot %s in item %s that was posted in %s.', 11, 1, @strLotNumber, @strItemNo, @strSourceTransactionId)  
 			RETURN -1 
 		END
 	END 

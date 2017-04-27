@@ -4,7 +4,7 @@
 AS
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblARQuotePage WHERE intQuotePageId = @intQuotePageId)
 		BEGIN
-			RAISERROR(120041, 16, 1)
+			RAISERROR('Invalid Quote Page ID.', 16, 1)
 			RETURN;
 		END
 

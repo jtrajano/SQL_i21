@@ -21,28 +21,28 @@ RETURN (
 	SELECT * FROM (
 		-- Check if the transaction still exists 
 		SELECT	intBankTransactionId = @intId
-				,strText = FORMATMESSAGE(50004)
+				,strText = FORMATMESSAGE('Cannot find the transaction.')
 				,intErrorCode = 50004
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankTransaction WHERE intTransactionId = @intId)	
 		
 		-- Check if the transaction is already cleared from the bank reconciliation 
 		UNION ALL 
 		SELECT	intBankTransactionId = @intId
-				,strText = FORMATMESSAGE(50009)
+				,strText = FORMATMESSAGE('The transaction is already cleared.')
 				,intErrorCode = 50009
 		WHERE	EXISTS (SELECT TOP 1 1 FROM tblCMBankTransaction WHERE intTransactionId = @intId AND ysnClr = 1)	
 		
 		-- Check if the transaction is already voided. 
 		UNION ALL 
 		SELECT	intBankTransactionId = @intId
-				,strText = FORMATMESSAGE(50012)
+				,strText = FORMATMESSAGE('Check is already voided.')
 				,intErrorCode = 50012
 		WHERE	EXISTS (SELECT TOP 1 1 FROM tblCMBankTransaction WHERE intTransactionId = @intId AND ysnCheckVoid = 1)
 		
 		-- Check if the bank account is inactive
 		UNION ALL 
 		SELECT	intBankTransactionId = @intId
-				,strText = FORMATMESSAGE(50010)
+				,strText = FORMATMESSAGE('The bank account or its associated GL account is inactive.')
 				,intErrorCode = 50010
 		WHERE	EXISTS (
 					SELECT	TOP 1 1 
@@ -55,7 +55,7 @@ RETURN (
 		-- Check if a check transaction is currently being printed. 
 		UNION ALL 
 		SELECT	intBankTransactionId = @intId
-				,strText = FORMATMESSAGE(50025)
+				,strText = FORMATMESSAGE('Unable to void while check printing is in progress.')
 				,intErrorCode = 50025
 		WHERE	EXISTS (
 					SELECT	TOP 1 1 

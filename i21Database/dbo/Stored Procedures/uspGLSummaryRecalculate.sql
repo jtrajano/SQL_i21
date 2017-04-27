@@ -10,7 +10,7 @@ BEGIN
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblGLDetail GROUP BY strTransactionId, ysnIsUnposted HAVING SUM(dblDebit-dblCredit)<>0 and ysnIsUnposted = 0)
 	BEGIN
-		RAISERROR(60010,16,1)--'Unable to recalculate summary. General Ledger Detail has out of balance transactions.'
+		RAISERROR('Unable to recalculate summary. General Ledger Detail has out of balance transactions.',16,1)--'Unable to recalculate summary. General Ledger Detail has out of balance transactions.'
 		RETURN
 	END
 	DELETE [dbo].[tblGLSummary]

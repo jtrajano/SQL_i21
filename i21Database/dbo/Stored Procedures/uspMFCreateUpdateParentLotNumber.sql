@@ -92,7 +92,7 @@ BEGIN
 			AND ISNUMERIC(Substring(@strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)) = 0
 		BEGIN
 			RAISERROR (
-					90031
+					'Invalid Lot Code'
 					,11
 					,1
 					)

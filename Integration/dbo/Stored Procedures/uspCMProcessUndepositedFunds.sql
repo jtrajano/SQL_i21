@@ -66,7 +66,7 @@ BEGIN
 
 			IF (ISNULL(@isValid, 1) = 0)  
 			BEGIN   
-				RAISERROR(70022,11,1)  
+				RAISERROR(''There is an outdated Undeposited Fund record. It may have been deposited from a different deposit transaction.'',11,1)  
 				IF @@ERROR <> 0 GOTO Exit_WithErrors   
 			END  
 
@@ -101,7 +101,7 @@ BEGIN
 
 			IF (ISNULL(@isValid, 1) = 0)  
 			BEGIN   
-				RAISERROR(70023,11,1)  
+				RAISERROR(''The Undeposited Fund amount was changed. It does not match the values from the origin system.'',11,1)  
 				IF @@ERROR <> 0 GOTO Exit_WithErrors   
 			END  
 
@@ -124,7 +124,7 @@ BEGIN
 
 			IF (ISNULL(@strInvalidTransactionId, '''') <> '''')  
 			BEGIN   
-				RAISERROR(70024,11,1, @strInvalidTransactionId)  
+				RAISERROR(''Please re-process the Undeposited Funds. It looks like one or more records of it is already posted in %s.'',11,1, @strInvalidTransactionId)  
 				IF @@ERROR <> 0 GOTO Exit_WithErrors   
 			END 
 		END   

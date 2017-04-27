@@ -36,7 +36,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51130
+				'Production run already trued up.'
 				,11
 				,1
 				)
@@ -62,7 +62,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51131
+				'Cycle count entries for the run not available, cannot proceed.'
 				,11
 				,1
 				)
@@ -87,7 +87,7 @@ BEGIN TRY
 				)
 		BEGIN
 			RAISERROR (
-					51132
+					'Please complete and save Cycle count entries for all the items before posting adjustment.'
 					,11
 					,1
 					)
@@ -124,7 +124,7 @@ BEGIN TRY
 		AND @intPriorWorkOrderId IS NOT NULL
 	BEGIN
 		RAISERROR (
-				51133
+				'Production run(s) prior to the current run has not been trued up, True up the earlier runs and proceed.'
 				,11
 				,1
 				)
@@ -152,7 +152,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51134
+				'No default consumption unit configured, cannot consume.'
 				,11
 				,1
 				)

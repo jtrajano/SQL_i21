@@ -165,7 +165,7 @@ BEGIN TRY
 		FROM tblMFManufacturingCell Where intManufacturingCellId =@intDraggedManufacturingCellId
 
 		RAISERROR (
-				90011
+				'Dragging this order from the current location will result in contamination between two adjacent orders %s, %s in this line: %s'
 				,14
 				,1
 				,@strWorkOrderNo1
@@ -216,7 +216,7 @@ BEGIN TRY
 		FROM tblMFManufacturingCell Where intManufacturingCellId =@intDroppedManufacturingCell
 
 		RAISERROR (
-				90012
+				'Dropping this order on the target location will result in contamination of either of the adjacent orders %s, %s of the line: %s'
 				,14
 				,1
 				,@strWorkOrderNo1
@@ -267,7 +267,7 @@ BEGIN TRY
 		FROM tblMFManufacturingCell Where intManufacturingCellId =@intDroppedManufacturingCell
 
 		RAISERROR (
-				90012
+				'Dropping this order on the target location will result in contamination of either of the adjacent orders %s, %s of the line: %s'
 				,14
 				,1
 				)
@@ -285,7 +285,7 @@ BEGIN TRY
 		--	)
 	BEGIN
 		RAISERROR (
-				90013
+				'This product is not configured for processing on this line: %s'
 				,14
 				,1
 				)

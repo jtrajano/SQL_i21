@@ -13,13 +13,13 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 	--VALIDATE DATES
 	IF @dtmStartDate IS NULL
 		BEGIN
-			RAISERROR(120043, 16, 1);
+			RAISERROR('Start Date is Required.', 16, 1);
 			RETURN 0;
 		END
 
 	IF @dtmEndDate IS NULL
 		BEGIN
-			RAISERROR(120044, 16, 1);
+			RAISERROR('End Date is Required.', 16, 1);
 			RETURN 0;
 		END
 

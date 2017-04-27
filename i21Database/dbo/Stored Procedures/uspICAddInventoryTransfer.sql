@@ -63,7 +63,7 @@ GROUP BY RawData.strTransferType
 IF NOT EXISTS (SELECT TOP 1 1 FROM @DataForInventoryTransferHeader)
 BEGIN 
 	-- 'Data not found. Unable to create the Inventory Transfer.'
-	RAISERROR(80060, 11, 1);	
+	RAISERROR('Data not found. Unable to create the Inventory Transfer.', 11, 1);	
 	GOTO _Exit;
 END 
 
@@ -108,7 +108,7 @@ BEGIN
 			WHERE	intInventoryTransferId = @inventoryTransferId
 
 			-- 'Unable to update %s. It is posted. Please unpost it first.'
-			RAISERROR(80077, 11, 1, @inventoryTransferNumber);	
+			RAISERROR('Unable to update %s. It is posted. Please unpost it first.', 11, 1, @inventoryTransferNumber);	
 			GOTO _Exit;
 		END
 				
@@ -204,7 +204,7 @@ BEGIN
 		IF @inventoryTransferId IS NULL 
 		BEGIN 
 			-- 'Unable to generate the Inventory Transfer. An error stopped the creation of the inventory transfer.'
-			RAISERROR(80061, 11, 1);
+			RAISERROR('Unable to generate the Inventory Transfer. An error stopped the creation of the inventory transfer.', 11, 1);
 			RETURN;
 		END
 

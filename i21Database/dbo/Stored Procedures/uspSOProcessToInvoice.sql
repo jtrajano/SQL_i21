@@ -14,14 +14,14 @@ SET ANSI_WARNINGS OFF
 --VALIDATE IF SO IS ALREADY CLOSED
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 
 	BEGIN
-		RAISERROR(120051, 16, 1)
+		RAISERROR('Sales Order already closed.', 16, 1)
 		RETURN;
 	END
 
 --VALIDATE IF SO HAS ZERO TOTAL AMOUNT
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [dblSalesOrderTotal]  = 0)
 	BEGIN
-		RAISERROR(120073, 16, 1)
+		RAISERROR('Cannot process Sales Order with zero(0) amount.', 16, 1)
 		RETURN;
 	END
 
@@ -29,7 +29,7 @@ IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrder
 IF NOT EXISTS (SELECT NULL FROM tblSOSalesOrder SO INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 				LEFT JOIN tblICItem I ON SI.intItemId = I.intItemId WHERE ISNULL(I.strLotTracking, 'No') = 'No' AND SO.intSalesOrderId = @SalesOrderId AND SI.dblQtyRemaining > 0)
 	BEGIN
-		RAISERROR(120053, 16, 1);
+		RAISERROR('Process To Invoice Failed. There is no item to process to Invoice.', 16, 1);
         RETURN;
 	END
 ELSE
