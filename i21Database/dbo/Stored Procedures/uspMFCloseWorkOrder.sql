@@ -26,6 +26,15 @@ BEGIN TRY
 		,@strWorkOrderNo NVARCHAR(50)
 		,@intBatchId INT
 		,@strUndoXML NVARCHAR(MAX)
+		,@strWIPSampleMandatory NVARCHAR(50)
+		,@intSampleStatusId INT
+		,@dtmSampleCreated DATETIME
+		,@strSampleNumber NVARCHAR(50)
+		,@dblProducedQuantity DECIMAL(24, 10)
+		,@strSampleTypeId NVARCHAR(MAX)
+		,@intSampleTypeId INT
+		,@strSampleTypeName NVARCHAR(50)
+		,@strCellName NVARCHAR(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -55,6 +64,8 @@ BEGIN TRY
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intLocationId = intLocationId
 		,@strWorkOrderNo = strWorkOrderNo
+		,@intManufacturingCellId = intManufacturingCellId
+		,@dblProducedQuantity = dblProducedQuantity
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -124,6 +135,79 @@ BEGIN TRY
 				,11
 				,1
 				)
+	END
+
+	SELECT @strWIPSampleMandatory = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 84
+
+	IF @strWIPSampleMandatory = 'True'
+		AND @dblProducedQuantity > 0
+	BEGIN
+		SELECT @strSampleTypeId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 97
+
+		SELECT @intSampleTypeId = Item Collate Latin1_General_CI_AS
+		FROM [dbo].[fnSplitString](@strSampleTypeId, ',') ST1
+		WHERE NOT EXISTS (
+				SELECT 1
+				FROM tblQMSample S
+				JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+				WHERE S.intProductTypeId = 12
+					AND S.intProductValueId = @intWorkOrderId
+					AND ST.intControlPointId = 11 --Line Sample
+					AND ST.intSampleTypeId = ST1.Item Collate Latin1_General_CI_AS
+				)
+
+		IF @intSampleTypeId IS NOT NULL
+		BEGIN
+			SELECT @strSampleTypeName = strSampleTypeName
+			FROM tblQMSampleType
+			WHERE intSampleTypeId = @intSampleTypeId
+
+			SELECT @strCellName = strCellName
+			FROM tblMFManufacturingCell
+			WHERE intManufacturingCellId = @intManufacturingCellId
+
+			RAISERROR (
+					'%s is not taken for the line %s. Please take the sample and then close the work order'
+					,11
+					,1
+					,@strSampleTypeName
+					,@strCellName
+					)
+		END
+
+		SELECT TOP 1 @strSampleNumber = S.strSampleNumber
+		FROM tblQMSample S
+		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+		WHERE S.intProductTypeId = 12
+			AND S.intProductValueId = @intWorkOrderId
+			AND ST.intControlPointId IN (
+				11
+				,12
+				) --Line / WIP Sample
+			AND S.intSampleStatusId = 1
+
+		IF @strSampleNumber IS Not NULL
+		BEGIN
+			SELECT @strCellName = strCellName
+			FROM tblMFManufacturingCell
+			WHERE intManufacturingCellId = @intManufacturingCellId
+
+			RAISERROR (
+					'The sample %s is not approved for the line %s. Please approve the sample and then close the work order'
+					,11
+					,1
+					,@strSampleNumber
+					,@strCellName
+					)
+		END
 	END
 
 	SELECT @intTransactionCount = @@TRANCOUNT

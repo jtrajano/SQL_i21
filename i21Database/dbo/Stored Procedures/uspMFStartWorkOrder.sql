@@ -9,19 +9,19 @@ BEGIN TRY
 		,@intItemId INT
 		,@intLocationId INT
 		,@strItemNo NVARCHAR(MAX)
-		,@intScheduleId int
-		,@strWorkOrderNo nvarchar(50)
+		,@intScheduleId INT
+		,@strWorkOrderNo NVARCHAR(50)
 		,@intSampleStatusId INT
 		,@strCellName NVARCHAR(50)
 		,@dtmSampleCreated DATETIME
-		,@strLineSampleMandatory NVARCHAR(50)
+		,@strWIPSampleMandatory NVARCHAR(50)
 		,@intDurationBetweenLineSample INT
 		,@dtmStartedDate DATETIME
 		,@intControlPointId INT
 		,@intSampleTypeId INT
-		,@intManufacturingCellId int
-		,@intManufacturingProcessId int
-		,@strSampleTypeName nvarchar(50)
+		,@intManufacturingCellId INT
+		,@intManufacturingProcessId INT
+		,@strSampleTypeName NVARCHAR(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -37,9 +37,9 @@ BEGIN TRY
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
-		,@strWorkOrderNo=strWorkOrderNo 
-		,@intManufacturingCellId=intManufacturingCellId
-		,@intManufacturingProcessId=intManufacturingProcessId
+		,@strWorkOrderNo = strWorkOrderNo
+		,@intManufacturingCellId = intManufacturingCellId
+		,@intManufacturingProcessId = intManufacturingProcessId
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -47,7 +47,7 @@ BEGIN TRY
 			SELECT *
 			FROM tblICItem
 			WHERE intItemId = @intItemId
-				AND strStatus  = 'Active'
+				AND strStatus = 'Active'
 			)
 	BEGIN
 		SELECT @strItemNo = strItemNo
@@ -86,7 +86,11 @@ BEGIN TRY
 			SELECT *
 			FROM dbo.tblMFWorkOrder W
 			WHERE W.intWorkOrderId = @intWorkOrderId
-				AND EXISTS(SELECT *FROM dbo.tblICItemUOM IU WHERE IU.intItemUOMId =W.intItemUOMId)
+				AND EXISTS (
+					SELECT *
+					FROM dbo.tblICItemUOM IU
+					WHERE IU.intItemUOMId = W.intItemUOMId
+					)
 			)
 	BEGIN
 		SELECT @strItemNo = strItemNo
@@ -103,59 +107,142 @@ BEGIN TRY
 	END
 
 	SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
-			,@dtmSampleCreated = S.dtmCreated
-		FROM tblQMSample S
-		JOIN tblQMSampleType ST on ST.intSampleTypeId =S.intSampleTypeId 
-		WHERE S.intProductTypeId = 12
-			AND S.intProductValueId = @intWorkOrderId
-			And ST.intControlPointId =11--Line Sample
-		ORDER BY S.dtmLastModified DESC
+		,@dtmSampleCreated = S.dtmCreated
+	FROM tblQMSample S
+	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+	WHERE S.intProductTypeId = 12
+		AND S.intProductValueId = @intWorkOrderId
+		AND ST.intControlPointId = 11 --Line Sample
+	ORDER BY S.dtmLastModified DESC
 
-		IF @intSampleStatusId = 4
+	IF @intSampleStatusId = 4
+	BEGIN
+		SELECT @strCellName = strCellName
+		FROM tblMFManufacturingCell
+		WHERE intManufacturingCellId = @intManufacturingCellId
+
+		RAISERROR (
+				'%s has failed the quality test. Cannot proceed further.'
+				,11
+				,1
+				,@strCellName
+				)
+	END
+
+	SELECT @intSampleStatusId = NULL
+		,@dtmSampleCreated = NULL
+
+	SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+		,@dtmSampleCreated = S.dtmCreated
+	FROM tblQMSample S
+	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+	WHERE S.intProductTypeId = 12
+		AND S.intProductValueId = @intWorkOrderId
+		AND ST.intControlPointId = 12 --WIP Sample
+	ORDER BY S.dtmLastModified DESC
+
+	IF @intSampleStatusId = 4
+	BEGIN
+		SELECT @strCellName = strCellName
+		FROM tblMFManufacturingCell
+		WHERE intManufacturingCellId = @intManufacturingCellId
+
+		RAISERROR (
+				'%s has failed the quality test. Cannot proceed further.'
+				,11
+				,1
+				,@strCellName
+				)
+	END
+
+	SELECT @strWIPSampleMandatory = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 84
+
+	IF @strWIPSampleMandatory = 'True'
+	BEGIN
+		SELECT @intSampleStatusId = NULL
+			,@dtmSampleCreated = NULL
+
+		DECLARE @strSampleTypeId NVARCHAR(MAX)
+
+		SELECT @strSampleTypeId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 96
+
+		SELECT @intSampleTypeId = Item Collate Latin1_General_CI_AS
+		FROM [dbo].[fnSplitString](@strSampleTypeId, ',') ST1
+		WHERE NOT EXISTS (
+				SELECT 1
+				FROM tblQMSample S
+				JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+				WHERE S.intProductTypeId = 12
+					AND S.intProductValueId = @intWorkOrderId
+					AND ST.intControlPointId = 11 --Line Sample
+					AND ST.intSampleTypeId = ST1.Item Collate Latin1_General_CI_AS
+				)
+
+		IF @intSampleTypeId IS NOT NULL
 		BEGIN
+			SELECT @strSampleTypeName = strSampleTypeName
+			FROM tblQMSampleType
+			WHERE intSampleTypeId = @intSampleTypeId
+
 			SELECT @strCellName = strCellName
 			FROM tblMFManufacturingCell
 			WHERE intManufacturingCellId = @intManufacturingCellId
 
 			RAISERROR (
-					90022
+					'%s is not taken for the line %s. Please take the sample and then start the work order'
 					,11
 					,1
+					,@strSampleTypeName
 					,@strCellName
 					)
 		END
-		SELECT  @intSampleStatusId=NULL,@dtmSampleCreated=NULL
+
+		SELECT @intSampleStatusId = NULL
+			,@dtmSampleCreated = NULL
 
 		SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
 			,@dtmSampleCreated = S.dtmCreated
 		FROM tblQMSample S
-		JOIN tblQMSampleType ST on ST.intSampleTypeId =S.intSampleTypeId 
+		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 		WHERE S.intProductTypeId = 12
 			AND S.intProductValueId = @intWorkOrderId
-			And ST.intControlPointId =12--WIP Sample
+			AND ST.intControlPointId = 12 --WIP Sample
 		ORDER BY S.dtmLastModified DESC
 
-		IF @intSampleStatusId = 4
+		IF @intSampleStatusId IS NULL
 		BEGIN
+			SELECT @strSampleTypeName = strSampleTypeName
+			FROM tblQMSampleType
+			WHERE intControlPointId = 12 --WIP Sample
+
 			SELECT @strCellName = strCellName
 			FROM tblMFManufacturingCell
 			WHERE intManufacturingCellId = @intManufacturingCellId
 
 			RAISERROR (
-					90022
+					'%s is not taken for the line %s. Please take the sample and then start the work order'
 					,11
 					,1
+					,@strSampleTypeName
 					,@strCellName
 					)
 		END
 
-		SELECT @strLineSampleMandatory = strAttributeValue
+		SELECT @strWIPSampleMandatory = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
 			AND intLocationId = @intLocationId
 			AND intAttributeId = 84
 
-		IF @strLineSampleMandatory = 'True'
+		IF @strWIPSampleMandatory = 'True'
 		BEGIN
 		SELECT  @intSampleStatusId=NULL,@dtmSampleCreated=NULL
 
@@ -224,37 +311,39 @@ BEGIN TRY
 						)
 			END
 		END
+	END
 
 	UPDATE dbo.tblMFWorkOrder
 	SET intStatusId = 10
 		,dtmStartedDate = @dtmCurrentDate
-		,intConcurrencyId=intConcurrencyId+1
+		,intConcurrencyId = intConcurrencyId + 1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	UPDATE dbo.tblMFScheduleWorkOrder
 	SET intStatusId = 10
-		,intConcurrencyId=intConcurrencyId+1
+		,intConcurrencyId = intConcurrencyId + 1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	SELECT @intScheduleId=W.intScheduleId 
-	FROM dbo.tblMFScheduleWorkOrder W 
-	JOIN dbo.tblMFSchedule S ON S.intScheduleId =W.intScheduleId  AND ysnStandard =1
+	SELECT @intScheduleId = W.intScheduleId
+	FROM dbo.tblMFScheduleWorkOrder W
+	JOIN dbo.tblMFSchedule S ON S.intScheduleId = W.intScheduleId
+		AND ysnStandard = 1
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	UPDATE tblMFSchedule 
-	SET intConcurrencyId=intConcurrencyId+1
+	UPDATE tblMFSchedule
+	SET intConcurrencyId = intConcurrencyId + 1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 	WHERE intScheduleId = @intScheduleId
 
 	EXEC dbo.uspMFCopyRecipe @intItemId = @intItemId
-			,@intLocationId = @intLocationId
-			,@intUserId = @intUserId
-			,@intWorkOrderId = @intWorkOrderId
+		,@intLocationId = @intLocationId
+		,@intUserId = @intUserId
+		,@intWorkOrderId = @intWorkOrderId
 
 	EXEC sp_xml_removedocument @idoc
 END TRY

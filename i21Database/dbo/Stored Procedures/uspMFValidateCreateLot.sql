@@ -61,7 +61,7 @@ BEGIN TRY
 		,@intSampleStatusId INT
 		,@strCellName NVARCHAR(50)
 		,@dtmSampleCreated DATETIME
-		,@strLineSampleMandatory NVARCHAR(50)
+		,@strWIPSampleMandatory NVARCHAR(50)
 		,@intDurationBetweenLineSample INT
 		,@dtmStartedDate DATETIME
 		,@intControlPointId INT
@@ -693,13 +693,13 @@ BEGIN TRY
 					)
 		END
 
-		SELECT @strLineSampleMandatory = strAttributeValue
+		SELECT @strWIPSampleMandatory = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
 			AND intLocationId = @intLocationId
 			AND intAttributeId = 84
 
-		IF @strLineSampleMandatory = 'True'
+		IF @strWIPSampleMandatory = 'True'
 		BEGIN
 			SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
 				,@dtmSampleCreated = S.dtmCreated
