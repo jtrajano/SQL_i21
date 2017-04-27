@@ -15,7 +15,8 @@ EXEC dbo.[uspARUpdatePricingHistory] 1, @SalesOrderId, @UserId
 EXEC dbo.[uspSOUpdateItemComponent] @SalesOrderId, 0
 EXEC dbo.[uspSOUpdateCommitted] @SalesOrderId, @ForDelete
 EXEC dbo.[uspSOUpdateItemComponent] @SalesOrderId, 1
-EXEC dbo.[uspSOUpdateContractOnSalesOrder] @SalesOrderId, @ForDelete, @UserId
+--AR-4579
+--EXEC dbo.[uspSOUpdateContractOnSalesOrder] @SalesOrderId, @ForDelete, @UserId
 
 DECLARE @Ids AS Id
 INSERT INTO @Ids(intId) SELECT @SalesOrderId
