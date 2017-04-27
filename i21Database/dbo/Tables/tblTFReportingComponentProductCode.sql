@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblTFReportingComponentProductCode](
-	[intReportingComponentProductCodeId] INT IDENTITY(1,1) NOT NULL,
+	[intReportingComponentProductCodeId] INT IDENTITY NOT NULL,
 	[intReportingComponentId] INT NOT NULL,
 	[intProductCodeId] INT NOT NULL,
 	[strType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,

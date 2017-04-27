@@ -10,6 +10,6 @@
 	[strCustomerComments] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblTRQuoteHeader] PRIMARY KEY ([intQuoteHeaderId]),	
-	CONSTRAINT [FK_tblTRQuoteHeader_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId])
+	CONSTRAINT [FK_tblTRQuoteHeader_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] (intEntityId)
 	
 )

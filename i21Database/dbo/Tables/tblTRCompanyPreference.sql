@@ -12,8 +12,8 @@
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	CONSTRAINT [PK_tblTRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC), 
     CONSTRAINT [FK_tblTRCompanyPreference_tblSMImportFileHeader] FOREIGN KEY ([intRackPriceImportMappingId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId]), 
-    CONSTRAINT [FK_tblTRCompanyPreference_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityId]),
-	CONSTRAINT [FK_tblTRCompanyPreference_Seller] FOREIGN KEY ([intSellerId]) REFERENCES [tblSMShipVia]([intEntityId]), 
+    CONSTRAINT [FK_tblTRCompanyPreference_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia](intEntityId),
+	CONSTRAINT [FK_tblTRCompanyPreference_Seller] FOREIGN KEY ([intSellerId]) REFERENCES [tblSMShipVia](intEntityId), 
     CONSTRAINT [FK_tblTRCompanyPreference_FreightItem] FOREIGN KEY ([intItemForFreightId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblTRCompanyPreference_SurchargeItem] FOREIGN KEY ([intSurchargeItemId]) REFERENCES [tblICItem]([intItemId])
 )

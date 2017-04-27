@@ -18,7 +18,8 @@ DECLARE  @intLoadId AS INT,
          @intLoadDetailId AS INT,
 		 @intPContractDetailId AS INT,
 		 @intSContractDetailId AS INT,
-		 @dblQuantity AS NUMERIC(18,6)
+		 @dblQuantity AS NUMERIC(18,6),
+		 @dblDeleteQuantity AS NUMERIC(18,6)
 
 BEGIN TRY
 
@@ -40,24 +41,10 @@ BEGIN TRY
 		SELECT @intPContractDetailId = intPContractDetailId
 			, @intSContractDetailId = intSContractDetailId
 			, @dblQuantity = dblQuantity
+			, @dblDeleteQuantity = dblQuantity * -1
 		FROM tblLGLoadDetail
 		WHERE intLoadDetailId = @intLoadDetailId
 
-		IF (@action = 'Added')
-		BEGIN
-			SET @dblQuantity = @dblQuantity * -1
-		END
-		
-		IF (ISNULL(@intPContractDetailId, '') <> '')
-		BEGIN
-			EXEC uspCTUpdateScheduleQuantity @intPContractDetailId, @dblQuantity, @intUserId, @intLoadDetailId, 'Load Schedule'
-		END
-		
-		IF (ISNULL(@intSContractDetailId, '') <> '')
-		BEGIN
-			EXEC uspCTUpdateScheduleQuantity @intSContractDetailId, @dblQuantity, @intUserId, @intLoadDetailId, 'Load Schedule'
-		END
-		
 		IF (@action = 'Delete')
 		BEGIN
 			UPDATE tblLGLoad
@@ -73,7 +60,30 @@ BEGIN TRY
 			UPDATE tblTRLoadDistributionDetail
 			SET intLoadDetailId = NULL
 			WHERE intLoadDetailId = @intLoadDetailId
+
+			IF (ISNULL(@intPContractDetailId, '') <> '')
+			BEGIN
+				EXEC uspCTUpdateScheduleQuantity @intPContractDetailId, @dblDeleteQuantity, @intUserId, @intLoadDetailId, 'Transport Purchase'
+				EXEC uspCTUpdateScheduleQuantity @intPContractDetailId, @dblQuantity, @intUserId, @intLoadDetailId, 'Load Schedule'
+			END
+			IF (ISNULL(@intSContractDetailId, '') <> '')
+			BEGIN
+				EXEC uspCTUpdateScheduleQuantity @intSContractDetailId, @dblDeleteQuantity, @intUserId, @intLoadDetailId, 'Transport Sale'
+				EXEC uspCTUpdateScheduleQuantity @intSContractDetailId, @dblQuantity, @intUserId, @intLoadDetailId, 'Load Schedule'
+			END
 		END
+		ELSE IF (@action = 'Added')
+		BEGIN
+			IF (ISNULL(@intPContractDetailId, '') <> '')
+			BEGIN
+				EXEC uspCTUpdateScheduleQuantity @intPContractDetailId, @dblDeleteQuantity, @intUserId, @intLoadDetailId, 'Load Schedule'
+			END
+		
+			IF (ISNULL(@intSContractDetailId, '') <> '')
+			BEGIN
+				EXEC uspCTUpdateScheduleQuantity @intSContractDetailId, @dblDeleteQuantity, @intUserId, @intLoadDetailId, 'Load Schedule'
+			END
+		END		
 
 		DELETE FROM #LoadTable WHERE intLoadDetailId = @intLoadDetailId
 	END

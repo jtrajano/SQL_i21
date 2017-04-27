@@ -13,6 +13,6 @@ SELECT QPAHeader.intQuotePriceAdjustmentHeaderId
 	, SupplyPoint.intEntityLocationId
 	, SupplyPoint.strSupplyPoint
 FROM tblTRQuotePriceAdjustmentHeader QPAHeader
-LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = QPAHeader.intEntityCustomerId
+LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = QPAHeader.intEntityCustomerId
 LEFT JOIN tblARCustomerGroup CustomerGroup ON CustomerGroup.intCustomerGroupId = QPAHeader.intCustomerGroupId
 LEFT JOIN vyuTRSupplyPointView SupplyPoint ON SupplyPoint.intSupplyPointId = QPAHeader.intSupplyPointId

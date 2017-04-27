@@ -39,11 +39,11 @@ SELECT TL.intLoadHeaderId
 	, strInvoiceNo = NULL
 FROM tblTRLoadHeader TL
 LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
-LEFT JOIN vyuTRTerminal Terminal ON Terminal.[intEntityId] = TR.intTerminalId
+LEFT JOIN vyuTRTerminal Terminal ON Terminal.intEntityVendorId = TR.intTerminalId
 LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = TR.intSupplyPointId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = TR.intCompanyLocationId
 LEFT JOIN tblICItem Item ON Item.intItemId = TR.intItemId
-LEFT JOIN vyuEMSalesperson Driver ON Driver.strType = 'Driver' AND Driver.[intEntityId] = TL.intDriverId
+LEFT JOIN vyuEMSalesperson Driver ON Driver.strType = 'Driver' AND Driver.intEntityId = TL.intDriverId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = TR.intInventoryReceiptId
 LEFT JOIN tblICInventoryTransfer Transfer ON Transfer.intInventoryTransferId = TR.intInventoryTransferId
 
@@ -84,7 +84,7 @@ SELECT TL.intLoadHeaderId
 FROM tblTRLoadHeader TL
 JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-LEFT JOIN vyuEMSalesperson Driver ON Driver.strType = 'Driver' AND Driver.[intEntityId] = TL.intDriverId
+LEFT JOIN vyuEMSalesperson Driver ON Driver.strType = 'Driver' AND Driver.intEntityId = TL.intDriverId
 LEFT JOIN tblICItem Item ON Item.intItemId = DD.intItemId
 LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = DH.intInvoiceId
 LEFT JOIN vyuEMEntity CS ON CS.intEntityId = DH.intEntityCustomerId AND CS.strType = 'Customer'

@@ -21,7 +21,7 @@ DECLARE @UpdatedInvoices NVARCHAR(MAX)
 BEGIN TRY
 
 	DECLARE @UserEntityId INT
-	SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @intUserId), @intUserId)
+	SET @UserEntityId = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intEntityId = @intUserId), @intUserId)
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 	DECLARE @intFreightItemId	INT
@@ -107,7 +107,8 @@ BEGIN TRY
 		,[dblMaintenanceAmount]					= NULL
 		,[dblLicenseAmount]						= NULL
 		,[intTaxGroupId]						= DD.intTaxGroupId
-		,[ysnRecomputeTax]						= 1
+		,[ysnRecomputeTax]						= CASE WHEN ISNULL(DD.intTaxGroupId, '') <> '' THEN 1
+														ELSE 0 END
 		,[intSCInvoiceId]						= NULL
 		,[strSCInvoiceNumber]					= ''
 		,[intInventoryShipmentItemId]			= NULL
@@ -136,7 +137,7 @@ BEGIN TRY
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 			LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
-			LEFT JOIN tblARCustomer Customer ON Customer.[intEntityId] = DH.intEntityCustomerId
+			LEFT JOIN tblARCustomer Customer ON Customer.intEntityId = DH.intEntityCustomerId
 			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
 			LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
 			LEFT JOIN vyuICGetItemLocation Item ON Item.intItemId = DD.intItemId AND Item.intLocationId = DH.intCompanyLocationId

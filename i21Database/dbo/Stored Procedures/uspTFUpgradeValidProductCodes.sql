@@ -47,7 +47,7 @@ BEGIN TRY
 		SET 
 			intReportingComponentId	= SOURCE.intReportingComponentId
 			, intProductCodeId		= SOURCE.intProductCodeId
-			, strType			= SOURCE.strFilter
+			, strType				= SOURCE.strType
 	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId

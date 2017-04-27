@@ -168,7 +168,7 @@ BEGIN TRY
 			INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId ON Origin.intEntityLocationId = Receipt.intShipFromId
 			LEFT OUTER JOIN tblSMTaxCode ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId AND tblSMTaxCode.intTaxCodeId = ReceiptItemTax.intTaxCodeId ON tblTRSupplyPoint.intEntityVendorId = Receipt.intShipFromId
 			FULL OUTER JOIN tblSMShipVia ShipVia
-			FULL OUTER JOIN tblEMEntity AS Transporter ON ShipVia.[intEntityId] = Transporter.intEntityId ON Receipt.intShipViaId = ShipVia.[intEntityId]
+			FULL OUTER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityId = Transporter.intEntityId ON Receipt.intShipViaId = ShipVia.intEntityId
 			CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
 			WHERE Receipt.ysnPosted = 1
 				AND RCPC.intReportingComponentId = @RCId
@@ -270,7 +270,7 @@ BEGIN TRY
 			INNER JOIN tblEMEntityLocation Origin ON Receipt.intShipFromId = Origin.intEntityLocationId
 			INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId ON tblTRSupplyPoint.intEntityLocationId = Receipt.intShipFromId
 			FULL OUTER JOIN tblSMShipVia ShipVia
-			FULL OUTER JOIN tblEMEntity AS Transporter ON ShipVia.[intEntityId] = Transporter.intEntityId ON Receipt.intShipViaId = ShipVia.[intEntityId]
+			FULL OUTER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityId = Transporter.intEntityId ON Receipt.intShipViaId = ShipVia.intEntityId
 			CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
 			WHERE Receipt.ysnPosted = 1
 				AND RCPC.intReportingComponentId = @RCId

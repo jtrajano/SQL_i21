@@ -399,13 +399,4 @@ BEGIN
 	DELETE FROM tblTRTransactionDetailLog
 	WHERE intTransactionId = @LoadHeaderId
 		AND strTransactionType = @TransactionType_TransportLoad
-
-	IF (@ForDelete = 1)
-	BEGIN
-		UPDATE tblLGLoad
-		SET intLoadHeaderId = NULL
-		WHERE intLoadHeaderId = @LoadHeaderId
-
-		EXEC uspTRLoadProcessLogisticsLoad @LoadHeaderId, 'Delete', @UserId
-	END
 END

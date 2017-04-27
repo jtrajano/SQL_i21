@@ -458,9 +458,9 @@ BEGIN TRY
 		AND ISNULL(intInvoiceId,0) != 0
 		AND DH.intLoadHeaderId = @intLoadHeaderId
 		
-	SELECT TOP 1 @intEntityUserSecurityId = [intEntityId]
+	SELECT TOP 1 @intEntityUserSecurityId = intEntityId
 	FROM tblSMUserSecurity
-	WHERE [intEntityId] = @intUserId
+	WHERE intEntityId = @intUserId
 	
 	SET @intLoadReceiptId = NULL
 	WHILE EXISTS (SELECT TOP 1 1 FROM #ReceiptDeleteTable)

@@ -78,12 +78,15 @@ SELECT LG.intLoadId
 	, LG.strInboundTaxGroup
 	, LG.intOutboundTaxGroupId
 	, LG.strOutboundTaxGroup
-	, LG.dblDeliveredQuantity
+	, dblDeliveredQuantity = ISNULL(LG.dblDeliveredQuantity, 0.000000)
+	, ysnClosed = CASE WHEN (ISNULL(LG.dblDeliveredQuantity, 0.000000) <= 0) THEN CAST(0 AS BIT)
+						ELSE CAST(1 AS BIT) END
+	, LG.strTransUsedBy
 FROM vyuLGLoadDetailView LG
 LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId)
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
 LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = Config.intSellerId
 LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = LG.intVendorEntityLocationId AND SP.intEntityVendorId = LG.intVendorEntityId
-LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = LG.intCustomerEntityId
+LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = LG.intCustomerEntityId
 LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId AND Salesperson.strType = 'Salesperson'
 WHERE ISNULL(LG.ysnDispatched, 0) = 1

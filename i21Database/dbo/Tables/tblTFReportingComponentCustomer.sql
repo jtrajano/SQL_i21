@@ -9,5 +9,5 @@
     CONSTRAINT [PK_tblTFReportingComponentCustomer] PRIMARY KEY ([intReportingComponentCustomerId]), 
     CONSTRAINT [AK_tblTFReportingComponentCustomer] UNIQUE ([intReportingComponentId], [intEntityCustomerId]), 
     CONSTRAINT [FK_tblTFReportingComponentCustomer_tblTFReportingComponent] FOREIGN KEY ([intReportingComponentId]) REFERENCES [tblTFReportingComponent]([intReportingComponentId]) ON DELETE CASCADE, 
-    CONSTRAINT [FK_tblTFReportingComponentCustomer_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [tblARCustomer]([intEntityId])
+    CONSTRAINT [FK_tblTFReportingComponentCustomer_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [tblARCustomer](intEntityId)
 )
