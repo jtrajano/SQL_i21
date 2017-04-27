@@ -102,7 +102,7 @@ BEGIN
 												FROM tblTRLoadDistributionHeader
 												WHERE intLoadHeaderId = @TransactionId)
 
-			EXEC uspTRLoadProcessContracts @TransactionId, 'Delete', @UserId
+			--EXEC uspTRLoadProcessContracts @TransactionId, 'Delete', @UserId
 			EXEC uspTRLoadProcessLogisticsLoad @TransactionId, 'Delete', @UserId
 		END
 	END
