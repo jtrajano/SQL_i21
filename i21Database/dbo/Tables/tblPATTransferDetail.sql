@@ -24,5 +24,5 @@
     [dblQuantityTransferred] DECIMAL(18, 6) NULL, 
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATTransferDetail] PRIMARY KEY ([intTransferDetailId]),
-	CONSTRAINT [FK_tblPATTransferDetail_tblPATTransfer] FOREIGN KEY ([intTransferId]) REFERENCES [tblPATTransfer]([intTransferId])
+	CONSTRAINT [FK_tblPATTransferDetail_tblPATTransfer] FOREIGN KEY ([intTransferId]) REFERENCES [tblPATTransfer]([intTransferId]) ON DELETE CASCADE
 )
