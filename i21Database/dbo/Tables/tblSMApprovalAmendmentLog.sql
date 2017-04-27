@@ -2,6 +2,7 @@
 (
 	[intApprovalAmendmentLogId]		INT              IDENTITY (1, 1)				NOT NULL,
 	[intTransactionId]				[int]											NOT NULL,
+	[intApprovalId]					[int]											NULL,
 	[strModifiedField]				[nvarchar](250) COLLATE Latin1_General_CI_AS	NOT NULL,
 	[strOldValue]					[nvarchar](max) COLLATE Latin1_General_CI_AS	NOT NULL,
 	[strNewValue]					[nvarchar](max) COLLATE Latin1_General_CI_AS	NOT NULL,

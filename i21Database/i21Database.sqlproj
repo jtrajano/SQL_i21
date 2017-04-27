@@ -5217,6 +5217,7 @@
     <Build Include="dbo\Views\vyuHDProjectLink.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceLinesOfBusiness.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceModule.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMTransactionCheckIfRequiredApproval.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
