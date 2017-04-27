@@ -29,7 +29,7 @@
 	[intInvalidAttempt]				INT NOT NULL DEFAULT 0,
 	[ysnLockedOut]					BIT NOT NULL DEFAULT 0,
 	[dtmLockOutTime]				DATETIME NULL,
-	[strEmployeeOriginId]			NVARCHAR(10) NULL,
+	[strEmployeeOriginId]			NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[ysnStoreManager]				BIT NOT NULL DEFAULT(0), 
     [intConcurrencyId]				INT	DEFAULT (1) NOT NULL,
 	[intEntityIdOld]				INT NULL,
