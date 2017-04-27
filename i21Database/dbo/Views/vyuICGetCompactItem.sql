@@ -48,7 +48,6 @@ SELECT Item.intItemId
 , strSeason 			= Season.strDescription
 , strClass 				= Class.strDescription
 , strProductLine 		= ProductLine.strDescription
---, strItemMessage		= ItemMessage.strDescription
 , strHazmatMessage		= HazMat.strDescription
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
@@ -65,7 +64,6 @@ LEFT JOIN tblICRinFuelCategory FuelCategory ON FuelCategory.intRinFuelCategoryId
 LEFT JOIN tblICTag Medication ON Medication.intTagId = Item.intMedicationTag
 LEFT JOIN tblICTag Ingredient ON Ingredient.intTagId = Item.intIngredientTag
 LEFT JOIN tblICTag HazMat ON HazMat.intTagId = Item.intHazmatMessage
---LEFT JOIN tblICTag ItemMessage ON ItemMessage.intTagId = Item.intItemMessage
 LEFT JOIN tblICItem PhysicalItem ON PhysicalItem.intItemId = Item.intPhysicalItem
 LEFT JOIN tblPATPatronageCategory PatronageCategory ON PatronageCategory.intPatronageCategoryId = Item.intPatronageCategoryId
 LEFT JOIN tblPATPatronageCategory PatronageDirect ON PatronageDirect.intPatronageCategoryId = Item.intPatronageCategoryDirectId
