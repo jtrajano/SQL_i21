@@ -30,7 +30,7 @@ DECLARE @dblDebitCreditBalance NUMERIC(18,2)
 IF NOT EXISTS (	SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID(N'[tempdb]..[#tmpGLDetail]'))
 BEGIN 
 	-- 'Invalid G/L temp table.'
-	RAISERROR (70002,11,1)
+	RAISERROR ('Invalid G/L temporary table.',11,1)
 	GOTO Exit_BookGLEntries_WithErrors
 END
 
@@ -39,7 +39,7 @@ END
 IF EXISTS (SELECT TOP 1 1 FROM #tmpGLDetail WHERE intAccountId IS NULL AND @ysnRecap = 0)
 BEGIN 
 	-- 'Failed. Invalid G/L account id found.'
-	RAISERROR (70001,11,1)
+	RAISERROR ('Invalid G/L account id found.',11,1)
 	GOTO Exit_BookGLEntries_WithErrors
 END		
 
@@ -50,7 +50,7 @@ FROM	#tmpGLDetail
 IF ISNULL(@dblDebitCreditBalance, 0) <> 0 AND @ysnRecap = 0 
 BEGIN
 	-- If not balanced, throw an error. 
-	RAISERROR (70003,11,1)
+	RAISERROR ('Debit and credit amounts are not balanced.',11,1)
 	GOTO Exit_BookGLEntries_WithErrors	
 END 
 
@@ -65,7 +65,7 @@ WHERE	ISNULL(tblGLAccount.ysnActive, 0) = 1
 IF ISNULL(@dblDebitCreditBalance, 0) <> 0
 BEGIN
 	-- Debit and credit amounts are not balanced.
-	RAISERROR (70003,11,1)
+	RAISERROR ('Debit and credit amounts are not balanced.',11,1)
 	GOTO Exit_BookGLEntries_WithErrors	
 END 
 
@@ -76,7 +76,7 @@ END
 IF EXISTS (SELECT 1 FROM #tmpGLDetail WHERE [dbo].isOpenAccountingDate(#tmpGLDetail.dtmDate) = 0) AND @ysnRecap = 0
 BEGIN 
 	-- Unable to find an open fiscal year period to match the transaction date.
-	RAISERROR(70005, 11, 1)
+	RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)
 	GOTO Exit_BookGLEntries_WithErrors
 END
 

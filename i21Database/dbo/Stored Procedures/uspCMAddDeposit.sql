@@ -54,7 +54,7 @@ IF NOT EXISTS (
 			AND GLAccount.ysnActive = 1
 )
 BEGIN
-	RAISERROR(70010, 11, 1, @strTransactionId)
+	RAISERROR('The bank account or its associated GL account is inactive.', 11, 1, @strTransactionId)
 	GOTO uspCMAddDeposit_Rollback
 END
 
@@ -73,7 +73,7 @@ IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 -- Check for duplicate transaction id. 
 IF EXISTS (SELECT TOP 1 1 FROM [dbo].[tblCMBankTransaction] WHERE strTransactionId = @strTransactionId)
 BEGIN
-	RAISERROR(70015, 11, 1, @strTransactionId)
+	RAISERROR('The transaction id %s already exists. Please ask your local administrator to check the starting numbers setup.', 11, 1, @strTransactionId)
 	GOTO uspCMAddDeposit_Rollback
 END
 

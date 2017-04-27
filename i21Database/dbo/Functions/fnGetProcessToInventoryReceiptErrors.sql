@@ -17,7 +17,7 @@ RETURN (
 		-- Check for any invalid item.
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(80001)
+				,strText = 'Item id is invalid or missing.'
 				,intErrorCode = 80001
 		WHERE	NOT EXISTS (
 					SELECT TOP 1 1 

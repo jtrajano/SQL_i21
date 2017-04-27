@@ -94,7 +94,7 @@ BEGIN TRY
 		WHERE intItemId = @intNewItemId
 
 		RAISERROR (
-				90016
+				'Source Lot''s UOM %s is not configured as one of the UOM in destination item %s.'
 				,11
 				,1
 				,@strUnitMeasure

@@ -121,7 +121,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 IF @intTransactionId IS NULL
 BEGIN 
 	-- Cannot find the transaction.
-	RAISERROR(70004, 11, 1)
+	RAISERROR('Cannot find the transaction.', 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -129,7 +129,7 @@ END
 IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0) AND @ysnRecap = 0
 BEGIN 
 	-- Unable to find an open fiscal year period to match the transaction date.
-	RAISERROR(70005, 11, 1)
+	RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)
 	GOTO Post_Rollback
 END
 
@@ -140,13 +140,13 @@ BEGIN
 	IF @ysnPost = 1
 	BEGIN
 		--You cannot %s transaction under a closed module.
-		RAISERROR(70029, 11, 1, 'Post')
+		RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Post')
 		GOTO Post_Rollback
 	END
 	ELSE
 	BEGIN
 		--You cannot %s transaction under a closed module.
-		RAISERROR(70029, 11, 1, 'Unpost')
+		RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Unpost')
 		GOTO Post_Rollback
 	END
 END
@@ -155,7 +155,7 @@ END
 IF ISNULL(@dblAmountDetailTotal, 0) <> ISNULL(@dblAmount, 0) AND @ysnRecap = 0
 BEGIN
 	-- The debit and credit amounts are not balanced.
-	RAISERROR(70006, 11, 1)
+	RAISERROR('The debit and credit amounts are not balanced.', 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -163,7 +163,7 @@ END
 IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1
 BEGIN 
 	-- The transaction is already posted.
-	RAISERROR(70007, 11, 1)
+	RAISERROR('The transaction is already posted.', 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -171,7 +171,7 @@ END
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN 
 	-- The transaction is already unposted.
-	RAISERROR(70008, 11, 1)
+	RAISERROR('The transaction is already unposted.', 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -179,7 +179,7 @@ END
 IF @ysnPost = 0 AND @ysnRecap = 0 AND @ysnTransactionClearedFlag = 1
 BEGIN
 	-- 'The transaction is already cleared.'
-	RAISERROR(70009, 11, 1)
+	RAISERROR('The transaction is already cleared.', 11, 1)
 	GOTO Post_Rollback
 END
 
@@ -187,7 +187,7 @@ END
 IF @ysnRecap = 0 AND @ysnCheckVoid = 1
 BEGIN
 	-- 'Check is already voided.'
-	RAISERROR(70012, 11, 1)
+	RAISERROR('Check is already voided.', 11, 1)
 	GOTO Post_Rollback
 END
 
@@ -202,7 +202,7 @@ BEGIN
 	IF @ysnBankAccountIdInactive = 1
 	BEGIN
 		-- 'The bank account is inactive.'
-		RAISERROR(70010, 11, 1)
+		RAISERROR('The bank account or its associated GL account is inactive.', 11, 1)
 		GOTO Post_Rollback
 	END
 END 
@@ -213,12 +213,12 @@ BEGIN
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
 	IF @ysnPost = 1	
 	BEGIN 
-		RAISERROR(70013, 11, 1, 'Post')
+		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')
 		GOTO Post_Rollback
 	END 
 	IF @ysnPost = 0
 	BEGIN
-		RAISERROR(70013, 11, 1, 'Unpost')
+		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Unpost')
 		GOTO Post_Rollback		
 	END
 END 
@@ -227,7 +227,7 @@ END
 IF @dblAmount = 0 AND @ysnPost = 1 AND @ysnRecap = 0
 BEGIN 
 	-- Cannot post a zero-value transaction.
-	RAISERROR(70020, 11, 1)
+	RAISERROR('Cannot post a zero-value transaction.', 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -243,7 +243,7 @@ BEGIN
 		)
 	BEGIN
 		-- Unable to unpost while check printing is in progress.
-		RAISERROR(70026, 11, 1)
+		RAISERROR('Unable to unpost while check printing is in progress.', 11, 1)
 		GOTO Post_Rollback
 	END
 END 

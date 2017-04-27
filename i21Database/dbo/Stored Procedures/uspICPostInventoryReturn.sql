@@ -87,7 +87,7 @@ BEGIN
 	IF @intTransactionId IS NULL  
 	BEGIN   
 		-- Cannot find the transaction.  
-		RAISERROR(50004, 11, 1)  
+		RAISERROR('Cannot find the transaction.', 11, 1)  
 		GOTO Post_Exit  
 	END   
   
@@ -95,7 +95,7 @@ BEGIN
 	IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) = 0) 
 	BEGIN   
 		-- Unable to find an open fiscal year period to match the transaction date.  
-		RAISERROR(50005, 11, 1)  
+		RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)  
 		GOTO Post_Exit  
 	END  
   
@@ -103,7 +103,7 @@ BEGIN
 	IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1  
 	BEGIN   
 		-- The transaction is already posted.  
-		RAISERROR(50007, 11, 1)  
+		RAISERROR('The transaction is already posted.', 11, 1)  
 		GOTO Post_Exit  
 	END   
   
@@ -111,7 +111,7 @@ BEGIN
 	IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
 	BEGIN   
 		-- The transaction is already unposted.  
-		RAISERROR(50008, 11, 1)  
+		RAISERROR('The transaction is already unposted.', 11, 1)  
 		GOTO Post_Exit  
 	END   
 
@@ -123,13 +123,13 @@ BEGIN
 		-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 		IF @ysnPost = 1   
 		BEGIN   
-			RAISERROR(50013, 11, 1, 'Post')  
+			RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')  
 			GOTO Post_Exit  
 		END   
 
 		IF @ysnPost = 0  
 		BEGIN  
-			RAISERROR(50013, 11, 1, 'Unpost')  
+			RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Unpost')  
 			GOTO Post_Exit    
 		END  
 	END   
@@ -152,7 +152,7 @@ BEGIN
 		IF ISNULL(@strBillNumber, '') <> ''
 		BEGIN 
 			-- 'Unable to unpost. The inventory return has a voucher in {Voucher id}.'
-			RAISERROR(80101, 11, 1, @strBillNumber)  
+			RAISERROR('Unable to unpost because it has a debit memo. Unpost and delete %s first before you can unpost the Inventory Return.', 11, 1, @strBillNumber)  
 			GOTO Post_Exit    
 		END 
 
@@ -179,7 +179,7 @@ BEGIN
 		IF ISNULL(@strBillNumber, '') <> ''
 		BEGIN 
 			-- 'Unable to unpost. Charge {Other Charge Id} has a voucher in {Voucher Id}.'
-			RAISERROR(80102, 11, 1, @strChargeItem, @strBillNumber)  
+			RAISERROR('Unable to unpost. Charge %s has a voucher in %s.', 11, 1, @strChargeItem, @strBillNumber)  
 			GOTO Post_Exit    
 		END 
 	END 
@@ -204,7 +204,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- 'The net quantity for item {Item Name} is missing.'
-			RAISERROR(80082, 11, 1, @strItemNo)  
+			RAISERROR('The net quantity for item %s is missing.', 11, 1, @strItemNo)  
 			GOTO Post_Exit    
 		END 
 	END 
@@ -223,7 +223,7 @@ BEGIN
 	IF @strItemNo IS NOT NULL
 	BEGIN
 		-- 'Lotted item {Item No} should should have lot(s) specified.'
-		RAISERROR(80090, 11, 1, @strItemNo)  
+		RAISERROR('Lotted item %s should have lot(s) specified.', 11, 1, @strItemNo)  
 		GOTO Post_Exit  
 	END
 END
@@ -236,7 +236,7 @@ BEGIN
 	IF @ysnValidLocation = 0
 	BEGIN 
 		-- The sub location and storage location in {Item No} does not match.
-		RAISERROR(80087, 11, 1, @strItemNo)  
+		RAISERROR('The storage location and storage unit in %s does not match.', 11, 1, @strItemNo)  
 		GOTO Post_Exit
 	END 
 END
@@ -278,7 +278,7 @@ BEGIN
 				SET @strItemNo = 'an item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
 
 			-- 'Please correct the unit qty in UOM {UOM} on {Item}.'
-			RAISERROR(80017, 11, 1, @strUnitMeasure, @strItemNo) 
+			RAISERROR('Please correct the unit qty in UOM %s on %s.', 11, 1, @strUnitMeasure, @strItemNo) 
 			RETURN -1; 			 
 		END 
 	END 
@@ -330,7 +330,7 @@ BEGIN
 		SET @FormattedDifference =  CAST(ABS(@OpenReceiveQty - @LotQtyInItemUOM) AS NVARCHAR(50))
 
 		-- 'The Qty to Return for {Item} is {Open Receive Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
-		RAISERROR(80158, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+		RAISERROR('The Qty to Return for %s is %s. Total Lot Quantity is %s. The difference is %s.', 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
 		RETURN -1; 
 	END 
 
@@ -391,7 +391,7 @@ BEGIN
 		SET @FormattedDifference =  CAST(ABS(@ReceiptItemNet - @LotQtyInItemUOM) AS NVARCHAR(50))
 
 		-- 'Net quantity mismatch. It is {@FormattedReceiptItemNet} on item {@strItemNo} but the total net from the lot(s) is {@FormattedLotQty}.'
-		RAISERROR(80081, 11, 1, @FormattedReceiptItemNet, @strItemNo, @FormattedLotQty)  
+		RAISERROR('Net quantity mismatch. It is %s on item %s but the total net from the lot(s) is %s.', 11, 1, @FormattedReceiptItemNet, @strItemNo, @FormattedLotQty)  
 		RETURN -1; 
 	END 
 END

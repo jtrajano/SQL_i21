@@ -335,7 +335,7 @@ BEGIN TRY
 			FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (intItemId INT) x
 			)
 
-		RAISERROR(90005,14,1,@strItemNo)
+		RAISERROR('Owner is not configured for the item %s.',14,1,@strItemNo)
 	END
 
 

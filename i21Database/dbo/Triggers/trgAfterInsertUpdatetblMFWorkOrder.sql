@@ -347,7 +347,7 @@ BEGIN
 		SELECT @strMinQtyCanBeProduced = @strMinQtyCanBeProduced + ' ' + @strUnitMeasure
 
 		RAISERROR (
-				90026
+				'Available qty for item %s is %s which is less than the required qty %s. %s can be produced with the available inputs. Please change the work order quantity and try again.'
 				,11
 				,1
 				,@strItemNo

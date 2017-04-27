@@ -46,14 +46,14 @@ WHERE
 IF NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120008, 16, 1);
+			RAISERROR('Invoice line item does not exists!', 16, 1);
 		RETURN 0;
 	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMTaxCode WHERE [intTaxCodeId] = @TaxCodeId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120009, 16, 1);
+			RAISERROR('Tax Code does not exists!', 16, 1);
 		RETURN 0;
 	END
 
@@ -70,7 +70,7 @@ WHERE
 IF LEN(LTRIM(RTRIM(ISNULL(@TaxCode,'')))) > 0
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120056, 16, 1, @TaxCode);
+			RAISERROR('Tax Code %s does not have a Sales Account!', 16, 1, @TaxCode);
 		RETURN 0;
 	END
 
@@ -87,7 +87,7 @@ WHERE
 IF UPPER(LTRIM(RTRIM(ISNULL(@CalculationMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage')) AND UPPER(LTRIM(RTRIM(ISNULL(@CalcMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage'))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120057, 16, 1, @CalculationMethod);
+			RAISERROR('%s is not a valid calculation method!', 16, 1, @CalculationMethod);
 		RETURN 0;
 	END
 	

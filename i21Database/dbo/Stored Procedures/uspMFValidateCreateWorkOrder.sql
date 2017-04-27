@@ -96,7 +96,7 @@ BEGIN TRY
 			END
 
 			RAISERROR (
-					51156
+					'A run for ''%s'' - ''%s'' is %s on ''%s''. Please create a run later than the ''%s''.'
 					,11
 					,1
 					,@strItemNo
@@ -149,7 +149,7 @@ BEGIN TRY
 			AND @dtmPlannedDate < @dtmLastPlannedDateTime
 		BEGIN
 			RAISERROR (
-					51156
+					'A run for ''%s'' - ''%s'' is %s on ''%s''. Please create a run later than the ''%s''.'
 					,11
 					,1
 					,@strItemNo
@@ -183,7 +183,7 @@ BEGIN TRY
 			SELECT @strPlannedDate = CONVERT(CHAR,@dtmPlannedDate,101) + ' ' + @strShiftName
 
 			RAISERROR (
-					51158
+					'There is already a run/work order for the date %s and %s, cannot create one more in the same shift and date.'
 					,11
 					,1
 					,@strPlannedDate
@@ -207,7 +207,7 @@ BEGIN TRY
 			SELECT @strPlannedDate = CONVERT(CHAR,@dtmPlannedDate,101)
 
 			RAISERROR (
-					51168
+					'There is already a run/work order for the date %s and %s, cannot create one more in the same date.'
 					,11
 					,1
 					,@strPlannedDate

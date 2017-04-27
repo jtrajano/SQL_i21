@@ -28,7 +28,7 @@ BEGIN
 	-- 'Item-Location is invalid or missing for {Item}.'
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		RAISERROR(80002, 11, 1, @strItemNo)
+		RAISERROR('Item Location is invalid or missing for %s.', 11, 1, @strItemNo)
 		GOTO _Exit
 	END 
 END 

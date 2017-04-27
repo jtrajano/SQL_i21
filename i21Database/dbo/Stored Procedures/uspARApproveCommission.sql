@@ -8,19 +8,19 @@ AS
 
 IF ISNULL(@intCommissionId, 0) = 0
 	BEGIN
-		RAISERROR(120015, 16, 1);
+		RAISERROR('Commission Id is Required!', 16, 1);
 		RETURN 0;
 	END
 
 IF ISNULL(@intApprovalListId, 0) = 0
 	BEGIN
-		RAISERROR(120016, 16, 1);
+		RAISERROR('Approval List Id is Required!', 16, 1);
 		RETURN 0;
 	END
 
 IF ISNULL(@intApproverEntityId, 0) = 0
 	BEGIN
-		RAISERROR(120017, 16, 1);
+		RAISERROR('Approver Entity Id is Required!', 16, 1);
 		RETURN 0;
 	END
 

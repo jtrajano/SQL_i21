@@ -77,11 +77,11 @@ BEGIN
 		IF @UnitsOnHand > 0 
 		BEGIN 
 			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
-			RAISERROR(80096, 11, 1, @strDate, @strItemNo, @strLocationName)
+			RAISERROR('Check the date on the transaction. As of %s, there is no stock available for %s in %s.', 11, 1, @strDate, @strItemNo, @strLocationName)
 		END 
 		ELSE 
 		BEGIN 
-			RAISERROR(80003, 11, 1, @strItemNo, @strLocationName)
+			RAISERROR('Negative stock quantity is not allowed for %s in %s.', 11, 1, @strItemNo, @strLocationName)
 		END 
 		RETURN -1
 	END 

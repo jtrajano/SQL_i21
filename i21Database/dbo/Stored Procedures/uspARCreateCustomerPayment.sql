@@ -51,20 +51,20 @@ SELECT @TransactionType = strTransactionType FROM tblARInvoice WHERE intInvoiceI
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120025, 16, 1);
+			RAISERROR('The customer Id provided does not exists!', 16, 1);
 		RETURN 0;
 	END
 
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND ysnActive = 1)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120026, 16, 1);
+			RAISERROR('The customer provided is not active!', 16, 1);
 		RETURN 0;
 	END	
 
 IF NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod WHERE [intPaymentMethodID] = @PaymentMethodId)
 	BEGIN		
-		IF ISNULL(120032,0) = 1
+		IF ISNULL('The payment method Id provided does not exists!',0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);		
 		RETURN 0;
 	END
@@ -73,28 +73,28 @@ IF NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod WHERE [intPaymentMethodID] = @
 IF NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod WHERE [intPaymentMethodID] = @PaymentMethodId AND [ysnActive] = 1)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120070, 16, 1);		
+			RAISERROR('The payment method provided is not active!', 16, 1);		
 		RETURN 0;
 	END	
 		
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120027, 16, 1);		
+			RAISERROR('The company location Id provided does not exists!', 16, 1);		
 		RETURN 0;
 	END	
 
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId AND [ysnLocationActive] = 1)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120028, 16, 1);		
+			RAISERROR('The company location provided is not active!', 16, 1);		
 		RETURN 0;
 	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE [intEntityId] = @EntityId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120029, 16, 1);		
+			RAISERROR('The entity Id provided does not exists!', 16, 1);		
 		RETURN 0;
 	END
 
@@ -102,14 +102,14 @@ IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE [intEntityId] = @EntityId)
 IF @AllowPrepayment = 0 AND @InvoiceId IS NULL AND @AmountPaid > @ZeroDecimal
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120035, 16, 1);		
+			RAISERROR('This will create a prepayment which has not been allowed!', 16, 1);		
 		RETURN 0;
 	END	
 
 IF @AllowOverpayment = 0 AND @ApplyTermDiscount = 0 AND @InvoiceId IS NOT NULL AND @AmountPaid > (@Payment + @Discount - @Interest)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120071, 16, 1);		
+			RAISERROR('This will create a overpayment which has not been allowed!', 16, 1);		
 		RETURN 0;
 	END
 

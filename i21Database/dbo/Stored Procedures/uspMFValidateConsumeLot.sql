@@ -43,7 +43,7 @@ BEGIN TRY
 	BEGIN
 		SELECT @strConsumeQty=@dblConsumeQty
 		RAISERROR (
-				51085
+				'The requested consume quantity of %s is invalid. Please attempt to consume a positive quantity less than or equal to input lot quantity.'
 				,11
 				,1
 				,@strConsumeQty
@@ -99,7 +99,7 @@ BEGIN TRY
 	IF @strSecondaryStatus <> 'Active'
 	BEGIN
 		RAISERROR (
-				51086
+				'Lot ''%s'' is in quarantine. You are not allowed to consume a quantity from a quarantined lot.'
 				,11
 				,1
 				,@strLotNumber
@@ -111,7 +111,7 @@ BEGIN TRY
 	IF @intWOLocationId <> @intLocationId
 	BEGIN
 		RAISERROR (
-				51087
+				'The lot ''%s'' is not available for consumption.'
 				,11
 				,1
 				,@strLotNumber
@@ -123,7 +123,7 @@ BEGIN TRY
 	IF @dtmExpiryDate IS NOT NULL AND @dtmExpiryDate < GETDATE()
 	BEGIN
 		RAISERROR (
-				51088
+				'The Lot ''%s'' is expired. You cannot consume.'
 				,11
 				,1
 				,@strLotNumber
@@ -138,7 +138,7 @@ BEGIN TRY
 		SELECT @strConsumeQty=@dblConsumeQty
 		Select @strOnHand=@dblOnHand
 		RAISERROR (
-				51089
+				'The attempted consumption quantity of %s %s of material ''%s'' from lot ''%s'' is more than the lot''s queued quantity of %s %s. The transaction will not be allowed to proceed.'
 				,11
 				,1
 				,@strConsumeQty
@@ -155,7 +155,7 @@ BEGIN TRY
 	IF @strStatus = 'InActive'
 	BEGIN
 		RAISERROR (
-				51065
+				'The specified item ''%s'' is InActive. The transaction can not proceed.'
 				,11
 				,1
 				,@strItemNo

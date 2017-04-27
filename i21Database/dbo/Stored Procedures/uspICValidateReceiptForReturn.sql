@@ -36,7 +36,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- 'Transaction not saved. Stocks for {Item No} will have an over-return.'
-		RAISERROR(80160, 11, 1, @strItemNo);
+		RAISERROR('Transaction not saved. Stocks for %s will have an over-return.', 11, 1, @strItemNo);
 		RETURN -1;
 	END 
 END 
@@ -60,7 +60,7 @@ BEGIN
 	IF @intItemId IS NULL 
 	BEGIN 
 		-- 'Return no longer allowed. All of the stocks are returned.'
-		RAISERROR(80161, 11, 1, @strItemNo);
+		RAISERROR('Return no longer allowed. All of the stocks are returned.', 11, 1, @strItemNo);
 		RETURN -1;
 	END 
 END 

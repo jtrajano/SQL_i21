@@ -46,7 +46,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51140
+				'The work order that you clicked on no longer exists. This is quite possible, if a packaging operator has deleted the work order and your iMake client is yet to refresh the screen.'
 				,11
 				,1
 				)
@@ -80,7 +80,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51141
+				'There are lots produced against this workorder which are not yet released to warehouse. In order to complete the workorder, either release the lots to warehouse or mark the pallet(s) as Ghost.'
 				,11
 				,1
 				)
@@ -120,7 +120,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51131
+				'Cycle count entries for the run not available, cannot proceed.'
 				,11
 				,1
 				)

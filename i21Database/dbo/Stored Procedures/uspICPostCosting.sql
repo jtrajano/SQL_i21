@@ -670,7 +670,7 @@ BEGIN
 				,[intCostingMethod]						= @AVERAGECOST
 				,[strDescription]						= -- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
 														 FORMATMESSAGE(
-															80078
+															'Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s.'
 															,CONVERT(NVARCHAR, CAST(dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) AS MONEY), 2)															
 															,CONVERT(NVARCHAR, CAST(Stock.dblUnitOnHand AS MONEY), 1)
 															,CONVERT(NVARCHAR, CAST(ItemPricing.dblAverageCost AS MONEY), 2)
@@ -792,7 +792,7 @@ BEGIN
 				,[intCostingMethod]						= @intCostingMethod
 				,[strDescription]						=	-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
 															FORMATMESSAGE(
-															80093
+															'Stock quantity is now zero on %s in %s. Auto variance is posted to zero out its inventory valuation.'
 															,i.strItemNo
 															,cl.strLocationName														
 														)

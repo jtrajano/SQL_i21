@@ -84,14 +84,14 @@ BEGIN
 	WHERE	intErrorCode = 80002
 
 	-- 'Item Location is invalid or missing for {Item}.'
-	RAISERROR(80002, 11, 1, @strItemNo)
+	RAISERROR('Item Location is invalid or missing for %s.', 11, 1, @strItemNo)
 	RETURN -1
 END 
 
 -- Check for invalid item UOM 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80048)
 BEGIN 
-	RAISERROR(80048, 11, 1)
+	RAISERROR('Item UOM is invalid or missing.', 11, 1)
 	RETURN -1
 END 
 
@@ -114,7 +114,7 @@ BEGIN
 				ON Errors.intItemId = Item.intItemId
 	WHERE	intErrorCode = 80003
 
-	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName)
+	RAISERROR('Negative stock quantity is not allowed for %s in %s.', 11, 1, @strItemNo, @strLocationName)
 	RETURN -1
 END 
 
@@ -130,7 +130,7 @@ WHERE	intErrorCode = 80023
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Missing costing method setup for item {Item}.'
-	RAISERROR(80023, 11, 1, @strItemNo)
+	RAISERROR('Missing costing method setup for item %s.', 11, 1, @strItemNo)
 	RETURN -1
 END 
 
@@ -146,7 +146,7 @@ WHERE	intErrorCode = 80022
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
-	RAISERROR(80022, 11, 1, @strItemNo)
+	RAISERROR('The status of %s is Discontinued.', 11, 1, @strItemNo)
 	RETURN -1
 END 
 
@@ -162,7 +162,7 @@ WHERE	intErrorCode = 80049
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Item {Item Name} is missing a Stock Unit. Please check the Unit of Measure setup.'
-	RAISERROR(80049, 11, 1, @strItemNo)
+	RAISERROR('Item %s is missing a Stock Unit. Please check the Unit of Measure setup.', 11, 1, @strItemNo)
 	RETURN -1
 END 
 
@@ -181,7 +181,7 @@ WHERE	intErrorCode = 80066
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Inventory Count is ongoing for Item {Item Name} and is locked under Location {Location Name}.'
-	RAISERROR(80066, 11, 1, @strItemNo, @strLocationName)
+	RAISERROR('Inventory Count is ongoing for Item %s and is locked under Location %s.', 11, 1, @strItemNo, @strLocationName)
 	RETURN -1
 END 
 
@@ -224,7 +224,7 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- 'Costing method mismatch. {Item No} is set to use Ave Costing. {Trans Id} is going to use Actual costing. It can''t be used together. You can fix it by changing the costing method to FIFO or LIFO.'
 	-- '{Item No} is set to use AVG Costing and it will be received in {Receipt Id} as Actual costing. Average cost computation will be messed up. Try receiving the stocks using Inventory Receipt instead of Transport Load.'
-	RAISERROR(80094, 11, 1, @strItemNo, @strTransactionId)
+	RAISERROR('%s costing method is Average Costing and it will be received in %s as Actual costing. This is not allowed to avoid bad computation of the average cost. Try receiving the stocks using Inventory Receipt instead of Transport Load.', 11, 1, @strItemNo, @strTransactionId)
 	RETURN -1
 END 
 
@@ -250,6 +250,6 @@ WHERE	ISNULL(iv.dblForexRate, 0) = 0
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate.'
-	RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo)
+	RAISERROR('%s is using a foreign currency. Please check if %s has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from %s to %s.', 11, 1, @strTransactionId, @strItemNo)
 	RETURN -1
 END 

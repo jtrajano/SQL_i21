@@ -44,7 +44,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				90029
+				'Manufacturing Process cannot be blank'
 				,11
 				,1
 				)
@@ -93,7 +93,7 @@ BEGIN TRY
 				) <> @intConcurrencyId
 		BEGIN
 			RAISERROR (
-					51194
+					'The data already updated by another user, Please refresh.'
 					,11
 					,1
 					)

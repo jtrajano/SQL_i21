@@ -130,7 +130,7 @@ IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @Type NOT IN ('Standar
 		IF ISNULL(@RaiseError,0) = 0
 			ROLLBACK TRANSACTION		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120072, 16, 1, @Type)
+			RAISERROR('Unable to duplicate %s Invoice Type.', 16, 1, @Type)
 		RETURN 0;
 	END
 
@@ -139,7 +139,7 @@ IF ISNULL(@LoadDistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
 		IF ISNULL(@RaiseError,0) = 0
 			ROLLBACK TRANSACTION		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120037, 16, 1)
+			RAISERROR('Duplicating of Transport Delivery Invoice type is not allowed.', 16, 1)
 		RETURN 0;
 	END
 	
@@ -148,7 +148,7 @@ IF @Type = 'CF Tran'
         IF ISNULL(@RaiseError,0) = 0
             ROLLBACK TRANSACTION        
         IF ISNULL(@RaiseError,0) = 1
-            RAISERROR(120077, 16, 1)
+            RAISERROR('Duplicating of CF Tran Invoice type is not allowed.', 16, 1)
         RETURN 0;
     END
       
@@ -157,7 +157,7 @@ IF @Type = 'CF Invoice'
         IF ISNULL(@RaiseError,0) = 0
             ROLLBACK TRANSACTION        
         IF ISNULL(@RaiseError,0) = 1
-            RAISERROR(120078, 16, 1)
+            RAISERROR('Duplicating of CF Invoice Invoice type is not allowed.', 16, 1)
         RETURN 0;
     END
   
@@ -166,7 +166,7 @@ IF @Type = 'Meter Billing'
         IF ISNULL(@RaiseError,0) = 0
             ROLLBACK TRANSACTION        
         IF ISNULL(@RaiseError,0) = 1
-            RAISERROR(120079, 16, 1)
+            RAISERROR('Duplicating of Meter Billing Invoice type is not allowed.', 16, 1)
         RETURN 0;
     END
 
@@ -181,7 +181,7 @@ IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID
 		IF ISNULL(@RaiseError,0) = 0
 			ROLLBACK TRANSACTION		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120038, 16, 1)
+			RAISERROR('There are items that will exceed the contract quantity.', 16, 1)
 		RETURN 0;
 	END
 

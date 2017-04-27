@@ -42,7 +42,7 @@ BEGIN TRY
 		) AS DT WHERE DT.intRowNumber > 1 )
 	BEGIN
 		RAISERROR (
-				51154
+				'Product specification entered should be unique.'
 				,11
 				,1
 				)

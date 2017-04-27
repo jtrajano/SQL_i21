@@ -37,7 +37,7 @@ BEGIN TRY
 	IF ISNULL(@strLotNumber, '') = ''
 	BEGIN
 		RAISERROR (
-				51192
+				'Supplied lot is not available.'
 				,11
 				,1
 				)

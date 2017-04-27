@@ -85,7 +85,7 @@ BEGIN TRY
 			) 
 	BEGIN
 		RAISERROR (
-				51194
+				'The data already updated by another user, Please refresh.'
 				,11
 				,1
 				)
