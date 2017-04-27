@@ -1411,64 +1411,6 @@ Ext.define('Inventory.view.Item', {
                                                                                 labelWidth: 115
                                                                             },
                                                                             {
-                                                                                xtype: 'gridcombobox',
-                                                                                columns: [
-                                                                                    {
-                                                                                        dataIndex: 'intTagId',
-                                                                                        dataType: 'numeric',
-                                                                                        text: 'Tag Id',
-                                                                                        hidden: true
-                                                                                    },
-                                                                                    {
-                                                                                        dataIndex: 'strTagNumber',
-                                                                                        dataType: 'string',
-                                                                                        text: 'Tag Number',
-                                                                                        flex: 1
-                                                                                    },
-                                                                                    {
-                                                                                        dataIndex: 'strDescription',
-                                                                                        dataType: 'string',
-                                                                                        text: 'Description',
-                                                                                        flex: 1
-                                                                                    }
-                                                                                ],
-                                                                                enableDrillDown: 'true',
-                                                                                itemId: 'cboMedicationTag',
-                                                                                fieldLabel: 'Medication Tag',
-                                                                                labelWidth: 115,
-                                                                                displayField: 'strTagNumber',
-                                                                                valueField: 'intTagId'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'gridcombobox',
-                                                                                columns: [
-                                                                                    {
-                                                                                        dataIndex: 'intTagId',
-                                                                                        dataType: 'numeric',
-                                                                                        text: 'Tag Id',
-                                                                                        hidden: true
-                                                                                    },
-                                                                                    {
-                                                                                        dataIndex: 'strTagNumber',
-                                                                                        dataType: 'string',
-                                                                                        text: 'Tag Number',
-                                                                                        flex: 1
-                                                                                    },
-                                                                                    {
-                                                                                        dataIndex: 'strDescription',
-                                                                                        dataType: 'string',
-                                                                                        text: 'Description',
-                                                                                        flex: 1
-                                                                                    }
-                                                                                ],
-                                                                                enableDrillDown: 'true',
-                                                                                itemId: 'cboIngredientTag',
-                                                                                fieldLabel: 'Ingredient Tag',
-                                                                                labelWidth: 115,
-                                                                                displayField: 'strTagNumber',
-                                                                                valueField: 'intTagId'
-                                                                            },
-                                                                            {
                                                                                 xtype: 'textfield',
                                                                                 itemId: 'txtVolumeRebateGroup',
                                                                                 fieldLabel: 'Volume Rebate Group',
@@ -1538,6 +1480,93 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'chkHazardMaterial',
                                                                         fieldLabel: 'Hazard Material',
                                                                         labelWidth: 125
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intTagId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Tag Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strTagNumber',
+                                                                                dataType: 'string',
+                                                                                text: 'Tag Number',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        enableDrillDown: 'true',
+                                                                        itemId: 'cboMedicationTag',
+                                                                        fieldLabel: 'Medication Tag',
+                                                                        labelWidth: 125,
+                                                                        displayField: 'strTagNumber',
+                                                                        valueField: 'intTagId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intTagId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Tag Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strTagNumber',
+                                                                                dataType: 'string',
+                                                                                text: 'Tag Number',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        enableDrillDown: 'true',
+                                                                        itemId: 'cboIngredientTag',
+                                                                        fieldLabel: 'Ingredient Tag',
+                                                                        labelWidth: 125,
+                                                                        displayField: 'strTagNumber',
+                                                                        valueField: 'intTagId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intTagId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Tag Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strTagNumber',
+                                                                                dataType: 'string',
+                                                                                text: 'Tag Number',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        enableDrillDown: 'true',
+                                                                        itemId: 'cboHazmat',
+                                                                        fieldLabel: 'Hazmat Message',
+                                                                        labelWidth: 125,
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'strDescription'
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',

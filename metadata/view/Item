@@ -1538,7 +1538,7 @@
                                                     ]
                                                 }
                                             ]
-                                        },                                      
+                                        },
                                         {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
@@ -3108,120 +3108,6 @@
                                                                     "designerId": "512f8006-93b0-4408-a79a-c3ed93249ddf"
                                                                 },
                                                                 {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "columns": [
-                                                                            "[",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intTagId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\ttext: 'Tag Id',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strTagNumber',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Tag Number',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strDescription',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Description',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t}",
-                                                                            "]"
-                                                                        ],
-                                                                        "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strTagNumber",
-                                                                        "enableDrillDown": "true",
-                                                                        "fieldLabel": "Medication Tag",
-                                                                        "itemId": "cboMedicationTag",
-                                                                        "labelWidth": 115,
-                                                                        "layout|flex": null,
-                                                                        "valueField": "intTagId"
-                                                                    },
-                                                                    "name": "MyComboBox15",
-                                                                    "configAlternates": {
-                                                                        "columns": "array"
-                                                                    },
-                                                                    "designerId": "cb709d0d-72ac-43ac-a04f-9a9f93b0afde",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "columns",
-                                                                            "type": "string"
-                                                                        },
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "enableDrillDown",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "columns": [
-                                                                            "[",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intTagId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\ttext: 'Tag Id',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strTagNumber',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Tag Number',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strDescription',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Description',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t}",
-                                                                            "]"
-                                                                        ],
-                                                                        "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strTagNumber",
-                                                                        "enableDrillDown": "true",
-                                                                        "fieldLabel": "Ingredient Tag",
-                                                                        "itemId": "cboIngredientTag",
-                                                                        "labelWidth": 115,
-                                                                        "layout|flex": null,
-                                                                        "valueField": "intTagId"
-                                                                    },
-                                                                    "name": "MyComboBox16",
-                                                                    "configAlternates": {
-                                                                        "columns": "array"
-                                                                    },
-                                                                    "designerId": "c1e9e750-3130-47d2-8a3a-8d65d328144a",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "columns",
-                                                                            "type": "string"
-                                                                        },
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "enableDrillDown",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
                                                                     "type": "Ext.form.field.Text",
                                                                     "reference": {
                                                                         "name": "items",
@@ -3371,6 +3257,177 @@
                                                             },
                                                             "name": "MyCheckbox13",
                                                             "designerId": "f2b75f1a-d5ae-494e-a784-dccd15580568"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intTagId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Tag Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strTagNumber',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Tag Number',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strTagNumber",
+                                                                "enableDrillDown": "true",
+                                                                "fieldLabel": "Medication Tag",
+                                                                "itemId": "cboMedicationTag",
+                                                                "labelWidth": 125,
+                                                                "layout|flex": null,
+                                                                "valueField": "intTagId"
+                                                            },
+                                                            "name": "MyComboBox15",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "cb709d0d-72ac-43ac-a04f-9a9f93b0afde",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "enableDrillDown",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intTagId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Tag Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strTagNumber',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Tag Number',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strTagNumber",
+                                                                "enableDrillDown": "true",
+                                                                "fieldLabel": "Ingredient Tag",
+                                                                "itemId": "cboIngredientTag",
+                                                                "labelWidth": 125,
+                                                                "layout|flex": null,
+                                                                "valueField": "intTagId"
+                                                            },
+                                                            "name": "MyComboBox16",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "c1e9e750-3130-47d2-8a3a-8d65d328144a",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "enableDrillDown",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intTagId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Tag Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strTagNumber',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Tag Number',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strDescription",
+                                                                "enableDrillDown": "true",
+                                                                "fieldLabel": "Hazmat Message",
+                                                                "itemId": "cboHazmat",
+                                                                "labelWidth": 125,
+                                                                "layout|flex": null,
+                                                                "valueField": "strDescription"
+                                                            },
+                                                            "name": "MyComboBox79",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "70e85511-8682-4cf7-bb8e-7542a92bc41b",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "enableDrillDown",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Checkbox",
