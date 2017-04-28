@@ -4,6 +4,7 @@ SELECT
 	intLoadDetailId
 	,LD.intLoadId
 	,strLoadNumber
+	,intContractTypeId
 	,intPContractDetailId
 	,intPContractHeaderId
 	,intPContractSeq
@@ -75,6 +76,7 @@ SELECT
 	intLoadDetailId
 	,intLoadId
 	,strLoadNumber
+	,intContractTypeId
 	,intPContractDetailId
 	,intContractHeaderId
 	,intContractSeq

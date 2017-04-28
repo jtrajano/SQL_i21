@@ -5,6 +5,7 @@ SELECT
 	,LDCL.intLoadId
 	,LDCL.intLoadDetailContainerLinkId
 	,LC.intLoadContainerId
+	,intContractTypeId = CASE WHEN L.intPurchaseSale IN (1,3) THEN 1 ELSE 2 END
 	,L.intPurchaseSale
 	,L.strLoadNumber
 	,LD.intPSubLocationId
