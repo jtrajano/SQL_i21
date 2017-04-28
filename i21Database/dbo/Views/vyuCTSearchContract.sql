@@ -65,7 +65,8 @@ AS
 			CH.intStockCommodityUnitMeasureId,
 			CH.strStockCommodityUnitMeasure,
 			CH.strProducer,
-			CH.strSalesperson
+			CH.strSalesperson,
+			ISNULL(TR.ysnOnceApproved,0) AS ysnApproved
 
 	FROM	[vyuCTSearchContractHeader] CH	LEFT
 	JOIN
@@ -84,3 +85,16 @@ AS
 		) F
  GROUP BY HV.intContractHeaderId
  )BL ON  BL.intContractHeaderId = CH.intContractHeaderId
+ LEFT JOIN	
+ (
+		SELECT * FROM 
+		(
+			SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY TR.intRecordId ASC) intRowNum,
+					TR.intRecordId, TR.ysnOnceApproved 
+			FROM	tblSMTransaction	TR
+			JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
+			WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
+										'ContractManagement.view.Amendments')
+		) t
+		WHERE intRowNum = 1
+) TR ON TR.intRecordId = CH.intContractHeaderId	
