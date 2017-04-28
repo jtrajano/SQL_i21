@@ -69,7 +69,7 @@ BEGIN TRY
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@intMachineId = intMachineId
 		,@intWorkOrderId = intWorkOrderId
-		,@dtmPlannedDate = dtmPlannedDate
+		--,@dtmPlannedDate = dtmPlannedDate
 		,@intPlannedShiftId = intPlannedShiftId
 		,@intItemId = intItemId
 		,@intStorageLocationId = intStorageLocationId
@@ -93,7 +93,7 @@ BEGIN TRY
 			,intManufacturingProcessId INT
 			,intMachineId INT
 			,intWorkOrderId INT
-			,dtmPlannedDate DATETIME
+			--,dtmPlannedDate DATETIME
 			,intPlannedShiftId INT
 			,intItemId INT
 			,intStorageLocationId INT
@@ -186,6 +186,10 @@ BEGIN TRY
 					)
 		END
 	END
+
+	SELECT TOP 1 @dtmPlannedDate = dtmPlannedDate
+	FROM dbo.tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	IF @intWorkOrderId IS NULL
 		OR @intWorkOrderId = 0
@@ -453,7 +457,7 @@ BEGIN TRY
 			EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
 				-- Parameters for filtering:
 				@intItemId = @intInputItemId
-				,@dtmDate = @dtmCurrentDateTime
+				,@dtmDate = @dtmPlannedDate
 				,@intLocationId = @intLocationId
 				,@intSubLocationId = @intSubLocationId
 				,@intStorageLocationId = @intStorageLocationId
@@ -510,7 +514,7 @@ BEGIN TRY
 		EXEC uspICInventoryAdjustment_CreatePostLotMerge
 			-- Parameters for filtering:
 			@intItemId = @intInputItemId
-			,@dtmDate = @dtmCurrentDateTime
+			,@dtmDate = @dtmPlannedDate
 			,@intLocationId = @intLocationId
 			,@intSubLocationId = @intSubLocationId
 			,@intStorageLocationId = @intStorageLocationId
