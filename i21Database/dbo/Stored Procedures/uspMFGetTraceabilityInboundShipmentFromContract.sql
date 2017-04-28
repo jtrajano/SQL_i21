@@ -7,5 +7,5 @@ Select DISTINCT 'In Shipment' AS strTransactionName,s.intLoadId,s.strLoadNumber,
 0 intCategoryId,'' strCategoryCode,s.dblQuantity,
 s.strUnitMeasure strUOM,
 NULL AS dtmTransactionDate,0 intParentLotId,s.strVendor,'IS' AS strType
-from vyuLGLoadContainerReceiptContracts s
-Where s.intPContractHeaderId=@intContractId
+from vyuLGLoadContainerReceiptContracts s Join tblLGLoad l on s.intLoadId=l.intLoadId 
+Where s.intPContractHeaderId=@intContractId AND l.intShipmentType=1
