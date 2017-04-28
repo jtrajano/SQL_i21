@@ -189,7 +189,7 @@ BEGIN
 				CASE 
 					WHEN intMarginById = 2
 						THEN ISNULL(RI.dblMargin, 0)/ R.dblQuantity
-					ELSE (ISNULL(l.dblLastCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
+					ELSE (ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId,cl.intItemUOMId,l.dblLastCost), 0) * ISNULL(RI.dblMargin, 0) / 100)
 					END
 				), 0)
 		,dblSalesPrice = 0
