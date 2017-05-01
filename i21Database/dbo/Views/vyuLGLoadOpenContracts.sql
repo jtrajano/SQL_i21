@@ -88,6 +88,7 @@ SELECT CD.intContractDetailId
 	,intShipmentType = 1
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
+	,CO.strCountry AS strOrigin
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -108,6 +109,16 @@ LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
+	AND CD.intItemContractId = ICI.intItemContractId
+LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
+		CASE 
+			WHEN ISNULL(ICI.intCountryId, 0) = 0
+				THEN ISNULL(CA.intCountryID, 0)
+			ELSE ICI.intCountryId
+			END
+		)
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -226,6 +237,7 @@ SELECT CD.intContractDetailId
 	,intShipmentType = 2
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
+	,CO.strCountry AS strOrigin
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -240,6 +252,16 @@ LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
+	AND CD.intItemContractId = ICI.intItemContractId
+LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
+		CASE 
+			WHEN ISNULL(ICI.intCountryId, 0) = 0
+				THEN ISNULL(CA.intCountryID, 0)
+			ELSE ICI.intCountryId
+			END
+		)
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -324,3 +346,4 @@ GROUP BY CD.intContractDetailId
 	,CD.intStorageLocationId
 	,WG.ysnSample
 	,CD.dblShippingInstructionQty
+	,CO.strCountry
