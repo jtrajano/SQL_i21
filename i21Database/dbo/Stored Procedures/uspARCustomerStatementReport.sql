@@ -90,6 +90,7 @@ DECLARE @temp_statement_table TABLE(
 	,[dblMonthlyBudget]				NUMERIC(18,6)
 	,[dblRunningBalance]			NUMERIC(18,6)
 	,[strCustomerNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,[strDisplayName]				NVARCHAR(100)
 	,[strName]						NVARCHAR(100)
 	,[strBOLNumber]					NVARCHAR(100)
 	,[dblCreditLimit]				NUMERIC(18,6)
@@ -225,7 +226,8 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](C.intEntityCustomerId, I.dtmDate), 0)
 	 , dblRunningBalance = SUM(CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)) OVER (PARTITION BY I.intEntityCustomerId ORDER BY I.dtmPostDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 	 , C.strCustomerNumber
-	 , strName = CASE WHEN CUST.strStatementFormat <> ''Running Balance'' THEN C.strName ELSE ISNULL(CC.strCheckPayeeName, C.strName) END
+	 , strDisplayName = CASE WHEN CUST.strStatementFormat <> ''Running Balance'' THEN C.strName ELSE ISNULL(CC.strCheckPayeeName, C.strName) END
+	 , strName = C.strName
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
 	 , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityCustomerId)
@@ -286,6 +288,7 @@ IF @ysnIncludeBudget = 1
 				  , dblMonthlyBudget			= dblBudgetAmount
 				  , dblRunningBalance			= SUM(dblBudgetAmount - dblAmountPaid) OVER (PARTITION BY C.intEntityCustomerId ORDER BY intCustomerBudgetId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 				  , strCustomerNumber			= C.strCustomerNumber
+				  , strDisplayName				= C.strDisplayName
 				  , strName						= C.strName
 				  , strBOLNumber				= NULL
 				  , dblCreditLimit				= C.dblCreditLimit
@@ -437,6 +440,7 @@ BEGIN
 		  ,STATEMENTREPORT.dblMonthlyBudget
 		  ,STATEMENTREPORT.dblRunningBalance
 		  ,STATEMENTREPORT.strCustomerNumber
+		  ,STATEMENTREPORT.strDisplayName
 		  ,STATEMENTREPORT.strName
 		  ,STATEMENTREPORT.strBOLNumber
 		  ,STATEMENTREPORT.dblCreditLimit	  
@@ -465,6 +469,7 @@ BEGIN
 		  ,dblMonthlyBudget								= SUM(STATEMENTREPORT.dblMonthlyBudget)
 		  ,dblRunningBalance							= SUM(STATEMENTREPORT.dblRunningBalance)
 		  ,STATEMENTREPORT.strCustomerNumber
+		  ,STATEMENTREPORT.strDisplayName
 		  ,STATEMENTREPORT.strName
 		  ,STATEMENTREPORT.strBOLNumber
 		  ,STATEMENTREPORT.dblCreditLimit	  
@@ -487,6 +492,7 @@ BEGIN
 		   , CFReportTable.dtmInvoiceDate
 		   , STATEMENTREPORT.strTransactionType	  
 		   , STATEMENTREPORT.strCustomerNumber
+		   , STATEMENTREPORT.strDisplayName
 		   , STATEMENTREPORT.strName
 		   , STATEMENTREPORT.strBOLNumber
 		   , STATEMENTREPORT.dblCreditLimit	  
@@ -531,6 +537,7 @@ ELSE
 		  ,STATEMENTREPORT.dblMonthlyBudget
 		  ,STATEMENTREPORT.dblRunningBalance
 		  ,STATEMENTREPORT.strCustomerNumber
+		  ,STATEMENTREPORT.strDisplayName
 		  ,STATEMENTREPORT.strName
 		  ,STATEMENTREPORT.strBOLNumber
 		  ,STATEMENTREPORT.dblCreditLimit	  
@@ -559,6 +566,7 @@ ELSE
 		  ,dblMonthlyBudget								= SUM(STATEMENTREPORT.dblMonthlyBudget)
 		  ,dblRunningBalance							= SUM(STATEMENTREPORT.dblRunningBalance)
 		  ,STATEMENTREPORT.strCustomerNumber
+		  ,STATEMENTREPORT.strDisplayName
 		  ,STATEMENTREPORT.strName
 		  ,STATEMENTREPORT.strBOLNumber
 		  ,STATEMENTREPORT.dblCreditLimit	  
@@ -581,6 +589,7 @@ ELSE
 		   , CFReportTable.dtmInvoiceDate
 		   , STATEMENTREPORT.strTransactionType	  
 		   , STATEMENTREPORT.strCustomerNumber
+		   , STATEMENTREPORT.strDisplayName
 		   , STATEMENTREPORT.strName
 		   , STATEMENTREPORT.strBOLNumber
 		   , STATEMENTREPORT.dblCreditLimit	  
