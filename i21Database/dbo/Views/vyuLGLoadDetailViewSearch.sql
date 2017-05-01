@@ -169,8 +169,41 @@ SELECT   Load.intLoadId
 			END COLLATE Latin1_General_CI_AS
 		,Item.intCommodityId
 		,CA.intCommodityAttributeId
-		,CA.strDescription AS strOrigin
+		,CO.strCountry AS strOrigin
 		,LoadDetail.intNumberOfContainers
+		,strShipmentStatus = CASE Load.intShipmentStatus
+			WHEN 1
+				THEN 'Scheduled'
+			WHEN 2
+				THEN 'Dispatched'
+			WHEN 3
+				THEN 'Inbound transit'
+			WHEN 4
+				THEN 'Received'
+			WHEN 5
+				THEN 'Outbound transit'
+			WHEN 6
+				THEN 'Delivered'
+			WHEN 7
+				THEN 'Instruction created'
+			WHEN 8
+				THEN 'Partial Shipment Created'
+			WHEN 9
+				THEN 'Full Shipment Created'
+			WHEN 10
+				THEN 'Cancelled'
+			ELSE ''
+			END COLLATE Latin1_General_CI_AS
+		,strTransportationMode = CASE 
+			WHEN Load.intTransportationMode = 1 
+				THEN 'Truck'
+			WHEN Load.intTransportationMode = 2
+				THEN 'Ocean Vessel'
+			END
+		,strPCompanyLocation = PCL.strLocationName
+		,strSCompanyLocation = SCL.strLocationName
+		,ICI.strContractItemNo
+		,ICI.strContractItemName
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
@@ -203,3 +236,12 @@ LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeade
 LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = LoadDetail.intAllocationDetailId
 LEFT JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId	
 LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = Load.intLoadShippingInstructionId
+LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
+	AND PDetail.intItemContractId = ICI.intItemContractId
+LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
+		CASE 
+			WHEN ISNULL(ICI.intCountryId, 0) = 0
+				THEN ISNULL(CA.intCountryID, 0)
+			ELSE ICI.intCountryId
+			END
+		)
