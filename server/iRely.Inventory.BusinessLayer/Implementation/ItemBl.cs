@@ -718,66 +718,8 @@ namespace iRely.Inventory.BusinessLayer
 
             // Create the filter for the Prior Balance Query
             List<SearchFilter> priorBalanceFilter = new List<SearchFilter>();
-            var itemExists = false;
-            var locationExists = false;
-            {
-                foreach (var pf in param.filter)
-                {
-                    switch (pf.c.ToString().ToLower())
-                    {
-                        case "dtmdate":
-                            switch (pf.co.ToString().ToLower())
-                            {
-                                case "gte":
-                                case "noteq":
-                                    if (pf.v.ToString() != "")
-                                    {
-                                        priorBalanceFilter.Add(
-                                            new SearchFilter()
-                                            {
-                                                c = pf.c,
-                                                v = pf.v,
-                                                co = "lt",
-                                                cj = pf.cj
-                                            }
-                                        );
-                                    }
-                                    break;
-                                case "gt":                                
-                                    if (pf.v.ToString() != "")
-                                    {
-                                        priorBalanceFilter.Add(
-                                            new SearchFilter()
-                                            {
-                                                c = pf.c,
-                                                v = pf.v,
-                                                co = "lte",
-                                                cj = pf.cj
-                                            }
-                                        );
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        case "stritemno":
-                        case "strlocationname":
-                            break; 
-                        default:
-                            priorBalanceFilter.Add(
-                                new SearchFilter()
-                                {
-                                    c = pf.c,
-                                    v = pf.v,
-                                    co = pf.co,
-                                    cj = pf.cj
-                                }
-                            );
-                            break;
-                    }
-                }
-            }
+            var itemChanges = false;
+            var locationChanges = false;
 
             // Get the page. Convert it into a list for the loop below. 
             var paged_data = await query.PagingBySelector(param).ToListAsync();
@@ -787,50 +729,55 @@ namespace iRely.Inventory.BusinessLayer
             string lastLocation = locationFromPreviousPage;
             string currentItem =  itemFromPreviousPage;
             string lastItem = itemFromPreviousPage;
+            string currentIntInventoryTransactionId; 
             foreach (var row in paged_data)
             {
                 if (row.intInventoryTransactionId != 0)
                 {                    
                     currentLocation = row.strLocationName;
                     currentItem = row.strItemNo;
+                    currentIntInventoryTransactionId = row.intInventoryTransactionId.ToString();
                     if (lastItem == "" || lastLocation == "" || currentItem != lastItem || currentLocation != lastLocation)
                     {
                         // Reset the qty and balances back to zero. 
                         dblBeginningBalance = 0;
                         dblBeginningQty = 0;
 
-                        itemExists = false;
-                        locationExists = false;
-
-                        priorBalanceFilter.RemoveAll(p => p.c == "strItemNo" || p.c == "strLocationName"); 
+                        itemChanges = true;
+                        locationChanges = true;                         
                     }
 
                     // Check if we need to rest the beginning qty and balance. It will reset if the item or location changes. 
-                    if (!itemExists || !locationExists) {
-                        if (!itemExists)
-                        {
-                            priorBalanceFilter.Add(
-                                new SearchFilter()
-                                {
-                                    c = "strItemNo",
-                                    v = currentItem,
-                                    cj = "And"
-                                }
-                            );
-                            itemExists = true;
-                        }
+                    if (itemChanges || locationChanges) {
+                        priorBalanceFilter.RemoveAll(p => p.c == "strItemNo" || p.c == "strLocationName" || p.c == "intInventoryTransactionId");
 
-                        if (!locationExists) {
-                            priorBalanceFilter.Add(
-                                new SearchFilter()
-                                {
-                                    c = "strLocationName",
-                                    v = currentLocation,
-                                    cj = "And"
-                                }
-                            );
-                            locationExists = true; 
-                        }                        
+                        priorBalanceFilter.Add(
+                            new SearchFilter()
+                            {
+                                c = "strItemNo",
+                                v = currentItem,
+                                cj = "And"
+                            }
+                        );
+
+                        priorBalanceFilter.Add(
+                            new SearchFilter()
+                            {
+                                c = "strLocationName",
+                                v = currentLocation,
+                                cj = "And"
+                            }
+                        );
+
+                        priorBalanceFilter.Add(
+                            new SearchFilter()
+                            {
+                                c = "intInventoryTransactionId",
+                                v = currentIntInventoryTransactionId,
+                                co = "lt",
+                                cj = "And"
+                            }
+                        );                        
 
                         var priorBalanceQuery = GetOpeningBalances(priorBalanceFilter);
 
@@ -840,6 +787,9 @@ namespace iRely.Inventory.BusinessLayer
                         lastLocation = currentLocation;
                         lastItem = currentItem;
                     }
+
+                    dblBeginningBalance = dblBeginningBalance.Equals(DBNull.Value) || dblBeginningBalance == null ? 0 : dblBeginningBalance;
+                    dblBeginningQty = dblBeginningQty.Equals(DBNull.Value) || dblBeginningQty == null ? 0 : dblBeginningQty;
 
                     // Calculate beginning and running balance
                     row.dblBeginningBalance = dblBeginningBalance;

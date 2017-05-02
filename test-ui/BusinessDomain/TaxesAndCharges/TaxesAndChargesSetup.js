@@ -684,6 +684,7 @@ StartTest (function (t) {
         .waitUntilLoaded('',3000)
         .displayText('===== Setup Item Pricing Done=====')
         .displayText('===== 14. Add Item =====')
+        .clickMenuFolder('Inventory','Folder')
 
         //Add Other Charge Item - Freight1
         .displayText('===== 15. Add Other Charge Item - Freight1 =====')
