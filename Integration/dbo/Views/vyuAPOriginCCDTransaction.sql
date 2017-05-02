@@ -11,7 +11,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAP
 	
 	WITH APOriginCCDTransaction AS (
 	SELECT			DISTINCT
-					[intEntityVendorId]		=	D.intEntityId, 
+					[intEntityId]		=	D.intEntityId, 
 					[strVendorOrderNumber] 	=	(CASE WHEN DuplicateData.apivc_ivc_no IS NOT NULL
 														THEN dbo.fnTrim(A.apivc_ivc_no) + ''-DUP'' 
 														ELSE A.apivc_ivc_no END),
