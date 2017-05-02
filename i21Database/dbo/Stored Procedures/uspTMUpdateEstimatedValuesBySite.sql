@@ -7,9 +7,13 @@ BEGIN
 	DECLARE @LastReadingDate DATETIME 
 	DECLARE @AccumulatedDD INT
 	DECLARE @intClockId INT
+	DECLARE @currentSeason NVARCHAR(10)
+	
+	
 
 	---Get Clock Id used in the Site
 	SELECT @intClockId = intClockID FROM tblTMSite WHERE intSiteID = @intSiteId
+	SET @currentSeason = (SELECT (CASE WHEN (MONTH(GETDATE()) >= intBeginSummerMonth AND  MONTH(GETDATE()) < intBeginWinterMonth) THEN 'SUMMER' ELSE 'WINTER' END) FROM tblTMClock WHERE intClockID = @intClockId)
 
 	IF OBJECT_ID('tempdb..#tmpLatestReading') IS NOT NULL DROP TABLE #tmpLatestReading
 
@@ -28,7 +32,7 @@ BEGIN
 
 		UPDATE tblTMSite
 		SET dtmLastReadingUpdate = @LastReadingDate,   
-			dblEstimatedGallonsLeft =	CASE WHEN((SELECT UPPER(strCurrentSeason) FROM tblTMClock WHERE intClockID = @intClockId) = 'SUMMER') THEN
+			dblEstimatedGallonsLeft =	CASE WHEN(@currentSeason = 'SUMMER') THEN
 											ISNULL(dblEstimatedGallonsLeft,0) 
 												- (
 													(DATEDIFF(DAY,ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate),@LastReadingDate)) * ISNULL(dblSummerDailyUse,0)
@@ -69,7 +73,7 @@ BEGIN
 													)
 												)
 										END	
-		,dblEstimatedPercentLeft =		CASE WHEN((SELECT UPPER(strCurrentSeason) FROM tblTMClock WHERE intClockID = @intClockId) = 'SUMMER') THEN
+		,dblEstimatedPercentLeft =		CASE WHEN(@currentSeason = 'SUMMER') THEN
 											ISNULL(dblEstimatedGallonsLeft,0) 
 												- (
 													(DATEDIFF(DAY,ISNULL(dtmLastReadingUpdate,dtmLastDeliveryDate),@LastReadingDate)) * ISNULL(dblSummerDailyUse,0)
