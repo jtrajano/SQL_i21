@@ -105,8 +105,32 @@ BEGIN
 		FROM	(	SELECT	DISTINCT 
 							apcbk_desc = i.apcbk_desc COLLATE Latin1_General_CI_AS
 					FROM	apcbkmst i
+					WHERE apcbk_bnk_no IS NULL 
 				) QUERY
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(QUERY.apcbk_desc, ''''))) COLLATE Latin1_General_CI_AS)
+
+		UNION SELECT 
+				strBankName				= LTRIM(RTRIM(ISNULL(Q.ssbnk_name, '''')))
+				,strContact				= (SELECT TOP 1 ISNULL(ssbnk_contact,'''') FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,strAddress				= (SELECT TOP 1 ISNULL(ssbnk_addr1 + char(13) + ssbnk_addr2,'''') FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,strZipCode				= (SELECT TOP 1 ISNULL(ssbnk_zip,'''') FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,strCity				= (SELECT TOP 1 ISNULL(ssbnk_city,'''') FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,strState				= (SELECT TOP 1 ISNULL(ssbnk_state,'''') FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,strCountry				= ''''
+				,strPhone				= (SELECT TOP 1 ISNULL(ssbnk_phone,'''') FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,strFax					= ''''
+				,strWebsite				= ''''	
+				,strEmail				= (SELECT TOP 1 ISNULL(ssbnk_email_addr,'''') FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,strRTN					= (SELECT TOP 1 ISNULL(CAST(ssbnk_transit_route AS NVARCHAR(12)), '''') FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,intCreatedUserId		= (SELECT TOP 1  dbo.fnConvertOriginUserIdtoi21(ssbnk_user_id) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,dtmCreated				= GETDATE()
+				,intLastModifiedUserId	= (SELECT TOP 1  dbo.fnConvertOriginUserIdtoi21(ssbnk_user_id) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+				,dtmLastModified		= GETDATE()
+				,intConcurrencyId		= 1
+		FROM(
+				SELECT DISTINCT ssbnk_name FROM ssbnkmst
+			) Q
+		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(Q.ssbnk_name, ''''))) COLLATE Latin1_General_CI_AS)
 
 		-- Insert new record in tblCMBankAccount
 		INSERT INTO tblCMBankAccount (
@@ -155,7 +179,14 @@ BEGIN
 				,strCbkNo	
 		)
 		SELECT			
-				intBankId							= (SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE A.strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''''))) COLLATE Latin1_General_CI_AS)   
+				intBankId							= CASE WHEN i.apcbk_bnk_no IS NULL THEN
+															(SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE A.strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''''))) COLLATE Latin1_General_CI_AS)   
+														ELSE
+															(SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE A.strBankName = (
+																	SELECT  LTRIM(RTRIM(ISNULL(ssbnk_name, ''''))) COLLATE Latin1_General_CI_AS  FROM ssbnkmst WHERE  ssbnk_code = i.apcbk_bnk_no
+																)
+															)
+														END	
 				,ysnActive							= CASE WHEN i.apcbk_active_yn = ''Y'' THEN 1 ELSE 0 END 
 				,intGLAccountId						= dbo.fnGetGLAccountIdFromOriginToi21(i.apcbk_gl_cash) 
 				,intCurrencyId						= ISNULL(dbo.fnGetCurrencyIdFromOriginToi21(i.apcbk_currency), @intCurrencyId)
