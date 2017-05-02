@@ -554,6 +554,7 @@ BEGIN TRY
 						,[strSettleTicket]
 						,[intTransactionTypeId]
 						,[intInventoryReceiptId]
+						,[dblPaidAmount]
 					)
 					VALUES 
 					(
@@ -569,6 +570,7 @@ BEGIN TRY
 						,@TicketNo
 						,4
 						,@intContractDetailId
+						,@dblCashPrice
 					)
 
 					INSERT INTO @SettleVoucherCreate 
@@ -637,6 +639,7 @@ BEGIN TRY
 						,[strSettleTicket]
 						,[intTransactionTypeId]
 						,[intInventoryReceiptId]
+						,[dblPaidAmount]
 					)
 					VALUES 
 					(
@@ -652,6 +655,7 @@ BEGIN TRY
 						,@TicketNo
 						,4
 						,@intContractDetailId
+						,@dblCashPrice
 					)
 
 					INSERT INTO @SettleVoucherCreate 
@@ -720,6 +724,7 @@ BEGIN TRY
 					,[intEntityId]
 					,[strSettleTicket]
 					,[intTransactionTypeId]
+					,[dblPaidAmount]
 				)
 				VALUES 
 				(
@@ -734,6 +739,7 @@ BEGIN TRY
 					,NULL
 					,@TicketNo
 					,4
+					,@dblSpotCashPrice
 				)
 				
 				SET @dblSpotUnits = @dblSpotUnits - @dblStorageUnits
@@ -790,6 +796,7 @@ BEGIN TRY
 					,[intEntityId]
 					,[strSettleTicket]
 					,[intTransactionTypeId]
+					,[dblPaidAmount]
 				)
 				VALUES 
 				(
@@ -804,6 +811,7 @@ BEGIN TRY
 					,NULL
 					,@TicketNo
 					,4
+					,@dblSpotCashPrice
 				)
 
 				SET @dblSpotUnits = 0
@@ -911,21 +919,21 @@ BEGIN TRY
 			,intItemUOMId = @intSourceItemUOMId
 			,dtmDate = GETDATE() 
 			,dblQty = -SV.[dblUnits]
-			,dblUOMQty = SV.[dblUnits]
-			,dblCost = SV.[dblCashPrice]
+			,dblUOMQty = @dblUOMQty
+			,dblCost = CASE WHEN St.ysnDPOwnedType = 0 THEN SV.[dblCashPrice] ELSE 0 END
 			,dblSalesPrice = 0.00
 			,intCurrencyId = @intCurrencyId
 			,dblExchangeRate = 1
 			,intTransactionId = 1
 			,intTransactionDetailId = SV.[intCustomerStorageId]
-			,strTransactionId = @strStorageAdjustment
+			,strTransactionId =  @TicketNo
 			,intTransactionTypeId = 4
 			,intSubLocationId = CS.intCompanyLocationSubLocationId
 			,intStorageLocationId = CS.intStorageLocationId
 			,ysnIsStorage = 1
 		FROM @SettleVoucherCreate SV 
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
-		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId AND St.ysnDPOwnedType = 0
+		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId --AND St.ysnDPOwnedType = 0
 		WHERE   SV.intCustomerStorageId=@intCustomerStorageId 
 				AND SV.intItemSort = 1 
 				AND SV.IsProcessed = 0 
@@ -957,16 +965,16 @@ BEGIN TRY
 			,intItemLocationId = @intItemLocationId	
 			,intItemUOMId = @intSourceItemUOMId
 			,dtmDate = GETDATE() 
-			,dblQty = -SV.[dblUnits]
-			,dblUOMQty = SV.[dblUnits]
-			,dblCost = SV.[dblCashPrice]
+			,dblQty = SV.[dblUnits]
+			,dblUOMQty = @dblUOMQty
+			,dblCost = 0
 			,dblSalesPrice = 0.00
 			,intCurrencyId = @intCurrencyId
 			,dblExchangeRate = 1
-			,intTransactionId = 1
+			,intTransactionId = SV.[intCustomerStorageId]
 			,intTransactionDetailId = SV.[intCustomerStorageId]
-			,strTransactionId = @strStorageAdjustment
-			,intTransactionTypeId = 4
+			,strTransactionId = @TicketNo
+			,intTransactionTypeId = 44
 			,intSubLocationId = CS.intCompanyLocationSubLocationId
 			,intStorageLocationId = CS.intStorageLocationId
 			,ysnIsStorage = 0
