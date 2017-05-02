@@ -1230,28 +1230,21 @@ BEGIN
 	END
 
 	/* Update the Employee Time Off Tiers and Accrued Hours */
-	SELECT DISTINCT EE.intEmployeeAccrueTimeOffId
-	INTO #tmpAccrueTimeOff
-	FROM tblPRPaycheckEarning PE
-		INNER JOIN tblPREmployeeEarning EE
-			ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
-			WHERE EE.intEmployeeAccrueTimeOffId IS NOT NULL
-				AND PE.intPaycheckId = @intPaycheckId
-				AND EE.intEntityEmployeeId = @intEmployeeId
+	SELECT DISTINCT intTypeTimeOffId INTO #tmpEmployeeTimeOff FROM tblPREmployeeTimeOff WHERE intEntityEmployeeId = @intEmployeeId
 		
-	DECLARE @intAccrueTimeOffId INT
-	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpAccrueTimeOff)
+	DECLARE @intTypeTimeOffId INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeTimeOff)
 	BEGIN
-		SELECT TOP 1 @intAccrueTimeOffId = intEmployeeAccrueTimeOffId FROM #tmpAccrueTimeOff
+		SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOff
 
-		EXEC uspPRUpdateEmployeeTimeOff @intAccrueTimeOffId, @intEmployeeId
-		EXEC uspPRUpdateEmployeeTimeOffHours @intAccrueTimeOffId, @intEmployeeId
+		EXEC uspPRUpdateEmployeeTimeOff @intTypeTimeOffId, @intEmployeeId
+		EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId
 
-		DELETE FROM #tmpAccrueTimeOff WHERE intEmployeeAccrueTimeOffId = @intAccrueTimeOffId
+		DELETE FROM #tmpEmployeeTimeOff WHERE intTypeTimeOffId = @intTypeTimeOffId
 	END
 
 	EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
 END
 END
 
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAccrueTimeOff')) DROP TABLE #tmpAccrueTimeOff
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployeeTimeOff')) DROP TABLE #tmpEmployeeTimeOff
