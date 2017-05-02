@@ -5220,6 +5220,7 @@
     <Build Include="dbo\Stored Procedures\uspSMTransactionCheckIfRequiredApproval.sql" />
     <Build Include="dbo\Tables\tblSMReportTranslation.sql" />
     <Build Include="dbo\Views\vyuCRMCustomerLicense.sql" />
+    <Build Include="dbo\Views\vyuHDTicketProjection.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
