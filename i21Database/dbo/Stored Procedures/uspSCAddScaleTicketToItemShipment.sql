@@ -182,7 +182,7 @@ IF @InventoryShipmentId IS NULL
 BEGIN 
 	-- Raise the error:
 	-- Unable to generate the Inventory Shipment. An error stopped the process from Sales Order to Inventory Shipment.
-	RAISERROR('Unable to generate the Inventory Shipment. An error stopped the process from Sales Order to Inventory Shipment.', 11, 1);
+	EXEC uspICRaiseError 80029; 
 	RETURN;
 END
 

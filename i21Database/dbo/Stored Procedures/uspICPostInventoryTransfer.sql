@@ -71,7 +71,7 @@ END
 IF @intTransactionId IS NULL  
 BEGIN   
 	-- Cannot find the transaction.  
-	RAISERROR('Cannot find the transaction.', 11, 1)  
+	EXEC uspICRaiseError 80167;  
 	GOTO Post_Exit  
 END   
   
@@ -79,7 +79,7 @@ END
 IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) = 0) 
 BEGIN   
 	-- Unable to find an open fiscal year period to match the transaction date.  
-	RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)  
+	EXEC uspICRaiseError 80168; 
 	GOTO Post_Exit  
 END  
   
@@ -87,7 +87,7 @@ END
 IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1  
 BEGIN   
 	-- The transaction is already posted.  
-	RAISERROR('The transaction is already posted.', 11, 1)  
+	EXEC uspICRaiseError 80169; 
 	GOTO Post_Exit  
 END   
   
@@ -95,7 +95,7 @@ END
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
 BEGIN   
 	-- The transaction is already unposted.  
-	RAISERROR('The transaction is already unposted.', 11, 1)  
+	EXEC uspICRaiseError 80170; 
 	GOTO Post_Exit  
 END
 
@@ -125,8 +125,8 @@ BEGIN
 		WHERE r.strReceiptType = 'Transfer Order'
 			AND t.intInventoryTransferId = @intTransactionId
 
-		RAISERROR('Unable to unpost the Inventory Transfer. The %s already have a receipt. Please remove it from the receipt "%s"', 11, 1, @TR, @R)
-	GOTO Post_Exit	
+		EXEC uspICRaiseError 80107, @TR, @R;
+		GOTO Post_Exit	
 	END
 END
 
@@ -156,7 +156,7 @@ IF EXISTS(
 		AND tfd.intLotId IS NULL
 		AND ISNULL(i.strLotTracking, 'No') <> 'No')
 BEGIN
-	RAISERROR('Each lotted item for %s that is going to be transferred should have a lot number specified.', 11, 1, @strTransactionId)
+	EXEC uspICRaiseError 80085, @strTransactionId;
 	GOTO Post_Exit
 END
 
@@ -174,7 +174,7 @@ BEGIN
 	DROP TABLE #tempValidateItemLocation
 	
 	-- Item %s is not available on location %s.
-	RAISERROR('Item %s is not available on location %s.', 11, 1, @ItemId, @LocationId)  
+	EXEC uspICRaiseError 80026, @ItemId, @LocationId;
 	GOTO Post_Exit  
 END
 
@@ -188,13 +188,13 @@ BEGIN
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 	IF @ysnPost = 1   
 	BEGIN   
-		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')  
+		EXEC uspICRaiseError 80172, 'Post';
 		GOTO Post_Exit  
 	END   
 
 	IF @ysnPost = 0  
 	BEGIN  
-		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Unpost')  
+		EXEC uspICRaiseError 80172, 'Unpost';
 		GOTO Post_Exit    
 	END  
 END   
@@ -509,7 +509,7 @@ BEGIN
 		COMMIT TRAN @TransactionName
 
 		-- 'Recap is not applicable when doing an inventory transfer for the same location.'
-		RAISERROR('Recap is not applicable when doing an inventory transfer for the same location.', 11, 1)  
+		EXEC uspICRaiseError 80045;
 		GOTO Post_Exit  
 	END 
 	ELSE 

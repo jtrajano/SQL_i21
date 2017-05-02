@@ -5181,6 +5181,9 @@
     <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
     <Build Include="dbo\Triggers\trgCustomJDESAPReceiptUpdateExportFlag.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MS_Mississippi.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMTransactionCheckIfRequiredApproval.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRaiseError.sql" />
+    <Build Include="dbo\Functions\fnICGetErrorMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

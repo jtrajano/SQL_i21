@@ -98,7 +98,9 @@ WHERE	ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserves.dblQuantity, 0) - Validate
 -- If invalid, exit immediately.
 IF @intInvalidItemId IS NOT NULL 
 BEGIN 
-	GOTO _Exit;
+	-- 'Not enough stocks for {Item}. Reserved stocks is {Reserved Stock Qty} while On Hand Qty is {On Hand Qty}.'			
+	EXEC uspICRaiseError 80007, @strInvalidItemNo, @dblReservedQty, @dblOnHandQty
+	RETURN -1;
 END 	
 
 --------------------------------------------------
@@ -188,26 +190,9 @@ FROM	(
 WHERE	ISNULL(Lot.dblQty, 0) - ISNULL(Reserves.dblQty, 0) - ValidateItems.dblQty < 0
 		AND ItemLocation.intAllowNegativeInventory = @AllowNegativeInventory_NoOption -- If No is selected, it does not allow negative stock
 
-_Exit:
-
 IF @intInvalidItemId IS NOT NULL 
 BEGIN 
-		DECLARE @FormattedReservedQty AS NVARCHAR(50)
-				,@FormattedOnHandQty AS NVARCHAR(50)
-
-		SET @FormattedReservedQty =  CONVERT(NVARCHAR, CAST(@dblReservedQty AS MONEY), 1)
-		SET @FormattedOnHandQty =  CONVERT(NVARCHAR, CAST(@dblOnHandQty AS MONEY), 1)
-
-		IF @intLotId IS NOT NULL 
-		BEGIN 
-			-- = 'There is not enough stocks for {Item}. Reserved stocks is {Reserved Lot Qty} while Lot Qty is {Lot Qty}.'
-			RAISERROR('There is not enough stocks for %s. Reserved stocks is %s while Lot Qty is %s.', 11, 1, @strInvalidItemNo, @FormattedReservedQty, @FormattedOnHandQty) 
-		END 
-		ELSE 
-		BEGIN 
-			-- 'Not enough stocks for {Item}. Reserved stocks is {Reserved Stock Qty} while On Hand Qty is {On Hand Qty}.'
-			RAISERROR('Not enough stocks for %s. Reserved stocks is %s while On Hand Qty is %s.', 11, 1, @strInvalidItemNo, @FormattedReservedQty, @FormattedOnHandQty) 
-		END 
-
-		RETURN -1;
+	-- 'Not enough stocks for {Item}. Reserved stocks is {Reserved Lot Qty} while Lot Qty is {Lot Qty}.'
+	EXEC uspICRaiseError 80176, @strInvalidItemNo, @dblReservedQty, @dblOnHandQty
+	RETURN -1;
 END 

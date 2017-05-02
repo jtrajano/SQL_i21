@@ -27,7 +27,7 @@ IF @intStatusId = 3
 
 	IF @PostedTransferOrder IS NOT NULL
 	BEGIN
-		RAISERROR('Cannot post this Inventory Receipt. The transfer order "%s" was already posted in "%s".', 11, 1, @PostedTransferOrder, @PostedTransferOrderReceipt)
+		EXEC uspICRaiseError 80086, @PostedTransferOrder, @PostedTransferOrderReceipt;
 		GOTO Post_Exit
 	END
 END

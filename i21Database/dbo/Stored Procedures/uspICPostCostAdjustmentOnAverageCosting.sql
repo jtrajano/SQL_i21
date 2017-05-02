@@ -191,7 +191,7 @@ BEGIN
 		WHERE	intItemId = @intItemId
 
 		-- 'Cost adjustment cannot continue. Unable to find the cost bucket for %s that was posted in %s.
-		RAISERROR('Cost adjustment cannot continue. Unable to find the cost bucket for %s that was posted in %s.', 11, 1, @strItemNo, @strSourceTransactionId)  
+		EXEC uspICRaiseError 80062, @strItemNo, @strSourceTransactionId;  
 		RETURN -1 
 	END
 END 
@@ -453,7 +453,7 @@ BEGIN
 				SET @strNewCost = CONVERT(NVARCHAR, CAST(@t_dblCost AS MONEY), 1)
 				SET @strNewValuation = CONVERT(NVARCHAR, CAST(@AdjustmentValue AS MONEY), 1)
 	
-				SELECT	@strDescription = FORMATMESSAGE('Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s.', @strCurrentValuation, @strRunningQty, @strNewCost, @strNewValuation)
+				SELECT	@strDescription = FORMATMESSAGE(dbo.fnICGetErrorMessage(80078), @strCurrentValuation, @strRunningQty, @strNewCost, @strNewValuation)
 
 				-- Create the 'Auto Variance'
 				EXEC [uspICPostInventoryTransaction]
@@ -595,7 +595,7 @@ BEGIN
 	SET @strNewCost = CONVERT(NVARCHAR, CAST(@NewCost AS MONEY), 1)
 	SET @strNewValuation = CONVERT(NVARCHAR, CAST(@AdjustmentValue AS MONEY), 1)
 	
-	SELECT	@strDescription = FORMATMESSAGE('Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s.', @strCurrentValuation, @strRunningQty, @strNewCost, @strNewValuation)
+	SELECT	@strDescription = FORMATMESSAGE(dbo.fnICGetErrorMessage(80078), @strCurrentValuation, @strRunningQty, @strNewCost, @strNewValuation)
 
 	-- Create the 'Auto Variance'
 	EXEC [uspICPostInventoryTransaction]

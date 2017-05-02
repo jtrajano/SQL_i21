@@ -43,7 +43,7 @@ IF NOT EXISTS (
 )
 BEGIN
 	-- 'Internal Error. The source transaction type provided is invalid or not supported.' 
-	RAISERROR('Internal Error. The source transaction type provided is invalid or not supported.', 11, 1)  
+	EXEC uspICRaiseError 80032;   
 	GOTO _Exit;
 END 
 
@@ -51,7 +51,7 @@ END
 IF @intSourceId IS NULL 
 BEGIN
 	-- 'Internal Error. The source transaction id is invalid.'
-	RAISERROR('Internal Error. The source transaction id is invalid.', 11, 1)  
+	EXEC uspICRaiseError 80033;  
 	GOTO _Exit;
 END 
 
@@ -111,7 +111,7 @@ END
 IF @intLotId IS NULL 
 BEGIN 
 	-- Invalid Lot
-	RAISERROR('Invalid Lot.', 11, 1)  
+	EXEC uspICRaiseError 80020; 
 	GOTO _Exit
 END 
 
@@ -137,7 +137,7 @@ BEGIN
 		WHERE	e.intEntityId = @intNewOwnerId
 
 		-- 'Invalid Owner. {Owner name} is not configured as an Owner for {Item}. Please check the Item setup.'
-		RAISERROR('Invalid Owner. %s is not configured as an Owner for %s. Please check the Item setup.', 11, 1, @strName, @strItemNo)  
+		EXEC uspICRaiseError 80105, @strName, @strItemNo;
 		GOTO _Exit
 	END
 END 

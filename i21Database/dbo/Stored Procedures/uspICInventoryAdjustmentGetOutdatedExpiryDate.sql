@@ -43,7 +43,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- 'The lot expiry dates are outdated for {Adjustment id}. Please review your quantity adjustments after the system reloads the latest expiry dates.'
-		RAISERROR('The lot expiry dates are outdated for %s. Please review your quantity adjustments after the system reloads the latest expiry dates.', 11, 1, @strAdjustmentId);
+		EXEC uspICRaiseError 80028, @strAdjustmentId;
 		GOTO _ExitWithErrors
 	END 
 END 

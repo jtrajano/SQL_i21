@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICUnpostInventoryReceiptOtherCharges]
+
 	@intInventoryReceiptId AS INT 
 	,@strBatchId AS NVARCHAR(20)
 	,@intEntityUserSecurityId AS INT
@@ -33,8 +34,8 @@ BEGIN
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- 'Unable to unpost the Inventory Receipt. The {Other Charge} was billed.'
-		RAISERROR('Unable to unpost the Inventory Receipt. The %s was billed.', 11, 1, @strItemNo) 	
+		-- 'Unable to unpost the {Inventory Receipt or Shipment}. The {Other Charge} was {voucher or invoiced}.'
+		EXEC uspICRaiseError 80054, 'Inventory Receipt', @strItemNo, 'vouchered';
 		GOTO _Exit
 	END
 END 
@@ -123,7 +124,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_Inventory) 	
+			EXEC uspICRaiseError 80008, @strItemNo, @ACCOUNT_CATEGORY_Inventory;
 			RETURN;
 		END 
 	END 
@@ -144,7 +145,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_APClearing) 	
+			EXEC uspICRaiseError 80008, @strItemNo, @ACCOUNT_CATEGORY_APClearing;
 			RETURN;
 		END 
 	END 
@@ -165,7 +166,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeExpense) 	
+			EXEC uspICRaiseError 80008, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeExpense;
 			RETURN;
 		END 
 	END 
@@ -186,32 +187,11 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeIncome) 	
+			EXEC uspICRaiseError 80008, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeIncome;
 			RETURN;
 		END 
 	END 
 	;
-
-	---- Check for missing Other Charge Asset 
-	--BEGIN 
-	--	SET @strItemNo = NULL
-	--	SET @intItemId = NULL
-
-	--	SELECT	TOP 1 
-	--			@intItemId = Item.intItemId 
-	--			,@strItemNo = Item.strItemNo
-	--	FROM	dbo.tblICItem Item INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
-	--				ON Item.intItemId = ChargesGLAccounts.intChargeId
-	--	WHERE	ChargesGLAccounts.intOtherChargeAsset IS NULL 			
-			
-	--	IF @intItemId IS NOT NULL 
-	--	BEGIN 
-	--		-- {Item} is missing a GL account setup for {Account Category} account category.
-	--		RAISERROR(80008, 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeAsset) 	
-	--		RETURN;
-	--	END 
-	--END 
-	--;
 
 	-- Log the g/l account used in this batch. 
 	INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (

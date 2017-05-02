@@ -64,7 +64,7 @@ BEGIN
 				SET @strItemNo = 'an item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
 
 			-- 'Please correct the unit qty in UOM {UOM} on {Item}.'
-			RAISERROR('Please correct the unit qty in UOM %s on %s.', 11, 1, @strUnitMeasure, @strItemNo) 
+			EXEC uspICRaiseError 80017, @strUnitMeasure, @strItemNo;
 			RETURN -1; 			 
 		END 
 	END 
@@ -119,11 +119,8 @@ BEGIN
 			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
 
 		-- The expected qty to receive for {Item} is {Open Receive Qty}. Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
-		SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@OpenReceiveQty AS MONEY), 1)
-		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
-		SET @FormattedDifference =  CAST(ABS(@OpenReceiveQty - @LotQtyInItemUOM) AS NVARCHAR(50))
-
-		RAISERROR('The Qty to Receive for %s is %s. Total Lot Quantity is %s. The difference is %s.', 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+		DECLARE @difference AS NUMERIC(18, 6) = ABS(@OpenReceiveQty - @LotQtyInItemUOM);
+		EXEC uspICRaiseError 80006, @strItemNo, @OpenReceiveQty, @LotQtyInItemUOM, @difference;
 		RETURN -1; 
 	END 
 END

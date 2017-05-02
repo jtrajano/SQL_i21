@@ -68,7 +68,7 @@ END
 IF @intTransactionId IS NULL  
 BEGIN   
 	-- Cannot find the transaction.  
-	RAISERROR('Cannot find the transaction.', 11, 1)  
+	EXEC uspICRaiseError 80167; 
 	GOTO Post_Exit  
 END   
   
@@ -76,7 +76,7 @@ END
 IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) = 0) 
 BEGIN   
 	-- Unable to find an open fiscal year period to match the transaction date.  
-	RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)  
+	EXEC uspICRaiseError 80168; 
 	GOTO Post_Exit  
 END  
   
@@ -84,7 +84,7 @@ END
 IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1  
 BEGIN   
 	-- The transaction is already posted.  
-	RAISERROR('The transaction is already posted.', 11, 1)  
+	EXEC uspICRaiseError 80169; 
 	GOTO Post_Exit  
 END   
   
@@ -92,7 +92,7 @@ END
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
 BEGIN   
 	-- The transaction is already unposted.  
-	RAISERROR('The transaction is already unposted.', 11, 1)  
+	EXEC uspICRaiseError 80170; 
 	GOTO Post_Exit  
 END   
  
@@ -104,13 +104,13 @@ BEGIN
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 	IF @ysnPost = 1   
 	BEGIN   
-		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')  
+		EXEC uspICRaiseError 80172, 'Post';
 		GOTO Post_Exit  
 	END   
 
 	IF @ysnPost = 0  
 	BEGIN  
-		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Unpost')  
+		EXEC uspICRaiseError 80172, 'Unpost';
 		GOTO Post_Exit    
 	END  
 END   
@@ -127,7 +127,7 @@ WHERE IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICD
 IF @ItemNo IS NOT NULL
 	BEGIN
 		-- Lot Number is invalid or missing for item {Item No.}
-		RAISERROR('Lot Number is invalid or missing for item %s.', 11, 1, @ItemNo)  
+		EXEC uspICRaiseError 80130, @ItemNo;
 		GOTO Post_Exit  
 	END
 -- Get the next batch number

@@ -80,7 +80,7 @@ BEGIN
 	IF @intItemId IS NULL
 		BEGIN 
 			-- Item id is invalid or missing.
-			RAISERROR('Item id is invalid or missing.', 11,1);
+			EXEC uspICRaiseError 80001; 
 			GOTO _Exit;
 		END
 
@@ -88,7 +88,7 @@ BEGIN
 	IF @dblNewQty IS NULL
 		BEGIN
 			-- New Quantity for item {item} is required.
-			RAISERROR('New Quantity for item %s is required.', 11, 1, @strItemNo);
+			EXEC uspICRaiseError 80099, @strItemNo;
 			GOTO _Exit;
 		END
 
@@ -96,7 +96,7 @@ BEGIN
 	IF EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmQtyChange) = 0) 
 	BEGIN   
 		-- Unable to find an open fiscal year period to match the transaction date.  
-		RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1);
+		EXEC uspICRaiseError 80168; 
 		GOTO _Exit;
 	END
 	
@@ -104,7 +104,7 @@ BEGIN
 	IF NOT EXISTS (SELECT 1 FROM tblICItem where intItemId = @intItemId)
 	BEGIN
 		-- Invalid Item.
-		RAISERROR('Invalid Item.', 11, 1); 
+		EXEC uspICRaiseError 80021;
 		GOTO _Exit;
 	END
 
@@ -112,7 +112,7 @@ BEGIN
 	IF @intSourceId IS NULL
 	BEGIN
 		-- 'Internal Error. The source transaction id is invalid.'
-		RAISERROR('Internal Error. The source transaction id is invalid.', 11, 1)  
+		EXEC uspICRaiseError 80033;  
 		GOTO _Exit;
 	END
 
@@ -120,7 +120,7 @@ BEGIN
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblICItemLocation WHERE intLocationId = @intLocationId AND intItemId = @intItemId)
 	BEGIN
 		-- Item Location is invalid or missing for {item}
-		RAISERROR('Item Location is invalid or missing for %s.', 11, 1, @strItemNo);
+		EXEC uspICRaiseError 80002, @strItemNo; 
 		GOTO _Exit;
 	END
 
@@ -128,7 +128,7 @@ BEGIN
 	IF NOT EXISTS (SELECT 1 FROM tblSMCompanyLocationSubLocation SubLocation WHERE SubLocation.intCompanyLocationSubLocationId = @intSubLocationId AND SubLocation.intCompanyLocationId = @intLocationId)
 		BEGIN
 			-- Sub Location is invalid or missing for item {item}.
-			RAISERROR('Storage Location is invalid or missing for item %s.', 11, 1, @strItemNo);
+			EXEC uspICRaiseError 80097, @strItemNo
 			GOTO _Exit;
 		END
 
@@ -137,8 +137,8 @@ BEGIN
 		BEGIN
 			IF NOT EXISTS (SELECT 1 FROM tblICStorageLocation StorageLocation WHERE StorageLocation.intLocationId = @intLocationId AND StorageLocation.intSubLocationId = @intSubLocationId AND StorageLocation.intStorageLocationId = @intStorageLocationId)
 				BEGIN
-					-- Storage Location is invalid for item {item}
-					RAISERROR('Storage Unit is invalid for item %s.', 11, 1, @strItemNo);
+					-- Storage Unit is invalid for item {item}
+					EXEC uspICRaiseError 80098, @strItemNo
 					GOTO _Exit;
 				END
 		END
@@ -163,7 +163,7 @@ BEGIN
 			IF @intLotId IS NULL 
 			BEGIN 
 				-- Invalid Lot
-				RAISERROR('Invalid Lot.', 11, 1);
+				EXEC uspICRaiseError 80020; 
 				GOTO _Exit;
 			END 	
 
@@ -177,7 +177,7 @@ BEGIN
 			)
 			BEGIN 
 				-- Item UOM is invalid or missing.
-				RAISERROR('Item UOM is invalid or missing.', 11, 1);
+				EXEC uspICRaiseError 80048; 
 				GOTO _Exit;
 			END 
 		END
@@ -187,7 +187,7 @@ BEGIN
 	IF @intItemUOMId IS NOT NULL AND @intItemUOMId NOT IN (SELECT intItemUOMId FROM tblICItemUOM)
 		BEGIN
 			-- UOM Id is invalid for item {Item}
-			RAISERROR('UOM Id is invalid for item %s.',11,1,@strItemNo);
+			EXEC uspICRaiseError 80104, @strItemNo
 			GOTO _Exit;
 		END
 

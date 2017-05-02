@@ -40,16 +40,9 @@ FROM	@Items Item CROSS APPLY dbo.fnGetProcessToInventoryReceiptErrors(Item.intIt
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80001)
 BEGIN 
-	RAISERROR('Item id is invalid or missing.', 11, 1)
+	EXEC uspICRaiseError 80001;
 	GOTO _Exit
 END 
-
----- Check for invalid location in the item-location setup. 
---IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80002)
---BEGIN 
---	RAISERROR(80002, 11, 1)
---	GOTO _Exit
---END 
 
 _Exit: 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 

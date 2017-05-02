@@ -250,14 +250,7 @@ BEGIN TRY
 		IF @intItemId1 IS NOT NULL
 		BEGIN
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR (
-					'%s is missing a GL account setup for %s account category.'
-					,11
-					,1
-					,@strItemNo1
-					,@ACCOUNT_CATEGORY_OtherChargeExpense
-					)
-
+			EXEC uspICRaiseError 80008, @strItemNo1, @ACCOUNT_CATEGORY_OtherChargeExpense;
 			RETURN;
 		END
 

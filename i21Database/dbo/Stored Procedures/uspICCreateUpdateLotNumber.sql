@@ -124,7 +124,7 @@ BEGIN
 	IF ISNULL(@strReceiptNumber, '') <> '' AND ISNULL(@strLotNumber, '') <> '' AND ISNULL(@strItemNo, '') <> ''
 	BEGIN 
 		-- 'Please check for duplicate lot numbers. The lot number {Lot Number} is used more than once in item {Item No} on {Transaction Id}.'
-		RAISERROR('Please check for duplicate lot numbers. The lot number %s is used more than once in item %s on %s.', 11, 1, @strLotNumber, @strItemNo, @strReceiptNumber);
+		EXEC uspICRaiseError 80019, @strLotNumber, @strItemNo, @strReceiptNumber;
 		RETURN -1
 	END
 END 
@@ -253,7 +253,7 @@ BEGIN
 		WHERE	Item.intItemId = @intItemId
 
 		--Please specify the lot numbers for {Item}.
-		RAISERROR('Please specify the lot numbers for %s.', 11, 1, @strItemNo);
+		EXEC uspICRaiseError 80005, @strItemNo;
 		RETURN -2;
 	END 	
 	
@@ -321,7 +321,7 @@ BEGIN
 		WHERE	Item.intItemId = @intItemId
 
 		--Unable to generate the serial lot number for {Item}.
-		RAISERROR('Unable to generate the serial lot number for %s.', 11, 1, @strItemNo);
+		EXEC uspICRaiseError 80009, @strItemNo; 
 		RETURN -3;
 	END 	
 
@@ -338,7 +338,7 @@ BEGIN
 		END 
 
 		-- '{Item} with lot number {Lot Number} needs to have a weight.'
-		RAISERROR('%s with lot number %s needs to have a weight.', 11, 1, @strItemNo, @strLotNumber)  
+		EXEC uspICRaiseError 80015, @strItemNo, @strLotNumber;
 		RETURN -4; 
 	END 
 
@@ -381,7 +381,7 @@ BEGIN
 		WHERE	e.intEntityId = @intOwnerId
 
 		--'Invalid Owner. {Owner Name} is not configured as an Owner for {Item Name}. Please check the Item setup.'
-		RAISERROR('Invalid Owner. %s is not configured as an Owner for %s. Please check the Item setup.', 11, 1, @strName, @strItemNo);
+		EXEC uspICRaiseError 80105, @strName, @strItemNo;
 		RETURN -11;
 	END 
 
@@ -818,7 +818,7 @@ BEGIN
 				AND ItemUOM.intItemUOMId = @intItemUOMId
 
 		-- Lot {Lot number} exists in {Quantity UOM used}. Cannot receive in {Quantity UOM proposed value}. Change the receiveing UOM to {Quantity UOM used} or create a new lot.
-		RAISERROR('Lot %s exists in %s. Cannot retrieve in %s. Change the receiving UOM to %s or create a new lot.', 11, 1, @strLotNumber, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMTo, @strUnitMeasureItemUOMFrom);
+		EXEC uspICRaiseError 80011, @strLotNumber, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMTo, @strUnitMeasureItemUOMFrom; 
 		RETURN -6;
 	END 
 
@@ -833,7 +833,7 @@ BEGIN
 				AND ItemUOM.intItemUOMId = @intWeightUOMId
 
 		--'The Weight UOM for {Lot number} cannot be changed from {Weight UOM} to {Weight UOM} because a stock from it has been used from a different transaction.'
-		RAISERROR('The Weight UOM for %s cannot be changed from %s to %s because a stock from it has been used from a different transaction.', 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
+		EXEC uspICRaiseError 80012, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo; 
 		RETURN -7;
 	END 
 
@@ -846,7 +846,7 @@ BEGIN
 		WHERE	ISNULL(SubLocation.intCompanyLocationSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 
 		--'The Sub-Location for {Lot number} cannot be changed from {Sub Location} to {Sub Location} because a stock from it has been used from a different transaction.'
-		RAISERROR('The Sub-Location for %s cannot be changed from %s to %s because a stock from it has been used from a different transaction.', 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
+		EXEC uspICRaiseError 80013, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo;
 		RETURN -8;
 	END 
 
@@ -859,7 +859,7 @@ BEGIN
 		WHERE	ISNULL(StorageLocation.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 
 		--'The Storage Location for {Lot number} cannot be changed from {Storage Location} to {StorageLocation} because a stock from it has been used from a different transaction.'
-		RAISERROR('The Storage Location for %s cannot be changed from %s to %s because a stock from it has been used from a different transaction.', 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
+		EXEC uspICRaiseError 80014, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo;
 		RETURN -9;
 	END
 
@@ -872,7 +872,7 @@ BEGIN
 		WHERE	Item.intItemId = @intItemId
 
 		--Failed to process the lot number for {Item}. It may have been used on a different sub-location or storage location.'
-		RAISERROR('Failed to process the lot number for %s. It may have been used on a different sub-location or storage location.', 11, 1, @strItemNo);
+		EXEC uspICRaiseError 80010, @strItemNo
 		RETURN -10;
 	END
 	

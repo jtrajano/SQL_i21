@@ -22,7 +22,7 @@ WHERE	intInventoryShipmentId = @InventoryShipmentId
 IF @strShipmentNumber IS NOT NULL 
 BEGIN 
 	-- 'Delete is not allowed. %s is posted.'
-	RAISERROR('Delete is not allowed. %s is posted.', 11, 1, @strShipmentNumber)  
+	EXEC uspICRaiseError 80070, @strShipmentNumber;
 	RETURN -1; 
 END 
 

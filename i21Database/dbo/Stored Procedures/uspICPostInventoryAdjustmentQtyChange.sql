@@ -57,7 +57,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'The UOM is missing on {Item}.'
-		RAISERROR('The UOM is missing on %s.', 11, 1, @strItemNo);
+		EXEC uspICRaiseError 80039, @strItemNo;
 		RETURN -1
 	END
 
@@ -82,7 +82,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'Please specify the Adjust By Quantity or New Quantity on {Item}.'
-		RAISERROR('Please specify the Adjust Qty By or New Quantity on %s.', 11, 1, @strItemNo);
+		EXEC uspICRaiseError 80040;
 		RETURN -1
 	END
 END 

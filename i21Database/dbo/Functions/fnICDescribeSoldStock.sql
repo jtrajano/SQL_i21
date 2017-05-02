@@ -11,12 +11,8 @@ BEGIN
 	DECLARE @strQty AS NVARCHAR(50) = CONVERT(NVARCHAR, CAST(@dblQty AS MONEY), 1)
 	DECLARE @strCost AS NVARCHAR(50) = CONVERT(NVARCHAR, CAST(@dblCost AS MONEY), 1)
 
-	-- ## Begin Note: This code does not work on SQL2008R2. It works on a higher version.  
-	-- SET @result = FORMATMESSAGE('Item: %s, Qty: %s, Cost: %s', @strItemNo, @strQty, @strCost)
-	-- ## End Note. 
-
 	-- [Item, Qty, Cost]: {Item No}, {Qty}, {Cost}.
-	SET @result = FORMATMESSAGE('Item: %s, Qty: %s, Cost: %s', @strItemNo, @strQty, @strCost)
+	SET @result = FORMATMESSAGE(dbo.fnICGetErrorMessage(80159), @strItemNo, @strQty, @strCost)
 	
 	RETURN @result;
 END

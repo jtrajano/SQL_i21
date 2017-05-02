@@ -76,7 +76,7 @@ END
 IF @intTransactionId IS NULL  
 BEGIN   
 	-- Cannot find the transaction.  
-	RAISERROR('Cannot find the transaction.', 11, 1)  
+	EXEC uspICRaiseError 80167; 
 	GOTO Post_Exit  
 END   
   
@@ -84,7 +84,7 @@ END
 IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) = 0) 
 BEGIN   
 	-- Unable to find an open fiscal year period to match the transaction date.  
-	RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)  
+	EXEC uspICRaiseError 80168; 
 	GOTO Post_Exit  
 END  
   
@@ -92,7 +92,7 @@ END
 IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1  
 BEGIN   
 	-- The transaction is already posted.  
-	RAISERROR('The transaction is already posted.', 11, 1)  
+	EXEC uspICRaiseError 80169; 
 	GOTO Post_Exit  
 END   
   
@@ -100,7 +100,7 @@ END
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
 BEGIN   
 	-- The transaction is already unposted.  
-	RAISERROR('The transaction is already unposted.', 11, 1)  
+	EXEC uspICRaiseError 80170; 
 	GOTO Post_Exit  
 END   
 
@@ -117,7 +117,7 @@ BEGIN
 		HAVING COUNT(Lot.intLotId) > 1
 	)
 	BEGIN
-		RAISERROR('Adjusting multiple lots with the same lot number is not allowed.', 11, 1)  
+		EXEC uspICRaiseError 80171; 		 
 		GOTO Post_Exit  
 	END
 END 
@@ -130,13 +130,13 @@ BEGIN
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 	IF @ysnPost = 1   
 	BEGIN   
-		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')  
+		EXEC uspICRaiseError 80172, 'Post';
 		GOTO Post_Exit  
 	END   
 
 	IF @ysnPost = 0  
 	BEGIN  
-		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Unpost')  
+		EXEC uspICRaiseError 80172, 'Unpost'; 		 
 		GOTO Post_Exit    
 	END  
 END
@@ -544,7 +544,7 @@ BEGIN
 		COMMIT TRAN @TransactionName
 
 		-- Recap is not applicable for this type of transaction.
-		RAISERROR('Recap is not applicable for this type of transaction.', 11, 1)  
+		EXEC uspICRaiseError 80025;
 		GOTO Post_Exit  
 	END
 END 

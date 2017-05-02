@@ -31,6 +31,8 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT 
 		,@strLocationName AS NVARCHAR(MAX)
 		,@strTransactionId AS NVARCHAR(50) 
+		,@strCurrencyId AS NVARCHAR(50)
+		,@strFunctionalCurrencyId AS NVARCHAR(50)
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
 	DROP TABLE #FoundErrors
@@ -61,7 +63,7 @@ FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostErrors(Item.int
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80001)
 BEGIN 
-	RAISERROR(80001, 11, 1)
+	EXEC uspICRaiseError 80001;
 	RETURN -1
 END 
 
@@ -84,14 +86,14 @@ BEGIN
 	WHERE	intErrorCode = 80002
 
 	-- 'Item Location is invalid or missing for {Item}.'
-	RAISERROR('Item Location is invalid or missing for %s.', 11, 1, @strItemNo)
+	EXEC uspICRaiseError 80002, @strItemNo;
 	RETURN -1
 END 
 
 -- Check for invalid item UOM 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80048)
 BEGIN 
-	RAISERROR('Item UOM is invalid or missing.', 11, 1)
+	EXEC uspICRaiseError 80048; 
 	RETURN -1
 END 
 
@@ -114,7 +116,8 @@ BEGIN
 				ON Errors.intItemId = Item.intItemId
 	WHERE	intErrorCode = 80003
 
-	RAISERROR('Negative stock quantity is not allowed for %s in %s.', 11, 1, @strItemNo, @strLocationName)
+	--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
+	EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 
 	RETURN -1
 END 
 
@@ -130,7 +133,7 @@ WHERE	intErrorCode = 80023
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Missing costing method setup for item {Item}.'
-	RAISERROR('Missing costing method setup for item %s.', 11, 1, @strItemNo)
+	EXEC uspICRaiseError 80023, @strItemNo
 	RETURN -1
 END 
 
@@ -146,7 +149,7 @@ WHERE	intErrorCode = 80022
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
-	RAISERROR('The status of %s is Discontinued.', 11, 1, @strItemNo)
+	EXEC uspICRaiseError 80022, @strItemNo
 	RETURN -1
 END 
 
@@ -162,7 +165,7 @@ WHERE	intErrorCode = 80049
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Item {Item Name} is missing a Stock Unit. Please check the Unit of Measure setup.'
-	RAISERROR('Item %s is missing a Stock Unit. Please check the Unit of Measure setup.', 11, 1, @strItemNo)
+	EXEC uspICRaiseError 80049, @strItemNo;
 	RETURN -1
 END 
 
@@ -181,7 +184,7 @@ WHERE	intErrorCode = 80066
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Inventory Count is ongoing for Item {Item Name} and is locked under Location {Location Name}.'
-	RAISERROR('Inventory Count is ongoing for Item %s and is locked under Location %s.', 11, 1, @strItemNo, @strLocationName)
+	EXEC uspICRaiseError 80066, @strItemNo, @strLocationName;
 	RETURN -1
 END 
 
@@ -224,7 +227,7 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- 'Costing method mismatch. {Item No} is set to use Ave Costing. {Trans Id} is going to use Actual costing. It can''t be used together. You can fix it by changing the costing method to FIFO or LIFO.'
 	-- '{Item No} is set to use AVG Costing and it will be received in {Receipt Id} as Actual costing. Average cost computation will be messed up. Try receiving the stocks using Inventory Receipt instead of Transport Load.'
-	RAISERROR('%s costing method is Average Costing and it will be received in %s as Actual costing. This is not allowed to avoid bad computation of the average cost. Try receiving the stocks using Inventory Receipt instead of Transport Load.', 11, 1, @strItemNo, @strTransactionId)
+	EXEC uspICRaiseError 80094, @strItemNo, @strTransactionId;
 	RETURN -1
 END 
 
@@ -239,9 +242,15 @@ SELECT TOP 1
 		@strTransactionId = strTransactionId
 		,@strItemNo = i.strItemNo
 		,@intItemId = iv.intItemId
-FROM	@ItemsToValidate iv  
-		INNER JOIN tblICItem i 
+		,@strCurrencyId = c.strCurrency
+		,@strFunctionalCurrencyId = fc.strCurrency
+FROM	@ItemsToValidate iv  INNER JOIN tblICItem i 
 			ON iv.intItemId = i.intItemId
+		LEFT JOIN tblSMCurrency c
+			ON c.intCurrencyID = iv.intCurrencyId
+		LEFT JOIN tblSMCurrency fc
+			ON fc.intCurrencyID = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+
 WHERE	ISNULL(iv.dblForexRate, 0) = 0 
 		AND iv.intCurrencyId IS NOT NULL 
 		AND iv.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
@@ -249,7 +258,7 @@ WHERE	ISNULL(iv.dblForexRate, 0) = 0
 
 IF @intItemId IS NOT NULL 
 BEGIN 
-	-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate.'
-	RAISERROR('%s is using a foreign currency. Please check if %s has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from %s to %s.', 11, 1, @strTransactionId, @strItemNo)
+	-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Trans Currency} to {Functional Currency}.'
+	EXEC uspICRaiseError 80162, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId
 	RETURN -1
 END 
