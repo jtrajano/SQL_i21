@@ -88,7 +88,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @AccountCategory_Inventory) 	
+		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Inventory;
 		RETURN -1;
 	END 
 END 
@@ -113,7 +113,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @AccountCategory_ContraInventory) 	
+		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_ContraInventory;
 		RETURN -1;
 	END 
 END 
@@ -135,7 +135,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @AccountCategory_Cost_of_Goods) 	
+		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Cost_of_Goods;
 		RETURN -1;
 	END 
 END 
@@ -166,7 +166,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @AccountCategory_Auto_Variance) 	
+		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Auto_Variance;
 		RETURN -1;
 	END 
 END 

@@ -22,7 +22,7 @@ WHERE	intInventoryTransferId = @InventoryTransferId
 IF @strTransferNo IS NOT NULL 
 BEGIN 
 	-- 'Delete is not allowed. %s is posted.'
-	RAISERROR('Delete is not allowed. %s is posted.', 11, 1, @strTransferNo)  
+	EXEC uspICRaiseError 80070, @strTransferNo;
 	RETURN -1; 
 END 
 

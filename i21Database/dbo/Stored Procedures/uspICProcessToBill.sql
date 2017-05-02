@@ -41,20 +41,3 @@ DECLARE @ErrorState INT;
 	).value('.', 'NVARCHAR(MAX)'), 1, 1, '')
 
 	DROP TABLE #tmpBillIds
-
---END TRY
---BEGIN CATCH
---	SELECT 
---		@ErrorMessage = ERROR_MESSAGE(),
---		@ErrorSeverity = ERROR_SEVERITY(),
---		@ErrorState = ERROR_STATE();
-
---	-- Use RAISERROR inside the CATCH block to return error
---	-- information about the original error that caused
---	-- execution to jump to the CATCH block.
---	RAISERROR (
---		@ErrorMessage, -- Message text.
---		@ErrorSeverity, -- Severity.
---		@ErrorState -- State.
---	);
---END CATCH

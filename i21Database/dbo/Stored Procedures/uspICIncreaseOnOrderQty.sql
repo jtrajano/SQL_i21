@@ -28,7 +28,7 @@ BEGIN
 	-- 'Item-Location is invalid or missing for {Item}.'
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		RAISERROR('Item Location is invalid or missing for %s.', 11, 1, @strItemNo)
+		EXEC uspICRaiseError 80002, @strItemNo;
 		GOTO _Exit
 	END 
 END 

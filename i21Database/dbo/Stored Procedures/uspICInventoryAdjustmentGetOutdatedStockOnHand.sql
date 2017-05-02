@@ -51,7 +51,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- 'The stock on hand is outdated for {Adjustment id}. Please review your quantity adjustments after the system reloads the latest stock on hand.'
-		RAISERROR('The stock on hand is outdated for %s. Please review your quantity adjustments after the system reloads the latest stock on hand.', 11, 1, @strAdjustmentId);
+		EXEC uspICRaiseError 80027, @strAdjustmentId;
 		GOTO ValidateInventoryAdjustment_ExitWithErrors
 	END 
 END 

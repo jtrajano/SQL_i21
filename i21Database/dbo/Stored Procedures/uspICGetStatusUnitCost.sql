@@ -15,22 +15,24 @@ DECLARE @TotalCost AS NUMERIC(38,20),
 
 BEGIN
 	IF EXISTS (SELECT * FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @intReceiptId) 
-		BEGIN
-			SELECT @TotalCost = SUM(dblUnitCost) FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @intReceiptId
-				IF @TotalCost = 0
+	BEGIN
+		SELECT @TotalCost = SUM(dblUnitCost) FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @intReceiptId
+			IF @TotalCost = 0
+				BEGIN
+					SET @intReceiptItemsStatusId = @Status_AllZeroCost
+				END
+			ELSE
+				IF EXISTS(SELECT * FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @intReceiptId AND dblUnitCost = 0)
 					BEGIN
-						SET @intReceiptItemsStatusId = @Status_AllZeroCost
+						SET @intReceiptItemsStatusId = @Status_SomeHaveZeroCost
 					END
 				ELSE
-					IF EXISTS(SELECT * FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @intReceiptId AND dblUnitCost = 0)
-						BEGIN
-							SET @intReceiptItemsStatusId = @Status_SomeHaveZeroCost
-						END
-					ELSE
-						BEGIN
-							SET @intReceiptItemsStatusId = @Status_NoZeroCost
-						END
-		END
+					BEGIN
+						SET @intReceiptItemsStatusId = @Status_NoZeroCost
+					END
+	END
 	ELSE
-		RAISERROR('There are no receipt items to process.', 16, 1);
+	BEGIN 
+		EXEC uspICRaiseError 80164; 
+	END 
 END

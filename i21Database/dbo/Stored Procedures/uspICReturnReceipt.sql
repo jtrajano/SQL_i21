@@ -19,7 +19,7 @@ DECLARE @strReceiptNumber AS NVARCHAR(50)
 IF @intReceiptId IS NULL  
 BEGIN   
 	-- Cannot find the transaction.  
-	RAISERROR('Cannot find the transaction.', 11, 1)  
+	EXEC uspICRaiseError 80167;  
 	GOTO _Exit  
 END   
 
@@ -34,21 +34,21 @@ WHERE	r.intInventoryReceiptId = @intReceiptId
 IF @strReceiptNumber IS NULL 
 BEGIN 
 	-- Cannot find the transaction.  
-	RAISERROR('Cannot find the transaction.', 11, 1)  
+	EXEC uspICRaiseError 80167;  
 	GOTO _Exit  
 END 
 
 IF ISNULL(@ysnPosted, 0) = 0 
 BEGIN 
 	-- Cannot return the inventory receipt. {Receipt Id} must be posted before it can be returned.
-	RAISERROR('Cannot return the inventory receipt. %s must be posted before it can be returned.', 11, 1, @strReceiptNumber)  
+	EXEC uspICRaiseError 80100, @strReceiptNumber
 	GOTO _Exit  
 END 
 
 IF @strReceiptType = 'Transfer Order'
 BEGIN 
 	-- 'Cannot return {Receipt Id} because it is a Transfer Order.'
-	RAISERROR('Cannot return %s because it is a Transfer Order.', 11, 1, @strReceiptNumber)  
+	EXEC uspICRaiseError 80103, @strReceiptNumber;
 	GOTO _Exit  
 END 
 

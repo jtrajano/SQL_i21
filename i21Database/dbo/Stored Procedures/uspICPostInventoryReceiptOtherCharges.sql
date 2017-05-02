@@ -44,7 +44,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- 'Item Location is invalid or missing for {Item}.'
-		RAISERROR('Item Location is invalid or missing for %s.', 11, 1, @strItemNo)
+		EXEC uspICRaiseError 80002, @strItemNo;
 		GOTO _Exit
 	END 
 END 
@@ -68,7 +68,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- 'Item Location is invalid or missing for {Item}.'
-		RAISERROR('Item Location is invalid or missing for %s.', 11, 1, @strItemNo)
+		EXEC uspICRaiseError 80002, @strItemNo;
 		GOTO _Exit
 	END 
 END 
@@ -92,7 +92,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- The {Other Charge} is both a payable and deductible to the bill of the same vendor. Please correct the Accrue or Price checkbox.
-		RAISERROR('The %s is both a payable and deductible to the bill of the same vendor. Please correct the Accrue or Price checkbox.', 11, 1, @strItemNo)
+		EXEC uspICRaiseError 80064, @strItemNo;
 		GOTO _Exit
 	END 
 END 
@@ -119,7 +119,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- The {Other Charge} is shouldered by the receipt vendor and can''t be added to the item cost. Please correct the Price or Inventory Cost checkbox.
-		RAISERROR('The %s is shouldered by the receipt vendor and can''t be added to the item cost. Please correct the Price or Inventory Cost checkbox.', 11, 1, @strItemNo)
+		EXEC uspICRaiseError 80065, @strItemNo;
 		GOTO _Exit
 	END 
 END 
@@ -155,8 +155,8 @@ BEGIN
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- '{Transaction Id} is using a foreign currency. Please check if {Other Charge} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'
-		RAISERROR('%s is using a foreign currency. Please check if %s has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from %s to %s.', 11, 1, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId)
+		-- '{Transaction Id} is using a foreign currency. Please check if {Other Charge} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'	
+		EXEC uspICRaiseError 80162, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId
 		RETURN -1
 	END 
 END 
@@ -258,7 +258,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_Inventory) 	
+			EXEC uspICRaiseError 80008, @strItemNo, @ACCOUNT_CATEGORY_Inventory;
 			RETURN;
 		END 
 	END 
@@ -279,7 +279,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_APClearing) 	
+			EXEC uspICRaiseError 80008, @strItemNo, @ACCOUNT_CATEGORY_APClearing;
 			RETURN;
 		END 
 	END 
@@ -300,7 +300,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Other Charge} is missing a GL account setup for {Account Category} account category.
-			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeExpense) 	
+			EXEC uspICRaiseError 80008, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeExpense;				
 			RETURN;
 		END 
 	END 
@@ -321,7 +321,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Other Charge} is missing a GL account setup for {Account Category} account category.
-			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeIncome) 	
+			EXEC uspICRaiseError 80008, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeIncome;
 			RETURN;
 		END 
 	END 
@@ -342,7 +342,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Other Charge} is missing a GL account setup for {Account Category} account category.
-			RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @ACCOUNT_CATEGORY_APClearing) 	
+			EXEC uspICRaiseError 80008, @strItemNo, @ACCOUNT_CATEGORY_APClearing;
 			RETURN;
 		END 
 	END 

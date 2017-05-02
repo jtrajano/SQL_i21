@@ -61,14 +61,22 @@ FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostStorageErrors(I
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80001)
 BEGIN 
-	RAISERROR('Item id is invalid or missing.', 11, 1)
+	EXEC uspICRaiseError 80001;
 	RETURN -1
 END 
 
 -- Check for invalid location in the item-location setup. 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80002)
 BEGIN 
-	RAISERROR('Item Location is invalid or missing for %s.', 11, 1)
+	SELECT TOP 1 
+			@strItemNo = CASE WHEN ISNULL(i.strItemNo, '') = '' THEN '(Item id: ' + CAST(i.intItemId AS NVARCHAR(10)) + ')' ELSE i.strItemNo END 
+			,@intItemId = i.intItemId
+	FROM	#FoundErrors e INNER JOIN tblICItem i 
+				ON e.intItemId = i.intItemId
+	WHERE	e.intErrorCode = 80002
+
+	-- 'Item Location is invalid or missing for {Item}.'
+	EXEC uspICRaiseError 80002, @strItemNo;
 	RETURN -1
 END 
 
@@ -90,7 +98,8 @@ BEGIN
 				ON Errors.intItemId = Item.intItemId
 	WHERE	intErrorCode = 80003
 
-	RAISERROR('Negative stock quantity is not allowed for %s in %s.', 11, 1, @strItemNo, @strLocationName)
+	--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
+	EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 
 	RETURN -1
 END 
 
@@ -104,7 +113,7 @@ WHERE	intErrorCode = 80023
 IF @strItemNo IS NOT NULL 
 BEGIN 
 	-- 'Missing costing method setup for item {Item}.'
-	RAISERROR('Missing costing method setup for item %s.', 11, 1, @strItemNo)
+	EXEC uspICRaiseError 80023, @strItemNo
 	RETURN -1
 END 
 
@@ -118,7 +127,7 @@ WHERE	intErrorCode = 80022
 IF @strItemNo IS NOT NULL 
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
-	RAISERROR('The status of %s is Discontinued.', 11, 1, @strItemNo)
+	EXEC uspICRaiseError 80022, @strItemNo
 	RETURN -1
 END 
 
@@ -137,7 +146,7 @@ WHERE	intErrorCode = 80066
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Inventory Count is ongoing for Item {Item Name} and is locked under Location {Location Name}.'
-	RAISERROR('Inventory Count is ongoing for Item %s and is locked under Location %s.', 11, 1, @strItemNo, @strLocationName)
+	EXEC uspICRaiseError 80066, @strItemNo, @strLocationName;
 	RETURN -1
 END 
 GO

@@ -18,14 +18,9 @@ DECLARE @SALES_CONTRACT AS INT = 1
 		,@TRANSFER_ORDER AS INT = 3
 
 -- Get the transaction id 
-EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryShipment, @ShipmentNumber OUTPUT 
-
-IF @ShipmentNumber IS NULL 
 BEGIN 
-	-- Raise the error:
-	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
-	RAISERROR('Unable to generate the Transaction Id. Please ask your local administrator to check the starting numbers setup.', 11, 1);
-	RETURN;
+	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryShipment, @ShipmentNumber OUTPUT 
+	IF @ShipmentNumber IS NULL RETURN; -- Exit sp if shipment number is not generated. 
 END 
 
 -- Insert the Inventory Shipment header 
@@ -97,7 +92,7 @@ IF @InventoryShipmentId IS NULL
 BEGIN 
 	-- Raise the error:
 	-- Unable to generate the Inventory Shipment. An error stopped the process from Sales Order to Inventory Shipment.
-	RAISERROR('Unable to generate the Inventory Shipment. An error stopped the process from Sales Order to Inventory Shipment.', 11, 1);
+	EXEC uspICRaiseError 80029; 
 	RETURN;
 END
 

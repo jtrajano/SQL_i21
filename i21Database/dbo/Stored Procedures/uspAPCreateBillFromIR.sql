@@ -101,12 +101,12 @@ BEGIN
 	)
 	BEGIN 
 		-- Debit Memo is no longer needed. All items have Debit Memo.
-		RAISERROR('Debit Memo is no longer needed. All items have Debit Memo.', 11, 1)  
+		EXEC uspICRaiseError 80110;
 	END 
 	ELSE 
 	BEGIN 
-		-- Voucher is no longer needed. All items have Voucher.
-		RAISERROR('Voucher is no longer needed. All items have Voucher.', 11, 1)  
+		-- Voucher is no longer needed. All items have Voucher. 
+		EXEC uspICRaiseError 80111; 
 	END 
 END
 ELSE 
@@ -143,13 +143,13 @@ BEGIN
 			-- Debit Memo is no longer needed. All items have Debit Memo.
 			IF(@rtype = 'Inventory Return')
 				BEGIN
-					RAISERROR('Debit Memo is no longer needed. All items have Debit Memo.', 11, 1)
+					EXEC uspICRaiseError 80110;
 					GOTO Post_Exit           
 				END              
 			ELSE
 			-- Voucher is no longer needed. All items have Voucher.      
 				BEGIN
-					RAISERROR('Voucher is no longer needed. All items have Voucher.', 11, 1) 
+					EXEC uspICRaiseError 80111; 
 					GOTO Post_Exit
 				END   
 		END
@@ -161,13 +161,13 @@ BEGIN
 			-- Debit Memo is no longer needed. All items have Debit Memo.
 			IF(@rtype = 'Inventory Return')
 				BEGIN
-					RAISERROR('Debit Memo is no longer needed. All items have Debit Memo.', 11, 1)
+					EXEC uspICRaiseError 80110;
 					GOTO Post_Exit           
 				END              
 			ELSE
 			-- Voucher is no longer needed. All items have Voucher.      
 				BEGIN
-					RAISERROR('Voucher is no longer needed. All items have Voucher.', 11, 1) 
+					EXEC uspICRaiseError 80111; 
 					GOTO Post_Exit
 				END   
 		END  

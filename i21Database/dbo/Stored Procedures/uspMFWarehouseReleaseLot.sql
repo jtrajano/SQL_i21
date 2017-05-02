@@ -83,12 +83,7 @@ BEGIN TRY
 	IF @intLotId = 0
 		OR @intLotId IS NULL
 	BEGIN
-		RAISERROR (
-				'Invalid Lot.'
-				,11
-				,1
-				)
-
+		EXEC uspICRaiseError 80020; 
 		RETURN
 	END
 

@@ -80,12 +80,7 @@ BEGIN TRY
 			FROM @tblMFParentLot
 			)
 	BEGIN
-		RAISERROR (
-				'Invalid Lot.'
-				,11
-				,1
-				)
-
+		EXEC uspICRaiseError 80020; 
 		RETURN
 	END
 

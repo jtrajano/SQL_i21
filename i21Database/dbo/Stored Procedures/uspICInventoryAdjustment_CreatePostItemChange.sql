@@ -65,7 +65,7 @@ IF NOT EXISTS (
 )
 BEGIN
 	-- 'Internal Error. The source transaction type provided is invalid or not supported.' 
-	RAISERROR('Internal Error. The source transaction type provided is invalid or not supported.', 11, 1)  
+	EXEC uspICRaiseError 80032;   
 	GOTO _Exit;
 END 
 
@@ -73,7 +73,7 @@ END
 IF @intSourceId IS NULL 
 BEGIN
 	-- 'Internal Error. The source transaction id is invalid.'
-	RAISERROR('Internal Error. The source transaction id is invalid.', 11, 1)  
+	EXEC uspICRaiseError 80033;  
 	GOTO _Exit;
 END 
 
@@ -81,7 +81,7 @@ END
 IF dbo.fnGetItemLotType(@intItemId) = 0 
 BEGIN 
 	-- Invalid Item.
-	RAISERROR('Invalid Item.', 11, 1); 
+	EXEC uspICRaiseError 80021;
 	GOTO _Exit;
 END 
 
@@ -95,7 +95,7 @@ BEGIN
 	SET @strNewItemNo = ISNULL(@strNewItemNo, '(Unknown new item)')
 
 	-- 'Item %s is invalid. It must be lot tracked.'
-	RAISERROR('Item %s is invalid. It must be lot tracked.', 11, 1, @strNewItemNo); 
+	EXEC uspICRaiseError 80075, @strNewItemNo;
 	GOTO _Exit;
 END 
 
@@ -103,7 +103,7 @@ END
 IF @intNewItemId = @intItemId
 BEGIN 
 	-- 'The lot {lot number} is assigned to the same item. Item change requires a different item.'
-	RAISERROR('The lot %s is assigned to the same item. Item change requires a different item.', 11, 1, @strLotNumber)  
+	EXEC uspICRaiseError 80074, @strLotNumber;
 	GOTO _Exit;
 END 
 
@@ -122,7 +122,7 @@ END
 IF @intLotId IS NULL 
 BEGIN 
 	-- Invalid Lot
-	RAISERROR('Invalid Lot.', 11, 1)  
+	EXEC uspICRaiseError 80020; 
 	GOTO _Exit
 END 
 
@@ -135,7 +135,7 @@ IF NOT EXISTS (
 ) AND @intNewSubLocationId IS NOT NULL 
 BEGIN 
 	-- 'Internal Error. The new sub-location is invalid.'
-	RAISERROR('Internal Error. The new sub-location is invalid.', 11, 1)  
+	EXEC uspICRaiseError 80036;
 	GOTO _Exit
 END 
 
@@ -148,7 +148,7 @@ IF NOT EXISTS (
 ) AND @intNewStorageLocationId IS NOT NULL 
 BEGIN 
 	-- 'Internal Error. The new storage location is invalid.'
-	RAISERROR('Internal Error. The new storage location is invalid.', 11, 1)  
+	EXEC uspICRaiseError 80037; 
 	GOTO _Exit
 END 
 
@@ -156,7 +156,7 @@ END
 IF ISNULL(@dblAdjustByQuantity, 0) > 0 
 BEGIN 
 	-- 'Internal Error. The Adjust By Quantity is required to be a negative value.'
-	RAISERROR('Internal Error. The Adjust By Quantity is required to be a negative value.', 11, 1)  
+	EXEC uspICRaiseError 80106; 
 	GOTO _Exit
 END 
 
@@ -185,7 +185,7 @@ BEGIN
 	)
 	BEGIN 
 		-- Item UOM for {item} is invalid or missing.
-		RAISERROR('Item UOM for %s is invalid or missing.', 11, 1, @strOriginalItemNo)  
+		EXEC uspICRaiseError 80079, @strOriginalItemNo;
 		GOTO _Exit
 	END 
 
@@ -198,8 +198,8 @@ BEGIN
 				AND (intItemUOMId = @intItemUOMId OR intWeightUOMId = @intItemUOMId) 
 	)
 	BEGIN 
-		-- Item UOM for {lot} is invalid or missing.
-		RAISERROR('Item UOM is invalid or missing.', 11, 1, @strLotNumber)  
+		-- Item UOM is invalid or missing.
+		EXEC uspICRaiseError 80048;
 		GOTO _Exit
 	END 
 END 
@@ -222,7 +222,7 @@ BEGIN
 	)
 	BEGIN 
 		-- 'Item UOM {UOM name} for {New Item} is invalid or missing.'
-		RAISERROR('Item UOM %s for %s is invalid or missing.', 11, 1, @strOriginalUOMName, @strNewItemNo)  
+		EXEC uspICRaiseError 80080, @strOriginalUOMName, @strNewItemNo;
 		GOTO _Exit
 	END 
 END

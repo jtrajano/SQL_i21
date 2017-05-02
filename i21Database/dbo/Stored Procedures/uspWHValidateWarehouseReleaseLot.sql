@@ -15,8 +15,7 @@ BEGIN TRY
 	IF @strLotNumber = ''
 		OR @strLotNumber IS NULL
 	BEGIN
-		RAISERROR ('Invalid Lot.', 11, 1)
-
+		EXEC uspICRaiseError 80020; 
 		RETURN
 	END
 
@@ -28,8 +27,7 @@ BEGIN TRY
 
 	IF @intLotId IS NULL
 	BEGIN
-		RAISERROR ('Invalid Lot.', 11, 1)
-
+		EXEC uspICRaiseError 80020; 
 		RETURN
 	END
 

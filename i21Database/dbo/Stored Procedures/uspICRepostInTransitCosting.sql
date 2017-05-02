@@ -336,7 +336,7 @@ BEGIN
 				,[intCostingMethod]						= @ACTUALCOST
 				,[strDescription]						=	-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
 															FORMATMESSAGE(
-															'Stock quantity is now zero on %s in %s. Auto variance is posted to zero out its inventory valuation.'
+															dbo.fnICGetErrorMessage(80093) 
 															,i.strItemNo
 															,cl.strLocationName														
 														)

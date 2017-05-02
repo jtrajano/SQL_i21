@@ -37,7 +37,7 @@ FROM	(
 IF @ysnPost = 1 AND (@strItemNo IS NOT NULL AND @strLotNumber IS NOT NULL)
 BEGIN   
 	-- 'Lot status for {Lot Number} for item {Item No} is going to be updated more than once. Please remove the duplicate.'
-	RAISERROR('Lot status for %s for item %s is going to be updated more than once. Please remove the duplicate.', 11, 1, @strLotNumber, @strItemNo)  
+	EXEC uspICRaiseError 80024, @strLotNumber, @strItemNo;
 	RETURN -1
 END   
 
