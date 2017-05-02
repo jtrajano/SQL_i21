@@ -31,6 +31,7 @@ SELECT CD.intContractDetailId
 	,ISNULL(S.ysnFinalApproval, 'false') AS ysnFinalApproval
 	,CD.intContractStatusId
 	,ISNULL(CD.strERPPONumber, '') AS strERPPONumber
+	,CH.intContractTypeId
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
