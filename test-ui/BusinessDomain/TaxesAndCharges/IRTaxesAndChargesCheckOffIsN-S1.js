@@ -8,7 +8,7 @@ StartTest (function (t) {
     new iRely.FunctionalTest().start(t)
 
         //Precondition: Run this first TaxesAndChargesSetup.
-        .displayText('===== This is Scenario 1: Freight1- Accrue is Y-Receipt Vendor; Price is N. Inventory Cost is N.  =====')
+       .displayText('===== This is Scenario 1: Freight1- Accrue is Y-Receipt Vendor; Price is N. Inventory Cost is N.  =====')
 
 
         //Create Inventory Receipt
@@ -233,13 +233,13 @@ StartTest (function (t) {
             }
             next();
         })
-        .clickTab('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
         .clickTab('Details')
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
-        .clickTab('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
         .displayText('===== Verify To Post entries =====')
@@ -266,7 +266,7 @@ StartTest (function (t) {
         .clickTab('Details')
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
-        .clickTab('PostPreview')
+        .clickTab('Unpost Preview')
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
@@ -294,7 +294,7 @@ StartTest (function (t) {
         .clickTab('Details')
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
-        .clickTab('PostPreview')
+        .clickTab('Post Preview')
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
