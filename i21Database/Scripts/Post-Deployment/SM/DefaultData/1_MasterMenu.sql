@@ -367,9 +367,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email History' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Email History', N'System Manager', @SystemManagerParentMenuId, N'Email History', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.ActivityEmail', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
+	VALUES (N'Email History', N'System Manager', @SystemManagerParentMenuId, N'Email History', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.ActivityEmail?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.ActivityEmail', intSort = 7 WHERE strMenuName = 'Email History' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.ActivityEmail?showSearch=true', intSort = 7 WHERE strMenuName = 'Email History' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Letters' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
