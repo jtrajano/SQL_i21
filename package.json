@@ -8,12 +8,13 @@
   },
   "dependencies": {
     "gulp": "^3.9.1",
-    "gulp-extjs-spec-generator": "^1.1.9",
+    "gulp-extjs-spec-generator": "^1.1.12",
     "karma": "^1.2.0",
     "karma-chai": "^0.1.0",
     "karma-coverage": "^1.1.1",
     "karma-mocha": "^1.1.1",
     "karma-sinon": "^1.0.5",
-    "mocha": "^3.0.2"
+    "mocha": "^3.0.2",
+    "require-dir": "^0.3.1"
   }
 }

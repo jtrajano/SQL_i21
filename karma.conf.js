@@ -39,7 +39,7 @@ var extJs = [
 
     // Load Base 64 js
     {pattern: '../resources/js/fn/Base64.js', watched: false},
-    {pattern: 'app/lib/numeral.js', watched: true },
+    {pattern: 'app/lib/numeraljs/numeral.js', watched: true },
     {pattern: 'app/ux/**/*.js', watched: true },
 ];
 var inventoryFiles = [{
