@@ -3,6 +3,7 @@
     [intDispatchID]            INT             IDENTITY (1, 1) NOT NULL,
     [intSiteID]                INT             DEFAULT 0 NULL,
     [dblPercentLeft]           NUMERIC (18, 6) DEFAULT 0 NULL,
+	[dblOriginalPercentLeft]   NUMERIC (18, 6) NULL,
     [dblQuantity]              NUMERIC (18, 6) DEFAULT 0 NULL,
     [dblMinimumQuantity]       NUMERIC (18, 6) DEFAULT 0 NULL,
     [intProductID]             INT             DEFAULT 0 NULL,
@@ -415,3 +416,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDispatch',
     @level2type = N'COLUMN',
     @level2name = N'ysnLeakCheckRequired'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Original Percent Left',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDispatch',
+    @level2type = N'COLUMN',
+    @level2name = N'dblOriginalPercentLeft'

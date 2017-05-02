@@ -40,6 +40,7 @@
     [intRouteId]				INT NULL, 
     [ysnReceived]				BIT NOT NULL DEFAULT 0, 
     [ysnLeakCheckRequired]		BIT NOT NULL DEFAULT 0, 
+	[dblOriginalPercentLeft]	NUMERIC(18, 6) NULL, 
 	[dtmCreated]				DATETIME NOT NULL DEFAULT GETDATE(),
     CONSTRAINT [PK_tblTMDispatchHistory] PRIMARY KEY CLUSTERED ([intDispatchSyncId] ASC), 
 );

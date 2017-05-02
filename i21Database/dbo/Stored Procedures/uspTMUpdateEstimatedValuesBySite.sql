@@ -30,6 +30,61 @@ BEGIN
 			@AccumulatedDD		=	dblAccumulatedDegreeDay
 		FROM #tmpLatestReading ORDER BY dtmDate DESC
 
+		--Update dispatch
+		UPDATE tblTMDispatch
+		SET 
+			dblPercentLeft =		CASE WHEN(@currentSeason = 'SUMMER') THEN
+											(ISNULL(A.dblTotalCapacity,0) * ISNULL(tblTMDispatch.dblPercentLeft,0) / 100) 
+												- (
+													(DATEDIFF(DAY,ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate),@LastReadingDate)) * ISNULL(A.dblSummerDailyUse,0)
+													+ (
+														(@AccumulatedDD 
+														 -
+														ISNULL(
+														(	
+															SELECT	TOP 1  
+																	dblAccumulatedDegreeDay 
+															FROM	#tmpLatestReading 
+															WHERE	DAY(dtmDate) = DAY(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))  
+																	AND MONTH(dtmDate) = MONTH(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))
+																	AND YEAR(dtmDate) = YEAR(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))
+														),0))		
+
+														/	(CASE WHEN ISNULL(A.dblBurnRate,1) = 0 THEN 1 ELSE ISNULL(A.dblBurnRate,1) END)
+													)
+												)
+
+										 ELSE
+											(ISNULL(A.dblTotalCapacity,0) * ISNULL(tblTMDispatch.dblPercentLeft,0) / 100)
+													- (
+														(DATEDIFF(DAY,ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate),@LastReadingDate)) * ISNULL(A.dblWinterDailyUse,0)
+														+ (
+															(@AccumulatedDD 
+															-
+															ISNULL(
+															(	
+																SELECT	TOP 1  
+																		dblAccumulatedDegreeDay 
+																FROM	#tmpLatestReading 
+																WHERE	DAY(dtmDate) = DAY(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))  
+																		AND MONTH(dtmDate) = MONTH(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))
+																		AND YEAR(dtmDate) = YEAR(ISNULL(A.dtmLastReadingUpdate,A.dtmLastDeliveryDate))
+															),0))		
+
+															/	(CASE WHEN ISNULL(A.dblBurnRate,1) = 0 THEN 1 ELSE ISNULL(A.dblBurnRate,1) END)
+														)
+													)
+										END
+											/(CASE WHEN ISNULL(dblTotalCapacity,1) = 0 THEN 1 ELSE ISNULL(dblTotalCapacity,1) END) * 100
+
+		FROM (SELECT * FROM tblTMSite) A
+		WHERE tblTMDispatch.intSiteID = @intSiteId 
+			AND CAST((ISNULL(A.dtmLastDeliveryDate,'1900-01-01')) as DATETIME) < @LastReadingDate
+			AND A.ysnActive = 1
+			AND CAST((ISNULL(A.dtmLastReadingUpdate,'1900-01-01')) as DATETIME) < @LastReadingDate
+
+
+
 		UPDATE tblTMSite
 		SET dtmLastReadingUpdate = @LastReadingDate,   
 			dblEstimatedGallonsLeft =	CASE WHEN(@currentSeason = 'SUMMER') THEN

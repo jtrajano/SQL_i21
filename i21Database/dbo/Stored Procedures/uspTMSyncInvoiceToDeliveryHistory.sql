@@ -952,7 +952,8 @@ BEGIN
 							,[ysnLockPrice]				
 							,[intRouteId]				
 							,[ysnReceived]				
-							,[ysnLeakCheckRequired]		
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]		
 						)	
 						SELECT TOP 1 
 							[intDispatchId]				= [intDispatchID]
@@ -993,7 +994,8 @@ BEGIN
 							,[ysnLockPrice]				
 							,[intRouteId]				
 							,[ysnReceived]				
-							,[ysnLeakCheckRequired]		
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]
 						FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
 					END

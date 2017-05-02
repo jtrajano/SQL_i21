@@ -316,6 +316,7 @@ BEGIN
 							,[intRouteId]				
 							,[ysnReceived]				
 							,[ysnLeakCheckRequired]		
+							,[dblOriginalPercentLeft]
 						)	
 						SELECT TOP 1 
 							[intDispatchID]				= [intDispatchId]
@@ -355,7 +356,8 @@ BEGIN
 							,[ysnLockPrice]				
 							,[intRouteId]				
 							,[ysnReceived]				
-							,[ysnLeakCheckRequired]		
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]		
 						FROM tblTMDispatchHistory
 						WHERE intDeliveryHistoryId = @intDeliveryHistoryId
 
@@ -663,7 +665,8 @@ BEGIN
 							,[ysnLockPrice]				
 							,[intRouteId]				
 							,[ysnReceived]				
-							,[ysnLeakCheckRequired]		
+							,[ysnLeakCheckRequired]	
+							,dblOriginalPercentLeft	
 						)	
 						SELECT TOP 1 
 							[intDispatchID]				= [intDispatchId]
@@ -704,6 +707,7 @@ BEGIN
 							,[intRouteId]				
 							,[ysnReceived]				
 							,[ysnLeakCheckRequired]		
+							,dblOriginalPercentLeft
 						FROM tblTMDispatchHistory
 						WHERE intDeliveryHistoryId = @intDeliveryHistoryId
 
