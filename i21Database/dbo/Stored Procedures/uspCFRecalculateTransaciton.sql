@@ -1530,6 +1530,30 @@ BEGIN
 				,ROUND((@dblPrice - (@totalOriginalTax / @dblQuantity) + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
 			)
 		END
+	ELSE IF (LOWER(@strPriceBasis) = 'local index fixed')
+		BEGIN
+			INSERT INTO @tblTransactionPrice (
+		 strTransactionPriceId	
+		,dblOriginalAmount		
+		,dblCalculatedAmount	
+		)
+		VALUES
+		(
+			 'Gross Price'
+			,@dblOriginalPrice
+			,@dblPrice 
+		),
+		(
+			 'Net Price'
+			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+			,Round((Round(@dblPrice * @dblQuantity,2) - @totalCalculatedTax ) / @dblQuantity, 6)
+		),
+		(
+			 'Total Amount'
+			,ROUND(@dblOriginalPrice * @dblQuantity,2)
+			,ROUND((@dblPrice * @dblQuantity),2)
+		)
+		END
 	ELSE
 		BEGIN
 			INSERT INTO @tblTransactionPrice (
