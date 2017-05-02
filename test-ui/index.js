@@ -777,6 +777,22 @@ if(_url.indexOf('version=TF') < 1) {
                             ]
                         }
                     ]
+                },
+
+                {
+                    group: 'MultiCurrency',
+                    items: [
+                        {
+                            url: 'BusinessDomain/MultiCurrency/MultiCurrencySetup.js?v=' + version,
+                            title: 'MultiCurrencySetup',
+                            preload: [
+                                functionalTest,
+                                commonIC,
+                                commonGL
+                            ]
+                        }
+
+                    ]
                 }
 
 
