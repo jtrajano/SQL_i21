@@ -80,7 +80,7 @@ BEGIN TRY
 	FROM tblSMCompanySetup
 	
 	-- ======================== HEADER ==============================
-	INSERT INTO vyuTFGetTransactionSummary (strSummaryGuid
+	INSERT INTO tblTFTransactionSummary(strSummaryGuid
 		, intTaxAuthorityId
 		, strFormCode
 		, strScheduleCode

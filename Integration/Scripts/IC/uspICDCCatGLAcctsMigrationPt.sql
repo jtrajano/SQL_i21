@@ -2,7 +2,7 @@ IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICD
 	DROP PROCEDURE [uspICDCCatGLAcctsMigrationPt]; 
 GO 
 
-Create PROCEDURE [dbo].[uspICDCCatGLAcctsMigrationPt]
+CREATE PROCEDURE [dbo].[uspICDCCatGLAcctsMigrationPt]
 --** Below Stored Procedure is to migrate inventory related gl accounts from origin to i21 tables such as tblICCategoryAccount, tblICItemAccount. **
 
 AS
@@ -17,26 +17,26 @@ SET ANSI_WARNINGS OFF
 ---------------------------------------------------------------------------------------------------
 ------update the account table with correct account category required for inventory to function
 
-UPDATE tgs SET intAccountCategoryId = tgc.intAccountCategoryId
-FROM dbo.tblGLAccountSegment tgs  
-JOIN 
-(--purchase
-select distinct(SUBSTRING(CAST(ptitm_pur_acct AS VARCHAR), 0, CHARINDEX('.', ptitm_pur_acct))) code,'Cost of Goods' cat from ptitmmst  
-where ptitm_phys_inv_yno = 'Y'
-union
----Sales Account Category
-select distinct(SUBSTRING(CAST(ptitm_sls_acct AS VARCHAR), 0, CHARINDEX('.', ptitm_sls_acct))) code,'Sales Account'cat from ptitmmst 
-where ptitm_phys_inv_yno = 'Y'
-union
----Inventory Category
-select distinct(SUBSTRING(CAST(ptcls_inv_acct_no AS VARCHAR), 0, CHARINDEX('.', ptcls_inv_acct_no))) code, 'Inventory' cat from ptclsmst
-where ptcls_class in (select distinct ptitm_class from ptitmmst where ptitm_phys_inv_yno = 'Y')
-union
----AP Clearing Category 
-select distinct(SUBSTRING(CAST(ptmgl_ap AS VARCHAR), 0, CHARINDEX('.', ptmgl_ap))) code, 'AP Clearing' cat from ptmglmst
-) as t 
-ON tgs.strCode = t.code  COLLATE SQL_Latin1_General_CP1_CS_AS
-JOIN dbo.tblGLAccountCategory tgc ON t.cat  COLLATE SQL_Latin1_General_CP1_CS_AS = tgc.strAccountCategory 
+--UPDATE tgs SET intAccountCategoryId = tgc.intAccountCategoryId
+--FROM dbo.tblGLAccountSegment tgs  
+--JOIN 
+--(--purchase
+----select distinct(SUBSTRING(CAST(ptitm_pur_acct AS VARCHAR), 0, CHARINDEX('.', ptitm_pur_acct))) code,'Cost of Goods' cat from ptitmmst  
+----where ptitm_phys_inv_yno = 'Y'
+----union
+-----Sales Account Category
+----select distinct(SUBSTRING(CAST(ptitm_sls_acct AS VARCHAR), 0, CHARINDEX('.', ptitm_sls_acct))) code,'Sales Account'cat from ptitmmst 
+----where ptitm_phys_inv_yno = 'Y'
+----union
+-----Inventory Category
+--select distinct(SUBSTRING(CAST(ptcls_inv_acct_no AS VARCHAR), 0, CHARINDEX('.', ptcls_inv_acct_no))) code, 'Inventory' cat from ptclsmst
+--where ptcls_class in (select distinct ptitm_class from ptitmmst where ptitm_phys_inv_yno = 'Y')
+--union
+-----AP Clearing Category 
+--select distinct(SUBSTRING(CAST(ptmgl_ap AS VARCHAR), 0, CHARINDEX('.', ptmgl_ap))) code, 'AP Clearing' cat from ptmglmst
+--) as t 
+--ON tgs.strCode = t.code  COLLATE SQL_Latin1_General_CP1_CS_AS
+--JOIN dbo.tblGLAccountCategory tgc ON t.cat  COLLATE SQL_Latin1_General_CP1_CS_AS = tgc.strAccountCategory 
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------
@@ -114,7 +114,7 @@ INSERT INTO tblICCategoryAccount (
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cgl.ptmgl_ap 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
 	WHERE coa.strExternalId = cgl.ptmgl_ap
-	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
+	--and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 )
 
 --UNION
@@ -124,7 +124,7 @@ INSERT INTO tblICCategoryAccount (
 --	,act.intAccountId
 --	,1 FROM ptclsmst AS cls INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS INNER JOIN ptmglmst AS mgl ON mgl.ptmgl_key = 01 INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = mgl.ptmgl_pur_variance INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId INNER JOIN tblGLAccountSegmentMapping AS segm ON segm.intAccountId = coa.intCrossReferenceId INNER JOIN tblGLAccountSegment AS seg ON seg.intAccountSegmentId = segm.intAccountSegmentId WHERE coa.strExternalId = mgl.ptmgl_pur_variance
 --	AND seg.strCode = SUBSTRING(strExternalId, 0, CHARINDEX('.', strExternalId))
-	--)
+--)
 
 ------------------------------------------------------
 --import gl accounts for 'Other Charge' category
@@ -166,3 +166,21 @@ INSERT INTO tblICCategoryAccount (
 	WHERE coa.strExternalId = cls.ptcls_pur_acct_no
 	and cat.strInventoryType = 'Other Charge'
 )
+
+-----------------------------------------------------------------------------------------------------
+--------update the account table with correct account category required for inventory to function
+UPDATE tgs SET intAccountCategoryId = act.intAccountCategoryId
+--select c.strDescription,ca.intCategoryId,ac.strAccountId,ac.strDescription, ca.intAccountCategoryId, tgs.intAccountCategoryId,act.intAccountCategoryId
+from tblICCategoryAccount ca 
+join tblGLAccount ac on ca.intAccountId = ac.intAccountId
+join tblICCategory c on ca.intCategoryId = c.intCategoryId
+join tblGLAccountCategory act on ca.intAccountCategoryId = act.intAccountCategoryId
+join tblGLAccountSegmentMapping sm on sm.intAccountId = ac.intAccountId
+join tblGLAccountSegment tgs on tgs.intAccountSegmentId = sm.intAccountSegmentId
+join tblGLAccountStructure ast on ast.intAccountStructureId = tgs.intAccountStructureId
+where act.strAccountCategory in ('Inventory', 'Sales Account')
+and c.strInventoryType in ('Inventory', 'Raw Material', 'Finished Goods')
+and ast.strType = 'Primary'
+
+GO
+--------------------------------------------------------------------------------------------------------------------------------------------

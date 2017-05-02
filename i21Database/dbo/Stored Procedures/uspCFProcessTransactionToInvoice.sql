@@ -25,11 +25,23 @@ DECLARE @ysnRemoteTransaction INT
 DECLARE @strItemTermDiscountBy NVARCHAR(MAX)
 
 DECLARE @companyConfigTermId	INT = NULL
+DECLARE @invalid				BIT = 0
 
 SELECT TOP 1 @companyConfigTermId = intTermsCode FROM tblCFCompanyPreference
 IF(ISNULL(@companyConfigTermId,0) = 0)
 BEGIN
 	SET @ErrorMessage = 'Term code is required.'
+	SET @CreatedIvoices = NULL
+	SET @UpdatedIvoices = NULL
+
+	RETURN
+END
+
+
+SELECT TOP 1 @invalid = ysnInvalid FROM tblCFTransaction where intTransactionId = @TransactionId
+IF(@invalid = 1)
+BEGIN
+	SET @ErrorMessage = 'Unable to post invalid transaction'
 	SET @CreatedIvoices = NULL
 	SET @UpdatedIvoices = NULL
 
@@ -58,7 +70,8 @@ END
 
 BEGIN TRANSACTION
 INSERT INTO @EntriesForInvoice(
-	 [strSourceTransaction]
+	 [strTransactionType]
+	,[strSourceTransaction]
 	,[intSourceId]
 	,[strSourceId]
 	,[intInvoiceId]
@@ -137,9 +150,14 @@ INSERT INTO @EntriesForInvoice(
 	,[ysnUpdateAvailableDiscount]
 	,[strItemTermDiscountBy]
 	,[dblItemTermDiscount]
+	,[dtmPostDate]
 )
 SELECT
-	 [strSourceTransaction]					= 'CF Tran'
+	 [strTransactionType]					= (case
+												when (cfTrans.dblQuantity < 0 OR cfTransPrice.dblCalculatedAmount < 0)  then 'Credit Memo'
+												else 'Invoice'
+											  end)
+	,[strSourceTransaction]					= 'CF Tran'
 	,[intSourceId]							= cfTrans.intTransactionId
 	,[strSourceId]							= cfTrans.strTransactionId
 	,[intInvoiceId]							= @InvoiceId --NULL Value will create new invoice
@@ -186,10 +204,10 @@ SELECT
 	,[ysnInventory]							= 1
 	,[strItemDescription]					= cfSiteItem.strDescription 
 	,[intItemUOMId]							= cfSiteItem.intIssueUOMId
-	,[dblQtyOrdered]						= cfTrans.dblQuantity
-	,[dblQtyShipped]						= cfTrans.dblQuantity 
+	,[dblQtyOrdered]						= ABS(cfTrans.dblQuantity)
+	,[dblQtyShipped]						= ABS(cfTrans.dblQuantity)
 	,[dblDiscount]							= 0
-	,[dblPrice]								= cfTransPrice.dblCalculatedAmount
+	,[dblPrice]								= ABS(cfTransPrice.dblCalculatedAmount)
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= ''
     ,[strFrequency]							= ''
@@ -229,6 +247,7 @@ SELECT
 	,[ysnUpdateAvailableDiscount]			= @UpdateAvailableDiscount
 	,[strItemTermDiscountBy]				= @strItemTermDiscountBy
 	,[dblItemTermDiscount]					= @Discount
+	,[dtmPostedDate]						= cfTrans.dtmPostedDate
 	
 FROM tblCFTransaction cfTrans
 INNER JOIN tblCFNetwork cfNetwork
@@ -306,8 +325,8 @@ DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 	,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < cfTransaction.dtmTransactionDate AND intTaxCodeId = cfTransactionTax.intTaxCodeId order by dtmEffectiveDate desc)
 	,[dblRate]					= cfTransactionTax.dblTaxRate
 	,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
-	,[dblTax]					= cfTransactionTax.dblTaxCalculatedAmount
-	,[dblAdjustedTax]			= cfTransactionTax.dblTaxCalculatedAmount--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
+	,[dblTax]					= ABS(cfTransactionTax.dblTaxCalculatedAmount)
+	,[dblAdjustedTax]			= ABS(cfTransactionTax.dblTaxCalculatedAmount)--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
 	,[ysnTaxAdjusted]			= 0
 	,[ysnSeparateOnInvoice]		= 0 
 	,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax

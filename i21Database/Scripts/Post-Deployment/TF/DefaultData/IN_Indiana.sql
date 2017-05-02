@@ -1,6 +1,8 @@
 ﻿-- Declare the Tax Authority Code that will be used all throughout Indiana Default Data
 PRINT ('Deploying Indiana Tax Forms')
 DECLARE @TaxAuthorityCode NVARCHAR(10) = 'IN'
+	, @TaxAuthorityId INT
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 
 -- Origin/Destination State
@@ -78,7 +80,7 @@ select 'UNION ALL SELECT intProductCodeId = ' + CAST(intProductCodeId AS NVARCHA
 	+ CASE WHEN strProductCodeGroup IS NULL THEN ', strProductCodeGroup = NULL' ELSE ', strProductCodeGroup = ''' + strProductCodeGroup + ''''  END
 	+ CASE WHEN strNote IS NULL THEN ', strNote = NULL' ELSE ', strNote = ''' + strNote + '''' END 
 from tblTFProductCode
-where intTaxAuthorityId = 
+where intTaxAuthorityId = @TaxAuthorityId
 */
 DECLARE @ProductCodes AS TFProductCodes
 
@@ -143,7 +145,7 @@ UNION ALL SELECT intProductCodeId = 312, strProductCode = '092', strDescription 
 UNION ALL SELECT intProductCodeId = 313, strProductCode = '093', strDescription = 'Undefined products - SFT', strProductCodeGroup = '', strNote = NULL
 UNION ALL SELECT intProductCodeId = 314, strProductCode = 'E00', strDescription = 'Ethanol (100%) Blended', strProductCodeGroup = 'Alcohol', strNote = NULL
 UNION ALL SELECT intProductCodeId = 315, strProductCode = 'E11', strDescription = 'Ethanol (11%) Blended', strProductCodeGroup = 'Alcohol', strNote = NULL
-UNION ALL SELECT intProductCodeId = 2438, strProductCode = 'E10', strDescription = 'Ethanol (11%) Blended', strProductCodeGroup = 'Alcohol', strNote = NULL
+UNION ALL SELECT intProductCodeId = 2438, strProductCode = 'E10', strDescription = 'Ethanol (11%) Blended', strProductCodeGroup = 'Alcohol', strNote = 'This Product Code is now obsolete'
 
 EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
 
@@ -158,7 +160,7 @@ select 'UNION ALL SELECT intTerminalControlNumberId = ' + CAST(intTerminalContro
 	+ CASE WHEN dtmApprovedDate IS NULL THEN ', dtmApprovedDate = NULL' ELSE ', dtmApprovedDate = ''' + CAST(dtmApprovedDate AS NVARCHAR(50)) + '''' END 
 	+ CASE WHEN strZip IS NULL THEN ', strZip = NULL' ELSE ', strZip = ''' + strZip + '''' END 
 from tblTFTerminalControlNumber
-where intTaxAuthorityId = 
+where intTaxAuthorityId = @TaxAuthorityId
 */
 DECLARE @TerminalControlNumbers AS TFTerminalControlNumbers
 
@@ -219,7 +221,7 @@ select 'UNION ALL SELECT intTaxCategoryId = ' + CAST(intTaxCategoryId AS NVARCHA
 	+ CASE WHEN strState IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + strState + ''''  END
 	+ CASE WHEN strTaxCategory IS NULL THEN ', strTaxCategory = NULL' ELSE ', strTaxCategory = ''' + strTaxCategory + ''''  END
 from tblTFTaxCategory
-where intTaxAuthorityId = 
+where intTaxAuthorityId = @TaxAuthorityId
 */
 DECLARE @TaxCategories AS TFTaxCategory
 
@@ -252,7 +254,7 @@ select 'UNION ALL SELECT intReportingComponentId = ' + CAST(intReportingComponen
 	+ CASE WHEN strSPInvoice IS NULL THEN ', strSPInvoice = NULL' ELSE ', strSPInvoice = ''' + strSPInvoice + '''' END
 	+ CASE WHEN strSPRunReport IS NULL THEN ', strSPRunReport = NULL' ELSE ', strSPRunReport = ''' + strSPRunReport + '''' END
 from tblTFReportingComponent
-where intTaxAuthorityId = 
+where intTaxAuthorityId = @TaxAuthorityId
 */
 DECLARE @ReportingComponent AS TFReportingComponent
 
@@ -361,7 +363,7 @@ EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @Rep
 
 -- Tax Criteria
 /* Generate script for Tax Criteria. Specify Tax Authority Id to filter out specific Tax Criteria only.
-select 'UNION ALL SELECT intTaxCriteriaId = ' + CAST(intTaxCriteriaId AS NVARCHAR(10))
+select 'UNION ALL SELECT intTaxCriteriaId = ' + CAST(intReportingComponentCriteriaId AS NVARCHAR(10))
 	+ CASE WHEN TaxCat.strTaxCategory IS NULL THEN ', strTaxCategory = NULL' ELSE ', strTaxCategory = ''' + TaxCat.strTaxCategory + ''''  END
 	+ CASE WHEN TaxCat.strState IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + TaxCat.strState + ''''  END
 	+ CASE WHEN strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + strFormCode + ''''  END
@@ -371,7 +373,7 @@ select 'UNION ALL SELECT intTaxCriteriaId = ' + CAST(intTaxCriteriaId AS NVARCHA
 from tblTFReportingComponentCriteria TaxCrit
 left join tblTFTaxCategory TaxCat ON TaxCat.intTaxCategoryId = TaxCrit.intTaxCategoryId
 left join tblTFReportingComponent RC ON RC.intReportingComponentId = TaxCrit.intReportingComponentId
-where RC.intTaxAuthorityId =  and TaxCat.intTaxAuthorityId = 
+where RC.intTaxAuthorityId = @TaxAuthorityId and TaxCat.intTaxAuthorityId = @TaxAuthorityId
 */
 DECLARE @TaxCriteria AS TFTaxCriteria
 
@@ -386,69 +388,67 @@ INSERT INTO @TaxCriteria(
 )
 -- Insert generated script here. Remove first instance of "UNION ALL "
 SELECT intTaxCriteriaId = 1, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 4, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 5, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 6, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '= 0'
-UNION ALL SELECT intTaxCriteriaId = 7, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strCriteria = '= 0'
-UNION ALL SELECT intTaxCriteriaId = 8, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strCriteria = '= 0'
-UNION ALL SELECT intTaxCriteriaId = 9, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '= 0'
-UNION ALL SELECT intTaxCriteriaId = 10, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strCriteria = '= 0'
-UNION ALL SELECT intTaxCriteriaId = 11, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strCriteria = '= 0'
-UNION ALL SELECT intTaxCriteriaId = 12, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 13, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 14, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 15, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 16, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 17, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 18, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '= 0'
-UNION ALL SELECT intTaxCriteriaId = 19, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strCriteria = '= 0'
-UNION ALL SELECT intTaxCriteriaId = 20, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strCriteria = '= 0'
-UNION ALL SELECT intTaxCriteriaId = 26, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 27, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 28, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strCriteria = '<> 0'
-UNION ALL SELECT intTaxCriteriaId = 29, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strCriteria = '= 0'
-UNION ALL SELECT intTaxCriteriaId = 30, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strCriteria = '= 0'
+UNION ALL SELECT intTaxCriteriaId = 2, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strCriteria = '<> 0'
+UNION ALL SELECT intTaxCriteriaId = 3, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strCriteria = '<> 0'
+UNION ALL SELECT intTaxCriteriaId = 4, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '= 0'
+UNION ALL SELECT intTaxCriteriaId = 5, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strCriteria = '= 0'
+UNION ALL SELECT intTaxCriteriaId = 6, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strCriteria = '= 0'
+UNION ALL SELECT intTaxCriteriaId = 7, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '= 0'
+UNION ALL SELECT intTaxCriteriaId = 8, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strCriteria = '= 0'
+UNION ALL SELECT intTaxCriteriaId = 9, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strCriteria = '= 0'
+UNION ALL SELECT intTaxCriteriaId = 10, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '<> 0'
+UNION ALL SELECT intTaxCriteriaId = 11, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strCriteria = '<> 0'
+UNION ALL SELECT intTaxCriteriaId = 12, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strCriteria = '<> 0'
+UNION ALL SELECT intTaxCriteriaId = 13, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '<> 0'
+UNION ALL SELECT intTaxCriteriaId = 14, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strCriteria = '<> 0'
+UNION ALL SELECT intTaxCriteriaId = 15, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strCriteria = '<> 0'
+UNION ALL SELECT intTaxCriteriaId = 16, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '= 0'
+UNION ALL SELECT intTaxCriteriaId = 17, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strCriteria = '= 0'
+UNION ALL SELECT intTaxCriteriaId = 18, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strCriteria = '= 0'
+UNION ALL SELECT intTaxCriteriaId = 19, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strCriteria = '<> 0'
+UNION ALL SELECT intTaxCriteriaId = 20, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strCriteria = '<> 0'
+UNION ALL SELECT intTaxCriteriaId = 21, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strCriteria = '<> 0'
+UNION ALL SELECT intTaxCriteriaId = 22, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strCriteria = '= 0'
+UNION ALL SELECT intTaxCriteriaId = 23, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strCriteria = '= 0'
 
 EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 
 
 -- Reporting Component - Base
 /* Generate script for Valid Product Codes. Specify Tax Authority Id to filter out specific Valid Product Codes only.
-select 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intValidProductCodeId AS NVARCHAR(10))
+select 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportingComponentProductCodeId AS NVARCHAR(10))
 	+ CASE WHEN PC.strProductCode IS NULL THEN ', strProductCode = NULL' ELSE ', strProductCode = ''' + PC.strProductCode + ''''  END
 	+ CASE WHEN RC.strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + strFormCode + ''''  END
 	+ CASE WHEN strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + strScheduleCode + ''''  END
-	+ CASE WHEN strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + strType + '''' END
-	+ CASE WHEN strFilter IS NULL THEN ', strFilter = ''''' ELSE ', strFilter = ''' + strFilter + '''' END
-from tblTFValidProductCode VPC
-left join tblTFProductCode PC ON PC.intProductCodeId= VPC.intProductCode
-left join tblTFReportingComponent RC ON RC.intReportingComponentId = VPC.intReportingComponentId
-where RC.intTaxAuthorityId =
+	+ CASE WHEN RC.strType IS NULL THEN ', strType = ''''' ELSE ', strType = ''' + RC.strType + '''' END
+from tblTFReportingComponentProductCode RCPC
+left join tblTFProductCode PC ON PC.intProductCodeId= RCPC.intProductCodeId
+left join tblTFReportingComponent RC ON RC.intReportingComponentId = RCPC.intReportingComponentId
+where RC.intTaxAuthorityId = @TaxAuthorityId
 */
 /* Generate script for Valid Origin States. Specify Tax Authority Id to filter out specific Valid Origin States only.
-select 'UNION ALL SELECT intValidOriginStateId = ' + CAST(intValidOriginStateId AS NVARCHAR(10))
+select 'UNION ALL SELECT intValidOriginStateId = ' + CAST(intReportingComponentOriginStateId AS NVARCHAR(10))
 	+ CASE WHEN RC.strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + RC.strFormCode + ''''  END
 	+ CASE WHEN RC.strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + RC.strScheduleCode + ''''  END
 	+ CASE WHEN RC.strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + RC.strType + '''' END
 	+ CASE WHEN ODS.strOriginDestinationState COLLATE Latin1_General_CI_AS IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + ODS.strOriginDestinationState COLLATE Latin1_General_CI_AS + ''''  END
-	+ CASE WHEN VOS.strType IS NULL THEN ', strStatus = NULL' ELSE ', strStatus = ''' + VOS.strType + ''''  END
-	+ CASE WHEN strFilter IS NULL THEN ', strFilter = NULL' ELSE ', strFilter = ''' + strFilter + '''' END
-from tblTFValidOriginState VOS
-left join tblTFOriginDestinationState ODS ON ODS.intOriginDestinationStateId= VOS.intOriginDestinationStateId
-left join tblTFReportingComponent RC ON RC.intReportingComponentId = VOS.intReportingComponentId
-where RC.intTaxAuthorityId =
+	+ CASE WHEN RCOS.strType IS NULL THEN ', strStatus = NULL' ELSE ', strStatus = ''' + RCOS.strType + ''''  END
+from tblTFReportingComponentOriginState RCOS
+left join tblTFOriginDestinationState ODS ON ODS.intOriginDestinationStateId= RCOS.intOriginDestinationStateId
+left join tblTFReportingComponent RC ON RC.intReportingComponentId = RCOS.intReportingComponentId
+where RC.intTaxAuthorityId = @TaxAuthorityId
 */
 /* Generate script for Valid Destination States. Specify Tax Authority Id to filter out specific Valid Destination States only.
-select 'UNION ALL SELECT intValidDestinationStateId = ' + CAST(intValidDestinationStateId AS NVARCHAR(10))
+select 'UNION ALL SELECT intValidDestinationStateId = ' + CAST(intReportingComponentDestinationStateId AS NVARCHAR(10))
 	+ CASE WHEN RC.strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + RC.strFormCode + ''''  END
 	+ CASE WHEN RC.strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + RC.strScheduleCode + ''''  END
 	+ CASE WHEN RC.strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + RC.strType + '''' END
 	+ CASE WHEN ODS.strOriginDestinationState COLLATE Latin1_General_CI_AS IS NULL THEN ', strState = NULL' ELSE ', strState = ''' + ODS.strOriginDestinationState COLLATE Latin1_General_CI_AS + ''''  END
-	+ CASE WHEN VDS.strStatus IS NULL THEN ', strStatus = NULL' ELSE ', strStatus = ''' + VDS.strStatus + ''''  END
-from tblTFValidDestinationState VDS
-left join tblTFOriginDestinationState ODS ON ODS.intOriginDestinationStateId= VDS.intOriginDestinationStateId
-left join tblTFReportingComponent RC ON RC.intReportingComponentId = VDS.intReportingComponentId
-where RC.intTaxAuthorityId =
+	+ CASE WHEN RCDS.strType IS NULL THEN ', strStatus = NULL' ELSE ', strStatus = ''' + RCDS.strType + ''''  END
+from tblTFReportingComponentDestinationState RCDS
+left join tblTFOriginDestinationState ODS ON ODS.intOriginDestinationStateId= RCDS.intOriginDestinationStateId
+left join tblTFReportingComponent RC ON RC.intReportingComponentId = RCDS.intReportingComponentId
+where RC.intTaxAuthorityId = @TaxAuthorityId
 */
 DECLARE @ValidProductCodes AS TFValidProductCodes
 DECLARE @ValidOriginStates AS TFValidOriginStates
@@ -460,1058 +460,1057 @@ INSERT INTO @ValidProductCodes(
 	, strFormCode
 	, strScheduleCode
 	, strType
-	, strFilter
 )
 -- Insert generated script here. Remove first instance of "UNION ALL "
-SELECT intValidProductCodeId = 1, strProductCode = 'B00', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 2, strProductCode = 'B11', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 3, strProductCode = 'D00', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 4, strProductCode = 'D11', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 5, strProductCode = '226', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 6, strProductCode = '227', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 7, strProductCode = '231', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 8, strProductCode = '232', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 9, strProductCode = '153', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 10, strProductCode = '161', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 11, strProductCode = '167', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 12, strProductCode = '154', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 13, strProductCode = '282', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 14, strProductCode = '283', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 15, strProductCode = '224', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 16, strProductCode = '225', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 17, strProductCode = '285', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 52, strProductCode = 'B00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 53, strProductCode = 'B11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 54, strProductCode = 'D00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 55, strProductCode = 'D11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 56, strProductCode = '226', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 57, strProductCode = '227', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 58, strProductCode = '231', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 59, strProductCode = '232', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 60, strProductCode = '153', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 61, strProductCode = '161', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 62, strProductCode = '167', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 63, strProductCode = '154', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 64, strProductCode = '282', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 65, strProductCode = '283', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 66, strProductCode = '224', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 67, strProductCode = '225', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 68, strProductCode = '285', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 69, strProductCode = 'B00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 70, strProductCode = 'B11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 71, strProductCode = 'D00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 72, strProductCode = 'D11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 73, strProductCode = '226', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 74, strProductCode = '227', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 75, strProductCode = '231', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 76, strProductCode = '232', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 77, strProductCode = '153', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 78, strProductCode = '161', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 79, strProductCode = '167', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 80, strProductCode = '154', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 81, strProductCode = '282', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 82, strProductCode = '283', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 83, strProductCode = '224', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 84, strProductCode = '225', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 85, strProductCode = '285', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 86, strProductCode = 'E00', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 87, strProductCode = 'E11', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 88, strProductCode = 'M00', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 89, strProductCode = 'M11', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 90, strProductCode = '125', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 91, strProductCode = '065', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 92, strProductCode = '061', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 93, strProductCode = '090', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 94, strProductCode = '248', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 95, strProductCode = '198', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 96, strProductCode = '249', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 97, strProductCode = '052', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 98, strProductCode = '196', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 99, strProductCode = '058', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 100, strProductCode = '265', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 101, strProductCode = '126', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 102, strProductCode = '059', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 103, strProductCode = '075', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 104, strProductCode = '223', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 105, strProductCode = '121', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 106, strProductCode = '199', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 107, strProductCode = '091', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 108, strProductCode = '076', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 109, strProductCode = '150', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 110, strProductCode = '130', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 111, strProductCode = '145', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 112, strProductCode = '146', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 113, strProductCode = '147', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 114, strProductCode = '148', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 115, strProductCode = '074', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 116, strProductCode = '073', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 117, strProductCode = '100', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 118, strProductCode = '101', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 119, strProductCode = '092', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 120, strProductCode = '093', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 121, strProductCode = 'E00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 122, strProductCode = 'E11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 123, strProductCode = 'M00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 124, strProductCode = 'M11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 125, strProductCode = '125', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 126, strProductCode = '065', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 127, strProductCode = '061', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 128, strProductCode = 'E00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 129, strProductCode = 'E11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 130, strProductCode = 'M00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 131, strProductCode = 'M11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 132, strProductCode = '125', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 133, strProductCode = '065', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 134, strProductCode = '061', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 135, strProductCode = '090', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 136, strProductCode = '248', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 137, strProductCode = '198', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 138, strProductCode = '249', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 139, strProductCode = '052', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 140, strProductCode = '196', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 141, strProductCode = '058', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 142, strProductCode = '265', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 143, strProductCode = '126', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 144, strProductCode = '059', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 145, strProductCode = '075', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 146, strProductCode = '223', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 147, strProductCode = '121', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 148, strProductCode = '199', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 149, strProductCode = '091', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 150, strProductCode = '076', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 151, strProductCode = '150', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 152, strProductCode = '130', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 153, strProductCode = '145', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 154, strProductCode = '146', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 155, strProductCode = '147', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 156, strProductCode = '148', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 157, strProductCode = '074', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 158, strProductCode = '073', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 159, strProductCode = '100', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 160, strProductCode = '101', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 161, strProductCode = '092', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 162, strProductCode = '093', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 163, strProductCode = '090', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 164, strProductCode = '248', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 165, strProductCode = '198', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 166, strProductCode = '249', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 167, strProductCode = '052', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 168, strProductCode = '196', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 169, strProductCode = '058', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 170, strProductCode = '265', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 171, strProductCode = '126', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 172, strProductCode = '059', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 173, strProductCode = '075', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 174, strProductCode = '223', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 175, strProductCode = '121', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 176, strProductCode = '199', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 177, strProductCode = '091', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 178, strProductCode = '076', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 179, strProductCode = '150', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 180, strProductCode = '130', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 181, strProductCode = '145', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 182, strProductCode = '146', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 183, strProductCode = '147', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 184, strProductCode = '148', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 185, strProductCode = '074', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 186, strProductCode = '073', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 187, strProductCode = '100', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 188, strProductCode = '101', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 189, strProductCode = '092', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 190, strProductCode = '093', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 191, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 192, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 193, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 194, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 195, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 196, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 197, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 198, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 199, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 200, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 201, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 202, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 203, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 204, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 205, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 206, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 207, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 208, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 209, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 210, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 211, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 212, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 213, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 214, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 215, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 216, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 217, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 218, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 219, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 220, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 221, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 222, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 223, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 224, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 225, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 226, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 227, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 228, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 229, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 230, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 231, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 232, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 233, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 234, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 235, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 236, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 237, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 238, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 239, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 240, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 241, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 242, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 243, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 244, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 245, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 246, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 247, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 248, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 249, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 250, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 251, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 252, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 253, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 254, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 255, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 256, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 257, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 258, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 259, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 260, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 261, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 262, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 263, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 264, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 265, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 266, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 267, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 268, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 269, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 270, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 271, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 272, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 273, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 274, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 275, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 276, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 277, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 278, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 279, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 280, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 281, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 282, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 283, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 284, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 285, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 286, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 287, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 288, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 289, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 290, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 291, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 292, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 293, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 294, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 295, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 296, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 297, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 298, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 299, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 300, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 301, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 302, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 303, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 304, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 305, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 306, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 307, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 308, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 309, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 310, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 311, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 312, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 313, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 314, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 315, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 316, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 317, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 318, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 319, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 320, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 321, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 322, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 323, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 324, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 325, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 334, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 335, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 336, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 337, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 338, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 339, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 340, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 341, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 342, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 343, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 344, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 345, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 346, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 347, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 348, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 349, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 350, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 351, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 352, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 353, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 354, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 355, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 356, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 357, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 358, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 359, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 360, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 361, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 362, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 363, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 364, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 365, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 366, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 367, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 368, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 369, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 370, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 371, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 372, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 373, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 374, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 375, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 376, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 377, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 378, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 379, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 380, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 381, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 382, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 383, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 384, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 385, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 386, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 387, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 388, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 389, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 390, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 391, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 392, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 393, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 394, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 395, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 396, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 397, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 398, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 399, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 400, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 401, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 402, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 403, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 404, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 405, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 406, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 407, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 408, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 409, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 410, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 411, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 412, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 413, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 414, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 415, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 416, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 417, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 418, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 419, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 420, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 421, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 422, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 423, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 424, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 425, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 426, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 427, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 428, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 429, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 430, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 431, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 432, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 433, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 434, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 435, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 436, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 437, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 438, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 439, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 440, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 441, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 442, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 443, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 444, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 445, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 446, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 447, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 448, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 449, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 450, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 451, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 452, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 453, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 454, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 455, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 456, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 457, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 458, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 459, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 460, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 461, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 462, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 463, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 464, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 465, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 466, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 467, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 468, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 469, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 470, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 471, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 472, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 473, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 474, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 475, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 476, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 477, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 478, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 479, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 480, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 481, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 482, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 483, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 484, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 485, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 486, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 487, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 488, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 489, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 490, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 491, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 492, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 493, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 494, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 495, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 496, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 497, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 498, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 499, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 500, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 501, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 502, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 503, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 504, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 505, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 506, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 507, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 508, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 509, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 510, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 511, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 512, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 513, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 514, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 515, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 516, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 517, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 518, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 519, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 520, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 521, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 522, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 523, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 524, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 525, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 526, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 527, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 528, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 529, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 530, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 531, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 532, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 533, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 534, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 535, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 536, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 537, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 538, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 539, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 540, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 541, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 542, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 543, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 544, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 545, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 546, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 547, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 548, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 549, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 550, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 551, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 552, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 553, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 554, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 555, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 556, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 557, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 558, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 559, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 560, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 561, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 562, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 563, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 564, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 572, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 573, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 574, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 575, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 576, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 577, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 578, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 579, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 580, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 581, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 582, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 583, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 584, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 585, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 586, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 587, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 588, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 589, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 590, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 591, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 592, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 593, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 594, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 595, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 596, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 597, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 598, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 599, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 600, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 601, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 602, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 603, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 604, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 605, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 606, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 607, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 608, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 609, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 610, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 611, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 612, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 613, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 614, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 615, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 616, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 617, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 618, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 619, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 620, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 621, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 622, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 623, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 624, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 625, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 626, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 627, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 628, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 629, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 630, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 631, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 632, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 633, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 634, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 635, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 636, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 637, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 638, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 639, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 640, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 641, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 642, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 643, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 644, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 645, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 646, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 647, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 648, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 649, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 650, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 651, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 652, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 653, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 654, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 655, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 656, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 657, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 658, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 659, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 660, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 661, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 662, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 663, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 664, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 665, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 666, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 667, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 675, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 676, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 677, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 678, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 679, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 680, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 681, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 682, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 683, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 684, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 685, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 686, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 687, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 688, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 689, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 690, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 691, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 692, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 693, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 694, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 695, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 696, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 697, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 698, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 699, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 700, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 701, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 702, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 703, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 704, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 705, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 706, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 707, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 708, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 709, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 710, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 711, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 712, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 713, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 714, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 715, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 716, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 717, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 718, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 719, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 720, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 721, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 722, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 723, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 724, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 725, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 726, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 727, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 728, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 729, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 730, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 731, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 732, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 733, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 734, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 735, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 736, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 737, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 738, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 739, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 740, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 741, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 742, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 743, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 744, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 745, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 746, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 747, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 748, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 749, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 750, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 751, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 752, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 753, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 754, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 755, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 756, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 757, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 758, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 759, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 760, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 761, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 762, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 763, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 764, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 765, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 766, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 767, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 768, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 769, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 770, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 771, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 772, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 773, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 774, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 775, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 776, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 777, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 778, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 779, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 780, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 781, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 782, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 783, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 784, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 785, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 786, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 787, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 788, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 789, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 790, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 791, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 792, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 793, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 794, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 795, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 796, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 797, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 798, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 799, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 800, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 801, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 802, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 803, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 804, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 805, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 806, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 807, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 808, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 809, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 810, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 811, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 812, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 813, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 814, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 815, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 816, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 817, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 818, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 819, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 820, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 821, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 822, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 823, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 824, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 825, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 826, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 827, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 828, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 829, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 830, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 831, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 832, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 833, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 834, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 835, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 836, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 837, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 838, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 839, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 840, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 841, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 842, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 843, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 844, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 845, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 846, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 847, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 848, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 849, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 850, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 851, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 852, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 853, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 854, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 855, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 856, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 857, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 858, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 859, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 860, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 861, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 862, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 863, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 864, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 865, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 866, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 873, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 874, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 875, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 876, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 879, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 880, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 881, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 882, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 883, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 886, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 887, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 888, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 889, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 890, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 891, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 902, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 903, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 904, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 905, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 906, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 907, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 908, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 909, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 910, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 911, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 912, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 913, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 914, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 915, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 916, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 917, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 918, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 919, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 920, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 921, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 922, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 923, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 924, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 925, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 926, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 927, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 928, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 929, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 930, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 931, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 932, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 933, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 934, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 935, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 936, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 937, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 938, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 939, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 940, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 941, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 942, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 943, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 944, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 945, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 946, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 947, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 948, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 949, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 950, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 951, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 952, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 953, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 954, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 955, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 956, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 957, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 958, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 959, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 960, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 961, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 962, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 963, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 964, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 965, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 966, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 967, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 968, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 969, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 970, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 971, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 972, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 973, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 974, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 975, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 976, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 977, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 978, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 979, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 980, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 981, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 982, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 983, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 984, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 985, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 986, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 987, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 988, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 989, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 990, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 991, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 992, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 993, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 994, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 995, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 996, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 997, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 998, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 999, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1000, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1001, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1002, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1003, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1004, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1005, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1006, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1007, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1008, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1009, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1010, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1011, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1012, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1013, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1014, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1015, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1016, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1017, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1018, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1019, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1020, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1021, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1022, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1023, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1024, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1025, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1026, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1027, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1028, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1029, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1030, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1031, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1032, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1033, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1034, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1035, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1036, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1037, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1038, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1039, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1040, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1041, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1042, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1043, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1044, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1045, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1046, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1047, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1048, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1049, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1050, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1051, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1052, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1053, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1054, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1055, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1056, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1057, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1058, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1059, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1060, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1061, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1062, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1063, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1064, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1065, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1066, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1067, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1068, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1069, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1070, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1071, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1072, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1073, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1074, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1075, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1076, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1077, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1078, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1079, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1080, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1081, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1082, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1083, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1084, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1085, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1086, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1087, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1088, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1089, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1090, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1091, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1092, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strFilter = NULL
-UNION ALL SELECT intValidProductCodeId = 1093, strProductCode = '061', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1094, strProductCode = '065', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1095, strProductCode = 'E00', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1096, strProductCode = 'E11', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1097, strProductCode = 'M00', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1098, strProductCode = 'M11', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1099, strProductCode = '061', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1100, strProductCode = '065', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1101, strProductCode = 'E00', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1102, strProductCode = 'E11', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1103, strProductCode = 'M00', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1104, strProductCode = 'M11', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1341, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1342, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1343, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1344, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1345, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1346, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1347, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1348, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1349, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1350, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1351, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1352, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1353, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1354, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1355, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1356, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1357, strProductCode = 'E10', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1358, strProductCode = 'E10', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1359, strProductCode = 'E10', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1360, strProductCode = 'E10', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strFilter = ''
-UNION ALL SELECT intValidProductCodeId = 1361, strProductCode = 'E10', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strFilter = ''
+SELECT intValidProductCodeId = 1, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 2, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 3, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 4, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 5, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 6, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 7, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1166, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 8, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 9, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 10, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 11, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 12, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 13, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 14, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 15, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 16, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 17, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 18, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 19, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 20, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 21, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 22, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 23, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 24, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 25, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 26, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 27, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 28, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 29, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 30, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 31, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 32, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 33, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 34, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 35, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 36, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 37, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 38, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 39, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1168, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 40, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 41, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 42, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 43, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 44, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 45, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 46, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 47, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 48, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 49, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 50, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 51, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 52, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 53, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 54, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 55, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 56, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 57, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 58, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 59, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 60, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 61, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 62, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 63, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 64, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 65, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 66, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 67, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 68, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 69, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 70, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 71, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1169, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 72, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 73, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 74, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 75, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 76, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 77, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 78, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 79, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 80, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 81, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 82, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 83, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 84, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 85, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 86, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 87, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 88, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 89, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 90, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 91, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 92, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 93, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 94, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 95, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 96, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 97, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 98, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 99, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 100, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 101, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 102, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 103, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1170, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 104, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 105, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 106, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 107, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 108, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 109, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 110, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 111, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 112, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 113, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 114, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 115, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 116, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 117, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 118, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 119, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 120, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 121, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 122, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 123, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 124, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 125, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 126, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 127, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 128, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 129, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 130, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 131, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 132, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 133, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 134, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 135, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1171, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 136, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 137, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 138, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 139, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 140, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 141, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 142, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 143, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 144, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 145, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 146, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 147, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 148, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 149, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 150, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 151, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 152, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 153, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 154, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 155, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 156, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 157, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 158, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 159, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 160, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 161, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 162, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 163, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 164, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 165, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 166, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 167, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1172, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 168, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 169, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 170, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 171, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 172, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 173, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 174, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 175, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 176, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 177, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 178, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 179, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 180, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 181, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 182, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 183, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 184, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 185, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 186, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 187, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 188, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 189, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 190, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 191, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 192, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 193, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 194, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 195, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 196, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 197, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 198, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 199, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1173, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 200, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 201, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 202, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 203, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 204, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 205, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 206, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 207, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 208, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 209, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 210, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 211, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 212, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 213, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 214, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 215, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 216, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 217, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 218, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 219, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 220, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 221, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 222, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 223, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 224, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 225, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 226, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 227, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 228, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 229, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 230, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 231, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1174, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 232, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 233, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 234, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 235, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 236, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 237, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 238, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 239, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 240, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 241, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 242, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 243, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 244, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 245, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 246, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 247, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 248, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 249, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 250, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 251, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 252, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 253, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 254, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 255, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 256, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 257, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 258, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 259, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 260, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 261, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 262, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 263, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1175, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 264, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 265, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 266, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 267, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 268, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 269, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 270, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 271, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 272, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 273, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 274, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 275, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 276, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 277, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 278, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 279, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 280, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 281, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 282, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 283, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 284, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 285, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 286, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 287, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 288, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 289, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 290, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 291, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 292, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 293, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 294, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 295, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1176, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 296, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 297, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 298, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 299, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 300, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 301, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 302, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 303, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 304, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 305, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 306, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 307, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 308, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 309, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 310, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 311, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 312, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 313, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 314, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 315, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 316, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 317, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 318, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 319, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 320, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 321, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 322, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 323, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 324, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 325, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 326, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 327, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1180, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 328, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 329, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 330, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 331, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 332, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 333, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 334, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 335, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 336, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 337, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 338, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 339, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 340, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 341, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 342, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 343, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 344, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 345, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 346, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 347, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 348, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 349, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 350, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 351, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 352, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 353, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 354, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 355, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 356, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 357, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 358, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 359, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1181, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 360, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 361, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 362, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 363, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 364, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 365, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 366, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1182, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 367, strProductCode = '065', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 368, strProductCode = '061', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 369, strProductCode = 'M00', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol'
+UNION ALL SELECT intValidProductCodeId = 370, strProductCode = 'M11', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol'
+UNION ALL SELECT intValidProductCodeId = 371, strProductCode = 'E00', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol'
+UNION ALL SELECT intValidProductCodeId = 372, strProductCode = 'E11', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1183, strProductCode = 'E10', strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol'
+UNION ALL SELECT intValidProductCodeId = 373, strProductCode = '065', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 374, strProductCode = '061', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 375, strProductCode = 'M00', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol'
+UNION ALL SELECT intValidProductCodeId = 376, strProductCode = 'M11', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol'
+UNION ALL SELECT intValidProductCodeId = 377, strProductCode = 'E00', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol'
+UNION ALL SELECT intValidProductCodeId = 378, strProductCode = 'E11', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1184, strProductCode = 'E10', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol'
+UNION ALL SELECT intValidProductCodeId = 379, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 380, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 381, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 382, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 383, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 384, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 385, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 386, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 387, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 388, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 389, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 390, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 391, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 392, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 393, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 394, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 395, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 396, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 397, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '1', strType = ''
+UNION ALL SELECT intValidProductCodeId = 398, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 399, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 400, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 401, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 402, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 403, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 404, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 405, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 406, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 407, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 408, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 409, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 410, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 411, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 412, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 413, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 414, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 415, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 416, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '2E', strType = ''
+UNION ALL SELECT intValidProductCodeId = 417, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 418, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 419, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 420, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 421, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 422, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 423, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 424, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 425, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 426, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 427, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 428, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 429, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 430, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 431, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 432, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 433, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 434, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 435, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '2K', strType = ''
+UNION ALL SELECT intValidProductCodeId = 436, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 437, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 438, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 439, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 440, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 441, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 442, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 443, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 444, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 445, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 446, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 447, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 448, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 449, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 450, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 451, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 452, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 453, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 454, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '3', strType = ''
+UNION ALL SELECT intValidProductCodeId = 455, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 456, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 457, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 458, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 459, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 460, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 461, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 462, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 463, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 464, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 465, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 466, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 467, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 468, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 469, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 470, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 471, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 472, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 473, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '5', strType = ''
+UNION ALL SELECT intValidProductCodeId = 474, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 475, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 476, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 477, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 478, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 479, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 480, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 481, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 482, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 483, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 484, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 485, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 486, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 487, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 488, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 489, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 490, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 491, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 492, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '6', strType = ''
+UNION ALL SELECT intValidProductCodeId = 493, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 494, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 495, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 496, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 497, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 498, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 499, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 500, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 501, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 502, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 503, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 504, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 505, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 506, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 507, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 508, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 509, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 510, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 511, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '6X', strType = ''
+UNION ALL SELECT intValidProductCodeId = 512, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 513, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 514, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 515, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 516, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 517, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 518, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 519, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 520, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 521, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 522, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 523, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 524, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 525, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 526, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 527, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 528, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 529, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 530, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7IL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 531, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 532, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 533, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 534, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 535, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 536, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 537, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 538, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 539, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 540, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 541, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 542, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 543, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 544, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 545, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 546, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 547, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 548, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 549, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 550, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 551, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 552, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 553, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 554, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 555, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 556, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 557, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 558, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 559, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 560, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 561, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 562, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 563, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 564, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 565, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 566, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 567, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 568, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = ''
+UNION ALL SELECT intValidProductCodeId = 569, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '8', strType = ''
+UNION ALL SELECT intValidProductCodeId = 570, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '8', strType = ''
+UNION ALL SELECT intValidProductCodeId = 571, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '8', strType = ''
+UNION ALL SELECT intValidProductCodeId = 572, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '8', strType = ''
+UNION ALL SELECT intValidProductCodeId = 573, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '8', strType = ''
+UNION ALL SELECT intValidProductCodeId = 574, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '8', strType = ''
+UNION ALL SELECT intValidProductCodeId = 575, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '8', strType = ''
+UNION ALL SELECT intValidProductCodeId = 576, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '8', strType = ''
+UNION ALL SELECT intValidProductCodeId = 577, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '8', strType = ''
+UNION ALL SELECT intValidProductCodeId = 578, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '8', strType = ''
+UNION ALL SELECT intValidProductCodeId = 579, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '8', strType = ''
+UNION ALL SELECT intValidProductCodeId = 580, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '10', strType = ''
+UNION ALL SELECT intValidProductCodeId = 581, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '10', strType = ''
+UNION ALL SELECT intValidProductCodeId = 582, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '10', strType = ''
+UNION ALL SELECT intValidProductCodeId = 583, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '10', strType = ''
+UNION ALL SELECT intValidProductCodeId = 584, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '10', strType = ''
+UNION ALL SELECT intValidProductCodeId = 585, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '10', strType = ''
+UNION ALL SELECT intValidProductCodeId = 586, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '10', strType = ''
+UNION ALL SELECT intValidProductCodeId = 587, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 588, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 589, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 590, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 591, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 592, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 593, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 594, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 595, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 596, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 597, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 598, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 599, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 600, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 601, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 602, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 603, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 604, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 605, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '11', strType = ''
+UNION ALL SELECT intValidProductCodeId = 606, strProductCode = 'B00', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 607, strProductCode = 'B11', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 608, strProductCode = 'D00', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 609, strProductCode = 'D11', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 610, strProductCode = '226', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 611, strProductCode = '227', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 612, strProductCode = '231', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 613, strProductCode = '232', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 614, strProductCode = '153', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 615, strProductCode = '161', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 616, strProductCode = '167', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 617, strProductCode = '154', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 618, strProductCode = '282', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 619, strProductCode = '283', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 620, strProductCode = '224', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 621, strProductCode = '225', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 622, strProductCode = '285', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 623, strProductCode = 'M00', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 624, strProductCode = 'M11', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 625, strProductCode = '125', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 626, strProductCode = '065', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 627, strProductCode = '061', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 628, strProductCode = 'E00', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 629, strProductCode = 'E11', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 1185, strProductCode = 'E10', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 630, strProductCode = '090', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 631, strProductCode = '248', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 632, strProductCode = '198', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 633, strProductCode = '249', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 634, strProductCode = '052', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 635, strProductCode = '196', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 636, strProductCode = '058', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 637, strProductCode = '265', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 638, strProductCode = '126', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 639, strProductCode = '059', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 640, strProductCode = '075', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 641, strProductCode = '223', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 642, strProductCode = '121', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 643, strProductCode = '199', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 644, strProductCode = '091', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 645, strProductCode = '076', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 646, strProductCode = '150', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 647, strProductCode = '130', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 648, strProductCode = '145', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 649, strProductCode = '146', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 650, strProductCode = '147', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 651, strProductCode = '148', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 652, strProductCode = '073', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 653, strProductCode = '074', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 654, strProductCode = '100', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 655, strProductCode = '101', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 656, strProductCode = '092', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 657, strProductCode = '093', strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 658, strProductCode = 'B00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 659, strProductCode = 'B11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 660, strProductCode = 'D00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 661, strProductCode = 'D11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 662, strProductCode = '226', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 663, strProductCode = '227', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 664, strProductCode = '231', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 665, strProductCode = '232', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 666, strProductCode = '153', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 667, strProductCode = '161', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 668, strProductCode = '167', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 669, strProductCode = '154', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 670, strProductCode = '282', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 671, strProductCode = '283', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 672, strProductCode = '224', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 673, strProductCode = '225', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 674, strProductCode = '285', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 675, strProductCode = 'M00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 676, strProductCode = 'M11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 677, strProductCode = '125', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 678, strProductCode = '065', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 679, strProductCode = '061', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 680, strProductCode = 'E00', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 681, strProductCode = 'E11', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 1186, strProductCode = 'E10', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 682, strProductCode = '090', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 683, strProductCode = '248', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 684, strProductCode = '198', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 685, strProductCode = '249', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 686, strProductCode = '052', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 687, strProductCode = '196', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 688, strProductCode = '058', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 689, strProductCode = '265', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 690, strProductCode = '126', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 691, strProductCode = '059', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 692, strProductCode = '075', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 693, strProductCode = '223', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 694, strProductCode = '121', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 695, strProductCode = '199', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 696, strProductCode = '091', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 697, strProductCode = '076', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 698, strProductCode = '150', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 699, strProductCode = '130', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 700, strProductCode = '145', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 701, strProductCode = '146', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 702, strProductCode = '147', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 703, strProductCode = '148', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 704, strProductCode = '073', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 705, strProductCode = '074', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 706, strProductCode = '100', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 707, strProductCode = '101', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 708, strProductCode = '092', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 709, strProductCode = '093', strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 710, strProductCode = 'B00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 711, strProductCode = 'B11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 712, strProductCode = 'D00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 713, strProductCode = 'D11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 714, strProductCode = '226', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 715, strProductCode = '227', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 716, strProductCode = '231', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 717, strProductCode = '232', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 718, strProductCode = '153', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 719, strProductCode = '161', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 720, strProductCode = '167', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 721, strProductCode = '154', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 722, strProductCode = '282', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 723, strProductCode = '283', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 724, strProductCode = '224', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 725, strProductCode = '225', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 726, strProductCode = '285', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel'
+UNION ALL SELECT intValidProductCodeId = 727, strProductCode = 'M00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 728, strProductCode = 'M11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 729, strProductCode = '125', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 730, strProductCode = '065', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 731, strProductCode = '061', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 732, strProductCode = 'E00', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 733, strProductCode = 'E11', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 1187, strProductCode = 'E10', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline'
+UNION ALL SELECT intValidProductCodeId = 734, strProductCode = '090', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 735, strProductCode = '248', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 736, strProductCode = '198', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 737, strProductCode = '249', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 738, strProductCode = '052', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 739, strProductCode = '196', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 740, strProductCode = '058', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 741, strProductCode = '265', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 742, strProductCode = '126', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 743, strProductCode = '059', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 744, strProductCode = '075', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 745, strProductCode = '223', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 746, strProductCode = '121', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 747, strProductCode = '199', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 748, strProductCode = '091', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 749, strProductCode = '076', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 750, strProductCode = '150', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 751, strProductCode = '130', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 752, strProductCode = '145', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 753, strProductCode = '146', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 754, strProductCode = '147', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 755, strProductCode = '148', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 756, strProductCode = '073', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 757, strProductCode = '074', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 758, strProductCode = '100', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 759, strProductCode = '101', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 760, strProductCode = '092', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 761, strProductCode = '093', strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products'
+UNION ALL SELECT intValidProductCodeId = 762, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 763, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 764, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 765, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 766, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 767, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 768, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1177, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 769, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 770, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 771, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 772, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 773, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 774, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 775, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 776, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 777, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 778, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 779, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 780, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 781, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 782, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 783, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 784, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 785, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 786, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 787, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 788, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 789, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 790, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 791, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 792, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 793, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 794, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 795, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 796, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 797, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 798, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 799, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 800, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1178, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 801, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 802, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 803, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 804, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 805, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 806, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 807, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 808, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 809, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 810, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 811, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 812, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 813, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 814, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 815, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 816, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 817, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 818, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 819, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 820, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 821, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 822, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 823, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 824, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 825, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 826, strProductCode = 'M00', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 827, strProductCode = 'M11', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 828, strProductCode = '125', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 829, strProductCode = '065', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 830, strProductCode = '061', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 831, strProductCode = 'E00', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 832, strProductCode = 'E11', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 1179, strProductCode = 'E10', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol'
+UNION ALL SELECT intValidProductCodeId = 833, strProductCode = '145', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 834, strProductCode = '147', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 835, strProductCode = '073', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 836, strProductCode = '074', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene'
+UNION ALL SELECT intValidProductCodeId = 837, strProductCode = '090', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 838, strProductCode = '248', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 839, strProductCode = '198', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 840, strProductCode = '249', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 841, strProductCode = '052', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 842, strProductCode = '196', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 843, strProductCode = '058', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 844, strProductCode = '265', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 845, strProductCode = '126', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 846, strProductCode = '059', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 847, strProductCode = '075', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 848, strProductCode = '223', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 849, strProductCode = '121', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 850, strProductCode = '199', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 851, strProductCode = '091', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 852, strProductCode = '076', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 853, strProductCode = '231', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 854, strProductCode = '150', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 855, strProductCode = '282', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 856, strProductCode = '152', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 857, strProductCode = '130', strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products'
+UNION ALL SELECT intValidProductCodeId = 858, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 859, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 860, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 861, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 862, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 863, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 864, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 865, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 866, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 867, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 868, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 869, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 870, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 871, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 872, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 873, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 874, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 875, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 876, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7KY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 877, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 878, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 879, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 880, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 881, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 882, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 883, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 884, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 885, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 886, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 887, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 888, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 889, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 890, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 891, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 892, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 893, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 894, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 895, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7MI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 896, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 897, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 898, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 899, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 900, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 901, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 902, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 903, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 904, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 905, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 906, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 907, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 908, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 909, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 910, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 911, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 912, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 913, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 914, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7OH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 915, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 916, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 917, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 918, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 919, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 920, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 921, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 922, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 923, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 924, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 925, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 926, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 927, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 928, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 929, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 930, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 931, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 932, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 933, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 934, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 935, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 936, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 937, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 938, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 939, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 940, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 941, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 942, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 943, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 944, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 945, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 946, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 947, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 948, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 949, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 950, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 951, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 952, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 953, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 954, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 955, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 956, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 957, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 958, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 959, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 960, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 961, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 962, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 963, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 964, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 965, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 966, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 967, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 968, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 969, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 970, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 971, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 972, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 973, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 974, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 975, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 976, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 977, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 978, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 979, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 980, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 981, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 982, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 983, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 984, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 985, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 986, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 987, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 988, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 989, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 990, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = ''
+UNION ALL SELECT intValidProductCodeId = 991, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 992, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 993, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 994, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 995, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 996, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 997, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 998, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 999, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1000, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1001, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1002, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1003, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1004, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1005, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1006, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1007, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1008, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1009, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1010, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1011, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1012, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1013, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1014, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1015, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1016, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1017, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1018, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1019, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1020, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1021, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1022, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1023, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1024, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1025, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1026, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1027, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
+UNION ALL SELECT intValidProductCodeId = 1028, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = ''
 
 INSERT INTO @ValidOriginStates(
 	intValidOriginStateId
@@ -1520,49 +1519,48 @@ INSERT INTO @ValidOriginStates(
 	, strType
 	, strState
 	, strStatus
-	, strFilter
 )
-SELECT intValidOriginStateId = 4, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 5, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 10, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 15, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strState = 'IN', strStatus = '', strFilter = 'Exclude'
-UNION ALL SELECT intValidOriginStateId = 16, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strState = 'IN', strStatus = '', strFilter = 'Exclude'
-UNION ALL SELECT intValidOriginStateId = 18, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 19, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 23, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 25, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'IN', strStatus = '', strFilter = 'Exclude'
-UNION ALL SELECT intValidOriginStateId = 26, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = '', strFilter = 'Exclude'
-UNION ALL SELECT intValidOriginStateId = 27, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = '', strFilter = 'Exclude'
-UNION ALL SELECT intValidOriginStateId = 28, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strState = 'IN', strStatus = '', strFilter = 'Exclude'
-UNION ALL SELECT intValidOriginStateId = 29, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = '', strFilter = 'Exclude'
-UNION ALL SELECT intValidOriginStateId = 30, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = '', strFilter = 'Exclude'
-UNION ALL SELECT intValidOriginStateId = 31, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strState = 'IN', strStatus = '', strFilter = 'Exclude'
-UNION ALL SELECT intValidOriginStateId = 32, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 33, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 34, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 35, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 36, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 37, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 38, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 39, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 40, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 41, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 42, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 43, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 44, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 45, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 46, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 47, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 48, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 49, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 50, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 51, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 52, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 53, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 54, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 55, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
-UNION ALL SELECT intValidOriginStateId = 56, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strState = 'IN', strStatus = '', strFilter = 'Exclude'
-UNION ALL SELECT intValidOriginStateId = 97, strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strState = 'IN', strStatus = '', strFilter = 'Include'
+SELECT intValidOriginStateId = 146, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 147, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 148, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 149, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 150, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 151, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 152, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 153, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 154, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 155, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 156, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 157, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 158, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 159, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 160, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 161, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 162, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 163, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 164, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 165, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 166, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 167, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 168, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 169, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 170, strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 171, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 172, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 173, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 174, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 175, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 176, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidOriginStateId = 177, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Exclude'
+UNION ALL SELECT intValidOriginStateId = 178, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Exclude'
+UNION ALL SELECT intValidOriginStateId = 179, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strState = 'IN', strStatus = 'Exclude'
+UNION ALL SELECT intValidOriginStateId = 180, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Exclude'
+UNION ALL SELECT intValidOriginStateId = 181, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Exclude'
+UNION ALL SELECT intValidOriginStateId = 182, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strState = 'IN', strStatus = 'Exclude'
+UNION ALL SELECT intValidOriginStateId = 183, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strState = 'IN', strStatus = 'Exclude'
+UNION ALL SELECT intValidOriginStateId = 184, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'IN', strStatus = 'Exclude'
+UNION ALL SELECT intValidOriginStateId = 185, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strState = 'IN', strStatus = 'Exclude'
+UNION ALL SELECT intValidOriginStateId = 186, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strState = 'IN', strStatus = 'Exclude'
 
 INSERT INTO @ValidDestinationStates(
 	intValidDestinationStateId
@@ -1572,62 +1570,62 @@ INSERT INTO @ValidDestinationStates(
 	, strState
 	, strStatus
 )
-SELECT intValidDestinationStateId = 5, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strState = 'IN', strStatus = 'Exclude'
-UNION ALL SELECT intValidDestinationStateId = 6, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strState = 'IN', strStatus = 'Exclude'
-UNION ALL SELECT intValidDestinationStateId = 11, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strState = 'IN', strStatus = 'Exclude'
-UNION ALL SELECT intValidDestinationStateId = 15, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 16, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 17, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 19, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 20, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 24, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 25, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 26, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 27, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 28, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 29, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 30, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 31, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'MI', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 32, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strState = 'MI', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 33, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strState = 'MI', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 34, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'KY', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 35, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strState = 'KY', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 36, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strState = 'KY', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 37, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IL', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 38, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strState = 'IL', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 39, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strState = 'IL', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 40, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'OH', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 41, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strState = 'OH', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 42, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strState = 'OH', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 43, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strState = 'IL', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 44, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strState = 'KY', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 45, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strState = 'MI', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 46, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strState = 'OH', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 47, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strState = 'IL', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 48, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strState = 'KY', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 49, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strState = 'MI', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 50, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strState = 'OH', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 51, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strState = 'IL', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 52, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strState = 'KY', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 53, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strState = 'MI', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 54, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strState = 'OH', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 55, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 81, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 82, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 83, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 84, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 85, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 86, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 87, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 88, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 89, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 90, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 91, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 92, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 93, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 94, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 95, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strState = 'IN', strStatus = 'Include'
-UNION ALL SELECT intValidDestinationStateId = 96, strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strState = 'IN', strStatus = 'Include'
+SELECT intValidDestinationStateId = 82, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 83, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 84, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 85, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 86, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 87, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 88, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 89, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 90, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 91, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 92, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 93, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 94, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 95, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 96, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 97, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 98, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 99, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 100, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'MI', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 101, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strState = 'MI', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 102, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strState = 'MI', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 103, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'KY', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 104, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strState = 'KY', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 105, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strState = 'KY', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 106, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'IL', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 107, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strState = 'IL', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 108, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strState = 'IL', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 109, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strState = 'OH', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 110, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strState = 'OH', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 111, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strState = 'OH', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 112, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 113, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 114, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 115, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 116, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strState = 'IL', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 117, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strState = 'KY', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 118, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strState = 'MI', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 119, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strState = 'OH', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 120, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strState = 'IL', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 121, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strState = 'KY', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 122, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strState = 'MI', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 123, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strState = 'OH', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 124, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strState = 'IL', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 125, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strState = 'KY', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 126, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strState = 'MI', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 127, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strState = 'OH', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 128, strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 129, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 130, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 131, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 132, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 133, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 134, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strState = 'IN', strStatus = 'Include'
+UNION ALL SELECT intValidDestinationStateId = 136, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strState = 'IN', strStatus = 'Exclude'
+UNION ALL SELECT intValidDestinationStateId = 137, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strState = 'IN', strStatus = 'Exclude'
+UNION ALL SELECT intValidDestinationStateId = 138, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strState = 'IN', strStatus = 'Exclude'
 
 EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
@@ -1654,7 +1652,7 @@ select 'UNION ALL SELECT intReportTemplateId = ' + CAST(intReportTemplateId AS N
 	+ CASE WHEN intConfigurationSequence IS NULL THEN ', intConfigurationSequence = NULL' ELSE ', intConfigurationSequence = ''' + CAST(intConfigurationSequence AS NVARCHAR(10)) + ''''  END
 from tblTFTaxReportTemplate Config
 left join tblTFReportingComponent RC ON RC.intReportingComponentId = Config.intReportingComponentId
-WHERE RC.intTaxAuthorityId =
+WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 */
 DECLARE @ReportingComponentConfigurations AS TFReportingComponentConfigurations
 
@@ -1741,7 +1739,7 @@ UNION ALL SELECT intReportTemplateId = 99, strFormCode = 'GT-103', strScheduleCo
 UNION ALL SELECT intReportTemplateId = 100, strFormCode = 'GT-103', strScheduleCode = '', strType = '', strTemplateItemId = 'GT-103-Summary-002', strReportSection = 'Gasoline Use Tax', intReportItemSequence = '2', intTemplateItemNumber = '2', strDescription = '2. Total Exempt Gallons Sold for Period', strScheduleList = '2D', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 101, strFormCode = 'GT-103', strScheduleCode = '', strType = '', strTemplateItemId = 'GT-103-Summary-003', strReportSection = 'Gasoline Use Tax', intReportItemSequence = '3', intTemplateItemNumber = '3', strDescription = '3. Total Taxable Gallons Sold (Line 1 minus Line 2)', strScheduleList = '1,2', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 102, strFormCode = 'GT-103', strScheduleCode = '', strType = '', strTemplateItemId = 'GT-103-Summary-004', strReportSection = 'Gasoline Use Tax', intReportItemSequence = '4', intTemplateItemNumber = '4', strDescription = '4. Gasoline Use Tax Due. (Line 3 multiplied by the current rate. See Departmental Notice #2', strScheduleList = '3', strConfiguration = NULL, ysnConfiguration = '1', ysnDynamicConfiguration = '0', strLastIndexOf = '', strSegment = 'Summary', intConfigurationSequence = '9'
-UNION ALL SELECT intReportTemplateId = 103, strFormCode = 'GT-103', strScheduleCode = '', strType = '', strTemplateItemId = 'GT-103-Summary-005', strReportSection = 'Gasoline Use Tax', intReportItemSequence = '5', intTemplateItemNumber = '5', strDescription = '5. Collection Allowance. Do not calculate this allowance if your return and payment are late. Collection allowance rate is 1%', strScheduleList = '0', strConfiguration = NULL, ysnConfiguration = '1', ysnDynamicConfiguration = '1', strLastIndexOf = '', strSegment = 'Summary', intConfigurationSequence = '10'
+UNION ALL SELECT intReportTemplateId = 103, strFormCode = 'GT-103', strScheduleCode = '', strType = '', strTemplateItemId = 'GT-103-Summary-005', strReportSection = 'Gasoline Use Tax', intReportItemSequence = '5', intTemplateItemNumber = '5', strDescription = '5. Collection Allowance. Do not calculate this allowance if your return and payment are late. Collection allowance rate is 1%', strScheduleList = '4', strConfiguration = '0.73', ysnConfiguration = '1', ysnDynamicConfiguration = '1', strLastIndexOf = '', strSegment = 'Summary', intConfigurationSequence = '10'
 UNION ALL SELECT intReportTemplateId = 104, strFormCode = 'GT-103', strScheduleCode = '', strType = '', strTemplateItemId = 'GT-103-Summary-006', strReportSection = 'Gasoline Use Tax', intReportItemSequence = '6', intTemplateItemNumber = '6', strDescription = '6. Net Gasoline Use Tax Due. Subtotal of use tax and collection allowance. (Line 4 minus Line 5)', strScheduleList = '4,5', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Summary', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 105, strFormCode = 'GT-103', strScheduleCode = '', strType = '', strTemplateItemId = 'GT-103-Summary-007', strReportSection = 'Gasoline Use Tax', intReportItemSequence = '7', intTemplateItemNumber = '7', strDescription = '7. Penalty Due. If late, the penalty is 10% of the tax due on Line 6 or $5, whichever is greater.', strScheduleList = '6', strConfiguration = NULL, ysnConfiguration = '1', ysnDynamicConfiguration = '1', strLastIndexOf = '', strSegment = 'Summary', intConfigurationSequence = '20'
 UNION ALL SELECT intReportTemplateId = 106, strFormCode = 'GT-103', strScheduleCode = '', strType = '', strTemplateItemId = 'GT-103-Summary-008', strReportSection = 'Gasoline Use Tax', intReportItemSequence = '8', intTemplateItemNumber = '8', strDescription = '8. Interest Due. If late, multiply Line 6 by the interest rate (see Departmental Notice #)', strScheduleList = '6', strConfiguration = NULL, ysnConfiguration = '1', ysnDynamicConfiguration = '1', strLastIndexOf = '', strSegment = 'Summary', intConfigurationSequence = '30'
@@ -1776,7 +1774,7 @@ UNION ALL SELECT intReportTemplateId = 77, strFormCode = 'SF-900', strScheduleCo
 UNION ALL SELECT intReportTemplateId = 78, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-027', strReportSection = 'Section A: Receipts', intReportItemSequence = '6', intTemplateItemNumber = '6', strDescription = '5. Total Receipts (Add Lines 1 through 4, carry forward to Section 2, Line 1 on', strScheduleList = '1,2E,2K,3', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 80, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-029', strReportSection = 'Section B: Disbursement', intReportItemSequence = '2', intTemplateItemNumber = '8', strDescription = '1. Gallons Delivered Tax Collected and Gallons Blended or Dyed Fuel Used', strScheduleList = '5', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 81, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-030', strReportSection = 'Section B: Disbursement', intReportItemSequence = '3', intTemplateItemNumber = '9', strDescription = '2. Diversions (Special fuel only)', strScheduleList = '11', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
-UNION ALL SELECT intReportTemplateId = 82, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-031', strReportSection = 'Section B: Disbursement', intReportItemSequence = '4', intTemplateItemNumber = '10', strDescription = '3. Taxable Gallons Sold or Used (Carry forward to Section 2, Line 3 on front', strScheduleList = '8,9', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
+UNION ALL SELECT intReportTemplateId = 82, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-031', strReportSection = 'Section B: Disbursement', intReportItemSequence = '4', intTemplateItemNumber = '10', strDescription = '3. Taxable Gallons Sold or Used (Carry forward to Section 2, Line 3 on front of return)', strScheduleList = '8,9', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 83, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-032', strReportSection = 'Section B: Disbursement', intReportItemSequence = '5', intTemplateItemNumber = '11', strDescription = '4. Gallons Delivered Via Rail, Pipeline, or Vessel to Licensed Suppliers, Tax Not Collected', strScheduleList = '6', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 84, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-033', strReportSection = 'Section B: Disbursement', intReportItemSequence = '6', intTemplateItemNumber = '12', strDescription = '5. Gallons Disbursed on Exchange for Other Suppliers or Permissive Suppliers', strScheduleList = '6X', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 85, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-034', strReportSection = 'Section B: Disbursement', intReportItemSequence = '7', intTemplateItemNumber = '13', strDescription = '6. Gallons Exported by License Holder', strScheduleList = '7', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
@@ -1784,7 +1782,7 @@ UNION ALL SELECT intReportTemplateId = 86, strFormCode = 'SF-900', strScheduleCo
 UNION ALL SELECT intReportTemplateId = 87, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-036', strReportSection = 'Section B: Disbursement', intReportItemSequence = '9', intTemplateItemNumber = '15', strDescription = '8. Gallons Sold to Licensed Exporters for Export', strScheduleList = '7B', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 88, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-037', strReportSection = 'Section B: Disbursement', intReportItemSequence = '10', intTemplateItemNumber = '16', strDescription = '9. Gallons of Undyed Fuel Sold to the U.S. Government - Tax Exempt', strScheduleList = '8', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 89, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-038', strReportSection = 'Section B: Disbursement', intReportItemSequence = '11', intTemplateItemNumber = '17', strDescription = '10. Gallons Sold of Tax Exempt Dyed Fuel', strScheduleList = '10', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
-UNION ALL SELECT intReportTemplateId = 90, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-039', strReportSection = 'Section B: Disbursement', intReportItemSequence = '12', intTemplateItemNumber = '18', strDescription = '11. Total Non-Taxable Disbursements (Add Lines 4 through 10; carry forward to Section 2, Line 2 on front of return', strScheduleList = '6,6X,7,7A,7B,8,10', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
+UNION ALL SELECT intReportTemplateId = 90, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-039', strReportSection = 'Section B: Disbursement', intReportItemSequence = '12', intTemplateItemNumber = '18', strDescription = '11. Total Non-Taxable Disbursements (Add Lines 4 through 10; carry forward to Section 2, Line 2 on front of return)', strScheduleList = '6,6X,7,7A,7B,8,10', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 97, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'LicenseHolderName', strReportSection = 'HEADER', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Name of License Holder', strScheduleList = NULL, strConfiguration = NULL, ysnConfiguration = '1', ysnDynamicConfiguration = '0', strLastIndexOf = '', strSegment = 'HEADER', intConfigurationSequence = '1'
 UNION ALL SELECT intReportTemplateId = 171, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-FilingType-001', strReportSection = '1', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Filing Type', strScheduleList = '', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Filing Type', intConfigurationSequence = NULL
 UNION ALL SELECT intReportTemplateId = 172, strFormCode = 'SF-900', strScheduleCode = '', strType = '', strTemplateItemId = 'SF-900-Summary-022', strReportSection = 'Section A: Receipts', intReportItemSequence = '1', intTemplateItemNumber = '1', strDescription = 'Section A:    Receipts', strScheduleList = '0', strConfiguration = NULL, ysnConfiguration = '0', ysnDynamicConfiguration = '0', strLastIndexOf = NULL, strSegment = 'Details', intConfigurationSequence = NULL
@@ -1838,7 +1836,7 @@ EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthor
 
 -- Reporting Component - Output Designer
 /* Generate script for Reporting Component - Output Designer. Specify Tax Authority Id to filter out specific Reporting Component - Output Designer only.
-select 'UNION ALL SELECT intScheduleColumnId = ' + CAST(intScheduleColumnId AS NVARCHAR(10))
+select 'UNION ALL SELECT intScheduleColumnId = ' + CAST(intReportingComponentFieldId AS NVARCHAR(10))
 	+ CASE WHEN strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + strFormCode + ''''  END
 	+ CASE WHEN strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + strScheduleCode + ''''  END
 	+ CASE WHEN strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + strType + '''' END
@@ -1847,9 +1845,9 @@ select 'UNION ALL SELECT intScheduleColumnId = ' + CAST(intScheduleColumnId AS N
 	+ CASE WHEN strFormat IS NULL THEN ', strFormat = NULL' ELSE ', strFormat = ''' + strFormat + '''' END
 	+ CASE WHEN strFooter IS NULL THEN ', strFooter = NULL' ELSE ', strFooter = ''' + strFooter + '''' END
 	+ CASE WHEN intWidth IS NULL THEN ', intWidth = NULL' ELSE ', intWidth = ' + CAST(intWidth AS NVARCHAR(10)) END
-from tblTFScheduleFields TRP
-left join tblTFReportingComponent RC on RC.intReportingComponentId = TRP.intReportingComponentId
-where RC.intTaxAuthorityId =
+from tblTFReportingComponentField RCF
+left join tblTFReportingComponent RC on RC.intReportingComponentId = RCF.intReportingComponentId
+where RC.intTaxAuthorityId = @TaxAuthorityId
 */
 
 DECLARE @ReportingComponentOutputDesigners AS TFReportingComponentOutputDesigners
@@ -1879,1030 +1877,1030 @@ UNION ALL SELECT intScheduleColumnId = 10, strFormCode = 'MF-360', strScheduleCo
 UNION ALL SELECT intScheduleColumnId = 11, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
 UNION ALL SELECT intScheduleColumnId = 12, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
 UNION ALL SELECT intScheduleColumnId = 13, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1262, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1263, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1264, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1265, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1266, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1267, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1268, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1269, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1270, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1271, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1272, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1273, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1274, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1275, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1276, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1277, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1278, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1279, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1280, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1281, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1282, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1283, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1284, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1285, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1286, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1287, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1288, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1289, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1290, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1291, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1292, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1293, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1294, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1295, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1296, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1297, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1298, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1299, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1300, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1301, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1302, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1303, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1304, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1305, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1306, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1307, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1308, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1309, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1310, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1311, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1312, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1313, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1314, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1315, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1316, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1317, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1318, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1319, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1320, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1321, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1322, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1323, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1324, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1325, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1326, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1327, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1328, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1329, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1330, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1331, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1332, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1333, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1334, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1335, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1336, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1337, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1338, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1339, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1340, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1341, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1342, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1343, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1344, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1345, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1346, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1347, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1348, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1349, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1350, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1351, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1352, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1353, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1354, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1355, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1356, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1357, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1358, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1359, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1360, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1361, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1362, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1363, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1364, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1365, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1366, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1367, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1368, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1369, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1370, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1371, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1372, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1373, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1374, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1375, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1376, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1377, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1378, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1379, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1380, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1381, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1382, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1383, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1384, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1385, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1386, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1387, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1388, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1389, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1390, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1391, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1392, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1393, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1394, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1395, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1396, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1397, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1398, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1399, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1400, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1401, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1402, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1403, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1404, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1405, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1406, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1407, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1408, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1409, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1410, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1411, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1412, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1413, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1414, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1415, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1416, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1417, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1418, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1419, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1420, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1421, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1422, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1423, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1424, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1425, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1426, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1427, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1428, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1429, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1430, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1431, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1432, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1433, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1434, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1435, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1436, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1437, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1438, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1439, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1440, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1441, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1442, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1443, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1444, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1445, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1446, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1447, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1448, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1449, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1450, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1451, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1452, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1453, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1454, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1455, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1456, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1457, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1458, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1459, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1460, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1461, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1462, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1463, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1464, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1465, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1466, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1467, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1468, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1469, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1470, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1471, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1472, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1473, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1474, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1475, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1476, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1477, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1478, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1479, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1480, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1481, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1482, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9208, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9213, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9214, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9215, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9216, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9217, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9218, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9219, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9220, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9221, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9222, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9223, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9224, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9225, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9226, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9227, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9228, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9229, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9230, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9231, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9232, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9233, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9234, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9235, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9236, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9237, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9238, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9239, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9240, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9241, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9242, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9243, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9244, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9245, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9246, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9247, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9248, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9249, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9250, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9251, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9252, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9253, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9254, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9255, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9256, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9257, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9258, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9259, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9260, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9261, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9262, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9263, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9264, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9265, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9266, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9267, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9268, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9269, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9270, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9271, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9272, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9273, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9274, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9275, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9276, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9277, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9278, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9279, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9280, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9281, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9282, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9283, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9284, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9285, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9286, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9287, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9288, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9289, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9290, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9291, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9292, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9293, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9294, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9295, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9296, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9297, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9298, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9299, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9300, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9301, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9302, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9303, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9304, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9305, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9306, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9307, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9308, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9309, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9310, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9311, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9312, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9313, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9314, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9315, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9316, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9317, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9318, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9319, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9320, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9321, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9322, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9323, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9324, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9325, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9326, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9327, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9328, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9329, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9330, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9331, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9332, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9333, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9334, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9335, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9336, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9337, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9338, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9339, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9340, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9341, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9342, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9343, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9344, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9345, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9346, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9347, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9348, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9349, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9350, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9351, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9352, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9353, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9354, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9355, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9356, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9357, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9358, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9359, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9360, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9361, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9362, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9363, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9364, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9365, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9366, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9367, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9368, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9369, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9370, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9371, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9372, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9373, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9374, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9375, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9376, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9377, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9378, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9379, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9380, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9381, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9382, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9383, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9384, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9385, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9386, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9387, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9388, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9389, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9390, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9391, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9392, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9393, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9394, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9395, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9396, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9397, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9398, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9399, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9400, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9401, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9402, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9403, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9404, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9405, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9406, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9407, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9408, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9409, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9410, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9411, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9412, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9413, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9414, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9415, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9416, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9417, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9418, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9419, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9420, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9421, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9422, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9423, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9424, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9425, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9426, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9427, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9428, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9429, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9430, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9431, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9432, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9433, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9434, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9435, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9464, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9465, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9466, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9467, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9468, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9469, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9470, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9471, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9472, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9473, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9474, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9475, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9476, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9477, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9959, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9960, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strVendorName', strCaption = 'Supplier Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9961, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9962, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9963, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strVendorFederalTaxId', strCaption = 'Supplier FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9964, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strVendorLicenseNumber', strCaption = 'Indiana TID', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9965, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Total Gals Purchased', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9966, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'dblTax', strCaption = 'GUT Paid to Supplier', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10343, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10344, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strVendorName', strCaption = 'Supplier Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10345, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10346, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10347, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Supplier FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10348, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strVendorLicenseNumber', strCaption = 'Indiana TID', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10349, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'dblGross', strCaption = 'Total Gals Purchased', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10350, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'dblTax', strCaption = 'GUT Paid to Supplier', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10351, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10352, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10353, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10354, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10355, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10357, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'dblQtyShipped', strCaption = 'Total Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10358, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Exempt Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 11401, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'dblTax', strCaption = 'GUT Collected', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10359, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10360, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10361, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10362, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10363, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10364, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dblQtyShipped', strCaption = 'Total Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10365, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dblGross', strCaption = 'Exempt Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 10366, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dblTax', strCaption = 'GUT Collected', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1483, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1484, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1485, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1486, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1487, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1488, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1489, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1490, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1491, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1492, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1493, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1494, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1495, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1496, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1497, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1498, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1499, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1500, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1501, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1502, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1503, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1504, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1505, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1506, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1507, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1508, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1509, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1510, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1511, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1512, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1513, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1514, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1515, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1516, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1517, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1518, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1519, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1520, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1521, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1522, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1523, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1524, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1525, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1526, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1527, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1528, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1529, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1530, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1531, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1532, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1533, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 1534, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9478, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9479, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9480, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9481, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9482, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9483, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9484, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9485, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9486, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9487, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9488, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9489, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9490, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9491, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9492, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9493, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9494, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9495, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9496, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9497, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9498, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9499, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9500, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9501, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9502, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9503, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9504, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9505, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9506, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9507, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9508, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9509, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9510, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9511, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9512, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9513, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9514, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9515, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9516, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9517, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9518, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9519, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9520, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9521, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9522, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9523, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9524, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9525, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9526, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9527, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9528, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9529, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9530, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9531, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9532, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9533, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9534, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9535, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9536, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9537, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9538, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9539, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9540, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9541, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9542, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9543, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9544, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9545, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9546, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9547, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9548, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9549, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9550, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9551, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9552, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9553, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9554, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9555, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9556, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9557, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9558, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9559, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9560, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9561, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9562, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9563, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9564, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9565, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9566, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9567, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9568, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9569, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9570, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9571, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9572, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9573, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9574, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9575, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9576, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9577, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9578, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9579, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9580, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9581, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9582, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9583, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9584, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9585, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9586, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9587, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9588, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9589, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9833, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9834, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9835, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9836, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9837, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9838, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9839, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9840, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9841, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9842, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9843, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9844, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9845, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9846, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9847, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9848, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9849, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9850, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9851, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9852, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9853, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9854, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9855, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9856, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9857, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9858, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9859, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9860, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9861, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9862, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9863, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9864, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9865, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9866, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9867, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9868, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9869, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9870, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9871, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9872, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9873, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9874, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9875, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9876, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9877, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9878, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9879, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9880, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9881, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9882, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9883, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9884, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9885, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9886, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9887, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9888, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9889, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9890, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9891, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9892, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9893, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9894, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9895, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9896, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9897, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9898, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9899, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9900, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9901, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9902, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9903, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9904, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9905, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9906, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9907, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9908, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9909, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9910, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9911, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9912, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9913, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9914, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9915, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9916, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9917, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9918, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9919, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9920, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9921, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9922, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9923, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9924, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9925, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9926, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9927, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9928, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9929, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9930, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9931, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9932, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9933, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9934, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9935, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9936, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9937, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9938, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9939, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9940, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9941, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9942, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9943, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9944, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9945, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9946, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9947, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9948, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9949, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9950, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9951, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9952, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9953, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9954, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9955, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9956, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9957, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9958, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9590, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9591, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9592, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9593, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9594, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9595, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9596, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9597, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9598, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9599, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9600, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9601, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9602, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9603, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9604, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9605, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9606, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9607, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9608, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9609, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9610, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9611, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9612, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9613, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9614, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9615, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9616, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9617, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9618, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9619, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9620, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9621, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9622, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9623, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9624, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9625, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9626, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9627, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9628, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9629, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9630, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9631, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9632, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9633, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9634, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9635, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9636, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9637, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9638, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9639, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9640, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9641, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9642, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9643, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9644, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9645, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9646, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9647, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9648, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9649, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9650, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9651, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9652, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9653, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9654, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9655, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9656, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9657, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9658, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9659, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9660, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9661, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9662, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9663, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9664, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9665, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9666, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9667, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9668, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9669, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9670, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9671, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9672, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9673, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9674, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9675, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9676, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9677, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9678, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9679, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9680, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9681, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9682, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9683, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9684, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9685, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9686, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9687, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9688, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9689, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9690, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9691, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9692, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9693, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9694, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9695, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9696, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9697, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9698, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9699, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9700, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9701, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9702, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9703, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9704, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9705, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9706, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9707, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9708, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9709, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9710, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9711, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9712, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strInvoiceNumber', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9713, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9714, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9715, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9716, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9717, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9718, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9719, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9720, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9721, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9722, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9723, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9724, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9725, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9726, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9727, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9728, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9729, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9730, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9731, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9732, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9733, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9734, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9735, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9736, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9737, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9738, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9739, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9740, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9741, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9742, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9743, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9744, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9745, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9746, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9747, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9748, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9749, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9750, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9751, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9752, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9753, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9754, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9755, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9756, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9757, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9758, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9759, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9760, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9761, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9762, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9763, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9764, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9765, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9766, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9767, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9768, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9769, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9770, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9771, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9772, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9773, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9774, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9775, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9776, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9777, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9778, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9779, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9780, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9781, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9782, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9783, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9784, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9785, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9786, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9787, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9788, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9789, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9790, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9791, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9792, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9793, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9794, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9795, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9796, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9797, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9798, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9799, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9800, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9801, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9802, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9803, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9804, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9805, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9806, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9807, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9808, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9809, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9810, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9811, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9812, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9813, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9814, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9815, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9816, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9817, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9818, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9819, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9820, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9821, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9822, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9823, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9824, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9825, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9826, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9827, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9828, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9829, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9830, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9831, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
-UNION ALL SELECT intScheduleColumnId = 9832, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 14, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 15, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 16, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 17, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 18, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 19, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 20, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 21, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 22, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 23, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 24, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 25, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 26, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 27, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 28, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 29, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 30, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 31, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 32, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 33, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 34, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 35, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 36, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 37, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 38, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 39, strFormCode = 'MF-360', strScheduleCode = '1A', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 40, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 41, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 42, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 43, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 44, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 45, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 46, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 47, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 48, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 49, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 50, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 51, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 52, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 53, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 54, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 55, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 56, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 57, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 58, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 59, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 60, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 61, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 62, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 63, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 64, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 65, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 66, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 67, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 68, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 69, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 70, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 71, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 72, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 73, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 74, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 75, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 76, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 77, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 78, strFormCode = 'MF-360', strScheduleCode = '2', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 79, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 80, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 81, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 82, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 83, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 84, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 85, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 86, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 87, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 88, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 89, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 90, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 91, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 92, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 93, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 94, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 95, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 96, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 97, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 98, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 99, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 100, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 101, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 102, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 103, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 104, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 105, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 106, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 107, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 108, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 109, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 110, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 111, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 112, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 113, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 114, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 115, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 116, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 117, strFormCode = 'MF-360', strScheduleCode = '2K', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 118, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 119, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 120, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 121, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 122, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 123, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 124, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 125, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 126, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 127, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 128, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 129, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 130, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 131, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 132, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 133, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 134, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 135, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 136, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 137, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 138, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 139, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 140, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 141, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 142, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 143, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 144, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 145, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 146, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 147, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 148, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 149, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 150, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 151, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 152, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 153, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 154, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 155, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 156, strFormCode = 'MF-360', strScheduleCode = '2X', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 157, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 158, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 159, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 160, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 161, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 162, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 163, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 164, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 165, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 166, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 167, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 168, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 169, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 170, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 171, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 172, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 173, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 174, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 175, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 176, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 177, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 178, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 179, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 180, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 181, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 182, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 183, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 184, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 185, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 186, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 187, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 188, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 189, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 190, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 191, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 192, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 193, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 194, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 195, strFormCode = 'MF-360', strScheduleCode = '3', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 196, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 197, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 198, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 199, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 200, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 201, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 202, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 203, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 204, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 205, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 206, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 207, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 208, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 209, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 210, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 211, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 212, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 213, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 214, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 215, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 216, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 217, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 218, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 219, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 220, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 221, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 222, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 223, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 224, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 225, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 226, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 227, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 228, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 229, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 230, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 231, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 232, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 233, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 234, strFormCode = 'MF-360', strScheduleCode = '4', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 235, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 236, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 237, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 238, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 239, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 240, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 241, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 242, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 243, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 244, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 245, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 246, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 247, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 248, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 249, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 250, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 251, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 252, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 253, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 254, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 255, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 256, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 257, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 258, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 259, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 260, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 261, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 262, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 263, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 264, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 265, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 266, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 267, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 268, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 269, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 270, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 271, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 272, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 273, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 274, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 275, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 276, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 277, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 278, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 279, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 280, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 281, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 282, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 283, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 284, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 285, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 286, strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 287, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 288, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 289, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 290, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 291, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 292, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 293, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 294, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 295, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 296, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 297, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 298, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 299, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 300, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 301, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 302, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 303, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 304, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 305, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 306, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 307, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 308, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 309, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 310, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 311, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 312, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 313, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 314, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 315, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 316, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 317, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 318, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 319, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 320, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 321, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 322, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 323, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 324, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 325, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 326, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 327, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 328, strFormCode = 'MF-360', strScheduleCode = '5', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 329, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 330, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 331, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 332, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 333, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 334, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 335, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 336, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 337, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 338, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 339, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 340, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 341, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 342, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 343, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 344, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 345, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 346, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 347, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 348, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 349, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 350, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 351, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 352, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 353, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 354, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 355, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 356, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 357, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 358, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 359, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 360, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 361, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 362, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 363, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 364, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 365, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 366, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 367, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 368, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 369, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 370, strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 371, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 372, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 373, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 374, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 375, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 376, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 377, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 378, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 379, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 380, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 381, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 382, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 383, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 384, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 385, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 386, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 387, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 388, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 389, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 390, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 391, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 392, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 393, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 394, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 395, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 396, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 397, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 398, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 399, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 400, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 401, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 402, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 403, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 404, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 405, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 406, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 407, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 408, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 409, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 410, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 411, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 412, strFormCode = 'MF-360', strScheduleCode = '6X', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 413, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 414, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 415, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 416, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 417, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 418, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 419, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 420, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 421, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 422, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 423, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 424, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 425, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 426, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 427, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 428, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 429, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 430, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 431, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 432, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 433, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 434, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 435, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 436, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 437, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 438, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 439, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 440, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 441, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 442, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 443, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 444, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 445, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 446, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 447, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 448, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 449, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 450, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 451, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 452, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 453, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 454, strFormCode = 'MF-360', strScheduleCode = '7MI', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 455, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 456, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 457, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 458, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 459, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 460, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 461, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 462, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 463, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 464, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 465, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 466, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 467, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 468, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 469, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 470, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 471, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 472, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 473, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 474, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 475, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 476, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 477, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 478, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 479, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 480, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 481, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 482, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 483, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 484, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 485, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 486, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 487, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 488, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 489, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 490, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 491, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 492, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 493, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 494, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 495, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 496, strFormCode = 'MF-360', strScheduleCode = '8', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 497, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 498, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 499, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 500, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 501, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 502, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 503, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 504, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 505, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 506, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 507, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 508, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 509, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 510, strFormCode = 'MF-360', strScheduleCode = '10A', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 511, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 512, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 513, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 514, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 515, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 516, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 517, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 518, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 519, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 520, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 521, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 522, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 523, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 524, strFormCode = 'MF-360', strScheduleCode = '10B', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 525, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 526, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 527, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 528, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 529, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 530, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 531, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 532, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 533, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 534, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 535, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 536, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 537, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 538, strFormCode = 'SF-900', strScheduleCode = '5', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 539, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 540, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 541, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 542, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 543, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 544, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 545, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 546, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 547, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 548, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 549, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 550, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 551, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 552, strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 553, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 554, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 555, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 556, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 557, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 558, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 559, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 560, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 561, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 562, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 563, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 564, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 565, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 566, strFormCode = 'SF-900', strScheduleCode = '6X', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 567, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 568, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 569, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 570, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 571, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 572, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 573, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 574, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 575, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 576, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 577, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 578, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 579, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 580, strFormCode = 'SF-900', strScheduleCode = '7IL', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 581, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 582, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 583, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 584, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 585, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 586, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 587, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 588, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 589, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 590, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 591, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 592, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 593, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 594, strFormCode = 'SF-900', strScheduleCode = '7AIL', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 595, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 596, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 597, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 598, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 599, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 600, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 601, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 602, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 603, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 604, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 605, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 606, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 607, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 608, strFormCode = 'SF-900', strScheduleCode = '7BIL', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 609, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 610, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 611, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 612, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 613, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 614, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 615, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 616, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 617, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 618, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 619, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 620, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 621, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 622, strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 623, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 624, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 625, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 626, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 627, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 628, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 629, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 630, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 631, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 632, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 633, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 634, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 635, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 636, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 637, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 638, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 639, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 640, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 641, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 642, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 643, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 644, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 645, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 646, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 647, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 648, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 649, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 650, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 651, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 652, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 653, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 654, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 655, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 656, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 657, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 658, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 659, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 660, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 661, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 662, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 663, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 664, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 665, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 666, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 667, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 668, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 669, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 670, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 671, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 672, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 673, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 674, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 675, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 676, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 677, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 678, strFormCode = 'MF-360', strScheduleCode = '7KY', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 679, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 680, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 681, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 682, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 683, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 684, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 685, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 686, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 687, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 688, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 689, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 690, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 691, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 692, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 693, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 694, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 695, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 696, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 697, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 698, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 699, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 700, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 701, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 702, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 703, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 704, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 705, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 706, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 707, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 708, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 709, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 710, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 711, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 712, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 713, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 714, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 715, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 716, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 717, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 718, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 719, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 720, strFormCode = 'MF-360', strScheduleCode = '7IL', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 721, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 722, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 723, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 724, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 725, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 726, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 727, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 728, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 729, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 730, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 731, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 732, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 733, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 734, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'Gasoline / Aviation Gasoline / Gasohol', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 735, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 736, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 737, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 738, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 739, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 740, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 741, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 742, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 743, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 744, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 745, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 746, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 747, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 748, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'K-1 / K-2 Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 749, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 750, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 751, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 752, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 753, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 754, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 755, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 756, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strCustomerName', strCaption = 'Sold To', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 757, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 758, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'dtmDate', strCaption = 'Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 759, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'strBillofLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 760, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 761, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 762, strFormCode = 'MF-360', strScheduleCode = '7OH', strType = 'All Other Products', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 763, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 764, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 765, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 766, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 767, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 768, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 769, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 770, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 771, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 772, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 773, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 774, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 775, strFormCode = 'SF-900', strScheduleCode = '7KY', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 776, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 777, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 778, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 779, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 780, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 781, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 782, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 783, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 784, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 785, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 786, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 787, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 788, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 789, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 790, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 791, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 792, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 793, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 794, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 795, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 796, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 797, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 798, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 799, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 800, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 801, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 802, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 803, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 804, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 805, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 806, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 807, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 808, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 809, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 810, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 811, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 812, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 813, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 814, strFormCode = 'SF-900', strScheduleCode = '7AKY', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 815, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 816, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 817, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 818, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 819, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 820, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 821, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 822, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 823, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 824, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 825, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 826, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 827, strFormCode = 'SF-900', strScheduleCode = '7AMI', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 828, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 829, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 830, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 831, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 832, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 833, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 834, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 835, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 836, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 837, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 838, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 839, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 840, strFormCode = 'SF-900', strScheduleCode = '7AOH', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 841, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 842, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 843, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 844, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 845, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 846, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 847, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 848, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 849, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 850, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 851, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 852, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 853, strFormCode = 'SF-900', strScheduleCode = '7BKY', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 854, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 855, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 856, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 857, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 858, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 859, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 860, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 861, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 862, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 863, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 864, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 865, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 866, strFormCode = 'SF-900', strScheduleCode = '7BMI', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 867, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 868, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 869, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 870, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 871, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 872, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 873, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 874, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 875, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 876, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 877, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 878, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 879, strFormCode = 'SF-900', strScheduleCode = '7BOH', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 880, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 881, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 882, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 883, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 884, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 885, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 886, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 887, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 888, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 889, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 890, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 891, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 892, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 893, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Special Fuel', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 894, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 895, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 896, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 897, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 898, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 899, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 900, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 901, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 902, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 903, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 904, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 905, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 906, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 907, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Gasoline', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 908, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 909, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 910, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 911, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 912, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 913, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 914, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 915, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 916, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 917, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 918, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 919, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 920, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 921, strFormCode = 'SF-401', strScheduleCode = '1A', strType = 'Other Products', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 922, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 923, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 924, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 925, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 926, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 927, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 928, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 929, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 930, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 931, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 932, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 933, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 934, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 935, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Special Fuel', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 936, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 937, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 938, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 939, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 940, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 941, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 942, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 943, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 944, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 945, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 946, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 947, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 948, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 949, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Gasoline', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 950, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 951, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 952, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 953, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 954, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 955, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 956, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 957, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 958, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 959, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 960, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 961, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 962, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 963, strFormCode = 'SF-401', strScheduleCode = '2A', strType = 'Other Products', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 964, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 965, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 966, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 967, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 968, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 969, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 970, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 971, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 972, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 973, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 974, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 975, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 976, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 977, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 978, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 979, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 980, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 981, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 982, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 983, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 984, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 985, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 986, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 987, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 988, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 989, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 990, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 991, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 992, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 993, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strConsignorName', strCaption = 'Consignor Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 994, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strConsignorFederalTaxId', strCaption = 'Consigner FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 995, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 996, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 997, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 998, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 999, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1000, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1001, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1002, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'dtmDate', strCaption = 'Document Date', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1003, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1004, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1005, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1006, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1007, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strVendorName', strCaption = 'Supplier Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1008, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1009, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1010, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strVendorFederalTaxId', strCaption = 'Supplier FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1011, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'strVendorLicenseNumber', strCaption = 'Indiana TID', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1012, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Total Gals Purchased', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1013, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasoline', strColumn = 'dblTax', strCaption = 'GUT Paid to Supplier', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1014, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1015, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strVendorName', strCaption = 'Supplier Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1016, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1017, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1018, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strVendorFederalTaxId', strCaption = 'Supplier FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1019, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'strVendorLicenseNumber', strCaption = 'Indiana TID', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1020, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'dblGross', strCaption = 'Total Gals Purchased', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1021, strFormCode = 'GT-103', strScheduleCode = '1R', strType = 'Gasohol', strColumn = 'dblTax', strCaption = 'GUT Paid to Supplier', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1022, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1023, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1024, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1025, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1026, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1027, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'dblQtyShipped', strCaption = 'Total Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1028, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'dblTaxExempt', strCaption = 'Exempt Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1029, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1030, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strCustomerName', strCaption = 'Customer Name', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1031, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1032, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1033, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'strCustomerFederalTaxId', strCaption = 'Customer FEIN', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1034, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dblQtyShipped', strCaption = 'Total Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1035, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dblTaxExempt', strCaption = 'Exempt Gals Sold', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1036, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', strColumn = 'dblTax', strCaption = 'GUT Collected', strFormat = '', strFooter = 'No', intWidth = 0
+UNION ALL SELECT intScheduleColumnId = 1037, strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasoline', strColumn = 'dblTax', strCaption = 'GUT Collected', strFormat = '', strFooter = 'No', intWidth = 0
 
 EXEC uspTFUpgradeReportingComponentOutputDesigners @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentOutputDesigners = @ReportingComponentOutputDesigners
 
@@ -2917,7 +2915,7 @@ select 'UNION ALL SELECT intFilingPacketId = ' + CAST(intFilingPacketId AS NVARC
 	+ CASE WHEN intFrequency IS NULL THEN ', intFrequency = NULL' ELSE ', intFrequency = ' + CAST(intFrequency AS NVARCHAR(10)) END
 from tblTFFilingPacket FP
 left join tblTFReportingComponent RC on RC.intReportingComponentId = FP.intReportingComponentId
-where FP.intTaxAuthorityId = 
+where FP.intTaxAuthorityId = @TaxAuthorityId
 */
 DECLARE @FilingPackets AS TFFilingPackets
 

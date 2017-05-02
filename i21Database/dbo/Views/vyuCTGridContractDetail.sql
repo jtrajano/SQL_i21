@@ -1,4 +1,4 @@
-﻿CREATE VIEW dbo.vyuCTContractDetailGrid
+﻿CREATE VIEW dbo.vyuCTGridContractDetail
 AS
 	SELECT	CD.*,
 
@@ -30,10 +30,12 @@ AS
 			IX.strIndex,
 			CS.strContractStatus,
 			PF.intPriceFixationId, 
+			PF.intPriceContractId, 
 			QA.strContainerNumber,
 			QA.strSampleTypeName,
 			QA.strSampleStatus,
 			QA.dtmTestingEndDate,
+			QA.dblApprovedQty,
 			MA.strFutMarketName AS strFutureMarket,
 			REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ')') strFutureMonth,
 			CASE WHEN (SELECT COUNT(SA.intSpreadArbitrageId) FROM tblCTSpreadArbitrage SA  WHERE SA.intPriceFixationId = PF.intPriceFixationId) > 0
@@ -52,8 +54,20 @@ AS
 			dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)	AS	dblExchangeRate,
 			IM.intProductTypeId,
 			CQ.dblBulkQuantity ,
-			CQ.dblQuantity AS dblBagQuantity,
-			CAST(1 AS BIT) ysnItemUOMIdExist
+			CQ.dblBagQuantity,
+			CAST(1 AS BIT) ysnItemUOMIdExist,
+			RM.strUnitMeasure strContainerUOM,
+			SB.strSubLocationName,
+			SL.strName						AS	strStorageLocationName,		
+			LP.strCity						AS	strLoadingPoint,
+			DP.strCity						AS	strDestinationPoint,
+			AP.strApprovalStatus,
+			MA.dblContractSize				AS dblMarketContractSize,
+			MA.intUnitMeasureId				AS intMarketUnitMeasureId,
+			MA.intCurrencyId				AS intMarketCurrencyId,
+			MU.strUnitMeasure				AS strMarketUnitMeasure,
+			XM.strUnitType					AS strQtyUnitType,
+			CAST(ISNULL(LG.intLoadDetailId,0) AS BIT) AS ysnLoadAvailable
 
 FROM		tblCTContractDetail			CD
 	 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=		CD.intContractHeaderId	
@@ -68,6 +82,7 @@ LEFT JOIN	tblCTFreightRate			FR	ON	FR.intFreightRateId				=		CD.intFreightRateId
 LEFT JOIN	tblCTRailGrade				RG	ON	RG.intRailGradeId				=		CD.intRailGradeId
 LEFT JOIN	tblCTPricingType			PT	ON	PT.intPricingTypeId				=		CD.intPricingTypeId
 LEFT JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=		CD.intFutureMarketId
+LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId				=		MA.intUnitMeasureId
 LEFT JOIN	tblCTContractOptHeader		OH	ON	OH.intContractOptHeaderId		=		CD.intContractOptHeaderId
 LEFT JOIN	tblCTDiscountType			DT	ON	DT.intDiscountTypeId			=		CD.intDiscountTypeId
 LEFT JOIN	tblGRDiscountId				DC	ON	DC.intDiscountId				=		CD.intDiscountId
@@ -101,28 +116,46 @@ LEFT JOIN	tblICCategoryUOM			GU	ON	GU.intCategoryId				=		CD.intCategoryId
 											AND	GU.intUnitMeasureId				=		CH.intCategoryUnitMeasureId		
 LEFT JOIN	tblCTPriceFixation			PF	ON	CD.intContractDetailId			=		PF.intContractDetailId		
 LEFT JOIN	(
-			SELECT	 intPriceFixationId,
-					 COUNT(intPriceFixationDetailId) intPFDCount,
-					 SUM(dblQuantity) dblQuantityPriceFixed,
-					 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
-			FROM	 tblCTPriceFixationDetail
-			GROUP BY intPriceFixationId
-			)							PD	ON	PD.intPriceFixationId			=		PF.intPriceFixationId
+				SELECT	 intPriceFixationId,
+						 COUNT(intPriceFixationDetailId) intPFDCount,
+						 SUM(dblQuantity) dblQuantityPriceFixed,
+						 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
+				FROM	 tblCTPriceFixationDetail
+				GROUP BY intPriceFixationId
+			)							PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
 LEFT JOIN	(
-				SELECT * FROM 
-				(
-					SELECT	ROW_NUMBER() OVER (PARTITION BY SA.intContractDetailId ORDER BY SA.intSampleId DESC) intRowNum,
-							SA.intContractDetailId,
-							SA.strSampleNumber,
-							SA.strContainerNumber,
-							ST.strSampleTypeName,
-							SS.strStatus AS strSampleStatus,
-							SA.dtmTestingEndDate
-					FROM	tblQMSample			SA
-					JOIN	tblQMSampleType		ST  ON ST.intSampleTypeId	= SA.intSampleTypeId
-					JOIN	tblQMSampleStatus	SS  ON SS.intSampleStatusId = SA.intSampleStatusId
-					WHERE	SA.intContractDetailId IS NOT NULL
-				) t
-				WHERE intRowNum = 1
-			)							QA	ON	QA.intContractDetailId			=		CD.intContractDetailId
-LEFT JOIN	tblLGContainerTypeCommodityQty CQ ON CQ.intCommodityId = CH.intCommodityId AND CQ.intContainerTypeId = CD.intContainerTypeId AND CQ.intCommodityAttributeId = IM.intOriginId
+				SELECT	CQ.intContainerTypeId,
+						CQ.intCommodityAttributeId,
+						CQ.intUnitMeasureId,
+						CQ.dblBulkQuantity ,
+						CQ.dblQuantity AS dblBagQuantity,
+						CQ.intCommodityId,
+						CA.intCountryID AS intCountryId
+				FROM	tblLGContainerTypeCommodityQty	CQ	
+				JOIN	tblICCommodityAttribute			CA	ON	CQ.intCommodityAttributeId	=	CA.intCommodityAttributeId
+			)							CQ	ON	CQ.intCommodityId			=	CH.intCommodityId 
+											AND CQ.intContainerTypeId		=	CD.intContainerTypeId 
+											AND CQ.intCountryId				=	ISNULL(IC.intCountryId,CA.intCountryID)
+LEFT JOIN	tblICUnitMeasure				RM	ON	RM.intUnitMeasureId			=	CQ.intUnitMeasureId
+LEFT JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			
+LEFT JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intDestinationPortId		
+LEFT JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= CD.intSubLocationId 	
+LEFT JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	CD.intStorageLocationId		
+LEFT JOIN	(
+					SELECT * FROM 
+					(
+						SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY AP.intApprovalId DESC) intRowNum,
+								TR.intRecordId, AP.strStatus AS strApprovalStatus 
+						FROM	tblSMApproval		AP
+						JOIN	tblSMTransaction	TR	ON	TR.intTransactionId =	AP.intTransactionId
+						JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
+						WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
+													'ContractManagement.view.Amendments')
+					) t
+					WHERE intRowNum = 1
+			) AP ON AP.intRecordId = CD.intContractHeaderId		
+LEFT JOIN	(
+				SELECT ROW_NUMBER() OVER (PARTITION BY ISNULL(intPContractDetailId,intSContractDetailId) ORDER BY intLoadDetailId DESC) intRowNum,ISNULL(intPContractDetailId,intSContractDetailId)intContractDetailId,intLoadDetailId 
+				FROM tblLGLoadDetail
+			)LG ON LG.intRowNum = 1 AND LG.intContractDetailId = CD.intContractDetailId
+OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA

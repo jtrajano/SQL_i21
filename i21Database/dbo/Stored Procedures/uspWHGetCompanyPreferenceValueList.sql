@@ -38,7 +38,8 @@ BEGIN
 					   CAST(dblPalletWeight AS NVARCHAR(255)) dblPalletWeight, 
 					   CAST(intNumberOfDecimalPlaces AS NVARCHAR(255)) intNumberOfDecimalPlaces, 
 					   CAST(ysnCreateLoadTasks AS NVARCHAR(255)) ysnCreateLoadTasks, 
-					   CAST(intMaximumPalletsOnForklift AS NVARCHAR(255)) intMaximumPalletsOnForklift
+					   CAST(intMaximumPalletsOnForklift AS NVARCHAR(255)) intMaximumPalletsOnForklift,
+					   CAST((SELECT ysnGenerateInvShipmentStagingOrder ysnGenerateInvShipmentStagingOrder FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnGenerateInvShipmentStagingOrder
 				FROM tblWHCompanyPreference
 				) p
 			UNPIVOT(SettingValue FOR SettingName IN (
@@ -61,6 +62,7 @@ BEGIN
 						,intNumberOfDecimalPlaces
 						,ysnCreateLoadTasks
 						,intMaximumPalletsOnForklift
+						,ysnGenerateInvShipmentStagingOrder
 						)) AS unpvt
 			) tblCompanyPreference
 		WHERE intCompanyLocationId = @intCompanyLocationId
@@ -91,7 +93,8 @@ BEGIN
 					   CAST(dblPalletWeight AS NVARCHAR(255)) dblPalletWeight, 
 					   CAST(intNumberOfDecimalPlaces AS NVARCHAR(255)) intNumberOfDecimalPlaces, 
 					   CAST(ysnCreateLoadTasks AS NVARCHAR(255)) ysnCreateLoadTasks, 
-					   CAST(intMaximumPalletsOnForklift AS NVARCHAR(255)) intMaximumPalletsOnForklift
+					   CAST(intMaximumPalletsOnForklift AS NVARCHAR(255)) intMaximumPalletsOnForklift,
+					   CAST((SELECT ysnGenerateInvShipmentStagingOrder ysnGenerateInvShipmentStagingOrder FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnGenerateInvShipmentStagingOrder
 				FROM tblWHCompanyPreference
 			) p
 		UNPIVOT(SettingValue FOR SettingName IN (
@@ -114,6 +117,7 @@ BEGIN
 					,intNumberOfDecimalPlaces
 					,ysnCreateLoadTasks
 					,intMaximumPalletsOnForklift
+					,ysnGenerateInvShipmentStagingOrder
 					)) AS unpvt
 				) tblCompanyPreference
 	END

@@ -163,6 +163,22 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--EXEC uspAPUpdateVoucherTax @billId
 	--EXEC uspAPUpdateVoucherContract @billId
 
+	--UPDATE the term if detail has contract
+	DECLARE @contractTermId INT;
+	SELECT TOP 1 @contractTermId = ContractHeader.intTermId
+	FROM tblAPBillDetail VoucherDetail
+	--INNER JOIN tblCTContractDetail ContractDetail ON VoucherDetail.intContractDetailId = VoucherDetail.intContractDetailId
+	INNER JOIN tblCTContractHeader ContractHeader ON VoucherDetail.intContractHeaderId = ContractHeader.intContractHeaderId
+	WHERE VoucherDetail.intBillId = @billId AND VoucherDetail.intContractDetailId > 0
+
+	IF @contractTermId > 0
+	BEGIN
+		UPDATE Voucher
+			SET Voucher.intTermsId = @contractTermId, Voucher.dtmDueDate = ISNULL(dbo.fnGetDueDateBasedOnTerm(Voucher.dtmDate, @contractTermId), Voucher.dtmDueDate)
+		FROM tblAPBill Voucher
+		WHERE Voucher.intBillId = @billId
+	END
+
 	IF @transCount = 0 COMMIT TRANSACTION
 
 END TRY

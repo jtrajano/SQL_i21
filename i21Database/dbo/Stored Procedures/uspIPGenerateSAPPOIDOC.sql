@@ -58,7 +58,8 @@ Declare @intMinSeq					INT,
 		@strSeq						NVARCHAR(MAX),
 		@strProductType				NVARCHAR(100),
 		@strVendorBatch				NVARCHAR(100),
-		@str10Zeros					NVARCHAR(50)='0000000000'
+		@str10Zeros					NVARCHAR(50)='0000000000',
+		@strLoadingPoint			NVARCHAR(200)
 
 Declare @tblOutput AS Table
 (
@@ -208,7 +209,8 @@ Begin
 			@strRowState				= strRowState ,
 			@strFeedStatus				= strFeedStatus,
 			@strContractItemNo			= strContractItemNo,
-			@strOrigin					= strOrigin	
+			@strOrigin					= strOrigin,
+			@strLoadingPoint			= strLoadingPoint	
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
 
 		Set @strSeq=ISNULL(@strSeq,'') + CONVERT(VARCHAR,@intContractSeq) + ','
@@ -235,7 +237,7 @@ Begin
 		If @strContractBasis IN ('FOB','CFR')
 			Set @strDocType='ZHUB'
 
-		If @strSubLocation IN ('L953','L954')
+		If @strSubLocation IN ('L953')
 			Set @strDocType='ZB2B'
 		
 		If ISNULL(@strDocType,'')='' Set @strDocType='ZHUB'
@@ -302,7 +304,7 @@ Begin
 				Set @strXmlHeaderStart += '<VPER_END>'		+ ISNULL(CONVERT(VARCHAR(10),@dtmEndDate,112),'')	+ '</VPER_END>'
 				Set @strXmlHeaderStart += '<REF_1>'			+ ISNULL(@strContractNumber,'')		+ '</REF_1>'
 				Set @strXmlHeaderStart += '<INCOTERMS1>'	+ dbo.fnEscapeXML(ISNULL(@strContractBasis,''))		+ '</INCOTERMS1>'
-				Set @strXmlHeaderStart += '<INCOTERMS2>'	+ dbo.fnEscapeXML(ISNULL(@strContractBasisDesc,''))	+ '</INCOTERMS2>'
+				Set @strXmlHeaderStart += '<INCOTERMS2>'	+ dbo.fnEscapeXML(ISNULL(@strLoadingPoint,''))	+ '</INCOTERMS2>'
 				Set @strXmlHeaderStart +=	'</E1BPMEPOHEADER>'
 
 				--HeaderX
@@ -409,6 +411,8 @@ Begin
 					Set @strItemXXml += '<NET_PRICE>'	+ 'X'		+ '</NET_PRICE>'
 				Set @strItemXXml += '<PRICE_UNIT>'	+ 'X'		+ '</PRICE_UNIT>'
 				Set @strItemXXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
+				If @strDocType='ZHUB'
+					Set @strItemXXml += '<GR_BASEDIV>'	+ 'X'	+ '</GR_BASEDIV>'	
 				Set @strItemXXml += '<CONF_CTRL>'		+ 'X'	+ '</CONF_CTRL>'
 				If @strTerm IS NOT NULL AND UPPER(@strCommodityCode)='COFFEE'
 					Set @strItemXXml += '<VEND_PART>'	+ 'X'		+ '</VEND_PART>'
@@ -471,6 +475,28 @@ Begin
 				Set @strCondXml += '<CHANGE_ID>'		+ 'U' + '</CHANGE_ID>'
 				Set @strCondXml += '</E1BPMEPOCOND>'
 
+				--ZPBX Information
+				If UPPER(@strHeaderState)='MODIFIED' AND ISNULL(@dblCashPrice,0)>0
+				Begin
+					Set @strCondXml += '<E1BPMEPOCOND SEGMENT="1">'
+					If UPPER(@strCommodityCode)='COFFEE'
+						Set @strCondXml += '<ITM_NUMBER>'		+ '0001'		+ '</ITM_NUMBER>'
+					Else
+						Set @strCondXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
+					Set @strCondXml += '<COND_TYPE>'		+ 'ZPBX'		+ '</COND_TYPE>'
+					Set @strCondXml += '<COND_VALUE>'		+ ISNULL(LTRIM(CONVERT(NUMERIC(38,2),@dblCashPrice)),'0.00')	+ '</COND_VALUE>'
+					Set @strCondXml += '<CURRENCY>'			+ ISNULL(@strCurrency,'')		+ '</CURRENCY>'
+					Set @strCondXml += '<COND_UNIT>'		+ ISNULL(@strPriceUOM,'')		+ '</COND_UNIT>'
+					If UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Washed Arabica','Unwashed Arabica')
+						Set @strCondXml += '<COND_P_UNT>'		+ '100'	+ '</COND_P_UNT>'
+					Else if UPPER(@strCommodityCode)='COFFEE' AND @strProductType IN ('Robusta')
+						Set @strCondXml += '<COND_P_UNT>'		+ '1000'	+ '</COND_P_UNT>'
+					Else
+						Set @strCondXml += '<COND_P_UNT>'		+ '1'	+ '</COND_P_UNT>'
+					Set @strCondXml += '<CHANGE_ID>'		+ 'U' + '</CHANGE_ID>'
+					Set @strCondXml += '</E1BPMEPOCOND>'
+				End
+
 				--Basis InformationX
 				Set @strCondXXml += '<E1BPMEPOCONDX SEGMENT="1">'
 				If UPPER(@strCommodityCode)='COFFEE'
@@ -488,6 +514,26 @@ Begin
 				Set @strCondXXml += '<COND_P_UNT>'	+ 'X'	+ '</COND_P_UNT>'
 				Set @strCondXXml += '<CHANGE_ID>'		+ 'X'	+ '</CHANGE_ID>'
 				Set @strCondXXml += '</E1BPMEPOCONDX>'
+
+				--ZPBX InformationX
+				If UPPER(@strHeaderState)='MODIFIED' AND ISNULL(@dblCashPrice,0)>0
+				Begin
+					Set @strCondXXml += '<E1BPMEPOCONDX SEGMENT="1">'
+					If UPPER(@strCommodityCode)='COFFEE'
+						Set @strCondXXml += '<ITM_NUMBER>'		+ '0001'		+ '</ITM_NUMBER>'
+					Else
+						Set @strCondXXml += '<ITM_NUMBER>'		+ ISNULL(RIGHT('0000' + CONVERT(VARCHAR,@intContractSeq),4),'')		+ '</ITM_NUMBER>'
+					Set @strCondXXml += '<ITM_NUMBERX>'		+ 'X'		+ '</ITM_NUMBERX>'
+					Set @strCondXXml += '<COND_TYPE>'		+ 'X'		+ '</COND_TYPE>'
+					Set @strCondXXml += '<COND_VALUE>'	+ 'X'	+ '</COND_VALUE>'
+					If @strCurrency IS NOT NULL
+						Set @strCondXXml += '<CURRENCY>'		+ 'X'		+ '</CURRENCY>'
+					If @strPriceUOM IS NOT NULL
+						Set @strCondXXml += '<COND_UNIT>'	+ 'X'		+ '</COND_UNIT>'
+					Set @strCondXXml += '<COND_P_UNT>'	+ 'X'	+ '</COND_P_UNT>'
+					Set @strCondXXml += '<CHANGE_ID>'		+ 'X'	+ '</CHANGE_ID>'
+					Set @strCondXXml += '</E1BPMEPOCONDX>'
+				End
 
 				If UPPER(@strCommodityCode)='COFFEE'
 				Begin

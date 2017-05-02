@@ -302,21 +302,18 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120075) EXEC sp_dropmess
 SET @strmessage = 'Transaction with Invoice Number - %s is already existing.'
 EXEC sp_addmessage 120075,16,@strmessage,'us_english','False' 
 
-
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120076) EXEC sp_dropmessage 120076, 'us_english'	
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120076) EXEC sp_dropmessage 120076, 'us_english'     
 SET @strmessage = 'Adding lot tracked item directly to invoice is not allowed.'
 EXEC sp_addmessage 120076,16,@strmessage,'us_english','False' 
-
-
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120077) EXEC sp_dropmessage 120077, 'us_english'	
+   
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120077) EXEC sp_dropmessage 120077, 'us_english'     
 SET @strmessage = 'Duplicating of CF Tran Invoice type is not allowed.'
-EXEC sp_addmessage 120077,16,@strmessage,'us_english','False' 
-
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120078) EXEC sp_dropmessage 120078, 'us_english'	
+EXEC sp_addmessage 120077,16,@strmessage,'us_english','False'  
+  
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120078) EXEC sp_dropmessage 120078, 'us_english'    
 SET @strmessage = 'Duplicating of CF Invoice Invoice type is not allowed.'
 EXEC sp_addmessage 120078,16,@strmessage,'us_english','False' 
-
-
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120079) EXEC sp_dropmessage 120079, 'us_english'	
+ 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120079) EXEC sp_dropmessage 120079, 'us_english'    
 SET @strmessage = 'Duplicating of Meter Billing Invoice type is not allowed.'
 EXEC sp_addmessage 120079,16,@strmessage,'us_english','False' 

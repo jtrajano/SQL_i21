@@ -29,9 +29,9 @@
 			null,
 			b.intShipToId,
 			null,
-			'Standard',
+			'Invoice',
 			0,	
-		    (SELECT TOP 1 intDefaultCountryId FROM tblSMCompanyPreference)
+		    (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 		) c
 	where a.intItemId is not null and a.intItemId > 0
 	
@@ -84,7 +84,7 @@
 			null,		
 			null,		
 			null,	
-			'Standard',
+			'Invoice',
 			null,
 			0		    					
 		) c

@@ -113,9 +113,9 @@ SELECT DISTINCT
 	, Bill.ysnPaid
 	, Bill.strTerm
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
-	, 1 AS dblQtyToReceive
-	, 1 AS dblQtyVouchered
-	, 1 AS dblQtyToVoucher
+	,1 AS dblQtyToReceive
+	,dblQtyVouchered = ABS(ISNULL(Bill.dblQtyReceived,ISNULL(CASE WHEN dblAmountBilled <> 0 THEN 1 ELSE 0 END,0)))
+	,CASE WHEN Bill.dblQtyReceived <> 0 THEN 0 ELSE 1 END AS dblQtyToVoucher
 	, dblAmountToVoucher = CAST(( ISNULL(dblAmount,0) + ISNULL(dblTax,0) * 1) AS DECIMAL (18,2))
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
@@ -154,8 +154,8 @@ LEFT JOIN vyuAPVendor Vendor
 
 	
 WHERE Receipt.ysnPosted = 1 
-	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT TOP 1 intInventoryReceiptChargeId FROM tblAPBillDetail A
-																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId where B.ysnPosted = 1)
+	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
+																				  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
 
 UNION ALL
 SELECT 

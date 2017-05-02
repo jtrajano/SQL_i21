@@ -153,7 +153,6 @@ BEGIN TRY
 				UPDATE	CH
 				SET		CH.intFutureMarketId	=	PF.intOriginalFutureMarketId,
 						CH.intFutureMonthId		=	PF.intOriginalFutureMonthId,
-						CH.intPricingTypeId		=	2,
 						CH.dblFutures			=	NULL,
 						CH.intConcurrencyId		=	CH.intConcurrencyId + 1
 				FROM	tblCTContractHeader		CH
@@ -379,8 +378,7 @@ BEGIN TRY
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
 				UPDATE	CH
-				SET		CH.intPricingTypeId		=	1,
-						CH.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),
+				SET		CH.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),
 						CH.intConcurrencyId		=	CH.intConcurrencyId + 1
 				FROM	tblCTContractHeader		CH
 				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
@@ -402,8 +400,7 @@ BEGIN TRY
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
 				UPDATE	CH
-				SET		CH.intPricingTypeId		=	2,
-						CH.dblFutures			=	NULL,
+				SET		CH.dblFutures			=	NULL,
 						CH.intConcurrencyId		=	CH.intConcurrencyId + 1
 				FROM	tblCTContractHeader		CH
 				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId

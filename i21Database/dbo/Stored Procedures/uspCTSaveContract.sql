@@ -20,7 +20,10 @@ BEGIN TRY
 			@Condition					NVARCHAR(100),
 			@idoc						INT,
 			@intUniqueId				INT,
-			@strRowState				NVARCHAR(100)
+			@strRowState				NVARCHAR(100),
+			@intNetWeightUOMId			INT,
+			@dblNetWeight				NUMERIC(18,6),
+			@intItemUOMId				INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber
@@ -40,10 +43,18 @@ BEGIN TRY
 				@dblCashPrice		=	dblCashPrice,
 				@dblBasis			=	dblBasis,
 				@dblOriginalBasis	=	dblOriginalBasis,
-				@intLastModifiedById=	intLastModifiedById
+				@intLastModifiedById=	intLastModifiedById,
+				@intNetWeightUOMId	=	intNetWeightUOMId,
+				@dblNetWeight		=	dblNetWeight,
+				@intItemUOMId		=	intItemUOMId
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
+		IF ISNULL(@intNetWeightUOMId,0) > 0 AND @dblNetWeight IS NULL
+		BEGIN
+			UPDATE tblCTContractDetail SET dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,dblQuantity) WHERE intContractDetailId = @intContractDetailId
+		END
+
 		EXEC	uspCTSequencePriceChanged @intContractDetailId,null,'Sequence'
 		
 		IF @intPricingTypeId = 2 AND @dblOriginalBasis IS NULL

@@ -14,8 +14,24 @@ FROM (
 	CD.intContractSeq,
 	strEntityName = EM.strName,
 	intEntityId = EM.intEntityId,
-	intPartyEntityId = (CASE WHEN ISNULL(CH.ysnClaimsToProducer,0) = 1 THEN EMP.intEntityId ELSE EM.intEntityId END),
-	strPaidTo = (CASE WHEN ISNULL(CH.ysnClaimsToProducer,0) = 1 THEN EMP.strName ELSE EM.strName END),
+	intPartyEntityId = (CASE 
+						WHEN ISNULL(CD.ysnClaimsToProducer, 0) = 1
+						THEN EMPD.intEntityId
+						ELSE CASE 
+							WHEN ISNULL(CH.ysnClaimsToProducer, 0) = 1
+								THEN EMPH.intEntityId
+							ELSE EM.intEntityId
+							END
+						END),
+	strPaidTo = (CASE 
+				 WHEN ISNULL(CD.ysnClaimsToProducer, 0) = 1
+					THEN EMPD.strName
+				 ELSE CASE 
+						WHEN ISNULL(CH.ysnClaimsToProducer, 0) = 1
+							THEN EMPH.strName
+						ELSE EM.strName
+						END
+				 END),
 	Load.intLoadId,
 	Load.strLoadNumber,
 	Load.dtmScheduledDate,
@@ -113,7 +129,8 @@ JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId 
 JOIN tblICItem I ON I.intItemId = CD.intItemId
 JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
-LEFT JOIN tblEMEntity EMP ON EMP.intEntityId = CH.intProducerId
+LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
+LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
 LEFT JOIN tblICCommodityAttribute CA ON	CA.intCommodityAttributeId	= I.intOriginId	AND CA.strType = 'Origin'
 LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId

@@ -2,20 +2,25 @@
 AS
 SELECT
 (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName
-,(SELECT TOP 1 dbo.[fnAPFormatAddress](strCompanyName, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+--,(SELECT TOP 1 dbo.[fnAPFormatAddress](strCompanyName, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+,strCompanyAddress = (SELECT TOP 1 ISNULL(RTRIM(strCompanyName) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(strAddress) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(strZip),'') + ' ' + ISNULL(RTRIM(strCity), '') + ' ' + ISNULL(RTRIM(strState), '') + CHAR(13) + char(10)
+				 + ISNULL('' + RTRIM(strCountry) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(strPhone)+ CHAR(13) + char(10), '') FROM tblSMCompanySetup)
 ,strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone))
 ,strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup), A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone))
 ,A.strBillId
 ,ContactEntity.strName AS strContactName
 ,ContactEntity.strEmail AS strContactEmail
-,strDateLocation = TranLoc.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 107)
+,strDateLocation = TranLoc.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 106)
 ,Bank.strBankName
 ,BankAccount.strBankAccountHolder
 ,BankAccount.strIBAN
 ,BankAccount.strSWIFT
 ,Term.strTerm
 ,A.strRemarks
-,CONVERT(VARCHAR(10), A.dtmDueDate, 101) AS dtmDueDate
+,CONVERT(VARCHAR(10), A.dtmDueDate, 103) AS dtmDueDate
 ,Bank.strCity + ', ' + Bank.strState +  ' ' + Bank.strCountry AS strBankAddress
 --,(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
 --(	
@@ -66,7 +71,12 @@ FROM
 	--UNION ALL --Weight Claim 2nd Version from weight claim screen
 	SELECT
 		strContractNumber		=	ContractHeader.strContractNumber
-		,strMiscDescription		=	Item.strDescription
+		,strMiscDescription		=	CASE WHEN WC2Details.intContractDetailId > 0
+												AND ContractDetail.intItemContractId > 0
+												AND WC2Details.intContractCostId IS NULL
+										THEN ItemContract.strContractItemName
+										ELSE ISNULL(Item.strDescription,'')
+									END
 		,strItemNo				=	Item.strItemNo
 		,strBillOfLading		=	(SELECT TOP 1 Loads.strBLNumber FROM tblLGLoad Loads WHERE Loads.intLoadId = WC2Details.intLoadId)--GET FROM LOAD --GET FROM LOAD
 		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
@@ -96,7 +106,7 @@ FROM
 			ON (CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.intWeightUOMId WHEN WC2Details.intCostUOMId > 0 THEN WC2Details.intCostUOMId ELSE WC2Details.intUnitOfMeasureId END) = QtyUOM.intItemUOMId
 	INNER JOIN (tblCTContractDetail ContractDetail INNER JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId)
 			ON WC2Details.intContractDetailId = ContractDetail.intContractDetailId
-	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = WC2Details.intAccountId
+	LEFT JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = WC2Details.intAccountId
 	INNER JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = WC2Details.intCurrencyId
 	LEFT JOIN (tblICItemUOM ItemCostUOM INNER JOIN tblICUnitMeasure ItemCostUOMMeasure ON ItemCostUOM.intUnitMeasureId = ItemCostUOMMeasure.intUnitMeasureId) 
 			ON WC2Details.intCostUOMId = ItemCostUOM.intItemUOMId
@@ -111,7 +121,12 @@ FROM
 	UNION ALL -- DEBIT MEMO
 	SELECT
 		strContractNumber		=	ContractHeader.strContractNumber
-		,strMiscDescription		=	Item.strDescription
+		,strMiscDescription		=	CASE WHEN DMDetails.intContractDetailId > 0
+												AND ContractDetail.intItemContractId > 0
+												AND DMDetails.intContractCostId IS NULL
+										THEN ItemContract.strContractItemName
+										ELSE ISNULL(Item.strDescription,'')
+									END
 		,strItemNo				=	Item.strItemNo
 		,strBillOfLading		=	Receipt.strBillOfLading
 		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
@@ -216,7 +231,12 @@ FROM
 	--UNION ALL
 	SELECT
 		strContractNumber		=	ContractHeader.strContractNumber
-		,strMiscDescription		=	Item.strDescription
+		,strMiscDescription		=	CASE WHEN DMDetails.intContractDetailId > 0
+												AND ContractDetail.intItemContractId > 0
+												AND DMDetails.intContractCostId IS NULL
+										THEN ItemContract.strContractItemName
+										ELSE ISNULL(Item.strDescription,'')
+									END
 		,strItemNo				=	CASE WHEN Item.strType = 'Other Charge' THEN '' ELSE Item.strItemNo END --AP-3233
 		,strBillOfLading		=	Receipt.strBillOfLading
 		,strCountryOrigin		=	CASE WHEN ContractDetail.intItemId > 0 THEN 

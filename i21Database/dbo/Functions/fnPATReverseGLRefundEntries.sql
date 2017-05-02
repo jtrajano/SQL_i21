@@ -36,7 +36,7 @@ RETURNS @returntable TABLE
     [dblCreditReport]           NUMERIC (18, 6) NULL,
     [dblReportingRate]          NUMERIC (18, 6) NULL,
     [dblForeignRate]            NUMERIC (18, 6) NULL,
-	[strRateType]				NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
+	[strRateType]				NVARCHAR (50)	 COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]          INT              DEFAULT 1 NULL
 )
 AS

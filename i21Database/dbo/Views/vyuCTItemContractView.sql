@@ -21,12 +21,16 @@ AS
 			CL.strLocationName,
 			CL.intCompanyLocationId AS	intLocationId,
 			IM.strStatus,
-			IM.intProductTypeId
+			IM.intProductTypeId,
+			CA.intPurchasingGroupId
 
 	FROM	tblICItemContract		IC
 	JOIN	tblICItem				IM	ON	IM.intItemId			=	IC.intItemId
 	JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId	=	IC.intItemLocationId
 	JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId =	IL.intLocationId		LEFT
-	JOIN	tblSMCountry			RY	ON	RY.intCountryID			=	IC.intCountryId 
+	JOIN	tblSMCountry			RY	ON	RY.intCountryID			=	IC.intCountryId			LEFT
+	JOIN	tblICCommodityAttribute	CA	ON	CA.intCountryID			=	IC.intCountryId
+										AND	CA.intCommodityId		=	IM.intCommodityId
+										AND	CA.strType				=	'Origin'
 	
 

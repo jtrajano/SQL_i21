@@ -2,8 +2,7 @@ IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICD
 	DROP PROCEDURE [uspICDCCatMigrationPt]; 
 GO 
 
-
-Create PROCEDURE [dbo].[uspICDCCatMigrationPt]
+CREATE PROCEDURE [dbo].[uspICDCCatMigrationPt]
 --** Below Stored Procedure is to migrate inventory and related tables like class, location, unit measure, item pricing, etc.
 --   It loads data into item and related i21 tables like tblICCategory, tblICUnitMeasure, tblICItem,
 --   tblICItemUOM, tblICItemLocation, tblICItemPricing. **
@@ -34,10 +33,12 @@ SELECT RTRIM(ptcls_class)
 	,RTRIM(ptcls_desc)
 	,RTRIM(ptcls_amf_yn)
 --** get the inventory type from item 
-	,case 
-	(select top 1 ptitm_phys_inv_yno from ptitmmst where ptitm_class = ptclsmst.ptcls_class order by ptitm_phys_inv_yno desc) 
-	when 'Y' then 'Inventory' 
-	else 'Other Charge' end	'InventoryType'			
+	,case	
+		when
+			(select COUNT(*) cnt from ptitmmst where ptitm_class = ptclsmst.ptcls_class and ptitm_phys_inv_yno = 'Y') > 1 then 'Inventory' 
+		else 
+			'Other Charge' 
+		end	'InventoryType'			
 	,'1'
 	,'Item Level'
 	,1
@@ -49,3 +50,6 @@ SELECT RTRIM(ptcls_class)
 			END
 		)
 FROM ptclsmst
+
+
+GO

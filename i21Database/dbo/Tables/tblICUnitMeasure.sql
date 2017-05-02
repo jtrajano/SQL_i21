@@ -18,7 +18,7 @@ Type the overview for the table here.
 		[strUnitType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		[intDecimalPlaces] INT NULL DEFAULT 6, 
-		CONSTRAINT [PK_tblICUnitMeasure] PRIMARY KEY ([intUnitMeasureId]), 
+    CONSTRAINT [PK_tblICUnitMeasure] PRIMARY KEY ([intUnitMeasureId]), 
 		CONSTRAINT [AK_tblICUnitMeasure_strUnitMeasure] UNIQUE ([strUnitMeasure]) 
 	)
 	GO

@@ -36,29 +36,18 @@ FROM	tblICInventoryReceipt Receipt
 			SELECT	strOrderNumber = ct.strContractNumber
 					,rc.intInventoryReceiptChargeId
 					,dblUnitCost = ROUND(rc.dblAmount, 2) 
-					,dblReceiptQty = 
-						CASE	
-							WHEN rc.ysnPrice = 1 THEN -1
-							ELSE 1
-						END
-					,dblVoucherQty = 
-						ISNULL(voucher.QtyTotal, 0)
-
+					,dblReceiptQty = 1
+					,dblVoucherQty = ISNULL(voucher.QtyTotal, 0)
 					,dblReceiptLineTotal = ROUND(rc.dblAmount, 2)
 					,dblVoucherLineTotal = ISNULL(voucher.LineTotal, 0)
-					,dblReceiptTax = ISNULL(rc.dblTax, 0)
+					,dblReceiptTax = ISNULL(CASE WHEN rc.ysnPrice = 1 THEN -rc.dblTax ELSE rc.dblTax END, 0)
 					,dblVoucherTax = ISNULL(voucher.TaxTotal, 0) 
-					,dblOpenQty =	
-						CASE	
-							WHEN rc.ysnPrice = 1 THEN -1
-							ELSE 1
-						END
-						- ISNULL(voucher.QtyTotal, 0)
+					,dblOpenQty = 1 - ISNULL(voucher.QtyTotal, 0)
 					,dblItemsPayable = 
 						ROUND(rc.dblAmount, 2)
 						- ISNULL(voucher.LineTotal, 0)
 					,dblTaxesPayable = 
-						ISNULL(rc.dblTax, 0)
+						ISNULL(CASE WHEN rc.ysnPrice = 1 THEN -rc.dblTax ELSE rc.dblTax END, 0)
 						- ISNULL(voucher.TaxTotal, 0) 
 					,i.strItemNo
 					,strItemDescription = i.strDescription	
@@ -76,13 +65,12 @@ FROM	tblICInventoryReceipt Receipt
 											, 2
 										)
 									)
-
 								,TaxTotal = 
 									SUM(ISNULL(bd.dblTax, 0)) 
 						FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
 									ON b.intBillId = bd.intBillId
 						WHERE	bd.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
-								AND bd.intInventoryReceiptItemId IS NULL
+								AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
 								AND b.ysnPosted = 1 
 					) voucher
 					LEFT JOIN (
@@ -109,7 +97,7 @@ FROM	tblICInventoryReceipt Receipt
 			FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
 						ON b.intBillId = bd.intBillId
 			WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-					AND bd.intInventoryReceiptItemId IS NULL 
+					AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
 					AND b.ysnPosted = 1
 			ORDER BY b.intBillId DESC 
 		) topVoucher
@@ -122,7 +110,7 @@ FROM	tblICInventoryReceipt Receipt
 								FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
 											ON b.intBillId = bd.intBillId
 								WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-										AND bd.intInventoryReceiptItemId IS NULL 
+										AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
 										AND b.ysnPosted = 1
 								GROUP BY b.intBillId
 								FOR xml path('')
@@ -141,7 +129,7 @@ FROM	tblICInventoryReceipt Receipt
 							FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
 										ON b.intBillId = bd.intBillId
 							WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-									AND bd.intInventoryReceiptItemId IS NULL 
+									AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
 									AND b.ysnPosted = 1
 							GROUP BY b.strBillId
 							FOR xml path('')
@@ -152,3 +140,4 @@ FROM	tblICInventoryReceipt Receipt
 				)
 		) allLinkedVoucherId  
 WHERE	Receipt.ysnPosted = 1
+		AND ReceiptCharge.ysnAccrue = 1 

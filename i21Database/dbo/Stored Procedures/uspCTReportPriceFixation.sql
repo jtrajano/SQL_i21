@@ -160,7 +160,12 @@ BEGIN TRY
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
-	JOIN	tblCTContractDetail			CD	ON	CD.intContractHeaderId			=	CH.intContractHeaderId
+	JOIN	(
+				SELECT	ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractDetailId ASC) intRowNum,* 
+				FROM	tblCTContractDetail			CD	
+
+			)							CD	ON	CD.intContractHeaderId			=	CH.intContractHeaderId
+											AND	CD.intRowNum					=	CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN 1 ELSE CD.intRowNum END
 	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
 												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
 	JOIN	tblICItem					IM	ON	IM.intItemId					=	CD.intItemId			LEFT

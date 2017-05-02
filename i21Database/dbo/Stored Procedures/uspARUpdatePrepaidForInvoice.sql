@@ -53,42 +53,13 @@ BEGIN CATCH
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber) 	
 END CATCH		
 		
---BEGIN TRY	
---	UPDATE
---		tblARPrepaidAndCredit
---	SET
---		 tblARPrepaidAndCredit.[intInvoiceId]					= ARPAC.[intInvoiceId]
---		,tblARPrepaidAndCredit.[intInvoiceDetailId]				= ARPAC.[intInvoiceDetailId]
---		,tblARPrepaidAndCredit.[intPrepaymentId]				= ARPAC.[intPrepaymentId]
---		,tblARPrepaidAndCredit.[intPrepaymentDetailId]			= ARPAC.[intPrepaymentDetailId]
---		,tblARPrepaidAndCredit.[dblPostedAmount]				= @ZeroDecimal
---		,tblARPrepaidAndCredit.[dblPostedDetailAmount]			= @ZeroDecimal
---		,tblARPrepaidAndCredit.[dblAppliedInvoiceAmount]		= @ZeroDecimal
---		,tblARPrepaidAndCredit.[dblAppliedInvoiceDetailAmount]	= @ZeroDecimal
---		,tblARPrepaidAndCredit.[ysnApplied]						= 0
---		,tblARPrepaidAndCredit.[ysnPosted]						= 0
---		,tblARPrepaidAndCredit.[intConcurrencyId]				= tblARPrepaidAndCredit.[intConcurrencyId] + 1
---	FROM
---		vyuARPrepaidAndCredit ARPAC
---	INNER JOIN
---		tblARInvoice ARI
---		ON ARPAC.[intInvoiceId] = ARI.[intInvoiceId] 
---		AND ARI.ysnPosted = 0
---	WHERE
---		tblARPrepaidAndCredit.[intPrepaidAndCreditId] = ARPAC.[intPrepaidAndCreditId]
---		AND tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId
---END TRY
---BEGIN CATCH	
---	SET @ErrorSeverity = ERROR_SEVERITY()
---	SET @ErrorNumber   = ERROR_NUMBER()
---	SET @ErrorMessage  = ERROR_MESSAGE()
---	SET @ErrorState    = ERROR_STATE()	
---	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber) 	
---END CATCH
+BEGIN TRY
+	DECLARE @intContractDetailId	INT = 0
+		  , @intItemId				INT = 0
 
+	SELECT TOP 1 @intContractDetailId = intContractDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ysnRestricted = 1 AND intContractDetailId IS NOT NULL
+	SELECT TOP 1 @intItemId = intItemId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ysnRestricted = 1 AND intContractDetailId IS NULL
 
-
-BEGIN TRY	
 	INSERT INTO tblARPrepaidAndCredit
 		([intInvoiceId]
 		,[intInvoiceDetailId]
@@ -105,33 +76,26 @@ BEGIN TRY
 	SELECT DISTINCT
 		 [intInvoiceId]						= @InvoiceId
 		,[intInvoiceDetailId]				= NULL
-		,[intPrepaymentId]					= ARPAC.[intPrepaymentId]
-		,[intPrepaymentDetailId]			= ARPAC.[intPrepaymentDetailId]
+		,[intPrepaymentId]					= I.intInvoiceId
+		,[intPrepaymentDetailId]			= ID.intInvoiceDetailId
 		,[dblPostedAmount]					= @ZeroDecimal
 		,[dblPostedDetailAmount]			= @ZeroDecimal
 		,[dblAppliedInvoiceAmount]			= @ZeroDecimal
 		,[dblAppliedInvoiceDetailAmount]	= @ZeroDecimal
 		,[ysnApplied]						= 0
 		,[ysnPosted]						= 0
-		,[intRowNumber]						= ROW_NUMBER() OVER(ORDER BY ARPAC.intInvoiceId ASC)
+		,[intRowNumber]						= ROW_NUMBER() OVER(ORDER BY I.intInvoiceId ASC)
 		,[intConcurrencyId]					= 1
-		
-	FROM
-		vyuARPrepaidAndCredit ARPAC
-	WHERE
-		ARPAC.[dblInvoiceDetailBalance] <> 0
-		AND ISNULL(ARPAC.[intInvoiceId],0) <> @InvoiceId
-		AND ARPAC.[intEntityCustomerId] = @EntityCustomerId
-		AND ARPAC.[dblInvoiceBalance] <> 0
-		AND NOT EXISTS(SELECT NULL FROM vyuARPrepaidAndCredit WHERE vyuARPrepaidAndCredit.[intEntityCustomerId] =  ARPAC.[intEntityCustomerId] AND vyuARPrepaidAndCredit.[intPrepaymentId] =  ARPAC.[intPrepaymentId] AND vyuARPrepaidAndCredit.[intInvoiceId] = @InvoiceId)
-		AND (ISNULL(ARPAC.[ysnRestricted],0) = 0
-			OR
-			(ISNULL(ARPAC.[ysnRestricted],0) = 1 AND EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID WHERE ARID.[intContractDetailId] = ARPAC.[intContractDetailId] AND ARID.[intInvoiceId] = @InvoiceId))
-			OR
-			(ISNULL(ARPAC.[ysnRestricted],0) = 1 AND ISNULL(ARPAC.[intContractDetailId],0) = 0 AND EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID WHERE ARID.[intItemId] = ARPAC.[intItemId] AND ARID.[intInvoiceId] = @InvoiceId))
-			)
-		
-		
+	FROM tblARInvoice I
+	CROSS APPLY (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail ID
+					WHERE ID.intInvoiceId = I.intInvoiceId 
+					 AND (ID.ysnRestricted = 0 OR (ID.ysnRestricted = 1 AND ID.intContractDetailId = @intContractDetailId) OR (ID.intContractDetailId IS NULL AND ID.intItemId = @intItemId))
+			) AS ID 
+	WHERE I.strTransactionType IN ('Customer Prepayment', 'Credit Memo')
+	  AND I.ysnPosted = 1
+	  AND I.ysnPaid = 0
+	  AND I.intEntityCustomerId = @EntityCustomerId
+	  AND I.intInvoiceId <> @InvoiceId
 
 END TRY
 BEGIN CATCH	

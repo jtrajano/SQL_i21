@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnCTContractApprovalExist]
 (
-	@intEntityUserSecurityId INT
+	@intEntityUserSecurityId INT,
+	@strNamespace NVARCHAR(100)
 )
 RETURNS BIT
 AS 
@@ -12,7 +13,7 @@ BEGIN
 		SELECT	AP.intEntityUserSecurityId 
 		FROM	tblSMUserSecurityRequireApprovalFor AP
 		JOIN	tblSMScreen  SC ON SC.intScreenId = AP.intScreenId
-		WHERE	SC.strNamespace = 'ContractManagement.view.Contract'
+		WHERE	SC.strNamespace = @strNamespace
 		AND		intEntityUserSecurityId = @intEntityUserSecurityId
 	)
 		SET @ysnExist = 1

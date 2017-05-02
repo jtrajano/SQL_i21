@@ -129,6 +129,8 @@ BEGIN
 					,strPerformerId = PRF.vwsls_slsmn_id
 					,C.strWorkStatus
 					,Z.strCompanyName
+					,strLocationName = loc.vwloc_loc_no
+					,CAT.strWorkOrderCategory
 				FROM tblTMCustomer CST 
 				INNER JOIN vwcusmst CUS 
 					ON CST.intCustomerNumber = CUS.A4GLIdentity 
@@ -142,6 +144,10 @@ BEGIN
 					ON WRK.intPerformerID = PRF.A4GLIdentity
 				LEFT JOIN vwtrmmst B
 					ON STE.intDeliveryTermID = B.A4GLIdentity
+				LEFT JOIN vwlocmst loc
+					ON STE.intLocationId = loc.A4GLIdentity
+				LEFT JOIN tblTMWorkOrderCategory CAT
+					ON WRK.intWorkOrderCategoryId = CAT.intWorkOrderCategoryId
 				,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 				,(SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) A 
 				WHERE STE.ysnActive = 1  AND CUS.vwcus_active_yn = ''Y'' 
@@ -231,7 +237,7 @@ BEGIN
 													CUS.vwcus_termdescription
 												END) COLLATE Latin1_General_CI_AS
 	
-				,strSiteAddress = REPLACE(STE.strSiteAddress,CHAR(13),'' '') + '', '' + RTRIM(strCity) + '', '' + RTRIM(strState) + '', '' + RTRIM(strZipCode) 
+				,strSiteAddress = REPLACE(STE.strSiteAddress,CHAR(13),'' '') + '', '' + RTRIM(STE.strCity) + '', '' + RTRIM(STE.strState) + '', '' + RTRIM(STE.strZipCode) 
 				,strSiteInstruction = STE.strInstruction
 				,dtmDateCreated = DATEADD(DAY, DATEDIFF(DAY, 0, WRK.dtmDateCreated), 0)
 				,dtmDateScheduled = WRK.dtmDateScheduled
@@ -240,6 +246,8 @@ BEGIN
 				,strPerformerId = PRF.strEntityNo
 				,C.strWorkStatus
 				,Z.strCompanyName
+				,loc.strLocationName
+				,CAT.strWorkOrderCategory
 			FROM tblTMCustomer CST 
 			INNER JOIN vyuTMCustomerEntityView CUS 
 				ON CST.intCustomerNumber = CUS.A4GLIdentity 
@@ -253,10 +261,15 @@ BEGIN
 				ON WRK.intPerformerID = PRF.intEntityId
 			LEFT JOIN tblSMTerm B
 				ON STE.intDeliveryTermID = B.intTermID
+			LEFT JOIN tblSMCompanyLocation loc
+				ON STE.intLocationId = loc.intCompanyLocationId
+			LEFT JOIN tblTMWorkOrderCategory CAT
+				ON WRK.intWorkOrderCategoryId = CAT.intWorkOrderCategoryId
 			,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 			,(SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) A 
 			WHERE STE.ysnActive = 1  AND CUS.vwcus_active_yn = ''Y'' 
-		')
+
+	')
 	END
 END
 

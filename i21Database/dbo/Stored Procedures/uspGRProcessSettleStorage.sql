@@ -84,6 +84,8 @@ BEGIN TRY
 	DECLARE @strOrderType NVARCHAR(50)
 	DECLARE @dblUnits DECIMAL(24, 10)
 	DECLARE @intShipFromId INT
+	DECLARE @dblUOMQty NUMERIC(38,20)
+	DECLARE @detailCreated AS Id
 
 	SET @dtmDate = GETDATE()
 	SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROm tblSMCompanyPreference
@@ -226,9 +228,9 @@ BEGIN TRY
 	)
 
 	SELECT @dblSpotUnits = dblSpotUnits
-		,@dblSpotPrice = dblSpotPrice
-		,@dblSpotBasis = dblSpotBasis
-		,@dblSpotCashPrice = dblSpotCashPrice
+			,@dblSpotPrice = dblSpotPrice
+			,@dblSpotBasis = dblSpotBasis
+			,@dblSpotCashPrice = dblSpotCashPrice
 	FROM OPENXML(@idoc, 'root/SettleSpot', 2) WITH 
 	(
 			dblSpotUnits DECIMAL(24, 10)
@@ -236,22 +238,28 @@ BEGIN TRY
 			,dblSpotBasis DECIMAL(24, 10)
 			,dblSpotCashPrice DECIMAL(24, 10)
 	)
-	SELECT TOP 1 @intShipFromId=intShipFromId 
-	FROM tblAPVendor 
-	WHERE intEntityVendorId =@EntityId
+	SELECT TOP 1 
+			@intShipFromId = intShipFromId 
+	FROM	tblAPVendor 
+	WHERE	intEntityVendorId =@EntityId
 	 
-	SELECT @ItemDescription = strItemNo
-	FROM tblICItem
-	WHERE intItemId = @ItemId
+	SELECT	@ItemDescription = strItemNo
+	FROM	tblICItem
+	WHERE	intItemId = @ItemId
 		
-	SELECT @FeeItemId=intItemId FROM tblGRCompanyPreference
-	SELECT @strFeeItem=strItemNo FROM tblICItem WHERE intItemId=@FeeItemId
+	SELECT	@FeeItemId = intItemId 
+	FROM	tblGRCompanyPreference
+	
+	SELECT	@strFeeItem = strItemNo 
+	FROM	tblICItem 
+	WHERE	intItemId = @FeeItemId
 
-	SELECT @IntCommodityId = a.intCommodityId
-		,@intUnitMeasureId = a.intUnitMeasureId
-	FROM tblICCommodityUnitMeasure a
-	JOIN tblICItem b ON b.intCommodityId = a.intCommodityId
-	WHERE b.intItemId = @ItemId AND a.ysnStockUnit = 1
+	SELECT	@IntCommodityId = a.intCommodityId
+			,@intUnitMeasureId = a.intUnitMeasureId
+	FROM	tblICCommodityUnitMeasure a JOIN tblICItem b 
+				ON b.intCommodityId = a.intCommodityId
+	WHERE	b.intItemId = @ItemId 
+			AND a.ysnStockUnit = 1
 
 	IF @intUnitMeasureId IS NULL
 	BEGIN
@@ -259,33 +267,41 @@ BEGIN TRY
 		RETURN;
 	END
 
-	SELECT TOP 1 @intStorageChargeItemId = intItemId
-	FROM tblICItem
-	WHERE strType = 'Other Charge' AND strCostType = 'Storage Charge' AND intCommodityId = @IntCommodityId
+	SELECT	TOP 1 
+			@intStorageChargeItemId = intItemId
+	FROM	tblICItem
+	WHERE	strType = 'Other Charge' 
+			AND strCostType = 'Storage Charge' 
+			AND intCommodityId = @IntCommodityId
 
 	IF @intStorageChargeItemId IS NULL
 	BEGIN
-		SELECT TOP 1 @intStorageChargeItemId = intItemId
-		FROM tblICItem
-		WHERE strType = 'Other Charge' AND strCostType = 'Storage Charge' AND intCommodityId IS NULL
+		SELECT	TOP 
+				1 @intStorageChargeItemId = intItemId
+		FROM	tblICItem
+		WHERE	strType = 'Other Charge' 
+				AND strCostType = 'Storage Charge' 
+				AND intCommodityId IS NULL
 	END
 
-	SELECT @StorageChargeItemDescription = strDescription
-	FROM tblICItem
-	WHERE intItemId = @intStorageChargeItemId
+	SELECT	@StorageChargeItemDescription = strDescription
+	FROM	tblICItem
+	WHERE	intItemId = @intStorageChargeItemId
 
 	IF NOT EXISTS (SELECT 1 FROM tblICItemUOM WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId)
 	BEGIN
 		RAISERROR ('The stock UOM of the commodity must exist in the conversion table of the item',16,1);
 	END
 
-	SELECT @intSourceItemUOMId = intItemUOMId
-	FROM tblICItemUOM UOM
-	WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId
+	SELECT	@intSourceItemUOMId = intItemUOMId
+			,@dblUOMQty=UOM.dblUnitQty
+	FROM	tblICItemUOM UOM
+	WHERE	intItemId = @ItemId 
+			AND intUnitMeasureId = @intUnitMeasureId
 
-	SELECT @SettleStorageKey = MIN(intSettleStorageKey)
-	FROM @SettleStorage
-	WHERE dblRemainingUnits > 0
+	SELECT	@SettleStorageKey = MIN(intSettleStorageKey)
+	FROM	@SettleStorage
+	WHERE	dblRemainingUnits > 0
 
 	SET @intCustomerStorageId = NULL
 	SET @dblStorageUnits = NULL
@@ -301,16 +317,16 @@ BEGIN TRY
 
 	WHILE @SettleStorageKey > 0
 	BEGIN
-		SELECT @intCustomerStorageId = intCustomerStorageId
-			,@dblStorageUnits = dblRemainingUnits
-			,@dblOpenBalance = dblOpenBalance
-			,@strStorageTicketNumber = strStorageTicketNumber
-			,@intCompanyLocationId = intCompanyLocationId
-			,@intStorageTypeId = intStorageTypeId
-			,@intStorageScheduleId = intStorageScheduleId
-			,@DPContractHeaderId = CASE WHEN dblStorageUnits = dblRemainingUnits THEN intContractHeaderId ELSE 0 END
-		FROM @SettleStorage
-		WHERE intSettleStorageKey = @SettleStorageKey
+		SELECT	@intCustomerStorageId = intCustomerStorageId
+				,@dblStorageUnits = dblRemainingUnits
+				,@dblOpenBalance = dblOpenBalance
+				,@strStorageTicketNumber = strStorageTicketNumber
+				,@intCompanyLocationId = intCompanyLocationId
+				,@intStorageTypeId = intStorageTypeId
+				,@intStorageScheduleId = intStorageScheduleId
+				,@DPContractHeaderId = CASE WHEN dblStorageUnits = dblRemainingUnits THEN intContractHeaderId ELSE 0 END
+		FROM	@SettleStorage
+		WHERE	intSettleStorageKey = @SettleStorageKey
 
 		--Storage Due		
 		SET @dblStorageDuePerUnit = 0
@@ -375,9 +391,8 @@ BEGIN TRY
 		--Discount
 		IF NOT EXISTS ( SELECT 1 FROM @SettleVoucherCreate WHERE intCustomerStorageId = @intCustomerStorageId AND intItemId IN 
 						(
-							SELECT DItem.intItemId
-							FROM tblICItem DItem
-							JOIN tblGRDiscountScheduleCode a ON a.intItemId = DItem.intItemId
+							SELECT	DItem.intItemId
+							FROM	tblICItem DItem JOIN tblGRDiscountScheduleCode a ON a.intItemId = DItem.intItemId
 						)
 				      )
 			AND EXISTS 
@@ -419,9 +434,9 @@ BEGIN TRY
 				AND (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
 				AND QM.intTicketFileId = @intCustomerStorageId
 		END
-		--Unpaid Fee
-		
-		IF NOT EXISTS (SELECT 1 FROM @SettleVoucherCreate WHERE intCustomerStorageId = @intCustomerStorageId AND intItemId =@FeeItemId AND intItemSort = 4)
+
+		--Unpaid Fee		
+		IF	NOT EXISTS (SELECT 1 FROM @SettleVoucherCreate WHERE intCustomerStorageId = @intCustomerStorageId AND intItemId =@FeeItemId AND intItemSort = 4)
 			AND EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId AND ISNULL(dblFeesDue,0)< >ISNULL(dblFeesPaid,0))
 		BEGIN
 			INSERT INTO @SettleVoucherCreate 
@@ -803,11 +818,9 @@ BEGIN TRY
 			BREAK;
 	END
 	
-	---Creating Receipt and Voucher.
-	
+	---Creating Receipt and Voucher.	
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3  	
-	DECLARE @ItemsToStorage AS ItemCostingTableType
-		   ,@ItemsToPost  AS ItemCostingTableType
+	DECLARE @ItemsToStorage AS ItemCostingTableType		   
 		   ,@strBatchId AS NVARCHAR(20)
 		   ,@ReceiptStagingTable ReceiptStagingTable 
 		   ,@OtherCharges ReceiptOtherChargesTableType 
@@ -827,11 +840,17 @@ BEGIN TRY
 		SET @strOrderType=NULL
 		SET @dblUnits=NULL
 		
-		SELECT @LocationId = intCompanyLocationId,@intCustomerStorageId=intCustomerStorageId,@strOrderType=strOrderType
-		FROM   @SettleVoucherCreate
-		WHERE intSettleVoucherKey = @intSettleVoucherKey
+		SELECT	@LocationId = intCompanyLocationId
+				,@intCustomerStorageId = intCustomerStorageId
+				,@strOrderType = strOrderType
+				,@dblUnits=dblUnits
+		FROM	@SettleVoucherCreate
+		WHERE	intSettleVoucherKey = @intSettleVoucherKey
 		
-		SELECT @intItemLocationId=intItemLocationId FROM tblICItemLocation WHERE intItemId=@ItemId AND intLocationId=@LocationId
+		SELECT	@intItemLocationId = intItemLocationId 
+		FROM	tblICItemLocation 
+		WHERE	intItemId = @ItemId 
+				AND intLocationId=@LocationId
 		
 		BEGIN 
 			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
@@ -839,95 +858,54 @@ BEGIN TRY
 		END
 		
 		DELETE FROM @ItemsToStorage
-		
-		DELETE FROM @ItemsToPost	 
-		
+
 		INSERT INTO @ItemsToStorage
 		(
-		  intItemId  
-		 ,intItemLocationId	
-		 ,intItemUOMId  
-		 ,dtmDate  
-		 ,dblQty  
-		 ,dblUOMQty  
-		 ,dblCost  
-		 ,dblSalesPrice  
-		 ,intCurrencyId  
-		 ,dblExchangeRate  
-		 ,intTransactionId  
-		 ,intTransactionDetailId 
-		 ,strTransactionId  
-		 ,intTransactionTypeId
-		 ,intSubLocationId
-		 ,intStorageLocationId
-		 ,ysnIsStorage
+			  intItemId  
+			 ,intItemLocationId	
+			 ,intItemUOMId  
+			 ,dtmDate  
+			 ,dblQty  
+			 ,dblUOMQty  
+			 ,dblCost  
+			 ,dblSalesPrice  
+			 ,intCurrencyId  
+			 ,dblExchangeRate  
+			 ,intTransactionId  
+			 ,intTransactionDetailId 
+			 ,strTransactionId  
+			 ,intTransactionTypeId
+			 ,intSubLocationId
+			 ,intStorageLocationId
+			 ,ysnIsStorage
 		)
 		SELECT  
-		 SV.[intItemId]
-		,@intItemLocationId	
-		,@intSourceItemUOMId
-		,GetDATE()
-		,-SV.[dblUnits]
-		,SV.[dblUnits]	
-		,SV.[dblCashPrice]
-		,0.00
-		,@intDefaultCurrencyId
-		,1
-		,1
-		,SV.[intCustomerStorageId]
-		,@strStorageAdjustment
-		,4
-		,CS.intCompanyLocationSubLocationId
-		,CS.intStorageLocationId
-		,1
-		FROM @SettleVoucherCreate SV
-		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
-		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=0
-		WHERE SV.intCustomerStorageId=@intCustomerStorageId AND SV.intItemSort=1 AND SV.IsProcessed = 0 AND SV.strOrderType=@strOrderType   
-		ORDER BY SV.intItemSort
-
-		INSERT INTO @ItemsToPost
-		(
-		  intItemId  
-		 ,intItemLocationId	
-		 ,intItemUOMId  
-		 ,dtmDate  
-		 ,dblQty  
-		 ,dblUOMQty  
-		 ,dblCost  
-		 ,dblSalesPrice  
-		 ,intCurrencyId  
-		 ,dblExchangeRate  
-		 ,intTransactionId  
-		 ,intTransactionDetailId 
-		 ,strTransactionId  
-		 ,intTransactionTypeId
-		 ,intSubLocationId
-		 ,intStorageLocationId
-		 ,ysnIsStorage
-		)
-		SELECT  
-		 SV.[intItemId]
-		,@intItemLocationId	
-		,@intSourceItemUOMId
-		,GetDATE()
-		,-SV.[dblUnits]
-		,SV.[dblUnits]	
-		,SV.[dblCashPrice]
-		,0.00
-		,@intDefaultCurrencyId
-		,1
-		,1
-		,SV.[intCustomerStorageId]
-		,@strStorageAdjustment
-		,4
-		,CS.intCompanyLocationSubLocationId
-		,CS.intStorageLocationId
-		,0
-		FROM @SettleVoucherCreate SV
-		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
-		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=1
-		WHERE SV.intCustomerStorageId=@intCustomerStorageId AND SV.intItemSort=1 AND SV.IsProcessed = 0 AND SV.strOrderType=@strOrderType     
+			intItemId = SV.[intItemId]
+			,intItemLocationId = @intItemLocationId	
+			,intItemUOMId = @intSourceItemUOMId
+			,dtmDate = GETDATE() 
+			,dblQty = -SV.[dblUnits]
+			,dblUOMQty = SV.[dblUnits]
+			,dblCost = SV.[dblCashPrice]
+			,dblSalesPrice = 0.00
+			,intCurrencyId = @intDefaultCurrencyId
+			,dblExchangeRate = 1
+			,intTransactionId = 1
+			,intTransactionDetailId = SV.[intCustomerStorageId]
+			,strTransactionId = @strStorageAdjustment
+			,intTransactionTypeId = 4
+			,intSubLocationId = CS.intCompanyLocationSubLocationId
+			,intStorageLocationId = CS.intStorageLocationId
+			,ysnIsStorage = 1
+		FROM	@SettleVoucherCreate SV JOIN tblGRCustomerStorage CS 
+					ON CS.intCustomerStorageId = SV.intCustomerStorageId
+				JOIN tblGRStorageType St 
+					ON St.intStorageScheduleTypeId = CS.intStorageTypeId 
+					AND St.ysnDPOwnedType = 0
+		WHERE	SV.intCustomerStorageId=@intCustomerStorageId 
+				AND SV.intItemSort = 1 
+				AND SV.IsProcessed = 0 
+				AND SV.strOrderType = @strOrderType   
 		ORDER BY SV.intItemSort
 						
 		--Reduce the On-Storage Quantity		
@@ -939,225 +917,317 @@ BEGIN TRY
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;
 		END
 
-		BEGIN
-			 EXEC uspICPostCosting 
-				  @ItemsToPost
-				, @strBatchId
-				,'Cost of Goods'
-				, @UserKey
-			IF @@ERROR <> 0 GOTO SettleStorage_Exit;
-		END
-
-		-- Create the temp table used by uspICAddItemReceipt
-		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
+		-- Do a cost adjustment against the inventory receipt created by the scale ticket. 
+		-- Cost adjustment will not require stock qty change. It will only update the cost and the valuation of the stock. 
 		BEGIN 
-			CREATE TABLE #tmpAddItemReceiptResult (
-				intSourceId INT
-				,intInventoryReceiptId INT
-			)
-		END
-			
-		BEGIN
-			DELETE FROM @ReceiptStagingTable
-			DELETE FROM @OtherCharges
-						
-			INSERT INTO @ReceiptStagingTable
-			(
-				 strReceiptType
-				,intEntityVendorId
-				,intShipFromId
-				,intLocationId
-				,intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,strBillOfLadding
-				,intContractHeaderId
-				,intContractDetailId
-				,dtmDate
-				,intShipViaId
-				,dblQty
-				,dblCost
-				,intCurrencyId
-				,dblExchangeRate
-				,intLotId
-				,intSubLocationId
-				,intStorageLocationId
-				,ysnIsStorage
-				,dblFreightRate
-				,intSourceId	
-				,intSourceType		 	
-				,dblGross
-				,dblNet
-				,intInventoryReceiptId
-				,dblSurcharge
-				,ysnFreightInPrice
-				,strActualCostId
-				,intTaxGroupId
-				,strVendorRefNo
-				,strSourceId
-				,strSourceScreenName
-			)	
-			
-			SELECT 
-				 strReceiptType				= @strOrderType 
-				,intEntityVendorId			= @EntityId
-				,intShipFromId				= @intShipFromId
-				,intLocationId				= SV.intCompanyLocationId
-				,intItemId					= SV.[intItemId]
-				,intItemLocationId			= @intItemLocationId
-				,intItemUOMId				= @intSourceItemUOMId	   
-				,strBillOfLadding			= NULL
-				,intContractHeaderId		= SV.[intContractHeaderId]
-				,intContractDetailId		= SV.[intContractDetailId]
-				,dtmDate					= GetDate()
-				,intShipViaId				= NULL
-				,dblQty						= SV.[dblUnits]
-				,dblCost					= SV.[dblCashPrice]
-				,intCurrencyId				= @intCurrencyId
-				,dblExchangeRate			= 1 
-				,intLotId					= NULL
-				,intSubLocationId			= NULL
-				,intStorageLocationId		= NULL
-				,ysnIsStorage				= 0 
-				,dblFreightRate				= 0
-				,intSourceId				= SV.[intCustomerStorageId]
-				,intSourceType		 		= 4
-				,dblGross					= SV.[dblUnits]
-				,dblNet						= SV.[dblUnits]
-				,intInventoryReceiptId		= NULL
-				,dblSurcharge				= 0
-				,ysnFreightInPrice			= 0
-				,strActualCostId			= NULL 											
-				,intTaxGroupId				= NULL
-				,strVendorRefNo				= NULL
-				,strSourceId				= NULL
-				,strSourceScreenName		= 'Settle Storage'
-			FROM @SettleVoucherCreate SV
-			WHERE SV.intCustomerStorageId=@intCustomerStorageId  AND SV.IsProcessed = 0 AND SV.intItemSort=1 AND SV.strOrderType=@strOrderType ORDER BY intSettleVoucherKey 
-			
-			SELECT @dblUnits=SUM(dblUnits) FROM @SettleVoucherCreate SV
-			WHERE SV.intCustomerStorageId=@intCustomerStorageId  AND SV.IsProcessed = 0 AND SV.intItemSort=1 AND SV.strOrderType=@strOrderType
-			
-			INSERT INTO @OtherCharges
-			(
-				[intEntityVendorId] 
-				,[strBillOfLadding] 
-				,[strReceiptType] 
-				,[intLocationId] 
-				,[intShipViaId] 
-				,[intShipFromId] 
-				,[intCurrencyId]  	
-				,[intChargeId] 
-				,[ysnInventoryCost] 
-				,[strCostMethod] 
-				,[dblRate] 
-				,[intCostUOMId] 
-				,[intOtherChargeEntityVendorId] 
-				,[dblAmount] 
-				,[strAllocateCostBy] 
-				,[intContractHeaderId]
-				,[intContractDetailId] 
-				,[ysnAccrue]
-				,[ysnPrice]
-			) 
-		    SELECT	
-		     [intEntityVendorId]				= @EntityId
-			,[strBillOfLadding]					= NULL
-			,[strReceiptType]					= @strOrderType
-			,[intLocationId]					= SV.intCompanyLocationId
-			,[intShipViaId]						= NULL
-			,[intShipFromId]					= @intShipFromId
-			,[intCurrencyId]  					= @intCurrencyId
-			,[intChargeId]						= SV.[intItemId]
-			,[ysnInventoryCost]					= 0
-			,[strCostMethod]					= Item.strCostMethod--'Amount'
-			,[dblRate]							= ABS(SV.[dblCashPrice])
-			,[intCostUOMId]						= Item.intCostUOMId
-			,[intOtherChargeEntityVendorId]		= NULL
-			,[dblAmount]						= ABS(SV.[dblCashPrice])* CASE 
-																		    WHEN SV.intItemSort = 3 THEN dbo.fnGRCalculateDiscountUnit(@intCustomerStorageId,SV.intTicketDiscountId,@dblUnits)
-																			ELSE @dblUnits 
-																		  END
-			,[strAllocateCostBy]				= 'Unit'
-			,[intContractHeaderId]				= SV.[intContractHeaderId]
-			,[intContractDetailId]				= SV.[intContractDetailId]
-			,[ysnAccrue]						= CASE WHEN SV.[dblCashPrice] < 0 THEN 0 ELSE 1 END
-			,[ysnPrice]							= CASE WHEN SV.[dblCashPrice] < 0 THEN 1 ELSE 0 END
-			FROM @SettleVoucherCreate SV
-			JOIN tblICItem Item ON Item.intItemId = SV.[intItemId]
-			WHERE SV.intCustomerStorageId=@intCustomerStorageId  AND SV.IsProcessed = 0 AND SV.intItemSort <> 1  ORDER BY intSettleVoucherKey
+			DECLARE @adjustCostOfDelayedPricingStock AS ItemCostAdjustmentTableType
+			DECLARE @GLEntries AS RecapTableType 
 
-			EXEC dbo.uspICAddItemReceipt 
-				 @ReceiptStagingTable
-				,@OtherCharges
-				,@UserKey;
-			IF @@ERROR <> 0 GOTO SettleStorage_Exit;
-		END
-		  
-		IF EXISTS (SELECT TOP 1 1 FROM #tmpAddItemReceiptResult)
+			INSERT INTO @adjustCostOfDelayedPricingStock (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[dtmDate] 
+				,[dblQty] 
+				,[dblUOMQty] 
+				,[intCostUOMId] 
+				,[dblVoucherCost] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[intTransactionId] 
+				,[intTransactionDetailId] 
+				,[strTransactionId] 
+				,[intTransactionTypeId] 
+				,[intLotId] 
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
+				,[ysnIsStorage] 
+				,[strActualCostId] 
+				,[intSourceTransactionId] 
+				,[intSourceTransactionDetailId] 
+				,[strSourceTransactionId] 
+				,[intFobPointId]
+				,[intInTransitSourceLocationId]
+			)
+			SELECT
+					[intItemId]							=	SV.[intItemId]
+					,[intItemLocationId]				=	@intItemLocationId
+					,[intItemUOMId]						=   @intSourceItemUOMId
+					,[dtmDate] 							=	GETDATE()
+					,[dblQty] 							=	SV.[dblUnits]
+					,[dblUOMQty] 						=	@dblUOMQty
+					,[intCostUOMId]						=	@intSourceItemUOMId
+					,[dblNewCost] 						=	SV.[dblCashPrice]						
+															-- NOTE: If Settlement will have multi-currency, it has to convert the foreign amount to functional currency. See commented code below as an example:
+															--CASE WHEN [Contract Currency] <> @intFunctionalCurrencyId THEN 
+															--		-- Convert the settlement cost to the functional currency. 
+															--		SV.[dblCashPrice] * ISNULL([Exchange Rate], 0) 
+															--	 ELSE 
+															--		SV.[dblCashPrice]
+															--END 
+
+					,[intCurrencyId] 					=	@intDefaultCurrencyId -- It is always in functional currency. 
+					,[dblExchangeRate] 					=	1 -- Exchange rate is always 1. 
+					,[intTransactionId]					=	SV.[intCustomerStorageId]
+					,[intTransactionDetailId] 			=	SV.[intCustomerStorageId]
+					,[strTransactionId] 				=	@TicketNo
+					,[intTransactionTypeId] 			=	transType.intTransactionTypeId
+					,[intLotId] 						=	NULL 
+					,[intSubLocationId] 				=	NULL 
+					,[intStorageLocationId] 			=	NULL 
+					,[ysnIsStorage] 					=	0
+					,[strActualCostId] 					=	NULL 
+					,[intSourceTransactionId] 			=	r.intInventoryReceiptId
+					,[intSourceTransactionDetailId] 	=	ri.intInventoryReceiptItemId
+					,[strSourceTransactionId] 			=	r.strReceiptNumber
+					,[intFobPointId]					=	NULL 
+					,[intInTransitSourceLocationId]		=	NULL 
+			FROM	@SettleVoucherCreate SV INNER JOIN tblGRCustomerStorage CS 
+						ON CS.intCustomerStorageId = SV.intCustomerStorageId
+					INNER JOIN tblGRStorageType St 
+						ON St.intStorageScheduleTypeId = CS.intStorageTypeId 
+						AND St.ysnDPOwnedType = 1
+					INNER JOIN tblSCTicket t
+						ON t.intTicketId = CS.intTicketId 
+					INNER JOIN (
+						tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+							ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+							AND r.strReceiptType = 'Purchase Contract'
+							AND r.intSourceType = 1 -- '1 = Scale' 
+					)
+						ON ri.intSourceId = t.intTicketId
+						AND ri.intLineNo = t.intContractId
+						AND ri.intItemId = t.intItemId
+					LEFT JOIN tblICInventoryTransactionType transType
+						ON transType.strName = 'Settle Storage'
+
+			WHERE	SV.intCustomerStorageId = @intCustomerStorageId 
+					AND SV.intItemSort = 1 
+					AND SV.IsProcessed = 0 
+					AND SV.strOrderType = @strOrderType     
+			ORDER BY SV.intItemSort						
+
+			-- NOTES: 
+			-- tblICInventoryReceiptItem.intSourceId	= Scale Ticket Id
+			-- tblICInventoryReceiptItem.intOrderId		= Contract Header Id 
+			-- tblICInventoryReceiptItem.intLineNo		= Contract Detail Id
+			-- tblSCTicket.intContractId				= Contract Detail Id
+
+			IF EXISTS(SELECT TOP 1 1 FROM @adjustCostOfDelayedPricingStock)
+			BEGIN
+				INSERT INTO @GLEntries (
+					dtmDate						
+					,strBatchId					
+					,intAccountId				
+					,dblDebit					
+					,dblCredit					
+					,dblDebitUnit				
+					,dblCreditUnit				
+					,strDescription				
+					,strCode					
+					,strReference				
+					,intCurrencyId				
+					,dblExchangeRate			
+					,dtmDateEntered				
+					,dtmTransactionDate			
+					,strJournalLineDescription  
+					,intJournalLineNo			
+					,ysnIsUnposted				
+					,intUserId					
+					,intEntityId				
+					,strTransactionId			
+					,intTransactionId			
+					,strTransactionType			
+					,strTransactionForm			
+					,strModuleName				
+					,intConcurrencyId			
+					,dblDebitForeign			
+					,dblDebitReport				
+					,dblCreditForeign			
+					,dblCreditReport			
+					,dblReportingRate			
+					,dblForeignRate						
+				)
+				EXEC uspICPostCostAdjustment @adjustCostOfDelayedPricingStock, @strBatchId, @UserKey
+			END
+
+			IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+			BEGIN 
+				EXEC uspGLBookEntries @GLEntries, 1
+			END 			
+		END 
+
+		--Get IR id created from the Scale Ticket
 		BEGIN 
 			SELECT TOP 1 
-					@strReceiptNumber = strReceiptNumber
-					,@intReceiptId = r.intInventoryReceiptId
-			FROM	#tmpAddItemReceiptResult result INNER JOIN tblICInventoryReceipt r
-						ON result.intInventoryReceiptId = r.intInventoryReceiptId
-						
-			IF @intReceiptId IS NOT NULL 
+			@intReceiptId = r.intInventoryReceiptId
+			FROM	tblICInventoryReceipt r  
+			JOIN    tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId=r.intInventoryReceiptId
+			JOIN	tblSCTicket SC ON SC.intTicketId=ri.intSourceId	
+			JOIN    tblGRCustomerStorage CS ON CS.intTicketId=SC.intTicketId					
+			WHERE  r.intSourceType=1 AND CS.intCustomerStorageId = @intCustomerStorageId
+		END 
+
+		-- Create a new voucher 
+		IF @intReceiptId IS NOT NULL 
+		BEGIN 
+			-- Work-around. Add dummy cost on the IR before converting it to Voucher
+			UPDATE	ri
+			SET		ri.dblUnitCost = 1
+					,ri.dblLineTotal = 1
+			FROM	tblICInventoryReceiptItem ri
+			WHERE	ri.intInventoryReceiptId = @intReceiptId
+
+			EXEC uspICProcessToBill 
+					@intReceiptId
+					, @UserKey
+					, @intBillId OUTPUT 
+
+			-- Work-around. Put the cost back to zero. 
+			UPDATE	ri
+			SET		ri.dblUnitCost = 0
+					,ri.dblLineTotal = 0
+			FROM	tblICInventoryReceiptItem ri
+			WHERE	ri.intInventoryReceiptId = @intReceiptId
+
+			-- Update the cost of the voucher detail. 
+			UPDATE	bd
+			SET		 bd.dblCost = SV.[dblCashPrice]
+					,bd.dblQtyOrdered  = CASE WHEN SV.intItemSort = 1 THEN @dblUnits ELSE  CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END END 
+					,bd.dblQtyReceived = CASE WHEN SV.intItemSort = 1 THEN @dblUnits ELSE  CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END END 
+					,bd.dblTotal = ROUND(ISNULL(@dblUnits, 0) * SV.[dblCashPrice], 2) 
+					,bd.intInventoryReceiptItemId = NULL -- and disconnect the IR from the Voucher to avoid double cost-adjustment. 					
+			FROM	tblAPBill b 
+			JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
+			JOIN @SettleVoucherCreate SV  ON SV.intItemId=bd.intItemId
+			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
+			JOIN tblSCTicket SC ON SC.intTicketId=CS.intTicketId		
+			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort=1
+			AND   b.intBillId = @intBillId
+			
+			UPDATE	bd
+			SET  bd.intContractHeaderId= CASE WHEN @strOrderType='Direct' THEN NULL ELSE SV.intContractHeaderId END
+				,bd.intContractDetailId=CASE  WHEN @strOrderType='Direct' THEN NULL ELSE SV.intContractDetailId END
+			FROM	tblAPBill b 
+			JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
+			JOIN @SettleVoucherCreate SV  ON SV.intItemId=bd.intItemId			
+			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort=1
+			AND   b.intBillId = @intBillId
+			
+			DELETE tblAPBillDetail WHERE intBillId = @intBillId AND intItemId <> @ItemId  
+			DELETE FROM @detailCreated
+
+			INSERT INTO tblAPBillDetail
+			(
+			 intBillId
+			,intAccountId
+			,intItemId
+			,intContractHeaderId
+			,intContractDetailId
+			,dblTotal
+			,dblQtyOrdered
+			,dblQtyReceived			
+			,dblRate
+			,dblCost
+			,intCurrencyId
+			)			
+			SELECT 
+			 intBillId = @intBillId 
+			,intAccountId = dbo.[fnGetItemGLAccount](SV.intItemId, @intItemLocationId, 'Other Charge Expense')
+			,intItemId = SV.intItemId
+			,intContractHeaderId = NULL
+			,intContractDetailId = NULL
+			,dblTotal = @dblUnits * SV.dblCashPrice 					
+			,dblQtyOrdered =  CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END
+			,dblQtyReceived = CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END			
+			,dblRate = 0
+			,dblCost = @dblUnits * SV.dblCashPrice
+			,intCurrencyId = @intCurrencyId
+			FROM   @SettleVoucherCreate SV
+			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort <> 1
+			--AND   SV.intItemId NOT IN (SELECT intItemId FROM tblAPBillDetail Where intBillId=@intBillId)
+			
+			INSERT INTO @detailCreated
+			SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId=@intBillId
+			
+			EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+										
+			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
+
+			-- Ensure the exchange rate in the voucher has a default value of 1. 
+			UPDATE	bd
+			SET		bd.dblRate = CASE WHEN ISNULL(bd.dblRate, 0) = 0 THEN 1 ELSE bd.dblRate END 
+			FROM	tblAPBillDetail bd
+			WHERE	bd.intBillId = @intBillId
+
+			-- Update the vendor order number and voucher total. 
+			SET @strStorageTicketNumber=NULL
+			SELECT @strStorageTicketNumber= strStorageTicketNumber FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId 			
+			
+			UPDATE	tblAPBill 
+			SET		strVendorOrderNumber = 'STR-'+@strStorageTicketNumber+'/'+strBillId
+					,dblTotal = (SELECT SUM(bd.dblTotal) FROM tblAPBillDetail bd WHERE bd.intBillId = @intBillId)
+			WHERE	intBillId = @intBillId
+
+			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
+		END 
+
+		-- Auto Post the Voucher 
+		IF @intBillId IS NOT NULL 
+		BEGIN 
+			EXEC [dbo].[uspAPPostBill]
+				@post = 1
+				,@recap = 0
+				,@isBatch = 0
+				,@param = @intBillId
+				,@userId = @UserKey
+				,@success = @success OUTPUT
+			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
+		END
+
+		-- TODO: 
+		-- 1. Tax recomputation because of the new cost. Ask help from AP on how to do it. Or maybe ask your PM if you need to compute any taxes. 
+		-- 2. Add any other charges involved with the settlement. 
+
+		-- Update the grain history. Link the history to the Voucher. 
+		BEGIN --CASE WHEN @strOrderType='Direct' THEN NULL ELSE bd.intContractHeaderId END
+			IF @strOrderType='Direct'
 			BEGIN
-									
-			EXEC uspICPostInventoryReceipt 
-					  @ysnPost = 1
-					, @ysnRecap = 0
-					, @strTransactionId = @strReceiptNumber
-					, @intEntityUserSecurityId = @UserKey
-				IF @@ERROR <> 0 GOTO SettleStorage_Exit;
-
+			UPDATE SH
+			SET		SH.intBillId = @intBillId
+			FROM	tblGRStorageHistory SH
+			WHERE	SH.strType = 'Settlement' AND SH.intCustomerStorageId = @intCustomerStorageId 
+					AND SH.strSettleTicket = @TicketNo
+					AND SH.intBillId IS NULL					
+					AND SH.intContractHeaderId IS NULL
+					  
 			END
-			
-			IF @intReceiptId IS NOT NULL 
-			BEGIN 
-				EXEC uspICProcessToBill 
-						@intReceiptId
-						, @UserKey
-						, @intBillId OUTPUT 
-						
-				UPDATE tblAPBill SET strVendorOrderNumber=@TicketNo WHERE intBillId=@intBillId
-				
-				UPDATE SH
-				SET  SH.intInventoryReceiptId = @intReceiptId
-					,SH.intBillId = @intBillId
-				FROM tblGRStorageHistory SH
-				JOIN tblICInventoryReceiptItem RL ON RL.intSourceId = SH.intCustomerStorageId
-				JOIN tblICInventoryReceipt RH ON RH.intInventoryReceiptId = RL.intInventoryReceiptId AND ISNULL(RL.intOrderId,0)=ISNULL(SH.intContractHeaderId,0)
-				WHERE SH.strType = 'Settlement' AND SH.strSettleTicket = @TicketNo AND RH.intInventoryReceiptId = @intReceiptId	
-				
-				IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
-			END 
-			IF @intBillId IS NOT NULL 
-			BEGIN 
-				EXEC [dbo].[uspAPPostBill]
-					@post = 1
-					,@recap = 0
-					,@isBatch = 0
-					,@param = @intBillId
-					,@userId = @UserKey
-					,@success = @success OUTPUT
-				IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
-			END
-
-			
-			DELETE FROM #tmpAddItemReceiptResult
-			WHERE	intInventoryReceiptId = @intReceiptId
+			ELSE
+			BEGIN
+			UPDATE SH
+			SET		SH.intBillId = @intBillId
+			FROM	tblGRStorageHistory SH 
+			JOIN    tblAPBillDetail BD ON BD.intContractHeaderId=SH.intContractHeaderId
+			WHERE	SH.strType = 'Settlement' AND SH.intCustomerStorageId = @intCustomerStorageId
+					AND SH.strSettleTicket = @TicketNo
+					AND SH.intBillId IS NULL
+					AND BD.intBillId=@intBillId
+					AND SH.intContractHeaderId > 0
+					
+			END	
+			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
 		END 
 		
-		UPDATE @SettleVoucherCreate
-		SET IsProcessed = 1
-		WHERE intCustomerStorageId=@intCustomerStorageId AND strOrderType=@strOrderType 
+		UPDATE	@SettleVoucherCreate
+		SET		IsProcessed = 1
+		WHERE	intCustomerStorageId = @intCustomerStorageId 
+				AND strOrderType = @strOrderType 
 		
-		SELECT @intSettleVoucherKey = MIN(intSettleVoucherKey)
-		FROM @SettleVoucherCreate
-		WHERE intSettleVoucherKey > @intSettleVoucherKey AND IsProcessed = 0 AND strOrderType IS NOT NULL
-		
+		SELECT	@intSettleVoucherKey = MIN(intSettleVoucherKey)
+		FROM	@SettleVoucherCreate
+		WHERE	intSettleVoucherKey > @intSettleVoucherKey 
+				AND IsProcessed = 0 
+				AND strOrderType IS NOT NULL		
 	END
 	
 	SettleStorage_Exit: 

@@ -8,40 +8,44 @@ AS
 			UP.strValue
 	FROM	(
 				SELECT	AD.intPContractDetailId intContractDetailId,
-						LTRIM(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,SUM(SI.dblQuantity))AS NUMERIC(18, 6))) Delivered,
-						LTRIM(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity - SUM(SI.dblQuantity)) AS NUMERIC(18, 6))) AS [To be Delivered]
+						dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(ISNULL(MAX(SI.intItemId),MAX(LD.intItemId)),ISNULL(MAX(WU.intUnitMeasureId),MAX(LO.intWeightUnitMeasureId)),LP.intWeightUOMId,SUM(ISNULL(SI.dblQuantity,LD.dblQuantity)))AS NUMERIC(18, 6))) Delivered,
+						dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(ISNULL(MAX(SI.intItemId),MAX(LD.intItemId)),ISNULL(MAX(WU.intUnitMeasureId),MAX(LO.intWeightUnitMeasureId)),LP.intWeightUOMId,MAX(CD.dblQuantity) - SUM(ISNULL(SI.dblQuantity,LD.dblQuantity))) AS NUMERIC(18, 6))) AS [To be Delivered]
 				FROM	tblLGPickLotDetail			PL
 				JOIN	tblLGPickLotHeader			LH	ON	LH.intPickLotHeaderId		=	PL.intPickLotHeaderId
-				JOIN	tblLGAllocationDetail		AD	ON	AD.intAllocationDetailId	=	PL.intAllocationDetailId
-				JOIN	tblICInventoryShipmentItem	SI	ON	SI.intSourceId				=	PL.intPickLotDetailId
-				JOIN	tblICInventoryShipment		SH	ON	SH.intInventoryShipmentId	=	SI.intInventoryShipmentId AND SH.intOrderType = 1 AND intSourceType = 3
-				JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	AD.intPContractDetailId		
+				JOIN	tblLGAllocationDetail		AD	ON	AD.intAllocationDetailId	=	PL.intAllocationDetailId	
+				JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	AD.intPContractDetailId		LEFT
+				JOIN	tblLGLoadDetail				LD	ON	LD.intPickLotDetailId		=	PL.intPickLotDetailId		LEFT
+				JOIN	tblLGLoad					LO	ON	LO.intLoadId				=	LD.intLoadId				LEFT
+				JOIN	tblICInventoryShipmentItem	SI	ON	SI.intSourceId				=	PL.intPickLotHeaderId		LEFT
+				JOIN	tblICInventoryShipment		SH	ON	SH.intInventoryShipmentId	=	SI.intInventoryShipmentId 
+														AND SH.intOrderType				=	1 
+														AND SH.intSourceType			=	3							LEFT
+				
 				JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId				=	SI.intItemUOMId	CROSS	
 				APPLY	tblLGCompanyPreference		LP 	
 				GROUP BY AD.intPContractDetailId,
-						CD.dblQuantity,
-						SI.intItemId,
-						WU.intUnitMeasureId,
-						LP.intWeightUOMId
+						 LP.intWeightUOMId
 				
 				UNION ALL
 				
 				SELECT	AD.intSContractDetailId,
-						LTRIM(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,SUM(SI.dblQuantity))AS NUMERIC(18, 6))) Delivered,
-						LTRIM(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity - SUM(SI.dblQuantity)) AS NUMERIC(18, 6))) AS [To be Delivered]
+						dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(ISNULL(MAX(SI.intItemId),MAX(LD.intItemId)),ISNULL(MAX(WU.intUnitMeasureId),MAX(LO.intWeightUnitMeasureId)),LP.intWeightUOMId,SUM(ISNULL(SI.dblQuantity,LD.dblQuantity)))AS NUMERIC(18, 6))) Delivered,
+						dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(ISNULL(MAX(SI.intItemId),MAX(LD.intItemId)),ISNULL(MAX(WU.intUnitMeasureId),MAX(LO.intWeightUnitMeasureId)),LP.intWeightUOMId,MAX(CD.dblQuantity) - SUM(ISNULL(SI.dblQuantity,LD.dblQuantity))) AS NUMERIC(18, 6))) AS [To be Delivered]
 				FROM	tblLGPickLotDetail			PL
 				JOIN	tblLGPickLotHeader			LH	ON	LH.intPickLotHeaderId		=	PL.intPickLotHeaderId
 				JOIN	tblLGAllocationDetail		AD	ON	AD.intAllocationDetailId	=	PL.intAllocationDetailId
-				JOIN	tblICInventoryShipmentItem	SI	ON	SI.intSourceId				=	PL.intPickLotDetailId
-				JOIN	tblICInventoryShipment		SH	ON	SH.intInventoryShipmentId	=	SI.intInventoryShipmentId AND SH.intOrderType = 1 AND intSourceType = 3
-				JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	AD.intSContractDetailId		
+				
+				JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	AD.intSContractDetailId		LEFT
+				JOIN	tblLGLoadDetail				LD	ON	LD.intPickLotDetailId		=	PL.intPickLotDetailId		LEFT
+				JOIN	tblLGLoad					LO	ON	LO.intLoadId				=	LD.intLoadId				LEFT
+				JOIN	tblICInventoryShipmentItem	SI	ON	SI.intSourceId				=	PL.intPickLotHeaderId		LEFT
+				JOIN	tblICInventoryShipment		SH	ON	SH.intInventoryShipmentId	=	SI.intInventoryShipmentId 
+														AND SH.intOrderType				=	1 
+														AND SH.intSourceType			=	3							LEFT		
 				JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId				=	SI.intItemUOMId	CROSS	
 				APPLY	tblLGCompanyPreference		LP 	
 				GROUP BY AD.intSContractDetailId,
-						CD.dblQuantity,
-						SI.intItemId,
-						WU.intUnitMeasureId,
-						LP.intWeightUOMId
+						 LP.intWeightUOMId
 			) s
 			UNPIVOT	(strValue FOR strName IN 
 						(

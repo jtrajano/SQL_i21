@@ -3,7 +3,7 @@
 AS 
 
 	SELECT	SY.intAssignFuturesToContractSummaryId,
-			SY.intContractDetailId,
+			CD.intContractDetailId,
 			PD.dtmFixationDate,
 			PD.[dblNoOfLots],
 			PD.dblFinalPrice,
@@ -18,7 +18,10 @@ AS
 	JOIn	tblICUnitMeasure					MM	ON	MM.intUnitMeasureId				=	MA.intUnitMeasureId			LEFT
 	JOIN	tblCTPriceFixationDetail			PD	ON	PD.intFutOptTransactionId		=	SY.intFutOptTransactionId	LEFT
 	JOIN	tblCTPriceFixation					PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId		LEFT
-	JOIN	tblCTContractDetail					CD	ON	CD.intContractDetailId			=	PF.intContractDetailId		LEFT
+	JOIN	tblCTContractHeader					CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId		LEFT
+	JOIN	tblCTContractDetail					CD	ON	CD.intContractDetailId = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN  CD.intContractDetailId	ELSE PF.intContractDetailId	END
+													AND	CD.intContractHeaderId = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN  PF.intContractHeaderId	ELSE CD.intContractHeaderId	END	LEFT
+	
 	JOIN	tblICCommodityUnitMeasure			CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId		LEFT
 	JOIN	tblICItemUOM						IU	ON	IU.intItemId					=	CD.intItemId				
 													AND	IU.intUnitMeasureId				=	CU.intUnitMeasureId			LEFT

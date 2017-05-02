@@ -89,16 +89,3 @@ WHERE     (cfSiteItem.ysnIncludeInQuantityDiscount = 1) AND (cfTrans.ysnPosted =
                          (cfTrans.strTransactionType = 'Local/Network') OR
                          (cfTrans.strTransactionType = 'Remote') AND (cfDiscount.ysnDiscountOnRemotes = 1) OR
                          (cfTrans.strTransactionType = 'Extended Remote') AND (cfDiscount.ysnDiscountOnExtRemotes = 1)
-
-
-GO
-
-
-
-GO
-
-
-
-GO
-
-

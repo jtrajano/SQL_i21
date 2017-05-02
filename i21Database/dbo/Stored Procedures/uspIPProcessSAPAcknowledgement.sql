@@ -31,6 +31,7 @@ DECLARE @intReceiptId INT
 DECLARE @strDeliveryType NVARCHAR(50)
 DECLARE @strPartnerNo NVARCHAR(100)
 DECLARE @strContractSeq NVARCHAR(50)
+DECLARE @intLoadStgId INT
 
 Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -130,6 +131,8 @@ Begin
 	Begin
 		Select @intContractHeaderId=intContractHeaderId From tblCTContractHeader Where strContractNumber=@strRefNo AND intContractTypeId=1
 
+		Select @strContractSeq=CONVERT(VARCHAR,intContractSeq) From tblCTContractDetail Where intContractDetailId=@strTrackingNo
+
 		If @strStatus IN (52,53) --Success
 		Begin
 			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo,intConcurrencyId=intConcurrencyId+1 
@@ -145,7 +148,10 @@ Begin
 			Update tblCTContractFeed Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')=''
 
-			Select @strContractSeq=CONVERT(VARCHAR,intContractSeq) From tblCTContractDetail Where intContractDetailId=@strTrackingNo
+			--update po details in shipping instruction/advice staging table
+			Update sld Set sld.strExternalPONumber=@strParam,sld.strExternalPOItemNumber=@strPOItemNo,sld.strExternalPOBatchNumber=@strLineItemBatchNo 
+			From tblLGLoadDetailStg sld Join tblLGLoadDetail ld on sld.intLoadDetailId=ld.intLoadDetailId 
+			Where ld.intPContractDetailId=@strTrackingNo
 
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 			Values(@strMesssageType,'Success',@strRefNo + ' / ' + ISNULL(@strContractSeq,''),@strParam)
@@ -163,8 +169,6 @@ Begin
 			Update tblCTContractFeed Set strFeedStatus='Ack Rcvd',strMessage=@strMessage
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND ISNULL(strFeedStatus,'')='Awt Ack'
 
-			Select @strContractSeq=CONVERT(VARCHAR,intContractSeq) From tblCTContractDetail Where intContractDetailId=@strTrackingNo
-
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 			Values(@strMesssageType,@strMessage,@strRefNo + ' / ' + ISNULL(@strContractSeq,''),@strParam)
 		End
@@ -175,6 +179,8 @@ Begin
 	Begin
 		Select @intContractHeaderId=intContractHeaderId From tblCTContractHeader Where strContractNumber=@strRefNo AND intContractTypeId=1
 
+		Select @strContractSeq=CONVERT(VARCHAR,intContractSeq) From tblCTContractDetail Where intContractDetailId=@strTrackingNo
+
 		If @strStatus IN (52,53) --Success
 		Begin
 			Update tblCTContractDetail  Set strERPPONumber=@strParam,strERPItemNumber=@strPOItemNo,strERPBatchNumber=@strLineItemBatchNo,intConcurrencyId=intConcurrencyId+1 
@@ -184,7 +190,7 @@ Begin
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND strFeedStatus IN ('Awt Ack','Ack Rcvd')
 
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
-			Values(@strMesssageType,'Success',@strRefNo,@strParam)
+			Values(@strMesssageType,'Success',@strRefNo + ' / ' + ISNULL(@strContractSeq,''),@strParam)
 		End
 
 		If @strStatus NOT IN (52,53) --Error
@@ -195,7 +201,7 @@ Begin
 			Where intContractHeaderId=@intContractHeaderId AND intContractDetailId = @strTrackingNo AND strFeedStatus='Awt Ack'
 
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
-			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
+			Values(@strMesssageType,@strMessage,@strRefNo + ' / ' + ISNULL(@strContractSeq,''),@strParam)
 		End
 	End
 
@@ -204,9 +210,13 @@ Begin
 	Begin
 		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
 
+		--Get Last sent StgId
+		Select TOP 1 @intLoadStgId=intLoadStgId From tblLGLoadStg Where intLoadId=@intLoadId AND strFeedStatus='Awt Ack' Order By intLoadStgId Desc
+
 		If @strStatus IN (52,53) --Success
 			Begin
-				Update tblLGLoadContainer Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+				Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId 
+				AND Exists (Select 1 From tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId) 
 
 				Update tblLGLoad  Set strExternalShipmentNumber=@strParam,intConcurrencyId=intConcurrencyId+1
 				Where intLoadId=@intLoadId
@@ -219,11 +229,7 @@ Begin
 				Update tblLGLoadDetailStg Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo AND intLoadId=@intLoadId
 
 				--update the delivery Details in modified loads both instruction and advice
-				Update tblLGLoadStg Set strExternalShipmentNumber=@strParam Where strShippingInstructionNumber=@strRefNo AND ISNULL(strFeedStatus,'')=''
-
-				--update shipping advice with delivery no  
-				Update tblLGLoad  Set strExternalShipmentNumber=@strParam,intConcurrencyId=intConcurrencyId+1
-				Where intLoadShippingInstructionId=@intLoadId
+				Update tblLGLoadStg Set strExternalShipmentNumber=@strParam Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'')=''
 
 				Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 				Values(@strMesssageType,'Success',@strRefNo,@strParam)
@@ -245,6 +251,13 @@ Begin
 		End
 	End
 
+	--Shipment Delete
+	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')=''
+	Begin
+		If @strRefNo like 'LSI-%' OR @strRefNo like 'LS-%'
+			Set @strDeliveryType='U'
+	End
+
 	--Shipment Update
 	If @strMesssageType='WHSCON' AND ISNULL(@strDeliveryType,'')='U'
 	Begin
@@ -258,12 +271,18 @@ Begin
 
 		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
 
-		If Exists(Select 1 From tblLGLoad Where intLoadShippingInstructionId=@intLoadId)
-			Select TOP 1 @intLoadId=intLoadId,@strRefNo=@strRefNo + ' / ' + strLoadNumber From tblLGLoad Where intLoadShippingInstructionId=@intLoadId
+		--Check for Delete
+		If ISNULL(@intLoadId,0)=0
+			Select @intLoadId=intLoadId From tblLGLoadStg Where strLoadNumber=@strRefNo
+
+		--Get Last sent StgId
+		Select TOP 1 @intLoadStgId=intLoadStgId From tblLGLoadStg Where intLoadId=@intLoadId AND strFeedStatus='Awt Ack' Order By intLoadStgId Desc
 
 		If @strStatus IN (52,53) --Success
 		Begin
-			Update tblLGLoadContainer Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+			Update tblLGLoadContainer Set ysnNewContainer=0, intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId 
+			AND Exists (Select 1 From tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId) 
+
 			Update tblLGLoad Set intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
 
 			Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success'
@@ -297,6 +316,8 @@ Begin
 		Begin
 			Update tblICInventoryReceiptItem  Set ysnExported=1 Where intInventoryReceiptId=@intReceiptId
 
+			Update tblIPReceiptError Set strErrorMessage='Success' Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP'
+
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 			Values(@strMesssageType,'Success',@strRefNo,@strParam)
 		End
@@ -305,8 +326,50 @@ Begin
 		Begin
 			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
 
+			--Log for sending mails
+			If Exists (Select 1 From tblIPReceiptError Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP')
+				Update tblIPReceiptError Set strErrorMessage=@strMessage Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP'
+			Else
+				Insert Into tblIPReceiptError(strExternalRefNo,strErrorMessage,strPartnerNo,strImportStatus)
+				Values(@strRefNo,@strMessage,'i212SAP','Ack Sent')
+
 			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
 			Values(@strMesssageType,@strMessage,@strRefNo,@strParam)
+		End
+	End
+
+	--Receipt WMMBXY
+	If @strMesssageType='WMMBXY'
+	Begin
+		Set @strMesssageType='WHSCON'
+
+		Select @intReceiptId=r.intInventoryReceiptId
+		From tblICInventoryReceipt r 
+		Where r.strReceiptNumber=@strRefNo
+
+		If @strStatus IN (52,53) --Success
+		Begin
+			Update tblICInventoryReceiptItem  Set ysnExported=1 Where intInventoryReceiptId=@intReceiptId
+
+			Update tblIPReceiptError Set strErrorMessage='Success' Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP'
+
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,'Success',@strRefNo,'')
+		End
+
+		If @strStatus NOT IN (52,53) --Error
+		Begin
+			Set @strMessage=@strStatus + ' - ' + @strStatusCode + ' : ' + @strStatusDesc
+
+			--Log for sending mails
+			If Exists (Select 1 From tblIPReceiptError Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP')
+				Update tblIPReceiptError Set strErrorMessage=@strMessage Where strExternalRefNo=@strRefNo AND strPartnerNo='i212SAP'
+			Else
+				Insert Into tblIPReceiptError(strExternalRefNo,strErrorMessage,strPartnerNo,strImportStatus)
+				Values(@strRefNo,@strMessage,'i212SAP','Ack Sent')
+
+			Insert Into @tblMessage(strMessageType,strMessage,strInfo1,strInfo2)
+			Values(@strMesssageType,@strMessage,@strRefNo,'')
 		End
 	End
 

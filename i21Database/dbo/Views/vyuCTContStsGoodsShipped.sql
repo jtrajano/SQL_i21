@@ -9,7 +9,10 @@ AS
 					SH.strLoadNumber,
 					IU.intItemUOMId,
 					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,CQ.dblNet)	AS dblNetWeight,
-					IM.strUnitMeasure
+					IM.strUnitMeasure,
+					SH.intShipmentType,
+					SH.intLoadId,
+					'intLoadId' AS strIdColumn
 			FROM	tblLGLoadDetail	CQ
 			JOIN	tblLGLoad					SH	ON	SH.intLoadId			=	CQ.intLoadId 
 			JOIN	tblICItemUOM				IU	ON	IU.intItemId			=	CQ.intItemId	
@@ -23,7 +26,10 @@ AS
 					SH.strLoadNumber,
 					IU.intItemUOMId,
 					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,CQ.dblNet),
-					IM.strUnitMeasure
+					IM.strUnitMeasure,
+					SH.intShipmentType,
+					SH.intLoadId,
+					'intLoadId' AS strIdColumn
 			FROM	tblLGLoadDetail	CQ
 			JOIN	tblLGLoad					SH	ON	SH.intLoadId			=	CQ.intLoadId 
 			JOIN	tblLGAllocationDetail		AD	ON	AD.intPContractDetailId =	CQ.intPContractDetailId

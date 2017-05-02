@@ -2,7 +2,7 @@
     [strConsumptionSiteCustomerNo] CHAR (10)       NOT NULL,
     [strBillToCustomerNo]          CHAR (10)       NOT NULL,
     [strSiteNumber]                CHAR (4)        NOT NULL,
-    [strDeviceSerialNumber]        CHAR (10)       NOT NULL,
+    [strDeviceSerialNumber]        CHAR (50)       NOT NULL,
     [strBatchNumber]               NUMERIC (3)     NULL,
     [intPostDate]                  NUMERIC (8)     NULL,
     [strLocationNumber]            CHAR (3)        NULL,

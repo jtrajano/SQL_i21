@@ -16,6 +16,8 @@ SELECT
 	,REQ.ysnPostedToCalendar
 	,strCalendarInfo = ENT.strName + ' : ' + CAST(CAST(dblRequest AS FLOAT) AS VARCHAR(20)) 
 						+ ' Hour' + CASE WHEN (dblRequest > 0) THEN 's ' ELSE ' ' END + TOFF.strTimeOff
+	,REQ.strReason
+	,REQ.strAddress
 FROM 
 	tblPRTimeOffRequest REQ
 	LEFT JOIN tblEMEntity ENT ON REQ.intEntityEmployeeId = ENT.intEntityId

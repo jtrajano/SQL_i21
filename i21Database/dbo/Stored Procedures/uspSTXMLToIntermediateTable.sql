@@ -3,306 +3,302 @@
 , @intCheckoutId Int
 , @strSPName nvarchar(100) 
 , @strXML nvarchar(max)
+, @strStatusMsg NVARCHAR(250) OUTPUT
+, @intCountRows int OUTPUT
 AS
 BEGIN
+Begin Try
 
-	DECLARE @XML XML --,  @strXML nvarchar(max)
+--GET ROOT TAG
+DECLARE @strRootTag nvarchar(200), @strRootCompressTag nvarchar(200), @intRootLevel int, @intRootImportFileHeaderId int, @intRootImportFileColumnDetailId int
+Select @intRootImportFileHeaderId = intImportFileHeaderId, @intRootImportFileColumnDetailId = intImportFileColumnDetailId, @strRootTag = REPLACE(strXMLTag, ' ', ''), @strRootCompressTag = REPLACE(REPLACE(REPLACE(strXMLTag, ' ', ''), ':', ''), '-', ''), @intRootLevel = intLevel 
+       from dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel <= 1
 
-	--START For passing xml string to uspSTCheckout stored proc
-	Declare @getStrXML nvarchar(MAX)
-	SET @getStrXML = @strXML
-	--END
+--GET XML Initiator
+DECLARE @strXMLinitiator nvarchar(200)
+Select @strXMLinitiator = strXMLInitiater FROM dbo.tblSMImportFileHeader WHERE intImportFileHeaderId = @intImportFileHeaderId
 
-	--SET @XML = CAST(@XML1 as xml)
+DECLARE @NamespaceVar NVARCHAR(200) = '', @NamespaceVendor NVARCHAR(200) = ''
 
-	If(ISNULL(@intCheckoutId, 0) = 0)
+--GET ROOT TAG Namespace
+DECLARE @strRootTagNamespace nvarchar(MAX) = ''
+IF EXISTS (SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intRootImportFileColumnDetailId)
+BEGIN
+	DECLARE @intTagAttributeIdMin Int, @intTagAttributeIdMax Int
+	SELECT  @intTagAttributeIdMin = MIN(intTagAttributeId)
+        , @intTagAttributeIdMax = MAX(intTagAttributeId)
+	FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intRootImportFileColumnDetailId
+		
+    DECLARE @intTempTagAttributeId int, @intTempImportFileColumnDetailId int, @strTempTagAttribute NVARCHAR(200), @strTempDefaultValue NVARCHAR(200)
+
+	DECLARE @intLoopTagAttributeCount int = 0
+
+	SET @strRootTagNamespace = @strRootTagNamespace + ';WITH XMLNAMESPACES ' + CHAR(13) + '(' + CHAR(13)
+
+	WHILE(@intTagAttributeIdMin <= @intTagAttributeIdMax)
 	BEGIN
-		RAISERROR('Checkout transaction needs to be carried out first.',16,1)
-	END
-
-	--DECLARE @intStoreId Int
-	--Select @intStoreId = intStoreId FROM dbo.tblSTCheckoutHeader Where intCheckoutId = @intCheckoutId
-
-	--Select @strSPName = RFC.strStoredProcedure 
-	--FROM dbo.tblSTRegisterFileConfiguration RFC
-	--JOIN dbo.tblSTRegister R ON R.intRegisterId = RFC.intRegisterId
-	----JOIN dbo.tblSTStore S ON S.intStoreId = R.intStoreId
-	----JOIN dbo.tblSTCheckoutHeader CH ON CH.intStoreId = S.intStoreId
-	--Where R.intStoreId = @intStoreId AND RFC.intImportFileHeaderId = @intImportFileHeaderId
-
-	--If(ISNULL(@strSPName, '') = '')
-	--BEGIN
-	--	RAISERROR('Please set Stored Procedure in Register configuration.',16,1)
-	--END
-
-	--SET @strXML = @XML1 -- CAST(@XML as nvarchar(max))
-
-	--SELECT LEN(@strXML) 'Len of strXML'
- 
-	IF (CHARINDEX(':' ,@strXML) > 0	)		
-		SET @strXML = REPLACE(@strXML, ':', '')
-	--SELECT @strXML
-
-	SET @XML = CAST(@strXML as XML)
-
-	DECLARE @strRootTag nvarchar(200)
-	Select @strRootTag = strXMLTag from dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel <= 1
-
-	DECLARE @tblXML TABLE (intImportFileColumnDetailId int, intLevel int, intLength int, intPosition int, strXMLTag nvarchar(200), strDataType nvarchar(50), strTable nvarchar(200))
-	DECLARE @tblRecursiveTags TABLE (intLevelRec int, intLengthRec int, strXMLTagRec nvarchar(200))
-
-	INSERT INTO @tblXML
-	SELECT intImportFileColumnDetailId, intLevel, intLength, intPosition, strXMLTag, strDataType, strTable
-	FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel > 1 Order By intLevel
-	
-	INSERT INTO @tblXML
-	SELECT CD.intImportFileColumnDetailId, intLevel, intLength, intPosition, TA.strTagAttribute [strXMLTag], 'TagAttribute' [strDataType], TA.strTable
-	FROM dbo.tblSMImportFileColumnDetail CD
-	JOIN dbo.tblSMXMLTagAttribute TA ON CD.intImportFileColumnDetailId = TA.intImportFileColumnDetailId 
-	Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel > 1 Order By intLevel
-
-	--Select * from @tblXML
-
-	DECLARE @intLevelMin Int, @intLevelMax Int
-	SELECT  @intLevelMin = MIN(intLevel), @intLevelMax = MAX(intLevel) FROM @tblXML 
-
-	DECLARE @strXMLPath nvarchar(max), @strColumnsList nvarchar(max), @strHeader nvarchar(150), @strColumnPath nvarchar(max)
-			, @intRec Int , @intRecCnt Int 
-	SET @strXMLPath = @strRootTag
-	SET @strColumnsList = ''
-	SET @strHeader = ''
-	SET @strColumnPath = ''
-
-	DECLARE @intMinTemp Int, @intMaxTemp Int
-
-	DECLARE @SQL nvarchar(max)
-
-	SET @SQL = '
-	DECLARE @DocumentID Int
-	DECLARE @XML XML
-	DECLARE @strXML nvarchar(max)
-
-	SET @strXML = ''' + @strXML + '''
-
-	SET @strXML = REPLACE(@strXML, ''' + ISNULL((Select strXMLInitiater from dbo.tblSMImportFileHeader Where intImportFileHeaderId = @intImportFileHeaderId), '') + ''', '''')
-
-	SET @strXML = REPLACE(@strXML, SUBSTRING(@strXML, 
-					 CHARINDEX('' '', @strXML), 
-					 (CHARINDEX(''>'', @strXML) - CHARINDEX('' '', @strXML))), '''')
-
-	SET @XML = CONVERT(XML, @strXML, 1)
-	EXEC sp_xml_preparedocument @DocumentID OUTPUT, @XML;
-
-
-	SELECT *
-	INTO #tempCheckoutInsert FROM '
-
-	WHILE(@intLevelMin <= @intLevelMax)
-	BEGIN
-
-		DECLARE @tagName nvarchar(50)
-
-		IF EXISTS (SELECT 1 FROM @tblXML WHERE intLevel = @intLevelMin)
+		IF EXISTS (SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intTagAttributeId = @intTagAttributeIdMin)
 		BEGIN
-			DECLARE @intImportFileColumnDetailId int, @intLength int, @intPosition int, @strXMLTag nvarchar(200)
-					, @strDataType nvarchar(50), @strTable nvarchar(200)
-				
-			SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId
-			, @intLength = intLength
-			, @intPosition = intPosition
-			, @strXMLTag = strXMLTag
-			, @strDataType = ISNULL(strDataType, '') 
-			, @strTable = ISNULL(strTable, '')
-			FROM @tblXML WHERE intLevel = @intLevelMin and ISNULL(strDataType, '') <> 'TagAttribute'
-		
-			DECLARE @strCompareTagName nvarchar(200)
-			SET @strCompareTagName = @strXMLTag + '>'
-		
-			IF (CHARINDEX(':' ,@strXMLTag) > 0	)		
-				SET @strXMLTag = REPLACE(@strXMLTag, ':', '') --REPLACE(SUBSTRING(@strXMLTag, CHARINDEX(':', @strXMLTag), LEN(@strXMLTag)), ':', '')
-		
-			--SET @strXML =
-		
-			IF ((((LEN(@strXML)-LEN(REPLACE(@strXML, @strCompareTagName, ''))) / LEN(@strCompareTagName) ) > 2) 
-					AND 
-				((SELECT COUNT(1) FROM @tblRecursiveTags WHERE strXMLTagRec = @strXMLTag) <= 0) AND @strDataType = 'Header') -- If repeating details
+			SELECT @intTempTagAttributeId = intTagAttributeId, @intTempImportFileColumnDetailId = intImportFileColumnDetailId, @strTempTagAttribute = strTagAttribute, @strTempDefaultValue = strDefaultValue FROM dbo.tblSMXMLTagAttribute WHERE intTagAttributeId = @intTagAttributeIdMin
+
+			IF(@strTempTagAttribute like '%:%')
 			BEGIN
-				WITH tableR (intLevel, intLength, strXMLTag)
-				AS
-				(
-				-- Anchor member definition
-					SELECT e.intLevel, e.intLength, e.strXMLTag
-					FROM tblSMImportFileColumnDetail AS e   
-					WHERE intLength in (@intLevelMin) AND intImportFileHeaderId = @intImportFileHeaderId
-					UNION ALL
-				-- Recursive member definition
-					SELECT e.intLevel, e.intLength, e.strXMLTag
-					FROM tblSMImportFileColumnDetail AS e
-					INNER JOIN tableR AS d
-						ON e.intLength = d.intLevel
-					   WHERE intImportFileHeaderId = @intImportFileHeaderId
-				)
-				-- Statement that executes the CTE
-				INSERT INTO @tblRecursiveTags
-				SELECT intLevel, intLength, strXMLTag
-				FROM tableR  
-			
-				DECLARE @strParentBeforeRec nvarchar(100)
-				SELECT @strParentBeforeRec = strXMLTag FROM @tblXML WHERE intLevel = @intLength
-			
-				If @strDataType = 'Header'
-				BEGIN
-					IF CHARINDEX(@strParentBeforeRec, @strXMLPath) = 0
-						SET @strXMLPath = @strXMLPath + '/' + @strParentBeforeRec
-				
-					SET @strXMLPath = @strXMLPath + '/' + @strXMLTag
-					SET @strHeader = @strXMLTag
-				END
-				SET @intRec = 0
-				SET @intRecCnt = (SELECT COUNT(*) FROM @tblRecursiveTags)
-				SET @intLevelMin = @intLevelMin + 1
-			
-				continue
+				SET @strTempTagAttribute = REPLACE(@strTempTagAttribute, LEFT(@strTempTagAttribute, CHARINDEX(':', @strTempTagAttribute) - 1) + ':', '')
+				SET @NamespaceVendor = @strTempTagAttribute + ':';
 			END
-		
-			IF ((SELECT COUNT(1) FROM @tblRecursiveTags WHERE strXMLTagRec = @strXMLTag) > 0)
-			BEGIN
-				SET @intRec = @intRec + 1
-				If @strDataType = 'Header'
-				BEGIN
-					If @strColumnPath <> ''
-					BEGIN
-						DECLARE @strParent nvarchar(200)
-						SELECT @strParent = strXMLTag FROM @tblXML WHERE intLevel = @intLength
-						IF CHARINDEX(@strParent, @strColumnPath, 0) <= 0 
-							SET @strColumnPath = ''
-					END
-					SET @strColumnPath = @strColumnPath + @strXMLTag + '/'
-				END
-				ELSE
-				BEGIN
-					SET @strColumnPath = '';
-					WITH tblParent AS
-					(
-						SELECT * FROM @tblRecursiveTags WHERE intLevelRec = @intLevelMin 
-						UNION ALL
-						SELECT rec.*
-							FROM @tblRecursiveTags rec JOIN tblParent  ON rec.intLevelRec = tblParent.intLengthRec 
-					)
-				
-					--SELECT * FROM  tblParent
-					--	WHERE intLevelRec <> @intLevelMin
-					--	ORDER BY intLevelRec ASC
-					
-					SELECT @strColumnPath = ISNULL(@strColumnPath,'') + '/' + strXMLTagRec FROM  tblParent
-						WHERE intLevelRec <> @intLevelMin
-						ORDER BY intLevelRec ASC
-					OPTION(MAXRECURSION 20)
 
-	--SELECT @strColumnPath
-									
-					SET @strColumnsList = @strColumnsList + ' ' + @strXMLTag + ' nvarchar(200) ''.' + ISNULL(@strColumnPath, '') + '/' + @strXMLTag + '/text()'' ,'
-
-					IF EXISTS(Select 1 FROM @tblXML Where intLevel = @intLevelMin and strDataType = 'TagAttribute')
-					BEGIN
-						SELECT @tagName = strXMLTag FROM @tblXML Where intLevel = @intLevelMin and strDataType = 'TagAttribute'
-						SET @strColumnsList = @strColumnsList + ' ' + @strXMLTag + @tagName + ' nvarchar(200) ''.' + ISNULL(@strColumnPath, '') + '/' + @strXMLTag + '/@' + @tagName + '/text()'' ,'
-					END
-
-				END
-			
-				IF ( (@intRec = @intRecCnt) OR (@intLevelMin = @intLevelMax) )
-				BEGIN
-					IF (CHARINDEX('OPENXML' ,@SQL) > 0	) 
-					BEGIN
-						SET @SQL = @SQL + ' OUTER APPLY '
-					END
-				
-					SET @strColumnsList = SUBSTRING(@strColumnsList, 0, LEN(@strColumnsList))
-				
-				
-					SET @SQL = @SQL + ' OPENXML(@DocumentID, ''' + @strXMLPath + ''',2) 
-										WITH( ' + @strColumnsList + ' ) ' + @strHeader
-				
-					SET @strXMLPath = @strRootTag
-					SET @strColumnsList = ''
-					SET @strHeader = ''
-					SET @strColumnPath = ''
-					SET @intRec = 0
-					SET @intRecCnt = 0
-					SET @strParentBeforeRec = ''
-					DELETE FROM @tblRecursiveTags
-				END
-			
-			END
 			ELSE
 			BEGIN
-				If @strDataType = 'Header'
-				BEGIN
-					If @strTable = ''
-					BEGIN
-						SET @strColumnPath = @strColumnPath + @strXMLTag + '/' 
-					END
-					ELSE
-					BEGIN
-						SET @strXMLPath = @strXMLPath + '/' + @strXMLTag
-						SET @strHeader = @strXMLTag
-					END
-				END
-				ELSE
-				BEGIN
-				
-					SET @strColumnsList = @strColumnsList + ' ' + @strXMLTag + ' nvarchar(200) ''./' + ISNULL(@strColumnPath, '') + @strXMLTag + '/text()'' ,'
-
-					
-					IF EXISTS(Select 1 FROM @tblXML Where intLevel = @intLevelMin and strDataType = 'TagAttribute')
-					BEGIN
-						SELECT @tagName = strXMLTag FROM @tblXML Where intLevel = @intLevelMin and strDataType = 'TagAttribute'
-						SET @strColumnsList = @strColumnsList + ' ' + @strXMLTag + @tagName + ' nvarchar(200) ''.' + ISNULL(@strColumnPath, '') + '/' + @strXMLTag + '/@' + @tagName + '/text()'' ,'
-					END
-
-
-				END
-			
-				DECLARE @strNextHeader nvarchar(200)
-				SET @strNextHeader = (SELECT TOP 1 strDataType FROM @tblXML Where intLevel > @intLevelMin Order by intLevel)
-			
-				IF (((ISNULL(@strNextHeader,'') = 'Header') AND (ISNULL(@strDataType ,'') <> 'Header') ) OR (@intLevelMin = @intLevelMax)) --AND @strTable <> ''
-				BEGIN
-					IF (CHARINDEX('OPENXML' ,@SQL) > 0	) 
-					BEGIN
-						SET @SQL = @SQL + ' OUTER APPLY '
-					END
-				
-					SET @strColumnsList = SUBSTRING(@strColumnsList, 0, LEN(@strColumnsList))
-				
-					SET @SQL = @SQL + ' OPENXML(@DocumentID, ''' + @strXMLPath + ''',2) 
-										WITH( ' + @strColumnsList + ' ) ' + @strHeader
-				
-					SET @strXMLPath = @strRootTag
-					SET @strColumnsList = ''
-					SET @strHeader = ''
-					SET @strColumnPath = ''
-				END
+				SET @strTempTagAttribute = @strTempTagAttribute + 'VAR'
+				SET @NamespaceVar = @strTempTagAttribute + ':';
 			END
-		
-		
-		END
-	
-		SET @intLevelMin = @intLevelMin + 1
 
+			IF(@intLoopTagAttributeCount = 0)
+			BEGIN
+				SET @strRootTagNamespace = @strRootTagNamespace + '	''' + @strTempDefaultValue + '''' + ' as ' + @strTempTagAttribute + CHAR(13)
+			END
+
+			ELSE IF(@intLoopTagAttributeCount > 0)
+			BEGIN
+				SET @strRootTagNamespace = @strRootTagNamespace + '	, ''' + @strTempDefaultValue + '''' + ' as ' + @strTempTagAttribute + CHAR(13)
+			END
+		END    
+ 
+		SET @intLoopTagAttributeCount = @intLoopTagAttributeCount + 1
+		SET @intTagAttributeIdMin = @intTagAttributeIdMin + 1
 	END
 
-	SET @SQL = @SQL + '
-	 EXEC sp_xml_removedocument @DocumentID  
-			SELECT * FROM #tempCheckoutInsert
-		EXEC ' + @strSPName + ' ' + CAST(@intCheckoutId as nvarchar(20))  + ', ' + '''' + @getStrXML + '''' + '
-		DROP TABLE #tempCheckoutInsert
-	'
+	SET @strRootTagNamespace = @strRootTagNamespace + ')'
+END
 
-	SELECT @SQL
+DECLARE @tblXML TABLE (intImportFileColumnDetailId int, intLevel int, intParent int, intPosition int, strXMLTag nvarchar(200), strDataType nvarchar(50), strTable nvarchar(200), strCompressTag nvarchar(200))
 
-	EXEC sp_executesql @SQL
+--GET XML TAG without ROOT tag using this (intLevel > 1)
+INSERT INTO @tblXML
+SELECT intImportFileColumnDetailId, intLevel, intLength, intPosition, REPLACE(strXMLTag, ' ', ''), strDataType, strTable, REPLACE(REPLACE(REPLACE(strXMLTag, ' ', ''), ':', ''), '-', '')
+FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId --AND intLevel > 1 
+AND ysnActive = 1 Order By intLevel
 
 
+DECLARE @SQL NVARCHAR(MAX)
+DECLARE @SELECTCOLUMNS NVARCHAR(MAX) = ''
+DECLARE @FROMNODES NVARCHAR(MAX) = ''
+
+--GET FROM NODES
+DECLARE @intLevelMin Int, @intLevelMax Int
+SELECT  @intLevelMin = MIN(intLevel)
+        , @intLevelMax = MAX(intLevel)
+FROM @tblXML WHERE strDataType = 'Header'
+
+--Declare variable to get Column values
+DECLARE @intImportFileColumnDetailId int, @intLevel int, @intParent int, @intPosition int, @strXMLTag nvarchar(200), @strDataType nvarchar(200), @strCompressTag nvarchar(200)
+
+DECLARE @intLoopCount int = 0
+
+DECLARE @ParentTag NVARCHAR(200) = ''
+
+SET @FROMNODES = @FROMNODES + '@xml.nodes(''' + @NamespaceVar + @strRootTag + ''') ' + @strRootCompressTag + '(' + @strRootCompressTag + ')' + CHAR(13)
+
+
+WHILE(@intLevelMin <= @intLevelMax)
+BEGIN
+	IF EXISTS (SELECT * FROM @tblXML WHERE intLevel = @intLevelMin AND strDataType = 'Header') 
+	BEGIN
+
+		SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId, @intLevel = intLevel, @intParent = intParent, @intPosition = intPosition, @strXMLTag = ISNULL(strXMLTag, ''), @strDataType = ISNULL(strDataType, ''), @strCompressTag = strCompressTag FROM @tblXML WHERE intLevel = @intLevelMin  AND strDataType = 'Header'
+
+		SELECT @ParentTag = strCompressTag FROM @tblXML WHERE intLevel = @intParent
+		
+		IF(@intImportFileColumnDetailId <> @intRootImportFileColumnDetailId)
+		BEGIN
+			SET @FROMNODES = @FROMNODES + 'CROSS APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
+		END
+
+		
+		--GET attributes from Header Tag if has any
+		DECLARE @strHeaderTagAttribute NVARCHAR(200)
+		IF EXISTS(SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND ysnActive = 1)
+		BEGIN
+			DECLARE @intHeaderAttributeMin Int, @intHeaderAttributeMax Int
+			SELECT  @intHeaderAttributeMin = MIN(intSequence)
+			, @intHeaderAttributeMax = MAX(intSequence)
+			FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND ysnActive = 1
+
+			WHILE(@intHeaderAttributeMin <= @intHeaderAttributeMax)
+			BEGIN
+				SELECT @strHeaderTagAttribute = strTagAttribute FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND ysnActive = 1 AND intSequence = @intHeaderAttributeMin
+
+					if(@intLoopCount = 0)
+					BEGIN
+						IF(@strXMLTag like '%:%')
+						BEGIN
+							SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
+						END
+
+						ELSE
+						BEGIN
+							SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
+						END
+					END
+
+					ELSE if(@intLoopCount > 0)
+					BEGIN
+						IF(@strXMLTag like '%:%')
+						BEGIN
+							SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
+						END
+
+						ELSE
+						BEGIN
+							SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @strXMLTag + '.value(''(@' + @strHeaderTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strHeaderTagAttribute + '' + CHAR(13)
+						END
+					END
+
+				SET @intLoopCount = @intLoopCount + 1
+				SET @intHeaderAttributeMin = @intHeaderAttributeMin + 1
+			END	
+		END
+		--END of GET attributes from Header Tag if has any
+
+		--GET SELECT COLUMN
+		DECLARE @intSubLevelMin Int, @intSubLevelMax Int
+		SELECT  @intSubLevelMin = MIN(intLevel)
+        , @intSubLevelMax = MAX(intLevel)
+		FROM @tblXML WHERE intParent = @intLevelMin AND strDataType IS NULL
+
+		IF EXISTS (SELECT * FROM @tblXML WHERE intParent = @intLevelMin AND strDataType IS NULL)
+		BEGIN
+			WHILE(@intSubLevelMin <= @intSubLevelMax)
+			BEGIN
+
+			    IF EXISTS(SELECT * FROM @tblXML WHERE intParent = @intLevelMin AND strDataType IS NULL AND intLevel = @intSubLevelMin)
+				BEGIN
+						SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId, @intLevel = intLevel, @intParent = intParent, @intPosition = intPosition, @strXMLTag = ISNULL(strXMLTag, ''), @strDataType = ISNULL(strDataType, ''), @strCompressTag = strCompressTag 
+						FROM @tblXML WHERE intParent = @intLevelMin AND strDataType IS NULL AND intLevel = @intSubLevelMin
+
+						SELECT @ParentTag = strCompressTag FROM @tblXML WHERE intLevel = @intParent
+
+						--Loop all attribute in a Tag Field
+						DECLARE @strTagAttribute NVARCHAR(200)
+						IF EXISTS(SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND ysnActive = 1)
+						BEGIN
+							DECLARE @intTagAttributeMin Int, @intTagAttributeMax Int
+							SELECT  @intTagAttributeMin = MIN(intSequence)
+							, @intTagAttributeMax = MAX(intSequence)
+							FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND ysnActive = 1
+							WHILE(@intTagAttributeMin <= @intTagAttributeMax)
+							BEGIN
+								IF EXISTS(SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intTagAttributeMin AND ysnActive = 1)
+								BEGIN
+
+									SELECT @strTagAttribute = strTagAttribute FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intTagAttributeMin AND ysnActive = 1
+
+									if(@intLoopCount = 0)
+									BEGIN
+										IF(@strXMLTag like '%:%')
+										BEGIN
+											SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @ParentTag + '.value(''(' + @strXMLTag + '/@' + @strTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strTagAttribute + '' + CHAR(13)
+										END
+
+										ELSE
+										BEGIN
+											SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @ParentTag + '.value(''(' + @NamespaceVar + @strXMLTag + '/@' + @strTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strTagAttribute + '' + CHAR(13)
+										END
+									END
+
+									ELSE if(@intLoopCount > 0)
+									BEGIN
+										IF(@strXMLTag like '%:%')
+										BEGIN
+											SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @ParentTag + '.value(''(' + @strXMLTag + '/@' + @strTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strTagAttribute + '' + CHAR(13)
+										END
+
+										ELSE
+										BEGIN
+											SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @ParentTag + '.value(''(' + @NamespaceVar + @strXMLTag + '/@' + @strTagAttribute + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + @strTagAttribute + '' + CHAR(13)
+										END
+									END
+
+									SET @intLoopCount = @intLoopCount + 1
+								END
+						
+								SET @intTagAttributeMin = @intTagAttributeMin + 1
+							END
+						END
+				
+						if(@intLoopCount = 0)
+								BEGIN
+									IF(@strXMLTag like '%:%')
+									BEGIN
+										SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @ParentTag + '.value(''(' + @strXMLTag + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + '' + CHAR(13)
+									END
+
+									ELSE
+									BEGIN
+										SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @ParentTag + '.value(''(' + @NamespaceVar + @strXMLTag + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + '' + CHAR(13)
+								END
+							END
+
+							ELSE if(@intLoopCount > 0)
+								BEGIN
+									IF(@strXMLTag like '%:%')
+									BEGIN
+										SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @ParentTag + '.value(''(' + @strXMLTag + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + '' + CHAR(13)
+									END
+
+									ELSE
+									BEGIN
+										SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @ParentTag + '.value(''(' + @NamespaceVar + @strXMLTag + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + '' + CHAR(13)
+								END
+							END
+						END		
+
+					SET @intLoopCount = @intLoopCount + 1
+					SET @intSubLevelMin = @intSubLevelMin + 1
+				END
+		END
+	END
+
+SET @intLevelMin = @intLevelMin + 1
+END
+
+SET @SQL =
+N'
+If(OBJECT_ID(''tempdb..#tempCheckoutInsert'') Is Not Null)
+Begin
+    Drop Table #tempCheckoutInsert
+End
+Declare @strXML nvarchar(max) 
+SET @strXML = ''' + @strXML + '''
+SET @strXML = REPLACE(@strXML, ''' + @strXMLinitiator + ''', '''')
+
+--Replace single quote to double quote
+SET @strXML = REPLACE(@strXML, '''''''','''')
+
+Declare @xml XML = @strXML
+' + @strRootTagNamespace + '
+
+SELECT ' + CHAR(13)
++ @SELECTCOLUMNS
++ ' INTO #tempCheckoutInsert ' + CHAR(13)
++ ' FROM ' + CHAR(13)
++ @FROMNODES + CHAR(13)
++ ' SELECT * FROM #tempCheckoutInsert ' +  CHAR(13)
++ ' EXEC ' + @strSPName + ' ' + CAST(@intCheckoutId as nvarchar(20)) + ', ' + '@strStatusMsg OUTPUT, @intCountRows OUTPUT' +  CHAR(13)
++ ' DROP TABLE #tempCheckoutInsert ' +  CHAR(13)
+
+
+DECLARE @ParmDef nvarchar(max);
+
+SET @ParmDef = N'@strStatusMsg NVARCHAR(250) OUTPUT'
+             + ', @intCountRows INT OUTPUT';
+
+EXEC sp_executesql @SQL, @ParmDef, @strStatusMsg OUTPUT, @intCountRows OUTPUT
+
+End Try
+
+Begin Catch
+	SET @intCountRows = 0
+	SET @strStatusMsg = ERROR_MESSAGE()
+End Catch
 END

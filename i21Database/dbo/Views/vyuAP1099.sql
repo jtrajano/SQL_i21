@@ -3,15 +3,15 @@ AS
 SELECT
       C.strVendorId
 	, C.intEntityVendorId
-    , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE((CASE WHEN ISNULL(C2.str1099Name,'') <> '' THEN dbo.fnTrim(C2.str1099Name) ELSE dbo.fnTrim(C2.strName) END), '&', 'and'))  COLLATE Latin1_General_CI_AS 
-    , strAddress = SUBSTRING(REPLACE(REPLACE(dbo.fnTrim(D.strAddress), CHAR(10), ' ') , CHAR(13), ' '),0,40) COLLATE Latin1_General_CI_AS  --max char 40       
+    , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE((CASE WHEN ISNULL(C2.str1099Name,'') <> '' THEN dbo.fnTrimX(C2.str1099Name) ELSE dbo.fnTrimX(C2.strName) END), '&', 'and'))  COLLATE Latin1_General_CI_AS 
+    , strAddress = SUBSTRING(REPLACE(REPLACE(dbo.fnTrimX(D.strAddress), CHAR(10), ' ') , CHAR(13), ' '),0,40) COLLATE Latin1_General_CI_AS  --max char 40       
 	, SUBSTRING(C2.strName, 0, 40) AS strPayeeName  --max char 40
-	, ISNULL(dbo.fnTrim(strCity), '')  COLLATE Latin1_General_CI_AS  strCity
-	, ISNULL(dbo.fnTrim(strState), '') COLLATE Latin1_General_CI_AS  strState 
-	, ISNULL(dbo.fnTrim(strZipCode), '') COLLATE Latin1_General_CI_AS  strZip 
-    , strZipState = (CASE WHEN LEN(D.strCity) <> 0 THEN dbo.fnTrim(D.strCity) ELSE '' END +               
-       CASE WHEN LEN(D.strState) <> 0 THEN ', ' + dbo.fnTrim(D.strState) ELSE '' END +               
-       CASE WHEN LEN(D.strZipCode) <> 0 THEN ', ' + dbo.fnTrim(D.strZipCode) ELSE '' END)  COLLATE Latin1_General_CI_AS            
+	, ISNULL(dbo.fnTrimX(strCity), '')  COLLATE Latin1_General_CI_AS  strCity
+	, ISNULL(dbo.fnTrimX(strState), '') COLLATE Latin1_General_CI_AS  strState 
+	, ISNULL(dbo.fnTrimX(strZipCode), '') COLLATE Latin1_General_CI_AS  strZip 
+    , strZipState = (CASE WHEN LEN(D.strCity) <> 0 THEN dbo.fnTrimX(D.strCity) ELSE '' END +               
+       CASE WHEN LEN(D.strState) <> 0 THEN ', ' + dbo.fnTrimX(D.strState) ELSE '' END +               
+       CASE WHEN LEN(D.strZipCode) <> 0 THEN ', ' + dbo.fnTrimX(D.strZipCode) ELSE '' END)  COLLATE Latin1_General_CI_AS            
     , C2.strFederalTaxId
 	, dblCropInsurance = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 1 --'Crop Insurance Proceeds'     
 		THEN (A.dbl1099 + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)

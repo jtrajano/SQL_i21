@@ -202,7 +202,7 @@ BEGIN TRY
 		,intTransUsedBy
 		,intShipmentType
 		,intLoadShippingInstructionId
-		,strExternalShipmentNumber
+		,NULL
 	FROM tblLGLoad
 	WHERE intLoadId = @intOldLoadId
 
@@ -284,10 +284,53 @@ BEGIN TRY
 		,intPickLotDetailId
 		,intPSubLocationId
 		,intSSubLocationId
-		,strExternalShipmentItemNumber
-		,strExternalBatchNo
+		,NULL
+		,NULL
 	FROM tblLGLoadDetail
 	WHERE intLoadDetailId = @intOldLoadDetailId
+
+	IF EXISTS(SELECT 1 FROM tblLGLoadWarehouse WHERE intLoadId = @intOldLoadId)
+	BEGIN
+		INSERT INTO tblLGLoadWarehouse (
+			 intLoadId
+			,strDeliveryNoticeNumber
+			,dtmDeliveryNoticeDate
+			,intSubLocationId
+			,intStorageLocationId
+			,intHaulerEntityId
+			,dtmPickupDate
+			,dtmDeliveryDate
+			,dtmLastFreeDate
+			,dtmStrippingReportReceivedDate
+			,dtmSampleAuthorizedDate
+			,strStrippingReportComments
+			,strFreightComments
+			,strSampleComments
+			,strOtherComments
+			,intWarehouseRateMatrixHeaderId
+			,intConcurrencyId
+			)
+		SELECT @intNewLoadId
+			,strDeliveryNoticeNumber
+			,dtmDeliveryNoticeDate
+			,intSubLocationId
+			,intStorageLocationId
+			,intHaulerEntityId
+			,dtmPickupDate
+			,dtmDeliveryDate
+			,dtmLastFreeDate
+			,dtmStrippingReportReceivedDate
+			,dtmSampleAuthorizedDate
+			,strStrippingReportComments
+			,strFreightComments
+			,strSampleComments
+			,strOtherComments
+			,intWarehouseRateMatrixHeaderId
+			,intConcurrencyId
+		FROM tblLGLoadWarehouse WHERE intLoadId = @intOldLoadId
+	END
+
+	EXEC uspLGCreateLoadIntegrationLog @intNewLoadId,'Added',2
 
 END TRY
 

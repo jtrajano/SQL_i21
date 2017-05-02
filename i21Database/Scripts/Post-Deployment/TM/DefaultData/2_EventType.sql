@@ -25,8 +25,28 @@ BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMEventType WHERE strEventType = 'Event-021' AND ysnDefault = 1) INSERT INTO tblTMEventType (strEventType,strDescription,ysnDefault) VALUES ('Event-021','Tank Monitor Reading', 1)
 	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMEventType WHERE strEventType = 'Event-020' AND ysnDefault = 1) INSERT INTO tblTMEventType (strEventType,strDescription,ysnDefault) VALUES ('Event-020','Device Lease Billed', 1)
 	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMEventType WHERE strEventType = 'Event-022' AND ysnDefault = 1) INSERT INTO tblTMEventType (strEventType,strDescription,ysnDefault) VALUES ('Event-022','Season Change', 1)
-	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMEventType WHERE strEventType = 'Event-023' AND ysnDefault = 1) INSERT INTO tblTMEventType (strEventType,strDescription,ysnDefault) VALUES ('Event-023','Device Bought', 1)
+
+
+	---Device Bought
+	DECLARE @strEventType NVARCHAR(50)
+	DECLARE @intEventId INT
+	SET @intEventId = 23
+	SET @strEventType = 'Event-' + RIGHT('000' + CAST(@intEventId AS NVARCHAR(3)),3)
 	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMEventType WHERE strDefaultEventType = 'Event-023' AND ysnDefault = 1)
+	BEGIN
+		WHILE EXISTS(SELECT TOP 1 1 FROM tblTMEventType WHERE strEventType = @strEventType)
+		BEGIN
+			SET @intEventId = @intEventId + 1
+			SET @strEventType = 'Event-' + RIGHT('000' + CAST(@intEventId AS NVARCHAR(3)),3)	
+		END
+		INSERT INTO tblTMEventType (strEventType,strDescription,ysnDefault,strDefaultEventType) VALUES (@strEventType,'Device Bought', 1,'Event-023')
+	END
+
+
+	UPDATE tblTMEventType
+	SET strDefaultEventType = strEventType
+	WHERE ysnDefault = 1 AND ISNULL(strDefaultEventType,'') = ''
 END
 
 GO

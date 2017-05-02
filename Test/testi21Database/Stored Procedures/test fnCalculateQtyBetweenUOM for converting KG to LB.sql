@@ -13,7 +13,7 @@ BEGIN
 	DECLARE @dblQty AS NUMERIC(18,6) = 100
 
 	DECLARE @result AS NUMERIC(18,6) 
-	DECLARE @Expected AS NUMERIC(18,6) = @dblQty * 0.453592 / 1
+	DECLARE @Expected AS NUMERIC(18,6) = @dblQty * 2.204622621850 / 1
 
 	-- Act
 	SELECT @result = dbo.fnCalculateQtyBetweenUOM(@KGS, @LBS, @dblQty)

@@ -29,7 +29,7 @@ FROM (
 		,intNoOfApprovals = SUM(ISNULL(Samp.intApprovalCount, 0))
 		,intNoOfRejects = SUM(ISNULL(RSamp.intApprovalCount, 0))
 		,intNoOfIntegrationRequests = SUM(CAST(ISNULL(LDLink.ysnExported, 0) AS INT))
-		,intTrucksRemaining = dbo.fnGetTrucksRemaining(CH.intContractHeaderId,MAX(CD.intItemUOMId))
+		,intTrucksRemaining = dbo.fnGetTrucksRemaining(CH.intContractHeaderId,CD.intItemId,CD.dblBasis)
 		,strRemarks = CH.strInternalComment
 		,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, MAX(CD.dtmEndDate)), 2)
 	FROM tblCTContractHeader CH

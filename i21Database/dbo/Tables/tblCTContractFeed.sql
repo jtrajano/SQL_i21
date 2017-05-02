@@ -30,6 +30,7 @@
 	strContractItemName		NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	strOrigin				NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	strStorageLocation		NVARCHAR(50) COLLATE Latin1_General_CI_AS, --STGE_LOC 
+	strLoadingPoint			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	dblQuantity				NUMERIC(18,6),
 	strQuantityUOM			NVARCHAR(50) COLLATE Latin1_General_CI_AS, --PO_UNIT
 	dblNetWeight			NUMERIC(18,6),

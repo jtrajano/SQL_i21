@@ -91,15 +91,15 @@ BEGIN
 								END)
 							END) 									
 		,@DiscountBy	= ICISP.strDiscountBy
-		,@PromotionType	= ICISP.strPromotionType
-		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblDiscount ELSE 0.000000 END)
+		,@PromotionType	= ICISP.strPromotionType		
+		,@TermDiscount    = (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblDiscount ELSE 0.000000 END)
 		,@Pricing		= 'Inventory Promotional Pricing' + ISNULL('(' + ICISP.strPromotionType + ')','')	
 	FROM
 		tblICItemSpecialPricing ICISP
 	WHERE
 		ICISP.intItemId = @ItemId 
 		AND ICISP.intItemLocationId = @ItemLocationId 
-		AND ICISP.intItemUnitMeasureId = @ItemUOMId
+		AND ICISP.intItemUnitMeasureId IN (SELECT intUnitMeasureId FROM tblICItemUOM WHERE intUnitMeasureId = @ItemUOMId)
 		AND ISNULL(ICISP.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ICISP.dtmBeginDate AS DATE) AND CAST(ISNULL(ICISP.dtmEndDate,@TransactionDate) AS DATE)
  	ORDER BY
@@ -155,7 +155,38 @@ BEGIN
 											SET @TermDiscount = @DiscountEP
 										END
 								END
-						END					
+						END	
+						ELSE IF @DiscountBy = 'Amount'
+						BEGIN
+							SELECT TOP 1		 
+								@TermDiscount    = (CASE WHEN ICISP.strPromotionType = 'Terms Discount' AND ICISP.strDiscountBy = 'Amount' THEN ISNULL((ISNULL(ICISP.dblDiscount, 0.00)/ISNULL(ICISP.dblUnit,0.00)) * @Quantity,0.00) ELSE 0.000000 END)	
+							FROM
+								tblICItemSpecialPricing ICISP
+							WHERE
+								ICISP.intItemId = @ItemId 
+								AND ICISP.intItemLocationId = @ItemLocationId 		
+								AND ICISP.intItemUnitMeasureId IN (SELECT intUnitMeasureId FROM tblICItemUOM WHERE intUnitMeasureId = @ItemUOMId)
+								AND ISNULL(ICISP.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId		
+								AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ICISP.dtmBeginDate AS DATE) AND CAST(ISNULL(ICISP.dtmEndDate,@TransactionDate) AS DATE)
+ 							ORDER BY
+								dtmBeginDate DESC
+						END	
+						ELSE
+						--- Discount By Percent
+						BEGIN
+							SELECT TOP 1		 
+								@TermDiscount    = (CASE WHEN ICISP.strPromotionType = 'Terms Discount' AND ICISP.strDiscountBy = 'Percent' THEN ISNULL(ISNULL((ISNULL(ICISP.dblDiscount, 0.00)/ISNULL(ICISP.dblUnit,0.00)) * @Quantity,0.00)/100,0.00) ELSE 0.000000 END)	
+							FROM
+								tblICItemSpecialPricing ICISP
+							WHERE
+								ICISP.intItemId = @ItemId 
+								AND ICISP.intItemLocationId = @ItemLocationId 		
+								AND ICISP.intItemUnitMeasureId IN (SELECT intUnitMeasureId FROM tblICItemUOM WHERE intUnitMeasureId = @ItemUOMId)
+								AND ISNULL(ICISP.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId		
+								AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ICISP.dtmBeginDate AS DATE) AND CAST(ISNULL(ICISP.dtmEndDate,@TransactionDate) AS DATE)
+ 							ORDER BY
+								dtmBeginDate DESC
+						END																	
 				END
 			ELSE
 				BEGIN

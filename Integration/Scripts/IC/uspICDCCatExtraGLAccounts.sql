@@ -2,7 +2,7 @@ IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICD
 	DROP PROCEDURE [uspICDCCatExtraGLAccounts]; 
 GO 
 
-Create PROCEDURE [dbo].[uspICDCCatExtraGLAccounts]
+CREATE PROCEDURE [dbo].[uspICDCCatExtraGLAccounts]
 
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -15,6 +15,7 @@ SET ANSI_WARNINGS OFF
 
 
 --insert extra inventory accounts to Category GL table
+--run this after class/category is imported
 
 insert into tblICCategoryAccount 
 (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
@@ -23,9 +24,11 @@ cross join
 (select top 1 51 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%adjustment%'
 union
 select top 1 46 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%transit%'
-union
-select top 1 44 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%variance%'
+--union
+--select top 1 44 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%variance%'
 --union
 --select top 1 45 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%Clearing%'
 ) ac
 where C.strInventoryType = 'Inventory' )
+
+GO

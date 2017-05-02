@@ -289,7 +289,6 @@
     <None Include="dbo\Functions\fnTMGetSpecialPricingPrice.sql" />
     <Build Include="dbo\Tables\tblAPapeglmst.sql" />
     <Build Include="dbo\Tables\tblAPaphglmst.sql" />
-    <Build Include="dbo\Tables\tblAPapivcmst.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportBillsFromAPIVCMST.sql" />
     <Build Include="dbo\Functions\fnValidateBillsImport.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
@@ -403,11 +402,14 @@
     <None Include="dbo\Stored Procedures\uspTRImportTruck.sql" />
     <None Include="dbo\Stored Procedures\uspMFImportRecipe.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportSupplyPoint.sql" />
+    <None Include="dbo\Views\vyuAPOriginCCDTransaction.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportSupplyPointRackPriceEquation.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportSupplyPointProductSearch.sql" />
     <None Include="dbo\Stored Procedures\uspTRImportRackPrice.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportTax.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportTaxRate.sql" />
     <Build Include="dbo\Tables\tblARagordmst.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateImportTankMonitorSP.sql" />
+    <None Include="Scripts\TM\CheckOriginTableAndTMPreference.sql" />
   </ItemGroup>
 </Project>

@@ -18,9 +18,9 @@ BEGIN TRY
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 	,@strXml
 
-	Select @strPartnerNo = RCVPRN 
+	Select @strPartnerNo = SNDPRN 
 	FROM OPENXML(@idoc, 'DELVRY07/IDOC/EDI_DC40', 2) WITH ( 
-		RCVPRN NVARCHAR(100)
+		SNDPRN NVARCHAR(100)
 	)
 
 	--ETA

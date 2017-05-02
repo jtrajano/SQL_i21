@@ -81,7 +81,7 @@ BEGIN
 		[dblDebit]						=	0,
 		[dblCredit]						=	 CAST(CASE WHEN ForexRate.dblRate > 0 
 												 THEN  (CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
-													 ELSE Details.dblTotal END)
+													 ELSE Details.dblTotal END) * ISNULL(NULLIF(Details.dblRate,0),1) 
 											ELSE (
 													(CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
 													 ELSE A.dblAmountDue END))
@@ -113,8 +113,18 @@ BEGIN
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	0,      
 		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	CAST((CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
-											 ELSE A.dblAmountDue END) AS DECIMAL(18,2)),
+		[dblCreditForeign]				=	CAST(
+											CASE WHEN Details.dblRate > 0 
+														THEN
+														(CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal > 0 THEN Details.dblTotal * -1 
+														 ELSE Details.dblTotal END)
+														ELSE
+														(
+														(CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
+														 ELSE A.dblAmountDue END)
+														)
+											END														 
+											AS DECIMAL(18,2)),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
@@ -134,13 +144,13 @@ BEGIN
 			(
 				SELECT CASE COUNT(DISTINCT A.dblRate) WHEN 1 THEN 0 ELSE 1 END AS ysnUniqueForex
 				FROM tblAPBillDetail A
-				WHERE A.intBillId = (SELECT intTransactionId FROM @tmpTransacions)
-			) ForexRateCounter
-			CROSS APPLY
-			(
-				SELECT SUM((dblTotal + dblTax) * A.dblRate) AS dblTotal
-				FROM dbo.tblAPBillDetail A 
 				WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+			) ForexRateCounter
+			OUTER APPLY
+			(
+				SELECT (R.dblTotal + R.dblTax) AS dblTotal , R.dblRate  AS dblRate
+				FROM dbo.tblAPBillDetail R
+				WHERE R.intBillId = A.intBillId AND dblRate > 0
 			) Details
 			
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
@@ -201,10 +211,12 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	B.intAccountId,
+		[intAccountId]					=	CASE WHEN B.intInventoryShipmentChargeId IS NOT NULL THEN dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') --AP-3492 use AP Clearing if tansaction is From IS
+											ELSE B.intAccountId
+											END,
 		[dblDebit]						=	CAST(
 												
-												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal - CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
+												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal /*- CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2))*/ --IC Tax Commented AP-3485
 														ELSE
 															CASE	WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 																	ELSE 
@@ -216,14 +228,12 @@ BEGIN
 																				ELSE 
 																					B.dblTotal 
 																		END																		
-																		+ CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
+																		--+ CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax Commented AP-3485
 															END
-															* 
-															ISNULL(NULLIF(B.dblRate,0),1)
+															
 															
 														END
-												AS DECIMAL(18,2)
-											), --Bill Detail
+												* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) , --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -252,7 +262,7 @@ BEGIN
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	CAST(
 												
-												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal - CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
+												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal /*- CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2))*/ --IC Tax Commented AP-3485
 														ELSE
 															CASE	WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 																	ELSE 
@@ -264,8 +274,8 @@ BEGIN
 																				ELSE 
 																					B.dblTotal 
 																		END																		
-																		+ CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax
-															END
+																		--+ CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) --IC Tax Commented AP-3485
+														END
 														END
 												AS DECIMAL(18,2)
 											), --Bill Detail Foreign,      
@@ -284,7 +294,13 @@ BEGIN
 			LEFT JOIN tblICInventoryReceiptItem E
 				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
-				ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId	
+				ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId
+			LEFT JOIN tblICItem B2
+				ON B.intItemId = B2.intItemId
+			LEFT JOIN tblICItemLocation loc
+				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+			LEFT JOIN tblICItem F
+				ON B.intItemId = F.intItemId					
 			OUTER APPLY (
 				--Add the tax from IR
 				SELECT 
@@ -332,8 +348,8 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'),--[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Auto-Variance'),
-		[dblDebit]						=	(CASE	WHEN A.intTransactionType IN (1) THEN (B.dblTotal - usingOldCost.dblTotal) * ISNULL(NULLIF(B.dblRate,0),1)
-											 ELSE 0 END), 
+		[dblDebit]						=	CAST((CASE	WHEN A.intTransactionType IN (1) THEN (B.dblTotal - usingOldCost.dblTotal) * ISNULL(NULLIF(B.dblRate,0),1) 
+											 ELSE 0 END) AS  DECIMAL(18, 2)), 
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -357,8 +373,8 @@ BEGIN
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	(CASE WHEN A.intTransactionType IN (1) THEN (B.dblTotal - usingOldCost.dblTotal)
-											 ELSE 0 END),      
+		[dblDebitForeign]				=	CAST((CASE WHEN A.intTransactionType IN (1) THEN (B.dblTotal - usingOldCost.dblTotal)
+											 ELSE 0 END) AS  DECIMAL(18, 2)),       
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
@@ -414,8 +430,9 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL OR D.ysnInventoryCost = 0 THEN B.intAccountId
-												ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
+		--[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL OR D.ysnInventoryCost = 0 THEN B.intAccountId
+		--										ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
+		[intAccountId]					=	dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing'), --AP-3227 always use the AP Clearing Account
 		[dblDebit]						=	CAST(CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal 
 												 ELSE (CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
 														ELSE 
@@ -488,7 +505,10 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	D.intAccountId,
+		[intAccountId]					=	CASE WHEN B.intInventoryReceiptItemId IS NOT NULL OR B.intInventoryReceiptChargeId IS NOT NULL
+												 THEN  dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing')
+												 ELSE D.intAccountId
+											END, --AP-3227 always use the AP Clearing Account,
 		--[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
 		--[dblDebit]						=	CASE WHEN B.dblOldCost IS NOT NULL THEN 0 ELSE 
 		--												(CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) 
@@ -549,6 +569,12 @@ BEGIN
 				ON B.intBillDetailId = D.intBillDetailId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 				ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+			INNER JOIN tblICItem B2
+				ON B.intItemId = B2.intItemId
+			INNER JOIN tblICItemLocation loc
+				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+			LEFT JOIN tblICItem F
+				ON B.intItemId = F.intItemId
 			OUTER APPLY (
 				SELECT 
 					SUM(D.dblTax) dblTotalTax
@@ -560,8 +586,8 @@ BEGIN
 	AND A.intTransactionType IN (1,3)
 	AND D.dblTax != 0
 	AND 1 = (
-		--create tax only from item receipt if it is adjusted / Cost is Adjusted  / third party vendor tax in other charge of receipt (AP-3227)
-		CASE WHEN B.intInventoryReceiptItemId IS NOT NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL AND B.intInventoryReceiptChargeId IS NULL
+		--create tax only from item receipt if it is adjusted / Cost is Adjusted  / third party vendor tax in other charge of receipt (AP-3227) // third party inv shipment vendor tax // PO Tax
+		CASE WHEN B.intInventoryReceiptItemId IS NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL AND B.intInventoryReceiptChargeId IS NULL AND B.intInventoryShipmentChargeId IS NULL AND B.intPurchaseDetailId IS NULL --Commented for AP-3461 
 				THEN 0 --AP-2792
 		ELSE 1 END
 	)
@@ -579,6 +605,10 @@ BEGIN
 	,G.strCurrencyExchangeRateType
 	,B.dblOldCost
 	,dblTotalTax
+	,F.intItemId
+	,loc.intItemLocationId
+	,B.intInventoryReceiptItemId
+	,B.intInventoryReceiptChargeId
 
 	UPDATE A
 		SET A.strDescription = B.strDescription

@@ -24,11 +24,11 @@ SELECT
 								PC2.intEntityEmployeeId, 
 								PC2.dtmPayDate, 
 								PCD2.intTypeEarningId, 
-								PCD2.dblHours 
+								dblHours = CASE WHEN (PC2.ysnVoid = 1) THEN 0 ELSE PCD2.dblHours END
 						   FROM tblPRPaycheckEarning PCD2 
 						   RIGHT JOIN tblPRPaycheck PC2 
 								ON PC2.intPaycheckId = PCD2.intPaycheckId
-										AND PC2.ysnPosted = 1 AND PC2.ysnVoid = 0
+										AND PC2.ysnPosted = 1
 						 ) PCX2
 				    WHERE 
 						YEAR(PCX2.dtmPayDate) = YEAR(tblPRPaycheck.dtmPayDate)
@@ -42,11 +42,11 @@ SELECT
 								PC2.intEntityEmployeeId, 
 								PC2.dtmPayDate, 
 								PCD2.intTypeEarningId, 
-								PCD2.dblTotal 
+								dblTotal = CASE WHEN (PC2.ysnVoid = 1) THEN 0 ELSE PCD2.dblTotal END
 						   FROM tblPRPaycheckEarning PCD2 
 						   RIGHT JOIN tblPRPaycheck PC2 
 								ON PC2.intPaycheckId = PCD2.intPaycheckId
-										AND PC2.ysnPosted = 1 AND PC2.ysnVoid = 0
+										AND PC2.ysnPosted = 1
 						 ) PCX2
 				    WHERE 
 						YEAR(PCX2.dtmPayDate) = YEAR(tblPRPaycheck.dtmPayDate)
@@ -83,6 +83,7 @@ SELECT
 	,tblPRPaycheckEarning.intSort
 	,tblPRPaycheckEarning.intConcurrencyId
 	,tblPRPaycheck.dblGross
+	,tblPRPaycheck.ysnVoid
 FROM
 	tblPRPaycheckEarning
 	INNER JOIN tblPRPaycheck  ON tblPRPaycheck.intPaycheckId = tblPRPaycheckEarning.intPaycheckId
@@ -90,4 +91,4 @@ FROM
 	LEFT JOIN tblPRDepartment ON tblPRPaycheckEarning.intEmployeeDepartmentId = tblPRDepartment.intDepartmentId
 	LEFT JOIN tblPRWorkersCompensation ON tblPRPaycheckEarning.intWorkersCompensationId = tblPRWorkersCompensation.intWorkersCompensationId
 WHERE
-	tblPRPaycheck.ysnPosted = 1 AND tblPRPaycheck.ysnVoid = 0
+	tblPRPaycheck.ysnPosted = 1

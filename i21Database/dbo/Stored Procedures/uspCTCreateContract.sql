@@ -3,7 +3,8 @@
 	@strScreenName			NVARCHAR(50),
 	@intUserId				INT,
 	@XML					NVARCHAR(MAX),
-	@intContractHeaderId	INT	OUTPUT
+	@intContractHeaderId	INT	OUTPUT,
+	@intEntityId			INT	= NULL
 AS
 BEGIN TRY
 
@@ -13,7 +14,6 @@ BEGIN TRY
 			@strTblXML					NVARCHAR(MAX),
 
 			@intContractTypeId			INT,
-			@intEntityId				INT,
 			@intCommodityId				INT,
 			@dblHeaderQuantity			NUMERIC(18,6),
 			@intCommodityUOMId			INT,
@@ -108,7 +108,7 @@ BEGIN TRY
 			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId
 		)
 		SELECT	intContractTypeId	=	CASE WHEN SC.strInOutFlag = 'I' THEN 1 ELSE 2 END,
-				intEntityId			=	SC.intEntityId,		dtmContractDate				=	SC.dtmTicketDateTime,
+				intEntityId			=	ISNULL(@intEntityId,SC.intEntityId),		dtmContractDate				=	SC.dtmTicketDateTime,
 				intCommodityId		=	CM.intCommodityId,	intCommodityUOMId			=	CU.intCommodityUnitMeasureId,
 				dblHeaderQuantity	=	0,					intSalespersonId			=	CP.intDefSalespersonId,	
 				ysnSigned			=	0,					strContractNumber			=	CAST('' AS NVARCHAR(100)),

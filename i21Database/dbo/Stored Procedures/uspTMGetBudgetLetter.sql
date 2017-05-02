@@ -26,12 +26,14 @@ BEGIN
 		DECLARE @idoc int
 		DECLARE @strCustomerIds NVARCHAR(MAX)
 		DECLARE @strLocationIds NVARCHAR(MAX)
+		DECLARE @strTermIds NVARCHAR(MAX)
 		DECLARE @strFirstPaymentDue DATETIME
 		DECLARE @intBudgetLetterId INT
 		DECLARE @strWhereClause NVARCHAR(MAX)
 		DECLARE @strBudgetLetterId NVARCHAR(10)
 		DECLARE @strPrintCompanyHeading NVARCHAR(1)
 		DECLARE @query NVARCHAR(MAX)
+		DECLARE @strStartMonth NVARCHAR(10)
 		
 		SET @strWhereClause = ''
 		
@@ -80,6 +82,48 @@ BEGIN
 				SET @strWhereClause = @strWhereClause + ' AND G.intLocationId IN (' + @strLocationIds + ') '
 			END
 		END
+
+		---Term Ids Parameter	
+		SELECT @strTermIds = [from]
+		FROM @temp_params where [fieldname] = 'strTermsIds'
+		
+		IF (ISNULL(@strTermIds,'') != '')
+		BEGIN
+			IF (@strWhereClause = '')
+			BEGIN
+				SET @strWhereClause = ' WHERE (ISNULL(G.intDeliveryTermID,D.intTermsId)) IN (' + @strTermIds + ') '
+			END
+			ELSE
+			BEGIN
+				SET @strWhereClause = @strWhereClause + ' AND (ISNULL(G.intDeliveryTermID,D.intTermsId)) IN (' + @strTermIds + ') '
+			END
+		END
+
+		--Start Month
+		SELECT @strStartMonth = [from]
+		FROM @temp_params where [fieldname] = 'intStartMonth'
+		
+		IF (ISNULL(@strStartMonth,'') != '')
+		BEGIN
+			IF (@strWhereClause = '')
+			BEGIN
+				SET @strWhereClause = ' WHERE MONTH(D.dtmBudgetBeginDate) = ' + @strStartMonth 
+			END
+			ELSE
+			BEGIN
+				SET @strWhereClause = @strWhereClause + ' AND MONTH(D.dtmBudgetBeginDate) =' + @strStartMonth 
+			END
+		END
+
+		--Budget Amount checking
+		IF (@strWhereClause = '')
+		BEGIN
+			SET @strWhereClause = ' WHERE ISNULL(D.dblMonthlyBudget,0) <> 0 ' 
+		END
+		ELSE
+		BEGIN
+			SET @strWhereClause = @strWhereClause + ' AND ISNULL(D.dblMonthlyBudget,0) <> 0'
+		END
 		
 		---@dtmFirstPaymentDue
 		SELECT @strFirstPaymentDue = [from] 
@@ -106,15 +150,16 @@ BEGIN
 			,strCompanyState = A.strState 
 			,strCompanyZip = A.strZip
 			,strCustomerName = C.strName
-			,strCustomerAddress = D.strAddress
-			,strCustomerCity = D.strCity
-			,strCustomerState = D.strState
-			,strCustomerZip = D.strZipCode
+			,strCustomerAddress = E.strAddress
+			,strCustomerCity = E.strCity
+			,strCustomerState = E.strState
+			,strCustomerZip = E.strZipCode
 			,intEntityCustomerId = B.intEntityCustomerId
 			,dblBudget = B.dblMonthlyBudget
 			,dtmFirstDueDate = CAST(''' + @strFirstPaymentDue + ''' AS DATETIME)
-			,blbLetterBody = E.blbMessage 
+			,blbLetterBody = H.blbMessage 
 			,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
+			,intDeliveryTermId = D.intTermsId
 		FROM (SELECT TOP 1 * FROM tblSMCompanySetup) A, tblARCustomer B
 		INNER JOIN tblEMEntity C
 			ON B.intEntityCustomerId = C.intEntityId
@@ -122,9 +167,12 @@ BEGIN
 			ON C.intEntityId = F.intCustomerNumber
 		INNER JOIN tblTMSite G
 			ON F.intCustomerID = G.intCustomerID
-		INNER JOIN tblEMEntityLocation D
-			ON C.intEntityId = D.intEntityId AND D.ysnDefaultLocation = 1
-		,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') E
+		INNER JOIN tblARCustomer D
+			ON C.intEntityId = D.intEntityCustomerId
+		INNER JOIN tblEMEntityLocation E
+			ON D.intEntityCustomerId = E.intEntityId
+				AND ysnDefaultLocation = 1
+		,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') H
 		' + @strWhereClause
 		)
 	END

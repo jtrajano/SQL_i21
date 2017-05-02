@@ -2,7 +2,7 @@ IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICD
 	DROP PROCEDURE [uspICDCStorageMigrationAg]; 
 GO 
 
-Create PROCEDURE [dbo].[uspICDCStorageMigrationAg]
+CREATE PROCEDURE [dbo].[uspICDCStorageMigrationAg]
 
 AS
 SET QUOTED_IDENTIFIER OFF

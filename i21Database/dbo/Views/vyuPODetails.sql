@@ -8,6 +8,8 @@ SELECT
 	 ,A.intCurrencyId
 	 ,B.intItemId
 	 ,B.intUnitOfMeasureId
+	 ,B.intWeightUOMId
+	 ,B.intCostUOMId
 	 ,B.intAccountId
 	 ,B.intStorageLocationId
 	 ,B.intSubLocationId
@@ -17,6 +19,7 @@ SELECT
 	 ,B.dblQtyOrdered
 	 ,B.dblQtyReceived
 	 ,B.dblQtyContract
+	 ,B.dblNetWeight
 	 ,B.dblVolume
 	 ,B.dblWeight
 	 ,B.dblDiscount
@@ -47,6 +50,7 @@ SELECT
 	 ,D.strType
 	 ,dblForexRate
 	 ,intForexRateTypeId
+	 ,dblQtyToReceive = CASE WHEN B.dblQtyReceived >= B.dblQtyOrdered THEN 0 ELSE B.dblQtyOrdered - B.dblQtyReceived END
 FROM tblPOPurchase A
  INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
  INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.intEntityVendorId = C2.intEntityId) ON A.[intEntityVendorId] = C.intEntityVendorId
@@ -58,3 +62,4 @@ FROM tblPOPurchase A
  INNER JOIN dbo.tblSMCompanyLocation I ON A.intShipToId = I.intCompanyLocationId
  LEFT JOIN [tblEMEntityLocation] J ON A.intEntityVendorId = J.intEntityId AND J.intEntityLocationId = A.intShipFromId --Add Filter to avoid multuple PO on add Order
  WHERE D.strType NOT IN ('Service','Software','Non-Inventory','Other Charge')
+GO

@@ -20,8 +20,7 @@ SELECT c.strCommodityCode,
 		intContractDetailId,
 		cd.intContractStatusId,
 		intEntityId
-FROM 
-	tblCTContractDetail cd
+FROM tblCTContractDetail cd
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=cd.intContractHeaderId AND cd.intContractStatusId <> 3
 	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId
 	JOIN tblCTPricingType pt on pt.intPricingTypeId=cd.intPricingTypeId

@@ -2,6 +2,7 @@
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
+	,@strPostedDate					NVARCHAR(MAX)
 	,@strCardId						NVARCHAR(MAX)
 	,@strVehicleId					NVARCHAR(MAX)
 	,@strProductId					NVARCHAR(MAX)
@@ -217,12 +218,6 @@ BEGIN
 
 	IF(@strNetworkType = 'PacPride')
 	BEGIN
-		-----------ORIGINAL GROSS PRICE-------
-		IF(@dblOriginalGrossPrice IS NULL OR @dblOriginalGrossPrice = 0)
-		BEGIN
-		SET @dblOriginalGrossPrice = @dblTransferCost
-		END
-		
 		-----------TRANSACTION TYPE-----------
 		IF(@intSellingHost = @intParticipantNo AND @intBuyingHost = @intParticipantNo)
 		BEGIN
@@ -252,12 +247,37 @@ BEGIN
 											THEN 'Extended Remote'
 									  END)
 		END 
+		-----------TRANSACTION TYPE-----------
+
+
+		-----------ORIGINAL GROSS PRICE-------
+		IF(@dblOriginalGrossPrice IS NULL OR @dblOriginalGrossPrice = 0)-- AND @strTransactionType = 'Local/Network'
+		BEGIN
+			SET @dblOriginalGrossPrice = @dblTransferCost
+			--SET @dblTransferCost = 0
+		END
+		--ELSE IF @strTransactionType != 'Local/Network'
+		--BEGIN
+		--	SET @dblOriginalGrossPrice = @dblTransferCost
+		--END
+		-----------ORIGINAL GROSS PRICE-------
+
+
 	END
 	ELSE IF (@strNetworkType = 'Voyager')
 	BEGIN 
 		SET @strTransactionType = 'Local/Network'
 	END
-	 
+
+
+	IF(@dblOriginalGrossPrice < 0)
+	BEGIN
+		SET @dblOriginalGrossPrice = ABS(@dblOriginalGrossPrice)
+		IF(ISNULL(@dblQuantity,0) > 0)
+		BEGIN
+			SET @dblQuantity = (@dblQuantity * -1)
+		END
+	END
 
 	DECLARE @ysnCreateSite BIT 
 	------------------------------------------------------------
@@ -536,12 +556,77 @@ BEGIN
 								FROM tblCFSite 
 								WHERE intSiteId = @intSiteId)
 	
-	IF(@intAccountId IS NOT NULL AND @intAccountId != 0 AND @strVehicleId != 0)
+
+
+	--------------------------VEHICLE---------------------------
+	
+	DECLARE @tblCFNumericVehicle TABLE(
+		 intVehicleId				int
+		,strVehicleNumber			nvarchar(MAX)
+		,intAccountId				int
+	)
+
+	DECLARE @tblCFCharVehicle TABLE(
+		 intVehicleId				int
+		,strVehicleNumber			nvarchar(MAX)
+		,intAccountId				int
+	)
+
+	
+
+
+	IF(@intAccountId IS NOT NULL AND @intAccountId != 0)
 	BEGIN
-		SET @intVehicleId =
-						(SELECT TOP 1 intVehicleId
-						FROM tblCFVehicle
-						WHERE strVehicleNumber	= @strVehicleId AND intAccountId = @intAccountId)
+
+		IF(@strVehicleId IS NOT NULL)
+		BEGIN
+
+			IF(ISNUMERIC(@strVehicleId) = 1)
+			BEGIN
+
+				--INT VEHICLE NUMBER--
+				INSERT INTO @tblCFNumericVehicle(
+					 intVehicleId			
+					,strVehicleNumber
+					,intAccountId
+				)	
+				SELECT 
+					 intVehicleId			
+					,strVehicleNumber	
+					,intAccountId		
+				FROM tblCFVehicle 
+				WHERE strVehicleNumber not like '%[^0-9]%' and strVehicleNumber != ''
+				AND intAccountId = @intAccountId
+
+				SET @intVehicleId =
+				(SELECT TOP 1 intVehicleId
+				FROM @tblCFNumericVehicle
+				WHERE CAST(strVehicleNumber AS INT) = CAST(@strVehicleId AS INT))
+
+			END
+			ELSE
+			BEGIN
+				--CHAR VEHICLE NUMBER--
+				INSERT INTO @tblCFCharVehicle(
+					 intVehicleId			
+					,strVehicleNumber
+					,intAccountId
+				)	
+				SELECT 
+					 intVehicleId			
+					,strVehicleNumber	
+					,intAccountId		
+				FROM tblCFVehicle WHERE strVehicleNumber like '%[^0-9]%' and strVehicleNumber != ''
+				AND intAccountId = @intAccountId
+
+				SET @intVehicleId =
+				(SELECT TOP 1 intVehicleId
+				FROM @tblCFNumericVehicle
+				WHERE strVehicleNumber = @strVehicleId)
+
+			END
+		
+		END
 	END
 	ELSE
 	BEGIN
@@ -642,7 +727,10 @@ BEGIN
 		IF(@intVehicleId = 0 OR @intVehicleId IS NULL)
 		BEGIN
 			SET @intVehicleId = NULL
-			SET @ysnInvalid = 1
+			IF(@ysnVehicleRequire = 1)
+			BEGIN
+				SET @ysnInvalid = 1
+			END
 		END
 
 		
@@ -679,6 +767,7 @@ BEGIN
 			,[intContractId]				
 			,[dblQuantity]				
 			,[dtmBillingDate]			
+			,[dtmPostedDate]
 			,[dtmTransactionDate]		
 			,[intTransTime]				
 			,[strSequenceNumber]		
@@ -721,7 +810,8 @@ BEGIN
 			,@intARItemLocationId			
 			,@intContractId			
 			,@dblQuantity				
-			,@dtmBillingDate			
+			,@dtmBillingDate		
+			,@strPostedDate	
 			,@dtmTransactionDate		
 			,@intTransTime				
 			,@strSequenceNumber	
@@ -923,6 +1013,7 @@ BEGIN
 		,@dblPriceIndexRate				= dblPriceIndexRate	
 		,@dtmPriceIndexDate				= dtmPriceIndexDate	
 		,@ysnDuplicate					= ysnDuplicate
+		,@ysnInvalid					= ysnInvalid
 		FROM ##tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)

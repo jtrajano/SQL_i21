@@ -17,7 +17,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@dtmDateFrom				AS DATETIME
 		,@strDateTo					AS NVARCHAR(50)
 		,@strDateFrom				AS NVARCHAR(50)
-		,@strCustomerName           AS NVARCHAR(100)
+		,@strCustomerName           AS NVARCHAR(MAX)
 		,@strStatementFormat        AS NVARCHAR(50)
 		,@strAccountStatusCode		AS NVARCHAR(5)
 		,@strLocationName			AS NVARCHAR(50)
@@ -31,8 +31,8 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@fieldname					AS NVARCHAR(50)
 		,@condition					AS NVARCHAR(20)
 		,@id						AS INT 
-		,@from						AS NVARCHAR(100)
-		,@to						AS NVARCHAR(100)
+		,@from						AS NVARCHAR(MAX)
+		,@to						AS NVARCHAR(MAX)
 		,@join						AS NVARCHAR(10)
 		,@begingroup				AS NVARCHAR(50)
 		,@endgroup					AS NVARCHAR(50)
@@ -43,8 +43,8 @@ DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
 	,[fieldname]	NVARCHAR(50)
 	,[condition]	NVARCHAR(20)
-	,[from]			NVARCHAR(100)
-	,[to]			NVARCHAR(100)
+	,[from]			NVARCHAR(MAX)
+	,[to]			NVARCHAR(MAX)
 	,[join]			NVARCHAR(10)
 	,[begingroup]	NVARCHAR(50)
 	,[endgroup]		NVARCHAR(50)
@@ -52,7 +52,7 @@ DECLARE @temp_xml_table TABLE (
 )
 
 DECLARE @temp_SOA_table TABLE(
-	 [strCustomerName]			NVARCHAR(100)
+	 [strCustomerName]			NVARCHAR(MAX)
 	,[strAccountStatusCode]		NVARCHAR(5)
 	,[strLocationName]			NVARCHAR(50)
 	,[ysnPrintZeroBalance]		BIT
@@ -74,8 +74,8 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
 WITH (
 	  [fieldname]  NVARCHAR(50)
 	, [condition]  NVARCHAR(20)
-	, [from]	   NVARCHAR(100)
-	, [to]		   NVARCHAR(100)
+	, [from]	   NVARCHAR(MAX)
+	, [to]		   NVARCHAR(MAX)
 	, [join]	   NVARCHAR(10)
 	, [begingroup] NVARCHAR(50)
 	, [endgroup]   NVARCHAR(50)

@@ -46,11 +46,11 @@
 	[ysnLiquidation]  BIT NULL,
 	[ysnSwap] bit,
 	[strRefSwapTradeNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[intRefFutOptTransactionId] INT NULL,
+	[intRefFutOptTransactionId] INT NULL
+    CONSTRAINT [PK_tblRKFutOptTransaction_intFutOptTransactionId] PRIMARY KEY (intFutOptTransactionId),	
 	[dtmCreateDateTime] DATETIME NULL, 
     [ysnFreezed] BIT NULL, 
     [intRollingMonthId] INT NULL, 
-	CONSTRAINT [PK_tblRKFutOptTransaction_intFutOptTransactionId] PRIMARY KEY (intFutOptTransactionId),	
     CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutOptTransactionHeader_intFutOptTransactionHeaderId] FOREIGN KEY ([intFutOptTransactionHeaderId]) REFERENCES [tblRKFutOptTransactionHeader]([intFutOptTransactionHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),

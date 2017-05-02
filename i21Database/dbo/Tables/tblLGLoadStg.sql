@@ -13,6 +13,10 @@
 	[strExternalShipmentNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[strDateQualifier] NVARCHAR(10) COLLATE Latin1_General_CI_AS,
 	[dtmScheduledDate] DATETIME, 
+	[strMVessel] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[strMVoyageNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strFVessel] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[strFVoyageNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[dtmETAPOD] DATETIME, 
 	[dtmETAPOL] DATETIME, 
 	[dtmETSPOL] DATETIME, 
@@ -20,7 +24,7 @@
 	[strRowState] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[strFeedStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[dtmFeedCreated] DATETIME,
-	[strMessage] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+	[strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS, 
 	[strMessageState] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[ysnMailSent]	BIT DEFAULT 0
 )

@@ -23,9 +23,10 @@ BEGIN
 		FROM @RouteOrder A
 		INNER JOIN tblTMDispatch B
 			ON A.intOrderId = B.intDispatchID
+		WHERE A.dblLongitude IS NOT NULL OR A.dblLatitude IS NOT NULL
 	) A
 	WHERE tblTMSite.intSiteID = A.intSiteID
-		AND (ISNULL(tblTMSite.dblLongitude,0) = 0 OR ISNULL(tblTMSite.dblLatitude,0) = 0)
+		AND (ISNULL(tblTMSite.dblLongitude,0) <> A.dblLongitude OR ISNULL(tblTMSite.dblLatitude,0) <> A.dblLatitude)
 
 
 	

@@ -54,7 +54,11 @@ AS
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId, CD.intPriceCommodityUOMId ,CD.dblBasis)	AS dblConvertedBasis,
 				CY.strCurrency	AS strMarketCurrency,
 				UM.strUnitMeasure AS strMarketUOM,
-				CD.ysnMultiplePriceFixation
+				CD.ysnMultiplePriceFixation,
+				CD.intCurrencyId,
+				CD.ysnSubCurrency				AS	ysnSeqSubCurrency,
+				MA.intCurrencyId				AS	intMarketCurrencyId,
+				CY.ysnSubCurrency				AS	ysnMarketSubCurrency	
 
 		FROM	tblCTPriceFixation	PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -107,7 +111,11 @@ AS
 				NULL					AS	dblConvertedBasis,
 				CY.strCurrency			AS	strMarketCurrency,
 				UM.strUnitMeasure		AS	strMarketUOM,
-				CH.ysnMultiplePriceFixation
+				CH.ysnMultiplePriceFixation,
+				CD.intCurrencyId,
+				CD.ysnSubCurrency				AS	ysnSeqSubCurrency,
+				MA.intCurrencyId				AS	intMarketCurrencyId,
+				CY.ysnSubCurrency				AS	ysnMarketSubCurrency	
 
 		FROM	tblCTPriceFixation	PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
@@ -121,5 +129,6 @@ AS
 		JOIN	tblEMEntity					EY	ON	EY.intEntityId			=	CH.intEntityId
 		JOIN	tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
 		JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId		=	QU.intUnitMeasureId
+		CROSS APPLY fnCTGetTopOneSequence(CH.intContractHeaderId,0)	CD
 		WHERE	ISNULL(CH.ysnMultiplePriceFixation,0) = 1
 	)t

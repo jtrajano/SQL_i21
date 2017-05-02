@@ -142,6 +142,33 @@ IF ISNULL(@LoadDistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
 			RAISERROR(120037, 16, 1)
 		RETURN 0;
 	END
+	
+IF @Type = 'CF Tran'
+    BEGIN    
+        IF ISNULL(@RaiseError,0) = 0
+            ROLLBACK TRANSACTION        
+        IF ISNULL(@RaiseError,0) = 1
+            RAISERROR(120077, 16, 1)
+        RETURN 0;
+    END
+      
+IF @Type = 'CF Invoice'
+    BEGIN    
+        IF ISNULL(@RaiseError,0) = 0
+            ROLLBACK TRANSACTION        
+        IF ISNULL(@RaiseError,0) = 1
+            RAISERROR(120078, 16, 1)
+        RETURN 0;
+    END
+  
+IF @Type = 'Meter Billing'
+    BEGIN    
+        IF ISNULL(@RaiseError,0) = 0
+            ROLLBACK TRANSACTION        
+        IF ISNULL(@RaiseError,0) = 1
+            RAISERROR(120079, 16, 1)
+        RETURN 0;
+    END
 
 IF @Type = 'CF Tran'
 	BEGIN	
@@ -340,9 +367,12 @@ BEGIN TRY
 		,[dblDiscount]
 		,[dblItemTermDiscount]
 		,[dblPrice]
+		,[dblBasePrice]
 		,[strPricing]
 		,[dblTotalTax]
+		,[dblBaseTotalTax]
 		,[dblTotal]
+		,[dblBaseTotal]
 		,[intSubCurrencyId]
 		,[dblSubCurrencyRate]
 		,[intAccountId]
@@ -354,7 +384,9 @@ BEGIN TRY
 		,[strFrequency]
 		,[dtmMaintenanceDate]
 		,[dblMaintenanceAmount]
+		,[dblBaseMaintenanceAmount]
 		,[dblLicenseAmount]
+		,[dblBaseLicenseAmount]
 		,[intTaxGroupId]
 		,[intSCInvoiceId]
 		,[intSCBudgetId]
@@ -393,7 +425,9 @@ BEGIN TRY
 		,[intPrepayTypeId]
 		,[intStorageLocationId]
 		,[strVFDDocumentNumber]
-		,[intCompanyLocationSubLocationId])
+		,[intCompanyLocationSubLocationId]
+		,[intCurrencyExchangeRateTypeId]
+		,[dblCurrencyExchangeRate])
 	SELECT 
 		 [intInvoiceId]					= @CreatedInvoiceId
 		,[strDocumentNumber]			= ''
@@ -413,9 +447,12 @@ BEGIN TRY
 		,[dblDiscount]					= ARID.[dblDiscount]
 		,[dblItemTermDiscount]			= ARID.[dblItemTermDiscount]
 		,[dblPrice]						= ARID.[dblPrice]
+		,[dblBasePrice]					= ARID.[dblBasePrice]
 		,[strPricing]					= ARID.[strPricing]
 		,[dblTotalTax]					= ARID.[dblTotalTax]
+		,[dblBaseTotalTax]				= ARID.[dblBaseTotalTax]
 		,[dblTotal]						= ARID.[dblTotal]
+		,[dblBaseTotal]					= ARID.[dblBaseTotal]
 		,[intSubCurrencyId]				= ARID.[intSubCurrencyId]
 		,[dblSubCurrencyRate]			= ARID.[dblSubCurrencyRate]
 		,[intAccountId]					= ARID.[intAccountId]
@@ -427,7 +464,9 @@ BEGIN TRY
 		,[strFrequency]					= ARID.[strFrequency]
 		,[dtmMaintenanceDate]			= ARID.[dtmMaintenanceDate]
 		,[dblMaintenanceAmount]			= ARID.[dblMaintenanceAmount]
+		,[dblBaseMaintenanceAmount]		= ARID.[dblBaseMaintenanceAmount]
 		,[dblLicenseAmount]				= ARID.[dblLicenseAmount]
+		,[dblBaseLicenseAmount]			= ARID.[dblBaseLicenseAmount]
 		,[intTaxGroupId]				= ARID.[intTaxGroupId]
 		,[intSCInvoiceId]				= NULL
 		,[intSCBudgetId]				= NULL
@@ -467,6 +506,8 @@ BEGIN TRY
 		,[intStorageLocationId]			= ARID.intStorageLocationId
 		,[strVFDDocumentNumber]			= ARID.strVFDDocumentNumber
 		,[intCompanyLocationSubLocationId] = ARID.intCompanyLocationSubLocationId
+		,[intCurrencyExchangeRateTypeId]	= ARID.[intCurrencyExchangeRateTypeId]
+		,[dblCurrencyExchangeRate]		= ARID.[dblCurrencyExchangeRate]
 	FROM
 		tblARInvoiceDetail ARID
 	LEFT OUTER JOIN
@@ -501,6 +542,7 @@ BEGIN TRY
 		,[intSalesTaxAccountId]
 		,[dblTax]
 		,[dblAdjustedTax]
+		,[dblBaseAdjustedTax]
 		,[ysnTaxAdjusted]
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
@@ -518,6 +560,7 @@ BEGIN TRY
 		,[intSalesTaxAccountId]		= ARIDT.[intSalesTaxAccountId]
 		,[dblTax]					= ARIDT.[dblTax]
 		,[dblAdjustedTax]			= ARIDT.[dblAdjustedTax]
+		,[dblBaseAdjustedTax]		= ARIDT.[dblBaseAdjustedTax]
 		,[ysnTaxAdjusted]			= ARIDT.[ysnTaxAdjusted]
 		,[ysnSeparateOnInvoice]		= ARIDT.[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]			= ARIDT.[ysnCheckoffTax]

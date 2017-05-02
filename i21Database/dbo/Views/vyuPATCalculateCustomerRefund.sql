@@ -5,7 +5,8 @@ WITH ComPref AS (
 	strRefund,
 	dblMinimumRefund,
 	dblServiceFee,
-	dblCutoffAmount
+	dblCutoffAmount,
+	strCutoffTo
 	FROM tblPATCompanyPreference
 ), Refund AS (
 SELECT	Total.intCustomerId,
@@ -22,8 +23,7 @@ SELECT	Total.intCustomerId,
 		dblRefundAmount = Total.dblRefundAmount,
 		dblEquityRefund = CASE WHEN (Total.dblRefundAmount - Total.dblCashRefund) < 0 THEN 0 ELSE Total.dblRefundAmount - Total.dblCashRefund END,
 		dblCashRefund = Total.dblCashRefund,
-		dblLessFWT = CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE Total.dbLessFWT END,
-		dblLessServiceFee = Total.dblLessServiceFee
+		dblLessFWTPercentage = CASE WHEN APV.ysnWithholding = 0 THEN 0 ELSE Total.dblLessFWTPercentage END
 		FROM (
 			SELECT	B.intCustomerPatronId as intCustomerId,
 			B.intFiscalYear,
@@ -35,9 +35,8 @@ SELECT	Total.intCustomerId,
 			dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume ELSE 0 END,
 			dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume ELSE 0 END,
 			dblRefundAmount = ROUND((RRD.dblRate * dblVolume), 2) ,
-			dblCashRefund = ROUND((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100), 2) ,
-			dbLessFWT = ROUND((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (CompLoc.dblWithholdPercent/100),2) ,
-			dblLessServiceFee = ComPref.dblServiceFee
+			dblCashRefund = ROUND((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100), 2),
+			dblLessFWTPercentage = CompLoc.dblWithholdPercent
 			FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
 				ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
@@ -69,19 +68,43 @@ SELECT	NEWID() AS id,
 		dblCashPayout,
 		dtmLastActivityDate,
 		strTaxCode,
-		ysnEligibleRefund = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
-		dblTotalPurchases = SUM(dblTotalPurchases),
-		dblTotalSales = SUM(dblTotalSales),
-		dblRefundAmount = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(dblRefundAmount) ELSE 0 END,
-		dblNonRefundAmount = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN 0 ELSE SUM(dblRefundAmount) END,
-		dblEquityRefund = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(dblEquityRefund) ELSE 0 END,
-		dblCashRefund = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(dblCashRefund) ELSE 0 END,
-		dblLessFWT = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(dblLessFWT) ELSE 0 END,
-		dblLessServiceFee = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN dblLessServiceFee ELSE 0 END,
-		dblCheckAmount = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN SUM(dblCashRefund) - SUM(dblLessFWT) - dblLessServiceFee ELSE 0 END
-	FROM Refund
-	CROSS APPLY ComPref
-	GROUP BY	intCustomerId,
+		ysnEligibleRefund,
+		dblTotalPurchases,
+		dblTotalSales,
+		dblRefundAmount ,
+		dblNonRefundAmount,
+		dblEquityRefund,
+		dblCashRefund,
+		dblLessFWT = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN ROUND(dblCashRefund * (dblLessFWTPercentage/100), 2) ELSE 0 END,
+		dblLessServiceFee = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund AND dblCashRefund > ComPref.dblCutoffAmount THEN ComPref.dblServiceFee ELSE 0 END,
+		dblCheckAmount = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN 
+								ROUND(dblCashRefund - ROUND(dblCashRefund * (dblLessFWTPercentage/100), 2) - 
+								(CASE WHEN dblRefundAmount >= ComPref.dblServiceFee AND dblCashRefund > ComPref.dblCutoffAmount THEN ComPref.dblServiceFee ELSE 0 END), 2)
+							ELSE 0 END
+		FROM (SELECT	intCustomerId,
+						intFiscalYearId,
+						intCompanyLocationId,
+						intRefundTypeId,
+						strCustomerName,
+						strStockStatus,
+						dblCashPayout,
+						dtmLastActivityDate,
+						strTaxCode,
+						ysnEligibleRefund = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
+						dblTotalPurchases = SUM(dblTotalPurchases),
+						dblTotalSales = SUM(dblTotalSales),
+						dblRefundAmount = CASE WHEN SUM(dblRefundAmount) > = ComPref.dblMinimumRefund THEN SUM(dblRefundAmount) ELSE 0 END,
+						dblNonRefundAmount = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN 0 ELSE SUM(dblRefundAmount) END,
+						dblCashRefund = CASE WHEN SUM(dblCashRefund) <= ComPref.dblCutoffAmount THEN
+											(CASE WHEN ComPref.strCutoffTo = 'Cash' THEN SUM(dblEquityRefund) + SUM(dblCashRefund) ELSE 0 END)
+											ELSE SUM(dblCashRefund) END,
+						dblEquityRefund = CASE WHEN SUM(dblRefundAmount) >= ComPref.dblMinimumRefund THEN (CASE WHEN SUM(dblCashRefund) <= ComPref.dblCutoffAmount THEN 
+												(CASE WHEN ComPref.strCutoffTo = 'Equity' THEN SUM(dblEquityRefund) + SUM(dblCashRefund) ELSE 0 END) 
+												ELSE SUM(dblEquityRefund) END) ELSE 0 END,
+						dblLessFWTPercentage
+			FROM Refund
+			CROSS APPLY ComPref
+			GROUP BY	intCustomerId,
 				intFiscalYearId,
 				intCompanyLocationId,
 				intRefundTypeId,
@@ -91,4 +114,10 @@ SELECT	NEWID() AS id,
 				dtmLastActivityDate,
 				strTaxCode,
 				ComPref.dblMinimumRefund,
-				dblLessServiceFee
+				dblLessFWTPercentage,
+				ComPref.dblMinimumRefund,
+				ComPref.dblServiceFee,
+				ComPref.dblCutoffAmount,
+				ComPref.strCutoffTo
+		) CalculatedRefunds
+		CROSS APPLY ComPref

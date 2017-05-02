@@ -404,7 +404,7 @@ USING
 		[dblWithheld]	= A.apivc_wthhld_amt,
 		[dblAmountDue]	= D.dblAmountDue,
 		[dblPayment]	= ABS(A.apivc_net_amt),
-		[dblInterest]	= 0,
+		[dblInterest]	= D.dblInterest,
 		[dblTotal]		= D.dblTotal
 	FROM tmp_apivcmstImport A
 	INNER JOIN #tmpPaymentCreated B 

@@ -139,15 +139,16 @@ GO
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract') 
 		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName],[ysnApproval], [ysnActivity], [intConcurrencyId]) 
-			VALUES (N'Contract', N'Contract', N'ContractManagement.view.Contract', N'Contract Management', N'tblCTContractHeader',  1,  1,  0)
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName],[ysnApproval], [ysnActivity], [ysnDocumentSource], [intConcurrencyId]) 
+			VALUES (N'Contract', N'Contract', N'ContractManagement.view.Contract', N'Contract Management', N'tblCTContractHeader',  1,  1, 1,  0)
 		END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
 			SET strTableName = 'tblCTContractHeader',
 				ysnApproval = 1,
-				ysnActivity = 1
+				ysnActivity = 1,
+				ysnDocumentSource = 1
 			WHERE strNamespace = 'ContractManagement.view.Contract'
 		END
 
@@ -167,15 +168,16 @@ GO
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Payroll.view.TimeOffRequest') 
 		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName],  [ysnApproval], [ysnActivity], [intConcurrencyId]) 
-			VALUES (N'Time Off Requests', N'Time Off Requests', N'Payroll.view.TimeOffRequest', N'Payroll', N'tblPRTimeOffRequest',  1,  1,  0)
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName],  [ysnApproval], [ysnActivity], [strApprovalMessage], [intConcurrencyId]) 
+			VALUES (N'Time Off Requests', N'Time Off Requests', N'Payroll.view.TimeOffRequest', N'Payroll', N'tblPRTimeOffRequest',  1,  1, '{transactionNo} for {currencySymbol}{amount} hours',  0)
 		END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
 			SET strTableName = 'tblPRTimeOffRequest',
 				ysnApproval = 1,
-				ysnActivity = 1
+				ysnActivity = 1,
+				strApprovalMessage = '{transactionNo} for {currencySymbol}{amount} hours'
 			WHERE strNamespace = 'Payroll.view.TimeOffRequest'
 		END
 

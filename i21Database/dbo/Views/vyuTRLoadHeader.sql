@@ -12,12 +12,12 @@ SELECT TL.intLoadHeaderId
 	, strCustomerLocation = NULL
 	, intCustomerCompanyLocationId = NULL
 	, strCustomerCompanyLocation = NULL
-	, intEntityVendorId = SP.intEntityVendorId
-	, SP.strFuelSupplier
-	, intVendorLocationId = SP.intEntityLocationId
+	, intEntityVendorId = CAST(SP.intEntityVendorId AS NVARCHAR(100))
+	, strFuelSupplier = Terminal.strName
+	, intVendorLocationId = CAST(SP.intEntityLocationId AS NVARCHAR(100))
 	, SP.strSupplyPoint
 	, strBOL = TR.strBillOfLading
-	, intReceiptCompanyLocationId = Location.intCompanyLocationId
+	, intReceiptCompanyLocationId = CAST(Location.intCompanyLocationId AS NVARCHAR(100))
 	, strReceiptCompanyLocation = Location.strLocationName
 	, Item.intItemId
 	, strItem = Item.strItemNo
@@ -39,6 +39,7 @@ SELECT TL.intLoadHeaderId
 	, strInvoiceNo = NULL
 FROM tblTRLoadHeader TL
 LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
+LEFT JOIN vyuTRTerminal Terminal ON Terminal.intEntityVendorId = TR.intTerminalId
 LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = TR.intSupplyPointId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = TR.intCompanyLocationId
 LEFT JOIN tblICItem Item ON Item.intItemId = TR.intItemId
@@ -122,7 +123,7 @@ LEFT JOIN(
 		, STUFF(
 				(SELECT	DISTINCT ', ' + CD.strBillOfLading
 				FROM vyuTRLinkedReceipts CD
-				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
+				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId 
 				AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
 				FOR XML PATH('')), 1, 2, ''
 				) strBillOfLading

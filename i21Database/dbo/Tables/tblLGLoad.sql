@@ -15,7 +15,7 @@
 [intEntityId] INT NULL,
 [intEntityLocationId] INT NULL,
 [intContractDetailId] INT NULL,
-[strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
+[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [intHaulerEntityId] INT NULL,
 [intTicketId] INT NULL,
 [ysnInProgress] [bit] NULL,
@@ -81,6 +81,9 @@
 [dtmISFReceivedDate] DATETIME NULL,
 [dtmISFFiledDate] DATETIME NULL,
 [dtmStuffingDate] DATETIME NULL,
+[dtmStartDate] DATETIME NULL,
+[dtmEndDate] DATETIME NULL,
+[dtmPlannedAvailabilityDate] DATETIME NULL,
 
 [dblDemurrage] NUMERIC(18, 6) NULL,
 [intDemurrageCurrencyId] INT NULL,
@@ -102,6 +105,14 @@
 [intLoadShippingInstructionId]  INT NULL,
 [strExternalShipmentNumber]  NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [ysn4cRegistration] [bit] NULL,
+[ysnInvoice] [bit] NULL,
+[ysnProvisionalInvoice] [bit] NULL,
+[ysnQuantityFinal] [bit] NULL,
+[ysnCancelled] [bit] NULL,
+[intShippingModeId] INT NULL,
+[intETAPOLReasonCodeId] INT NULL,
+[intETSPOLReasonCodeId] INT NULL,
+[intETAPODReasonCodeId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
@@ -132,5 +143,10 @@ CONSTRAINT [FK_tblLGLoad_tblLGContainerType_intContainerTypeId] FOREIGN KEY ([in
 CONSTRAINT [FK_tblLGLoad_tblSMCurrency_intDemurrageCurrencyId_intCurrencyID] FOREIGN KEY ([intDemurrageCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 CONSTRAINT [FK_tblLGLoad_tblSMCurrency_intDespatchCurrencyId_intCurrencyID] FOREIGN KEY ([intDespatchCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 CONSTRAINT [FK_tblLGLoad_tblICUnitMeasure_intLoadingUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intLoadingUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-CONSTRAINT [FK_tblLGLoad_tblICUnitMeasure_intDischargeUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intDischargeUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+CONSTRAINT [FK_tblLGLoad_tblICUnitMeasure_intDischargeUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intDischargeUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+
+CONSTRAINT [FK_tblLGLoad_tblLGShippingMode_intShippingModeId_intShippingModeId] FOREIGN KEY ([intShippingModeId]) REFERENCES [tblLGShippingMode]([intShippingModeId]),
+CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETAPOLReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETAPOLReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId]),
+CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETSPOLReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETSPOLReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId]),
+CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETAPODReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETAPODReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId])
 )

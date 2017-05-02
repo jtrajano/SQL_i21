@@ -415,3 +415,9 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDispatch',
     @level2type = N'COLUMN',
     @level2name = N'ysnLeakCheckRequired'
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblTMDispatch_strOrderNumber] ON [dbo].[tblTMDispatch]
+(
+	[strOrderNumber] ASC
+)

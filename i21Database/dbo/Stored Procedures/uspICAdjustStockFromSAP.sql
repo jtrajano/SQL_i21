@@ -38,7 +38,20 @@ BEGIN
 	-- SET Values --
 	----------------
 	-- Set Transaction Date
-	SET @dtmQtyChange = ISNULL(@dtmQtyChange, GETDATE());
+		--SET @dtmQtyChange = ISNULL(@dtmQtyChange, GETDATE());
+	IF EXISTS(SELECT * FROM tblICInventoryLot Lot WHERE Lot.intItemId=@intItemId)
+		BEGIN
+			IF @dtmQtyChange IS NULL
+				BEGIN
+					SELECT TOP 1 @dtmQtyChange=Lot.dtmDate 
+					FROM tblICInventoryLot Lot 
+						LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Lot.intItemId
+					WHERE Lot.intItemId=@intItemId AND Lot.intSubLocationId=@intSubLocationId AND ItemLocation.intLocationId = @intLocationId
+					ORDER BY Lot.dtmDate desc
+				END
+		END
+	ELSE
+		SET @dtmQtyChange = ISNULL(@dtmQtyChange, GETDATE());
  	
 	IF @intItemId IS NOT NULL
 		BEGIN

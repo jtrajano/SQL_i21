@@ -39,12 +39,14 @@ AS
 									THEN	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,LB.intUnitMeasureId,PU.intUnitMeasureId,CD.dblCashPrice)*100
 									WHEN	PT.strDescription = 'Robusta'
 									THEN	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,TN.intUnitMeasureId,PU.intUnitMeasureId,CD.dblCashPrice)
-									ELSE	CD.dblFutures
+									ELSE	CD.dblCashPrice
 							END	
 					ELSE	0
-			END	dblCashPrice
+			END	dblCashPrice,
+			LP.strCity			AS	strLoadingPoint
 			
 	FROM	vyuCTContractSequence	CD
+	JOIN	tblCTContractDetail		DL	ON	DL.intContractDetailId		=	CD.intContractDetailId
 	JOIN	vyuCTContractHeaderView	CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
 	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId			LEFT
 	JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId	LEFT
@@ -72,4 +74,5 @@ AS
 			) AP ON AP.intRecordId = CD.intContractHeaderId											LEFT
 	JOIN	tblEMEntity	AE	ON	AE.intEntityId	=	AP.intSubmittedById
 	JOIN	tblEMEntity	UE	ON	UE.intEntityId	=	ISNULL(CH.intLastModifiedById,CH.intCreatedById)LEFT
-	JOIN	tblAPVendor	VE	ON	VE.intEntityVendorId	=	CH.intEntityId
+	JOIN	tblAPVendor	VE	ON	VE.intEntityVendorId	=	CH.intEntityId							LEFT
+	JOIN	tblSMCity	LP	ON	LP.intCityId			=	DL.intLoadingPortId			

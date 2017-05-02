@@ -127,3 +127,28 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDegreeDayReading',
     @level2type = N'COLUMN',
     @level2name = N'ysnSeasonStart'
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTMDegreeDayReading_intClockID_dtmDate] ON [dbo].[tblTMDegreeDayReading]
+(
+	[intClockID] ASC,
+	[dtmDate] ASC
+)
+INCLUDE ([intDegreeDays])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTMDegreeDayReading_dtmDate_intClockID_intDegreeDayReadingID] ON [dbo].[tblTMDegreeDayReading]
+(
+	[dtmDate] ASC,
+	[intClockID] ASC,
+	[intDegreeDayReadingID] ASC
+)
+INCLUDE ([intConcurrencyId],
+	[intClockLocationID],
+	[intDegreeDays],
+	[dblAccumulatedDegreeDay],
+	[strSeason],
+	[intUserID],
+	[dtmLastUpdated],
+	[ysnSeasonStart])
+GO

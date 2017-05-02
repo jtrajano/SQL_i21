@@ -30,6 +30,17 @@ BEGIN TRY
 	DECLARE @strFeeItem NVARCHAR(40)
 	DECLARE @strUserName NVARCHAR(40)
 	DECLARE @strInventoryItem NVARCHAR(40)
+	DECLARE @intItemUOMId AS INT
+	DECLARE @intTransactionTypeId AS INT
+	DECLARE @ItemCostingTableType AS ItemCostingTableType
+
+	SELECT @intItemUOMId = intItemUOMId
+	FROM dbo.tblICItemUOM
+	WHERE intItemId = @intItemId AND ysnStockUnit = 1
+
+	SELECT @intTransactionTypeId = intTransactionTypeId
+	FROM dbo.tblICInventoryTransactionType
+	WHERE strName = 'Inventory Adjustment - Quantity Change'
 	
 	DECLARE @StorageTicketInfoByFIFO AS TABLE 
 	(
@@ -309,6 +320,47 @@ BEGIN TRY
 					AND QM.intTicketFileId = @intCustomerStorageId
 
 			SET @dblUnitsConsumed = @dblUnitsConsumed - @dblStorageUnits
+		END
+
+		INSERT INTO @ItemCostingTableType 
+		(
+			 [intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblQty]
+			,[dblCost]
+			,[dblValue]
+			,[dblSalesPrice]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[intSubLocationId]
+		)
+		SELECT 
+			 [intItemId] = @intItemId
+			,[intItemLocationId] = (SELECT TOP 1 intItemLocationId FROM tblICItemLocation WHERE intItemId = @intItemId AND intLocationId = CS.intCompanyLocationId)
+			,[intItemUOMId] = @intItemUOMId
+			,[dtmDate] = GetDate()
+			,[dblQty] = - tblFIFO.[dblOpenBalance]
+			,[dblCost] = 0
+			,[dblValue] = 0
+			,[dblSalesPrice] = 0
+			,[intCurrencyId] = NULL
+			,[dblExchangeRate] = 1
+			,[intTransactionId] = tblFIFO.intCustomerStorageId
+			,[strTransactionId] = tblFIFO.[strStorageTicketNumber]
+			,[intTransactionTypeId] = @intTransactionTypeId
+			,[intSubLocationId] = CS.intCompanyLocationSubLocationId
+			FROM @StorageTicketInfoByFIFO tblFIFO 
+			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=tblFIFO.intCustomerStorageId
+			WHERE strItemType = 'Inventory'
+        
+		IF @strSourceType <> 'Invoice'--Invoice Calls uspICPostStorage to Update Inventory.
+		BEGIN
+			EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
 		END
 
 		UPDATE CS

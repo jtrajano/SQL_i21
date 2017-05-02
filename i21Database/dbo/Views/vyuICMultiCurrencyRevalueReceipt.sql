@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuICMultiCurrencyRevalueReceipt]
+﻿CREATE VIEW [dbo].[vyuICMultiCurrencyRevalueReceipt]
 AS
 SELECT
      strTransactionType            = r.strReceiptType

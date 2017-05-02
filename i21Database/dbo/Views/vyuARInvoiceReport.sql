@@ -15,6 +15,7 @@ SELECT INV.intInvoiceId
 									END)
 	 , strType					= ISNULL(INV.strType, 'Standard')
      , strCustomerName			= E.strName
+	 , strCustomerNumber		= C.strCustomerNumber
 	 , L.strLocationName
 	 , INV.dtmDate
 	 , INV.dtmPostDate

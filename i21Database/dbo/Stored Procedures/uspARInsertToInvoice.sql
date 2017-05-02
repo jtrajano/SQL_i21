@@ -67,6 +67,7 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT,
 							dblItemTermDiscount			NUMERIC(18,6),
 							strItemTermDiscountBy		NVARCHAR(50),
 							dblPrice					NUMERIC(18,6),
+							dblBasePrice				NUMERIC(18,6),
 							strPricing					NVARCHAR(250),
 							strVFDDocumentNumber		NVARCHAR(100),
 							intTaxGroupId				INT,
@@ -91,7 +92,9 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT,
 							intEntityContactId			INT,
 							intStorageScheduleTypeId	INT,
 							intSubCurrencyId			INT,
-							dblSubCurrencyRate		    NUMERIC(18,6))
+							dblSubCurrencyRate		    NUMERIC(18,6),
+							intCurrencyExchangeRateTypeId	INT,
+							dblCurrencyExchangeRate		    NUMERIC(18,6))
 
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intItemId					INT, 
@@ -109,6 +112,7 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							dblItemTermDiscount			NUMERIC(18,6),
 							strItemTermDiscountBy		NVARCHAR(50),
 							dblPrice					NUMERIC(18,6),
+							dblBasePrice				NUMERIC(18,6),
 							strPricing					NVARCHAR(250),
 							strVFDDocumentNumber		NVARCHAR(100),
 							intTaxGroupId				INT,
@@ -133,7 +137,9 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intEntityContactId			INT,
 							intStorageScheduleTypeId	INT,
 							intSubCurrencyId			INT,
-							dblSubCurrencyRate			NUMERIC(18,6))
+							dblSubCurrencyRate			NUMERIC(18,6),
+							intCurrencyExchangeRateTypeId	INT,
+							dblCurrencyExchangeRate		    NUMERIC(18,6))
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -163,6 +169,7 @@ SELECT intItemId					= SI.intItemId
 	 , dblItemTermDiscount			= SOD.dblItemTermDiscount
 	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
 	 , dblPrice						= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
+	 , dblBasePrice					= CASE WHEN I.strType = 'Software' THEN SOD.dblBaseLicenseAmount ELSE SI.dblPrice END
 	 , strPricing					= SOD.strPricing 
 	 , strVFDDocumentNumber		    = SOD.strVFDDocumentNumber
 	 , intTaxGroupId				= SI.intTaxGroupId
@@ -188,6 +195,8 @@ SELECT intItemId					= SI.intItemId
 	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
 	 , intSubCurrencyId				= SOD.intSubCurrencyId
 	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
+	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
+	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -216,6 +225,7 @@ SELECT intItemId					= SOD.intItemId
 	 , dblItemTermDiscount			= 0
 	 , strItemTermDiscountBy		= 0
 	 , dblPrice						= 0
+	 , dblBasePrice					= 0
 	 , strPricing					= SOD.strPricing 
 	 , strVFDDocumentNumber		    = NULL
 	 , intTaxGroupId				= NULL
@@ -241,6 +251,8 @@ SELECT intItemId					= SOD.intItemId
 	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
 	 , intSubCurrencyId				= SOD.intSubCurrencyId
 	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
+	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
+	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 FROM tblSOSalesOrderDetail SOD
 INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
@@ -263,6 +275,7 @@ SELECT intItemId					= ICSI.intItemId
 	 , dblItemTermDiscount			= SOD.dblItemTermDiscount
 	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
 	 , dblPrice						= ICSI.dblUnitPrice
+	 , dblBasePrice					= ICSI.dblUnitPrice
 	 , strPricing					= SOD.strPricing 
 	 , strVFDDocumentNumber		    = SOD.strVFDDocumentNumber
 	 , intTaxGroupId				= SOD.intTaxGroupId
@@ -288,6 +301,8 @@ SELECT intItemId					= ICSI.intItemId
 	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
 	 , intSubCurrencyId				= SOD.intSubCurrencyId
 	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
+	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
+	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 FROM tblICInventoryShipmentItem ICSI 
 INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
 INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
@@ -313,6 +328,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , dblItemTermDiscount			= 0
 	 , strItemTermDiscountBy		= NULL
 	 , dblPrice						= ARSI.dblPrice 
+	 , dblBasePrice					= ARSI.dblPrice 
 	 , strPricing					= ARSI.strPricing
 	 , strVFDDocumentNumber		    = ARSI.strVFDDocumentNumber
 	 , intTaxGroupId				= NULL
@@ -338,6 +354,8 @@ SELECT intItemId					= ARSI.intItemId
 	 , intStorageScheduleTypeId		= ARSI.intStorageScheduleTypeId
 	 , intSubCurrencyId				= NULL
 	 , dblSubCurrencyRate			= 1
+	 , intCurrencyExchangeRateTypeId = ARSI.intCurrencyExchangeRateTypeId
+	 , dblCurrencyExchangeRate		= ARSI.dblCurrencyExchangeRate
 FROM vyuARShippedItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -679,7 +697,9 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intConcurrencyId]
 					,[intStorageScheduleTypeId]
 					,[intSubCurrencyId]
-					,[dblSubCurrencyRate])
+					,[dblSubCurrencyRate]
+					,[intCurrencyExchangeRateTypeId]
+					,[dblCurrencyExchangeRate])
 				SELECT 	
 					 @SoftwareInvoiceId			--[intInvoiceId]
 					,[intItemId]				--[intItemId]
@@ -711,6 +731,8 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intStorageScheduleTypeId]
 					,[intSubCurrencyId]
 					,[dblSubCurrencyRate]
+					,[intCurrencyExchangeRateTypeId]
+					,[dblCurrencyExchangeRate]
 				FROM
 					tblSOSalesOrderDetail
 				WHERE
@@ -821,7 +843,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ContractBalance		INT,
 						@ContractAvailable		INT,
 						@ItemSubCurrencyId		INT,
-						@ItemSubCurrencyRate	NUMERIC(18,6)					
+						@ItemSubCurrencyRate	NUMERIC(18,6),
+						@ItemCurrencyExchangeRateTypeId		INT,
+						@ItemCurrencyExchangeRate	NUMERIC(18, 6)					
 
 				SELECT TOP 1
 						@intItemToInvoiceId		= intItemToInvoiceId,
@@ -863,7 +887,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@EntityContactId		= intEntityContactId,	
 						@StorageScheduleTypeId	= intStorageScheduleTypeId,
 						@ItemSubCurrencyId		= intSubCurrencyId,
-						@ItemSubCurrencyRate	= dblSubCurrencyRate 
+						@ItemSubCurrencyRate	= dblSubCurrencyRate,
+						@ItemCurrencyExchangeRateTypeId	= intCurrencyExchangeRateTypeId,
+						@ItemCurrencyExchangeRate	=dblCurrencyExchangeRate
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
@@ -910,6 +936,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemMaintenanceDate			= @ItemMaintenanceDate
 							,@ItemSubCurrencyId				= @ItemSubCurrencyId
 							,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
+							,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+							,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 
 				UPDATE tblARInvoiceDetail SET dblContractBalance = @ContractBalance, dblContractAvailable = @ContractAvailable
 				FROM @tblItemsToInvoice 
@@ -942,6 +970,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 									,[intSalesTaxAccountId]
 									,[dblTax]
 									,[dblAdjustedTax]
+									,[dblBaseAdjustedTax]
 									,[ysnTaxAdjusted]
 									,[ysnSeparateOnInvoice]
 									,[ysnCheckoffTax]
@@ -960,6 +989,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 									,[intSalesTaxAccountId]
 									,[dblTax]
 									,[dblAdjustedTax]
+									,[dblBaseAdjustedTax]
 									,[ysnTaxAdjusted]
 									,[ysnSeparateOnInvoice]
 									,[ysnCheckoffTax]
@@ -1101,14 +1131,18 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 			END			
 			
 		UPDATE tblARInvoice
-		SET intPeriodsToAccrue = CASE WHEN @ysnHasMaintenanceItem = 1 THEN
-									CASE WHEN @strFrequency = 'Monthly' THEN 1
-										 WHEN @strFrequency = 'Bi-Monthly' THEN 2
-										 WHEN @strFrequency = 'Quarterly' THEN 3
-										 WHEN @strFrequency = 'Semi-Annually' THEN 6
-										 WHEN @strFrequency = 'Annually' THEN 12
-									ELSE 1 END
-								 ELSE 1 END
+		SET intPeriodsToAccrue = CASE WHEN ISNULL(intPeriodsToAccrue, 0) <> 0 THEN
+									 intPeriodsToAccrue
+								 ELSE
+									 CASE WHEN @ysnHasMaintenanceItem = 1 THEN
+										CASE WHEN @strFrequency = 'Monthly' THEN 1
+											 WHEN @strFrequency = 'Bi-Monthly' THEN 2
+											 WHEN @strFrequency = 'Quarterly' THEN 3
+											 WHEN @strFrequency = 'Semi-Annually' THEN 6
+											 WHEN @strFrequency = 'Annually' THEN 12
+										ELSE 1 END
+									 ELSE 1 END
+								 END
 		WHERE intInvoiceId = @SoftwareInvoiceId
 
 		IF NOT EXISTS (SELECT NULL FROM tblSMRecurringTransaction WHERE intTransactionId = @SoftwareInvoiceId AND strTransactionType = 'Invoice')

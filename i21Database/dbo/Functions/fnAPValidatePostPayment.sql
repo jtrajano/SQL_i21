@@ -185,6 +185,22 @@ BEGIN
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND PaymentDetails.intPaymentDetailId IS NULL
 
+		--duplicate payment detail
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Unable to post. Duplicate vouchers found in details.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		CROSS APPLY (
+			SELECT COUNT(*) intVouchers FROM tblAPPaymentDetail B
+			WHERE B.dblPayment > 0 AND B.intPaymentId = A.intPaymentId
+			GROUP BY B.intBillId
+		) PaymentDetails
+		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND PaymentDetails.intVouchers > 1
+
 		--Payment without detail
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 

@@ -16,9 +16,9 @@ BEGIN
 	)
 	SELECT	@LBS, 1, 1, 1 				-- @LBS is the stock unit. 
 	UNION ALL 
-	SELECT	@KGS, 0.453592, 0, 1		-- one KG is 0.453592 Lbs
+	SELECT	@KGS, 2.20462262185, 0, 1	-- one KG is 2.20462262185 Lbs
 	UNION ALL 
 	SELECT	@50LB_BAG, 50, 0, 1			-- one 50-Lb bag is 50 Lbs
 	UNION ALL 
-	SELECT	@20KG_BAG, 44.0925, 0, 1	-- one 20-Kg bag is 44.0925 Lbs	
+	SELECT	@20KG_BAG, 44.092452437, 0, 1	-- one 20-Kg bag is 44.0925 Lbs	
 END

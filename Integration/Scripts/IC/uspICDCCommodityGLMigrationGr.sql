@@ -2,7 +2,7 @@ IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICD
 	DROP PROCEDURE [uspICDCCommodityGLMigrationGr]; 
 GO 
 
-Create PROCEDURE [dbo].[uspICDCCommodityGLMigrationGr]
+CREATE PROCEDURE [dbo].[uspICDCCommodityGLMigrationGr]
 
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -94,3 +94,28 @@ cross join
 select top 1 45 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%Clearing%'
 ) ac
 where C.strInventoryType = 'Inventory' )
+
+
+
+--==================================================================
+--update the account table with correct account category required for inventory to function
+
+UPDATE tgs SET intAccountCategoryId = tgc.intAccountCategoryId
+--select tgs.strCode,  t.code, t.cat , tgc.strAccountCategory
+FROM dbo.tblGLAccountSegment tgs  
+JOIN 
+(--purchase
+--select distinct(CAST(gacom_gl_pur AS VARCHAR)) code,'Cost of Goods' cat from gacommst  
+--union
+-----Sales Account Category
+--select distinct(CAST(gacom_gl_sls AS VARCHAR)) code,'Sales Account'cat from gacommst 
+--union
+---Inventory Category
+select distinct(CAST(gacom_gl_inv AS VARCHAR)) code, 'Inventory' cat from gacommst
+) as t 
+ON tgs.strCode = t.code  
+JOIN dbo.tblGLAccountCategory tgc ON t.cat  = tgc.strAccountCategory 
+
+
+
+GO

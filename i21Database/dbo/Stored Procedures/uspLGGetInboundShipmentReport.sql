@@ -16,6 +16,8 @@ BEGIN
 			@strCountry					NVARCHAR(25),
 			@strPhone					NVARCHAR(50),
 			@strFullName				NVARCHAR(100),
+			@strUserPhoneNo				NVARCHAR(100),
+			@strUserEmailId				NVARCHAR(100),
 			@strUserName				NVARCHAR(100),
 			@strLogisticsCompanyName	NVARCHAR(MAX),
 			@strLogisticsPrintSignOff	NVARCHAR(MAX),
@@ -91,7 +93,14 @@ BEGIN
 				,@strPhone = strPhone
 	FROM tblSMCompanySetup
 
-	SELECT @strFullName = strFullName FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	SELECT @strFullName = E.strName,
+		   @strUserEmailId = ETC.strEmail,
+		   @strUserPhoneNo = EPN.strPhone  FROM tblSMUserSecurity S
+	JOIN tblEMEntity E ON E.intEntityId = S.intEntityUserSecurityId 
+	JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId
+	JOIN tblEMEntity ETC ON ETC.intEntityId = EC.intEntityContactId
+	JOIN tblEMEntityPhoneNumber EPN ON EPN.intEntityId = ETC.intEntityId
+	WHERE strUserName = @strUserName
 
 	SELECT @strWarehouseEntityName = CASE 
 			WHEN ISNULL(E.strName, '') = ''
@@ -110,7 +119,7 @@ BEGIN
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 
 
-	SELECT @strReleaseOrderText = 'Attn '+ ISNULL(@strShippingLineName,'') +' : Please release the the cargo in favour of ' + @strWarehouseEntityName
+	SELECT @strReleaseOrderText = 'Attn '+ ISNULL(@strShippingLineName,'') +' : Please release the cargo in favour of ' + @strWarehouseEntityName
 	
 	SELECT @strLogisticsCompanyName = strLogisticsCompanyName,
 		   @strLogisticsPrintSignOff = strLogisticsPrintSignOff
@@ -234,18 +243,44 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strCountry AS strCompanyCountry ,
 				@strPhone AS strCompanyPhone ,
 				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip,
-				@strFullName AS strUserFullName,
-				'' AS strExternalPONumber,
+				CASE WHEN ISNULL(@strFullName,'') = '' THEN  @strUserName ELSE @strFullName END AS strUserFullName,
+				CD.strERPPONumber AS strExternalPONumber,
 				CONVERT(NVARCHAR,L.intNumberOfContainers) + ' (' + L.strPackingDescription +')' AS strNumberOfContainers,
 				CType.strContainerType,
 				@strLogisticsCompanyName AS strLogisticsCompanyName,
 				@strLogisticsPrintSignOff AS strLogisticsPrintSignOff,
 				CASE WHEN @strInstoreTo = 'Shipping Line' THEN SLETC.strName ELSE WETC.strName END AS strWarehouseContact,
 				@strInstoreTo AS strInstoreTo,
-				CASE WHEN @strInstoreTo = 'Shipping Line' THEN @strReleaseOrderText ELSE NULL END AS strReleaseOrderText
+				CASE WHEN @strInstoreTo = 'Shipping Line' THEN @strReleaseOrderText ELSE NULL END AS strReleaseOrderText,
 
+				'' AS strWarehouseVendorName,
+				'' AS strWarehouseVendorLocation,
+				'' AS strWarehouseVendorAddress,
+				'' AS strWarehouseVendorCity,
+				'' AS strWarehouseVendorState,
+				'' AS strWarehouseVendorZipCode,
+				'' AS strWarehouseVendorCountry,
+				'' AS strPhone,
+				'' AS strMobile,
+				'' AS strWarehouseVendorContract,
+				'' AS strWarehouseVendorContactPhone,
+				'' AS strWarehouseVendorContactEmail,
+
+				'' AS  strWarehouseAddressInfo,
+				'' AS  strWarehouseContractInfo,
+				'' AS intContractBasisId,
+				'' AS strContractBasis,
+				'' AS strContractBasisDescription,
+				'' AS strUserEmailId,
+				'' AS strUserPhoneNo,
+				L.strShippingMode,
+				strCertificationName = (SELECT TOP 1 strCertificationName
+										FROM tblICCertification CER
+										JOIN tblCTContractCertification CTCER ON CTCER.intCertificationId = CER.intCertificationId
+										WHERE CTCER.intContractDetailId = CD.intContractDetailId) 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN	tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
@@ -389,18 +424,52 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strCountry AS strCompanyCountry ,
 				@strPhone AS strCompanyPhone ,
 				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip,
-				@strFullName AS strUserFullName,
-				'' AS strExternalPONumber,
+				CASE WHEN ISNULL(@strFullName,'') = '' THEN  @strUserName ELSE @strFullName END AS strUserFullName,
+				CD.strERPPONumber AS strExternalPONumber,
 				CONVERT(NVARCHAR,L.intNumberOfContainers) + ' (' + L.strPackingDescription +')' AS strNumberOfContainers,
 				CType.strContainerType,
 				@strLogisticsCompanyName AS strLogisticsCompanyName,
 				@strLogisticsPrintSignOff AS strLogisticsPrintSignOff,
 				CASE WHEN @strInstoreTo = 'Shipping Line' THEN SLETC.strName ELSE WETC.strName END AS strWarehouseContact,
 				@strInstoreTo AS strInstoreTo,
-				CASE WHEN @strInstoreTo = 'Shipping Line' THEN @strReleaseOrderText ELSE NULL END AS strReleaseOrderText
+				CASE WHEN @strInstoreTo = 'Shipping Line' THEN @strReleaseOrderText ELSE NULL END AS strReleaseOrderText,
+				WHVendor.strName AS strWarehouseVendorName,
+				WHVendorLoc.strLocationName AS strWarehouseVendorLocation,
+				WHVendorLoc.strAddress AS strWarehouseVendorAddress,
+				WHVendorLoc.strCity AS strWarehouseVendorCity,
+				WHVendorLoc.strState AS strWarehouseVendorState,
+				WHVendorLoc.strZipCode + ' ' + WHVendorLoc.strCity AS strWarehouseVendorZipCode,
+				WHVendorLoc.strCountry AS strWarehouseVendorCountry,
+				WETCP.strPhone,
+				WETCM.strPhone strMobile,
+				WETC.strName AS strWarehouseVendorContract,
+				'Phone: ' + WETCP.strPhone AS strWarehouseVendorContactPhone,
+				'E-Mail: ' + WETC.strEmail AS strWarehouseVendorContactEmail,
 
+				WHVendor.strName + CHAR(13) + 
+				RTRIM(LTRIM(ISNULL(WHVendorLoc.strAddress,''))) + CHAR(13) + 
+				ISNULL(WHVendorLoc.strZipCode,'') + ' ' + 
+				CASE WHEN ISNULL(WHVendorLoc.strCity,'') = '' THEN '' ELSE WHVendorLoc.strCity END + CHAR(13) + 
+				CASE WHEN ISNULL(WHVendorLoc.strState,'') = '' THEN '' ELSE WHVendorLoc.strState END + CHAR(13) +  
+				ISNULL(WHVendorLoc.strCountry,'') strWarehouseAddressInfo,
+
+				WETC.strName + CHAR(13) + 
+				'Phone: ' + WETCP.strPhone + CHAR(13) + 
+				'E-Mail: ' + WETC.strEmail strWarehouseContractInfo,
+				CH.intContractBasisId,
+				Basis.strContractBasis,
+				Basis.strDescription AS strContractBasisDescription,
+				@strUserEmailId AS strUserEmailId,
+				@strUserPhoneNo AS strUserPhoneNo,
+				L.strShippingMode,
+				strCertificationName = (SELECT TOP 1 strCertificationName
+										FROM tblICCertification CER
+										JOIN tblCTContractCertification CTCER ON CTCER.intCertificationId = CER.intCertificationId
+										WHERE CTCER.intContractDetailId = CD.intContractDetailId) 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN		tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN	tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
@@ -416,15 +485,22 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 		LEFT JOIN	tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 		LEFT JOIN	tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
-		--LEFT JOIN   tblEMEntityToContact VEC ON VEC.intEntityId = Vendor.intEntityId
 		LEFT JOIN	tblEMEntity Via ON Via.intEntityId = LW .intHaulerEntityId
 		LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
+		LEFT JOIN   tblEMEntity WHVendor ON WHVendor.intEntityId = WH.intVendorId
+		LEFT JOIN	tblEMEntityLocation WHVendorLoc ON WHVendorLoc.intEntityLocationId = WHVendor.intDefaultLocationId
 		LEFT JOIN   tblEMEntityToContact WEC ON WEC.intEntityId = WH.intVendorId
 		LEFT JOIN   tblEMEntity WETC ON WETC .intEntityId = WEC.intEntityContactId
+		LEFT JOIN	tblEMEntityPhoneNumber WETCP ON WETCP.intEntityId = WETC .intEntityId
+		LEFT JOIN	tblEMEntityMobileNumber WETCM ON WETCM.intEntityId = WETC .intEntityId
+		LEFT JOIN	tblEMContactDetail WETCD ON WETCD.intEntityId = WETC.intEntityId 
+		LEFT JOIN	tblEMContactDetailType WETCDT ON WETCDT.intContactDetailTypeId = WETCDT.intContactDetailTypeId
+				AND WETCDT.strField = 'Fax'
 		LEFT JOIN   tblEMEntityToContact SLEC ON SLEC.intEntityId = SLEntity.intEntityId
 		LEFT JOIN   tblEMEntity SLETC ON SLETC .intEntityId = SLEC.intEntityContactId
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
+		LEFT JOIN	tblCTContractBasis Basis ON Basis.intContractBasisId = CH.intContractBasisId
 		WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 	END
 END

@@ -9,7 +9,7 @@ BEGIN
 
 IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'agordmst' and type = 'U') 
 BEGIN
-	IF EXISTS (SELECT 1 FROM sys.columns WHERE name = 'agord_no_of_months') AND EXISTS (SELECT 1 FROM sys.columns WHERE name = 'agord_final_due_dt') 
+	IF EXISTS (SELECT 1 FROM sys.columns WHERE name = 'agord_no_of_months' AND [object_id] = OBJECT_ID(N'agordmst')) AND EXISTS (SELECT 1 FROM sys.columns WHERE name = 'agord_final_due_dt' AND [object_id] = OBJECT_ID(N'agordmst')) 
 	BEGIN 
 		EXEC('
 			CREATE PROCEDURE [dbo].[uspARImportInvoiceBackupAGORDMST]

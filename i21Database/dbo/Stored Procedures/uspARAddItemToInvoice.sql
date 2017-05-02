@@ -59,6 +59,7 @@
 	,@ItemCustomerStorageId			INT				= NULL		
 	,@ItemSiteDetailId				INT				= NULL		
 	,@ItemLoadDetailId				INT				= NULL			
+	,@ItemLotId						INT				= NULL			
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemConversionAccountId		INT				= NULL
 	,@ItemSalesAccountId			INT				= NULL
@@ -104,7 +105,7 @@ SELECT
 	 @CompanyLocationId = [intCompanyLocationId]
 	 ,@CurrencyId		= [intCurrencyId]	
 FROM
-	tblARInvoice
+	tblARInvoice WITH (NOLOCK)
 WHERE
 	intInvoiceId = @InvoiceId
 
@@ -175,6 +176,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemCustomerStorageId			= @ItemCustomerStorageId
 			,@ItemSiteDetailId				= @ItemSiteDetailId
 			,@ItemLoadDetailId				= @ItemLoadDetailId
+			,@ItemLotId						= @ItemLotId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
 			,@ItemBillingBy					= @ItemBillingBy
@@ -278,7 +280,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemDescription
 				,@ItemDocumentNumber
 				,@OrderUOMId
-				,ISNULL(ISNULL(@ItemUOMId, (SELECT TOP 1 [intIssueUOMId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId ORDER BY [intItemLocationId] )), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
+				,ISNULL(ISNULL(@ItemUOMId, (SELECT TOP 1 [intIssueUOMId] FROM tblICItemLocation WITH (NOLOCK) WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId ORDER BY [intItemLocationId] )), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,@ItemContractHeaderId
 				,@ItemContractDetailId
 				,@ItemQtyOrdered
@@ -321,7 +323,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemDestinationGradeId
 				,@ItemDestinationWeightId
 				,@ItemSalesAccountId
-			FROM tblICItem WHERE intItemId = @ItemId
+			FROM tblICItem WITH (NOLOCK)
+			WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
 
@@ -413,18 +416,19 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 SET @NewInvoiceDetailId = @NewDetailId
 
 UPDATE tblARInvoiceDetail SET intStorageScheduleTypeId = ABC.intStorageScheduleTypeId, intCompanyLocationSubLocationId = ABC.intSubLocationId, intStorageLocationId = ABC.intStorageLocationId
-FROM tblARInvoiceDetail
+FROM 
+(SELECT intInvoiceId FROM tblARInvoiceDetail) ARID
 INNER JOIN
 (
-SELECT intInvoiceId, intStorageScheduleTypeId, intStorageLocationId, intSubLocationId FROM tblICInventoryShipment  ICIS
-INNER JOIN (SELECT intInventoryShipmentId, intItemId, intItemUOMId, intOrderId, intStorageLocationId, intSubLocationId FROM tblICInventoryShipmentItem) ICISI ON ICIS.intInventoryShipmentId = ICISI.intInventoryShipmentId
-INNER JOIN (SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, intStorageScheduleTypeId, intItemId, intItemUOMId FROM tblSOSalesOrder SO 
-			INNER JOIN (SELECT intSalesOrderId, intStorageScheduleTypeId, intItemId, intItemUOMId  FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId) SO ON ICIS.strReferenceNumber = SO.strSalesOrderNumber AND ICISI.intItemId = SO.intItemId AND ICISI.intItemUOMId = SO.intItemUOMId
-INNER JOIN (SELECT ARI.intInvoiceId, ARID.strDocumentNumber, strInvoiceNumber, intItemId, intItemUOMId FROM tblARInvoice ARI  
-			INNER JOIN (SELECT intInvoiceId, strDocumentNumber, intItemId, intItemUOMId FROM tblARInvoiceDetail) ARID ON ARI.intInvoiceId = ARID.intInvoiceId 
+SELECT intInvoiceId, intStorageScheduleTypeId, intStorageLocationId, intSubLocationId FROM tblICInventoryShipment ICIS WITH (NOLOCK)
+INNER JOIN (SELECT intInventoryShipmentId, intItemId, intItemUOMId, intOrderId, intStorageLocationId, intSubLocationId FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI ON ICIS.intInventoryShipmentId = ICISI.intInventoryShipmentId
+INNER JOIN (SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, intStorageScheduleTypeId, intItemId, intItemUOMId FROM tblSOSalesOrder SO  WITH (NOLOCK)
+			INNER JOIN (SELECT intSalesOrderId, intStorageScheduleTypeId, intItemId, intItemUOMId  FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId) SO ON ICIS.strReferenceNumber = SO.strSalesOrderNumber AND ICISI.intItemId = SO.intItemId AND ICISI.intItemUOMId = SO.intItemUOMId
+INNER JOIN (SELECT ARI.intInvoiceId, ARID.strDocumentNumber, strInvoiceNumber, intItemId, intItemUOMId FROM tblARInvoice ARI   WITH (NOLOCK)
+			INNER JOIN (SELECT intInvoiceId, strDocumentNumber, intItemId, intItemUOMId FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ARI.intInvoiceId = ARID.intInvoiceId 
 						WHERE strDocumentNumber IS NOT NULL AND ISNULL(strDocumentNumber,'') <> '' AND ARI.intInvoiceId = @InvoiceId ) ARI ON ICIS.strShipmentNumber = ARI.strDocumentNumber AND ICISI.intItemId = ARI.intItemId AND ICISI.intItemUOMId = ARI.intItemUOMId
-) ABC ON tblARInvoiceDetail.intInvoiceId = ABC.intInvoiceId
-WHERE tblARInvoiceDetail.intInvoiceId = @InvoiceId
+) ABC ON ARID.intInvoiceId = ABC.intInvoiceId
+WHERE ARID.intInvoiceId = @InvoiceId
 
 
 EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId

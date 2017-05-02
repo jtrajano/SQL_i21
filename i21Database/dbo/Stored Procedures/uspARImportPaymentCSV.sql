@@ -11,7 +11,7 @@ BEGIN
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 	
 DECLARE @DateNow			DATETIME
 	  , @DefaultCurrencyId	INT
@@ -53,7 +53,7 @@ WHILE EXISTS(SELECT NULL FROM @PaymentsForImport)
 		SELECT  @intEntityCustomerId		= (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = ILD.strCustomerNumber)
 			  , @intCompanyLocationId		= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = ILD.strLocationName)
 			  , @intUndepositedAccountId	= (SELECT TOP 1 intUndepositedFundsId FROM tblSMCompanyLocation WHERE strLocationName = ILD.strLocationName)
-			  , @intBankAccountId			= (SELECT TOP 1 intBankAccountId FROM vyuCMBankAccount WHERE RTRIM(LTRIM(strBankAccountNo)) = ISNULL(dbo.fnAESDecryptASym(ILD.strBankAccountNo),ILD.strBankAccountNo))
+			  , @intBankAccountId			= (SELECT TOP 1 intBankAccountId FROM vyuCMBankAccount WHERE RTRIM(LTRIM(strBankAccountNo)) = RTRIM(LTRIM(ILD.strBankAccountNo)))
 			  , @intPaymentMethodId			= (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = (CASE WHEN ILD.strPaymentMethod = 'C' THEN 'Check' ELSE NULL END))
 			  , @strPaymentInfo				= ILD.strCheckNumber
 			  , @dtmDatePaid				= ILD.dtmDatePaid

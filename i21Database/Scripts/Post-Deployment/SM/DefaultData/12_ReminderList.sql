@@ -335,10 +335,22 @@ GO
                                                 FROM tblSMApproval 
                                                 WHERE    ysnCurrent = 1 AND 
                                                         strStatus IN (''Rejected'') AND 
-                                                        intSubmittedById= {0}',
+                                                        {0} = {0}',
                 [strNamespace]      =        N'i21.view.Approval?activeTab=Rejected',
                 [intSort]           =        15
     END
+	ELSE
+		BEGIN
+			UPDATE [tblSMReminderList]
+			SET	[strQuery] = N'    SELECT 
+										intTransactionId 
+									FROM tblSMApproval 
+									WHERE    ysnCurrent = 1 AND 
+											strStatus IN (''Rejected'') AND 
+											{0} = {0}'
+			WHERE [strReminder] = N'Rejected' AND [strType] = N'Transaction' 
+		END
+
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Activity' AND [strType] = N'Reminder')
     BEGIN
@@ -567,10 +579,48 @@ BEGIN
 	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
 	SELECT [strReminder]        =        N'Error',
 			[strType]        	=        N'Scale Service',
-			[strMessage]		=        N'Scale service is not currently working. <br> Please check scale configuration.',
-			[strQuery]  		=        N'SELECT intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile where DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(intEntityId,0) != {0}',
+			[strMessage]		=        N'{0} Scale service is not currently working. <br> Please check scale configuration.',
+			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
+											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
+											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intInScaleDeviceId
+											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(intEntityId,0) != {0}',
 			[strNamespace]      =        N'',
 			[intSort]           =        @intMaxSortOrder + 1
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+	SELECT [strReminder]        =        N'Error',
+			[strType]        	=        N'Scale Service',
+			[strMessage]		=        N'{0} Scale service is not currently working. <br> Please check scale configuration.',
+			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
+											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
+											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intOutScaleDeviceId
+											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(intEntityId,0) != {0}',
+			[strNamespace]      =        N'',
+			[intSort]           =        @intMaxSortOrder + 2
+END
+ELSE
+BEGIN
+	DELETE FROM [tblSMReminderList] WHERE [strReminder] = N'Error' AND [strType] = N'Scale Service'
+	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+	SELECT [strReminder]        =        N'Error',
+			[strType]        	=        N'Scale Service',
+			[strMessage]		=        N'{0} Scale service is not currently working. <br> Please check scale configuration.',
+			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
+											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
+											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intInScaleDeviceId
+											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(intEntityId,0) != {0}',
+			[strNamespace]      =        N'',
+			[intSort]           =        @intMaxSortOrder + 1
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+	SELECT [strReminder]        =        N'Error',
+			[strType]        	=        N'Scale Service',
+			[strMessage]		=        N'{0} Scale service is not currently working. <br> Please check scale configuration.',
+			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
+											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
+											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intOutScaleDeviceId
+											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(intEntityId,0) != {0}',
+			[strNamespace]      =        N'',
+			[intSort]           =        @intMaxSortOrder + 2
 END
 
 --	IF EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
@@ -623,7 +673,7 @@ END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET	[strMessage] = N'{0} {1} {2} unconfirmed.'
+	SET	[strMessage] = N'{0} {1} {2} without sequence.'
 	WHERE [strReminder] = N'Empty' AND [strType] = N'Contract' 
 END
 
@@ -662,7 +712,7 @@ BEGIN
 													tblCTEvent EV											
 											JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
 											WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') 
-											AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE strERPPONumber IS NULL)
+											AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE LTRIM(RTRIM(ISNULL(strERPPONumber,''''))) = '''')
 											AND		EV.strEventName  =  ''Unsubmitted Contract Alert'' AND ER.intEntityId = {0}
 											',
 			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Unsubmitted', 
@@ -677,7 +727,7 @@ BEGIN
 									tblCTEvent EV											
 									JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
 									WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') 
-									AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE strERPPONumber IS NULL)
+									AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE LTRIM(RTRIM(ISNULL(strERPPONumber,''''))) = '''')
 									AND		EV.strEventName = ''Unsubmitted Contract Alert'' AND ER.intEntityId = {0}
 										'
 	WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Contract' 
@@ -691,7 +741,7 @@ BEGIN
 	SELECT [strReminder]        =        N'Unapproved Contract',
 			[strType]        	=        N'Quality Sample',
 			[strMessage]		=        N'{0} {1} {2} unapproved.',
-			[strQuery]  		=        N'	SELECT CA.intSampleId
+			[strQuery]  		=        N'	SELECT CA.intContractDetailId
 											FROM vyuQMSampleContractAlert CA
 											JOIN tblCTEventRecipient ER ON ER.intEventId = CA.intEventId
 											WHERE ER.intEntityId = {0}',
@@ -701,7 +751,11 @@ END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET	[strMessage] = N'{0} {1} {2} unapproved.'
+	SET	[strMessage] = N'{0} {1} {2} unapproved.',
+			[strQuery]  		=        N'	SELECT CA.intContractDetailId
+											FROM vyuQMSampleContractAlert CA
+											JOIN tblCTEventRecipient ER ON ER.intEventId = CA.intEventId
+											WHERE ER.intEntityId = {0}'
 	WHERE [strReminder] = N'Unapproved Contract' AND [strType] = N'Quality Sample' 
 END
 GO
@@ -713,7 +767,7 @@ BEGIN
 	SELECT [strReminder]        =        N'Unapproved FOB Contract',
 			[strType]        	=        N'Quality Sample',
 			[strMessage]		=        N'{0} {1} {2} unapproved.',
-			[strQuery]  		=        N'	SELECT CA.intSampleId
+			[strQuery]  		=        N'	SELECT CA.intContractDetailId
 											FROM vyuQMSampleFOBContractAlert CA
 											JOIN tblCTEventRecipient ER ON ER.intEventId = CA.intEventId
 											WHERE ER.intEntityId = {0}',
@@ -723,7 +777,11 @@ END
 ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
-	SET	[strMessage] = N'{0} {1} {2} unapproved.'
+	SET	[strMessage] = N'{0} {1} {2} unapproved.',
+			[strQuery]  		=        N'	SELECT CA.intContractDetailId
+											FROM vyuQMSampleFOBContractAlert CA
+											JOIN tblCTEventRecipient ER ON ER.intEventId = CA.intEventId
+											WHERE ER.intEntityId = {0}'
 	WHERE [strReminder] = N'Unapproved FOB Contract' AND [strType] = N'Quality Sample' 
 END
 GO
@@ -941,5 +999,26 @@ BEGIN
 	SET [strMessage] = N'{0} Contracts are w/o 4C.'
 	WHERE [strReminder] = N''
 		AND [strType] = N'Contracts w/o 4C'
+END
+GO
+
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Mail Not Sent For' AND [strType] = N'Approved Contract')
+BEGIN
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+	SELECT  [strReminder]       =		 N'Mail Not Sent For',
+			[strType]        	=        N'Approved Contract',
+			[strMessage]		=        N'{0} {1} {2} Not Sent.',
+			[strQuery]  		=        N'	SELECT	intContractHeaderId 
+											FROM	tblCTContractHeader CH	
+											CROSS JOIN tblCTEvent EV											
+											JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
+											JOIN	tblSMTransaction	TN	ON	TN.intRecordId	=	CH.intContractHeaderId
+											JOIN	tblSMScreen			SN	ON	SN.intScreenId	=	TN.intScreenId AND SN.strNamespace IN (''ContractManagement.view.Contract'', ''ContractManagement.view.Amendments'')
+											WHERE	ISNULL(ysnMailSent,0) = 0 AND TN.ysnOnceApproved = 1
+											AND		EV.strEventName  =  ''Approved Contract Mail Not Sent'' AND ER.intEntityId = {0}
+											',
+			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Approved Not Sent', 
+			[intSort]            =        25
 END
 GO

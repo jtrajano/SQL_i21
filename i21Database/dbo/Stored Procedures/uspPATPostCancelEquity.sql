@@ -94,7 +94,7 @@ SET @batchIdUsed = @batchId;
 	FROM tblPATCustomerEquity AS CE
 	INNER JOIN #tempCancelEquity AS tempCE
 		ON CE.intCustomerId = tempCE.intCustomerId AND CE.intFiscalYearId = tempCE.intFiscalYearId AND CE.intRefundTypeId = tempCE.intRefundTypeId 
-			AND CE.strEquityType = tempCE.strEquityType AND CE.ysnEquityPaid <> 1
+			AND CE.strEquityType = tempCE.strEquityType
 
 	---------------- END - UPDATE TABLES ----------------
 

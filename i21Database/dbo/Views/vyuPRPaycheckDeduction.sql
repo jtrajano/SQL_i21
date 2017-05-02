@@ -21,11 +21,11 @@ SELECT
 								PC2.intEntityEmployeeId, 
 								PC2.dtmPayDate, 
 								PCD2.intTypeDeductionId, 
-								PCD2.dblTotal 
+								dblTotal = CASE WHEN (PC2.ysnVoid = 1) THEN 0 ELSE PCD2.dblTotal END
 						   FROM tblPRPaycheckDeduction PCD2 
 						   RIGHT JOIN tblPRPaycheck PC2 
 								ON PC2.intPaycheckId = PCD2.intPaycheckId
-										AND PC2.ysnPosted = 1 AND PC2.ysnVoid = 0
+										AND PC2.ysnPosted = 1
 						 ) PCX2
 				    WHERE 
 						YEAR(PCX2.dtmPayDate) = YEAR(tblPRPaycheck.dtmPayDate)
@@ -66,10 +66,11 @@ SELECT
 	,tblPRPaycheckDeduction.intSort
 	,tblPRPaycheckDeduction.intConcurrencyId
 	,tblPRPaycheck.dblGross
+	,tblPRPaycheck.ysnVoid
 FROM
 	tblPRPaycheckDeduction LEFT JOIN tblPRPaycheck ON tblPRPaycheck.intPaycheckId = tblPRPaycheckDeduction.intPaycheckId
 WHERE
-	tblPRPaycheck.ysnPosted = 1 AND tblPRPaycheck.ysnVoid = 0
+	tblPRPaycheck.ysnPosted = 1
 GROUP BY
 	tblPRPaycheckDeduction.intPaycheckDeductionId,
 	tblPRPaycheck.intPaycheckId,
@@ -91,4 +92,5 @@ GROUP BY
 	tblPRPaycheckDeduction.ysnSet,
 	tblPRPaycheckDeduction.intSort,
 	tblPRPaycheckDeduction.intConcurrencyId,
-	tblPRPaycheck.dblGross
+	tblPRPaycheck.dblGross,
+	tblPRPaycheck.ysnVoid

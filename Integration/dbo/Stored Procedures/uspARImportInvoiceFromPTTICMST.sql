@@ -73,7 +73,7 @@ SELECT TOP 1 @defaultCurrencyId = intCurrencyID FROM tblSMCurrency WHERE strCurr
 
 --AR Account
 DECLARE @ARAccount VARCHAR(250)
-SET @ARAccount = (SELECT [intARAccountId] FROM tblARCompanyPreference)
+SET @ARAccount = (SELECT TOP 1 [intARAccountId] FROM tblARCompanyPreference)
 
 DECLARE @maxInvoiceId INT
 	
@@ -121,6 +121,7 @@ SELECT
 	[ysnPosted] = 0,
 	[ysnPaid] = 0,
 	[ysnImportedFromOrigin] = 1,
+	[ysnImportedAsPosted] = 0,
 	[intEntityId] = @UserId,
 	[intBackupId] =	A.intBackupId
 	FROM tmp_ptticmstImport A
@@ -159,6 +160,7 @@ INSERT
 	,[ysnPosted]
 	,[ysnPaid]
 	,[ysnImportedFromOrigin]
+	,[ysnImportedAsPosted]
 	,[intEntityId]
 )
 VALUES
@@ -189,6 +191,7 @@ VALUES
 	,[ysnPosted]
 	,[ysnPaid]
 	,[ysnImportedFromOrigin]
+	,[ysnImportedAsPosted]
 	,[intEntityId]
 	)
 OUTPUT inserted.intInvoiceId, SourceData.intBackupId INTO #tmpInvoice;

@@ -232,7 +232,7 @@ SELECT
 		,[intTransactionId]					=	A.intBillId
 		,[intTransactionDetailId] 			=	B.intBillDetailId
 		,[strTransactionId] 				=	A.strBillId
-		,[intTransactionTypeId] 			=	25
+		,[intTransactionTypeId] 			=	transType.intTransactionTypeId
 		,[intLotId] 						=	NULL 
 		,[intSubLocationId] 				=	E2.intSubLocationId
 		,[intStorageLocationId] 			=	E2.intStorageLocationId
@@ -267,6 +267,8 @@ FROM	tblAPBill A INNER JOIN tblAPBillDetail B
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 		LEFT JOIN tblICItemUOM receiptCostUOM
 			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
+		LEFT JOIN tblICInventoryTransactionType transType
+			ON transType.strName = 'Bill' -- 'Cost Adjustment'
 
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NULL 
@@ -481,7 +483,7 @@ BEGIN
 
 		--Update Inventory Item Receipt
 		UPDATE A
-			SET A.dblBillQty = A.dblBillQty - (CASE WHEN C.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END)
+			SET A.dblBillQty = A.dblBillQty - B.dblQtyReceived --(CASE WHEN C.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END)
 		FROM tblICInventoryReceiptItem A
 			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
 			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
@@ -724,8 +726,7 @@ ELSE
 			,C.strAccountGroup
 			,DebitForeign.Value
 			,CreditForeign.Value
-			,(SELECT strCurrencyExchangeRateType FROM dbo.tblSMCurrencyExchangeRateType 
-				WHERE intCurrencyExchangeRateTypeId IN (SELECT TOP 1 intCurrencyExchangeRateTypeId FROM dbo.tblAPBillDetail WHERE intBillId = A.intTransactionId ))         
+			,A.[strRateType]           
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId

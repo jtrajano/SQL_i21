@@ -154,22 +154,32 @@ END
 
 -- Rebuild the G/L Summary for that day. 
 BEGIN 
-	--DELETE [dbo].[tblGLSummary] WHERE dbo.fnDateEquals(dtmDate, @adjdt) = 1
+	DELETE [dbo].[tblGLSummary] WHERE dbo.fnDateEquals(dtmDate, @adjdt) = 1
 
-	--INSERT INTO tblGLSummary
-	--SELECT
-	--		intAccountId
-	--		,dtmDate
-	--		,SUM(ISNULL(dblDebit,0)) as dblDebit
-	--		,SUM(ISNULL(dblCredit,0)) as dblCredit
-	--		,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
-	--		,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
-	--		,strCode
-	--		,0 as intConcurrencyId
-	--FROM	tblGLDetail
-	--WHERE	ysnIsUnposted = 0
-	--		AND dbo.fnDateEquals(dtmDate, @adjdt) = 1	
-	--GROUP BY intAccountId, dtmDate, strCode
-	EXEC [dbo].[uspGLSummaryRecalculate]
+	INSERT INTO tblGLSummary(
+		intCompanyId
+		,intAccountId
+		,dtmDate
+		,dblDebit 
+		,dblCredit
+		,dblDebitUnit 
+		,dblCreditUnit 
+		,strCode
+		,intConcurrencyId 
+	)
+	SELECT
+			intCompanyId
+			,intAccountId
+			,dtmDate
+			,SUM(ISNULL(dblDebit,0)) as dblDebit
+			,SUM(ISNULL(dblCredit,0)) as dblCredit
+			,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
+			,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
+			,strCode
+			,0 as intConcurrencyId
+	FROM	tblGLDetail
+	WHERE	ysnIsUnposted = 0
+			AND dbo.fnDateEquals(dtmDate, @adjdt) = 1	
+	GROUP BY intCompanyId, intAccountId, dtmDate, strCode
 END
 

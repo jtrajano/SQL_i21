@@ -47,7 +47,7 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 			,[intLicenseAccountId]
 			,[intMaintenanceAccountId]
 		FROM
-			tblARInvoiceDetail ARID
+			tblARInvoiceDetail ARID WITH (NOLOCK)
 		INNER JOIN
 			@Ids PID
 				ON ARID.[intInvoiceId] = PID.[intId]
@@ -62,19 +62,19 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblARInvoiceDetail ARID
+			(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intSalesAccountId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON LIA.[intDetailId] = ARID.[intInvoiceDetailId] 
 		INNER JOIN
-			tblICItem ICI
+			(SELECT [intItemId], [strType] FROM tblICItem  WITH (NOLOCK)) ICI
 				ON ARID.[intItemId] = ICI.[intItemId] 				
 		INNER JOIN
-			tblARInvoice ARI
+			(SELECT [intInvoiceId], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
 				ON ARID.[intInvoiceId] = ARI.[intInvoiceId] 
 		INNER JOIN 
 			@Ids PID
 				ON ARI.[intInvoiceId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intSalesAccountId], [intCOGSAccountId], [intInventoryAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON ARID.[intItemId] = IST.[intItemId]
 				AND ARI.[intCompanyLocationId] = IST.[intLocationId] 							
 		WHERE
@@ -99,21 +99,24 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblARInvoiceDetail ARID
+			(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intSalesAccountId], [intConversionAccountId], [intServiceChargeAccountId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON LIA.[intDetailId] = ARID.[intInvoiceDetailId]
 		INNER JOIN
-			tblARInvoice ARI
+			(SELECT [intInvoiceId], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
 				ON ARID.[intInvoiceId] = ARI.[intInvoiceId] 
 		INNER JOIN 
 			@Ids PID
 				ON ARI.[intInvoiceId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intGeneralAccountId], [intOtherChargeIncomeAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON ARID.[intItemId] = IST.[intItemId] 
-				AND ARI.[intCompanyLocationId] = IST.[intLocationId]					
+				AND ARI.[intCompanyLocationId] = IST.[intLocationId]
+		LEFT OUTER JOIN
+			(SELECT [intCompanyLocationId], [intProfitCenter] FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
+				ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]				
 		WHERE
 			ISNULL(ARID.[intItemId], 0) <> 0
-			OR (EXISTS(SELECT NULL FROM tblICItem WHERE [intItemId] = ARID.[intItemId] AND [strType] IN ('Non-Inventory','Service','Other Charge')))
+			OR (EXISTS(SELECT NULL FROM tblICItem WITH (NOLOCK) WHERE [intItemId] = ARID.[intItemId] AND [strType] IN ('Non-Inventory','Service','Other Charge')))
 
 
 		UPDATE LIA
@@ -122,19 +125,19 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblARInvoiceDetail ARID
+			(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intSalesAccountId], [intConversionAccountId], [intServiceChargeAccountId], [strMaintenanceType] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON LIA.[intDetailId] = ARID.[intInvoiceDetailId] 
 		INNER JOIN
-			tblICItem ICI
+			(SELECT [intItemId], [strType] FROM tblICItem  WITH (NOLOCK)) ICI
 				ON ARID.[intItemId] = ICI.[intItemId] 				
 		INNER JOIN
-			tblARInvoice ARI
+			(SELECT [intInvoiceId], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
 				ON ARID.[intInvoiceId] = ARI.[intInvoiceId] 
 		INNER JOIN 
 			@Ids PID
 				ON ARI.[intInvoiceId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intGeneralAccountId], [intOtherChargeIncomeAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON ARID.[intItemId] = IST.[intItemId]
 				AND ARI.[intCompanyLocationId] = IST.[intLocationId] 
 		WHERE
@@ -148,19 +151,19 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblARInvoiceDetail ARID
+			(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intSalesAccountId], [intConversionAccountId], [intServiceChargeAccountId], [strMaintenanceType] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON LIA.[intDetailId] = ARID.[intInvoiceDetailId] 
 		INNER JOIN
-			tblICItem ICI
+			(SELECT [intItemId], [strType] FROM tblICItem  WITH (NOLOCK)) ICI
 				ON ARID.[intItemId] = ICI.[intItemId] 				
 		INNER JOIN
-			tblARInvoice ARI
+			(SELECT [intInvoiceId], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
 				ON ARID.[intInvoiceId] = ARI.[intInvoiceId] 
 		INNER JOIN 
 			@Ids PID
 				ON ARI.[intInvoiceId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intGeneralAccountId], [intOtherChargeIncomeAccountId], [intMaintenanceSalesAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON ARID.[intItemId] = IST.[intItemId]
 				AND ARI.[intCompanyLocationId] = IST.[intLocationId]						
 		WHERE
@@ -174,18 +177,21 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblARInvoiceDetail ARID
+			(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intSalesAccountId], [intConversionAccountId], [intServiceChargeAccountId], [strMaintenanceType] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON LIA.[intDetailId] = ARID.[intInvoiceDetailId] 			
 		INNER JOIN
-			tblARInvoice ARI
+			(SELECT [intInvoiceId], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
 				ON ARID.[intInvoiceId] = ARI.[intInvoiceId] 
 		INNER JOIN 
 			@Ids PID
 				ON ARI.[intInvoiceId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intGeneralAccountId], [intOtherChargeIncomeAccountId], [intSalesAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON ARID.[intItemId] = IST.[intItemId]
-				AND ARI.[intCompanyLocationId] = IST.[intLocationId]							
+				AND ARI.[intCompanyLocationId] = IST.[intLocationId]		
+		LEFT OUTER JOIN
+			(SELECT [intCompanyLocationId], [intProfitCenter] FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
+				ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]	
 		WHERE
 			ISNULL(LIA.[intAccountId], 0) = 0
 			
@@ -195,18 +201,21 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblARInvoiceDetail ARID
+			(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intSalesAccountId], [intConversionAccountId], [intServiceChargeAccountId], [strMaintenanceType] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON LIA.[intDetailId] = ARID.[intInvoiceDetailId] 			
 		INNER JOIN
-			tblARInvoice ARI
+			(SELECT [intInvoiceId], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
 				ON ARID.[intInvoiceId] = ARI.[intInvoiceId] 
 		INNER JOIN 
 			@Ids PID
 				ON ARI.[intInvoiceId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intGeneralAccountId], [intOtherChargeIncomeAccountId], [intSalesAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON ARID.[intItemId] = IST.[intItemId]
-				AND ARI.[intCompanyLocationId] = IST.[intLocationId]					
+				AND ARI.[intCompanyLocationId] = IST.[intLocationId]	
+		LEFT OUTER JOIN
+			(SELECT [intCompanyLocationId], [intProfitCenter] FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
+				ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 		WHERE
 			ISNULL(LIA.[intSalesAccountId], 0) = 0			
 			
@@ -221,10 +230,35 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 			,ARID.[intLicenseAccountId]			= LIA.[intLicenseAccountId]
 			,ARID.[intMaintenanceAccountId]		= LIA.[intMaintenanceAccountId]
 		FROM 
-			tblARInvoiceDetail ARID
+			(SELECT [intInvoiceId], [intInvoiceDetailId], [intAccountId], [intCOGSAccountId], [intSalesAccountId], [intInventoryAccountId], [intServiceChargeAccountId], [intLicenseAccountId], [intMaintenanceAccountId]
+			 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 		INNER JOIN
 			@LineItemAccounts LIA
-				ON ARID.[intInvoiceDetailId] = LIA.[intDetailId] 
+				ON ARID.[intInvoiceDetailId] = LIA.[intDetailId]
+		INNER JOIN
+			(SELECT [intInvoiceId], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
+				ON ARID.[intInvoiceId] = ARI.[intInvoiceId] 
+		LEFT OUTER JOIN
+			(SELECT [intCompanyLocationId], [intProfitCenter] FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
+				ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]	
+
+		UPDATE ARITD
+		SET
+			ARITD.[intSalesTaxAccountId] = ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](ARITD.[intSalesTaxAccountId], SMCL.[intProfitCenter]), ARITD.[intSalesTaxAccountId])
+		FROM
+			(SELECT [intSalesTaxAccountId], [intInvoiceDetailId] FROM tblARInvoiceDetailTax) ARITD
+		INNER JOIN
+			tblARInvoiceDetail ARID
+				ON ARITD.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+		INNER JOIN
+			(SELECT [intInvoiceId], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
+				ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+		INNER JOIN
+			@Ids IDS
+				ON ARI.[intInvoiceId] = IDS.[intId]
+		LEFT OUTER JOIN
+			(SELECT [intCompanyLocationId], [intProfitCenter] FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
+				ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 					
 	END
 ELSE
@@ -248,7 +282,7 @@ ELSE
 			,[intLicenseAccountId]
 			,[intMaintenanceAccountId]
 		FROM
-			tblSOSalesOrderDetail SOSOD
+			tblSOSalesOrderDetail SOSOD WITH(NOLOCK)
 		INNER JOIN
 			@Ids PID
 				ON SOSOD.[intSalesOrderId] = PID.[intId]
@@ -262,19 +296,19 @@ ELSE
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblSOSalesOrderDetail SOSOD
+			(SELECT [intSalesOrderId], [intSalesOrderDetailId], [intItemId] FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOSOD
 				ON LIA.[intDetailId] = SOSOD.[intSalesOrderDetailId] 
 		INNER JOIN
-			tblICItem ICI
+			(SELECT [intItemId], [strType] FROM tblICItem WITH (NOLOCK)) ICI
 				ON SOSOD.[intItemId] = ICI.[intItemId] 				
 		INNER JOIN
-			tblSOSalesOrder SO
+			(SELECT [intSalesOrderId], [intCompanyLocationId] FROM tblSOSalesOrder  WITH (NOLOCK)) SO
 				ON SOSOD.[intSalesOrderId] = SO.[intSalesOrderId]  
 		INNER JOIN 
 			@Ids PID
 				ON SO.[intSalesOrderId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intInventoryAccountId], [intSalesAccountId], [intCOGSAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON SOSOD.[intItemId] = IST.[intItemId] 
 				AND SO.[intCompanyLocationId] = IST.[intLocationId] 							
 		WHERE
@@ -296,21 +330,21 @@ ELSE
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblSOSalesOrderDetail SOSOD
+			(SELECT [intSalesOrderId], [intSalesOrderDetailId], [intItemId], [intSalesAccountId] FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOSOD
 				ON LIA.[intDetailId] = SOSOD.[intSalesOrderDetailId] 
 		INNER JOIN
-			tblSOSalesOrder SO
+			(SELECT [intSalesOrderId], [intCompanyLocationId] FROM tblSOSalesOrder  WITH (NOLOCK)) SO
 				ON SOSOD.[intSalesOrderId] = SO.[intSalesOrderId]  
 		INNER JOIN 
 			@Ids PID
 				ON SO.[intSalesOrderId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intOtherChargeIncomeAccountId], [intSalesAccountId], [intGeneralAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON SOSOD.[intItemId] = IST.[intItemId] 
 				AND SO.[intCompanyLocationId] = IST.[intLocationId]					
 		WHERE
 			ISNULL(SOSOD.[intItemId], 0) <> 0
-			OR (EXISTS(SELECT NULL FROM tblICItem WHERE [intItemId] = SOSOD.[intItemId] AND [strType] IN ('Non-Inventory','Service','Other Charge')))
+			OR (EXISTS(SELECT NULL FROM tblICItem WITH (NOLOCK) WHERE [intItemId] = SOSOD.[intItemId] AND [strType] IN ('Non-Inventory','Service','Other Charge')))
 
 
 		UPDATE LIA
@@ -319,19 +353,19 @@ ELSE
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblSOSalesOrderDetail SOSOD
+			(SELECT [intSalesOrderId], [intSalesOrderDetailId], [intItemId], [intSalesAccountId], [strMaintenanceType] FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOSOD
 				ON LIA.[intDetailId] = SOSOD.[intSalesOrderDetailId] 
 		INNER JOIN
-			tblICItem ICI
+			(SELECT [intItemId], [strType] FROM tblICItem WITH (NOLOCK)) ICI
 				ON SOSOD.[intItemId] = ICI.[intItemId] 				
 		INNER JOIN
-			tblSOSalesOrder SO
+			(SELECT [intSalesOrderId], [intCompanyLocationId] FROM tblSOSalesOrder  WITH (NOLOCK)) SO
 				ON SOSOD.[intSalesOrderId] = SO.[intSalesOrderId]  
 		INNER JOIN 
 			@Ids PID
 				ON SO.[intSalesOrderId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intOtherChargeIncomeAccountId], [intSalesAccountId], [intGeneralAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON SOSOD.[intItemId] = IST.[intItemId] 
 				AND SO.[intCompanyLocationId] = IST.[intLocationId] 
 		WHERE
@@ -345,19 +379,19 @@ ELSE
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblSOSalesOrderDetail SOSOD
+			(SELECT [intSalesOrderId], [intSalesOrderDetailId], [intItemId], [intSalesAccountId], [strMaintenanceType] FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOSOD
 				ON LIA.[intDetailId] = SOSOD.[intSalesOrderDetailId] 
 		INNER JOIN
-			tblICItem ICI
+			(SELECT [intItemId], [strType] FROM tblICItem WITH (NOLOCK)) ICI
 				ON SOSOD.[intItemId] = ICI.[intItemId] 				
 		INNER JOIN
-			tblSOSalesOrder SO
+			(SELECT [intSalesOrderId], [intCompanyLocationId] FROM tblSOSalesOrder  WITH (NOLOCK)) SO
 				ON SOSOD.[intSalesOrderId] = SO.[intSalesOrderId]  
 		INNER JOIN 
 			@Ids PID
 				ON SO.[intSalesOrderId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intOtherChargeIncomeAccountId], [intSalesAccountId], [intMaintenanceSalesAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON SOSOD.[intItemId] = IST.[intItemId] 
 				AND SO.[intCompanyLocationId] = IST.[intLocationId]						
 		WHERE
@@ -371,18 +405,21 @@ ELSE
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblSOSalesOrderDetail SOSOD
+			(SELECT [intSalesOrderId], [intSalesOrderDetailId], [intItemId], [intSalesAccountId], [strMaintenanceType] FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOSOD
 				ON LIA.[intDetailId] = SOSOD.[intSalesOrderDetailId] 	
 		INNER JOIN
-			tblSOSalesOrder SO
+			(SELECT [intSalesOrderId], [intCompanyLocationId] FROM tblSOSalesOrder  WITH (NOLOCK)) SO
 				ON SOSOD.[intSalesOrderId] = SO.[intSalesOrderId]  
 		INNER JOIN 
 			@Ids PID
 				ON SO.[intSalesOrderId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intOtherChargeIncomeAccountId], [intSalesAccountId], [intMaintenanceSalesAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON SOSOD.[intItemId] = IST.[intItemId] 
-				AND SO.[intCompanyLocationId] = IST.[intLocationId]					
+				AND SO.[intCompanyLocationId] = IST.[intLocationId]				
+		LEFT OUTER JOIN
+			(SELECT [intCompanyLocationId], [intProfitCenter] FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
+				ON SO.[intCompanyLocationId] = SMCL.[intCompanyLocationId]	
 		WHERE
 			ISNULL(LIA.[intAccountId], 0) = 0
 
@@ -393,18 +430,21 @@ ELSE
 		FROM
 			@LineItemAccounts LIA
 		INNER JOIN
-			tblSOSalesOrderDetail SOSOD
+			(SELECT [intSalesOrderId], [intSalesOrderDetailId], [intItemId], [intSalesAccountId], [strMaintenanceType] FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOSOD
 				ON LIA.[intDetailId] = SOSOD.[intSalesOrderDetailId] 	
 		INNER JOIN
-			tblSOSalesOrder SO
+			(SELECT [intSalesOrderId], [intCompanyLocationId] FROM tblSOSalesOrder  WITH (NOLOCK)) SO
 				ON SOSOD.[intSalesOrderId] = SO.[intSalesOrderId]  
 		INNER JOIN 
 			@Ids PID
 				ON SO.[intSalesOrderId] = PID.[intId]
 		LEFT OUTER JOIN
-			vyuARGetItemAccount IST
+			(SELECT [intItemId], [intLocationId], [intOtherChargeIncomeAccountId], [intSalesAccountId], [intMaintenanceSalesAccountId] FROM vyuARGetItemAccount WITH (NOLOCK)) IST
 				ON SOSOD.[intItemId] = IST.[intItemId] 
-				AND SO.[intCompanyLocationId] = IST.[intLocationId]							
+				AND SO.[intCompanyLocationId] = IST.[intLocationId]	
+		LEFT OUTER JOIN
+			(SELECT [intCompanyLocationId], [intProfitCenter] FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
+				ON SO.[intCompanyLocationId] = SMCL.[intCompanyLocationId]	
 		WHERE
 			ISNULL(LIA.[intSalesAccountId], 0) = 0			
 			
@@ -412,17 +452,34 @@ ELSE
 		UPDATE SOSOD
 		SET
 			SOSOD.[intAccountId]					= LIA.[intAccountId]
-			,SOSOD.[intCOGSAccountId]			= LIA.[intCOGSAccountId]
-			,SOSOD.[intSalesAccountId]			= LIA.[intSalesAccountId]
-			,SOSOD.[intInventoryAccountId]		= LIA.[intInventoryAccountId]
+			,SOSOD.[intCOGSAccountId]				= LIA.[intCOGSAccountId]
+			,SOSOD.[intSalesAccountId]				= LIA.[intSalesAccountId]
+			,SOSOD.[intInventoryAccountId]			= LIA.[intInventoryAccountId]
 			,SOSOD.[intLicenseAccountId]			= LIA.[intLicenseAccountId]
 			,SOSOD.[intMaintenanceAccountId]		= LIA.[intMaintenanceAccountId]
 		FROM 
-			tblSOSalesOrderDetail SOSOD
+			(SELECT [intSalesOrderDetailId], [intAccountId], [intCOGSAccountId], [intSalesAccountId], [intInventoryAccountId], [intLicenseAccountId],  [intMaintenanceAccountId] FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOSOD
 		INNER JOIN
 			@LineItemAccounts LIA
 				ON SOSOD.[intSalesOrderDetailId] = LIA.[intDetailId] 	
-	
+				
+		UPDATE SOSODT
+		SET
+			SOSODT.[intSalesTaxAccountId] = ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](SOSODT.[intSalesTaxAccountId], SMCL.[intProfitCenter]), SOSODT.[intSalesTaxAccountId])
+		FROM
+			(SELECT [intSalesTaxAccountId], [intSalesOrderDetailId] FROM tblSOSalesOrderDetailTax WITH (NOLOCK)) SOSODT
+		INNER JOIN
+			(SELECT [intSalesOrderId], [intSalesOrderDetailId] FROM tblSOSalesOrderDetail) SOSOD
+				ON SOSODT.[intSalesOrderDetailId] = SOSOD.[intSalesOrderDetailId]
+		INNER JOIN
+			(SELECT [intSalesOrderId], [intCompanyLocationId] FROM tblSOSalesOrder WITH (NOLOCK)) SO
+				ON SOSOD.[intSalesOrderId] = SO.[intSalesOrderId]
+		INNER JOIN
+			@Ids IDS
+				ON SO.[intSalesOrderId] = IDS.[intId]
+		LEFT OUTER JOIN
+			(SELECT [intCompanyLocationId], [intProfitCenter] FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
+				ON SO.[intCompanyLocationId] = SMCL.[intCompanyLocationId]	
 	END
 	 
 END

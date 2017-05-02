@@ -25,21 +25,21 @@ SELECT
 										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 										ELSE ISNULL(SAR.dblQtyOrdered, 0)
 									END
-	 , dblMargin				= (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+	 , dblMargin				= (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0) - ISNULL(SAR.dblDiscountAmount, 0)) * 
 									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 										ELSE ISNULL(SAR.dblQtyOrdered, 0)
 									END
-	 , dblMarginPercentage		= CASE WHEN (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+	 , dblMarginPercentage		= CASE WHEN (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0) - ISNULL(SAR.dblDiscountAmount, 0)) * 
 											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 												THEN ISNULL(SAR.dblQtyShipped, 0)
 												ELSE ISNULL(SAR.dblQtyOrdered, 0)
 											END > 0 AND ISNULL(SAR.dblLineTotal, 0) > 0
-									THEN ((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+									THEN ((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0) - ISNULL(SAR.dblDiscountAmount, 0)) * 
 											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 												THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 												ELSE ISNULL(SAR.dblQtyOrdered, 0)
-											END / ISNULL(SAR.dblLineTotal, 0)) * 100 
+											END / (ISNULL(SAR.dblLineTotal, 0) + ISNULL(SAR.dblDiscountAmount, 0))) * 100 
 									ELSE 0 
 								  END
 	 , dblPrice					= ISNULL(SAR.dblPrice, 0)
@@ -89,18 +89,19 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strTransactionType			= ARI.strTransactionType
 	  , strType						= ARI.strType
 	  , strItemDescription			= ARID.strItemDescription
-	  , intItemAccountId			= ARID.intAccountId 
+	  , intItemAccountId			= ARID.intSalesAccountId 
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 												THEN ISNULL(NONSO.dblCost, 0)
-											WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
+											WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0
 												THEN NONLOTTED.dblCost
-											WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
+											WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0
 												THEN LOTTED.dblCost
 											ELSE ISNULL(NONSO.dblCost, 0)
 										END)
 	  , dblPrice					= ARID.dblPrice
+	  , dblDiscountAmount			= ARID.dblPrice * (ISNULL(ARID.dblDiscount, 0) / 100)
 	  ,	dblTax						= ARID.dblTotalTax
 	  , dblLineTotal				= ARID.dblTotal
 	  , dblTotal					= ARI.dblInvoiceTotal			
@@ -116,93 +117,88 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strCurrency					= SMC.strCurrency
 	  , strCurrencyDescription		= SMC.strDescription
 FROM
-			tblARInvoiceDetail ARID 
-		INNER JOIN
-			tblARInvoice ARI 
-				ON ARID.intInvoiceId = ARI.intInvoiceId
-		LEFT OUTER JOIN 
-			(SELECT intCurrencyID, 
-					strCurrency, 
-					strDescription 
-			FROM 
-				tblSMCurrency) SMC ON ARI.intCurrencyId = SMC.intCurrencyID	
-		LEFT JOIN
-			tblICItem ICI
-				ON ARID.intItemId = ICI.intItemId
-		--CROSS APPLY
-		--	dbo.fnARGetAccountUsedInLineItemAsTable(ARID.intInvoiceDetailId, 0, NULL) ARGIA
-		LEFT OUTER JOIN (
-			SELECT intTransactionId
-				 , strTransactionId
-				 , intItemId
-				 , intItemUOMId
-				 , dblCost				= AVG(dblCost)
-			FROM
-				tblICInventoryTransaction 
-			WHERE ysnIsUnposted = 0
-			GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId) AS NONSO
-				ON ARI.intInvoiceId			= NONSO.intTransactionId
-				AND ARI.strInvoiceNumber	= NONSO.strTransactionId
-				AND ARID.intItemId			= NONSO.intItemId
-				AND ARID.intItemUOMId		= NONSO.intItemUOMId
-		LEFT OUTER JOIN (
-			SELECT ICISI.intInventoryShipmentItemId
-				 , ICISI.intLineNo
-				 , ICISI.intItemId
-				 , ICISI.intItemUOMId
-				 , ICIT.dblCost		 
-			FROM
-				tblICInventoryShipmentItem ICISI	
-			INNER JOIN tblICInventoryShipment ICIS
-				ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-			INNER JOIN tblICItem ICI
-				ON ICISI.intItemId = ICI.intItemId
-				AND ISNULL(ICI.strLotTracking, 'No') = 'No'
-			INNER JOIN tblICInventoryTransaction ICIT
-				ON ICIT.ysnIsUnposted							= 0
-				AND ISNULL(ICIT.intLotId, 0)					= 0
-				AND ICIS.intInventoryShipmentId					= ICIT.intTransactionId
-				AND ICIS.strShipmentNumber						= ICIT.strTransactionId
-				AND ICISI.intInventoryShipmentItemId			= ICIT.intTransactionDetailId
-				AND ICISI.intItemId								= ICIT.intItemId
-				AND ICISI.intItemUOMId							= ICIT.intItemUOMId) AS NONLOTTED
-					ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
-					AND ARID.intItemId					= NONLOTTED.intItemId
-					AND ARID.intItemUOMId				= NONLOTTED.intItemUOMId
-					AND ARID.intSalesOrderDetailId		= NONLOTTED.intLineNo
-		LEFT OUTER JOIN (
-			SELECT ICISI.intInventoryShipmentItemId
-				 , ICISI.intLineNo
-				 , ICISI.intItemId
-				 , ICISI.intItemUOMId
-				 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-				 , dblCost = ABS(AVG(ICIT.dblQty * ICIT.dblCost))
-			FROM
-				tblICInventoryShipmentItem ICISI
-			INNER JOIN tblICInventoryShipment ICIS
-				ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-			INNER JOIN tblICItem ICI
-				ON ICISI.intItemId = ICI.intItemId
-				AND ISNULL(ICI.strLotTracking, 'No') <> 'No'
-			INNER JOIN tblICInventoryTransaction ICIT
-				ON ICIT.ysnIsUnposted							= 0
-				AND ISNULL(ICIT.intLotId, 0)					<> 0
-				AND ICIS.intInventoryShipmentId					= ICIT.intTransactionId
-				AND ICIS.strShipmentNumber						= ICIT.strTransactionId
-				AND ICISI.intInventoryShipmentItemId			= ICIT.intTransactionDetailId
-				AND ICISI.intItemId								= ICIT.intItemId		
-				AND ISNULL(ICI.strLotTracking, 'No')			<> 'No'
-			INNER JOIN tblICLot ICL
-				ON ICIT.intLotId = ICL.intLotId
-				AND ICISI.intItemUOMId = (CASE WHEN ICI.strType = 'Finished Good' THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
-			GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId) AS LOTTED
-					ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
-					AND ARID.intItemId					= LOTTED.intItemId
-					AND ARID.intItemUOMId				= LOTTED.intItemUOMId
-					AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
-		WHERE ARI.ysnPosted = 1 
-		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
-		  AND ISNULL(ICI.strType, '') <> 'Software'
+	tblARInvoiceDetail ARID 
+INNER JOIN
+	tblARInvoice ARI 
+		ON ARID.intInvoiceId = ARI.intInvoiceId
+LEFT OUTER JOIN 
+	(SELECT intCurrencyID, 
+			strCurrency, 
+			strDescription 
+	FROM 
+		tblSMCurrency) SMC ON ARI.intCurrencyId = SMC.intCurrencyID	
+LEFT JOIN
+	tblICItem ICI
+		ON ARID.intItemId = ICI.intItemId
+LEFT OUTER JOIN (
+	SELECT intTransactionId
+			, strTransactionId
+			, intItemId
+			, intItemUOMId
+			, dblCost				= AVG(dblCost)
+	FROM
+		tblICInventoryTransaction 
+	WHERE ysnIsUnposted = 0
+	GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId) AS NONSO
+		ON ARI.intInvoiceId			= NONSO.intTransactionId
+		AND ARI.strInvoiceNumber	= NONSO.strTransactionId
+		AND ARID.intItemId			= NONSO.intItemId
+		AND ARID.intItemUOMId		= NONSO.intItemUOMId
+LEFT OUTER JOIN (
+	SELECT ICISI.intInventoryShipmentItemId
+			, ICISI.intLineNo
+			, ICISI.intItemId
+			, ICISI.intItemUOMId
+			, ICIT.dblCost		 
+	FROM
+		tblICInventoryShipmentItem ICISI	
+	INNER JOIN tblICInventoryShipment ICIS
+		ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+	INNER JOIN tblICItem ICI
+		ON ICISI.intItemId = ICI.intItemId
+		AND ISNULL(ICI.strLotTracking, 'No') = 'No'
+	INNER JOIN tblICInventoryTransaction ICIT
+		ON ICIT.ysnIsUnposted							= 0
+		AND ISNULL(ICIT.intLotId, 0)					= 0
+		AND ICIS.intInventoryShipmentId					= ICIT.intTransactionId
+		AND ICIS.strShipmentNumber						= ICIT.strTransactionId
+		AND ICISI.intInventoryShipmentItemId			= ICIT.intTransactionDetailId
+		AND ICISI.intItemId								= ICIT.intItemId
+		AND ICISI.intItemUOMId							= ICIT.intItemUOMId) AS NONLOTTED
+			ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
+			AND ARID.intItemId					= NONLOTTED.intItemId
+			AND ARID.intItemUOMId				= NONLOTTED.intItemUOMId
+LEFT OUTER JOIN (
+	SELECT ICISI.intInventoryShipmentItemId
+			, ICISI.intLineNo
+			, ICISI.intItemId
+			, ICISI.intItemUOMId
+			, dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
+	FROM
+		tblICInventoryShipmentItem ICISI
+	INNER JOIN tblICInventoryShipment ICIS
+		ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+	INNER JOIN tblICItem ICI
+		ON ICISI.intItemId = ICI.intItemId
+		AND ISNULL(ICI.strLotTracking, 'No') <> 'No'
+	INNER JOIN tblICInventoryTransaction ICIT
+		ON ICIT.ysnIsUnposted							= 0
+		AND ISNULL(ICIT.intLotId, 0)					<> 0
+		AND ICIS.intInventoryShipmentId					= ICIT.intTransactionId
+		AND ICIS.strShipmentNumber						= ICIT.strTransactionId
+		AND ICISI.intInventoryShipmentItemId			= ICIT.intTransactionDetailId
+		AND ICISI.intItemId								= ICIT.intItemId		
+		AND ISNULL(ICI.strLotTracking, 'No')			<> 'No'
+	INNER JOIN tblICLot ICL
+		ON ICIT.intLotId = ICL.intLotId
+		AND ICISI.intItemUOMId = (CASE WHEN ICI.strType = 'Finished Good' THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
+	GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId) AS LOTTED
+			ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
+			AND ARID.intItemId					= LOTTED.intItemId
+			AND ARID.intItemUOMId				= LOTTED.intItemUOMId
+WHERE ARI.ysnPosted = 1 
+	AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
+	AND ISNULL(ICI.strType, '') <> 'Software'
 
 UNION ALL
 
@@ -218,7 +214,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , strTransactionType			= SO.strTransactionType
 	 , strType						= SO.strType
 	 , strItemDescription			= SOD.strItemDescription
-	 , intItemAccountId				= ISNULL(INV.intAccountId, SOD.intAccountId)
+	 , intItemAccountId				= ISNULL(INV.intSalesAccountId, SOD.intSalesAccountId)
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
 	 , dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
@@ -230,6 +226,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 											ELSE 0.000000
 										END)
 	 , dblPrice						= SOD.dblPrice
+	 , dblDiscountAmount			= SOD.dblPrice * (ISNULL(SOD.dblDiscount, 0) / 100)
 	 , dblTax						= SOD.dblTotalTax
 	 , dblLineTotal					= SOD.dblTotal
 	 , dblTotal						= SO.dblSalesOrderTotal
@@ -273,7 +270,7 @@ FROM
 			 , ID.intItemId
 			 , ID.intOrderUOMId
 			 , ICIT.dblCost
-			 , ID.intAccountId
+			 , ID.intSalesAccountId
 		FROM 
 			tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I
@@ -322,7 +319,7 @@ FROM
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
 			 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-			 , dblCost = ABS(AVG(ICIT.dblQty * ICIT.dblCost))
+			 , dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
 		FROM
 			tblICInventoryShipmentItem ICISI
 		INNER JOIN tblICInventoryShipment ICIS
@@ -377,7 +374,8 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 												THEN LOTTED.dblCost
 											ELSE 0.000000
 										END)
-	  , dblPrice					= ARID.dblLicenseAmount 
+	  , dblPrice					= ARID.dblLicenseAmount
+	  , dblDiscountAmount			= ARID.dblLicenseAmount * (ISNULL(ARID.dblDiscount, 0) / 100)
 	  ,	dblTax						= ARID.dblTotalTax
 	  , dblLineTotal				= ARID.dblQtyShipped * ARID.dblLicenseAmount
 	  , dblTotal					= ARI.dblInvoiceTotal			
@@ -453,7 +451,7 @@ FROM
 				 , ICISI.intItemId
 				 , ICISI.intItemUOMId
 				 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-				 , dblCost = ABS(AVG(ICIT.dblQty * ICIT.dblCost))
+				 , dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
 			FROM
 				tblICInventoryShipmentItem ICISI
 			INNER JOIN tblICInventoryShipment ICIS
@@ -508,6 +506,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 											ELSE 0.000000
 										END)
 	 , dblPrice						= SOD.dblLicenseAmount
+	 , dblDiscountAmount			= SOD.dblLicenseAmount * (ISNULL(SOD.dblDiscount, 0) / 100)
 	 , dblTax						= SOD.dblTotalTax
 	 , dblLineTotal					= SOD.dblQtyOrdered * SOD.dblLicenseAmount
 	 , dblTotal						= SO.dblSalesOrderTotal
@@ -600,7 +599,7 @@ FROM
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
 			 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-			 , dblCost = ABS(AVG(ICIT.dblQty * ICIT.dblCost))
+			 , dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
 		FROM
 			tblICInventoryShipmentItem ICISI
 		INNER JOIN tblICInventoryShipment ICIS
@@ -655,7 +654,8 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 												THEN LOTTED.dblCost
 											ELSE 0.000000
 										END)
-	  , dblPrice					= ARID.dblMaintenanceAmount  
+	  , dblPrice					= ARID.dblMaintenanceAmount
+	  , dblDiscountAmount			= ARID.dblMaintenanceAmount * (ISNULL(ARID.dblDiscount, 0) / 100)
 	  ,	dblTax						= ARID.dblTotalTax
 	  , dblLineTotal				= ARID.dblQtyShipped * ARID.dblMaintenanceAmount
 	  , dblTotal					= ARI.dblInvoiceTotal			
@@ -731,7 +731,7 @@ FROM
 				 , ICISI.intItemId
 				 , ICISI.intItemUOMId
 				 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-				 , dblCost = ABS(AVG(ICIT.dblQty * ICIT.dblCost))
+				 , dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
 			FROM
 				tblICInventoryShipmentItem ICISI
 			INNER JOIN tblICInventoryShipment ICIS
@@ -786,6 +786,7 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 											ELSE 0.000000
 										END)
 	 , dblPrice						= SOD.dblMaintenanceAmount
+	 , dblDiscountAmount			= SOD.dblMaintenanceAmount * (ISNULL(SOD.dblDiscount, 0) / 100)
 	 , dblTax						= SOD.dblTotalTax
 	 , dblLineTotal					= SOD.dblQtyOrdered * SOD.dblMaintenanceAmount
 	 , dblTotal						= SO.dblSalesOrderTotal
@@ -878,7 +879,7 @@ FROM
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
 			 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-			 , dblCost = ABS(AVG(ICIT.dblQty * ICIT.dblCost))
+			 , dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
 		FROM
 			tblICInventoryShipmentItem ICISI
 		INNER JOIN tblICInventoryShipment ICIS
@@ -922,7 +923,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strTransactionType			= ARI.strTransactionType
 	  , strType						= ARI.strType
 	  , strItemDescription			= ARID.strItemDescription
-	  , intItemAccountId			= ARID.intAccountId 
+	  , intItemAccountId			= ARID.intSalesAccountId 
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
@@ -934,6 +935,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 											ELSE ISNULL(NONSO.dblCost, 0)
 										END)
 	  , dblPrice					= ARID.dblPrice
+	  , dblDiscountAmount			= ARID.dblPrice * (ISNULL(ARID.dblDiscount, 0) / 100)
 	  ,	dblTax						= ARID.dblTotalTax
 	  , dblLineTotal				= ARID.dblTotal
 	  , dblTotal					= ARI.dblInvoiceTotal			
@@ -1009,7 +1011,7 @@ FROM
 				 , ICISI.intItemId
 				 , ICISI.intItemUOMId
 				 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
-				 , dblCost = ABS(AVG(ICIT.dblQty * ICIT.dblCost))
+				 , dblCost = dbo.fnCalculateUnitCost(AVG(ABS(ICIT.dblCost)), AVG(ABS(ICIT.dblUOMQty)))
 			FROM
 				tblICInventoryShipmentItem ICISI
 			INNER JOIN tblICInventoryShipment ICIS

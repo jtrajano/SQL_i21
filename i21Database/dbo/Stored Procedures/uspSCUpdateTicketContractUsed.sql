@@ -27,6 +27,8 @@ BEGIN TRY
 		, intContractSequence = CT.intContractSeq
 		, strContractLocation = CT.strLocationName
 		, dblScheduleQty = CT.dblScheduleQty
+		, dblUnitPrice = CT.dblFutures
+		, dblUnitBasis = CT.dblBasis
 		FROM tblSCTicket SC INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId
 	END
 END TRY

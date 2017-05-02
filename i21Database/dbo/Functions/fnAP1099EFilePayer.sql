@@ -14,36 +14,37 @@ BEGIN
 
 	IF @form1099 = 1
 	BEGIN
-		SELECT @amountCodes =
-			CASE WHEN A.dblDirectSales > 0 THEN '1' ELSE '' END + --DIRECT SALES see page 53
-			CASE WHEN A.dblRents > 0 THEN '1' ELSE '' END +
-			CASE WHEN A.dblRoyalties > 0 THEN '2' ELSE '' END +
-			CASE WHEN A.dblOtherIncome > 0 THEN '3' ELSE '' END +
-			CASE WHEN A.dblFederalIncome > 0 THEN '4' ELSE '' END +
-			CASE WHEN A.dblBoatsProceeds > 0 THEN '5' ELSE '' END +
-			CASE WHEN A.dblMedicalPayments > 0 THEN '6' ELSE '' END +
-			CASE WHEN A.dblNonemployeeCompensation > 0 THEN '7' ELSE '' END +
-			CASE WHEN A.dblSubstitutePayments > 0 THEN '8' ELSE '' END +
-			CASE WHEN A.dblCropInsurance > 0 THEN 'A' ELSE '' END +
-			CASE WHEN A.dblParachutePayments > 0 THEN 'B' ELSE '' END +
-			CASE WHEN A.dblGrossProceedsAtty > 0 THEN 'C' ELSE '' END +
-			SPACE(15)
-		FROM vyuAP1099MISC A
-		--OUTER APPLY --Temporarily removed, identify when the voucher will exclude from generating 1099 file and report
-		--(
-		--	SELECT TOP 1 * FROM tblAP1099History B
-		--	WHERE A.intYear = B.intYear AND B.int1099Form = 1
-		--	AND B.intEntityVendorId = A.intEntityVendorId
-		--	ORDER BY B.dtmDatePrinted DESC
-		--) History
-		WHERE 1 = (CASE WHEN @vendorFrom IS NOT NULL THEN
-					(CASE WHEN A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
-				ELSE 1 END)
-		AND A.intYear = @year
-		--AND 1 = (CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprint = 1 THEN 1 
-		--		WHEN History.ysnPrinted IS NULL THEN 1
-		--		WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
-		--		ELSE 0 END)
+		SELECT @amountCodes = COALESCE(@amountCodes,'') + strAmountCodes FROM (
+			SELECT DISTINCT(strAmountCodes) strAmountCodes 
+			FROM (
+				SELECT 
+					CASE WHEN A.dblDirectSales > 0 THEN '1' --ELSE '' END, --DIRECT SALES see page 53
+							WHEN A.dblRents > 0 THEN '1' --ELSE '' END,
+							WHEN A.dblRoyalties > 0 THEN '2' --ELSE '' END,
+						WHEN A.dblOtherIncome > 0 THEN '3' --ELSE '' END,
+						WHEN A.dblFederalIncome > 0 THEN '4' --ELSE '' END,
+						WHEN A.dblBoatsProceeds > 0 THEN '5' --ELSE '' END,
+						WHEN A.dblMedicalPayments > 0 THEN '6' --ELSE '' END,
+						WHEN A.dblNonemployeeCompensation > 0 THEN '7' --ELSE '' END,
+						WHEN A.dblSubstitutePayments > 0 THEN '8' --ELSE '' END,
+						WHEN A.dblCropInsurance > 0 THEN 'A' --ELSE '' END,
+						WHEN A.dblParachutePayments > 0 THEN 'B' --ELSE '' END,
+						WHEN A.dblGrossProceedsAtty > 0 THEN 'C' 
+					ELSE '' END AS strAmountCodes
+				FROM vyuAP1099MISC A
+				--OUTER APPLY --Temporarily removed, identify when the voucher will exclude from generating 1099 file and report
+				--(
+				--	SELECT TOP 1 * FROM tblAP1099History B
+				--	WHERE A.intYear = B.intYear AND B.int1099Form = 1
+				--	AND B.intEntityVendorId = A.intEntityVendorId
+				--	ORDER BY B.dtmDatePrinted DESC
+				--) History
+				WHERE 1 = (CASE WHEN @vendorFrom IS NOT NULL THEN
+							(CASE WHEN A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
+						ELSE 1 END)
+				AND A.intYear = 2016
+			) tmpAmountCodes
+		) tblAmountCodes
 	END
 	ELSE IF @form1099 = 2
 	BEGIN
@@ -72,7 +73,7 @@ BEGIN
 			WHEN 3 THEN 'B ' --1099 B
 			WHEN 4 THEN '7 ' --1099 PATR
 			ELSE SPACE(2) END --Type of return/1099 --Position 26-27
-		+ @amountCodes
+		+ @amountCodes + SPACE(16 - LEN(@amountCodes))
 			--CASE @form1099 
 			--WHEN 1 --1099 MISC
 			--	THEN @amountCodes
@@ -86,13 +87,13 @@ BEGIN
 			--ELSE SPACE(16) END
 		+ SPACE(8) --44-51
 		+ ' ' --Foreign Indicator
-		+ SPACE(40 - LEN(A.strCompanyName)) + dbo.fnTrim(A.strCompanyName) --Position 53-92
+		+ SPACE(40 - LEN(A.strCompanyName)) + dbo.fnTrimX(A.strCompanyName) --Position 53-92
 		+ SPACE(40)
 		+ ' '
 		+ LEFT(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '), 40) + SPACE(40 - LEN(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '))) --Position 134-173
 		+ LEFT(REPLACE(A.strCity, CHAR(13) + CHAR(10), ' '), 40) + SPACE(40 - LEN(REPLACE(A.strCity, CHAR(13) + CHAR(10), ' '))) 
-		+ SPACE(2 - LEN(ISNULL(dbo.fnTrim(A.strState),''))) + dbo.fnTrim(A.strState)  
-		+ SPACE(9 - LEN(ISNULL(dbo.fnTrim(A.strZip),'')))+  dbo.fnTrim(A.strZip) 
+		+ SPACE(2 - LEN(ISNULL(dbo.fnTrimX(A.strState),''))) + dbo.fnTrimX(A.strState)  
+		+ SPACE(9 - LEN(ISNULL(dbo.fnTrimX(A.strZip),'')))+  dbo.fnTrimX(A.strZip) 
 		+ SPACE(15 - LEN(ISNULL(dbo.fnAPRemoveSpecialChars(A.strPhone),''))) + REPLACE(ISNULL(dbo.fnAPRemoveSpecialChars(A.strPhone),''), ' ','') --Position 225-239
 		+ SPACE(260)
 		+ '00000002' --500-507

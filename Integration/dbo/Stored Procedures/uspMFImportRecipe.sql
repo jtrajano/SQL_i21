@@ -216,7 +216,6 @@ BEGIN
 					   ,FRMI.ptfrm_ingr_qty_'+CAST(@cnt AS NVARCHAR)+'
 					   ,0  --[dblShrinkage]
 					   ,1  --[ysnScaled]
-					   ,(SELECT intConsumptionMethodId FROM tblMFConsumptionMethod WHERE strName = ''None'')
 					   ,0  --[ysnYearValidationRequired]
 					   ,0  --[ysnMinorIngredient]
 					   ,0  --[ysnOutputItemMandatory]

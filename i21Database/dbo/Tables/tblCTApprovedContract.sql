@@ -27,16 +27,20 @@
 	[dblFutures] [numeric](18, 6),
 	[dblBasis] [numeric](18, 6),	
 	[dblCashPrice] [numeric](18, 6),
+	[dblNoOfLots] [numeric](18, 6),
 	[intCurrencyId] [int],
 	[intPriceUOMId]  INT, -- From tblICUnitMeasure not tblICItemUOM
 	[intSubLocationId] INT,
 	[intStorageLocationId] INT,
 	[intPurchasingGroupId] INT,
+	[strVendorLotID] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intCertificationId] INT,
 
 	[strApprovalType]	NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
-
+	[intLoadingPortId] INT,
 	[intApprovedById]	INT,
 	[dtmApproved]	DATETIME,
+	[ysnApproved]	BIT,
 
 	CONSTRAINT [PK_tblCTApprovedContract_intApprovedContractId] PRIMARY KEY CLUSTERED (intApprovedContractId ASC)
 )

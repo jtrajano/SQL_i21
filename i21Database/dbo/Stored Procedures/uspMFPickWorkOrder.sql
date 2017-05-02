@@ -8,6 +8,7 @@
 	,@dblUnitQty NUMERIC(38, 20)
 	,@ysnProducedQtyByWeight BIT = 1
 	,@ysnFillPartialPallet BIT = 0
+	,@dblProducePartialQty NUMERIC(38, 20) = 0
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -72,8 +73,8 @@ BEGIN TRY
 		,@intLotCodeNoOfDigits INT
 		,@dblLowerToleranceReqQty NUMERIC(18, 6)
 		,@intLotItemId INT
-		,@intPMCategoryId int
-		,@intPMStageLocationId int
+		,@intPMCategoryId INT
+		,@intPMStageLocationId INT
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
@@ -145,7 +146,7 @@ BEGIN TRY
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
-		AND intAttributeId = 90--PM Staging Location
+		AND intAttributeId = 90 --PM Staging Location
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
@@ -174,9 +175,9 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intPackagingCategoryId
 
-	Select @intPMCategoryId=intCategoryId 
-	From tblICCategory
-	Where strCategoryCode =@strPackagingCategory
+	SELECT @intPMCategoryId = intCategoryId
+	FROM tblICCategory
+	WHERE strCategoryCode = @strPackagingCategory
 
 	IF @intTransactionCount = 0
 		BEGIN TRAN
@@ -232,12 +233,14 @@ BEGIN TRY
 	WHERE intTransactionId = @intWorkOrderId
 		AND strTransactionId = @strWorkOrderNo
 
-	Update WC
-	Set intBatchId =@intBatchId
+	UPDATE WC
+	SET intBatchId = @intBatchId
 	FROM tblMFWorkOrderConsumedLot WC
-	JOIN tblMFWorkOrderProducedLot WP on WP.intWorkOrderId=WC.intWorkOrderId and WP.intSpecialPalletLotId =WC.intLotId
+	JOIN tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = WC.intWorkOrderId
+		AND WP.intSpecialPalletLotId = WC.intLotId
 	WHERE WC.intWorkOrderId = @intWorkOrderId
-		AND intSpecialPalletLotId is not null and WC.intBatchId is null
+		AND intSpecialPalletLotId IS NOT NULL
+		AND WC.intBatchId IS NULL
 
 	INSERT INTO @tblItem (
 		intItemId
@@ -253,9 +256,19 @@ BEGIN TRY
 			WHEN C.strCategoryCode = @strPackagingCategory
 				AND @ysnProducedQtyByWeight = 1
 				AND P.dblMaxWeightPerPack > 0
-				THEN (CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
+				THEN (
+						CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack)) + CASE 
+									WHEN ri.ysnPartialFillConsumption = 1
+										THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / P.dblMaxWeightPerPack))
+									ELSE 0
+									END) AS NUMERIC(38, 20))
+						)
 			WHEN C.strCategoryCode = @strPackagingCategory
-				THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))) AS NUMERIC(38, 20))
+				THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity)) + CASE 
+								WHEN ri.ysnPartialFillConsumption = 1
+									THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / r.dblQuantity))
+								ELSE 0
+								END) AS NUMERIC(38, 20))
 			ELSE (
 					ri.dblCalculatedQuantity * (
 						dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / (
@@ -265,7 +278,19 @@ BEGIN TRY
 								ELSE 1
 								END
 							)
-						)
+						) + CASE 
+						WHEN ri.ysnPartialFillConsumption = 1
+							THEN ri.dblCalculatedQuantity * (
+									dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / (
+										CASE 
+											WHEN r.intRecipeTypeId = 1
+												THEN r.dblQuantity
+											ELSE 1
+											END
+										)
+									)
+						ELSE 0
+						END
 					)
 			END AS RequiredQty
 		,ri.intItemUOMId
@@ -276,9 +301,19 @@ BEGIN TRY
 			WHEN C.strCategoryCode = @strPackagingCategory
 				AND @ysnProducedQtyByWeight = 1
 				AND P.dblMaxWeightPerPack > 0
-				THEN (CAST(CEILING((ri.dblCalculatedLowerTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
+				THEN (
+						CAST(CEILING((ri.dblCalculatedLowerTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack)) + CASE 
+									WHEN ri.ysnPartialFillConsumption = 1
+										THEN (ri.dblCalculatedLowerTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / P.dblMaxWeightPerPack))
+									ELSE 0
+									END) AS NUMERIC(38, 20))
+						)
 			WHEN C.strCategoryCode = @strPackagingCategory
-				THEN CAST(CEILING((ri.dblCalculatedLowerTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))) AS NUMERIC(38, 20))
+				THEN CAST(CEILING((ri.dblCalculatedLowerTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity)) + CASE 
+								WHEN ri.ysnPartialFillConsumption = 1
+									THEN (ri.dblCalculatedLowerTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / r.dblQuantity))
+								ELSE 0
+								END) AS NUMERIC(38, 20))
 			ELSE (
 					ri.dblCalculatedLowerTolerance * (
 						dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / (
@@ -288,7 +323,19 @@ BEGIN TRY
 								ELSE 1
 								END
 							)
-						)
+						) + CASE 
+						WHEN ri.ysnPartialFillConsumption = 1
+							THEN ri.dblCalculatedLowerTolerance * (
+									dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / (
+										CASE 
+											WHEN r.intRecipeTypeId = 1
+												THEN r.dblQuantity
+											ELSE 1
+											END
+										)
+									)
+						ELSE 0
+						END
 					)
 			END
 	FROM dbo.tblMFWorkOrderRecipeItem ri
@@ -312,13 +359,13 @@ BEGIN TRY
 				)
 			)
 		AND ri.intConsumptionMethodId <> 4
-		AND ri.ysnPartialFillConsumption = (
-			CASE 
-				WHEN @ysnFillPartialPallet = 1
-					THEN 1
-				ELSE ri.ysnPartialFillConsumption
-				END
-			)
+		--AND ri.ysnPartialFillConsumption = (
+		--	CASE 
+		--		WHEN @ysnFillPartialPallet = 1
+		--			THEN 1
+		--		ELSE ri.ysnPartialFillConsumption
+		--		END
+		--	)
 		AND NOT EXISTS (
 			SELECT 1
 			FROM dbo.tblMFWorkOrderConsumedLot WC
@@ -327,6 +374,7 @@ BEGIN TRY
 				AND IsNull(WC.intBatchId, @intBatchId) = @intBatchId
 				AND WC.intItemId = SI.intSubstituteItemId
 				AND SI.intItemId = ri.intItemId
+			--AND @ysnFillPartialPallet = 0
 			
 			UNION
 			
@@ -336,6 +384,7 @@ BEGIN TRY
 				AND IsNull(WC.intBatchId, @intBatchId) = @intBatchId
 				AND WC.intItemId = ri.intItemId
 			)
+	--AND @ysnFillPartialPallet = 0
 	
 	UNION
 	
@@ -345,9 +394,19 @@ BEGIN TRY
 				WHEN C.strCategoryCode = @strPackagingCategory
 					AND @ysnProducedQtyByWeight = 1
 					AND P.dblMaxWeightPerPack > 0
-					THEN (CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
+					THEN (
+							CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack)) + CASE 
+										WHEN ri.ysnPartialFillConsumption = 1
+											THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / P.dblMaxWeightPerPack))
+										ELSE 0
+										END) AS NUMERIC(38, 20))
+							)
 				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))) AS NUMERIC(38, 20))
+					THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity)) + CASE 
+									WHEN ri.ysnPartialFillConsumption = 1
+										THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / r.dblQuantity))
+									ELSE 0
+									END) AS NUMERIC(38, 20))
 				ELSE (
 						ri.dblCalculatedQuantity * (
 							dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / (
@@ -357,7 +416,19 @@ BEGIN TRY
 									ELSE 1
 									END
 								)
-							)
+							) + CASE 
+							WHEN ri.ysnPartialFillConsumption = 1
+								THEN ri.dblCalculatedQuantity * (
+										dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / (
+											CASE 
+												WHEN r.intRecipeTypeId = 1
+													THEN r.dblQuantity
+												ELSE 1
+												END
+											)
+										)
+							ELSE 0
+							END
 						)
 				END
 			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
@@ -370,12 +441,20 @@ BEGIN TRY
 				WHEN C.strCategoryCode = @strPackagingCategory
 					AND @ysnProducedQtyByWeight = 1
 					AND P.dblMaxWeightPerPack > 0
-					THEN (CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
+					THEN (CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack))) + CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
 				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))) AS NUMERIC(38, 20))
+					THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))) + CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / r.dblQuantity))) AS NUMERIC(38, 20))
 				ELSE (
 						ri.dblCalculatedQuantity * (
 							dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / (
+								CASE 
+									WHEN r.intRecipeTypeId = 1
+										THEN r.dblQuantity
+									ELSE 1
+									END
+								)
+							) + ri.dblCalculatedQuantity * (
+							dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / (
 								CASE 
 									WHEN r.intRecipeTypeId = 1
 										THEN r.dblQuantity
@@ -416,18 +495,18 @@ BEGIN TRY
 				)
 			)
 		AND ri.intConsumptionMethodId <> 4
-		AND ri.ysnPartialFillConsumption = (
-			CASE 
-				WHEN @ysnFillPartialPallet = 1
-					THEN 1
-				ELSE ri.ysnPartialFillConsumption
-				END
-			)
+		--AND ri.ysnPartialFillConsumption = (
+		--CASE 
+		--	WHEN @ysnFillPartialPallet = 1
+		--		THEN 1
+		--	ELSE ri.ysnPartialFillConsumption
+		--	END
+		--)
 		AND (
 			CASE 
 				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN (CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack))))
-				ELSE (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))
+					THEN (CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack)))) + (CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / P.dblMaxWeightPerPack))))
+				ELSE (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity)) + (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / r.dblQuantity))
 				END
 			) - WC.dblQuantity / rs.dblSubstituteRatio > 0
 
@@ -520,24 +599,25 @@ BEGIN TRY
 				AND IU.ysnStockUnit = 1
 			WHERE S.intItemId = @intItemId
 				AND IL.intLocationId = @intLocationId
-				AND (S.intStorageLocationId = (
-					CASE 
-						WHEN @intConsumptionMethodId = 1
-							THEN ISNULL(@intProductionStageLocationId, S.intStorageLocationId)
-						WHEN @intConsumptionMethodId = 2
-							THEN ISNULL(@intStorageLocationId, S.intStorageLocationId)
-						ELSE S.intStorageLocationId
-						END
-					) or 
+				AND (
 					S.intStorageLocationId = (
-					CASE 
-						WHEN @intConsumptionMethodId = 1
-							THEN ISNULL(@intPMStageLocationId, S.intStorageLocationId)
-						WHEN @intConsumptionMethodId = 2
-							THEN ISNULL(@intStorageLocationId, S.intStorageLocationId)
-						ELSE S.intStorageLocationId
-						END
-					)
+						CASE 
+							WHEN @intConsumptionMethodId = 1
+								THEN ISNULL(@intProductionStageLocationId, S.intStorageLocationId)
+							WHEN @intConsumptionMethodId = 2
+								THEN ISNULL(@intStorageLocationId, S.intStorageLocationId)
+							ELSE S.intStorageLocationId
+							END
+						)
+					OR S.intStorageLocationId = (
+						CASE 
+							WHEN @intConsumptionMethodId = 1
+								THEN ISNULL(@intPMStageLocationId, S.intStorageLocationId)
+							WHEN @intConsumptionMethodId = 2
+								THEN ISNULL(@intStorageLocationId, S.intStorageLocationId)
+							ELSE S.intStorageLocationId
+							END
+						)
 					)
 				AND S.dblOnHand - S.dblUnitReserved > 0
 		END
@@ -640,23 +720,26 @@ BEGIN TRY
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND (L.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-							ELSE L.intStorageLocationId
-							END
-						) OR L.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-							ELSE L.intStorageLocationId
-							END
-						))
+					AND (
+						L.intStorageLocationId = (
+							CASE 
+								WHEN @intConsumptionMethodId = 1
+									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+								WHEN @intConsumptionMethodId = 2
+									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+								ELSE L.intStorageLocationId
+								END
+							)
+						OR L.intStorageLocationId = (
+							CASE 
+								WHEN @intConsumptionMethodId = 1
+									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+								WHEN @intConsumptionMethodId = 2
+									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+								ELSE L.intStorageLocationId
+								END
+							)
+						)
 					AND L.dblQty > 0
 				ORDER BY CASE 
 						WHEN @ysnPickByLotCode = 0
@@ -755,24 +838,26 @@ BEGIN TRY
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus = 'Active'
 				AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-				AND (L.intStorageLocationId = (
-					CASE 
-						WHEN @intConsumptionMethodId = 1
-							THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-						WHEN @intConsumptionMethodId = 2
-							THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-						ELSE L.intStorageLocationId
-						END
-					) or L.intStorageLocationId = (
-					CASE 
-						WHEN @intConsumptionMethodId = 1
-							THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
-						WHEN @intConsumptionMethodId = 2
-							THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-						ELSE L.intStorageLocationId
-						END
-					))
-
+				AND (
+					L.intStorageLocationId = (
+						CASE 
+							WHEN @intConsumptionMethodId = 1
+								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+							WHEN @intConsumptionMethodId = 2
+								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+							ELSE L.intStorageLocationId
+							END
+						)
+					OR L.intStorageLocationId = (
+						CASE 
+							WHEN @intConsumptionMethodId = 1
+								THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
+							WHEN @intConsumptionMethodId = 2
+								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+							ELSE L.intStorageLocationId
+							END
+						)
+					)
 				AND L.dblQty > 0
 			ORDER BY CASE 
 					WHEN @ysnPickByLotCode = 0
@@ -875,24 +960,26 @@ BEGIN TRY
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND (L.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-							ELSE L.intStorageLocationId
-							END
-						) or
+					AND (
 						L.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-							ELSE L.intStorageLocationId
-							END
-						))
+							CASE 
+								WHEN @intConsumptionMethodId = 1
+									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+								WHEN @intConsumptionMethodId = 2
+									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+								ELSE L.intStorageLocationId
+								END
+							)
+						OR L.intStorageLocationId = (
+							CASE 
+								WHEN @intConsumptionMethodId = 1
+									THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
+								WHEN @intConsumptionMethodId = 2
+									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+								ELSE L.intStorageLocationId
+								END
+							)
+						)
 					AND L.dblQty = 0
 				ORDER BY IsNULL(L.dtmManufacturedDate, L.dtmDateCreated) DESC
 
@@ -1190,23 +1277,25 @@ BEGIN TRY
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND (L.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-							ELSE L.intStorageLocationId
-							END
-						) or L.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-							ELSE L.intStorageLocationId
-							END
-						)
+					AND (
+						L.intStorageLocationId = (
+							CASE 
+								WHEN @intConsumptionMethodId = 1
+									THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+								WHEN @intConsumptionMethodId = 2
+									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+								ELSE L.intStorageLocationId
+								END
+							)
+						OR L.intStorageLocationId = (
+							CASE 
+								WHEN @intConsumptionMethodId = 1
+									THEN ISNULL(@intPMStageLocationId, L.intStorageLocationId)
+								WHEN @intConsumptionMethodId = 2
+									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+								ELSE L.intStorageLocationId
+								END
+							)
 						)
 					AND L.dblQty > 0
 				ORDER BY CASE 
@@ -1220,16 +1309,17 @@ BEGIN TRY
 		IF EXISTS (
 				SELECT SUM(dblQty)
 				FROM @tblLot
-				HAVING SUM(dblQty) < (CASE 
-						WHEN (
-								SELECT Count(*)
-								FROM @tblLot
-								WHERE ysnSubstituteItem = 1
-								) >= 1
-							THEN @dblLowerToleranceReqQty
-						ELSE
-							[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblLowerToleranceReqQty)
-						END)
+				HAVING SUM(dblQty) < (
+						CASE 
+							WHEN (
+									SELECT Count(*)
+									FROM @tblLot
+									WHERE ysnSubstituteItem = 1
+									) >= 1
+								THEN @dblLowerToleranceReqQty
+							ELSE [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblLowerToleranceReqQty)
+							END
+						)
 				)
 		BEGIN
 			IF @ysnExcessConsumptionAllowed = 0

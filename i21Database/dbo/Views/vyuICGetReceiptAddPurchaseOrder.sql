@@ -60,26 +60,26 @@ FROM (
 		, ysnSubCurrency = CAST(0  AS BIT)
 		, intCurrencyId = POView.intCurrencyId
 		, strSubCurrency = CAST(NULL AS NVARCHAR(50)) 
-		, dblGross = CAST(0 AS NUMERIC(38, 20)) -- There is no gross from PO
-		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from PO
+		, dblGross = POView.dblNetWeight -- There is no gross from PO
+		, dblNet = POView.dblNetWeight -- There is no net from PO
 		, intForexRateTypeId = POView.intForexRateTypeId
-		, strForexRateType = currencyType.strCurrencyExchangeRateType
+		, strForexRateType = currencyRateType.strCurrencyExchangeRateType
 		, dblForexRate = POView.dblForexRate
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
 				ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
 			LEFT JOIN dbo.tblICItemUOM CostUOM
-				ON POView.intUnitOfMeasureId = CostUOM.intItemUOMId
+				ON POView.intCostUOMId = CostUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-            OUTER APPLY dbo.fnGetDefaultGrossNetUOMForLotItem(POView.intItemId) DefaultGrossNetUOM
+            --OUTER APPLY dbo.fnGetDefaultGrossNetUOMForLotItem(POView.intItemId) DefaultGrossNetUOM
             LEFT JOIN dbo.tblICItemUOM GrossNetUOM
-                ON GrossNetUOM.intItemUOMId = DefaultGrossNetUOM.intGrossNetUOMId
+                ON GrossNetUOM.intItemUOMId = POView.intWeightUOMId
             LEFT JOIN dbo.tblICUnitMeasure GrossNetName 
                 ON GrossNetName.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
-			LEFT JOIN tblSMCurrencyExchangeRateType currencyType 
-				ON currencyType.intCurrencyExchangeRateTypeId = POView.intForexRateTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = POView.intForexRateTypeId
 	WHERE ysnCompleted = 0
 		
 ) tblAddOrders

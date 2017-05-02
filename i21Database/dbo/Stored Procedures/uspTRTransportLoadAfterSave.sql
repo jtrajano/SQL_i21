@@ -169,6 +169,7 @@ BEGIN
 			LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
 		WHERE DH.intLoadHeaderId = @LoadHeaderId
 			AND DH.strDestination = 'Customer'
+			AND ISNULL(DD.intLoadDistributionDetailId, '') <> ''
 
 		-- Check and Delete Deleted Inventory Receipt line items
 		INSERT INTO @tblToProcess(intLoadHeaderId, intTransactionId, strTransactionType, intActivity, dblQuantity, intContractDetailId)

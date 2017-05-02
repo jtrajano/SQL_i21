@@ -133,6 +133,7 @@ SELECT	CHK.dtmDate
 		,CHK.intTransactionId
 		,PRINTSPOOL.strBatchId
 		,CHK.intBankAccountId
+		,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = CHK.intCurrencyId)
 		
 		-- Bank and company info related fields
 		,strCompanyName = CASE

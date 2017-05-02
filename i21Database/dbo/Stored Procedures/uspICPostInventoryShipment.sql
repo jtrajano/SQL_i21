@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspICPostInventoryShipment]
+﻿CREATE PROCEDURE [dbo].[uspICPostInventoryShipment]
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
@@ -32,18 +32,21 @@ DECLARE	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods
 		,@FOB_DESTINATION AS INT = 2
 
 -- Get the default currency ID
-DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 -- Get the Inventory Shipment batch number
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@ysnAllowBlankGLEntries AS BIT = 1
 		,@intItemId AS INT
+		,@strCurrencyId AS NVARCHAR(50)
+		,@strFunctionalCurrencyId AS NVARCHAR(50)
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
+		,@dummyGLEntries AS RecapTableType 
 		,@intReturnValue AS INT
 
 -- Ensure ysnPost is not NULL  
@@ -272,6 +275,40 @@ BEGIN
 			RETURN -1; 
 		END 
 	END
+
+	-- Check if the transaction is using a foreign currency and it has a missing forex rate. 
+	BEGIN 		
+		SELECT @strItemNo = NULL
+				,@intItemId = NULL 
+				,@strCurrencyId = NULL 
+				,@strFunctionalCurrencyId = NULL 
+
+		SELECT TOP 1 
+				@strTransactionId = Shipment.strShipmentNumber 
+				,@strItemNo = Item.strItemNo
+				,@intItemId = Item.intItemId
+				,@strCurrencyId = c.strCurrency
+				,@strFunctionalCurrencyId = fc.strCurrency
+		FROM	tblICInventoryShipment Shipment INNER JOIN tblICInventoryShipmentItem ShipmentItem
+					ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId	
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = ShipmentItem.intItemId
+				LEFT JOIN tblSMCurrency c
+					ON c.intCurrencyID =  Shipment.intCurrencyId
+				LEFT JOIN tblSMCurrency fc
+					ON fc.intCurrencyID =  @intFunctionalCurrencyId
+		WHERE	ISNULL(ShipmentItem.dblForexRate, 0) = 0 
+				AND Shipment.intCurrencyId IS NOT NULL 
+				AND Shipment.intCurrencyId <> @intFunctionalCurrencyId
+				AND Shipment.strShipmentNumber = @strTransactionId
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'
+			RAISERROR(80162, 11, 1, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId)
+			RETURN -1; 
+		END 
+	END 
 END
 
 -- Get the next batch number
@@ -413,7 +450,7 @@ BEGIN
 												END
 
 				,dblSalesPrice              = 0.00
-				,intCurrencyId              = @DefaultCurrencyId 
+				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
 				,intTransactionId           = Header.intInventoryShipmentId
 				,intTransactionDetailId     = DetailItem.intInventoryShipmentItemId
@@ -443,6 +480,40 @@ BEGIN
 			SET @ysnAllowBlankGLEntries = 0
 
 			-- Call the Costing routine. 
+			INSERT INTO @dummyGLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+			)	
 			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@ItemsForPost  
 					,@strBatchId  
@@ -648,7 +719,7 @@ BEGIN
 														Lot.dblLastCost + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
 												END, 0 + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId))
 				,dblSalesPrice              = 0.00
-				,intCurrencyId              = @DefaultCurrencyId 
+				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
 				,intTransactionId           = Header.intInventoryShipmentId
 				,intTransactionDetailId     = DetailItem.intInventoryShipmentItemId
@@ -860,6 +931,28 @@ BEGIN
 	UPDATE @GLEntries
 	SET dblDebitForeign = ISNULL(dblDebitForeign, 0)
 		,dblCreditForeign = ISNULL(dblCreditForeign, 0) 
+
+	-- If shipment is in foreign currency, then make sure the Foreign Debits and Credits are filled-in. 
+	UPDATE	glEntries
+	SET
+			dblDebitForeign = CASE WHEN dblDebit <> 0 AND dblDebitForeign = 0 AND si.dblForexRate <> 0 THEN ISNULL(dblDebit / si.dblForexRate, 0) ELSE ISNULL(dblDebitForeign, 0) END
+			,dblCreditForeign = CASE WHEN dblCredit <> 0 AND dblCreditForeign = 0 AND si.dblForexRate <> 0 THEN ISNULL(dblCredit / si.dblForexRate, 0) ELSE ISNULL(dblCreditForeign, 0) END 
+			,intCurrencyId = s.intCurrencyId
+			,dblExchangeRate = si.dblForexRate
+			,dblForeignRate = si.dblForexRate
+			,strRateType = currencyRateType.strCurrencyExchangeRateType
+	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+				ON s.intInventoryShipmentId = si.intInventoryShipmentId
+			INNER JOIN tblICInventoryTransaction t
+				ON t.strTransactionId = s.strShipmentNumber
+				AND t.intTransactionDetailId = si.intInventoryShipmentItemId
+			INNER JOIN @GLEntries glEntries
+				ON glEntries.intJournalLineNo = t.intInventoryTransactionId 			
+				AND glEntries.strTransactionId = s.strShipmentNumber 
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = si.intForexRateTypeId
+	WHERE	s.strShipmentNumber = @strTransactionId
+			AND s.intCurrencyId <> @intFunctionalCurrencyId
 END 
 
 --------------------------------------------------------------------------------------------  

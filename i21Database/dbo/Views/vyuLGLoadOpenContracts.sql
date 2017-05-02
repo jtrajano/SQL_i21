@@ -22,6 +22,7 @@ SELECT CD.intContractDetailId
 	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) AS strEndDate
 	,CD.dtmStartDate
 	,CD.dtmEndDate
+	,CD.dtmPlannedAvailabilityDate
 	,EY.intDefaultLocationId
 	,ISNULL(CD.dblScheduleQty, 0) AS dblScheduleQty
 	,CH.strCustomerContract
@@ -71,11 +72,22 @@ SELECT CD.intContractDetailId
 	,S.strSampleTypeName
 	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) AS strTestingStartDate
 	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
-	,S.intCompanyLocationSubLocationId
-	,S.strSubLocationName
+	,CASE 
+		WHEN S.intCompanyLocationSubLocationId IS NULL
+			THEN CD.intSubLocationId
+		ELSE S.intCompanyLocationSubLocationId
+		END AS intCompanyLocationSubLocationId
+	,CASE 
+		WHEN ISNULL(S.strSubLocationName, '') = ''
+			THEN CLSL.strSubLocationName
+		ELSE S.strSubLocationName
+		END AS strSubLocationName
 	,S.dblRepresentingQty AS dblContainerQty
+	,SL.strName AS strStorageLocationName
+	,CD.intStorageLocationId
 	,intShipmentType = 1
 	,CD.strERPPONumber
+	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -89,10 +101,13 @@ JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
 			END
 		)
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -139,6 +154,7 @@ SELECT CD.intContractDetailId
 			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 			WHERE LD.intPContractDetailId = CD.intContractDetailId
 				AND L.intShipmentType = 2
+				AND ISNULL(L.ysnCancelled,0) = 0 
 			), 0) AS dblUnLoadedQuantity
 	,CH.intContractTypeId intPurchaseSale
 	,CH.intEntityId
@@ -149,12 +165,14 @@ SELECT CD.intContractDetailId
 	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) AS strEndDate
 	,CD.dtmStartDate
 	,CD.dtmEndDate
+	,CD.dtmPlannedAvailabilityDate
 	,EY.intDefaultLocationId
 	,ISNULL((SELECT SUM(LD.dblQuantity)
 			 FROM tblLGLoadDetail LD
 			 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 			 WHERE CD.intContractDetailId = (CASE WHEN CH.intContractTypeId = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END)
 				 AND L.intShipmentType = 2
+				 AND ISNULL(L.ysnCancelled,0) = 0 
 			 ), 0) AS dblScheduleQty
 	,CH.strCustomerContract
 	,ISNULL(CD.dblBalance, 0) AS dblBalance
@@ -178,6 +196,7 @@ SELECT CD.intContractDetailId
 										JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 										WHERE CD.intContractDetailId = (CASE WHEN CH.intContractTypeId = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END)
 											AND L.intShipmentType = 2
+											AND ISNULL(L.ysnCancelled,0) = 0 
 										), 0) > 0
 								)
 							OR (CH.ysnUnlimitedQuantity = 1)
@@ -211,11 +230,22 @@ SELECT CD.intContractDetailId
 	,S.strSampleTypeName
 	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) AS strTestingStartDate
 	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
-	,S.intCompanyLocationSubLocationId
-	,S.strSubLocationName
+	,CASE 
+		WHEN S.intCompanyLocationSubLocationId IS NULL
+			THEN CD.intSubLocationId
+		ELSE S.intCompanyLocationSubLocationId
+		END AS intCompanyLocationSubLocationId
+	,CASE 
+		WHEN ISNULL(S.strSubLocationName, '') = ''
+			THEN CLSL.strSubLocationName
+		ELSE S.strSubLocationName
+		END AS strSubLocationName
 	,S.dblRepresentingQty AS dblContainerQty
+	,SL.strName AS strStorageLocationName
+	,CD.intStorageLocationId
 	,intShipmentType = 2
 	,CD.strERPPONumber
+	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -229,10 +259,13 @@ JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
 			END
 		)
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -279,6 +312,7 @@ GROUP BY CD.intContractDetailId
 	,EY.strEntityName
 	,CD.dtmStartDate
 	,CD.dtmEndDate
+	,CD.dtmPlannedAvailabilityDate
 	,EY.intDefaultLocationId
 	,CH.strCustomerContract
 	,CD.intContractStatusId
@@ -310,3 +344,8 @@ GROUP BY CD.intContractDetailId
 	,S.dblRepresentingQty
 	,CD.strERPPONumber
 	,ysnValidateExternalPONo
+	,CD.intSubLocationId
+	,CLSL.strSubLocationName
+	,SL.strName
+	,CD.intStorageLocationId
+	,WG.ysnSample

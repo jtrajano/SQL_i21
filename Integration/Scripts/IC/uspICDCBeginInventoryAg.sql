@@ -2,7 +2,7 @@ IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICD
 	DROP PROCEDURE [uspICDCBeginInventoryAg]; 
 GO 
 
-Create PROCEDURE [dbo].[uspICDCBeginInventoryAg]
+CREATE PROCEDURE [dbo].[uspICDCBeginInventoryAg]
 --** Below Stored Procedure is to migrate origin onhand unit balances from agitmmst table to i21 inventory by creating adjustments.
 --   Then adjustment posting need to be done in i21 application, which will update the onhand units of inventory.
 --   So here we do not directly update the onhand units from ptitmmst origin table into i21 item tblICItem table, rather we update 
@@ -154,22 +154,31 @@ END
 
 -- Rebuild the G/L Summary for that day. 
 BEGIN 
-	--DELETE [dbo].[tblGLSummary] WHERE dbo.fnDateEquals(dtmDate, @adjdt) = 1
+	DELETE [dbo].[tblGLSummary] WHERE dbo.fnDateEquals(dtmDate, @adjdt) = 1
 
-	--INSERT INTO tblGLSummary
-	--SELECT
-	--		intAccountId
-	--		,dtmDate
-	--		,SUM(ISNULL(dblDebit,0)) as dblDebit
-	--		,SUM(ISNULL(dblCredit,0)) as dblCredit
-	--		,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
-	--		,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
-	--		,strCode
-	--		,0 as intConcurrencyId
-	--FROM	tblGLDetail
-	--WHERE	ysnIsUnposted = 0
-	--		AND dbo.fnDateEquals(dtmDate, @adjdt) = 1	
-	--GROUP BY intAccountId, dtmDate, strCode
-	EXEC [dbo].[uspGLSummaryRecalculate]
+	INSERT INTO tblGLSummary (
+		intCompanyId
+		,intAccountId
+		,dtmDate
+		,dblDebit 
+		,dblCredit
+		,dblDebitUnit 
+		,dblCreditUnit 
+		,strCode
+		,intConcurrencyId 
+	)
+	SELECT
+			intCompanyId
+			,intAccountId
+			,dtmDate
+			,SUM(ISNULL(dblDebit,0)) as dblDebit
+			,SUM(ISNULL(dblCredit,0)) as dblCredit
+			,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
+			,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
+			,strCode
+			,0 as intConcurrencyId
+	FROM	tblGLDetail
+	WHERE	ysnIsUnposted = 0
+			AND dbo.fnDateEquals(dtmDate, @adjdt) = 1	
+	GROUP BY intCompanyId, intAccountId, dtmDate, strCode
 END
-

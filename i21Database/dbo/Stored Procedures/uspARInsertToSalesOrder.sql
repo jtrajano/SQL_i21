@@ -165,8 +165,11 @@ BEGIN
 			,[dblItemTermDiscount]
 			,[intTaxId]
 			,[dblPrice]
+			,[dblBasePrice]
 			,[dblTotalTax]
+			,[dblBaseTotalTax]
 			,[dblTotal]
+			,[dblBaseTotal]
 			,[strComments]
 			,[intAccountId]
 			,[intCOGSAccountId]
@@ -177,8 +180,10 @@ BEGIN
 			,[strMaintenanceType]
 			,[strFrequency]
 	        ,[dtmMaintenanceDate]
-	        ,[dblMaintenanceAmount]
-	        ,[dblLicenseAmount]
+			,[dblMaintenanceAmount]
+	        ,[dblBaseMaintenanceAmount]
+			,[dblLicenseAmount]
+	        ,[dblBaseLicenseAmount]
 			,[intContractHeaderId]
 			,[intTaxGroupId]
 			,[intContractDetailId]
@@ -187,7 +192,9 @@ BEGIN
 			,[dblOriginalItemWeight]
 			,[intSubCurrencyId]
 			,[dblSubCurrencyRate]
-			,[strVFDDocumentNumber])
+			,[strVFDDocumentNumber]
+			,[intCurrencyExchangeRateTypeId]
+			,[dblCurrencyExchangeRate])
 		SELECT 
 			@NewTransactionId
 			,[intItemId]
@@ -200,8 +207,11 @@ BEGIN
 			,[dblItemTermDiscount]
 			,[intTaxId]
 			,[dblPrice]
+			,[dblBasePrice]
 			,[dblTotalTax]
+			,[dblBaseTotalTax]
 			,[dblTotal]
+			,[dblBaseTotal]
 			,[strComments]
 			,[intAccountId]
 			,[intCOGSAccountId]
@@ -213,7 +223,9 @@ BEGIN
 			,[strFrequency]
 	        ,[dtmMaintenanceDate]
 	        ,[dblMaintenanceAmount]
+			,[dblBaseMaintenanceAmount]
 	        ,[dblLicenseAmount]
+			,[dblBaseLicenseAmount]
 			,NULL
 			,[intTaxGroupId]
 			,NULL
@@ -223,6 +235,8 @@ BEGIN
 			,[intSubCurrencyId]
 			,[dblSubCurrencyRate]
 			,[strVFDDocumentNumber]
+			,[intCurrencyExchangeRateTypeId]
+			,[dblCurrencyExchangeRate]
 		FROM tblSOSalesOrderDetail		
 		WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 
@@ -240,6 +254,9 @@ BEGIN
 			,[intSalesTaxAccountId]
 			,[dblTax]
 			,[dblAdjustedTax]
+			,[dblBaseAdjustedTax]
+			,[dblExemptionPercent]
+			,[ysnTaxExempt]
 			,[ysnTaxAdjusted]
 			,[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]
@@ -256,11 +273,14 @@ BEGIN
 			,[intSalesTaxAccountId]
 			,[dblTax]
 			,[dblAdjustedTax]
+			,[dblBaseAdjustedTax]
+			,[dblExemptionPercent]
+			,[ysnTaxExempt]
 			,[ysnTaxAdjusted]
 			,[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]
 			,[strNotes] 
-			,0
+			,1
 		FROM tblSOSalesOrderDetailTax
 		WHERE intSalesOrderDetailId = @SalesOrderDetailId
 			

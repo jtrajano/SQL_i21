@@ -87,7 +87,7 @@ SELECT	[dtmDate]
 		,[strDescription] = udtRecap.strDescription
 		,[strCode]
 		,[strReference]
-		,[intCurrencyId]
+		,[intCurrencyId] = udtRecap.intCurrencyId
 		,[dblExchangeRate]
 		,[dtmDateEntered]
 		,[dtmTransactionDate]

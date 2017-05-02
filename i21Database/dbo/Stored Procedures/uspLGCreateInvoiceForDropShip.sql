@@ -110,6 +110,7 @@ BEGIN
 		,[strSalesOrderNumber]
 		,[intContractHeaderId]
 		,[intContractDetailId]
+		,[intLoadDetailId] 
 		,[intShipmentPurchaseSalesContractId]
 		,[dblShipmentGrossWt]
 		,[dblShipmentTareWt]
@@ -179,15 +180,15 @@ BEGIN
 		,[intInvoiceDetailId]					= ID.intInvoiceDetailId
 		,[intItemId]							= LD.intItemId
 		,[ysnInventory]							= 1
-		,[strDocumentNumber]					= '' 
+		,[strDocumentNumber]					= L.strLoadNumber
 		,[strItemDescription]					= ITM.strDescription
 		,[intOrderUOMId]						= CD.[intOrderUOMId] 
 		,[dblQtyOrdered]						= CD.[dblOrderQuantity] 
 		,[intItemUOMId]							= CD.[intItemUOMId] 
-		,[dblQtyShipped]						= CD.[dblShipQuantity] 
+		,[dblQtyShipped]						= LD.dblQuantity
 		,[dblDiscount]							= 0 
 		,[dblItemWeight]						= 0 
-		,[intItemWeightUOMId]					= 0
+		,[intItemWeightUOMId]					= CD.[intItemWeightUOMId]
 		,[dblPrice]								= CD.[dblCashPrice] 
 		,[strPricing]							= 'Contract Pricing'
 		,[ysnRefreshPrice]						= 0
@@ -218,6 +219,7 @@ BEGIN
 		,[strSalesOrderNumber]					= NULL
 		,[intContractHeaderId]					= CH.[intContractHeaderId] 
 		,[intContractDetailId]					= CD.[intContractDetailId] 
+		,[intLoadDetailId]						= LD.intLoadDetailId
 		,[intShipmentPurchaseSalesContractId]	= NULL
 		,[dblShipmentGrossWt]					= LD.dblGross
 		,[dblShipmentTareWt]					= LD.dblTare

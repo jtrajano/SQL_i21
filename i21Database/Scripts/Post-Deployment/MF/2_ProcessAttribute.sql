@@ -1915,14 +1915,21 @@ BEGIN
 		,intAttributeDataTypeId
 		,intAttributeTypeId
 		,strSQL
+		,ysnMultiSelect
 		)
 	SELECT 88
 		,'3rd Party Pallets (e.g. iGPS) Item Id'
 		,5
 		,1
 		,'Select CONVERT(nvarchar,intItemId) as ValueMember,strItemNo as DisplayMember from tblICItem I JOIN tblICCategory C on C.intCategoryId=I.intCategoryId Where C.strCategoryCode =''PM'''
+		,1
 END
-GO
+ELSE
+BEGIN
+	UPDATE tblMFAttribute
+	SET ysnMultiSelect=1
+	WHERE intAttributeId = 88
+END
 GO
 IF NOT EXISTS (
         SELECT 1

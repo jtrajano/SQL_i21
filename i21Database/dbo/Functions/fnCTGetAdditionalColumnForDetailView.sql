@@ -44,7 +44,7 @@ BEGIN
 				@intCurrencyId		=	CD.intCurrencyId,
 				@intMainCurrencyId	=	ISNULL(CY.intMainCurrencyId,CD.intCurrencyId),
 				@ysnSubCurrency		=	CY.ysnSubCurrency,
-				@intPriceItemUOMId	=	CD.intPriceItemUOMId,
+				@intPriceItemUOMId	=	ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),
 				@dblRate			=	CD.dblRate,
 				@intFXPriceUOMId	=	CD.intFXPriceUOMId,
 				@intExchangeRateId	=	CD.intCurrencyExchangeRateId,

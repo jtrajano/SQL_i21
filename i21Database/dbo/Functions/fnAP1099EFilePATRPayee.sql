@@ -24,7 +24,7 @@ BEGIN
 		+ SPACE(4)
 		+ '1'
 		+ ISNULL(NULLIF(A.strFederalTaxId,''),SPACE(9)) -- 12-20
-		+ dbo.fnTrim(A.strVendorId) + SPACE(20 - LEN(dbo.fnTrim(A.strVendorId))) -- 21-40
+		+ dbo.fnTrimX(A.strVendorId) + SPACE(20 - LEN(dbo.fnTrimX(A.strVendorId))) -- 21-40
 		+ SPACE(4) -- 41-44
 		+ SPACE(10) -- 45-54
 		+ CASE WHEN ISNULL(A.dblDividends,0) IS NOT NULL THEN REPLICATE('0',192) -- ALL ZEROS WHEN DIRECT SALES SEE PAGE 53

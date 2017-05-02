@@ -70,11 +70,11 @@ IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 	END  
 END
 
@@ -84,11 +84,11 @@ IF @dtmBillDate IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery =  ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmBillDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmBillDate, 110) + ''''
+		SET @innerQuery =  ' DATEADD(dd, DATEDIFF(dd, 0,dtmBillDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmBillDate, 110) + ''''
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery =  ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmBillDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmBillDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @innerQuery =  ' DATEADD(dd, DATEDIFF(dd, 0,dtmBillDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmBillDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 	END  
 END
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmBillDate'
@@ -144,14 +144,15 @@ SET @query = 'SELECT [intEntityVendorId]
 	  ,[strCompanyAddress]
 	  ,[ysnPaid] FROM [vyuAPRptAPTransactionByGLAccount]'
 
-IF ISNULL(@filter,'') != ''
-BEGIN
-	SET @query = @query + ' WHERE ' + @filter
-END
-
+	  
 IF ISNULL(@innerQuery,'') != ''
 BEGIN
-	SET @query = @query + @innerQuery
+	SET @query = @query + ' WHERE ' + @innerQuery
+END
+
+IF ISNULL(@filter,'') != ''
+BEGIN
+	SET @query = @query + ' AND ' + @filter
 END
 PRINT @filter
 PRINT @query

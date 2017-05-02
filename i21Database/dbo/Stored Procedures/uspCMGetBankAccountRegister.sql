@@ -85,24 +85,24 @@ intTransactionId
 	ELSE
 	strPayee
 	END AS strPayee
-,dtmDate
+,CAST(dtmDate AS DATE) AS dtmDate
 ,dtmDateReconciled
 ,CASE WHEN intBankTransactionTypeId IN (2,3,9,12,13,14,15,16,20,21,22,23)  THEN dblAmount 
 	WHEN intBankTransactionTypeId = 5 AND dblAmount < 0 THEN dblAmount
 	ELSE 0 
 	END AS dblPayment
-,CASE WHEN intBankTransactionTypeId IN (1,10,11,18,19,103,116,121,123)  THEN dblAmount 
+,CASE WHEN intBankTransactionTypeId IN (1,10,11,18,19,103,116,121,122,123)  THEN dblAmount 
 	WHEN intBankTransactionTypeId = 5 AND dblAmount > 0 THEN dblAmount
 	ELSE 0 
 	END AS dblDeposit
 ,ysnCheckVoid
 ,ysnClr
-,ROW_NUMBER() OVER (ORDER BY dtmDate,intTransactionId) AS RowNum
+,ROW_NUMBER() OVER (ORDER BY CAST(dtmDate AS DATE),intTransactionId) AS RowNum
 INTO #tempTransaction
 FROM tblCMBankTransaction A
 WHERE intBankAccountId = @intBankAccountId
 AND (ysnPosted = 1 OR ysnCheckVoid = 1)
-ORDER BY dtmDate, intTransactionId
+ORDER BY CAST(dtmDate AS DATE), intTransactionId
 
 CREATE NONCLUSTERED  INDEX cx_tempTransaction ON #tempTransaction (intTransactionId,dtmDate);
 

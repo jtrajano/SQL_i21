@@ -32,6 +32,7 @@ BEGIN TRY
 			, '' AS 'strParentLotNumber'
 			, '' AS 'strCustomerName'
 			, '' AS 'strShipFromLocation'
+			, '' AS 'strReferenceNumber'
 		RETURN
 	END
 
@@ -107,6 +108,7 @@ BEGIN TRY
 				,ParentLot.strParentLotNumber
 				,Shipment.strCustomerName
 				,strShipFromLocation = Shipment.strShipFromLocation
+				,Shipment.strReferenceNumber
 			FROM vyuICGetInventoryShipment Shipment
 			LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId

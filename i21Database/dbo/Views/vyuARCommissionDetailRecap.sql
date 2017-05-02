@@ -14,5 +14,5 @@ FROM tblARCommissionRecapDetail CRD
 	LEFT JOIN tblARInvoiceDetail ID ON CRD.intSourceId = ID.intInvoiceDetailId
 	LEFT JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 	LEFT JOIN tblHDTicketHoursWorked THW ON CRD.intSourceId = THW.intTicketHoursWorkedId
-	LEFT JOIN tblHDTicket T ON THW.intTicketId = THW.intTicketId
+	LEFT JOIN tblHDTicket T ON T.intTicketId = THW.intTicketId
 	LEFT JOIN tblGLDetail GL ON CRD.intSourceId = GL.intGLDetailId

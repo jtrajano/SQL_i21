@@ -234,6 +234,7 @@ DECLARE  @Id									INT
 		,@ItemCustomerStorageId					INT
 		,@ItemSiteDetailId						INT
 		,@ItemLoadDetailId						INT
+		,@ItemLotId								INT
 		,@ItemOriginalInvoiceDetailId			INT			
 		,@ItemSiteId							INT
 		,@ItemBillingBy							NVARCHAR(100)
@@ -392,6 +393,7 @@ BEGIN
 		,@ItemCustomerStorageId			= (CASE WHEN @GroupingOption = 0 THEN [intCustomerStorageId] ELSE NULL END)
 		,@ItemSiteDetailId				= (CASE WHEN @GroupingOption = 0 THEN [intSiteDetailId] ELSE NULL END)
 		,@ItemLoadDetailId				= (CASE WHEN @GroupingOption = 0 THEN [intLoadDetailId] ELSE NULL END)
+		,@ItemLotId						= (CASE WHEN @GroupingOption = 0 THEN [intLotId] ELSE NULL END)
 		,@ItemOriginalInvoiceDetailId	= (CASE WHEN @GroupingOption = 0 THEN [intOriginalInvoiceDetailId] ELSE NULL END)
 		,@ItemSiteId					= (CASE WHEN @GroupingOption = 0 THEN [intSiteId] ELSE NULL END)
 		,@ItemBillingBy					= (CASE WHEN @GroupingOption = 0 THEN [strBillingBy] ELSE NULL END)
@@ -608,6 +610,7 @@ BEGIN
 			,@ItemCustomerStorageId			= @ItemCustomerStorageId
 			,@ItemSiteDetailId				= @ItemSiteDetailId
 			,@ItemLoadDetailId				= @ItemLoadDetailId
+			,@ItemLotId						= @ItemLotId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
 			,@ItemBillingBy					= @ItemBillingBy
@@ -721,6 +724,8 @@ BEGIN
 					,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
 					,@ItemLicenseAmount				= [dblLicenseAmount]
 					,@ItemTaxGroupId				= [intTaxGroupId]
+					,@ItemStorageLocationId			= [intStorageLocationId]
+					,@ItemCompanyLocationSubLocationId	= [intCompanyLocationSubLocationId]
 					,@RecomputeTax					= [ysnRecomputeTax]
 					,@ItemSCInvoiceId				= [intSCInvoiceId]
 					,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
@@ -750,6 +755,7 @@ BEGIN
 					,@ItemCustomerStorageId			= [intCustomerStorageId]
 					,@ItemSiteDetailId				= [intSiteDetailId]
 					,@ItemLoadDetailId				= [intLoadDetailId]
+					,@ItemLotId						= [intLotId]
 					,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 					,@ItemSiteId					= [intSiteId]
 					,@ItemBillingBy					= [strBillingBy]
@@ -807,6 +813,8 @@ BEGIN
 						,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
 						,@ItemLicenseAmount				= @ItemLicenseAmount
 						,@ItemTaxGroupId				= @ItemTaxGroupId
+						,@ItemStorageLocationId			= @ItemStorageLocationId
+						,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId
 						,@RecomputeTax					= @RecomputeTax
 						,@ItemSCInvoiceId				= @ItemSCInvoiceId
 						,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
@@ -838,6 +846,7 @@ BEGIN
 						,@ItemCustomerStorageId			= @ItemCustomerStorageId
 						,@ItemSiteDetailId				= @ItemSiteDetailId
 						,@ItemLoadDetailId				= @ItemLoadDetailId
+						,@ItemLotId						= @ItemLotId
 						,@ItemSiteId					= @ItemSiteId
 						,@ItemBillingBy					= @ItemBillingBy
 						,@ItemPercentFull				= @ItemPercentFull
@@ -1347,6 +1356,8 @@ BEGIN TRY
 						,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
 						,@ItemLicenseAmount				= [dblLicenseAmount]
 						,@ItemTaxGroupId				= [intTaxGroupId]
+						,@ItemStorageLocationId			= [intStorageLocationId]
+						,@ItemCompanyLocationSubLocationId	= [intCompanyLocationSubLocationId]
 						,@RecomputeTax					= [ysnRecomputeTax]
 						,@ItemSCInvoiceId				= [intSCInvoiceId]
 						,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
@@ -1376,6 +1387,7 @@ BEGIN TRY
 						,@ItemCustomerStorageId			= [intCustomerStorageId]
 						,@ItemSiteDetailId				= [intSiteDetailId]
 						,@ItemLoadDetailId				= [intLoadDetailId]
+						,@ItemLotId						= [intLotId]
 						,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 						,@ItemSiteId					= [intSiteId]
 						,@ItemBillingBy					= [strBillingBy]
@@ -1429,6 +1441,8 @@ BEGIN TRY
 							,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
 							,@ItemLicenseAmount				= @ItemLicenseAmount
 							,@ItemTaxGroupId				= @ItemTaxGroupId
+							,@ItemStorageLocationId			= @ItemStorageLocationId
+							,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId
 							,@RecomputeTax					= @RecomputeTax
 							,@ItemSCInvoiceId				= @ItemSCInvoiceId
 							,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
@@ -1454,6 +1468,7 @@ BEGIN TRY
 							,@ItemCustomerStorageId			= @ItemCustomerStorageId
 							,@ItemSiteDetailId				= @ItemSiteDetailId
 							,@ItemLoadDetailId				= @ItemLoadDetailId
+							,@ItemLotId						= @ItemLotId
 							,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 							,@ItemSiteId					= @ItemSiteId
 							,@ItemBillingBy					= @ItemBillingBy
@@ -1610,6 +1625,8 @@ BEGIN TRY
 					,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
 					,@ItemLicenseAmount				= [dblLicenseAmount]
 					,@ItemTaxGroupId				= [intTaxGroupId]
+					,@ItemStorageLocationId			= @ItemStorageLocationId
+					,@ItemCompanyLocationSubLocationId	= [intCompanyLocationSubLocationId]
 					,@RecomputeTax					= [ysnRecomputeTax]
 					,@ItemSCInvoiceId				= [intSCInvoiceId]
 					,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
@@ -1640,6 +1657,7 @@ BEGIN TRY
 					,@ItemCustomerStorageId			= [intCustomerStorageId]
 					,@ItemSiteDetailId				= [intSiteDetailId]
 					,@ItemLoadDetailId				= [intLoadDetailId]
+					,@ItemLotId						= [intLotId]
 					,@ItemSiteId					= [intSiteId]
 					,@ItemBillingBy					= [strBillingBy]
 					,@ItemPercentFull				= [dblPercentFull]
@@ -1728,6 +1746,8 @@ BEGIN TRY
 						,[dblMaintenanceAmount]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceAmount ELSE [dblMaintenanceAmount] END			
 						,[dblLicenseAmount]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLicenseAmount ELSE [dblLicenseAmount] END				
 						,[intTaxGroupId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemTaxGroupId ELSE [intTaxGroupId] END				
+						,[intStorageLocationId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemStorageLocationId ELSE [intStorageLocationId] END				
+						,[intCompanyLocationSubLocationId]		= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCompanyLocationSubLocationId ELSE [intCompanyLocationSubLocationId] END				
 						,[intSCInvoiceId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSCInvoiceId ELSE [intSCInvoiceId] END					
 						,[strSCInvoiceNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSCInvoiceNumber ELSE [strSCInvoiceNumber] END				
 						,[intInventoryShipmentItemId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemInventoryShipmentItemId ELSE [intInventoryShipmentItemId] END			
@@ -1755,8 +1775,9 @@ BEGIN TRY
 						,[intTicketId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemTicketId ELSE [intTicketId] END
 						,[intTicketHoursWorkedId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemTicketHoursWorkedId ELSE [intTicketHoursWorkedId] END
 						,[intCustomerStorageId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCustomerStorageId ELSE [intCustomerStorageId] END
-						,[intSiteDetailId]						=	CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSiteDetailId ELSE [intSiteDetailId] END
+						,[intSiteDetailId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSiteDetailId ELSE [intSiteDetailId] END
 						,[intLoadDetailId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLoadDetailId ELSE [intLoadDetailId] END
+						,[intLotId]								= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLotId ELSE [intLotId] END
 						,[intOriginalInvoiceDetailId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemOriginalInvoiceDetailId ELSE [intOriginalInvoiceDetailId] END
 						,[intSiteId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSiteId ELSE [intSiteId] END
 						,[strBillingBy]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemBillingBy ELSE [strBillingBy] END

@@ -19,6 +19,8 @@
 :r "..\dbo\Stored Procedures\uspSMSyncPaymentMethod.sql"
 :r "..\dbo\Stored Procedures\uspSMImportShipVia.sql"
 :r "..\dbo\Stored Procedures\uspSMSyncShipVia.sql"
+:r "..\dbo\Stored Procedures\uspSMImportTax.sql"
+:r "..\dbo\Stored Procedures\uspSMImportTaxRate.sql"
 
 -- GENERAL LEDGER
 :r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
@@ -57,6 +59,7 @@
 
 -- ACCOUNTS PAYABLE
 :r "..\dbo\Views\vwapivcmst.sql"
+:r "..\dbo\Views\vyuAPOriginCCDTransaction.sql"
 :r "..\dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql"
 
 
@@ -96,6 +99,7 @@
 --:r "..\dbo\Views\vyuECCFCardTransaction.sql"
 
 -- TANK MANAGEMENT
+:r "..\Scripts\TM\CheckOriginTableAndTMPreference.sql"
 :r "..\dbo\Views\vwclsmst.sql"
 :r "..\dbo\Views\vwpyemst.sql"
 :r "..\dbo\Views\vwticmst.sql"
@@ -143,13 +147,14 @@
 :r "..\dbo\Functions\fnTMGetContractForCustomer.sql"
 :r "..\dbo\Functions\fnTMGetSpecialPricing.sql"
 :r "..\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
-:r "..\dbo\Stored Procedures\uspTMImportTankMonitorReading.sql"
+--:r "..\dbo\Stored Procedures\uspTMImportTankMonitorReading.sql"
 --:r "..\dbo\Views\vyuTMLeaseCode.sql"
 :r "..\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
-:r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
+--:r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
 :r "..\dbo\Stored Procedures\uspTMUpdateCustomerBudgetOrigin.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateImportTankMonitorSP.sql" 
 :r "..\dbo\Stored Procedures\uspTMRecreateOpenCallEntryView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateOpenWorkOrderView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateConsumptionSiteSearchView.sql"
@@ -183,6 +188,8 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateCustomerContractSubReportView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateAssociateSiteSearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMCreateMigrateOriginToi21TMDataSP.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateDeliveryFillGroupSubReportView.sql"
+
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql"
@@ -215,6 +222,10 @@
 :r "..\dbo\Stored Procedures\uspARImportTerm.sql"
 :r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
+:r "..\dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql"
+
+--MANUFACTURING RECIPE
+:r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
 
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 

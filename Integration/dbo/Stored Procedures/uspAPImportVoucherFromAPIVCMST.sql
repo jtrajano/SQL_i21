@@ -120,10 +120,10 @@ SELECT
 									ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
 	[dblTotal] 				=	CASE WHEN A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A' THEN A.apivc_orig_amt
 									ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
-	[dblPayment]			=	CASE WHEN A.apivc_status_ind = 'P' THEN
-									(CASE WHEN (A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A') THEN A.apivc_orig_amt
-										ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END)
-									- A.apivc_disc_taken --DO NOT USE apivc_net_amt directly as there are origin transaction that the net amount do not subtract the discount
+	[dblPayment]			=	CASE WHEN A.apivc_status_ind = 'P' OR ISNULL(A.apivc_chk_no,'') != '' THEN ISNULL(A.apivc_orig_amt, A.apivc_net_amt)
+									--(CASE WHEN (A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A') THEN A.apivc_orig_amt
+									--	ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END)
+									--- (CASE WHEN A.apivc_net_amt + ISNULL(A.apivc_disc_taken,0) = A.apivc_orig_amt THEN ISNULL(A.apivc_disc_taken,0) ELSE 0 END) --DO NOT USE apivc_net_amt directly as there are origin transaction that the net amount do not subtract the discount
 								ELSE 0 END,
 	[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = 'P' THEN 0 ELSE 
 										CASE WHEN A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A' THEN A.apivc_orig_amt
@@ -148,7 +148,16 @@ SELECT
 										ELSE 1
 										END
 									END),
-	[dblDiscount]			=	ISNULL(A.apivc_disc_taken,0),
+	[dblDiscount]			=	CASE WHEN ISNULL(A.apivc_disc_taken,0) > 0 AND A.apivc_net_amt + ISNULL(A.apivc_disc_taken,0) = A.apivc_orig_amt
+											THEN ISNULL(A.apivc_disc_taken,0)
+									WHEN ISNULL(A.apivc_disc_avail,0) > 0 AND A.apivc_net_amt + ISNULL(A.apivc_disc_avail,0) = A.apivc_orig_amt
+											THEN ISNULL(A.apivc_disc_avail,0)
+								ELSE 0 END, --THERE ARE DISCOUNT TAKE BUT DID NOT DEDUCTED TO CHECK AMOUNT
+	[dblInterest]			=	CASE WHEN A.apivc_disc_taken < 0 AND A.apivc_net_amt - ISNULL(ABS(A.apivc_disc_taken),0) = A.apivc_orig_amt
+											THEN A.apivc_disc_taken --it is interest if its value is negative
+									WHEN A.apivc_disc_avail < 0 AND A.apivc_net_amt - ISNULL(ABS(A.apivc_disc_avail),0) = A.apivc_orig_amt
+											THEN ABS(A.apivc_disc_avail) --it is interest if its value is negative
+								ELSE 0 END, 
 	[dblWithheld]			=	A.apivc_wthhld_amt,
 	[intShipToId]			=	@userLocation,
 	[intShipFromId]			=	loc.intEntityLocationId,
@@ -200,6 +209,7 @@ INSERT
 	[ysnPaid],
 	[intTransactionType],
 	[dblDiscount],
+	[dblInterest],
 	[dblWithheld],
 	[intShipToId],
 	[intShipFromId],
@@ -241,6 +251,7 @@ VALUES
 	[ysnPaid],
 	[intTransactionType],
 	[dblDiscount],
+	[dblInterest],
 	[dblWithheld],
 	[intShipToId],
 	[intShipFromId],

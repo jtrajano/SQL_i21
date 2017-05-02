@@ -26,9 +26,9 @@ FROM	dbo.tblCMBankTransaction CHK
 		INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
 		INNER JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
-		INNER JOIN tblSCTicket TICKET ON INVRCPTITEM.intSourceId = TICKET.intTicketId			
+		--INNER JOIN tblSCTicket TICKET ON INVRCPTITEM.intSourceId = TICKET.intTicketId			
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId = CHK.strTransactionId
-		
+		AND INVRCPTITEM.intSourceId IS NOT NULL
 
 SET @ysnCheckSettlement = ISNULL(@ysnCheckSettlement, 0)

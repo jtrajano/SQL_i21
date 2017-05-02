@@ -19,7 +19,7 @@ BEGIN
 		JOIN tblICItem I ON I.intItemId = L.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WP.intPhysicalItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE Left(L.strLotNumber, 10) = Left(@strLotNumber, 10)
+		WHERE Left(L.strLotNumber, Len(@strLotNumber)) = Left(@strLotNumber, Len(@strLotNumber))
 		GROUP BY I.strItemNo
 			,I.strDescription
 			,strParentLotNumber

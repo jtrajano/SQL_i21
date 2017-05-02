@@ -132,16 +132,16 @@ FROM
 		INNER JOIN vyuPRPaycheckYTD PCYTD 
 			ON PC.intPaycheckId = PCYTD.intPaycheckId
 		INNER JOIN (SELECT intPaycheckId, dblTotal = SUM(dblTotal), dblTotalYTD = SUM(dblTotalYTD)
-					FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay'
+					FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay' AND ysnVoid = 0
 					AND dtmPayDate >= @dtmBeginDate AND dtmPayDate < DATEADD(DAY, 1, @dtmEndDate)
 					GROUP BY intPaycheckId) PRETAX 
 			ON PC.intPaycheckId = PRETAX.intPaycheckId
 		INNER JOIN vyuPRPaycheckDeduction COOP 
-			ON PC.intPaycheckId = COOP.intPaycheckId AND COOP.strDeduction = @strEmployeeDeductionId
+			ON PC.intPaycheckId = COOP.intPaycheckId AND COOP.strDeduction = @strEmployeeDeductionId AND COOP.ysnVoid = 0
 		INNER JOIN vyuPRPaycheckDeduction COOPCO 
-			ON PC.intPaycheckId = COOPCO.intPaycheckId AND COOPCO.strDeduction = @strEmployerDeductionId
+			ON PC.intPaycheckId = COOPCO.intPaycheckId AND COOPCO.strDeduction = @strEmployerDeductionId AND COOPCO.ysnVoid = 0
 	WHERE 
-		PC.dtmPayDate >= @dtmBeginDate AND PC.dtmPayDate < DATEADD(DAY, 1, @dtmEndDate)
+		PC.dtmPayDate >= @dtmBeginDate AND PC.dtmPayDate < DATEADD(DAY, 1, @dtmEndDate) AND PC.ysnVoid = 0
 	GROUP BY
 		PC.intEntityEmployeeId
 		,YEAR(PC.dtmPayDate)) [PC]

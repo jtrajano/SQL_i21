@@ -30,6 +30,10 @@ BEGIN TRY
 			@SecondApprovalSign     VARBINARY(MAX),
 			@IsFullApproved         BIT = 0,
 			@ysnFairtrade			BIT = 0,
+			@ysnFeedOnApproval		BIT = 0,
+			@strCommodityCode		NVARCHAR(MAX),
+			@dtmApproved			DATETIME,
+			@ysnPrinted				BIT,
 
 			@intLastApprovedContractId INT,
 			@intPrevApprovedContractId INT,
@@ -75,13 +79,22 @@ BEGIN TRY
 	SELECT @intScreenId=intScreenId FROM tblSMScreen WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'--ContractManagement.view.ContractAmendment
 	SELECT @intTransactionId=intTransactionId FROM tblSMTransaction WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
 
+	SELECT	@strCommodityCode	=	CM.strCommodityCode,
+			@ysnPrinted			=	CH.ysnPrinted
+	FROM	tblCTContractHeader CH
+	JOIN	tblICCommodity		CM	ON	CM.intCommodityId		=	CH.intCommodityId
+	WHERE	CH.intContractHeaderId = @intContractHeaderId
+
 	IF (SELECT COUNT(1) FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved') >1	
 	BEGIN	
-		SET @strApprovalText='This document concerns the Confirmed Agreement between Parties. Please sign in twofold and return to KDE as follows: one signed original by mail and one PDF-copy of the signed original by e-mail.'	
+		SET @strApprovalText='This document concerns the Confirmed Agreement between Parties. Please sign in twofold and return to KDE as follows: one PDF-copy of the signed original by e-mail.'	
 		SET @IsFullApproved=1    
 	END
 	ELSE
 		SET @strApprovalText='This document concerns an unconfirmed agreement. Please check this unconfirmed agreement and let us know if you find any discrepancies; If no notification of discrepancy has been received by us from you within 24 hours after receipt of this document, this unconfirmed agreement becomes confirmed from Supplier side. Once confirmed from Supplier side, KDE will check the document on discrepancies. If no discrepancies are found, a confirmed agreement will be issued by KDE, replacing the unconfirmed agreement. A confirmed agreement will only be binding for KDE once it has been signed by the authorized KDE representatives. Upon receipt of the confirmed agreement signed by KDE, Supplier shall sign the confirmed agreement and return it to KDE'
+
+	IF @strCommodityCode = 'Tea'
+		SET @strApprovalText = NULL
 
     SELECT TOP 1 @FirstApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
 	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId ORDER BY intApprovalId
@@ -145,30 +158,31 @@ BEGIN TRY
 		SET @ysnFairtrade = 1
 	END
 
-	SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId,@intContractDetailId = intContractDetailId 
+	SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId,@intContractDetailId = intContractDetailId,@dtmApproved = dtmApproved 
     FROM   tblCTApprovedContract 
-    WHERE  intContractHeaderId = @intContractHeaderId AND strApprovalType IN ('Contract','Contract Amendment ')
+    WHERE  intContractHeaderId = @intContractHeaderId AND strApprovalType IN ('Contract Amendment ') AND ysnApproved = 1
     ORDER BY intApprovedContractId DESC
 
 	SELECT TOP 1 @intPrevApprovedContractId =  intApprovedContractId
     FROM   tblCTApprovedContract 
-    WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId <> @intLastApprovedContractId 
+    WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId < @intLastApprovedContractId AND ysnApproved = 1
     ORDER BY intApprovedContractId DESC
 
 	IF @intPrevApprovedContractId IS NOT NULL AND @intLastApprovedContractId IS NOT NULL
 	BEGIN
 		EXEC uspCTCompareRecords 'tblCTApprovedContract', @intPrevApprovedContractId, @intLastApprovedContractId,'intApprovedById,dtmApproved,
 		intContractBasisId,dtmPlannedAvailabilityDate,strOrigin,dblNetWeight,intNetWeightUOMId,
-		intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType', @strAmendedColumns OUTPUT
+		intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType,strVendorLotID,ysnApproved,intCertificationId,intLoadingPortId', @strAmendedColumns OUTPUT
 	END
 
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
-
+	IF ISNULL(@ysnPrinted,0) = 0 SELECT @strAmendedColumns = ''
+	 
 	SELECT	CH.intContractHeaderId,
 
 			TP.strContractType + ' Contract:- ' + CH.strContractNumber AS strCaption,
 			@strCompanyName + ' - '+TP.strContractType+' Contract' AS strTeaCaption,
-
+			TP.strContractType + ' Order:- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL END AS strPurchaseOrder,
 			CH.dtmContractDate,
 			'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition.' strAssociation,
 			CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END AS strBuyerRefNo,
@@ -228,7 +242,7 @@ BEGIN TRY
 			END strCallerDesc,
 			@strContractConditions AS strContractConditions,
 			CASE WHEN ISNULL(CB.strContractBasis,'') <>'' THEN 'Condition :' ELSE NULL END AS lblCondition,
-			CASE WHEN ISNULL(PR.strName,'') <>'' THEN 'Producer :' ELSE NULL END AS lblProducer,
+			CASE WHEN ISNULL(PR.strName,'') <>'' THEN 'Shipper :' ELSE NULL END AS lblProducer,
 			CASE WHEN ISNULL(SQ.strLoadingPointName,'') <>'' THEN SQ.srtLoadingPoint + ' :'  ELSE NULL END AS lblLoadingPoint,
 			CASE WHEN ISNULL(PO.strPosition,'') <>'' THEN 'Position :' ELSE NULL END AS lblPosition,			
 			CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Seller Ref No. :' ELSE NULL END AS lblSellerRefNo,
@@ -237,7 +251,7 @@ BEGIN TRY
 			CASE WHEN ISNULL(SQ.strDestinationPointName,'') <>'' THEN SQ.srtDestinationPoint + ' :'  ELSE NULL END AS lblDestinationPoint,			
 			CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2 THEN 'Pricing :' ELSE NULL END AS lblPricing,
 			CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>'' THEN 'Weighing:' ELSE NULL END AS lblWeighing,
-			CASE WHEN ISNULL(TM.strTerm,'') <>'' THEN 'Payment Term:' ELSE NULL END AS lblTerm,
+			CASE WHEN ISNULL(TM.strTerm,'') <>'' THEN 'Payment Terms:' ELSE NULL END AS lblTerm,
 			CASE WHEN ISNULL(IB.strInsuranceBy,'') <>'' THEN 'Insurance:' ELSE NULL END AS lblInsurance,
 			CASE WHEN ISNULL(AN.strComment,'') <>'' AND ISNULL(AB.strState,'') <>'' AND ISNULL(RY.strCountry,'') <>'' THEN 'Arbitration:' ELSE NULL END AS lblArbitration,
 			CASE WHEN ISNULL(@strContractConditions,'') <>'' THEN 'Conditions:' ELSE NULL END AS lblContractCondition,
@@ -245,7 +259,7 @@ BEGIN TRY
 	        CASE WHEN LEN(LTRIM(RTRIM(@strAmendedColumns))) = 0 THEN
 			'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition and the particular conditions mentioned below.' 
 		    ELSE
-				'Subject - Contract Amendment' + CHAR(13) + CHAR(10) + 'The field highlighted in bold have been amended.'
+				'Subject - Contract Amendment as of '+ CONVERT(NVARCHAR(15),@dtmApproved,106) + CHAR(13) + CHAR(10) + 'The field/s highlighted in bold have been amended.'
 			END strCondition,
 			PO.strPosition +' ('+SQ.strPackingDescription +') ' AS strPositionWithPackDesc,
 			TX.strText+' '+CH.strPrintableRemarks AS strText,
@@ -259,6 +273,7 @@ BEGIN TRY
 			@strAmendedColumns strAmendedColumns
 
 	FROM	tblCTContractHeader CH
+	JOIN	tblICCommodity		CM	ON	CM.intCommodityId		=	CH.intCommodityId
 	JOIN	tblCTContractType	TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
 	JOIN	vyuCTEntity			EY	ON	EY.intEntityId			=	CH.intEntityId	AND
 										EY.strEntityType		=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
@@ -293,7 +308,8 @@ BEGIN TRY
 							MA.strFutMarketName,
 							CD.strPackingDescription				AS strPackingDescription,
 							CL.strContractCompanyName				AS strContractCompanyName,
-						    CL.strContractPrintSignOff              AS strContractPrintSignOff
+						    CL.strContractPrintSignOff              AS strContractPrintSignOff,
+							CD.strERPPONumber
 
 				FROM		tblCTContractDetail		CD
 				JOIN		tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
@@ -305,7 +321,10 @@ BEGIN TRY
 			)					SQ	ON	SQ.intContractHeaderId	=	CH.intContractHeaderId	AND  SQ.intRowNum = 1 
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 	
-	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId
+	SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference
+
+	IF @IsFullApproved=1  OR ISNULL(@ysnFeedOnApproval,0) = 0
+		UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId
 
 END TRY
 

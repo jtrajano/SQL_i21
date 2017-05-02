@@ -41,6 +41,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\21_CommentMigration.sql
 :r .\SM\DefaultData\22_TypeValue.sql
 :r .\SM\DefaultData\23_ApproverConfigurationApprovalFor.sql
+:r .\SM\DefaultData\25_DocumentSource.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL
@@ -130,7 +131,7 @@ print 'BEGIN POST DEPLOYMENT'
 --:r "..\..\..\Integration\dbo\Views\vyuTMLeaseCode.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 :r ".\TM\2_DataTransferAndCorrection.sql" 
-:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
+--:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateLeaseSearchView.sql"
@@ -168,6 +169,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\ReportData\TrialBalance.sql
 :r .\GL\ReportData\TrialBalanceDetail.sql
 :r .\GL\ReportData\BalanceSheetStandard.sql
+:r .\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -213,6 +215,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
 :r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
 :r .\AR\DefaultData\27_RenamePricingForContracts.sql
+:r .\AR\DefaultData\28_UpdateBaseAmounts.sql
+:r .\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql
+:r .\AR\DefaultData\30_FixAmountsForCashTransaction.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -361,6 +366,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\7_Checkout_Radiant_MCM.sql
 :r .\ST\8_Checkout_Radiant_FGM.sql
 :r .\ST\9_Checkout_Radiant_MSM.sql
+:r .\ST\10_Checkout_Commander_Translog.sql
 
 -- Motor Fuel Tax
 --:r .\TF\DefaultData\_TaxAuthority.sql
@@ -382,6 +388,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\01_TaxAuthority.sql
 :r .\TF\DefaultData\IN_Indiana.sql
 :r .\TF\DefaultData\NE_Nebraska.sql
+:r .\TF\DefaultData\MS_Mississippi.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql
