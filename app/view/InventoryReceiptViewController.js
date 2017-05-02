@@ -5682,7 +5682,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 strStorageLocation: newReceiptItem.get('strStorageLocationName'),
                                 strSubLocationName:  newReceiptItem.get('strSubLocationName'),
                                 strUnitMeasure: newReceiptItem.get('strUnitMeasure'),
-                                dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor')
+                                dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor'),
+								strCondition: i21.ModuleMgr.Inventory.getCompanyPreference('strLotCondition')
                             });
                             currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
                         }
