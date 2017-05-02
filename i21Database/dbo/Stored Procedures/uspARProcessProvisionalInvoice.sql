@@ -162,6 +162,7 @@ BEGIN TRY
 		,[dblShipmentGrossWt]
 		,[dblShipmentTareWt]
 		,[dblShipmentNetWt]
+		,[intLoadDetailId]
 		,[intTicketId]
 		,[intTicketHoursWorkedId]
 		,[intOriginalInvoiceDetailId]
@@ -249,12 +250,13 @@ BEGIN TRY
 		,[strSalesOrderNumber]				= ARID.[strSalesOrderNumber] 
 		,[intContractHeaderId]				= ARSID.[intContractHeaderId] 
 		,[intContractDetailId]				= ARSID.[intContractDetailId] 
-		,[intShipmentPurchaseSalesContractId]	= ARSID.[intShipmentPurchaseSalesContractId] 
+		,[intShipmentPurchaseSalesContractId]	= NULL
 		,[intItemWeightUOMId]				= ARSID.[intWeightUOMId]
 		,[dblItemWeight]					= ARSID.[dblWeight] 
 		,[dblShipmentGrossWt]				= ARSID.[dblGrossWt]
 		,[dblShipmentTareWt]				= ARSID.[dblTareWt]
 		,[dblShipmentNetWt]					= ARSID.[dblNetWt]
+		,[intLoadDetailId]					= ARSID.[intLoadDetailId]
 		,[intTicketId]						= ARID.[intTicketId]
 		,[intTicketHoursWorkedId]			= ARID.[intTicketHoursWorkedId]
 		,[intOriginalInvoiceDetailId]		= ARID.[intInvoiceDetailId] 
@@ -277,17 +279,17 @@ BEGIN TRY
 	FROM
 		vyuARShippedItemDetail ARSID
 	INNER JOIN
-		vyuLGShipmentHeader ARSI
-			ON ARSID.[intShipmentId] = ARSI.[intShipmentId] 
+		vyuLGLoadViewSearch ARSI
+			ON ARSID.[intShipmentId] = ARSI.[intLoadId] 
 	LEFT OUTER JOIN		
 		tblARInvoiceDetail ARID
-			ON ARSID.[intShipmentPurchaseSalesContractId] = ARID.[intShipmentPurchaseSalesContractId]
+			ON ARSID.[intLoadDetailId] = ARID.[intLoadDetailId]
 			AND ARID.[intInvoiceId] = @InvoiceId
 	WHERE
-		ARSI.[intShipmentId] IN	(	SELECT LG.[intShipmentId] 
-									FROM vyuLGDropShipmentDetails LG 
+		ARSI.[intLoadId] IN	(	SELECT LG.[intShipmentId] 
+									FROM [vyuARShippedItemDetail] LG 
 										INNER JOIN tblARInvoiceDetail AR 
-											ON LG.[intShipmentPurchaseSalesContractId] = AR.[intShipmentPurchaseSalesContractId] 
+											ON LG.[intLoadDetailId] = AR.[intLoadDetailId] 
 									WHERE AR.[intInvoiceId] = @InvoiceId
 								)
 								
@@ -366,6 +368,7 @@ SELECT
 		,[dblShipmentGrossWt]				= 0.00
 		,[dblShipmentTareWt]				= 0.00
 		,[dblShipmentNetWt]					= 0.00
+		,[intLoadDetailId]					= ARID.[intLoadDetailId]
 		,[intTicketId]						= ARID.[intTicketId]
 		,[intTicketHoursWorkedId]			= ARID.[intTicketHoursWorkedId]
 		,[intOriginalInvoiceDetailId]		= ARID.[intInvoiceDetailId] 

@@ -1297,164 +1297,164 @@ LEFT OUTER JOIN
 		ON ICISC.[intForexRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE ISNULL(ARID.[intInventoryShipmentChargeId],0) = 0
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [strTransactionType]				= 'Inbound Shipment'
-	,[strTransactionNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
-	,[strShippedItemId]					= 'lgis:' + CAST(LGS.intShipmentId AS NVARCHAR(250))
-	,[intEntityCustomerId]				= LGS.[intCustomerEntityId] 
-	,[strCustomerName]					= E.[strName]
-	,[intCurrencyId]					= ISNULL(ISNULL(ARSID.[intCurrencyId], C.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WITH (NOLOCK) WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
-	,[intSalesOrderId]					= NULL
-	,[intSalesOrderDetailId]			= NULL
-	,[strSalesOrderNumber]				= ''
-	,[dtmProcessDate]					= ISNULL(LGS.dtmShipmentDate, ISNULL(LGS.[dtmInventorizedDate], GETDATE()))
-	,[intInventoryShipmentId]			= NULL
-	,[intInventoryShipmentItemId]		= NULL	
-	,[intInventoryShipmentChargeId]		= NULL
-	,[strInventoryShipmentNumber]		= ''	
-	,[intShipmentId]					= LGS.[intShipmentId]
-	,[strShipmentNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
-	,[intLoadId]						= NULL	
-	,[intLoadDetailId]					= NULL
-	,[intLotId]							= ARSID.[intLotId]
-	,[strLoadNumber]					= NULL
-	,[intRecipeItemId]					= NULL
-	,[intContractHeaderId]				= NULL
-	,[strContractNumber]				= ''
-	,[intContractDetailId]				= NULL
-	,[intContractSeq]					= NULL
-	,[intCompanyLocationId]				= LGS.[intCompanyLocationId]
-	,[strLocationName]					= CL.[strLocationName]
-	,[intShipToLocationId]				= ISNULL(SL.[intEntityLocationId], EL.[intEntityLocationId])
-	,[intFreightTermId]					= NULL
-	,[intItemId]						= NULL
-	,[strItemNo]						= ''
-	,[strItemDescription]				= ''
-	,[intItemUOMId]						= NULL
-	,[strUnitMeasure]					= ''
-	,[intOrderUOMId]					= NULL
-	,[strOrderUnitMeasure]				= ''
-	,[intShipmentItemUOMId]				= NULL
-	,[strShipmentUnitMeasure]			= ''
-	,[dblQtyShipped]					= 0.00
-	,[dblQtyOrdered]					= 0.00
-	,[dblShipmentQuantity]				= 0.00
-	,[dblShipmentQtyShippedTotal]		= 0.00
-	,[dblQtyRemaining]					= 0.00
-	,[dblDiscount]						= 0.00
-	,[dblPrice]							= 0.00
-	,[dblShipmentUnitPrice]				= 0.00
-	,[strPricing]						= ''
-	,[strVFDDocumentNumber]				= NULL
-	,[dblTotalTax]						= 0.00
-	,[dblTotal]							= 0.00
-	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-	,[intTermID]						= NULL
-	,[strTerm]							= ''
-	,[intEntityShipViaId]				= NULL
-	,[strShipVia]						= ''
-	,[strTicketNumber]					= NULL
-	,[strCustomerReference]				= NULL
-	,[intTicketId]						= NULL
-	,[intTaxGroupId]					= NULL
-	,[strTaxGroup]						= NULL
-	,[dblWeight]						= 0.00
-	,[intWeightUOMId]					= NULL
-	,[strWeightUnitMeasure]				= ''
-	,[dblGrossWt]						= 0.00
-	,[dblTareWt]						= 0.00
-	,[dblNetWt]							= 0.00
-	,[strPONumber]						= ''
-	,[strBOLNumber]						= ''
-	,[intSplitId]						= NULL
-	,[intEntitySalespersonId]			= NULL
-	,[strSalespersonName]				= NULL
-	,[ysnBlended]						= NULL
-	,[intRecipeId]						= NULL
-	,[intSubLocationId]					= NULL
-	,[intCostTypeId]					= NULL
-	,[intMarginById]					= NULL
-	,[intCommentTypeId]					= NULL
-	,[dblMargin]						= NULL
-	,[dblRecipeQuantity]				= NULL
-	,[intStorageScheduleTypeId]			= NULL
-	,[intDestinationGradeId]			= NULL
-	,[strDestinationGrade]				= ''
-	,[intDestinationWeightId]			= NULL
-	,[strDestinationWeight]				= ''
-	,[intCurrencyExchangeRateTypeId]	= ARSID.[intCurrencyExchangeRateTypeId]
-	,[strCurrencyExchangeRateType]		= ARSID.[strCurrencyExchangeRateType]
-	,[intCurrencyExchangeRateId]		= ARSID.[intCurrencyExchangeRateId]
-	,[dblCurrencyExchangeRate]			= ARSID.[dblCurrencyExchangeRate]
-	,[intSubCurrencyId]					= ARSID.[intSubCurrencyId]
-	,[dblSubCurrencyRate]				= ARSID.[dblSubCurrencyRate]
-	,[strSubCurrency]					= ARSID.[strSubCurrency]
-FROM
-	(SELECT [intSubCurrencyId],
-			[dblSubCurrencyRate],
-			[strSubCurrency],
-			[intShipmentId],
-			[intCurrencyId],
-			[intCurrencyExchangeRateTypeId],
-			[strCurrencyExchangeRateType],
-			[intCurrencyExchangeRateId],
-			[dblCurrencyExchangeRate],
-			[intLotId]
-	 FROM vyuARShippedItemDetail WITH (NOLOCK))ARSID
-INNER JOIN
-	(SELECT [intShipmentId],
-		intCustomerEntityId,
-		intCompanyLocationId,
-		dtmShipmentDate,
-		dtmInventorizedDate
-	 FROM vyuLGShipmentHeader WITH (NOLOCK)
-	 WHERE [ysnInventorized] = 1
-		AND [intShipmentId] IN (SELECT [intShipmentId] FROM vyuLGDropShipmentDetails WITH (NOLOCK))) LGS		
-		ON ARSID.[intShipmentId] = LGS.[intShipmentId]
-INNER JOIN
-	(SELECT [intEntityCustomerId],
-			[intCurrencyId],
-			[intShipToId]
-	 FROM tblARCustomer WITH (NOLOCK)) C
-		ON LGS.[intCustomerEntityId] = C.[intEntityCustomerId] 
-INNER JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) E ON C.[intEntityCustomerId]  = E.[intEntityId]
-LEFT OUTER JOIN
-	(SELECT [intCompanyLocationId],
-		strLocationName
-	 FROM tblSMCompanyLocation WITH (NOLOCK)) CL ON LGS.[intCompanyLocationId] = CL.[intCompanyLocationId]
-LEFT OUTER JOIN
-		(	SELECT 
-				 [intEntityLocationId]
-				,[strLocationName]
-				,[strAddress]
-				,[intEntityId] 
-				,[strCountry]
-				,[strState]
-				,[strCity]
-				,[strZipCode]
-				,[intTermsId]
-				,[intShipViaId]
-			FROM 
-				[tblEMEntityLocation] WITH (NOLOCK)
-			WHERE
-				ysnDefaultLocation = 1
-		) EL
-			ON LGS.[intCustomerEntityId] = EL.[intEntityId]
-LEFT OUTER JOIN
-	(SELECT intEntityLocationId 
-	 FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
-		ON C.intShipToId = SL.intEntityLocationId
-LEFT OUTER JOIN
-	(SELECT [intInventoryShipmentItemId],
-		[intShipmentId]	
-	 FROM tblARInvoiceDetail WITH (NOLOCK)
-	 WHERE intInvoiceId IS NULL) ARID ON LGS.[intShipmentId] = ARID.[intShipmentId]
+--SELECT
+--	 [strTransactionType]				= 'Inbound Shipment'
+--	,[strTransactionNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
+--	,[strShippedItemId]					= 'lgis:' + CAST(LGS.intShipmentId AS NVARCHAR(250))
+--	,[intEntityCustomerId]				= LGS.[intCustomerEntityId] 
+--	,[strCustomerName]					= E.[strName]
+--	,[intCurrencyId]					= ISNULL(ISNULL(ARSID.[intCurrencyId], C.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WITH (NOLOCK) WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
+--	,[intSalesOrderId]					= NULL
+--	,[intSalesOrderDetailId]			= NULL
+--	,[strSalesOrderNumber]				= ''
+--	,[dtmProcessDate]					= ISNULL(LGS.dtmShipmentDate, ISNULL(LGS.[dtmInventorizedDate], GETDATE()))
+--	,[intInventoryShipmentId]			= NULL
+--	,[intInventoryShipmentItemId]		= NULL	
+--	,[intInventoryShipmentChargeId]		= NULL
+--	,[strInventoryShipmentNumber]		= ''	
+--	,[intShipmentId]					= LGS.[intShipmentId]
+--	,[strShipmentNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
+--	,[intLoadId]						= NULL	
+--	,[intLoadDetailId]					= NULL
+--	,[intLotId]							= ARSID.[intLotId]
+--	,[strLoadNumber]					= NULL
+--	,[intRecipeItemId]					= NULL
+--	,[intContractHeaderId]				= NULL
+--	,[strContractNumber]				= ''
+--	,[intContractDetailId]				= NULL
+--	,[intContractSeq]					= NULL
+--	,[intCompanyLocationId]				= LGS.[intCompanyLocationId]
+--	,[strLocationName]					= CL.[strLocationName]
+--	,[intShipToLocationId]				= ISNULL(SL.[intEntityLocationId], EL.[intEntityLocationId])
+--	,[intFreightTermId]					= NULL
+--	,[intItemId]						= NULL
+--	,[strItemNo]						= ''
+--	,[strItemDescription]				= ''
+--	,[intItemUOMId]						= NULL
+--	,[strUnitMeasure]					= ''
+--	,[intOrderUOMId]					= NULL
+--	,[strOrderUnitMeasure]				= ''
+--	,[intShipmentItemUOMId]				= NULL
+--	,[strShipmentUnitMeasure]			= ''
+--	,[dblQtyShipped]					= 0.00
+--	,[dblQtyOrdered]					= 0.00
+--	,[dblShipmentQuantity]				= 0.00
+--	,[dblShipmentQtyShippedTotal]		= 0.00
+--	,[dblQtyRemaining]					= 0.00
+--	,[dblDiscount]						= 0.00
+--	,[dblPrice]							= 0.00
+--	,[dblShipmentUnitPrice]				= 0.00
+--	,[strPricing]						= ''
+--	,[strVFDDocumentNumber]				= NULL
+--	,[dblTotalTax]						= 0.00
+--	,[dblTotal]							= 0.00
+--	,[intStorageLocationId]				= NULL
+--	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+--	,[intTermID]						= NULL
+--	,[strTerm]							= ''
+--	,[intEntityShipViaId]				= NULL
+--	,[strShipVia]						= ''
+--	,[strTicketNumber]					= NULL
+--	,[strCustomerReference]				= NULL
+--	,[intTicketId]						= NULL
+--	,[intTaxGroupId]					= NULL
+--	,[strTaxGroup]						= NULL
+--	,[dblWeight]						= 0.00
+--	,[intWeightUOMId]					= NULL
+--	,[strWeightUnitMeasure]				= ''
+--	,[dblGrossWt]						= 0.00
+--	,[dblTareWt]						= 0.00
+--	,[dblNetWt]							= 0.00
+--	,[strPONumber]						= ''
+--	,[strBOLNumber]						= ''
+--	,[intSplitId]						= NULL
+--	,[intEntitySalespersonId]			= NULL
+--	,[strSalespersonName]				= NULL
+--	,[ysnBlended]						= NULL
+--	,[intRecipeId]						= NULL
+--	,[intSubLocationId]					= NULL
+--	,[intCostTypeId]					= NULL
+--	,[intMarginById]					= NULL
+--	,[intCommentTypeId]					= NULL
+--	,[dblMargin]						= NULL
+--	,[dblRecipeQuantity]				= NULL
+--	,[intStorageScheduleTypeId]			= NULL
+--	,[intDestinationGradeId]			= NULL
+--	,[strDestinationGrade]				= ''
+--	,[intDestinationWeightId]			= NULL
+--	,[strDestinationWeight]				= ''
+--	,[intCurrencyExchangeRateTypeId]	= ARSID.[intCurrencyExchangeRateTypeId]
+--	,[strCurrencyExchangeRateType]		= ARSID.[strCurrencyExchangeRateType]
+--	,[intCurrencyExchangeRateId]		= ARSID.[intCurrencyExchangeRateId]
+--	,[dblCurrencyExchangeRate]			= ARSID.[dblCurrencyExchangeRate]
+--	,[intSubCurrencyId]					= ARSID.[intSubCurrencyId]
+--	,[dblSubCurrencyRate]				= ARSID.[dblSubCurrencyRate]
+--	,[strSubCurrency]					= ARSID.[strSubCurrency]
+--FROM
+--	(SELECT [intSubCurrencyId],
+--			[dblSubCurrencyRate],
+--			[strSubCurrency],
+--			[intShipmentId],
+--			[intCurrencyId],
+--			[intCurrencyExchangeRateTypeId],
+--			[strCurrencyExchangeRateType],
+--			[intCurrencyExchangeRateId],
+--			[dblCurrencyExchangeRate],
+--			[intLotId]
+--	 FROM vyuARShippedItemDetail WITH (NOLOCK))ARSID
+--INNER JOIN
+--	(SELECT [intShipmentId],
+--		intCustomerEntityId,
+--		intCompanyLocationId,
+--		dtmShipmentDate,
+--		dtmInventorizedDate
+--	 FROM vyuLGShipmentHeader WITH (NOLOCK)
+--	 WHERE [ysnInventorized] = 1
+--		AND [intShipmentId] IN (SELECT [intShipmentId] FROM vyuLGDropShipmentDetails WITH (NOLOCK))) LGS		
+--		ON ARSID.[intShipmentId] = LGS.[intShipmentId]
+--INNER JOIN
+--	(SELECT [intEntityCustomerId],
+--			[intCurrencyId],
+--			[intShipToId]
+--	 FROM tblARCustomer WITH (NOLOCK)) C
+--		ON LGS.[intCustomerEntityId] = C.[intEntityCustomerId] 
+--INNER JOIN
+--	(SELECT [intEntityId],
+--			strName
+--	 FROM tblEMEntity WITH (NOLOCK)) E ON C.[intEntityCustomerId]  = E.[intEntityId]
+--LEFT OUTER JOIN
+--	(SELECT [intCompanyLocationId],
+--		strLocationName
+--	 FROM tblSMCompanyLocation WITH (NOLOCK)) CL ON LGS.[intCompanyLocationId] = CL.[intCompanyLocationId]
+--LEFT OUTER JOIN
+--		(	SELECT 
+--				 [intEntityLocationId]
+--				,[strLocationName]
+--				,[strAddress]
+--				,[intEntityId] 
+--				,[strCountry]
+--				,[strState]
+--				,[strCity]
+--				,[strZipCode]
+--				,[intTermsId]
+--				,[intShipViaId]
+--			FROM 
+--				[tblEMEntityLocation] WITH (NOLOCK)
+--			WHERE
+--				ysnDefaultLocation = 1
+--		) EL
+--			ON LGS.[intCustomerEntityId] = EL.[intEntityId]
+--LEFT OUTER JOIN
+--	(SELECT intEntityLocationId 
+--	 FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
+--		ON C.intShipToId = SL.intEntityLocationId
+--LEFT OUTER JOIN
+--	(SELECT [intInventoryShipmentItemId],
+--		[intShipmentId]	
+--	 FROM tblARInvoiceDetail WITH (NOLOCK)
+--	 WHERE intInvoiceId IS NULL) ARID ON LGS.[intShipmentId] = ARID.[intShipmentId]
 		 
 
 UNION ALL
