@@ -77,7 +77,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intProducerId] FOREIGN KEY ([intProducerId]) REFERENCES tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intCounterPartyId] FOREIGN KEY (intCounterPartyId) REFERENCES tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intEntityId_intEntityContactId] FOREIGN KEY ([intEntityContactId]) REFERENCES tblEMEntity ([intEntityId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblARSalesperson_intSalespersonId] FOREIGN KEY([intSalespersonId])REFERENCES [tblARSalesperson] ([intEntityId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intSalespersonId] FOREIGN KEY([intSalespersonId])REFERENCES tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTContractText_intContractTextId] FOREIGN KEY([intContractTextId])REFERENCES [tblCTContractText] ([intContractTextId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTCropYear_intCropYearId] FOREIGN KEY([intCropYearId])REFERENCES [tblCTCropYear] ([intCropYearId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTWeightGrade_intWeightGradeId_intGradeId] FOREIGN KEY([intGradeId])REFERENCES [tblCTWeightGrade] ([intWeightGradeId]),
@@ -99,7 +99,12 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intCategoryUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intCategoryUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intLoadCategoryUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intLoadCategoryUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTContractPlan_intContractPlanId] FOREIGN KEY([intContractPlanId])REFERENCES [tblCTContractPlan] ([intContractPlanId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intArbitrationId_intCityId] FOREIGN KEY ([intArbitrationId]) REFERENCES [tblSMCity]([intCityId])
+	CONSTRAINT [FK_tblCTContractHeader_tblSMCity_intArbitrationId_intCityId] FOREIGN KEY ([intArbitrationId]) REFERENCES [tblSMCity]([intCityId]),
+
+	CONSTRAINT [FK_tblCTContractHeader_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY (intFutureMarketId) REFERENCES tblRKFutureMarket(intFutureMarketId),
+	CONSTRAINT [FK_tblCTContractHeader_tblRKFutureMonth_intFutureMonthId] FOREIGN KEY (intFutureMonthId) REFERENCES tblRKFuturesMonth(intFutureMonthId),
+	CONSTRAINT [FK_tblCTContractHeader_tblSMCompanyLocationSubLocation_intINCOLocationTypeId] FOREIGN KEY (intINCOLocationTypeId) REFERENCES tblSMCompanyLocationSubLocation(intCompanyLocationSubLocationId),
+	CONSTRAINT [FK_tblCTContractHeader_tblSMCountry_intCountryId] FOREIGN KEY (intCountryId) REFERENCES tblSMCountry(intCountryID)
 )
 
 GO
