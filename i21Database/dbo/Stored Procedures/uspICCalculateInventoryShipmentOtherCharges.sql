@@ -128,8 +128,8 @@ BEGIN
 
 		IF @intItemId IS NOT NULL 
 		BEGIN 
-			-- 'Unable to calculate {Other Charge Item} as the {Unit of Measure} is not setup for item {Item}.'
-			RAISERROR('Unable to calculate %s as the UOM %s is not setup for item %s.', 11, 1, @strOtherCharge, @strUnitMeasure, @strItemNo)  
+			-- 'Unable to calculate {Other Charge Item} as {Unit of Measure} is not found in {Item} > UOM setup.'
+			EXEC uspICRaiseError 80050, @strOtherCharge, @strUnitMeasure, @strItemNo;
 			GOTO _Exit
 		END 
 	END 

@@ -256,9 +256,8 @@ BEGIN
 			-- Raise error if template id can't be found. 
 			IF @intTemplateInventoryTransactionId IS NULL 
 			BEGIN 
-				SELECT 'Unable to find a template.', * FROM tblICFixClosedPeriodValues WHERE id = @id
-					
-				RAISERROR('Unable to find a template.', 16, 1);
+				SELECT 'Unable to find a template.', * FROM tblICFixClosedPeriodValues WHERE id = @id				
+				EXEC uspICRaiseError 80174; 
 				GOTO _ExitWithError; 
 			END 
 
@@ -323,7 +322,7 @@ BEGIN
 			
 			IF @intInventoryTransactionId IS NULL 
 			BEGIN 
-				RAISERROR('Unable to find a template.', 16, 1);
+				EXEC uspICRaiseError 80174; 
 				GOTO _ExitWithError; 	
 			END 
 		END
@@ -395,7 +394,7 @@ BEGIN
 				FROM	tblICInventoryTransaction t
 				WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId
 
-				RAISERROR('Unable to create the G/L entries', 16, 1);
+				EXEC uspICRaiseError 80175; 
 				GOTO _ExitWithError; 				
 			END 
 			
@@ -763,7 +762,7 @@ BEGIN
 				FROM	tblICInventoryTransaction t
 				WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId
 
-				RAISERROR('Unable to create the G/L entries', 16, 1);
+				EXEC uspICRaiseError 80175; 
 				GOTO _ExitWithError; 				
 			END 
 			

@@ -5214,6 +5214,9 @@
     <Build Include="dbo\Tables\tblSMReportTranslation.sql" />
     <Build Include="dbo\Views\vyuCRMCustomerLicense.sql" />
     <Build Include="dbo\Views\vyuHDTicketProjection.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSaveTestInTemplates.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRaiseError.sql" />
+    <Build Include="dbo\Functions\fnICGetErrorMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

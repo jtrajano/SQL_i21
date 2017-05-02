@@ -599,7 +599,7 @@ BEGIN
 					,[intConcurrencyId]						= 1
 					,[strDescription]						= -- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
 															 FORMATMESSAGE(
-																'Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s.'
+																dbo.fnICGetErrorMessage(80078)
 																,CONVERT(NVARCHAR, CAST(dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) AS MONEY), 2)
 																,CONVERT(NVARCHAR, CAST(Stock.dblUnitOnHand AS MONEY), 1)
 																,CONVERT(NVARCHAR, CAST(ItemPricing.dblAverageCost AS MONEY), 2)

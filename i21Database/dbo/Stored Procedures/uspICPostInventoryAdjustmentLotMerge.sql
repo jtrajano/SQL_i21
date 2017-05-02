@@ -58,7 +58,7 @@ BEGIN
 			WHERE intItemId = @intItemId		
 
 			-- 'The UOM is missing on {Item}.'
-			RAISERROR('The UOM is missing on %s.', 11, 1, @strItemNo);
+			EXEC uspICRaiseError 80039, @strItemNo;
 			RETURN -1
 		END
 
@@ -82,7 +82,7 @@ BEGIN
 			WHERE intItemId = @intItemId		
 
 			-- 'Merge Lot requires a negative Adjust Qty on %s as stock for the merge.'
-			RAISERROR('Merge Lot requires a negative Adjust Qty on %s as stock for the merge.', 11, 1, @strItemNo);
+			EXEC uspICRaiseError 80058, @strItemNo;
 			RETURN -1
 		END
 	END 
@@ -107,7 +107,7 @@ BEGIN
 		IF @intLotId IS NOT NULL 
 		BEGIN
 			-- 'Lot merge of %s is not allowed because it will be merged to the same lot number, location, sub location, and storage location.'
-			RAISERROR('Lot merge of %s is not allowed because it will be merged to the same lot number, location, storage location, and storage unit.', 11, 1, @strLotNumber)  
+			EXEC uspICRaiseError 80072, @strLotNumber; 
 			RETURN -1
 		END
 	END 
@@ -135,7 +135,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN
 			-- --'The new Item Location is invalid or missing for %s.'
-			RAISERROR('The new Item Location is invalid or missing for %s.', 11, 1, @strItemNo)  
+			EXEC uspICRaiseError 80083, @strItemNo;  
 			RETURN -1
 		END		
 	END 

@@ -133,64 +133,6 @@ BEGIN
 	END 
 END 
 
----- Validate if the cost bucket is negative. If Negative stock is not allowed, then block the posting. 
---IF @cbOutOutId IS NULL 
---BEGIN 
---	DECLARE @ALLOW_NEGATIVE_NO AS INT = 3
-
---	DECLARE @strItemNo AS NVARCHAR(50) 
---			,@strLocationName AS NVARCHAR(MAX) 
---			,@CostBucketId AS INT 
---			,@AllowNegativeInventory AS INT 
---			,@UnitsOnHand AS NUMERIC(38, 20)
-
---	-- Get the on-hand qty 
---	SELECT	@UnitsOnHand = s.dblUnitOnHand
---	FROM	tblICItemStock s
---	WHERE	s.intItemId = @intItemId
---			AND s.intItemLocationId = @intItemLocationId
-
---	SELECT	@strItemNo = i.strItemNo
---			,@CostBucketId = cb.intInventoryLIFOId
---			,@AllowNegativeInventory = il.intAllowNegativeInventory
---			,@strLocationName = cl.strLocationName
---	FROM	tblICItem i INNER JOIN tblICItemLocation il
---				ON i.intItemId = il.intItemId
---				AND il.intItemLocationId = @intItemLocationId
---			INNER JOIN tblSMCompanyLocation cl
---				ON cl.intCompanyLocationId = il.intLocationId
---			OUTER APPLY (
---				SELECT	TOP 1 cb.*
---				FROM	tblICInventoryLIFO cb INNER JOIN (
---							tblICInventoryReceipt rSource INNER JOIN tblICInventoryReceipt r
---								ON rSource.intInventoryReceiptId = r.intSourceInventoryReceiptId
---						)
---							ON cb.intTransactionId = rSource.intInventoryReceiptId
---							AND cb.strTransactionId = rSource.strReceiptNumber
---				WHERE	cb.intItemId = @intItemId
---						AND cb.intItemLocationId = @intItemLocationId
---						AND cb.intItemUOMId = @intItemUOMId
---						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  
---						AND dbo.fnDateGreaterThanEquals(cb.dtmDate, @dtmDate) = 1
---						AND r.intInventoryReceiptId = @intTransactionId
---						AND r.strReceiptNumber = @strTransactionId
---			) cb 
-
---	IF @CostBucketId IS NULL AND @AllowNegativeInventory = @ALLOW_NEGATIVE_NO
---	BEGIN 
---		IF @UnitsOnHand > 0 
---		BEGIN 
---			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
---			RAISERROR(80096, 11, 1, @strDate, @strItemNo, @strLocationName)
---		END 
---		ELSE 
---		BEGIN 
---			RAISERROR(80003, 11, 1, @strItemNo, @strLocationName)
---		END 
---		RETURN -1
---	END 
---END 
-
 -- Validate if the cost bucket is negative. If Negative stock is not allowed, then block the posting. 
 IF @cbOutOutId IS NULL 
 BEGIN 
@@ -267,12 +209,12 @@ BEGIN
 			DECLARE @strReceiptDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmReceiptDate, 101) 
 			
 			-- 'Check the return date on the transaction. Return date is {Return date}, while {Item Id} in {Receipt Id} is dated {Receipt date}.'
-			RAISERROR('Check the return date on the transaction. Return date is %s, while %s in %s is dated %s.', 11, 1, @strReturnDate, @strItemNo, @strReceiptSourceNumber, @strReceiptDate)
+			EXEC uspICRaiseError 80108, @strReturnDate, @strItemNo, @strReceiptSourceNumber, @strReceiptDate;
 		END 
 		ELSE 
 		BEGIN 
 			-- 'Unable to do the return. All the stocks in {item id} from {receipt id} are fully returned already.'
-			RAISERROR('Return is stopped. All of the stocks in %s that is received in %s are either sold, consumed, returned, or over-return is going to happen.', 11, 1, @strItemNo, @strReceiptSourceNumber)
+			EXEC uspICRaiseError 80109, @strItemNo, @strReceiptSourceNumber;
 		END 
 		RETURN -1
 	END 

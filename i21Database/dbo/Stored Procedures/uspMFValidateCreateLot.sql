@@ -433,11 +433,10 @@ BEGIN TRY
 				WHERE RI.intWorkOrderId = @intWorkOrderId
 					AND RI.intRecipeItemTypeId = 2
 				)
-			RAISERROR (
-					'Invalid Item.'
-					,11
-					,1
-					)
+		BEGIN 
+			EXEC uspICRaiseError 80021;
+			RETURN;
+		END 
 
 		IF NOT EXISTS (
 				SELECT *

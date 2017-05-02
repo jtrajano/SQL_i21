@@ -235,7 +235,7 @@ BEGIN
 			WHERE	intItemId = @intItemId
 
 			-- 'Cost adjustment cannot continue. Unable to find the cost bucket for %s that was posted in %s.
-			RAISERROR('Cost adjustment cannot continue. Unable to find the cost bucket for %s that was posted in %s.', 11, 1, @strItemNo, @strSourceTransactionId)  
+			EXEC uspICRaiseError 80062, @strItemNo, @strSourceTransactionId;
 			RETURN -1  
 
 		END

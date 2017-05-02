@@ -70,8 +70,8 @@ BEGIN
 				ON Errors.intItemId = Item.intItemId
 	WHERE	intErrorCode = 80003
 
-	RAISERROR('Negative stock quantity is not allowed for %s in %s.', 11, 1, @strItemNo, @strLocationName)
-
+	--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
+	EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 
 	RETURN -1
 END 
 
@@ -90,7 +90,7 @@ WHERE	intErrorCode = 80066
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Inventory Count is ongoing for Item {Item Name} and is locked under Location {Location Name}.'
-	RAISERROR('Inventory Count is ongoing for Item %s and is locked under Location %s.', 11, 1, @strItemNo, @strLocationName)
+	EXEC uspICRaiseError 80066, @strItemNo, @strLocationName;
 	RETURN -1
 END 
 GO

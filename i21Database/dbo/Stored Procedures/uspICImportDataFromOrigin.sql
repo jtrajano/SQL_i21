@@ -5,13 +5,13 @@ AS
 
 IF @strLineOfBusiness IS NULL OR LTRIM(RTRIM(@strLineOfBusiness)) = ''
 BEGIN
-	RAISERROR('No line of business specified', 11, 1)
+	EXEC uspICRaiseError 80165; 
 	GOTO _Exit;
 END
 
 IF @strType IS NULL OR LTRIM(RTRIM(@strType)) = ''
 BEGIN
-	RAISERROR('No type of data is specified.', 11, 1)
+	EXEC uspICRaiseError 80166; 
 	GOTO _Exit;
 END
 

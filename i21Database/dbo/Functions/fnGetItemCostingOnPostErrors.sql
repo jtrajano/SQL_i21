@@ -17,7 +17,7 @@ RETURN (
 		-- Check for any invalid item.
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = 'Item id is invalid or missing.'
+				,strText = dbo.fnICGetErrorMessage(80001) -- 'Item id is invalid or missing.'
 				,intErrorCode = 80001
 		WHERE	NOT EXISTS (
 					SELECT TOP 1 1 
@@ -29,7 +29,7 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = 'Item Location is invalid or missing for %s.'
+				,strText = dbo.fnICGetErrorMessage(80002) -- 'Item Location is invalid or missing for %s.'
 				,intErrorCode = 80002
 		WHERE	NOT EXISTS (
 					SELECT TOP 1 1 
@@ -58,7 +58,7 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE('Missing costing method setup for item %s.')
+				,strText = FORMATMESSAGE(dbo.fnICGetErrorMessage(80023), Item.strItemNo) 
 				,intErrorCode = 80023
 		FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation ItemLocation 
 					ON Item.intItemId = ItemLocation.intItemLocationId
@@ -70,17 +70,7 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = 'The status of %s is Discontinued.'
-				,intErrorCode = 80022
-		FROM	tblICItem Item
-		WHERE	Item.intItemId = @intItemId
-				AND Item.strStatus = 'Discontinued'
-
-		-- Check for "Discontinued" status. Do not allow use of that item even if there are stocks on it. 
-		UNION ALL 
-		SELECT	intItemId = @intItemId
-				,intItemLocationId = @intItemLocationId
-				,strText = 'The status of %s is Discontinued.'
+				,strText = FORMATMESSAGE(dbo.fnICGetErrorMessage(80022), Item.strItemNo) 
 				,intErrorCode = 80022
 		FROM	tblICItem Item
 		WHERE	Item.intItemId = @intItemId
@@ -93,7 +83,7 @@ RETURN (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText = FORMATMESSAGE(
-								'Negative stock quantity is not allowed for %s in %s.'
+								dbo.fnICGetErrorMessage(80003)
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,dbo.fnFormatMsg80003(
 									@intItemLocationId
@@ -143,7 +133,7 @@ RETURN (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText =	FORMATMESSAGE(
-								'Negative stock quantity is not allowed for %s in %s.'
+								dbo.fnICGetErrorMessage(80003)
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,dbo.fnFormatMsg80003(
 									@intItemLocationId
@@ -193,7 +183,7 @@ RETURN (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText =	FORMATMESSAGE(
-								'Negative stock quantity is not allowed for %s in %s.'
+								dbo.fnICGetErrorMessage(80003)
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,dbo.fnFormatMsg80003(
 									@intItemLocationId
@@ -240,9 +230,11 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE('Item %s is missing a Stock Unit. Please check the Unit of Measure setup.')
+				,strText = FORMATMESSAGE(dbo.fnICGetErrorMessage(80049), i.strItemNo)
 				,intErrorCode = 80049
-		WHERE	dbo.fnGetItemStockUOM(@intItemId) IS NULL 
+		FROM	tblICItem i 
+		WHERE	i.intItemId = @intItemId
+				AND dbo.fnGetItemStockUOM(@intItemId) IS NULL 
 				AND @intItemId IS NOT NULL 
 
 		-- Check for locked inventory. 
@@ -251,7 +243,7 @@ RETURN (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText = FORMATMESSAGE(
-								'Inventory Count is ongoing for Item %s and is locked under Location %s.'
+								dbo.fnICGetErrorMessage(80066)
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,(
 									SELECT	tblSMCompanyLocation.strLocationName 

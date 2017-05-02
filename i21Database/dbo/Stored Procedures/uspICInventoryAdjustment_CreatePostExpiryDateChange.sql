@@ -41,7 +41,7 @@ IF NOT EXISTS (
 )
 BEGIN
 	-- 'Internal Error. The source transaction type provided is invalid or not supported.' 
-	RAISERROR('Internal Error. The source transaction type provided is invalid or not supported.', 11, 1)  
+	EXEC uspICRaiseError 80032; 
 	GOTO _Exit;
 END 
 
@@ -49,7 +49,7 @@ END
 IF @intSourceId IS NULL 
 BEGIN
 	-- 'Internal Error. The source transaction id is invalid.'
-	RAISERROR('Internal Error. The source transaction id is invalid.', 11, 1)  
+	EXEC uspICRaiseError 80033; 
 	GOTO _Exit;
 END 
 
@@ -57,7 +57,7 @@ END
 IF @dtmNewExpiryDate IS NULL 
 BEGIN 
 	-- 'Internal Error. The new expiration date is invalid.'
-	RAISERROR('Internal Error. The new expiry date is invalid.', 11, 1)  
+	EXEC uspICRaiseError 80034;
 	GOTO _Exit;
 END 
 
@@ -117,7 +117,7 @@ END
 IF @intLotId IS NULL 
 BEGIN 
 	-- Invalid Lot
-	RAISERROR('Invalid Lot.', 11, 1)  
+	EXEC uspICRaiseError 80020; 
 	GOTO _Exit
 END 
 

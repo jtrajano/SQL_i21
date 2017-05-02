@@ -93,7 +93,7 @@ BEGIN
 	IF @intTransactionId IS NULL  
 	BEGIN   
 		-- Cannot find the transaction.  
-		RAISERROR('Cannot find the transaction.', 11, 1)  
+		EXEC uspICRaiseError 80167;  
 		GOTO Post_Exit  
 	END   
   
@@ -101,7 +101,7 @@ BEGIN
 	IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) = 0) 
 	BEGIN   
 		-- Unable to find an open fiscal year period to match the transaction date.  
-		RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)  
+		EXEC uspICRaiseError 80168; 
 		GOTO Post_Exit  
 	END  
   
@@ -109,7 +109,7 @@ BEGIN
 	IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1  
 	BEGIN   
 		-- The transaction is already posted.  
-		RAISERROR('The transaction is already posted.', 11, 1)  
+		EXEC uspICRaiseError 80169; 
 		GOTO Post_Exit  
 	END   
   
@@ -117,7 +117,7 @@ BEGIN
 	IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
 	BEGIN   
 		-- The transaction is already unposted.  
-		RAISERROR('The transaction is already unposted.', 11, 1)  
+		EXEC uspICRaiseError 80170; 
 		GOTO Post_Exit  
 	END   
 
@@ -129,13 +129,13 @@ BEGIN
 		-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 		IF @ysnPost = 1   
 		BEGIN   
-			RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')  
+			EXEC uspICRaiseError 80172, 'Post';
 			GOTO Post_Exit  
 		END   
 
 		IF @ysnPost = 0  
 		BEGIN  
-			RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Unpost')  
+			EXEC uspICRaiseError 80172, 'Unpost';
 			GOTO Post_Exit    
 		END  
 	END   
@@ -158,7 +158,7 @@ BEGIN
 
 		IF @strInvoiceNumber IS NOT NULL 
 		BEGIN 
-			RAISERROR('The inventory shipment is already in %s. Remove the invoice first before you can unpost this shipment.', 11, 1, @strInvoiceNumber)  
+			EXEC uspICRaiseError 80089, @strInvoiceNumber;
 			GOTO Post_Exit    
 		END 
 	END 
@@ -183,7 +183,7 @@ BEGIN
 
 		IF @strInvoiceNumber IS NOT NULL 
 		BEGIN 
-			RAISERROR('The inventory shipment is already in %s. Remove the invoice first before you can unpost this shipment.', 11, 1, @strInvoiceNumber)  
+			EXEC uspICRaiseError 80089, @strInvoiceNumber;
 			GOTO Post_Exit    
 		END 
 	END
@@ -209,7 +209,7 @@ BEGIN
 		IF @strBillNumber IS NOT NULL 
 		BEGIN 
 			-- 'Unable to unpost the Inventory Shipment. The {Other Charge} was billed.'
-			RAISERROR('Unable to unpost the Inventory Shipment. The %s was billed.', 11, 1, @strChargeItem)  
+			EXEC uspICRaiseError 80091, @strChargeItem;
 			GOTO Post_Exit    
 		END 
 	END 
@@ -267,13 +267,9 @@ BEGIN
 			IF ISNULL(@strItemNo, '') = '' 
 				SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
 
-			SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@dblQuantityShipped AS MONEY), 1)
-			SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
-			SET @FormattedDifference =  CAST(ABS(@dblQuantityShipped - @LotQtyInItemUOM) AS NVARCHAR(50))
-
 			-- 'The Qty to Ship for {Item} is {Ship Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
-			RAISERROR('The Qty to Ship for %s is %s. Total Lot Quantity is %s. The difference is %s.', 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
-
+			DECLARE @difference AS NUMERIC(38, 20) = ABS(@dblQuantityShipped - @LotQtyInItemUOM)
+			EXEC uspICRaiseError 80047, @strItemNo, @dblQuantityShipped, @LotQtyInItemUOM, @difference
 			RETURN -1; 
 		END 
 	END
@@ -307,7 +303,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'
-			RAISERROR('%s is using a foreign currency. Please check if %s has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from %s to %s.', 11, 1, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId)
+			EXEC uspICRaiseError 80162, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId;
 			RETURN -1; 
 		END 
 	END 

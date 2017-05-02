@@ -88,7 +88,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR('%s is missing a GL account setup for %s account category.', 11, 1, @strItemNo, @AccountCategory_Auto_Negative) 	
+		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Auto_Negative;
 		RETURN;
 	END 
 END 

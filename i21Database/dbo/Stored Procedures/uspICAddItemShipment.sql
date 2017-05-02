@@ -40,7 +40,7 @@ IF EXISTS(
 	WHERE i.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material', 'Bundle', 'Kit')
 )
 BEGIN
-	RAISERROR('Can''t ship non-inventory items.', 11, 1)
+	EXEC uspICRaiseError 80163; 
 	GOTO _Exit
 END
 -- Insert Raw Data

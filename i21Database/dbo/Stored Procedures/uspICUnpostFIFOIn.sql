@@ -47,7 +47,7 @@ IF @ysnRecap = 0
 	IF @strRelatedTransactionId IS NOT NULL 
 	BEGIN 
 		-- 'Unable to unpost because {Item} has a cost adjustment from {Transaction Id}.'
-		RAISERROR('Unable to unpost because %s has a cost adjustment from %s.', 11, 1, @strItemNo, @strRelatedTransactionId)  
+		EXEC uspICRaiseError 80063, @strItemNo, @strRelatedTransactionId;  
 		RETURN -1
 	END 
 END

@@ -157,13 +157,9 @@ BEGIN
 		IF ISNULL(@strItemNo, '') = '' 
 			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
 
-		SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@dblQuantityShipped AS MONEY), 1)
-		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
-		SET @FormattedDifference =  CAST(ABS(@dblQuantityShipped - @LotQtyInItemUOM) AS NVARCHAR(50))
-
 		-- 'The Qty to Ship for {Item} is {Ship Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
-		RAISERROR('The Qty to Ship for %s is %s. Total Lot Quantity is %s. The difference is %s.', 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
-
+		DECLARE @difference AS NUMERIC(38, 20) = ABS(@dblQuantityShipped - @LotQtyInItemUOM)
+		EXEC uspICRaiseError 80047, @strItemNo, @dblQuantityShipped, @LotQtyInItemUOM, @difference
 		RETURN -1; 
 	END 
 END
