@@ -19,6 +19,8 @@ SELECT @intTimeOffRequestId = @intTransactionId
 		DELETE FROM tblSMEvents
 		WHERE CAST(strRecordNo AS INT) = @intTimeOffRequestId
 			AND strScreen = 'Payroll.view.TimeOffRequest'
+
+		EXEC uspSMAuditLog 'Payroll.view.TimeOffRequest', @intTransactionId, @intUserId, 'Unposted from Calendar', '', '', ''
 		
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblPREmployeeEarning EE INNER JOIN tblPRTimeOffRequest TOR
 						ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
@@ -115,6 +117,8 @@ SELECT @intTimeOffRequestId = @intTransactionId
 			SET ysnPostedToCalendar = 1
 				,intEventId = (SELECT TOP 1 intEventId FROM @udtSMEventsIn)
 			WHERE intTimeOffRequestId = @intTimeOffRequestId
+
+			EXEC uspSMAuditLog 'Payroll.view.TimeOffRequest', @intTransactionId, @intUserId, 'Posted to Calendar', '', '', ''
 		
 			IF EXISTS (SELECT TOP 1 1 FROM tblPREmployeeEarning EE INNER JOIN tblPRTimeOffRequest TOR
 						ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
