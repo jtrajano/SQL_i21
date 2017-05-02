@@ -148,6 +148,18 @@ BEGIN TRY
 			,@intWeightUOMId = intWeightUOMId
 		FROM tblICLot
 		WHERE intLotId = @intInputLotId
+		
+		IF @dblInputWeight > @dblWeight
+		BEGIN
+			IF @ysnExcessConsumptionAllowed = 0
+			BEGIN
+				RAISERROR (
+						'The quantity to be consumed must not exceed the selected lot quantity.'
+						,14
+						,1
+						)
+			END 
+		END
 
 		IF @intInputLotId IS NULL
 			OR @intInputLotId = 0
