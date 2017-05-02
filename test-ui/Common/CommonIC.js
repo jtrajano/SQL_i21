@@ -111,6 +111,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded()
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
             .displayText('===== Item Created =====')
             .done();
 
@@ -209,6 +210,7 @@ Ext.define('Inventory.CommonIC', {
             .verifyStatusMessage('Saved')
             .clickButton('Close')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
             .displayText('===== Item Created =====')
             .done();
 
@@ -251,6 +253,7 @@ Ext.define('Inventory.CommonIC', {
         .verifyStatusMessage('Saved')
         .clickButton('Close')
         .clickMenuFolder('Inventory','Folder')
+        .waitUntilLoaded('')
         .displayText('===== Add Commodity Done =====')
 
         .done();
@@ -316,6 +319,7 @@ Ext.define('Inventory.CommonIC', {
             .verifyStatusMessage('Saved')
             .clickButton('Close')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
             .displayText('===== Add New Category - Inventory Type Done =====')
             .done();
     },
@@ -367,8 +371,10 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
+            .waitUntilLoaded('')
             .displayText('===== Creating Direct IR for Non Lotted Done =====')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
 
             .done();
     },
@@ -428,8 +434,10 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
+            .waitUntilLoaded('')
             .displayText('===== Creating Direct IR for Non Lotted Done =====')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
 
             .done();
     },
@@ -506,6 +514,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+            .waitUntilLoaded('')
 
             .done();
     },
@@ -612,6 +621,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+            .waitUntilLoaded('')
 
             .done();
     },
@@ -700,7 +710,9 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+            .waitUntilLoaded('')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
 
             .done();
     },
@@ -819,6 +831,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
 
             .done();
     },
@@ -929,6 +942,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
 
             .done();
     },
@@ -1053,6 +1067,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
 
             .done();
     },
@@ -1156,6 +1171,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Contract Management','Folder')
+            .waitUntilLoaded('')
 
             .done();
     },
@@ -1279,6 +1295,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Contract Management','Folder')
+            .waitUntilLoaded('')
 
             .done();
     },
@@ -1467,6 +1484,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .waitUntilLoaded('')
             .displayText('===== Ship Button SO to IS for Non Lotted Done=====')
 
             .done();
@@ -1526,6 +1544,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .displayText('===== Create Direct Inventory Shipment for Non Lotted Item Done=====')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
 
             .done();
     },
@@ -1595,6 +1614,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
             .displayText('===== Add Orders Button SO to IS for Non Lotted Done=====')
             //endregion
 
@@ -1674,6 +1694,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
             .displayText('===== Add Orders Button SO to IS for Lotted Done=====')
             //endregion
 
@@ -1761,6 +1782,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
             .displayText('===== Ship Button SC to IS for Non Lotted Done=====')
 
 
@@ -1857,6 +1879,7 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
             .displayText('===== Ship Button SC to IS for Lotted Done=====')
 
 

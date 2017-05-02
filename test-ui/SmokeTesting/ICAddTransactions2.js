@@ -368,7 +368,7 @@ StartTest (function (t) {
         .clickButton('Close')
         .clickMenuFolder('Inventory','Folder')
         .displayText('===== Scenario  12. Inventory Count - Lock Inventory =====')
-        //endregion
+        endregion
 
 
         //region Scenario 13. Add new Storage Measurement Reading with 1 item only.
