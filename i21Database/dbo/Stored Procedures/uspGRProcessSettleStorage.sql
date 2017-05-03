@@ -967,7 +967,7 @@ BEGIN TRY
 			,dtmDate = GETDATE() 
 			,dblQty = SV.[dblUnits]
 			,dblUOMQty = @dblUOMQty
-			,dblCost = 0
+			,dblCost = CASE WHEN St.ysnDPOwnedType = 0 THEN SV.[dblCashPrice] ELSE 0 END
 			,dblSalesPrice = 0.00
 			,intCurrencyId = @intCurrencyId
 			,dblExchangeRate = 1
@@ -980,7 +980,7 @@ BEGIN TRY
 			,ysnIsStorage = 0
 		FROM	@SettleVoucherCreate SV 
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
-		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId  AND St.ysnDPOwnedType = 1
+		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId  --AND St.ysnDPOwnedType = 1
 		WHERE	SV.intCustomerStorageId=@intCustomerStorageId 
 				AND SV.intItemSort = 1 
 				AND SV.IsProcessed = 0 

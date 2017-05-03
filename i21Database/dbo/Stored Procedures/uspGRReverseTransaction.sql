@@ -216,8 +216,7 @@ BEGIN TRY
 				, @strBatchId
 				, @intEntityUserSecurityId
 
-         IF @ysnDPOwnedType=1
-		 BEGIN
+         
 			INSERT INTO @ItemsToPost
 			(
 				  intItemId  
@@ -245,7 +244,7 @@ BEGIN TRY
 				,dtmDate = GETDATE() 
 				,dblQty = @NegativeUnits
 				,dblUOMQty = @dblUOMQty
-				,dblCost = 0
+				,dblCost = CASE WHEN @ysnDPOwnedType = 0 THEN @dblAmount ELSE 0 END
 				,dblSalesPrice = 0.00
 				,intCurrencyId = @intCurrencyId
 				,dblExchangeRate = 1
@@ -261,8 +260,7 @@ BEGIN TRY
 				  @ItemsToPost
 				, @strBatchId
 				,'Cost of Goods'
-				, @intEntityUserSecurityId
-		 END				
+				, @intEntityUserSecurityId 
 		
 
 		-- 4. Delete the Voucher(From User Interface deleting Voucher Should not be allowed)		
