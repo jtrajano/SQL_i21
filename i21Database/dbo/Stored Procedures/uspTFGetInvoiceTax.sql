@@ -657,6 +657,12 @@ BEGIN TRY
 			, @DateTo
 			, 1)
 	END
+
+	EXEC uspTFProcessBeforePreview @Guid = @Guid
+		, @ReportingComponentId = @ReportingComponentId
+		, @DateFrom = @DateFrom
+		, @DateTo = @DateTo
+		
 END TRY
 BEGIN CATCH
 	SELECT 
