@@ -896,3 +896,8 @@ ALTER TABLE tblAPBill
 --END
 
 SELECT * FROM #tmpReceiptBillIds
+
+Post_Exit:
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpReceiptData')) DROP TABLE #tmpReceiptData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpReceiptDetailData')) DROP TABLE #tmpReceiptDetailData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpReceiptDetailTaxData')) DROP TABLE #tmpReceiptDetailTaxData
