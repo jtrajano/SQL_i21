@@ -11,5 +11,5 @@
 	[dblEquityPay] NUMERIC(18,6) NOT NULL,
 	[intConcurrencyId] INT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblPATEquityPayDetail] PRIMARY KEY ([intEquityPayDetailId]),
-	CONSTRAINT [FK_tblPATEquityPayDetail_tblPATEquityPaySummary] FOREIGN KEY ([intEquityPaySummaryId]) REFERENCES [tblPATEquityPaySummary]([intEquityPaySummaryId])
+	CONSTRAINT [FK_tblPATEquityPayDetail_tblPATEquityPaySummary] FOREIGN KEY ([intEquityPaySummaryId]) REFERENCES [tblPATEquityPaySummary]([intEquityPaySummaryId]) ON DELETE CASCADE
 )	
