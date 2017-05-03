@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -1521,9 +1519,16 @@ BEGIN
 			),
 			(
 				 'Net Price'
-				,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
-				,@dblPrice - (@totalOriginalTax / @dblQuantity) -- @totalOriginalTax to handle tax exemption
+				,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblOriginalPrice - (@totalOriginalTax / @dblQuantity) 
+				,Round((Round(@dblPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblPrice - (@totalOriginalTax / @dblQuantity) 
+					-- @totalOriginalTax to handle tax exemption
 			),
+			-- OLD WAY--
+			--(
+			--	 'Net Price'
+			--	,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+			--	,@dblPrice - (@totalOriginalTax / @dblQuantity) -- @totalOriginalTax to handle tax exemption
+			--),
 			(
 				 'Total Amount'
 				,ROUND(@dblOriginalPrice * @dblQuantity,2)
@@ -1569,15 +1574,23 @@ BEGIN
 		),
 		(
 			 'Net Price'
-			,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
 			,@dblPrice
 		),
+		--OLD WAY--
+		--(
+		--	 'Net Price'
+		--	,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+		--	,@dblPrice
+		--),
 		(
 			 'Total Amount'
 			,ROUND(@dblOriginalPrice * @dblQuantity,2)
 			,ROUND((@dblPrice + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
 		)
 		END
+
+	
 	---------------------------------------------------
 	--				 PRICE CALCULATION				 --
 	---------------------------------------------------
