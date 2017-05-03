@@ -61,5 +61,5 @@ FROM tblPOPurchase A
  LEFT JOIN tblICStorageLocation G ON B.intStorageLocationId = G.intStorageLocationId
  INNER JOIN dbo.tblSMCompanyLocation I ON A.intShipToId = I.intCompanyLocationId
  LEFT JOIN [tblEMEntityLocation] J ON A.intEntityVendorId = J.intEntityId AND J.intEntityLocationId = A.intShipFromId --Add Filter to avoid multuple PO on add Order
- WHERE D.strType NOT IN ('Service','Software','Non-Inventory','Other Charge')
+ --WHERE D.strType NOT IN ('Service','Software','Non-Inventory','Other Charge')
 GO
