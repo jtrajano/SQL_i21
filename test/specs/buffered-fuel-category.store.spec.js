@@ -3,5 +3,17 @@ UnitTestEngine.testStore({
     alias: "store.icbufferedfuelcategory",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.FuelCategory"],
-    config: {}
+    config: {
+        "model": "Inventory.model.FuelCategory",
+        "storeId": "BufferedFuelCategory",
+        "pageSize": 50,
+        "remoteFilter": true,
+        "remoteSort": true,
+        "proxy": {
+            "type": "rest",
+            "api": {
+                "read": "../Inventory/api/FuelCategory/Search"
+            }
+        }
+    }
 });

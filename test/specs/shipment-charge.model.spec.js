@@ -59,6 +59,18 @@ UnitTestEngine.testModel({
         "name": "strCurrency",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "intForexRateTypeId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strForexRateType",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "dblForexRate",
+        "type": "float",
+        "allowNull": true
     }],
     validators: [
         [{

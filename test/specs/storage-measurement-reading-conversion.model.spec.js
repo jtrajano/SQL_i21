@@ -59,6 +59,10 @@ UnitTestEngine.testModel({
         "name": "dblEffectiveDepth",
         "type": "float",
         "allowNull": false
+    }, {
+        "name": "strUnitMeasure",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{

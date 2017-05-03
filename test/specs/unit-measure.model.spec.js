@@ -19,6 +19,10 @@ UnitTestEngine.testModel({
         "name": "strUnitType",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "intDecimalPlaces",
+        "type": "int",
+        "allowNull": true
     }],
     validators: [
         [{

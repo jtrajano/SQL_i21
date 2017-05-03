@@ -76,6 +76,14 @@ UnitTestEngine.testModel({
         "type": "boolean",
         "allowNull": false
     }, {
+        "name": "intM2MComputationId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strM2MComputation",
+        "type": "string",
+        "allowNull": false
+    }, {
         "name": "ysnPrice",
         "type": "boolean",
         "allowNull": false
@@ -110,6 +118,10 @@ UnitTestEngine.testModel({
     }, {
         "name": "strShortName",
         "type": "string",
+        "allowNull": false
+    }, {
+        "name": "ysnBasisContract",
+        "type": "boolean",
         "allowNull": false
     }],
     validators: [

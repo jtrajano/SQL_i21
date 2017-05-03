@@ -59,6 +59,10 @@ UnitTestEngine.testModel({
         "name": "strCountry",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "strContractItemNo",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{

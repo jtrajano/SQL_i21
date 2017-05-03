@@ -79,6 +79,14 @@ UnitTestEngine.testModel({
         "name": "strUPC",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "intCurrencyId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strCurrency",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{

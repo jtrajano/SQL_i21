@@ -35,6 +35,14 @@ UnitTestEngine.testModel({
         "name": "intShipmentSourceType",
         "type": "int",
         "allowNull": true
+    }, {
+        "name": "strOriginLastTask",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strOriginLineOfBusiness",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         []

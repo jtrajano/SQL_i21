@@ -2,7 +2,7 @@ UnitTestEngine.testModel({
     name: 'Inventory.model.ItemLocation',
     base: 'iRely.BaseEntity',
     idProperty: 'intItemLocationId',
-    dependencies: ["Ext.data.Field"],
+    dependencies: ["Ext.data.Field", "Inventory.model.ItemSubLocation"],
     fields: [{
         "name": "intItemLocationId",
         "type": "int",

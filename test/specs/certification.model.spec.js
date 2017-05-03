@@ -27,6 +27,10 @@ UnitTestEngine.testModel({
         "name": "strCertificationIdName",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "strCertificationCode",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{

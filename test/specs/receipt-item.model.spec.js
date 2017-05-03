@@ -64,6 +64,10 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
+        "name": "intCostUOMId",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "intWeightUOMId",
         "type": "int",
         "allowNull": true
@@ -175,6 +179,18 @@ UnitTestEngine.testModel({
         "name": "strTaxGroup",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "intForexRateTypeId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strForexRateType",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "dblForexRate",
+        "type": "float",
+        "allowNull": true
     }],
     validators: [
         [{

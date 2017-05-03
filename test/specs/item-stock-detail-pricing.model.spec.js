@@ -1,7 +1,7 @@
 UnitTestEngine.testModel({
     name: 'Inventory.model.ItemStockDetailPricing',
     base: 'Ext.data.Model',
-    idProperty: 'intItemPricingId',
+    idProperty: 'intItemUnitMeasureId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intItemPricingId",
@@ -107,6 +107,10 @@ UnitTestEngine.testModel({
         "name": "dblEndMonthCost",
         "type": "float",
         "allowNull": false
+    }, {
+        "name": "intDecimalPlaces",
+        "type": "int",
+        "allowNull": true
     }, {
         "name": "intSort",
         "type": "int",

@@ -147,6 +147,22 @@ UnitTestEngine.testModel({
         "name": "strSubLocationName",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "dblStatedNetPerUnit",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblStatedTotalNet",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblPhysicalVsStated",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "strUnitMeasure",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{

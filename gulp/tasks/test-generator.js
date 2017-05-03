@@ -7,7 +7,6 @@
  */
 var gulp = require('gulp');
 var prettify = require('gulp-js-prettify');
-var changed = require('gulp-changed');
 var gen = require('gulp-extjs-spec-generator');
 
 var destDir = 'test/specs';

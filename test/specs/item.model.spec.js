@@ -260,6 +260,14 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
+        "name": "intHazmatMessage",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intItemMessage",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "strVolumeRebateGroup",
         "type": "string",
         "allowNull": false
@@ -428,6 +436,14 @@ UnitTestEngine.testModel({
         "type": "boolean",
         "allowNull": false
     }, {
+        "name": "intM2MComputationId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strM2MComputation",
+        "type": "string",
+        "allowNull": true
+    }, {
         "name": "ysnPrice",
         "type": "boolean",
         "allowNull": false
@@ -566,6 +582,18 @@ UnitTestEngine.testModel({
     }, {
         "name": "strRequired",
         "type": "string",
+        "allowNull": false
+    }, {
+        "name": "ysnBasisContract",
+        "type": "boolean",
+        "allowNull": false
+    }, {
+        "name": "intTonnageTaxUOMId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "ysnUseWeighScales",
+        "type": "boolean",
         "allowNull": false
     }],
     validators: [

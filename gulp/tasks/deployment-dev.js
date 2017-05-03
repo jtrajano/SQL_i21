@@ -6,6 +6,7 @@
  * ************************************************************************** 
  */
 var gulp = require('gulp');
+var changed = require('gulp-changed');
 
 gulp.task('publish', function () {
     gulp.src(['app/**/*.{js,css}'])

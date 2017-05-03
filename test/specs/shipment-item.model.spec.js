@@ -92,6 +92,10 @@ UnitTestEngine.testModel({
         "type": "string",
         "allowNull": false
     }, {
+        "name": "intDecimalPlaces",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "dblLineTotal",
         "type": "float",
         "allowNull": false
@@ -103,6 +107,18 @@ UnitTestEngine.testModel({
         "name": "strStorageTypeDescription",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "intForexRateTypeId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strForexRateType",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "dblForexRate",
+        "type": "float",
+        "allowNull": true
     }],
     validators: [
         [{

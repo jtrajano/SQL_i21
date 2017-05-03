@@ -48,6 +48,10 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
+        "name": "intCurrencyId",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "strBOLNumber",
         "type": "string",
         "allowNull": false
@@ -144,6 +148,9 @@ UnitTestEngine.testModel({
             "type": "presence"
         }, {
             "field": "intFreightTermId",
+            "type": "presence"
+        }, {
+            "field": "intCurrencyId",
             "type": "presence"
         }]
     ]

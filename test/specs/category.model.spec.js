@@ -155,9 +155,6 @@ UnitTestEngine.testModel({
         }, {
             "field": "strInventoryType",
             "type": "presence"
-        }, {
-            "field": "intCostingMethod",
-            "type": "presence"
         }]
     ]
 });

@@ -5612,6 +5612,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         iRely.Functions.openScreen('i21.view.Currency', { viewConfig: { modal: true } });
     },
 
+    getWeightLossPercentage: function(items, sourceType) {
+        return 0.1;
+    },
+
     getWeightLoss: function (ReceiptItems, sourceType, action) {
         var dblWeightLoss = 0;
         var dblNetShippedWt = 0;

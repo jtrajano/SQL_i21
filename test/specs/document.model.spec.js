@@ -28,6 +28,18 @@ UnitTestEngine.testModel({
         "type": "boolean",
         "allowNull": false
     }, {
+        "name": "intCertificationId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intOriginal",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intCopies",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "strCommodityCode",
         "type": "string",
         "allowNull": false

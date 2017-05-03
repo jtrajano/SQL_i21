@@ -10,7 +10,6 @@ module.exports = {
         dest: env === 'prod' ? dest_prod : dest_dev
     },
     testing: {
-        config: __dirname.replace('gulp', '') +  '/karma.conf.js',
-        single: '../../../karma.single.conf.js'
+        config: __dirname.replace('gulp', '') +  '/karma.conf.js'
     }
 };

@@ -3,5 +3,17 @@ UnitTestEngine.testStore({
     alias: "store.icbufferedmanufacturingcell",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.ManufacturingCell"],
-    config: {}
+    config: {
+        "model": "Inventory.model.ManufacturingCell",
+        "storeId": "BufferedManufacturingCell",
+        "pageSize": 50,
+        "remoteFilter": true,
+        "remoteSort": true,
+        "proxy": {
+            "type": "rest",
+            "api": {
+                "read": "../Inventory/api/ManufacturingCell/Search"
+            }
+        }
+    }
 });

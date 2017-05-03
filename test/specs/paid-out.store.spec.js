@@ -3,5 +3,16 @@ UnitTestEngine.testStore({
     alias: "store.storepaidout",
     base: 'Ext.data.BufferedStore',
     dependencies: [],
-    config: {}
+    config: {
+        "storeId": "PaidOut",
+        "pageSize": 50,
+        "remoteFilter": true,
+        "remoteSort": true,
+        "proxy": {
+            "type": "rest",
+            "api": {
+                "read": "../Inventory/api/PaidOut/GetPaidOuts"
+            }
+        }
+    }
 });

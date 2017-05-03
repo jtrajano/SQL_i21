@@ -3,5 +3,17 @@ UnitTestEngine.testStore({
     alias: "store.icbufferedcertification",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.Certification"],
-    config: {}
+    config: {
+        "model": "Inventory.model.Certification",
+        "storeId": "BufferedCertification",
+        "pageSize": 50,
+        "remoteFilter": true,
+        "remoteSort": true,
+        "proxy": {
+            "type": "rest",
+            "api": {
+                "read": "../Inventory/api/Certification/Search"
+            }
+        }
+    }
 });

@@ -3,5 +3,17 @@ UnitTestEngine.testStore({
     alias: "store.iclotstatus",
     base: 'Ext.data.Store',
     dependencies: ["Inventory.model.LotStatus"],
-    config: {}
+    config: {
+        "model": "Inventory.model.LotStatus",
+        "storeId": "LotStatus",
+        "pageSize": 50,
+        "proxy": {
+            "type": "rest",
+            "api": {
+                "read": "../Inventory/api/LotStatus/Get",
+                "update": "../Inventory/api/LotStatus/Put",
+                "create": "../Inventory/api/LotStatus/Post"
+            }
+        }
+    }
 });

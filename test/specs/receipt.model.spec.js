@@ -171,6 +171,10 @@ UnitTestEngine.testModel({
         "name": "strWarehouseRefNo",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "dtmLastFreeWhseDate",
+        "type": "date",
+        "allowNull": false
     }],
     validators: [
         [{

@@ -2383,6 +2383,15 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 fieldLabel: 'Gain/Loss:',
                                                                                 value: 0.00,
                                                                                 readOnly: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                quantityField: true,
+                                                                                tabIndex: -1,
+                                                                                itemId: 'txtWeightLossMsgPercent',
+                                                                                fieldLabel: 'Gain/Loss (%):',
+                                                                                value: 0.00,
+                                                                                readOnly: true
                                                                             }
                                                                         ]
                                                                     },

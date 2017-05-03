@@ -16,7 +16,7 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
-        "name": "ysnActive",
+        "name": "ysnDefault",
         "type": "boolean",
         "allowNull": false
     }, {
@@ -25,6 +25,10 @@ UnitTestEngine.testModel({
         "allowNull": false
     }, {
         "name": "strCustomerNumber",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strName",
         "type": "string",
         "allowNull": false
     }],

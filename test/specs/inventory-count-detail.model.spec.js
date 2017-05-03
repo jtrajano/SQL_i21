@@ -129,6 +129,12 @@ UnitTestEngine.testModel({
         "allowNull": false
     }],
     validators: [
-        []
+        [{
+            "field": "intItemUOMId",
+            "type": "presence"
+        }, {
+            "field": "strUnitMeasure",
+            "type": "presence"
+        }]
     ]
 });
