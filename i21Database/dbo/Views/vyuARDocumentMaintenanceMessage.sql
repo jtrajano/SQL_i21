@@ -12,7 +12,7 @@ SELECT A.intDocumentMaintenanceId
 	 , B.intDocumentMaintenanceMessageId
 	 , B.strHeaderFooter
 	 , B.intCharacterLimit
-	 , strMessage								= REPLACE(REPLACE(CONVERT(VarChar(max), B.blbMessage), '<p>', ''), '</p>','')
+	 , strMessage								= REPLACE(REPLACE(REPLACE(CONVERT(VarChar(max), B.blbMessage), '<p>', ''), '</p>',''), '&nbsp;', ' ')	 
 	 , B.ysnRecipe
 	 , B.ysnQuote
 	 , B.ysnSalesOrder
