@@ -6524,4 +6524,46 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntityId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0aeebf49-3d9c-4513-8d33-10641e6d8416" ChangeDateTime="05/03/2017 07:52:53">
+    <Property Name="ElementName" Value="[dbo].[tblGRDiscountCalculationOption].[intValueFieldId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRDiscountCalculationOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDiscountCalculationOptionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4dc99cec-744b-420a-be8b-c22a63d52587" ChangeDateTime="05/03/2017 07:53:24">
+    <Property Name="ElementName" Value="[dbo].[tblGRDiscountCalculationOption].[strDisplayField]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRDiscountCalculationOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDiscountCalculationOption" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="096f6f86-cf35-4242-b593-826ef3fbd84b" ChangeDateTime="05/03/2017 07:55:22">
+    <Property Name="ElementName" Value="[dbo].[PK_tblGRDiscountCalculationOption_intValueFieldId]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRDiscountCalculationOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblGRDiscountCalculationOption_intDiscountCalculationOptionId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ad2740f5-86cc-4731-b506-136e8277502d" ChangeDateTime="05/03/2017 07:58:36">
+    <Property Name="ElementName" Value="[dbo].[tblGRShrinkCalculationOption].[intValueFieldId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRShrinkCalculationOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intShrinkCalculationOptionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9a997336-0443-4d18-a895-ac3e1ae037ce" ChangeDateTime="05/03/2017 07:58:59">
+    <Property Name="ElementName" Value="[dbo].[tblGRShrinkCalculationOption].[strDisplayField]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRShrinkCalculationOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strShrinkCalculationOption" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f60e36bb-689e-4fd4-8e57-0090449ee816" ChangeDateTime="05/03/2017 08:01:01">
+    <Property Name="ElementName" Value="[dbo].[PK_tblGRShrinkCalculationOption_intValueFieldId]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRShrinkCalculationOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblGRShrinkCalculationOption_intShrinkCalculationOptionId]" />
+  </Operation>
 </Operations>

@@ -24,7 +24,7 @@ SELECT CONVERT(INT, DENSE_RANK() OVER (
 	WHEN QM.strCalcMethod=2 THEN ((SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance))/100.0)*(100-ISNULL(t.dblGrossShrink,0))
 	WHEN QM.strCalcMethod=3 THEN SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance)
   END  dblOpenBalance  
- ,DC.strDisplayField AS strDicountOn
+ ,DC.strDiscountCalculationOption AS strDicountOn
  ,SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance) AS dblGrossUnits
  ,((SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance))/100.0)*(100-ISNULL(t.dblGrossShrink,0)) AS dblWetUnits
  ,(SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance))* ISNULL(t1.dblTotalShrink,0)/100.0 AS dblTotalShrink
@@ -48,7 +48,7 @@ JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND C
 LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = CS.intCustomerStorageId AND QM.strSourceType = 'Storage'  
 JOIN tblGRDiscountScheduleCode Dcode ON Dcode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId  
 JOIN tblICItem DItem ON DItem.intItemId = Dcode.intItemId
-JOIN tblGRDiscountCalculationOption DC ON DC.intValueFieldId = QM.strCalcMethod
+JOIN tblGRDiscountCalculationOption DC ON DC.intDiscountCalculationOptionId = QM.strCalcMethod
 LEFT JOIN (SELECT intTicketFileId,ISNULL(SUM(dblShrinkPercent),0) dblGrossShrink FROM tblQMTicketDiscount WHERE strSourceType = 'Storage' AND strCalcMethod=3 GROUP BY intTicketFileId)t ON t.intTicketFileId=CS.intCustomerStorageId
 LEFT JOIN (SELECT intTicketFileId,ISNULL(SUM(dblShrinkPercent),0) dblTotalShrink FROM tblQMTicketDiscount WHERE strSourceType = 'Storage' GROUP BY intTicketFileId)t1 ON t1.intTicketFileId=CS.intCustomerStorageId    
 WHERE ISNULL(CS.strStorageType, '') <> 'ITR' AND CS.dblOpenBalance >0 AND (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0

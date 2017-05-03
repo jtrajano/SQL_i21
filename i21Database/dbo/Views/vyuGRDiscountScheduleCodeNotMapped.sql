@@ -9,8 +9,15 @@ SELECT
 ,LOC.strLocationName
 ,Dcode.intUnitMeasureId
 ,UOM.strUnitMeasure
+,Dcode.intDiscountCalculationOptionId
+,DCO.strDiscountCalculationOption
+,Dcode.intShrinkCalculationOptionId
+,SCO.strShrinkCalculationOption
 FROM tblGRDiscountScheduleCode Dcode
 LEFT JOIN tblICItem Item ON Item.intItemId=Dcode.intItemId
 LEFT JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=Dcode.intStorageTypeId
 LEFT JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = Dcode.intCompanyLocationId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = Dcode.intUnitMeasureId
+LEFT JOIN tblGRDiscountCalculationOption DCO ON DCO.intDiscountCalculationOptionId = Dcode.intDiscountCalculationOptionId
+LEFT JOIN tblGRShrinkCalculationOption SCO ON SCO.intShrinkCalculationOptionId = Dcode.intShrinkCalculationOptionId
+
