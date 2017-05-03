@@ -445,6 +445,132 @@ FROM
 WHERE 
 	ICIS.intInventoryShipmentId = @ShipmentId
 
+
+UNION ALL
+
+SELECT 
+	 [strSourceTransaction]					= 'Inventory Shipment'
+	,[intSourceId]							= @ShipmentId
+	,[strSourceId]							= @ShipmentNumber
+	,[intInvoiceId]							= NULL
+	,[intEntityCustomerId]					= @EntityCustomerId 
+	,[intCompanyLocationId]					= @CompanyLocationId 
+	,[intCurrencyId]						= @CurrencyId 
+	,[intTermId]							= NULL 
+	,[intPeriodsToAccrue]					= @PeriodsToAccrue 
+	,[dtmDate]								= @Date 
+	,[dtmDueDate]							= NULL
+	,[dtmShipDate]							= @ShipDate 
+	,[intEntitySalespersonId]				= @EntitySalespersonId 
+	,[intFreightTermId]						= @FreightTermId 
+	,[intShipViaId]							= @ShipViaId 
+	,[intPaymentMethodId]					= NULL 
+	,[strInvoiceOriginId]					= NULL 
+	,[strPONumber]							= @PONumber 
+	,[strBOLNumber]							= @BOLNumber 
+	,[strDeliverPickup]						= NULL 
+	,[strComments]							= @Comments 
+	,[intShipToLocationId]					= @ShipToLocationId 
+	,[intBillToLocationId]					= NULL
+	,[ysnTemplate]							= 0
+	,[ysnForgiven]							= 0
+	,[ysnCalculated]						= 0
+	,[ysnSplitted]							= 0
+	,[intPaymentId]							= NULL
+	,[intSplitId]							= NULL
+	,[intDistributionHeaderId]				= NULL
+	,[strActualCostId]						= NULL
+	,[intShipmentId]						= NULL
+	,[intTransactionId]						= NULL
+	,[intOriginalInvoiceId]					= NULL
+	,[intEntityId]							= @UserId
+	,[ysnResetDetails]						= 0
+	,[ysnRecap]								= 0
+	,[ysnPost]								= 0
+
+	,[intInvoiceDetailId]					= NULL
+	,[intItemId]							= ICISI.intItemId
+	,[ysnInventory]							= 0
+	,[strDocumentNumber]					= ''
+	,[strItemDescription]					= ICI.strDescription
+	,[intOrderUOMId]						= NULL
+	,[dblQtyOrdered]						= @ZeroDecimal
+	,[intItemUOMId]							= ICISI.intItemUOMId
+	,[dblQtyShipped]						= ICISI.dblQuantity
+	,[dblDiscount]							= @ZeroDecimal
+	,[dblItemWeight]						= @ZeroDecimal
+	,[intItemWeightUOMId]					= @ZeroDecimal
+	,[dblPrice]								= ICISI.dblUnitPrice
+	,[strPricing]							= 'Inventory Shipment'
+	,[ysnRefreshPrice]						= 0
+	,[strMaintenanceType]					= NULL
+	,[strFrequency]							= NULL
+	,[dtmMaintenanceDate]					= NULL
+	,[dblMaintenanceAmount]					= @ZeroDecimal 
+	,[dblLicenseAmount]						= @ZeroDecimal
+	,[intTaxGroupId]						= NULL
+	,[intStorageLocationId]					= ICISI.[intStorageLocationId] 
+	,[intCompanyLocationSubLocationId]		= ICISI.[intSubLocationId] 
+	,[ysnRecomputeTax]						= 0
+	,[intSCInvoiceId]						= NULL
+	,[strSCInvoiceNumber]					= NULL
+	,[intSCBudgetId]						= NULL
+	,[strSCBudgetDescription]				= NULL
+	,[intInventoryShipmentItemId]			= NULL 
+	,[intInventoryShipmentChargeId]			= NULL
+	,[strShipmentNumber]					= ICIS.strShipmentNumber
+	,[intRecipeItemId]						= NULL
+	,[intRecipeId]							= NULL
+	,[intSubLocationId]						= NULL
+	,[intCostTypeId]						= NULL
+	,[intMarginById]						= NULL
+	,[intCommentTypeId]						= NULL
+	,[dblMargin]							= @ZeroDecimal
+	,[dblRecipeQuantity]					= @ZeroDecimal
+	,[intSalesOrderDetailId]				= NULL
+	,[strSalesOrderNumber]					= '' 
+	,[intContractHeaderId]					= NULL
+	,[intContractDetailId]					= NULL
+	,[intShipmentPurchaseSalesContractId]	= NULL
+	,[dblShipmentGrossWt]					= @ZeroDecimal 
+	,[dblShipmentTareWt]					= @ZeroDecimal
+	,[dblShipmentNetWt]						= @ZeroDecimal
+	,[intTicketId]							= NULL
+	,[intTicketHoursWorkedId]				= NULL
+	,[intOriginalInvoiceDetailId]			= NULL
+	,[intSiteId]							= NULL
+	,[strBillingBy]							= NULL
+	,[dblPercentFull]						= NULL
+	,[dblNewMeterReading]					= @ZeroDecimal
+	,[dblPreviousMeterReading]				= @ZeroDecimal
+	,[dblConversionFactor]					= @ZeroDecimal
+	,[intPerformerId]						= NULL
+	,[ysnLeaseBilling]						= 0
+	,[ysnVirtualMeterReading]				= 0
+	,[ysnClearDetailTaxes]					= 0
+	,[intTempDetailIdForTaxes]				= NULL
+	,[ysnBlended]							= 0
+	,[intStorageScheduleTypeId]				= ICISI.intStorageScheduleTypeId
+	,[intDestinationGradeId]				= NULL
+	,[intDestinationWeightId]				= NULL
+	,[intCurrencyExchangeRateTypeId]		= ICISI.[intForexRateTypeId]
+	,[intCurrencyExchangeRateId]			= NULL
+	,[dblCurrencyExchangeRate]				= ICISI.[dblForexRate]
+	,[intSubCurrencyId]						= NULL
+	,[dblSubCurrencyRate]					= @ZeroDecimal
+FROM 
+	tblICInventoryShipment ICIS
+INNER JOIN
+	tblICInventoryShipmentItem ICISI
+		ON ICIS.intInventoryShipmentId = ICISI.intInventoryShipmentId
+INNER JOIN
+	tblICItem ICI
+		ON ICISI.intItemId = ICI.intItemId
+WHERE 
+	ICIS.intInventoryShipmentId = @ShipmentId
+	AND ICISI.intOrderId IS NULL
+	AND ICISI.intLineNo IS NULL
+
 SELECT * INTO #TempTable
 FROM @UnsortedEntriesForInvoice
 
