@@ -207,16 +207,16 @@ BEGIN
 	END
 	
 	----GET THE TOTAL IR AMOUNT
-	SELECT @receiptAmount = ISNULL(SUM(A.dblLineTotal),0) + ISNULL(SUM(dblTax),0) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
+	--SELECT @receiptAmount = ISNULL(SUM(A.dblLineTotal),0) + ISNULL(SUM(dblTax),0) FROM tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = @receiptId;
 	
-	SELECT @totalCharges = ISNULL((SUM(dblUnitCost) + ISNULL(SUM(dblTax),0.00)),0.00)
-	FROM vyuICChargesForBilling WHERE intInventoryReceiptId = @receiptId
+	--SELECT @totalCharges = ISNULL((SUM(dblUnitCost) + ISNULL(SUM(dblTax),0.00)),0.00)
+	--FROM vyuICChargesForBilling WHERE intInventoryReceiptId = @receiptId
 	
-	SELECT @totalLineItem =   SUM(A.dblLineTotal) + ISNULL(SUM(dblTax),0)
-	FROM #tmpReceiptDetailData A 
-	WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptId = @receiptId
+	--SELECT @totalLineItem =   SUM(A.dblLineTotal) + ISNULL(SUM(dblTax),0)
+	--FROM #tmpReceiptDetailData A 
+	--WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptId = @receiptId
 	
-	SET @totalReceiptAmount = @totalLineItem + @totalCharges;
+	--SET @totalReceiptAmount = @totalLineItem + @totalCharges;
 
 	SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM #tmpReceiptData A
 		INNER JOIN #tmpReceiptDetailData B ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -308,8 +308,8 @@ BEGIN
 				[intAccountId] 			=	@APAccount,
 				[strBillId]				=	@generatedBillRecordId,
 				[strReference] 			=	A.strBillOfLading,
-				[dblTotal] 				=	@totalReceiptAmount,
-				[dblAmountDue]			=	@totalReceiptAmount,
+				[dblTotal] 				=	0,
+				[dblAmountDue]			=	0,
 				[intEntityId]			=	@userId,
 				[ysnPosted]				=	0,
 				[ysnPaid]				=	0,
@@ -361,11 +361,11 @@ BEGIN
 		END
 		
 		----GET THE TOTAL IR AMOUNT PER RECEIPT ITEM
-		SELECT @totalLineItem =   SUM(A.dblLineTotal) + ISNULL(SUM(dblTax),0)
-		FROM #tmpReceiptDetailData A 
-		WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptItemId = @receiptDetailId 
+		--SELECT @totalLineItem =   SUM(A.dblLineTotal) + ISNULL(SUM(dblTax),0)
+		--FROM #tmpReceiptDetailData A 
+		--WHERE A.dblUnitCost > 0 AND A.intInventoryReceiptItemId = @receiptDetailId 
 		
-		SET @totalReceiptAmount = @totalLineItem;
+		--SET @totalReceiptAmount = @totalLineItem;
 
 		IF @intProducerId IS NOT NULL 
 		BEGIN
@@ -425,8 +425,8 @@ BEGIN
 					,[intAccountId] 		=	@APAccount
 					,[strBillId]			=	@generatedBillRecordId
 					,[strReference] 		=	A.strBillOfLading
-					,[dblTotal] 			=	@totalReceiptAmount
-					,[dblAmountDue]			=	@totalReceiptAmount
+					,[dblTotal] 			=	0
+					,[dblAmountDue]			=	0
 					,[intEntityId]			=	@userId
 					,[ysnPosted]			=	0
 					,[ysnPaid]				=	0
@@ -808,8 +808,16 @@ BEGIN
 	WHERE intBillId = @currentVoucher
 
 	UPDATE A
-		SET A.dblSubtotal = ISNULL(dblTotal - (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @currentVoucher),0)--AP-3180 Update the subtotal when posting directly from Scale
+		SET A.dblSubtotal = Details.dblTotal--ISNULL(dblTotal - (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @currentVoucher),0)--AP-3180 Update the subtotal when posting directly from Scale
+		,A.dblTotal = Details.dblTotal--ISNULL(dblTotal - (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @currentVoucher),0)--AP-3180 Update the subtotal when posting directly from Scale
+		,A.dblAmountDue = Details.dblTotal
 	FROM tblAPBill A
+	CROSS APPLY (
+		SELECT
+			SUM(ISNULL(dblTotal,0) + ISNULL(dblTax,0)) AS dblTotal
+		FROM tblAPBillDetail B
+		WHERE B.intBillId = A.intBillId
+	) Details
 	WHERE intBillId = @currentVoucher
 	
 	SELECT @shipFrom = intShipFromId, @shipTo = intShipToId FROM tblAPBill WHERE intBillId = @currentVoucher
