@@ -92,6 +92,12 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
 		,@strBatchId OUTPUT
 
+	IF @dtmProductionDate > @dtmDate
+		OR @dtmProductionDate IS NULL
+	BEGIN
+		SELECT @dtmProductionDate = @dtmDate
+	END
+
 	--Non Lot Tracking
 	INSERT INTO @ItemsForPost (
 		intItemId
@@ -117,7 +123,7 @@ BEGIN
 	SELECT intItemId = cl.intItemId
 		,intItemLocationId = il.intItemLocationId
 		,intItemUOMId = cl.intItemIssuedUOMId
-		,dtmDate = GetDate()
+		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblIssuedQuantity)
 		,dblUOMQty = ItemUOM.dblUnitQty
 		,dblCost = ISNULL(IP.dblLastCost,0)+ISNULL((
@@ -151,12 +157,6 @@ BEGIN
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND cl.intBatchId = @intBatchId
 		AND ISNULL(cl.intLotId, 0) = 0
-
-	IF @dtmProductionDate > @dtmDate
-		OR @dtmProductionDate IS NULL
-	BEGIN
-		SELECT @dtmProductionDate = @dtmDate
-	END
 
 	INSERT INTO @ItemsForPost (
 		intItemId
