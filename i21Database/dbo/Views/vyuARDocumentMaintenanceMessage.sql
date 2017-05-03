@@ -30,6 +30,6 @@ INNER JOIN
 		ysnInvoice, ysnScaleTicket 
 	 FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 LEFT JOIN 
-	(SELECT intEntityCustomerId, strCustomerNumber FROM vyuARCustomer) C ON A.intEntityCustomerId = C.intEntityCustomerId
+	(SELECT intEntityId, strCustomerNumber FROM vyuARCustomer) C ON A.intEntityCustomerId = C.intEntityId
 LEFT JOIN 
 	(SELECT intCompanyLocationId, strLocationName FROM tblSMCompanyLocation) CL ON A.intCompanyLocationId = CL.intCompanyLocationId
