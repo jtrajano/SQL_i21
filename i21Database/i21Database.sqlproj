@@ -5408,7 +5408,4 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\24_OfflineMenu.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\SM\DefaultData\25_DocumentSource.sql" />
-  </ItemGroup>
 </Project>
