@@ -5214,6 +5214,9 @@
     <Build Include="dbo\Functions\fnICGetErrorMessage.sql" />
     <Build Include="dbo\Views\vyuTRLoadHeaderLink.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MS_Mississippi.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPRHedgeDailyPositionDetailByMonth.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPRInvDailyPositionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPRHedgeDailyPositionDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
