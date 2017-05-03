@@ -46,6 +46,7 @@ AS
 	,A.dblTotalCapacity
 	,A.ysnTaxable
 	,Q.strTaxGroup
+	,strDeviceOwnership = J.strOwnership
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
@@ -73,6 +74,7 @@ AS
 	LEFT JOIN (
 					SELECT Y.strSerialNumber 
 						,Z.intSiteID
+						,Y.strOwnership
 					FROM tblTMSiteDevice Z
 					INNER JOIN tblTMDevice Y
 						ON Z.intDeviceId = Y.intDeviceId

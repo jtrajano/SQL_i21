@@ -70,6 +70,7 @@ BEGIN
 				,A.dblTotalCapacity
 				,A.ysnTaxable
 				,strTaxGroup = Q.vwlcl_tax_state
+				,strDeviceOwnership = J.strOwnership
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -88,6 +89,7 @@ BEGIN
 				LEFT JOIN (
 								SELECT Y.strSerialNumber 
 									,Z.intSiteID
+									,Y.strOwnership
 								FROM tblTMSiteDevice Z
 								INNER JOIN tblTMDevice Y
 									ON Z.intDeviceId = Y.intDeviceId
@@ -147,6 +149,7 @@ BEGIN
 				,A.dblTotalCapacity
 				,A.ysnTaxable
 				,Q.strTaxGroup
+				,strDeviceOwnership = J.strOwnership
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -174,6 +177,7 @@ BEGIN
 				LEFT JOIN (
 								SELECT Y.strSerialNumber 
 									,Z.intSiteID
+									,Y.strOwnership
 								FROM tblTMSiteDevice Z
 								INNER JOIN tblTMDevice Y
 									ON Z.intDeviceId = Y.intDeviceId
