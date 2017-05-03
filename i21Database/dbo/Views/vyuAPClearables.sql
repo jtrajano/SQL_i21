@@ -13,12 +13,15 @@ SELECT DISTINCT
 	, Bill.intBillId 
 	, strBillId = ISNULL(Bill.strBillId, 'New Voucher')
 	, dblAmountPaid = 0
-	, Receipt.dblLineTotal + ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0) AS dblTotal
-	, CASE 
-		WHEN Bill.intTransactionType != 1 AND Bill.dblDetailTotal > 0 
-		THEN Bill.dblDetailTotal * -1 
-		ELSE Bill.dblDetailTotal 
-	  END AS dblAmountDue 
+	, dblTotal = CASE WHEN Receipt.strReceiptType = 'Inventory Return' 
+					  THEN (Receipt.dblLineTotal + ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) *-1
+					  ELSE Receipt.dblLineTotal + ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)
+				 END
+	, dblAmountDue = CASE 
+						WHEN Bill.intTransactionType != 1 AND Bill.dblDetailTotal > 0 
+						THEN Bill.dblDetailTotal * -1 
+						ELSE Bill.dblDetailTotal 
+					END  
 	, dblVoucherAmount = ISNULL(Bill.dblDetailTotal,0) 
 	, dblWithheld = 0
 	, dblDiscount = 0 
@@ -30,15 +33,29 @@ SELECT DISTINCT
 	, Bill.ysnPaid
 	, Bill.strTerm
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
-	,Receipt.dblQtyToReceive
-	,dblQtyVouchered = ISNULL(Bill.dblQtyReceived,ISNULL(Receipt.dblBillQty,0))
-	,(Receipt.dblQtyToReceive - ISNULL(Bill.dblQtyReceived,0)) dblQtyToVoucher
+	,dblQtyToReceive = (CASE WHEN Receipt.strReceiptType = 'Inventory Return' 
+							 THEN Receipt.dblQtyToReceive * -1 
+							 ELSE Receipt.dblQtyToReceive END)
+	,dblQtyVouchered = (CASE WHEN Receipt.strReceiptType = 'Inventory Return' 
+							 THEN ISNULL(Bill.dblQtyReceived,ISNULL(Receipt.dblBillQty,0)) *-1
+							 ELSE ISNULL(Bill.dblQtyReceived,ISNULL(Receipt.dblBillQty,0)) END)
+	,dblQtyToVoucher = (CASE WHEN Receipt.strReceiptType = 'Inventory Return' 
+							 THEN (Receipt.dblQtyToReceive - ISNULL(Bill.dblQtyReceived,0)) *-1
+							 ELSE (Receipt.dblQtyToReceive - ISNULL(Bill.dblQtyReceived,0)) END) 
 	,dblAmountToVoucher =
-	  CASE
-		WHEN Receipt.dblQtyToReceive = 0
-		THEN 0
-		ELSE CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) / (Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) AS DECIMAL (18,2))
-	  END
+					  (CASE WHEN Receipt.strReceiptType = 'Inventory Return' 
+					  THEN
+						  (CASE
+							WHEN Receipt.dblQtyToReceive = 0 THEN 0
+							ELSE CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) / 
+								(Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) AS DECIMAL (18,2))
+						  END) *-1
+					  ELSE 
+						  (CASE
+							WHEN Receipt.dblQtyToReceive = 0 THEN 0
+							ELSE CAST((ISNULL(Receipt.dblLineTotal,0) +  ISNULL(ReceiptTaxes.dblTotalTax,0) + ISNULL(ReceiptCharges.dblCharges,0)) / 
+								(Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) AS DECIMAL (18,2))
+						  END)END)                    
 	,0 AS dblChargeAmount	
 	,Receipt.strContainer
 FROM vyuICGetInventoryReceiptItem Receipt
@@ -80,10 +97,9 @@ FROM vyuICGetInventoryReceiptItem Receipt
 		SELECT SUM(dblAmount) + SUM(dblTax) AS dblCharges FROM dbo.tblICInventoryReceiptCharge A 
 		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId AND A.intEntityVendorId IN (select intEntityVendorId FROM tblAPVendor WHERE strVendorId = Receipt.strVendorId)
 	) ReceiptCharges
-	
 WHERE Receipt.ysnPosted = 1 AND ((Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) != 0 OR  (CASE WHEN Receipt.dblQtyToReceive = 0  THEN 0  
 																										ELSE (ISNULL(Receipt.dblLineTotal,0)/Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0))END) != 0)
-																										--AND Receipt.strReceiptNumber = 'IR-369'
+																										--AND Receipt.strReceiptNumber = 'RTN-25'
 UNION ALL																									
 --QUERY FOR RECEIPT VENDOR PRICE DOWN WITH CHARGES
 SELECT DISTINCT
