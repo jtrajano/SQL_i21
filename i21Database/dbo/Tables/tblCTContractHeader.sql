@@ -103,7 +103,6 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 
 	CONSTRAINT [FK_tblCTContractHeader_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY (intFutureMarketId) REFERENCES tblRKFutureMarket(intFutureMarketId),
 	CONSTRAINT [FK_tblCTContractHeader_tblRKFutureMonth_intFutureMonthId] FOREIGN KEY (intFutureMonthId) REFERENCES tblRKFuturesMonth(intFutureMonthId),
-	CONSTRAINT [FK_tblCTContractHeader_tblSMCompanyLocationSubLocation_intINCOLocationTypeId] FOREIGN KEY (intINCOLocationTypeId) REFERENCES tblSMCompanyLocationSubLocation(intCompanyLocationSubLocationId),
 	CONSTRAINT [FK_tblCTContractHeader_tblSMCountry_intCountryId] FOREIGN KEY (intCountryId) REFERENCES tblSMCountry(intCountryID)
 )
 
