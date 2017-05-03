@@ -39,8 +39,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intAccountId]					=	ISNULL(A.intAccountId ,ISNULL(C2.intAccountId,D.intGLAccountExpenseId)),
 		[intItemId]						=	C.[intItemId]					,
 		[strMiscDescription]			=	ISNULL(A.strMiscDescription, C.strDescription),
-		[dblTotal]						=	(ISNULL(A.dblCost, C.dblReceiveLastCost) * A.dblQtyReceived) 
-												- ((ISNULL(A.dblCost, C.dblReceiveLastCost) * A.dblQtyReceived) * (A.dblDiscount / 100)),
+		[dblTotal]						=	CAST((ISNULL(A.dblCost, C.dblReceiveLastCost) * A.dblQtyReceived) 
+												- ((ISNULL(A.dblCost, C.dblReceiveLastCost) * A.dblQtyReceived) * (A.dblDiscount / 100)) AS DECIMAL(18,2)),
 		[dblQtyOrdered]					=	A.dblQtyReceived,
 		[dblQtyReceived]				=	A.dblQtyReceived,
 		[dblDiscount]					=	A.[dblDiscount],
