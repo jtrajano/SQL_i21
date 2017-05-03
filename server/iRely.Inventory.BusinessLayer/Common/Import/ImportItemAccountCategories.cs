@@ -19,7 +19,11 @@ namespace iRely.Inventory.BusinessLayer
         {
             tblICCategoryAccount fc = new tblICCategoryAccount();
             fc.intConcurrencyId = 1;
+            string category = "";
+            string accountId = "";
             bool valid = true;
+            string glcategory = null, account = null;
+
             for (var i = 0; i < fieldCount; i++)
             {
                 string header = headers[i];
@@ -87,9 +91,11 @@ namespace iRely.Inventory.BusinessLayer
                             context,
                             m => m.strAccountCategory == value,
                             e => e.intAccountCategoryId);
+                        category = value;
                         if (lu != null)
                         {
                             fc.intAccountCategoryId = (int)lu;
+                            glcategory = value;
                         }
                         else
                         {
@@ -125,9 +131,11 @@ namespace iRely.Inventory.BusinessLayer
                             context,
                             m => m.strAccountId == value,
                             e => e.intAccountId);
+                        accountId = value;
                         if (lu != null)
                         {
                             fc.intAccountId = (int)lu;
+                            account = value;
                         }
                         else
                         {
@@ -146,6 +154,10 @@ namespace iRely.Inventory.BusinessLayer
 
                 }
             }
+
+            if (fc != null && account != null && category != null)
+                valid = IsAccountMatchedForCategory(category, account, dr, "GL Account Id", row);
+
             if (!valid)
                 return null;
 
@@ -156,9 +168,9 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     Type = TYPE_INNER_WARN,
                     Status = REC_SKIP,
-                    Column = headers[0],
+                    Column = headers[1] + "/"  + headers[2],
                     Row = row,
-                    Message = "The record already exists: " + fc.strAccountCategory + " - " + fc.strAccountId + " . Record skipped."
+                    Message = "The record already exists: " + category + " - " + accountId + " . Record skipped."
                 });
             }
             else
@@ -168,6 +180,57 @@ namespace iRely.Inventory.BusinessLayer
             return fc;
         }
 
+        class vyuGLAccountDetail
+        {
+            public int? intAccountId { get; set; }
+            public string strAccountCategory { get; set; }
+            public string strAccountId { get; set; }
+            public string strAccountId1 { get; set; }
+            public string strAccountType { get; set; }
+            public int? intAccountCategoryId { get; set; }
+        }
+
+        private bool IsAccountMatchedForCategory(string category, string account, ImportDataResult dr, string header, int row)
+        {
+            var p2 = new System.Data.SqlClient.SqlParameter("@p2", account.Trim().Replace("-", ""));
+            p2.DbType = System.Data.DbType.String;
+            var p1 = new System.Data.SqlClient.SqlParameter("@p1", category.Trim());
+            p1.DbType = System.Data.DbType.String;
+            var query = "SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = @p1 AND strAccountId1 = @p2";
+            IEnumerable<vyuGLAccountDetail> ships = context.ContextManager.Database.SqlQuery<vyuGLAccountDetail>(query, p1, p2);
+            try
+            {
+                vyuGLAccountDetail ship = ships.FirstOrDefault();
+
+                if (ship != null)
+                    return true;
+                else
+                {
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Column = header,
+                        Row = row,
+                        Type = TYPE_INNER_ERROR,
+                        Message = "Invalid Account Id: " + account + '.',
+                        Status = REC_SKIP
+                    });
+                    dr.Info = INFO_ERROR;
+                }
+            }
+            catch (Exception e)
+            {
+                dr.Messages.Add(new ImportDataMessage()
+                {
+                    Column = header,
+                    Row = row,
+                    Type = TYPE_INNER_EXCEPTION,
+                    Message = "Error validating Account Id: " + account + ". " + e.Message,
+                    Status = REC_SKIP
+                });
+                dr.Info = INFO_ERROR;
+            }
+            return false;
+        }
         protected override int GetPrimaryKeyId(ref tblICCategoryAccount entity)
         {
             return entity.intCategoryAccountId;

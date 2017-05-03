@@ -2739,6 +2739,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             lotTare = lot.get('dblTareWeight');
                             lotTare = Ext.isNumeric(lotTare) ? lotTare : 0.00;
 
+                            // Set the default condition
+                            lot.set('strCondition', i21.ModuleMgr.Inventory.getCompanyPreference('strLotCondition'));
+                            
                             // Calculate the total Gross and total Net
                             totalGross += lotGross;
                             totalNet += (lotGross - lotTare);
@@ -5621,8 +5624,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                             ysnSubCurrency: otherCharge.ysnSubCurrency,
                                                             strCostUOM: otherCharge.strUOM,
                                                             strVendorName: otherCharge.strVendorName,
-                                                            strContractNumber: order.get('strOrderNumber')
-
+                                                            strContractNumber: order.get('strOrderNumber'),
+                                                            strCondition: i21.ModuleMgr.Inventory.getCompanyPreference('strLotCondition')
                                                         });
                                                         currentVM.tblICInventoryReceiptCharges().add(newReceiptCharge);
                                                     }
@@ -5679,7 +5682,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 strStorageLocation: newReceiptItem.get('strStorageLocationName'),
                                 strSubLocationName:  newReceiptItem.get('strSubLocationName'),
                                 strUnitMeasure: newReceiptItem.get('strUnitMeasure'),
-                                dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor')
+                                dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor'),
+								strCondition: i21.ModuleMgr.Inventory.getCompanyPreference('strLotCondition')
                             });
                             currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
                         }

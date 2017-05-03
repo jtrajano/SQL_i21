@@ -20,6 +20,7 @@ namespace iRely.Inventory.BusinessLayer
             tblICItemAccount fc = new tblICItemAccount();
 
             bool valid = true;
+            string category = null, account = null;
 
             for (var i = 0; i < fieldCount; i++)
             {
@@ -30,6 +31,7 @@ namespace iRely.Inventory.BusinessLayer
                 string value = csv[header];
                 string h = header.ToLower().Trim();
                 int? lu = null;
+                
 
                 switch (h)
                 {
@@ -93,6 +95,7 @@ namespace iRely.Inventory.BusinessLayer
                         if (lu != null)
                         {
                             fc.intAccountCategoryId = (int) lu;
+                            category = value;
                         }
                         else
                         {
@@ -131,6 +134,7 @@ namespace iRely.Inventory.BusinessLayer
                         if (lu != null)
                         {
                             fc.intAccountId = (int) lu;
+                            account = value;
                         }
                         else
                         {
@@ -148,6 +152,9 @@ namespace iRely.Inventory.BusinessLayer
                         break;
                 }
             }
+
+            if(fc != null && account != null && category != null)
+                valid = IsAccountMatchedForCategory(category, account, dr, "GL Account Id", row);
 
             if (!valid)
                 return null;
@@ -204,6 +211,53 @@ namespace iRely.Inventory.BusinessLayer
                 });
             }
             return fc;
+        }
+
+        class vyuGLAccountDetail
+        {
+            public int? intAccountId { get; set; }
+        }
+
+        private bool IsAccountMatchedForCategory(string category, string account, ImportDataResult dr, string header, int row)
+        {
+            var p2 = new System.Data.SqlClient.SqlParameter("@p2", account.Trim().Replace("-", ""));
+            p2.DbType = System.Data.DbType.String;
+            var p1 = new System.Data.SqlClient.SqlParameter("@p1", category.Trim());
+            p1.DbType = System.Data.DbType.String;
+            var query = "SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = @p1 AND strAccountId1 = @p2";
+            IEnumerable<vyuGLAccountDetail> ships = context.ContextManager.Database.SqlQuery<vyuGLAccountDetail>(query, p1, p2);
+            try
+            {
+                vyuGLAccountDetail ship = ships.FirstOrDefault();
+                
+                if (ship != null)
+                    return true;
+                else
+                {
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Column = header,
+                        Row = row,
+                        Type = TYPE_INNER_ERROR,
+                        Message = "Invalid Account Id: " + account + '.',
+                        Status = REC_SKIP
+                    });
+                    dr.Info = INFO_ERROR;
+                }
+            }
+            catch (Exception e)
+            {
+                dr.Messages.Add(new ImportDataMessage()
+                {
+                    Column = header,
+                    Row = row,
+                    Type = TYPE_INNER_EXCEPTION,
+                    Message = "Error validating Account Id: " + account + ". " + e.Message,
+                    Status = REC_SKIP
+                });
+                dr.Info = INFO_ERROR;
+            }
+            return false;
         }
 
         protected override int GetPrimaryKeyId(ref tblICItemAccount entity)
