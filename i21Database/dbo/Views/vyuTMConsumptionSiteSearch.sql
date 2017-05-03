@@ -47,6 +47,8 @@ AS
 	,A.ysnTaxable
 	,Q.strTaxGroup
 	,strDeviceOwnership = J.strOwnership
+	,A.strZipCode
+	,strGlobalJulianCalendar = R.strDescription
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
@@ -91,5 +93,7 @@ AS
 		ON A.intTaxStateID = Q.intTaxGroupId
 	LEFT JOIN tblEMEntityPhoneNumber EP
 		ON G.intEntityId = EP.intEntityId  
+	LEFT JOIN tblTMGlobalJulianCalendar R
+		ON A.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 	WHERE ISNULL(D.ysnActive,0) = 1
 GO

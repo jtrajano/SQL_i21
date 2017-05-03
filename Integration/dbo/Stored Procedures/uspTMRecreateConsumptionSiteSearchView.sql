@@ -71,6 +71,8 @@ BEGIN
 				,A.ysnTaxable
 				,strTaxGroup = Q.vwlcl_tax_state
 				,strDeviceOwnership = J.strOwnership
+				,A.strZipCode
+				,strGlobalJulianCalendar = R.strDescription
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -104,6 +106,8 @@ BEGIN
 					ON A.intRouteId = P.intRouteId
 				LEFT JOIN vwlclmst Q
 					ON A.intTaxStateID = Q.A4GLIdentity
+				LEFT JOIN tblTMGlobalJulianCalendar R
+					ON A.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 				
 		')
 	END
@@ -150,6 +154,8 @@ BEGIN
 				,A.ysnTaxable
 				,Q.strTaxGroup
 				,strDeviceOwnership = J.strOwnership
+				,A.strZipCode
+				,strGlobalJulianCalendar = R.strDescription
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -194,6 +200,8 @@ BEGIN
 					ON A.intTaxStateID = Q.intTaxGroupId
 				LEFT JOIN tblEMEntityPhoneNumber EP
 					ON G.intEntityId = EP.intEntityId  
+				LEFT JOIN tblTMGlobalJulianCalendar R
+					ON A.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 				WHERE ISNULL(D.ysnActive,0) = 1
 		')
 	END
