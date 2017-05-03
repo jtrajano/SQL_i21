@@ -5217,6 +5217,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRptDPRHedgeDailyPositionDetailByMonth.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptDPRInvDailyPositionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptDPRHedgeDailyPositionDetail.sql" />
+    <Build Include="dbo\Tables\tblSMLanguage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

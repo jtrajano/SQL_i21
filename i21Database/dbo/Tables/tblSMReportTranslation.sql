@@ -6,5 +6,6 @@
 	[intTransactionId]			INT  NOT NULL,
 	[intLanguageId]				INT  NOT NULL,
     [intConcurrencyId]			INT	 NOT NULL DEFAULT (1),
-	CONSTRAINT [FK_tblSMReportTranslation_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblSMReportTranslation_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSMReportTranslation_tblSMLanguage] FOREIGN KEY ([intLanguageId]) REFERENCES [tblSMLanguage]([intLanguageId])
 )
