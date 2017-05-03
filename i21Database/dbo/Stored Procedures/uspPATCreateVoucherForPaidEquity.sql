@@ -96,6 +96,18 @@ END
 
 		UPDATE tblPATEquityPaySummary SET intBillId = @intCreatedBillId WHERE intEquityPaySummaryId = @intEquityPaySummaryId;
 
+		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
+		BEGIN
+			DECLARE @voucherId AS Id;
+			INSERT INTO @voucherId SELECT intBillId FROM tblAPBillDetail where intBillId = @intCreatedBillId;
+
+			DELETE FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intId FROM @voucherId);
+			UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intId FROM @voucherId);
+			UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intId FROM @voucherId);
+
+			EXEC uspAPUpdateVoucherTotal @voucherId
+		END
+
 		EXEC [dbo].[uspAPPostBill]
 			@batchId = @intCreatedBillId,
 			@billBatchId = NULL,
