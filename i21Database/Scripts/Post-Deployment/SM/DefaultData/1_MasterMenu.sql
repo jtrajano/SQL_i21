@@ -4298,6 +4298,50 @@ BEGIN
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@QualityViewMenuId)
 END
 
+/* Risk Management */
+
+DECLARE @RiskParentMenuId INT
+SELECT  @RiskParentMenuId=intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Risk Management' AND strModuleName = 'Risk Management' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Brokerage Accounts' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskParentMenuId)
+
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Brokerage Accounts', N'Risk Management', @RiskParentMenuId, N'Brokerage Accounts', N'Maintenance', N'Screen', N'RiskManagement.view.BrokerageAccount?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'RiskManagement.view.BrokerageAccount?showSearch=true' WHERE strMenuName = 'Brokerage Accounts' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskParentMenuId
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Futures Markets' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskParentMenuId)
+
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Futures Markets', N'Risk Management', @RiskParentMenuId, N'Futures Markets', N'Maintenance', N'Screen', N'RiskManagement.view.FuturesMarket?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'RiskManagement.view.FuturesMarket?showSearch=true' WHERE strMenuName = 'Futures Markets' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskParentMenuId
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reconciliation Broker Statement' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskParentMenuId)
+
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Reconciliation Broker Statement', N'Risk Management', @RiskParentMenuId, N'Reconciliation Broker Statement', N'Activity', N'Screen', N'RiskManagement.view.ReconciliationBrokerStatement?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'RiskManagement.view.ReconciliationBrokerStatement?showSearch=true' WHERE strMenuName = 'Reconciliation Broker Statement' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskParentMenuId
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Collateral' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskParentMenuId)
+
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Collateral', N'Risk Management', @RiskParentMenuId, N'Collateral', N'Activity', N'Screen', N'RiskManagement.view.Collateral?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'RiskManagement.view.Collateral?showSearch=true' WHERE strMenuName = 'Collateral' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskParentMenuId
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Derivative Screen' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskParentMenuId)
+
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Derivative Screen', N'Risk Management', @RiskParentMenuId, N'Derivative Screen', N'Activity', N'Screen', N'RiskManagement.view.DerivativeScreen?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'RiskManagement.view.DerivativeScreen?showSearch=true' WHERE strMenuName = 'Derivative Screen' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskParentMenuId
+
 GO
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------- ADJUST uspSMSortOriginMenus' sorting -------------------------------------------------------
