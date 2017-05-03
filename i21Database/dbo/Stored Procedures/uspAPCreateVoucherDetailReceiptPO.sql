@@ -51,7 +51,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContractHeaderId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractHeaderId
 											ELSE NULL END,
-		[dblTotal]						=	ISNULL(detail.dblQtyReceived,(B.dblOpenReceive - B.dblBillQty)) * B.dblUnitCost,
+		[dblTotal]						=	CAST(ISNULL(detail.dblQtyReceived,(B.dblOpenReceive - B.dblBillQty)) * B.dblUnitCost AS DECIMAL(18,2)),
 		[dblTax]						=	B.dblTax,
 		[dblQtyOrdered]					=	ISNULL(detail.dblQtyReceived,(B.dblOpenReceive - B.dblBillQty)),
 		[dblQtyReceived]				=	ISNULL(detail.dblQtyReceived,(B.dblOpenReceive - B.dblBillQty)),
