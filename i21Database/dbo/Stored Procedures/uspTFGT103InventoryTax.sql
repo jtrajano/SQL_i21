@@ -119,7 +119,6 @@ BEGIN TRY
 		INNER JOIN tblEMEntityLocation
 		INNER JOIN tblEMEntity
 		INNER JOIN tblSMTaxCode
-		INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 		INNER JOIN tblICItemMotorFuelTax
 		INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 		INNER JOIN tblICInventoryReceiptItem
