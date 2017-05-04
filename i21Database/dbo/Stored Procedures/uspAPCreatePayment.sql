@@ -112,7 +112,7 @@ BEGIN
 	END
 		
 	--Make sure there is payment method
-	IF @paymentMethodId IS NULL
+	IF @paymentMethodId IS NULL OR @paymentMethodId = 0
 	BEGIN
 		SELECT TOP 1 @paymentMethodId = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'check'
 		IF @paymentMethodId IS NULL
