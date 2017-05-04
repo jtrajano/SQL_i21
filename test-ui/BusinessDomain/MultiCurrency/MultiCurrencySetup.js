@@ -248,16 +248,21 @@ StartTest (function (t) {
         .displayText('===== 4a. Add EUR > USD =====')
         .selectGridComboBoxRowValue('CurrencyExchangeRate',5,'colFromCurrency','EUR','strFromCurrency',1)
         .selectGridComboBoxRowValue('CurrencyExchangeRate',5,'colToCurrency','USD','strToCurrency',1)
+
         .enterGridData('CurrencyExchangeRateDetail', 1, 'dblRate', '1.08')
         .selectGridComboBoxRowValue('CurrencyExchangeRateDetail',1,'colRateType','Spot','strRateType',1)
-        .enterGridData('CurrencyExchangeRateDetail', 1, 'dtmValidFromDate', '4/30/2016')
+        .enterGridData('CurrencyExchangeRateDetail', 1, 'dtmValidFromDate', '4/25/2016')
 
-        .enterGridData('CurrencyExchangeRateDetail', 2, 'dblRate', '1.06115')
+        .enterGridData('CurrencyExchangeRateDetail', 2, 'dblRate', '1.10')
         .selectGridComboBoxRowValue('CurrencyExchangeRateDetail',2,'colRateType','Spot','strRateType',1)
+        .enterGridData('CurrencyExchangeRateDetail', 2, 'dtmValidFromDate', '4/30/2016')
+
+        .enterGridData('CurrencyExchangeRateDetail', 3, 'dblRate', '1.06115')
+        .selectGridComboBoxRowValue('CurrencyExchangeRateDetail',3,'colRateType','Spot','strRateType',1)
         .addFunction (function (next){
         var date = new Date().toLocaleDateString();
         new iRely.FunctionalTest().start(t, next)
-            .selectGridComboBoxRowValue('CurrencyExchangeRateDetail',2,'colEffectiveDate',date,'dtmValidFromDate', 0, 10)
+            .selectGridComboBoxRowValue('CurrencyExchangeRateDetail',3,'colEffectiveDate',date,'dtmValidFromDate', 0, 10)
             .done();
     })
         .displayText('===== 4a. Add EUR > USD DONE =====')
@@ -327,7 +332,8 @@ StartTest (function (t) {
         .selectComboBoxRowValue('CashManagementUnrealized','36005-0002-001', 'CashManagementUnrealizedId', 1,1)
         .displayText('===== 5b. Set Unrealized Gain or Loss Foreign Currency Done  =====')
 
-        .displayText('===== 5c. Set Unrealized Gain or Loss Foreign Currency Offset =====')
+        .displayText('===== 5c. Set Unrealized Gain or Loss Foreign Currency Offset ====='
+        .clickCheckBox('Revalue',true)
         .selectComboBoxRowValue('AccountsPayableOffset','20040-0002-001', 'AccountsPayableOffsetId', 1,1)
         .selectComboBoxRowValue('AccountsReceivableOffset','12040-0002-001', 'AccountsReceivableOffsetId', 1,1)
         .selectComboBoxRowValue('InventoryOffset','16140-0002-001', 'InventoryOffsetId', 1,1)
@@ -377,9 +383,16 @@ StartTest (function (t) {
         .selectComboBoxRowValue('VendorTerms', 'Net 30', 'VendorTerms',5)
         .clickButton('Save')
         .waitUntilLoaded('',3000)
+        .clickButton('Close')
+        .waitUntilLoaded('',3000)
         .displayText('===== 6a. Create ItemVendor MC-1 Done =====')
+        .clickMenuFolder('Purchasing (Accounts Payable)')
 
         .displayText('===== 6b. Create Trucker Vendor MC-1 =====')
+        .clickMenuFolder('Purchasing (Accounts Payable)')
+        .waitUntilLoaded('',3000)
+        .clickMenuScreen('Vendors')
+        .waitUntilLoaded('',3000)
         .clickButton('New')
         .waitUntilLoaded('emcreatenewentity',3000)
         .enterData('Text Field','Name','Trucker MC-1')
