@@ -5189,6 +5189,7 @@
     <Build Include="dbo\Stored Procedures\uspTFProcessBeforePreview.sql" />
     <Build Include="dbo\Views\vyuICLoadContainerPurchaseContracts.sql" />
     <Build Include="dbo\Functions\fnFormatMessage.sql" />
+    <Build Include="dbo\Views\vyuCTSequenceCombo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
