@@ -424,7 +424,7 @@ BEGIN
 		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Periodic]
 			ON dbo.#tmpICInventoryTransaction(dtmDate ASC, strBatchId ASC);
 
-		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Periodic] ON dbo.#tmpICInventoryTransaction([dtmDate] ASC, [id] ASC, [id2] ASC);') 
+		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Periodic] ON dbo.#tmpICInventoryTransaction([dtmDate] ASC, [dblQty] DESC, [id] ASC, [id2] ASC);') 
 
 	END
 	ELSE 
@@ -1962,40 +1962,11 @@ BEGIN
 					--PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Invoice'
 					GOTO _EXIT_WITH_ERROR
 				END 
-			END							
-								
-			ELSE 
-			BEGIN 								
-				-- Update the cost used in the adjustment 
-				UPDATE	AdjDetail
-				SET		dblCost =	CASE	WHEN Lot.intLotId IS NOT NULL  THEN 
-												-- If Lot, then get the Lot's last cost. Otherwise, get the item's last cost. 
-												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
-											WHEN dbo.fnGetCostingMethod(AdjDetail.intItemId, ItemLocation.intItemLocationId) = @AVERAGECOST THEN 
-												-- It item is using Average Costing, then get the Average Cost. 
-												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(ItemPricing.dblAverageCost, 0)) 
-											ELSE
-												-- Otherwise, get the item's last cost. 
-												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(ItemPricing.dblLastCost, 0))
-									END
-				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
-							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
-						LEFT JOIN dbo.tblICItemLocation ItemLocation
-							ON ItemLocation.intLocationId = Adj.intLocationId 
-							AND ItemLocation.intItemId = AdjDetail.intItemId
-						LEFT JOIN dbo.tblICLot Lot
-							ON AdjDetail.intLotId = Lot.intLotId
-						LEFT JOIN dbo.tblICItemUOM ItemUOM
-							ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
-						LEFT JOIN dbo.tblICItemUOM StockUnit
-							ON StockUnit.intItemId = AdjDetail.intItemId
-							AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
-						LEFT JOIN dbo.tblICItemPricing ItemPricing
-							ON ItemPricing.intItemId = Lot.intItemId
-							AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
-				WHERE	Adj.strAdjustmentNo = @strTransactionId
-						AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
-
+			END	
+			
+			-- Repost 'Inventory Receipt/Return'
+			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Inventory Receipt', 'Inventory Return')) 
+			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -2025,21 +1996,6 @@ BEGIN
 						,RebuilInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty) 
 						,dblCost  = CASE 
-										WHEN RebuilInvTrans.dblQty < 0 THEN 
-											CASE	
-												WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-													dbo.fnGetItemAverageCost(
-														RebuilInvTrans.intItemId
-														, RebuilInvTrans.intItemLocationId
-														, RebuilInvTrans.intItemUOMId
-													) 
-												ELSE 
-													dbo.fnMultiply(
-														ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId))
-														,dblUOMQty
-													)
-											END 
-
 										WHEN (RebuilInvTrans.dblQty > 0 AND Receipt.intInventoryReceiptId IS NOT NULL) THEN
 
 											-- New Hierarchy:
@@ -2120,6 +2076,246 @@ BEGIN
 														1
 											END											
 											
+
+										 ELSE 
+											RebuilInvTrans.dblCost
+									END 
+						,RebuilInvTrans.dblSalesPrice  
+						,RebuilInvTrans.intCurrencyId  
+						,RebuilInvTrans.dblExchangeRate  
+						,RebuilInvTrans.intTransactionId  
+						,RebuilInvTrans.intTransactionDetailId  
+						,RebuilInvTrans.strTransactionId  
+						,RebuilInvTrans.intTransactionTypeId  
+						,RebuilInvTrans.intLotId 
+						,RebuilInvTrans.intSubLocationId
+						,RebuilInvTrans.intStorageLocationId
+						,strActualCostId = Receipt.strActualCostId
+						,RebuilInvTrans.intForexRateTypeId
+						,RebuilInvTrans.dblForexRate
+
+				FROM	#tmpICInventoryTransaction RebuilInvTrans INNER JOIN tblICItemLocation ItemLocation 
+							ON RebuilInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
+						LEFT JOIN dbo.tblICInventoryReceipt Receipt
+							ON Receipt.intInventoryReceiptId = RebuilInvTrans.intTransactionId
+							AND Receipt.strReceiptNumber = RebuilInvTrans.strTransactionId			
+						LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+							ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+							AND ReceiptItem.intInventoryReceiptItemId = RebuilInvTrans.intTransactionDetailId 
+							AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
+						LEFT JOIN dbo.tblICInventoryReceiptItemLot ReceiptItemLot
+							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+							AND ReceiptItemLot.intLotId = RebuilInvTrans.intLotId 
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON RebuilInvTrans.intItemId = ItemUOM.intItemId
+							AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
+						LEFT JOIN dbo.tblICLot lot
+							ON lot.intLotId = RebuilInvTrans.intLotId 
+				WHERE	RebuilInvTrans.strBatchId = @strBatchId
+						AND RebuilInvTrans.intTransactionId = @intTransactionId
+						AND ItemLocation.intLocationId IS NOT NULL 
+
+				EXEC dbo.uspICRepostCosting
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intEntityUserSecurityId
+					,@strGLDescription
+					,@ItemsToPost
+
+				-- Clear the GL entries 
+				DELETE FROM @GLEntries
+
+				SET @intReturnId = NULL 
+				INSERT INTO @GLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]					
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm] 
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]
+						,[dblDebitReport]
+						,[dblCreditForeign]
+						,[dblCreditReport]
+						,[dblReportingRate]
+						,[dblForeignRate]
+						,[strRateType]
+				)			
+				EXEC @intReturnId = dbo.uspICCreateReceiptGLEntries
+					@strBatchId 
+					,@strAccountToCounterInventory
+					,@intEntityUserSecurityId
+					,@strGLDescription
+					,NULL 
+					,@intItemId-- This is only used when rebuilding the stocks. 								
+
+				IF @intReturnId <> 0 
+				BEGIN 
+					PRINT 'Error found in uspICCreateReceiptGLEntries'
+					GOTO _EXIT_WITH_ERROR
+				END 				
+
+				-- Rebuild the Other Charges GL Entries
+				BEGIN 
+					-- Delete the GL Detail related to the other charges. 
+					DELETE  gd 
+					FROM	tblGLDetail gd INNER JOIN (
+								tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+									ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+							)
+								ON 
+								gd.strTransactionId = r.strReceiptNumber
+								AND gd.intTransactionId = r.intInventoryReceiptId
+								AND gd.intJournalLineNo = ri.intInventoryReceiptItemId
+					WHERE	gd.strBatchId = @strBatchId
+							AND gd.strTransactionId = @strTransactionId
+							AND ri.intItemId = ISNULL(@intItemId, ri.intItemId)
+
+					-- Re-create the other charge GL entries. 
+					INSERT INTO @GLEntries (
+								[dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[strRateType]
+							)	
+					EXEC @intReturnId = dbo.uspICPostInventoryReceiptOtherCharges 
+						@intTransactionId
+						,@strBatchId
+						,@intEntityUserSecurityId
+						,@intTransactionTypeId			
+						,@intItemId-- This is only used when rebuilding the stocks. 	
+				
+					IF @intReturnId <> 0 
+					BEGIN 
+						PRINT 'Error found in uspICPostInventoryReceiptOtherCharges'
+						GOTO _EXIT_WITH_ERROR
+					END 	
+				END 
+			END 									
+								
+			ELSE 
+			BEGIN 								
+				-- Update the cost used in the adjustment 
+				UPDATE	AdjDetail
+				SET		dblCost =	CASE	WHEN Lot.intLotId IS NOT NULL  THEN 
+												-- If Lot, then get the Lot's last cost. Otherwise, get the item's last cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
+											WHEN dbo.fnGetCostingMethod(AdjDetail.intItemId, ItemLocation.intItemLocationId) = @AVERAGECOST THEN 
+												-- It item is using Average Costing, then get the Average Cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(ItemPricing.dblAverageCost, 0)) 
+											ELSE
+												-- Otherwise, get the item's last cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(ItemPricing.dblLastCost, 0))
+									END
+				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
+							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
+						LEFT JOIN dbo.tblICItemLocation ItemLocation
+							ON ItemLocation.intLocationId = Adj.intLocationId 
+							AND ItemLocation.intItemId = AdjDetail.intItemId
+						LEFT JOIN dbo.tblICLot Lot
+							ON AdjDetail.intLotId = Lot.intLotId
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
+						LEFT JOIN dbo.tblICItemUOM StockUnit
+							ON StockUnit.intItemId = AdjDetail.intItemId
+							AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
+						LEFT JOIN dbo.tblICItemPricing ItemPricing
+							ON ItemPricing.intItemId = Lot.intItemId
+							AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+				WHERE	Adj.strAdjustmentNo = @strTransactionId
+						AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
+
+				INSERT INTO @ItemsToPost (
+						intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId	
+						,strActualCostId 
+						,intForexRateTypeId
+						,dblForexRate
+				)
+				SELECT 	RebuilInvTrans.intItemId  
+						,RebuilInvTrans.intItemLocationId 
+						,RebuilInvTrans.intItemUOMId  
+						,RebuilInvTrans.dtmDate  
+						,RebuilInvTrans.dblQty  
+						,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty) 
+						,dblCost  = CASE 
+										WHEN RebuilInvTrans.dblQty < 0 THEN 
+											CASE	
+												WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+													dbo.fnGetItemAverageCost(
+														RebuilInvTrans.intItemId
+														, RebuilInvTrans.intItemLocationId
+														, RebuilInvTrans.intItemUOMId
+													) 
+												ELSE 
+													dbo.fnMultiply(
+														ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId))
+														,dblUOMQty
+													)
+											END 
+											
 										WHEN (RebuilInvTrans.dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
 											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 1 
 
@@ -2194,7 +2390,7 @@ BEGIN
 				SELECT	TOP 1 1 
 				FROM	tblICInventoryTransactionType 
 				WHERE	intTransactionTypeId = @intTransactionTypeId 
-						AND strName NOT IN ('Cost Adjustment', 'Inventory Shipment', 'Invoice')
+						AND strName NOT IN ('Cost Adjustment', 'Inventory Shipment', 'Invoice', 'Inventory Receipt', 'Inventory Return')
 			)
 			BEGIN 
 				-- Clear the GL entries 
