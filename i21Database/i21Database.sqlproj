@@ -5187,6 +5187,7 @@
     <Build Include="dbo\Stored Procedures\uspICRaiseError.sql" />
     <Build Include="dbo\Functions\fnICGetErrorMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspTFProcessBeforePreview.sql" />
+    <Build Include="dbo\Views\vyuICLoadContainerPurchaseContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
