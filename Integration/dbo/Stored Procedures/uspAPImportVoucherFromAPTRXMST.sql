@@ -103,8 +103,8 @@ SELECT
 	[dtmBillDate] 				=	CASE WHEN ISDATE(A.aptrx_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 	[dtmDueDate] 				=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 	[intAccountId] 				=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(B.apcbk_gl_ap AS NVARCHAR(MAX))),
-	[strReference] 				=	A.aptrx_comment,
-	[strPONumber]				=	A.aptrx_pur_ord_no,
+	[strReference] 				=	A.aptrx_pur_ord_no,
+	[strRemarks]				=	A.aptrx_comment,
 	[dblSubtotal] 				=	CASE WHEN A.aptrx_trans_type = 'C' OR A.aptrx_trans_type = 'A' THEN A.aptrx_orig_amt 
 										ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
 	[dblTotal] 					=	CASE WHEN A.aptrx_trans_type = 'C' OR A.aptrx_trans_type = 'A' THEN A.aptrx_orig_amt 
@@ -171,7 +171,7 @@ INSERT
 	[dtmDueDate], 
 	[intAccountId], 
 	[strReference], 
-	[strPONumber],
+	[strRemarks],
 	[dblSubtotal],
 	[dblTotal], 
 	[dblAmountDue],
@@ -210,7 +210,7 @@ VALUES
 	[dtmDueDate], 
 	[intAccountId], 
 	[strReference], 
-	[strPONumber],
+	[strRemarks],
 	[dblSubtotal],
 	[dblTotal], 
 	[dblAmountDue],
