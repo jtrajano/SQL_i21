@@ -445,12 +445,12 @@ BEGIN
 
 		IF EXISTS(SELECT TOP 1 intBillBatchId FROM dbo.tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
 		BEGIN
-			SET @billBatchId = (SELECT intBillBatchId FROM dbo.tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+			SET @billBatchId = (SELECT TOP 1 intBillBatchId FROM dbo.tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
 			
 			BEGIN
 				UPDATE tblAPBillBatch
 				SET ysnPosted = 0
-				FROM tblAPBillBatch WHERE intBillBatchId = @billBatchId	          
+				FROM tblAPBillBatch WHERE intBillBatchId IN (@billBatchId)
 			END          
 		END 
 		UPDATE tblAPBill
@@ -548,7 +548,7 @@ BEGIN
 
 		IF EXISTS(SELECT TOP 1 intBillBatchId FROM dbo.tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
 		BEGIN
-			SET @billBatchId = (SELECT intBillBatchId FROM dbo.tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+			SET @billBatchId = (SELECT TOP 1 intBillBatchId FROM dbo.tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
 			DECLARE @ctr INT;
 			SELECT @ctr = (CASE COUNT(DISTINCT ysnPosted) WHEN 1 THEN 1 ELSE 0 END)
 			FROM tblAPBill A  WHERE intBillBatchId = @billBatchId
@@ -557,13 +557,13 @@ BEGIN
 			BEGIN
 				UPDATE tblAPBillBatch
 				SET ysnPosted = 1
-				FROM tblAPBillBatch WHERE intBillBatchId = @billBatchId	          
+				FROM tblAPBillBatch WHERE intBillBatchId IN (@billBatchId)
 			END
 			ELSE
 			BEGIN
 				UPDATE tblAPBillBatch
 				SET ysnPosted = 0
-				FROM tblAPBillBatch WHERE intBillBatchId = @billBatchId	              
+				FROM tblAPBillBatch WHERE intBillBatchId IN (@billBatchId)
 			END          
 		END 
 		--UPDATE amount due of vendor prepayment, debit memo and overpayment once payment has been applied to bill
