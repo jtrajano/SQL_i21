@@ -5222,6 +5222,7 @@
     <Build Include="dbo\Tables\tblTRState.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntries.sql" />
     <Build Include="dbo\Functions\fnGetAddCostFromInventoryReceiptCharges.sql" />
+    <Build Include="dbo\Functions\fnFormatMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

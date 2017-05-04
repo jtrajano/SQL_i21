@@ -453,7 +453,19 @@ BEGIN
 				SET @strNewCost = CONVERT(NVARCHAR, CAST(@t_dblCost AS MONEY), 1)
 				SET @strNewValuation = CONVERT(NVARCHAR, CAST(@AdjustmentValue AS MONEY), 1)
 	
-				SELECT	@strDescription = FORMATMESSAGE(dbo.fnICGetErrorMessage(80078), @strCurrentValuation, @strRunningQty, @strNewCost, @strNewValuation)
+				SELECT	@strDescription = dbo.fnFormatMessage(
+							dbo.fnICGetErrorMessage(80078)
+							, @strCurrentValuation
+							, @strRunningQty
+							, @strNewCost
+							, @strNewValuation
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+						)
 
 				-- Create the 'Auto Variance'
 				EXEC [uspICPostInventoryTransaction]
@@ -595,7 +607,19 @@ BEGIN
 	SET @strNewCost = CONVERT(NVARCHAR, CAST(@NewCost AS MONEY), 1)
 	SET @strNewValuation = CONVERT(NVARCHAR, CAST(@AdjustmentValue AS MONEY), 1)
 	
-	SELECT	@strDescription = FORMATMESSAGE(dbo.fnICGetErrorMessage(80078), @strCurrentValuation, @strRunningQty, @strNewCost, @strNewValuation)
+	SELECT	@strDescription = dbo.fnFormatMessage(
+				dbo.fnICGetErrorMessage(80078)
+				, @strCurrentValuation
+				, @strRunningQty
+				, @strNewCost
+				, @strNewValuation
+				, DEFAULT
+				, DEFAULT
+				, DEFAULT
+				, DEFAULT
+				, DEFAULT
+				, DEFAULT
+			)
 
 	-- Create the 'Auto Variance'
 	EXEC [uspICPostInventoryTransaction]
