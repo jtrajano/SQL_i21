@@ -765,13 +765,13 @@ GO
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 81
-			,[strTransactionType]	= N'Provisional Invoice'
+			,[strTransactionType]	= N'Provisional'
 			,[strPrefix]			= N'PI-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Provisional Invoice')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Provisional')
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 82

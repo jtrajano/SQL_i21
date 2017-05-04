@@ -32,7 +32,13 @@ WHERE
 	[intInvoiceId] IN (SELECT [intInvoiceId] FROM tblARInvoiceDetail WHERE [intInvoiceDetailId] IN (SELECT intOriginalInvoiceDetailId FROM tblARTransactionDetail WHERE [intTransactionId] = @InvoiceId))
 	AND @ForDelete = 1
 	
-	
+UPDATE
+	tblARInvoice
+SET
+	[ysnProcessed] = 1
+WHERE
+	[intInvoiceId] IN (SELECT [intInvoiceId] FROM @InvoiceIds)
+	AND strType = 'Provisional'	
 
 UPDATE
 	tblARInvoice
@@ -41,6 +47,6 @@ SET
 WHERE
 	[intInvoiceId] IN (SELECT [intInvoiceId] FROM @InvoiceIds)
 	AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE intOriginalInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId <> tblARInvoice.intInvoiceId))
-	AND strType = 'Provisional Invoice'
+	AND strType = 'Provisional'
 		
 GO

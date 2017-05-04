@@ -14,7 +14,7 @@ IF EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId 
 AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intInventoryShipmentItemId],0) <> 0)
 	RETURN 2
 
--- 2. "Invoice", "Provisional Invoice", 	
+-- 2. "Invoice", "Provisional", 	
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intOriginalInvoiceId],0) <> 0)
 AND EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intOriginalInvoiceDetailId],0) <> 0)
 	RETURN 2	
