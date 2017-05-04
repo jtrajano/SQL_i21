@@ -374,7 +374,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryReceiptItemId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -438,7 +438,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryReceiptItemId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -497,7 +497,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryReceiptItemId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -563,7 +563,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryReceiptItemId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -619,7 +619,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryReceiptItemId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -683,7 +683,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryReceiptItemId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -748,7 +748,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryReceiptItemId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -803,7 +803,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryReceiptItemId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
