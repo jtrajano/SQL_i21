@@ -224,11 +224,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (112, N'Purchasing (Accounts Payable)', N'Accounts Payable', 0, N'Purchasing (Accounts Payable)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 9, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-		VALUES (114, N'Pay Voucher Details', N'Accounts Payable', 112, N'Pay Voucher Details', N'Activity', N'Screen', N'AccountsPayable.view.PayVouchersDetail', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
+		VALUES (114, N'Pay Voucher Details', N'Accounts Payable', 112, N'Pay Voucher Details', N'Activity', N'Screen', N'AccountsPayable.view.PayVouchersDetail?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (115, N'Pay Vouchers', N'Accounts Payable', 112, N'Pay Vouchers (Multi-Vendor)', N'Activity', N'Screen', N'AccountsPayable.view.PayVouchers', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-		VALUES (116, N'Voucher Batch Entry', N'Accounts Payable', 112, N'Voucher Batch Entry', N'Activity', N'Screen', N'AccountsPayable.view.VoucherBatch', N'small-menu-activity', 0, 0, 0, 1, 1, 1)
+		VALUES (116, N'Voucher Batch Entry', N'Accounts Payable', 112, N'Voucher Batch Entry', N'Activity', N'Screen', N'AccountsPayable.view.VoucherBatch?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 1, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (117, N'Batch Posting', N'Accounts Payable', 112, N'Batch Posting', N'Activity', N'Screen', N'i21.view.BatchPosting?module=Purchasing', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1188,18 +1188,18 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @AccountsPayableReportParentMenuId 
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchase Orders' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Purchase Orders', N'Accounts Payable', @AccountsPayableParentMenuId, N'', N'Activity', N'Screen', N'AccountsPayable.view.PurchaseOrder', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Purchase Orders', N'Accounts Payable', @AccountsPayableParentMenuId, N'', N'Activity', N'Screen', N'AccountsPayable.view.PurchaseOrder?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PurchaseOrder', intSort = 0 WHERE strMenuName = 'Purchase Orders' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PurchaseOrder?showSearch=true', intSort = 0 WHERE strMenuName = 'Purchase Orders' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Voucher Batch Entry' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.VoucherBatch', intSort = 1 WHERE strMenuName = 'Voucher Batch Entry' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.VoucherBatch?showSearch=true', intSort = 1 WHERE strMenuName = 'Voucher Batch Entry' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Vouchers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Vouchers', N'Accounts Payable', @AccountsPayableParentMenuId, N'Vouchers', N'Activity', N'Screen', N'AccountsPayable.view.Voucher', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Vouchers', N'Accounts Payable', @AccountsPayableParentMenuId, N'Vouchers', N'Activity', N'Screen', N'AccountsPayable.view.Voucher?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.Voucher', intSort = 2 WHERE strMenuName = 'Vouchers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.Voucher?showSearch=true', intSort = 2 WHERE strMenuName = 'Vouchers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId) 
 UPDATE tblSMMasterMenu SET strCommand = 'i21.view.BatchPosting?module=Purchasing', intSort = 4 WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
@@ -1208,7 +1208,7 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Pay Vouchers'
 UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PayVouchers', intSort = 5 WHERE strMenuName = 'Pay Vouchers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Pay Voucher Details' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PayVouchersDetail', intSort = 6 WHERE strMenuName = 'Pay Voucher Details' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PayVouchersDetail?showSearch=true', intSort = 6 WHERE strMenuName = 'Pay Voucher Details' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Payments' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.controller.PrintChecks', intSort = 7 WHERE strMenuName = 'Process Payments' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
