@@ -5219,6 +5219,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRptDPRHedgeDailyPositionDetail.sql" />
     <Build Include="dbo\Tables\tblSMLanguage.sql" />
     <Build Include="dbo\Views\vyuICLoadContainerPurchaseContracts.sql" />
+    <Build Include="dbo\Tables\tblTRState.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
