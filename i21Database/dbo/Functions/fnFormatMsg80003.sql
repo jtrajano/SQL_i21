@@ -4,14 +4,14 @@
 * 
 */
 CREATE FUNCTION fnFormatMsg80003 (@intItemLocationId AS INT, @intSubLocationId AS INT, @intStorageLocationId AS INT)
-RETURNS NVARCHAR(MAX)
+RETURNS NVARCHAR(2000)
 AS
 BEGIN 
 	DECLARE @intCompanyLocationId AS INT
 			,@CompanyLocationName AS NVARCHAR(50)
 			,@SubLocationName AS NVARCHAR(50)
 			,@StorageLocationName AS NVARCHAR(50)
-			,@ReturnValue AS NVARCHAR(MAX)
+			,@ReturnValue AS NVARCHAR(2000)
 
 
 	SELECT	@CompanyLocationName = tblSMCompanyLocation.strLocationName 

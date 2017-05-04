@@ -358,10 +358,18 @@ BEGIN
 				,[intConcurrencyId]						= 1
 				,[intCostingMethod]						= @ACTUALCOST
 				,[strDescription]						=	-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
-															FORMATMESSAGE(
-															dbo.fnICGetErrorMessage(80093) 
-															,i.strItemNo
-															,cl.strLocationName														
+														dbo.fnFormatMessage(
+																dbo.fnICGetErrorMessage(80093) 
+																, i.strItemNo
+																, cl.strLocationName
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
 														)
 				,[intFobPointId]						= @FOB_DESTINATION 
 				,[intInTransitSourceLocationId]			= @intInTransitSourceLocationId

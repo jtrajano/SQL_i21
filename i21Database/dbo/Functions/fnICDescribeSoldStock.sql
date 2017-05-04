@@ -12,7 +12,18 @@ BEGIN
 	DECLARE @strCost AS NVARCHAR(50) = CONVERT(NVARCHAR, CAST(@dblCost AS MONEY), 1)
 
 	-- [Item, Qty, Cost]: {Item No}, {Qty}, {Cost}.
-	SET @result = FORMATMESSAGE(dbo.fnICGetErrorMessage(80159), @strItemNo, @strQty, @strCost)
-	
+	SET @result = dbo.fnFormatMessage(
+					dbo.fnICGetErrorMessage(80159)
+					, @strItemNo
+					, @strQty
+					, @strCost
+					, DEFAULT
+					, DEFAULT
+					, DEFAULT
+					, DEFAULT
+					, DEFAULT
+					, DEFAULT
+					, DEFAULT
+				)	
 	RETURN @result;
 END
