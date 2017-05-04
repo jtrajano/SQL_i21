@@ -5190,6 +5190,7 @@
     <Build Include="dbo\Tables\tblSMDocumentConfiguration.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntries.sql" />
     <Build Include="dbo\Functions\fnGetAddCostFromInventoryReceiptCharges.sql" />
+    <Build Include="dbo\Views\vyuICLoadContainerPurchaseContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
