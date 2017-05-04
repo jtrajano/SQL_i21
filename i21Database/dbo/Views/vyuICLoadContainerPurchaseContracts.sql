@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICLoadContainerReceiptContracts_NEW]
+﻿CREATE VIEW [dbo].[vyuICLoadContainerPurchaseContracts]
 AS	
 SELECT LD.intLoadDetailId
 	,L.intLoadId
