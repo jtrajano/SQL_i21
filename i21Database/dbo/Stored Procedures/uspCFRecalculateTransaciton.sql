@@ -1010,7 +1010,7 @@ BEGIN
 					,originalTax.ysnSeparateOnInvoice
 					,originalTax.ysnCheckoffTax
 					,originalTax.strTaxCode
-					,originalTax.ysnTaxExempt
+					,calculatedTax.ysnTaxExempt
 					,originalTax.ysnInvalidSetup
 					,originalTax.strTaxGroup
 					,originalTax.strNotes
@@ -1313,7 +1313,7 @@ BEGIN
 					,originalTax.ysnSeparateOnInvoice
 					,originalTax.ysnCheckoffTax
 					,originalTax.strTaxCode
-					,originalTax.ysnTaxExempt
+					,calculatedTax.ysnTaxExempt
 					,originalTax.ysnInvalidSetup
 					,originalTax.strTaxGroup
 					,originalTax.strNotes
@@ -1482,14 +1482,25 @@ BEGIN
 	---------------------------------------------------
 	--				 PRICE CALCULATION				 --
 	---------------------------------------------------
-	DECLARE @totalCalculatedTax NUMERIC(18,6)
-	DECLARE @totalOriginalTax	NUMERIC(18,6)
+	DECLARE @totalCalculatedTax					NUMERIC(18,6)
+	DECLARE @totalOriginalTax					NUMERIC(18,6)
+	DECLARE @totalCalculatedTaxExempt			NUMERIC(18,6)
 
 	SELECT 
 	 @totalCalculatedTax = ISNULL(SUM(dblCalculatedTax),0)
 	,@totalOriginalTax = ISNULL(SUM(dblOriginalTax),0)
 	FROM
 	@tblCFTransactionTax
+
+	SELECT 
+	 @totalCalculatedTaxExempt = ISNULL(SUM(dblOriginalTax),0)
+	FROM
+	@tblCFTransactionTax
+	WHERE ysnTaxExempt = 1
+	
+	
+
+	--select * from @tblCFTransactionTax
 
 	DECLARE @tblTransactionPrice TABLE(
 		 strTransactionPriceId		NVARCHAR(MAX)
@@ -1515,13 +1526,13 @@ BEGIN
 			(
 				 'Gross Price'
 				,@dblOriginalPrice
-				,@dblPrice - (@totalOriginalTax / @dblQuantity) + (@totalCalculatedTax / @dblQuantity)
+				,@dblPrice - (@totalCalculatedTaxExempt / @dblQuantity)
 			),
 			(
 				 'Net Price'
-				,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblOriginalPrice - (@totalOriginalTax / @dblQuantity) 
-				,Round((Round(@dblPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblPrice - (@totalOriginalTax / @dblQuantity) 
-					-- @totalOriginalTax to handle tax exemption
+				,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  
+				,Round((Round(@dblPrice * @dblQuantity,2) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity, 6)  
+					
 			),
 			-- OLD WAY--
 			--(
@@ -1532,7 +1543,7 @@ BEGIN
 			(
 				 'Total Amount'
 				,ROUND(@dblOriginalPrice * @dblQuantity,2)
-				,ROUND((@dblPrice - (@totalOriginalTax / @dblQuantity) + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
+				,ROUND((@dblPrice - (@totalCalculatedTaxExempt / @dblQuantity)) * @dblQuantity,2)
 			)
 		END
 	ELSE IF (LOWER(@strPriceBasis) = 'local index fixed')
