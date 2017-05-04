@@ -73,6 +73,7 @@ BEGIN
 				,strDeviceOwnership = J.strOwnership
 				,A.strZipCode
 				,strGlobalJulianCalendar = R.strDescription
+				,intCustomerEntityId = B.intCustomerNumber
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -156,6 +157,7 @@ BEGIN
 				,strDeviceOwnership = J.strOwnership
 				,A.strZipCode
 				,strGlobalJulianCalendar = R.strDescription
+				,intCustomerEntityId = B.intCustomerNumber
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
