@@ -41,7 +41,15 @@ BEGIN
 		,[intItemUOMId]				=	SOTD.[intItemUOMId]
 		,[dtmDate]					=	ARI.[dtmDate]
 		,[dblQty]					=	(CASE
-											WHEN dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOTD.intItemUOMId, ARID.dblQtyShipped) > SOTD.dblQtyOrdered AND @Negate = 0 
+											WHEN dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOTD.intItemUOMId, ARID.dblQtyShipped) + SOTD.dblQtyShipped > SOTD.dblQtyOrdered AND @Negate = 0 
+												THEN  SOTD.dblQtyOrdered - SOTD.dblQtyShipped
+											WHEN (SOTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOTD.intItemUOMId, ARID.dblQtyShipped)) > (SOTD.dblQtyOrdered - dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOTD.intItemUOMId, ARID.dblQtyShipped)) 
+												AND (SOTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOTD.intItemUOMId, ARID.dblQtyShipped)) <> 0
+												AND @Negate = 1 
+												THEN  ABS(SOTD.dblQtyOrdered - SOTD.dblQtyShipped)
+											WHEN (SOTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOTD.intItemUOMId, ARID.dblQtyShipped)) > (SOTD.dblQtyOrdered - dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOTD.intItemUOMId, ARID.dblQtyShipped)) 
+												AND (SOTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOTD.intItemUOMId, ARID.dblQtyShipped)) = 0
+												AND @Negate = 1 
 												THEN  SOTD.dblQtyOrdered
 											ELSE
 												dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOTD.intItemUOMId, ARID.dblQtyShipped)
