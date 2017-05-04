@@ -7,15 +7,21 @@ var libFiles = [
 var dependencies = require('./test/dependencies.js');
 
 var mockFiles = [
-    {pattern: 'test/mock/**/*.js', watched: true}
+    { pattern: 'test/mock/**/*.js', watched: true }
+];
+
+var appFiles = [
+    { pattern: 'app/Utils.js', watched: true },
+    { pattern: 'app/controller/Inventory.js', watched: true }    
 ];
 
 var testFiles = [
     { pattern: 'node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true },
-    {pattern: 'test/specs/inventory-receipt.viewcontroller.spec.js', watched: true}
+
+    { pattern: 'test/specs/inventory-receipt.viewcontroller.spec.js', watched: true }
 ];
 
-var files = libFiles.concat(dependencies.frameworkFiles).concat(mockFiles).concat(dependencies.files).concat(testFiles);
+var files = libFiles.concat(dependencies.frameworkFiles).concat(mockFiles).concat(dependencies.files).concat(appFiles).concat(testFiles);
 
 module.exports = function (config) {
     config.set({

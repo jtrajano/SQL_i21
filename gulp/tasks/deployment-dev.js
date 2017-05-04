@@ -7,16 +7,18 @@
  */
 var gulp = require('gulp');
 var changed = require('gulp-changed');
+var config = require('../config');
+config.env = 'dev';
 
 gulp.task('publish', function () {
     gulp.src(['app/**/*.{js,css}'])
-        .pipe(changed(destination))
-        .pipe(gulp.dest(destination));
+        .pipe(changed(config.path.dest))
+        .pipe(gulp.dest(config.path.dest));
 });
 
 gulp.task('publish-all', function () {
     gulp.src(['app/**/*.{js,css}'])
-        .pipe(gulp.dest(destination));
+        .pipe(gulp.dest(config.path.dest));
 });
 
 gulp.task('watch', function () {

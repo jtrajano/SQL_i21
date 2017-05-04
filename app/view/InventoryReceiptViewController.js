@@ -1115,10 +1115,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     updateWeightLossText: function(window, clear, weightLoss) {
         if(clear) {
             window.down("#txtWeightLossMsgValue").setValue("");
+            window.down("#txtWeightLossMsgPercent").setValue("");
         } else {
-            window.down("#txtWeightLossMsgValue").setValue(Ext.util.Format.number(weightLoss, '0,000.00'));
+            window.down("#txtWeightLossMsgValue").setValue(Ext.util.Format.number(weightLoss.dblWeightLoss, '0,000.00'));
+            window.down("#txtWeightLossMsgPercent").setValue(Ext.util.Format.number(weightLoss.dblWeightLossPercentage, '0,000.00'));
 
-            if(weightLoss === 0) {
+            if(weightLoss.dblWeightLoss === 0) {
                 document.getElementsByName(window.down("#txtWeightLossMsgValue").name)[0].style.color = 'black';
             }
             else {
@@ -5612,16 +5614,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         iRely.Functions.openScreen('i21.view.Currency', { viewConfig: { modal: true } });
     },
 
-    getWeightLossPercentage: function(items, sourceType) {
-        return 0.1;
-    },
-
-    getWeightLoss: function (ReceiptItems, sourceType, action) {
-        var dblWeightLoss = 0;
+    getWeightLoss: function (ReceiptItems, sourceType) {
+        var dblWeightLoss = 0.00;
         var dblNetShippedWt = 0;
         var dblNetReceivedWt = 0;
         var dblFranchise = 0;
-        
+        var dblWeightLossPercentage = 0;
+
         // Check if item is Inbound Shipment
         if (sourceType === 2) {           
             Ext.Array.each(ReceiptItems.data.items, function (item) {
@@ -5641,24 +5640,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     
                     dblNetReceivedWt = netQty;
                     dblNetShippedWt = orderQty * wgtQty;
+                    dblWeightLossPercentage = ic.utils.Math.round(((dblNetShippedWt - dblNetReceivedWt) / dblNetShippedWt) * 100, 2);
                     dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
                 }
             });
         }
-        else {
-             dblWeightLoss = 0.00;
-        }
 
-        action(dblWeightLoss);
+        return {
+            dblWeightLoss: dblWeightLoss,
+            dblWeightLossPercentage: dblWeightLossPercentage
+        };
     },
 
     validateWeightLoss: function (win, ReceiptItems) {
         win.viewModel.data.weightLoss = 0;
         var me = this;
-        var action = function (weightLoss) {
-            win.viewModel.set('weightLoss', weightLoss);
-            me.updateWeightLossText(win, false, weightLoss);
-        };
 
         var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();
 
@@ -5666,7 +5662,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var sourceType = current.get('intSourceType');
 
         if (ReceiptItems) {
-            this.getWeightLoss(ReceiptItems, sourceType, action);
+            var weightLoss = this.getWeightLoss(ReceiptItems, sourceType);
+            win.viewModel.set('weightLoss', weightLoss);
+            me.updateWeightLossText(win, false, weightLoss);
         }
 
     },

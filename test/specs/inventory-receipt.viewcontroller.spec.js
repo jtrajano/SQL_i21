@@ -8,8 +8,16 @@ UnitTestEngine.testViewController({
             it('should compute weight/loss percentage', function() {
 
                 var receipt = Ext.create('Inventory.view.InventoryReceiptViewController');
-                var percentage = receipt.getWeightLossPercentage();
-                (percentage).should.equal(0);
+                var items = { data:[
+                        {
+                            dblNet: 10.50,
+                            dblOrderQty: 2.10,
+                            dblContainerWeightPerQty: 1.20
+                        }
+                    ] };
+                
+                var percentage = receipt.getWeightLoss(items, 2).dblWeightLossPercentage;
+                percentage.should.equal(0.92);
             });
         });
     }

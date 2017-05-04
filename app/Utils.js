@@ -3,6 +3,17 @@ Ext.define('Inventory.Utils', {
     alternateClassName: 'ic.utils',
 
     statics: {
+        Math: {
+            round: function(number, precision) {
+                var zeroes = "";
+                for(var i = 0; i < precision; i++) {
+                    zeroes += "0";
+                }
+                var pattern = "0.[" + zeroes + "]";
+                return parseFloat(numeral(number).format(pattern));
+            }
+        },
+        
         ajax: function (options) {
             /* Prevent SQL injection attacks by sanitizing all the concatenated parameters in the URL path and place them to the param property of the ajax configuration. */
             var urlObject = ic.utils.getUrlObject(options.url);
