@@ -1,5 +1,5 @@
-﻿-- This function returns the total allocated other charge per 
-CREATE FUNCTION [dbo].[fnGetOtherChargesFromInventoryReceipt] ( 
+﻿-- This function returns the total allocated other charge per receipt line item. 
+CREATE FUNCTION [dbo].[fnGetAddCostFromInventoryReceiptCharges] ( 
 	@intInventoryReceiptItemId AS INT
 )
 RETURNS NUMERIC(18,6)
@@ -31,16 +31,6 @@ BEGIN
 	WHERE	ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
 			AND ItemOtherCharges.ysnInventoryCost = 1
 
-	SELECT	@units = 
-					CASE	WHEN ReceiptItems.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItems.dblNet, 0)
-							ELSE ISNULL(ReceiptItems.dblOpenReceive, 0)
-					END 
-	FROM	dbo.tblICInventoryReceiptItem ReceiptItems 
-	WHERE	ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
-
-	IF @units <> 0 
-		RETURN ISNULL(@totalOtherCharges / @units, 0);
-
-	RETURN 0
+	RETURN ISNULL(@totalOtherCharges, 0) 
 	;
 END

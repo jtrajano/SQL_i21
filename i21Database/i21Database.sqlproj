@@ -5220,6 +5220,10 @@
     <Build Include="dbo\Tables\tblSMLanguage.sql" />
     <Build Include="dbo\Views\vyuICLoadContainerPurchaseContracts.sql" />
     <Build Include="dbo\Tables\tblTRState.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFProcessBeforePreview.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentConfiguration.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntries.sql" />
+    <Build Include="dbo\Functions\fnGetAddCostFromInventoryReceiptCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
