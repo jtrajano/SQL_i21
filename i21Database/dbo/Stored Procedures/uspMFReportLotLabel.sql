@@ -8,9 +8,9 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
-	DECLARE @strLotNo NVARCHAR(100)
+	DECLARE @strLotNo NVARCHAR(MAX)
 		,@xmlDocumentId INT
-	DECLARE @intLotId INT
+	--DECLARE @intLotId INT
 	DECLARE @strLotId NVARCHAR(MAX)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
@@ -19,7 +19,7 @@ BEGIN TRY
 	DECLARE @temp_xml_table TABLE (
 		[fieldname] NVARCHAR(50)
 		,condition NVARCHAR(20)
-		,[from] NVARCHAR(50)
+		,[from] NVARCHAR(MAX)
 		,[to] NVARCHAR(50)
 		,[join] NVARCHAR(10)
 		,[begingroup] NVARCHAR(50)
@@ -35,7 +35,7 @@ BEGIN TRY
 	FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH (
 			[fieldname] NVARCHAR(50)
 			,condition NVARCHAR(20)
-			,[from] NVARCHAR(50)
+			,[from] NVARCHAR(MAX)
 			,[to] NVARCHAR(50)
 			,[join] NVARCHAR(10)
 			,[begingroup] NVARCHAR(50)
