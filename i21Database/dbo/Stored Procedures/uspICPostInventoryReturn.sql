@@ -698,10 +698,16 @@ BEGIN
 					SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				END
 
-				---- Negate the qty 
-				--UPDATE @CompanyOwnedItemsForPost
-				--SET		dblQty = -dblQty 
+				-- Do the inventory valuation
+				EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
+						@CompanyOwnedItemsForPost  
+						,@strBatchId  
+						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+						,@intEntityUserSecurityId
 
+				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+				-- Create the GL entries specific for Inventory Receipt/Return 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
 						,[strBatchId]
@@ -736,13 +742,54 @@ BEGIN
 						,[dblForeignRate]
 						,[strRateType]
 				)
-				EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
-						@CompanyOwnedItemsForPost  
-						,@strBatchId  
+				EXEC	@intReturnValue = uspICCreateReceiptGLEntries
+						@strBatchId 
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@intEntityUserSecurityId
 
 				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+				--INSERT INTO @GLEntries (
+				--		[dtmDate] 
+				--		,[strBatchId]
+				--		,[intAccountId]
+				--		,[dblDebit]
+				--		,[dblCredit]
+				--		,[dblDebitUnit]
+				--		,[dblCreditUnit]
+				--		,[strDescription]
+				--		,[strCode]
+				--		,[strReference]
+				--		,[intCurrencyId]
+				--		,[dblExchangeRate]
+				--		,[dtmDateEntered]
+				--		,[dtmTransactionDate]
+				--		,[strJournalLineDescription]
+				--		,[intJournalLineNo]
+				--		,[ysnIsUnposted]
+				--		,[intUserId]
+				--		,[intEntityId]
+				--		,[strTransactionId]
+				--		,[intTransactionId]
+				--		,[strTransactionType]
+				--		,[strTransactionForm]
+				--		,[strModuleName]
+				--		,[intConcurrencyId]
+				--		,[dblDebitForeign]	
+				--		,[dblDebitReport]	
+				--		,[dblCreditForeign]	
+				--		,[dblCreditReport]	
+				--		,[dblReportingRate]	
+				--		,[dblForeignRate]
+				--		,[strRateType]
+				--)
+				--EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
+				--		@CompanyOwnedItemsForPost  
+				--		,@strBatchId  
+				--		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				--		,@intEntityUserSecurityId
+
+				--IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			END
 		END
 	END 
