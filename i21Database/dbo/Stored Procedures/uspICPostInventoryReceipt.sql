@@ -678,6 +678,16 @@ BEGIN
 					SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				END
 
+				-- Do the inventory valuation
+				EXEC	@intReturnValue = dbo.uspICPostCosting  
+						@CompanyOwnedItemsForPost  
+						,@strBatchId  
+						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+						,@intEntityUserSecurityId
+
+				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+				
+				-- Create the GL entries specific for Inventory Receipt/Return 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
 						,[strBatchId]
@@ -712,9 +722,8 @@ BEGIN
 						,[dblForeignRate]
 						,[strRateType]
 				)
-				EXEC	@intReturnValue = dbo.uspICPostCosting  
-						@CompanyOwnedItemsForPost  
-						,@strBatchId  
+				EXEC	@intReturnValue = uspICCreateReceiptGLEntries
+						@strBatchId 
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@intEntityUserSecurityId
 
