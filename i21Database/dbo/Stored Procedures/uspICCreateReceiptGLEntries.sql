@@ -224,11 +224,19 @@ AS
 			,dblAddOnCostFromOtherCharge = 
 				CASE 
 					WHEN ISNULL(r.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ri.dblForexRate, 0) <> 0 THEN 
-						-- Convert the other charge to the currency used by the detail item. 
-						dbo.fnGetAddCostFromInventoryReceiptCharges(ri.intInventoryReceiptItemId) / ri.dblForexRate
+						-- Convert the other charge to the currency used by the detail item. 						
+						CASE WHEN r.strReceiptType = 'Inventory Return' THEN 
+								-dbo.fnGetAddCostFromInventoryReceiptCharges(ri.intInventoryReceiptItemId) / ri.dblForexRate /*Negate the other charge if it is an Inventory Return*/
+							ELSE 
+								dbo.fnGetAddCostFromInventoryReceiptCharges(ri.intInventoryReceiptItemId) / ri.dblForexRate
+						END 
 					ELSE 
-						-- No conversion. Detail item is already in functional currency. 
-						dbo.fnGetAddCostFromInventoryReceiptCharges(ri.intInventoryReceiptItemId)
+						-- No conversion. Detail item is already in functional currency. 						
+						CASE WHEN r.strReceiptType = 'Inventory Return' THEN 
+								-dbo.fnGetAddCostFromInventoryReceiptCharges(ri.intInventoryReceiptItemId) /*Negate the other charge if it is an Inventory Return*/
+							ELSE 
+								dbo.fnGetAddCostFromInventoryReceiptCharges(ri.intInventoryReceiptItemId)		
+						END 
 				END
 				/ 
 				CASE	WHEN ri.ysnSubCurrency = 1 THEN 
