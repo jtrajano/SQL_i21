@@ -755,10 +755,18 @@ BEGIN
 				,[intConcurrencyId]						= 1
 				,[intCostingMethod]						= @intCostingMethod
 				,[strDescription]						=	-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
-															FORMATMESSAGE(
-															dbo.fnICGetErrorMessage(80093) 
-															,i.strItemNo
-															,cl.strLocationName														
+														dbo.fnFormatMessage (
+																dbo.fnICGetErrorMessage(80093) 
+																, i.strItemNo
+																, cl.strLocationName
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
+																, DEFAULT
 														)
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
 					ON iWithZeroStock.intItemId = iStock.intItemId

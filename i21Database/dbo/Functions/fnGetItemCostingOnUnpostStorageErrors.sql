@@ -17,7 +17,7 @@ RETURN (
 	FROM (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText =	FORMATMESSAGE(
+				,strText =	dbo.fnFormatMessage(
 								dbo.fnICGetErrorMessage(80003)
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,dbo.fnFormatMsg80003(
@@ -25,22 +25,14 @@ RETURN (
 									,@intSubLocationId
 									,@intStorageLocationId
 								)
-								,ISNULL(
-									(
-										SELECT	strSubLocationName
-										FROM	dbo.tblSMCompanyLocationSubLocation
-										WHERE	intCompanyLocationSubLocationId = @intSubLocationId
-									)
-									, '(Blank Sub Location)'
-								)
-								,ISNULL(
-									(
-										SELECT	strName
-										FROM	dbo.tblICStorageLocation
-										WHERE	intStorageLocationId = @intStorageLocationId
-									)
-									, '(Blank Storage Location)'
-								)
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
 							)
 				,intErrorCode = 80003
 		WHERE	EXISTS (
@@ -62,7 +54,7 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText =	FORMATMESSAGE(
+				,strText =	dbo.fnFormatMessage(
 								dbo.fnICGetErrorMessage(80003)
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,dbo.fnFormatMsg80003(
@@ -70,22 +62,14 @@ RETURN (
 									,@intSubLocationId
 									,@intStorageLocationId
 								)
-								,ISNULL(
-									(
-										SELECT	strSubLocationName
-										FROM	dbo.tblSMCompanyLocationSubLocation
-										WHERE	intCompanyLocationSubLocationId = @intSubLocationId
-									)
-									, '(Blank Sub Location)'
-								)
-								,ISNULL(
-									(
-										SELECT	strName
-										FROM	dbo.tblICStorageLocation
-										WHERE	intStorageLocationId = @intStorageLocationId
-									)
-									, '(Blank Storage Location)'
-								)
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
 							)
 				,intErrorCode = 80003
 		WHERE	EXISTS (
@@ -107,7 +91,7 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(
+				,strText = dbo.fnFormatMessage(
 								dbo.fnICGetErrorMessage(80066)
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,(
@@ -117,6 +101,14 @@ RETURN (
 									WHERE	tblICItemLocation.intItemId = @intItemId
 											AND tblICItemLocation.intItemLocationId = @intItemLocationId
 								)
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
 							)
 				,intErrorCode = 80066
 		WHERE	EXISTS (
