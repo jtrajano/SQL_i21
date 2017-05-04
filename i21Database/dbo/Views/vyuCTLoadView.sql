@@ -5,7 +5,7 @@ AS
 	WITH Shipment AS
 	(
 		SELECT   LO.strLoadNumber
-				,LO.strShippingLine	AS strLoadShippingLine
+				,SL.strName	AS strLoadShippingLine
 				,LO.strOriginPort
 				,LO.strDestinationPort
 				,LO.strMVessel
@@ -31,8 +31,9 @@ AS
 					),1,2,' '
 				) strContainerNumber
 
-		FROM	vyuLGLoadView		LO
-		JOIN	tblLGLoadDetail		LD ON LD.intLoadId = LO.intLoadId
+		FROM	tblLGLoad			LO
+		JOIN	tblLGLoadDetail		LD ON LD.intLoadId		=	LO.intLoadId LEFT
+		JOIN	tblEMEntity			SL ON SL.intEntityId	=	LO.intShippingLineEntityId
 		WHERE	LO.intShipmentType = 1
 	
 	
@@ -63,7 +64,7 @@ AS
 		UNION ALL
 
 		SELECT   LO.strLoadNumber
-				,LO.strShippingLine
+				,SL.strName
 				,LO.strOriginPort
 				,LO.strDestinationPort
 				,LO.strMVessel
@@ -89,8 +90,9 @@ AS
 					),1,2,' '
 				) strContainerNumber
 
-		FROM	vyuLGLoadView		LO
-		JOIN	tblLGLoadDetail		LD ON LD.intLoadId = LO.intLoadId
+		FROM	tblLGLoad			LO
+		JOIN	tblLGLoadDetail		LD ON LD.intLoadId		=	LO.intLoadId	LEFT
+		JOIN	tblEMEntity			SL ON SL.intEntityId	=	LO.intShippingLineEntityId
 		WHERE	LD.intPContractDetailId NOT IN (SELECT intContractDetailId FROM Shipment)
 		AND		LO.intShipmentType = 2
 	)t
