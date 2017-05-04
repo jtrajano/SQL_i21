@@ -5224,6 +5224,7 @@
     <Build Include="dbo\Functions\fnGetAddCostFromInventoryReceiptCharges.sql" />
     <Build Include="dbo\Functions\fnFormatMessage.sql" />
     <Build Include="dbo\Views\vyuCTSequenceCombo.sql" />
+    <Build Include="dbo\Views\vyuQMProductNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
