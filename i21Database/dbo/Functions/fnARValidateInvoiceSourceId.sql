@@ -15,7 +15,7 @@ BEGIN
 	IF @SourceTransaction = 'Sales Order'
 		RETURN 1		
 		
-	IF @SourceTransaction IN ('Invoice', 'Provisional Invoice')
+	IF @SourceTransaction IN ('Invoice', 'Provisional')
 		RETURN 2		
 		
 	IF @SourceTransaction = 'Transport Load'

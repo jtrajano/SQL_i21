@@ -17,7 +17,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- "Standard" - Default
 																											-- "Software"
 																											-- "Tank Delivery", 
-																											-- "Provisional Invoice"
+																											-- "Provisional"
 																											-- "Service Charge"
 																											-- "Transport Delivery"
 																											-- "Meter Billing"
@@ -26,7 +26,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[strSourceTransaction]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Valid values 
 																											-- 0. "Direct"
 																											-- 1. "Sales Order"
-																											-- 2. "Invoice", "Provisional Invoice", 
+																											-- 2. "Invoice", "Provisional", 
 																											-- 3. "Transport Load"
 																											-- 4. "Inbound Shipment"
 																											-- 5. "Inventory Shipment"
@@ -80,7 +80,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intMeterReadingId]					INT												NULL		-- Key Value from tblMBMeterReading (Meter Reading)
 	,[intContractHeaderId]					INT												NULL		-- Key Value from tblCTContractHeader (Sales Contract)
 	,[intLoadId]							INT												NULL		-- Key Value from tblLGLoad (Load Schedule)
-	,[intOriginalInvoiceId]					INT												NULL		-- Key Value from tblARInvoice (Provisional Invoice/ Duplicate/ Import/ Recurring) 	
+	,[intOriginalInvoiceId]					INT												NULL		-- Key Value from tblARInvoice (Provisional/ Duplicate/ Import/ Recurring) 	
 	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEMEntity			
 	,[intTruckDriverId]						INT												NULL		-- Key Value([intEntitySalespersonId]) from [tblARSalesperson] : strType = 'Driver'	
 	,[intTruckDriverReferenceId]			INT												NULL		-- Key Value  from [tblSCTruckDriverReference]
@@ -101,7 +101,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 3. "Percentage"	
 	,[dblPrepayRate]						NUMERIC(18, 6)									NULL		-- Prepay Rate
     ,[ysnInventory]							BIT												NULL		-- Indicate whether the line item is a inventory item or a miscellaneous item
-	,[strDocumentNumber]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- Document Number (Transaction Number(Provisional Invoice/Inbound Shipment/Inventory Shipment))
+	,[strDocumentNumber]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- Document Number (Transaction Number(Provisional/Inbound Shipment/Inventory Shipment))
     ,[strItemDescription]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL		-- Line Item Description(If NULL the item's description will be used)
 	,[intOrderUOMId]						INT												NULL		-- The order UOM Id
     ,[dblQtyOrdered]						NUMERIC(18, 6)									NULL		-- The quantity ordered
@@ -155,7 +155,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intSiteDetailId]						INT												NULL		-- Key Value from tblCCSiteDetail (Credit Card Reconciliation)
 	,[intLoadDetailId]						INT												NULL		-- Key Value from tblLGLoadDetail (Load/Shipment Schedules)
 	,[intLotId]								INT												NULL		-- Key Value from tblICLot (Load/Shipment Schedules)
-	,[intOriginalInvoiceDetailId]			INT												NULL		-- Key Value from tblARInvoiceDetail (Provisional Invoice)
+	,[intOriginalInvoiceDetailId]			INT												NULL		-- Key Value from tblARInvoiceDetail (Provisional)
 	,[intSiteId]							INT												NULL		-- Key Value from tblTMSite (Tank MAnagement)
 	,[strBillingBy]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- tblTMSite.[strBillingBy] (Tank MAnagement)
 	,[dblPercentFull]						NUMERIC(18, 6)									NULL
