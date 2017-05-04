@@ -838,11 +838,11 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<vyuICGetInventoryValuationSummary>()
                         .Filter(param, true);                              
 
-            var sorts = new List<SearchSort>();
-            sorts.Add(new SearchSort() { property = "intItemId" });
-            sorts.Add(new SearchSort() { property = "intItemLocationId" });
-            sorts.AddRange(param.sort.ToList());
-            param.sort = sorts;
+            //var sorts = new List<SearchSort>();
+            //sorts.Add(new SearchSort() { property = "intItemId" });
+            //sorts.Add(new SearchSort() { property = "intItemLocationId" });
+            //sorts.AddRange(param.sort.ToList());
+            //param.sort = sorts;
 
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
