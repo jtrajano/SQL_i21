@@ -5260,6 +5260,7 @@
     <Build Include="dbo\Stored Procedures\uspICDeleteChargePerItemOnShipmentSave.sql" />
     <Build Include="dbo\Views\vyuARProcessedQuotes.sql" />
     <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentConfiguration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
