@@ -67,6 +67,8 @@
 
 
 
+
+
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCFNetwork_intNetworkId]
     ON [dbo].[tblCFNetwork]([intNetworkId] ASC);

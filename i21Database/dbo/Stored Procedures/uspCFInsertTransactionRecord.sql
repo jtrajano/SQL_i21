@@ -2,6 +2,7 @@
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
+	,@strPostedDate					NVARCHAR(MAX)
 	,@strCardId						NVARCHAR(MAX)
 	,@strVehicleId					NVARCHAR(MAX)
 	,@strProductId					NVARCHAR(MAX)
@@ -137,7 +138,7 @@ BEGIN
 	DECLARE @ysnInvalid					BIT	= 0
 	DECLARE @ysnPosted					BIT = 0
 	DECLARE @ysnCreditCardUsed			BIT	= 0
-	DECLARE @intParticipantNo			INT = 0
+	DECLARE @strParticipantNo			NVARCHAR(MAX)
 	DECLARE @strNetworkType				NVARCHAR(MAX)
 	DECLARE @intNetworkLocation			INT = 0
 	DECLARE @intDupTransCount			INT = 0
@@ -194,7 +195,7 @@ BEGIN
 		BEGIN
 			SELECT TOP 1
 			 @intNetworkId			= intNetworkId 
-			,@intParticipantNo		= strParticipant
+			,@strParticipantNo		= strParticipant
 			,@strNetworkType		= strNetworkType	
 			,@intForeignCustomerId	= intCustomerId
 			,@strNetworkType		= strNetworkType
@@ -206,7 +207,7 @@ BEGIN
 		BEGIN
 			SELECT TOP 1
 			 @intNetworkId			= intNetworkId 
-			,@intParticipantNo		= strParticipant
+			,@strParticipantNo		= strParticipant
 			,@strNetworkType		= strNetworkType	
 			,@intForeignCustomerId	= intCustomerId
 			,@strNetworkType		= strNetworkType
@@ -217,18 +218,35 @@ BEGIN
 
 	IF(@strNetworkType = 'PacPride')
 	BEGIN
+
+		DECLARE @intMatchSellingHost INT = 0
+		DECLARE @intMatchBuyingHost  INT = 0
+
+
+		SET @strParticipantNo = REPLACE(@strParticipantNo,' ', '')
+		SET @strParticipantNo = RTRIM(LTRIM(@strParticipantNo))
+
+
+		select @intMatchSellingHost = Count(*) from fnCFSplitString(@strParticipantNo,',') where Record = @intSellingHost
+		select @intMatchBuyingHost = Count(*) from fnCFSplitString(@strParticipantNo,',') where Record = @intBuyingHost
+		
+
+
 		-----------TRANSACTION TYPE-----------
-		IF(@intSellingHost = @intParticipantNo AND @intBuyingHost = @intParticipantNo)
+		--IF(@intSellingHost = @strParticipantNo AND @intBuyingHost = @strParticipantNo)
+		IF(@intMatchSellingHost > 0 AND @intMatchBuyingHost > 0)
 		BEGIN
 			SET @strTransactionType = 'Local/Network'
 		END
-		ELSE IF (@intSellingHost = @intParticipantNo AND @intBuyingHost != @intParticipantNo)
+		--ELSE IF (@intSellingHost = @strParticipantNo AND @intBuyingHost != @strParticipantNo)
+		ELSE IF (@intMatchSellingHost > 0 AND @intMatchBuyingHost = 0)
 		BEGIN
 			SET @strTransactionType = 'Foreign Sale'
 			SET @dblOriginalGrossPrice = @dblTransferCost
 			--SET @intCustomerId = @intForeignCustomerId
 		END
-		ELSE IF (@intBuyingHost = @intParticipantNo AND @intSellingHost != @intParticipantNo)
+		--ELSE IF (@intBuyingHost = @strParticipantNo AND @intSellingHost != @strParticipantNo)
+		ELSE IF (@intMatchBuyingHost > 0 AND @intMatchSellingHost = 0)
 		BEGIN
 			SET @strTransactionType = (CASE @strPPSiteType 
 										WHEN 'N' 
@@ -237,7 +255,8 @@ BEGIN
 											THEN 'Extended Remote'
 									  END)
 		END
-		ELSE IF (@intBuyingHost != @intParticipantNo AND @intSellingHost != @intParticipantNo)
+		--ELSE IF (@intBuyingHost != @strParticipantNo AND @intSellingHost != @strParticipantNo)
+		ELSE IF (@intMatchBuyingHost = 0 AND @intMatchSellingHost = 0)
 		BEGIN
 			SET @strTransactionType = (CASE @strPPSiteType 
 										WHEN 'N' 
@@ -250,15 +269,15 @@ BEGIN
 
 
 		-----------ORIGINAL GROSS PRICE-------
-		IF(@dblOriginalGrossPrice IS NULL OR @dblOriginalGrossPrice = 0) AND @strTransactionType = 'Local/Network'
+		IF(@dblOriginalGrossPrice IS NULL OR @dblOriginalGrossPrice = 0)-- AND @strTransactionType = 'Local/Network'
 		BEGIN
 			SET @dblOriginalGrossPrice = @dblTransferCost
 			--SET @dblTransferCost = 0
 		END
-		ELSE IF @strTransactionType != 'Local/Network'
-		BEGIN
-			SET @dblOriginalGrossPrice = @dblTransferCost
-		END
+		--ELSE IF @strTransactionType != 'Local/Network'
+		--BEGIN
+		--	SET @dblOriginalGrossPrice = @dblTransferCost
+		--END
 		-----------ORIGINAL GROSS PRICE-------
 
 
@@ -267,7 +286,16 @@ BEGIN
 	BEGIN 
 		SET @strTransactionType = 'Local/Network'
 	END
-	 
+
+
+	IF(@dblOriginalGrossPrice < 0)
+	BEGIN
+		SET @dblOriginalGrossPrice = ABS(@dblOriginalGrossPrice)
+		IF(ISNULL(@dblQuantity,0) > 0)
+		BEGIN
+			SET @dblQuantity = (@dblQuantity * -1)
+		END
+	END
 
 	DECLARE @ysnCreateSite BIT 
 	------------------------------------------------------------
@@ -757,6 +785,7 @@ BEGIN
 			,[intContractId]				
 			,[dblQuantity]				
 			,[dtmBillingDate]			
+			,[dtmPostedDate]
 			,[dtmTransactionDate]		
 			,[intTransTime]				
 			,[strSequenceNumber]		
@@ -799,7 +828,8 @@ BEGIN
 			,@intARItemLocationId			
 			,@intContractId			
 			,@dblQuantity				
-			,@dtmBillingDate			
+			,@dtmBillingDate		
+			,@strPostedDate	
 			,@dtmTransactionDate		
 			,@intTransTime				
 			,@strSequenceNumber	
@@ -929,7 +959,7 @@ BEGIN
 		END
 
 		
-		
+		DECLARE @ysnRecalculateInvalid BIT	= 0
 
 		------------------------------------------------------------
 
@@ -1001,6 +1031,7 @@ BEGIN
 		,@dblPriceIndexRate				= dblPriceIndexRate	
 		,@dtmPriceIndexDate				= dtmPriceIndexDate	
 		,@ysnDuplicate					= ysnDuplicate
+		,@ysnRecalculateInvalid			= ysnInvalid
 		FROM ##tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
@@ -1009,6 +1040,11 @@ BEGIN
 		--	INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 		--	VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Duplicate transaction history found.')
 		--END
+
+		IF(@ysnRecalculateInvalid = 1)
+		BEGIN 
+			SET @ysnInvalid = @ysnRecalculateInvalid
+		END
 
 		IF (@strPriceMethod = 'Inventory - Standard Pricing')
 		BEGIN

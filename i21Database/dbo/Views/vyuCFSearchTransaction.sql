@@ -14,7 +14,8 @@ SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.in
                          AS dblMargin, cfCard.[intEntityId], cfTransaction.dtmInvoiceDate, cfTransaction.strInvoiceReportNumber
 FROM         dbo.tblCFTransaction AS cfTransaction LEFT OUTER JOIN
                          dbo.tblARInvoice AS arInvoice ON cfTransaction.intInvoiceId = arInvoice.intInvoiceId LEFT OUTER JOIN
-                         dbo.vyuARSalesAnalysisReport AS arSalesAnalysisReport ON arInvoice.intInvoiceId = arSalesAnalysisReport.intTransactionId LEFT OUTER JOIN
+                         dbo.vyuARSalesAnalysisReport AS arSalesAnalysisReport ON arInvoice.intInvoiceId = arSalesAnalysisReport.intTransactionId 
+						 AND arInvoice.strInvoiceNumber = arSalesAnalysisReport.strRecordNumber LEFT OUTER JOIN
                          dbo.tblCFNetwork AS cfNetwork ON cfTransaction.intNetworkId = cfNetwork.intNetworkId LEFT OUTER JOIN
                              (SELECT   smiCompanyLocation.strLocationName, cfiSite.intSiteId, cfiSite.strSiteNumber, cfiSite.strSiteName
                                 FROM         dbo.tblCFSite AS cfiSite LEFT OUTER JOIN

@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
-	 @xmlParam					NVARCHAR(MAX)  
-	,@entityId					INT			   = NULL
+	 @entityId					INT			   = NULL
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
 	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -29,7 +28,7 @@ BEGIN
 		)
 
 		SET @executedLine = 2
-		CREATE TABLE #tblCFInvoiceDiscount	
+		CREATE TABLE #tblCFInvoices	
 		(
 			 intAccountId					INT
 			,intSalesPersonId				INT
@@ -44,7 +43,6 @@ BEGIN
 			,intDayofMonthDue				INT
 			,intDueNextMonth				INT
 			,intSort						INT
-			,intConcurrencyId				INT
 			,ysnAllowEFT					BIT
 			,ysnActive						BIT
 			,ysnEnergyTrac					BIT
@@ -84,8 +82,89 @@ BEGIN
 	
 		-------------INVOICE LIST-------------
 		SET @executedLine = 4
-		INSERT INTO #tblCFInvoiceDiscount
-		EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
+		INSERT INTO #tblCFInvoices
+		(
+		 intAccountId				
+		,intSalesPersonId			
+		,dtmInvoiceDate				
+		,intCustomerId				
+		,intInvoiceId				
+		,intTransactionId			
+		,intCustomerGroupId			
+		,intTermID					
+		,intBalanceDue				
+		,intDiscountDay				
+		,intDayofMonthDue			
+		,intDueNextMonth			
+		,intSort					
+		,ysnAllowEFT				
+		,ysnActive					
+		,ysnEnergyTrac				
+		,dblQuantity				
+		,dblTotalQuantity			
+		,dblDiscountRate			
+		,dblDiscount				
+		,dblTotalAmount				
+		,dblAccountTotalAmount		
+		,dblAccountTotalDiscount	
+		,dblAccountTotalLessDiscount
+		,dblDiscountEP				
+		,dblAPR						
+		,strTerm					
+		,strType					
+		,strTermCode				
+		,strNetwork					
+		,strCustomerName			
+		,strInvoiceCycle			
+		,strGroupName				
+		,strInvoiceNumber			
+		,strInvoiceReportNumber		
+		,dtmDiscountDate			
+		,dtmDueDate					
+		,dtmTransactionDate			
+		,dtmPostedDate				
+		)
+		SELECT 
+		 intAccountId				
+		,intSalesPersonId			
+		,dtmInvoiceDate				
+		,intCustomerId				
+		,intInvoiceId				
+		,intTransactionId			
+		,intCustomerGroupId			
+		,intTermID					
+		,intBalanceDue				
+		,intDiscountDay				
+		,intDayofMonthDue			
+		,intDueNextMonth			
+		,intSort					
+		,ysnAllowEFT				
+		,ysnActive					
+		,ysnEnergyTrac				
+		,dblQuantity				
+		,dblTotalQuantity			
+		,dblDiscountRate			
+		,dblDiscount				
+		,dblTotalAmount				
+		,dblAccountTotalAmount		
+		,dblAccountTotalDiscount	
+		,dblAccountTotalLessDiscount
+		,dblDiscountEP				
+		,dblAPR						
+		,strTerm					
+		,strType					
+		,strTermCode				
+		,strNetwork					
+		,strCustomerName			
+		,strInvoiceCycle			
+		,strGroupName				
+		,strInvoiceNumber			
+		,strTempInvoiceReportNumber		
+		,dtmDiscountDate			
+		,dtmDueDate					
+		,dtmTransactionDate			
+		,dtmPostedDate				
+		FROM tblCFInvoiceStagingTable
 		--------------------------------------
 
 		----------GROUP BY CUSTOMER-----------
@@ -97,7 +176,7 @@ BEGIN
 		SELECT 
 			 intAccountId	
 			,intCustomerId	
-		FROM #tblCFInvoiceDiscount
+		FROM #tblCFInvoices
 		GROUP BY intAccountId,intCustomerId	
 		--------------------------------------
 
@@ -147,13 +226,13 @@ BEGIN
 
 			------------LOOP INVOICE------------
 			SET @executedLine = 10
-			WHILE (EXISTS(SELECT 1 FROM #tblCFInvoiceDiscount WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId))
+			WHILE (EXISTS(SELECT 1 FROM #tblCFInvoices WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId))
 			---------------------------------------
 			BEGIN
 
 				SET @executedLine = 11
 				SELECT	TOP 1 @id = intTransactionId
-				FROM #tblCFInvoiceDiscount
+				FROM #tblCFInvoices
 				WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId
 
 				SET @executedLine = 12
@@ -166,7 +245,7 @@ BEGIN
 				,@PaymentMethodId		= (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'CF Invoice')
 				,@InvoiceReportNumber	= strInvoiceReportNumber 
 				,@PaymentInfo			= strInvoiceReportNumber
-				FROM #tblCFInvoiceDiscount 
+				FROM #tblCFInvoices 
 				WHERE intTransactionId = @id
 				AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
 
@@ -215,12 +294,13 @@ BEGIN
 
 					SET @executedLine = 15
 					INSERT INTO tblCFInvoiceProcessResult(
-						 strInvoiceProcessResultId
-						,intTransactionProcessId
+						 strPaymentId
+						,intPaymentId
 						,ysnStatus
 						,strRunProcessId
 						,intCustomerId
 						,strInvoiceReportNumber
+						,dblPayment
 					)
 
 					SELECT TOP 1 
@@ -230,6 +310,8 @@ BEGIN
 					,''
 					,@EntityCustomerId
 					,@InvoiceReportNumber
+					,(SELECT SUM(ISNULL(dblTotalAmount,0)) FROM #tblCFInvoices WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
+
 					
 
 				END
@@ -252,7 +334,7 @@ BEGIN
 				END
 
 				SET @executedLine = 17
-				DELETE FROM #tblCFInvoiceDiscount 
+				DELETE FROM #tblCFInvoices 
 				WHERE intTransactionId = @id
 				AND (intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
 
@@ -275,7 +357,7 @@ BEGIN
 		--------------------------------------------
 
 		SET @executedLine = 20
-		DROP TABLE #tblCFInvoiceDiscount
+		DROP TABLE #tblCFInvoices
 		DROP TABLE #tblCFDisctinctCustomerInvoice
 
 	END TRY
@@ -299,7 +381,7 @@ BEGIN
 		----------------------------------------
 
 		----------DROP TEMPORARY TABLE----------
-		DROP TABLE #tblCFInvoiceDiscount
+		DROP TABLE #tblCFInvoices
 		DROP TABLE #tblCFDisctinctCustomerInvoice
 		----------------------------------------
 

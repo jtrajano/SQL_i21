@@ -87,6 +87,8 @@
 
 
 
+
+
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCFSite_intSiteId]
     ON [dbo].[tblCFSite]([intSiteId] ASC);

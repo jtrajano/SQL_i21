@@ -5,7 +5,7 @@
     [strPrefix]             NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [intCardId]             INT            NULL,
     [strCardDescription]    NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
-	[strCreditCardNumber]   NVARCHAR(250)  COLLATE Latin1_General_CI_AS NULL, 
+    [strCreditCardNumber]   NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [intCustomerId]         INT            NULL,
     [ysnLocalPrefix]        BIT            NULL,
     [intCreatedUserId]      INT            NULL,
@@ -17,6 +17,8 @@
     CONSTRAINT [FK_tblCFCreditCard_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
     CONSTRAINT [FK_tblCFCreditCard_tblCFSiteLocation] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId])
 );
+
+
 
 
 

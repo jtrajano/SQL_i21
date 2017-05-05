@@ -68,6 +68,8 @@
 
 
 
+
+
 GO
 CREATE NONCLUSTERED INDEX [tblCFAccount_intTermsCode]
     ON [dbo].[tblCFAccount]([intTermsCode] ASC);

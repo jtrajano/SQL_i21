@@ -141,6 +141,7 @@ BEGIN
 		,dtmPriceIndexDate				DATETIME
 		,dblMargin						NUMERIC(18,6)
 		,ysnDuplicate					BIT
+		,ysnInvalid						BIT
 	);
 
 	IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionTaxType') = 1)
@@ -966,6 +967,7 @@ BEGIN
 
 				END
 
+				UPDATE @tblCFOriginalTax SET ysnInvalidSetup = 1, dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 				INSERT INTO @tblCFTransactionTax
 				(
 					 [intTransactionDetailTaxId]	
@@ -1008,7 +1010,7 @@ BEGIN
 					,originalTax.ysnSeparateOnInvoice
 					,originalTax.ysnCheckoffTax
 					,originalTax.strTaxCode
-					,originalTax.ysnTaxExempt
+					,calculatedTax.ysnTaxExempt
 					,originalTax.ysnInvalidSetup
 					,originalTax.strTaxGroup
 					,originalTax.strNotes
@@ -1267,6 +1269,8 @@ BEGIN
 
 				END
 			
+				UPDATE @tblCFOriginalTax SET ysnInvalidSetup = 1, dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
+
 				INSERT INTO @tblCFTransactionTax
 				(
 					 [intTransactionDetailTaxId]	
@@ -1309,7 +1313,7 @@ BEGIN
 					,originalTax.ysnSeparateOnInvoice
 					,originalTax.ysnCheckoffTax
 					,originalTax.strTaxCode
-					,originalTax.ysnTaxExempt
+					,calculatedTax.ysnTaxExempt
 					,originalTax.ysnInvalidSetup
 					,originalTax.strTaxGroup
 					,originalTax.strNotes
@@ -1377,6 +1381,9 @@ BEGIN
 				,@StateSalesTax					=@StateSalesTax		
 				,@CountySalesTax				=@CountySalesTax	
 				,@CitySalesTax					=@CitySalesTax
+
+
+				UPDATE @tblCFRemoteTax SET ysnInvalidSetup = 1 , dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 
 				INSERT INTO @tblCFTransactionTax
 				(
@@ -1458,6 +1465,12 @@ BEGIN
 	END
 	
 
+	--SELECT * FROM @tblCFBackoutTax
+	--SELECT * FROM @tblCFCalculatedTax
+	--SELECT * FROM @tblCFOriginalTax
+	--SELECT * FROM @tblCFRemoteTax
+	--SELECT * FROM @tblCFTransactionTax
+
 	---------------------------------------------------
 	--				TAX COMPUTATION					 --
 	---------------------------------------------------
@@ -1469,14 +1482,25 @@ BEGIN
 	---------------------------------------------------
 	--				 PRICE CALCULATION				 --
 	---------------------------------------------------
-	DECLARE @totalCalculatedTax NUMERIC(18,6)
-	DECLARE @totalOriginalTax	NUMERIC(18,6)
+	DECLARE @totalCalculatedTax					NUMERIC(18,6)
+	DECLARE @totalOriginalTax					NUMERIC(18,6)
+	DECLARE @totalCalculatedTaxExempt			NUMERIC(18,6)
 
 	SELECT 
 	 @totalCalculatedTax = ISNULL(SUM(dblCalculatedTax),0)
 	,@totalOriginalTax = ISNULL(SUM(dblOriginalTax),0)
 	FROM
 	@tblCFTransactionTax
+
+	SELECT 
+	 @totalCalculatedTaxExempt = ISNULL(SUM(dblOriginalTax),0)
+	FROM
+	@tblCFTransactionTax
+	WHERE ysnTaxExempt = 1
+	
+	
+
+	--select * from @tblCFTransactionTax
 
 	DECLARE @tblTransactionPrice TABLE(
 		 strTransactionPriceId		NVARCHAR(MAX)
@@ -1502,18 +1526,49 @@ BEGIN
 			(
 				 'Gross Price'
 				,@dblOriginalPrice
-				,@dblPrice
+				,@dblPrice - (@totalCalculatedTaxExempt / @dblQuantity)
 			),
 			(
 				 'Net Price'
-				,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
-				,@dblPrice - (@totalCalculatedTax / @dblQuantity)
+				,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  
+				,Round((Round(@dblPrice * @dblQuantity,2) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity, 6)  
+					
 			),
+			-- OLD WAY--
+			--(
+			--	 'Net Price'
+			--	,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+			--	,@dblPrice - (@totalOriginalTax / @dblQuantity) -- @totalOriginalTax to handle tax exemption
+			--),
 			(
 				 'Total Amount'
 				,ROUND(@dblOriginalPrice * @dblQuantity,2)
-				,ROUND(@dblPrice * @dblQuantity,2)
+				,ROUND((@dblPrice - (@totalCalculatedTaxExempt / @dblQuantity)) * @dblQuantity,2)
 			)
+		END
+	ELSE IF (LOWER(@strPriceBasis) = 'local index fixed')
+		BEGIN
+			INSERT INTO @tblTransactionPrice (
+		 strTransactionPriceId	
+		,dblOriginalAmount		
+		,dblCalculatedAmount	
+		)
+		VALUES
+		(
+			 'Gross Price'
+			,@dblOriginalPrice
+			,@dblPrice 
+		),
+		(
+			 'Net Price'
+			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+			,Round((Round(@dblPrice * @dblQuantity,2) - @totalCalculatedTax ) / @dblQuantity, 6)
+		),
+		(
+			 'Total Amount'
+			,ROUND(@dblOriginalPrice * @dblQuantity,2)
+			,ROUND((@dblPrice * @dblQuantity),2)
+		)
 		END
 	ELSE
 		BEGIN
@@ -1530,15 +1585,23 @@ BEGIN
 		),
 		(
 			 'Net Price'
-			,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
 			,@dblPrice
 		),
+		--OLD WAY--
+		--(
+		--	 'Net Price'
+		--	,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+		--	,@dblPrice
+		--),
 		(
 			 'Total Amount'
 			,ROUND(@dblOriginalPrice * @dblQuantity,2)
 			,ROUND((@dblPrice + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
 		)
 		END
+
+	
 	---------------------------------------------------
 	--				 PRICE CALCULATION				 --
 	---------------------------------------------------
@@ -1595,15 +1658,92 @@ BEGIN
 		SET @ysnDuplicate = 1
 		IF(@ysnDuplicate = 1)
 		BEGIN
-			SET @ysnInvalid = 1
+			--SET @ysnInvalid = 1
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Import',@runDate,@guid, @intTransactionId, 'Duplicate transaction history found.')
 		END
 	END
+
+
 	---------------------------------------------------
 	--				LOG DUPLICATE TRANS				 --
 	---------------------------------------------------
+	DECLARE @ysnVehicleRequire BIT = 0
 
+	IF (@intCardId = 0)
+	BEGIN
+		SET @intCardId = NULL
+	END
+	ELSE
+	BEGIN
+		SELECT TOP 1 
+			@ysnVehicleRequire = a.ysnVehicleRequire
+		FROM tblCFCard as c
+		INNER JOIN tblCFAccount as a
+		ON c.intAccountId = a.intAccountId
+		WHERE intCardId = @intCardId
+	END
+
+	IF(@intProductId = 0 OR @intProductId IS NULL)
+	BEGIN
+		SET @ysnInvalid = 1
+	END
+	IF(@intCardId = 0 OR @intCardId IS NULL)
+	BEGIN
+		SET @ysnInvalid = 1
+	END
+	IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
+	BEGIN
+		SET @intNetworkId = NULL
+		SET @ysnInvalid = 1
+	END
+	IF(@intSiteId = 0 OR @intSiteId IS NULL)
+	BEGIN
+		SET @intSiteId = NULL
+		SET @ysnInvalid = 1
+	END
+	IF(@intCardId = 0 OR @intCardId IS NULL)
+	BEGIN
+		SET @intCardId = NULL
+		SET @ysnInvalid = 1
+	END
+	IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
+	BEGIN
+		SET @ysnInvalid = 1
+	END
+	IF(@intVehicleId = 0 OR @intVehicleId IS NULL)
+	BEGIN
+		SET @intVehicleId = NULL
+		IF(@ysnVehicleRequire = 1)
+		BEGIN
+			SET @ysnInvalid = 1
+		END
+	END
+
+	---------------------------------------------------
+	--					ZERO PRICING				 --
+	---------------------------------------------------
+	DECLARE @dblCalculatedPricing NUMERIC(18,6)
+	SELECT TOP 1 @dblCalculatedPricing = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+	IF (@dblCalculatedPricing IS NULL OR @dblCalculatedPricing <= 0)
+	BEGIN		
+		SET @ysnInvalid = 1
+		--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
+		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid calculated price.')
+	END
+
+	
+	DECLARE @dblOriginalPricing NUMERIC(18,6)
+	SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+	IF (@dblOriginalPricing IS NULL OR @dblOriginalPricing <= 0)
+	BEGIN
+		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid original price.')
+	END
+	---------------------------------------------------
+	--					ZERO PRICING				 --
+	---------------------------------------------------
 
 	---------------------------------------------------
 	--					PRICING OUT					 --
@@ -1645,6 +1785,7 @@ BEGIN
 			,dtmPriceIndexDate
 			,dblMargin	
 			,ysnDuplicate
+			,ysnInvalid
 			)
 			SELECT
 			 @intItemId					AS intItemId
@@ -1680,6 +1821,7 @@ BEGIN
 			,@dtmPriceIndexDate			AS dtmPriceIndexDate	
 			,@dblMargin					AS dblMargin
 			,@ysnDuplicate				AS ysnDuplicate
+			,@ysnInvalid				AS ysnInvalid
 		END
 	ELSE
 		BEGIN
@@ -1717,6 +1859,7 @@ BEGIN
 			,@dtmPriceIndexDate			AS dtmPriceIndexDate	
 			,@dblMargin					AS dblMargin	
 			,@ysnDuplicate				AS ysnDuplicate
+			,@ysnInvalid				AS ysnInvalid
 		END
 	---------------------------------------------------
 	--					PRICING OUT					 --
@@ -1771,30 +1914,6 @@ BEGIN
 	END
 	---------------------------------------------------
 	--					INDEX PRICING				 --
-	---------------------------------------------------
-
-
-	---------------------------------------------------
-	--					ZERO PRICING				 --
-	---------------------------------------------------
-	DECLARE @dblCalculatedPricing NUMERIC(18,6)
-	SELECT TOP 1 @dblCalculatedPricing = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
-	IF (@dblCalculatedPricing IS NULL OR @dblCalculatedPricing <= 0)
-	BEGIN
-		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid calculated price.')
-	END
-
-	
-	DECLARE @dblOriginalPricing NUMERIC(18,6)
-	SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
-	IF (@dblOriginalPricing IS NULL OR @dblOriginalPricing <= 0)
-	BEGIN
-		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid original price.')
-	END
-	---------------------------------------------------
-	--					ZERO PRICING				 --
 	---------------------------------------------------
 
 
