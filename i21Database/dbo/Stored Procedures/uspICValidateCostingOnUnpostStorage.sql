@@ -23,7 +23,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT 
-		,@strLocationName AS NVARCHAR(MAX)
+		,@strLocationName AS NVARCHAR(2000)
 		
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
