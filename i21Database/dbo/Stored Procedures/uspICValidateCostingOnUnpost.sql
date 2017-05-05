@@ -25,7 +25,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT
-		,@strLocationName AS NVARCHAR(MAX)
+		,@strLocationName AS NVARCHAR(2000)
 		,@intItemLocationId AS INT 
 		,@strRelatedTransactionId AS NVARCHAR(50)
 

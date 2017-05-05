@@ -44,7 +44,7 @@ BEGIN
 	DECLARE @ALLOW_NEGATIVE_NO AS INT = 3
 
 	DECLARE @strItemNo AS NVARCHAR(50) 
-			,@strLocationName AS NVARCHAR(MAX) 
+			,@strLocationName AS NVARCHAR(2000) 
 			,@CostBucketId AS INT 
 			,@AllowNegativeInventory AS INT 
 			,@UnitsOnStorage AS NUMERIC(38, 20)
