@@ -4,6 +4,7 @@
     [intColumnId]              INT             NOT NULL,
     [intRefNo]                 INT             NOT NULL,
     [ysnReverseSignforExpense] BIT             CONSTRAINT [DF__tblFRColu__ysnRe__42793730] DEFAULT ((0)) NOT NULL,
+	[ysnReverseSignforRevenue] BIT             DEFAULT 0 NULL,	
     [strColumnHeader]          NVARCHAR (255)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strColumnCaption]         NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
     [strColumnType]            NVARCHAR (20)   COLLATE Latin1_General_CI_AS NULL,
