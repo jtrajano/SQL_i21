@@ -161,6 +161,7 @@ BEGIN
 									WHEN @strTransactionType = 'Customer Prepayment' THEN 'Customer Prepayment' 
 									WHEN @strTransactionType = 'Overpayment' THEN 'Customer Overpayment'
 									WHEN @strTransactionType = 'Invoice' AND @strType = 'Service Charge' THEN 'Service Charge'
+									WHEN @strTransactionType = 'Invoice' AND @strType = 'Provisional' THEN 'Provisional'
 									ELSE 'Invoice' END
 		
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId
