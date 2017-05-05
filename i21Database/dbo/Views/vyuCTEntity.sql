@@ -21,6 +21,10 @@ AS
 					WHEN Y.strType = 'Customer'	THEN	CASE WHEN TM.ysnActive = 1 THEN U.intTermsId ELSE NULL END
 					ELSE L.intTermsId 
 			END AS intTermId,
+			CASE	WHEN Y.strType = 'Vendor'	THEN	CASE WHEN TM.ysnActive = 1 THEN TM.strTerm ELSE NULL END
+					WHEN Y.strType = 'Customer'	THEN	CASE WHEN TM.ysnActive = 1 THEN TM.strTerm ELSE NULL END
+					ELSE TM.strTerm 
+			END AS strTerm,
 			V.strVendorAccountNum
 	FROM	tblEMEntity				E
 	JOIN	[tblEMEntityLocation]	L	ON	E.intEntityId			=	L.intEntityId 
