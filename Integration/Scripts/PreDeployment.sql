@@ -62,6 +62,10 @@
 :r "..\dbo\Views\vyuAPOriginCCDTransaction.sql"
 :r "..\dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql"
 
+--Inventory 
+:r "..\Scripts\IC\uspICDCItemMigrationPt.sql" 
+:r "..\Scripts\IC\uspICDCItemMigrationAg.sql" 
+
 
 ---- CUSTOMER PORTAL
 --:r "..\dbo\Views\vyuCPAgcusMst.sql"
