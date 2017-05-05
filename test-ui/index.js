@@ -532,7 +532,23 @@ if(_url.indexOf('version=TF') < 1) {
                                     }
 
                                 ]
+                            },
+
+                            {
+                                group: 'PurchaseOrderInventoryReceipt',
+                                items: [
+                                    {
+                                        url: 'BusinessDomain/InventoryReceipt/PurchaseOrderInventoryReceipt/AddOrdersPurchaseOrders.js?v=' + version,
+                                        title: 'AddOrdersPurchaseOrders',
+                                        preload: [
+                                            functionalTest,
+                                            commonIC
+
+                                        ]
+                                    }
+                                ]
                             }
+
 
                         ]
 

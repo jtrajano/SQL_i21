@@ -391,7 +391,7 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
 
-            .displayText('===== Creeating Direct IR for Non Lotted Item  =====')
+            .displayText('===== Creeating Direct IR for Lotted Item  =====')
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Receipts','Screen')
             .waitUntilLoaded()
@@ -2002,6 +2002,88 @@ Ext.define('Inventory.CommonIC', {
             .done();
 
     },
+
+    filterOnSearch_text: function (t, next, colName, colRow, columnId, filter){
+        var win = Ext.ComponentQuery.query('viewport')[0].down('#pnlIntegratedDashboard'),
+            grid = win.down('#grdSearch'),
+            store = grid.store,
+            recordCount = store.getCount(),
+            target1 = '>>#pnlMain #pnlIntegratedDashboard #pnlIntegratedDashboardGridPanel #searchTabPanel #mainTab-sorted #grdSearch gridcolumn[text=',
+            target2 = '>>menu{isVisible()} #mnuFilter';
+        if (recordCount <= '5000'){
+            new iRely.FunctionalTest().start(t, next)
+                .filterGridRecords('Search', 'FilterGrid', filter)
+                .addFunction (function (next){
+                var task = new Ext.util.DelayedTask(function () {
+                    next();
+                });
+                task.delay(3000);
+            })
+                .addFunction(function (next){
+                    var items = store.data.items,
+                        data;
+                    Ext.each(items, function (record) {
+                        if (record.get(columnId) == filter ) {data = true;}
+                        else {data = false
+                            return false;}});
+                    if(!data){t.ok(true, 'All records that equal the entered keyword were filtered.');}
+                    else{t.ok(false, 'There are filtered records that are not equal to the entered keyword.');}
+                    next();
+                })
+                .done();
+        }
+        else {
+            new iRely.FunctionalTest().start(t, next)
+                .addFunction(function (next){
+                    t.chain(
+                        {action: 'moveCursorTo', target: target1 + colName+']'},
+                        {action: 'contextmenu', target: target1 + colName+'] => .x-column-header-text-wrapper'},
+                        {action: 'moveCursorTo',target:target2 },
+                        {action: 'click',target: target2},
+                        next
+                    )
+                })
+                .waitUntilLoaded()
+                .filterGridRecords('Search', 'ValueStoreFrom', filter)
+//                .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
+//                .addFunction(function (next) {
+//                    var task = new Ext.util.DelayedTask(function () {
+//                        next();
+//                    });
+//                    task.delay(3000);
+//                })
+                .waitUntilLoaded()
+
+                .addFunction(function (next) {
+                    var items = store.data.items,
+                        data;
+                    Ext.each(items, function (record) {
+                        if (record.get(columnId) == filter) {
+                            data = true;
+                        }
+                        else {
+                            data = false
+                            return false;
+                        }
+                    });
+                    if (!data) {
+                        t.ok(true, 'All records that equal the entered keyword were filtered.');
+                    }
+                    else {
+                        t.ok(false, 'There are filtered records that are not equal to the entered keyword.');
+                    }
+                    next();
+                })
+                .done();
+        }
+    },
+
+
+
+
+
+
+
 ////////////////////////////////////////////////////////////////////////    
 //Start Jerome Paul Fazon Codes
 ////////////////////////////////////////////////////////////////////////    
@@ -2136,7 +2218,7 @@ createPurchaseOrder: function (t,next,ProductID){
      *
      */
 
-createInventoryReceipt: function (t,next,itemQty,toPost) {
+createInventoryReceipt: function (t,next,itemQty,toPost,cost) {
                 new iRely.FunctionalTest().start(t, next)
                 //.displayText(PONumber)
                 
@@ -2150,10 +2232,12 @@ createInventoryReceipt: function (t,next,itemQty,toPost) {
                 .selectSearchRowNumber(1)
                 .clickButton('OpenSelected')
                 .waitUntilLoaded('icinventoryreceipt')
-                .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1) 
+//               .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
                 .selectGridRowNumber('InventoryReceipt', 1)
-                .selectGridComboBoxRowValue('InventoryReceipt',1,'colWeightUOM', 'Bushels' ,'strWeightUOM',1) 
                 .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure',itemQty, 'Bushels')
+                 .waitUntilLoaded()
+                .enterGridData('InventoryReceipt', 1, 'colUnitCost', cost)
+                .selectGridComboBoxRowValue('InventoryReceipt',1,'colWeightUOM', 'Bushels' ,'strWeightUOM',1)
                 .enterGridData('LotTracking',1,'colLotId','Sample Parent Lot [TAB]')
                 .enterGridData('LotTracking',1,'colLotQuantity',itemQty)
                 .selectGridRowNumber('InventoryReceipt', 1)                  
