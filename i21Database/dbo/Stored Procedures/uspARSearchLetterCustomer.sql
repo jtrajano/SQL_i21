@@ -30,7 +30,7 @@ SELECT TOP 1
 	@strCompanyAddress		= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL),
 	@strCompanyPhone		= strPhone
 FROM 
-	tblSMCompanySetup
+	tblSMCompanySetup WITH (NOLOCK)
 SET NOCOUNT OFF;
 
 DECLARE @temp_aging_table TABLE(
@@ -73,7 +73,7 @@ EXEC uspARCollectionOverdueDetailReport NULL, NULL, NULL
 
 
 DELETE FROM @temp_aging_table
-WHERE [strInvoiceNumber] IN (SELECT [strInvoiceNumber] FROM tblARInvoice WHERE strType IN ('CF Tran'))
+WHERE [strInvoiceNumber] IN (SELECT [strInvoiceNumber] FROM tblARInvoice WITH (NOLOCK) WHERE strType IN ('CF Tran'))
 
 DELETE FROM tblARCollectionOverdueDetail
 INSERT INTO tblARCollectionOverdueDetail
@@ -120,7 +120,7 @@ SELECT intCompanyLocationId		=	@intCompanyLocationId
  	, strCustomerName			=	Cus.strName
 	, strCustomerAddress		=	[dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, Cus.strName, NULL)
 	, strCustomerPhone			=	EnPhoneNo.strPhone 
-	, strAccountNumber			=	(SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = Cus.intEntityCustomerId) 
+	, strAccountNumber			=	(SELECT strAccountNumber FROM tblARCustomer WITH (NOLOCK) WHERE intEntityCustomerId = Cus.intEntityCustomerId) 
 	, intInvoiceId				=	Aging.intInvoiceId	
 	, strInvoiceNumber			=	Aging.strInvoiceNumber		 
 	, strBOLNumber				=	Aging.strBOLNumber
@@ -153,7 +153,7 @@ FROM
 		intInvoiceId NOT IN (SELECT 
 								intInvoiceId 
 							FROM 
-								tblARInvoice 
+								tblARInvoice WITH (NOLOCK)
 							WHERE 
 								strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') AND ysnPaid = 1) 
 	)  Aging
@@ -178,20 +178,20 @@ INNER JOIN (
 					ARC.intTermsId,
 					SMT.strTerm								
 				FROM 
-					tblARCustomer ARC
+					tblARCustomer ARC WITH (NOLOCK)
 				INNER JOIN (
 							SELECT 
 								intTermID,
 								strTerm 
 							FROM 
-								tblSMTerm) SMT ON ARC.intTermsId = SMT.intTermID ) ARC
+								tblSMTerm WITH (NOLOCK)) SMT ON ARC.intTermsId = SMT.intTermID ) ARC
 				INNER JOIN (
 							SELECT 
 								intEntityId, 
 								strEntityNo, 
 								strName								 
 							FROM 
-								tblEMEntity
+								tblEMEntity WITH (NOLOCK)
 							) EME ON ARC.intEntityCustomerId = EME.intEntityId
 				LEFT JOIN (
 							SELECT 
@@ -200,13 +200,13 @@ INNER JOIN (
 								Loc.intTermsId,
 								SMT.strTerm																
 							FROM 
-								tblEMEntityLocation Loc
+								tblEMEntityLocation Loc WITH (NOLOCK)
 							INNER JOIN (
 										SELECT 
 											intTermID,
 											strTerm 
 										FROM 
-											tblSMTerm) SMT ON Loc.intTermsId = SMT.intTermID
+											tblSMTerm WITH (NOLOCK)) SMT ON Loc.intTermsId = SMT.intTermID
 							WHERE ysnDefaultLocation = 1
 							) EMEL ON ARC.intEntityCustomerId = EMEL.intEntityId
 				LEFT JOIN (
@@ -220,7 +220,7 @@ INNER JOIN (
 								strBillToState			= strState,
 								strBillToZipCode		= strZipCode
 							FROM 
-								tblEMEntityLocation
+								tblEMEntityLocation WITH (NOLOCK)
 							) BillToLoc ON ARC.intEntityCustomerId = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
 			) Cus ON Aging.intEntityCustomerId = Cus.intEntityCustomerId
 INNER JOIN (
@@ -229,7 +229,7 @@ INNER JOIN (
 					, [intEntityContactId]
 					, ysnDefaultContact 
 			FROM 
-				[tblEMEntityToContact]
+				[tblEMEntityToContact] WITH (NOLOCK)
 			WHERE 
 				ysnDefaultContact = 1) CusToCon ON Aging.intEntityCustomerId = CusToCon.intEntityId  
  LEFT JOIN (
@@ -237,7 +237,7 @@ INNER JOIN (
 				intEntityId
 				, strPhone 
 			FROM 
-				tblEMEntityPhoneNumber) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
+				tblEMEntityPhoneNumber WITH (NOLOCK)) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
 			
 DELETE FROM tblARCollectionOverdue				
 INSERT INTO tblARCollectionOverdue
@@ -281,8 +281,7 @@ FROM
 GROUP BY 
 	intEntityCustomerId
 
-
-
+	
 IF @strLetterName = 'Recent Overdue Collection Letter'
 BEGIN
 
@@ -293,7 +292,7 @@ BEGIN
 	SELECT 
 		ARCO.intEntityCustomerId
 	FROM 
-		tblARCollectionOverdue ARCO
+		tblARCollectionOverdue ARCO WITH (NOLOCK)
 	INNER JOIN (SELECT 
 					intEntityCustomerId
 				FROM 
@@ -303,15 +302,15 @@ BEGIN
 						(SELECT 
 							intEntityId 
 						FROM 
-							tblEMEntity) EME
+							tblEMEntity WITH (NOLOCK)) EME
 						INNER JOIN (SELECT 
 										ARC.intEntityCustomerId									 
 									FROM 
-										tblARCustomer ARC
+										tblARCustomer ARC WITH (NOLOCK)
 									INNER JOIN (SELECT 
 													intEntityCustomerId
 												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
+													tblARCollectionOverdue WITH (NOLOCK)) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
 									WHERE
 										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
 					) Cus
@@ -343,7 +342,7 @@ BEGIN
 		, strCustomerNumber
 		, strCustomerName 		
 	FROM 
-		tblARCollectionOverdue ARCO
+		tblARCollectionOverdue ARCO WITH (NOLOCK)
 	INNER JOIN (SELECT 
 					intEntityCustomerId
 					, strCustomerNumber
@@ -359,12 +358,12 @@ BEGIN
 							strEntityNo,
 							strCustomerName		= strName
 						FROM 
-							tblEMEntity) EME
+							tblEMEntity WITH (NOLOCK)) EME
 						INNER JOIN (SELECT 
 										ARC.intEntityCustomerId
 										, ARC.strCustomerNumber
 									FROM 
-										tblARCustomer ARC
+										tblARCustomer ARC WITH (NOLOCK)
 									INNER JOIN (SELECT 
 													intEntityCustomerId 
 												FROM 
@@ -389,7 +388,7 @@ BEGIN
 	SELECT 
 		ARCO.intEntityCustomerId
 	FROM 
-		tblARCollectionOverdue ARCO
+		tblARCollectionOverdue ARCO WITH (NOLOCK)
 	INNER JOIN (SELECT 
 					intEntityCustomerId
 				FROM 
@@ -399,15 +398,15 @@ BEGIN
 						(SELECT 
 							intEntityId
 						FROM 
-							tblEMEntity) EME
+							tblEMEntity WITH (NOLOCK)) EME
 						INNER JOIN (SELECT 
 										ARC.intEntityCustomerId									 
 									FROM 
-										tblARCustomer ARC
+										tblARCustomer ARC WITH (NOLOCK)
 									INNER JOIN (SELECT 
 													intEntityCustomerId
 												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
+													tblARCollectionOverdue WITH (NOLOCK)) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
 									 WHERE
 										ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
 					) Cus
@@ -439,7 +438,7 @@ BEGIN
 		, strCustomerNumber
 		, strCustomerName 		
 	FROM 
-		tblARCollectionOverdue ARCO
+		tblARCollectionOverdue ARCO WITH (NOLOCK)
 	INNER JOIN (SELECT 
 					intEntityCustomerId
 					, strCustomerNumber
@@ -455,12 +454,12 @@ BEGIN
 							strEntityNo,
 							strCustomerName		= strName
 						FROM 
-							tblEMEntity) EME
+							tblEMEntity WITH (NOLOCK)) EME
 						INNER JOIN (SELECT 
 										ARC.intEntityCustomerId
 										, ARC.strCustomerNumber
 									FROM 
-										tblARCustomer ARC
+										tblARCustomer ARC WITH (NOLOCK)
 									INNER JOIN (SELECT 
 													intEntityCustomerId 
 												FROM 
@@ -495,15 +494,15 @@ BEGIN
 						(SELECT 
 							intEntityId
 						FROM 
-							tblEMEntity) EME
+							tblEMEntity WITH (NOLOCK)) EME
 						INNER JOIN (SELECT 
 										ARC.intEntityCustomerId									 
 									FROM 
-										tblARCustomer ARC
+										tblARCustomer ARC WITH (NOLOCK)
 									INNER JOIN (SELECT 
 													intEntityCustomerId
 												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
+													tblARCollectionOverdue WITH (NOLOCK)) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
 									 WHERE
 										ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
 					) Cus
@@ -535,7 +534,7 @@ BEGIN
 		, strCustomerNumber
 		, strCustomerName 
 	FROM 
-		tblARCollectionOverdue ARCO
+		tblARCollectionOverdue ARCO WITH (NOLOCK)
 	INNER JOIN (SELECT 
 					intEntityCustomerId
 					, strCustomerNumber
@@ -551,12 +550,12 @@ BEGIN
 							strEntityNo,
 							strCustomerName		= strName
 						FROM 
-							tblEMEntity) EME
+							tblEMEntity WITH (NOLOCK)) EME
 						INNER JOIN (SELECT 
 									ARC.intEntityCustomerId
 										, ARC.strCustomerNumber
 									FROM 
-										tblARCustomer ARC
+										tblARCustomer ARC WITH (NOLOCK)
 									INNER JOIN (SELECT 
 													intEntityCustomerId 
 												FROM 
@@ -581,7 +580,7 @@ BEGIN
 	SELECT 
 		ARCO.intEntityCustomerId
 	FROM 
-		tblARCollectionOverdue ARCO
+		tblARCollectionOverdue ARCO WITH (NOLOCK)
 	INNER JOIN (SELECT 
 					intEntityCustomerId
 				FROM 
@@ -591,15 +590,15 @@ BEGIN
 						(SELECT 
 							intEntityId
 						FROM 
-							tblEMEntity) EME
+							tblEMEntity WITH (NOLOCK)) EME
 						INNER JOIN (SELECT 
 										ARC.intEntityCustomerId									 
 									FROM 
-										tblARCustomer ARC
+										tblARCustomer ARC WITH (NOLOCK)
 									INNER JOIN (SELECT 
 													intEntityCustomerId
 												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
+													tblARCollectionOverdue WITH (NOLOCK)) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
 									 WHERE
 										ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
 					) Cus
@@ -631,7 +630,7 @@ BEGIN
 		, strCustomerNumber
 		, strCustomerName 
 	FROM 
-		tblARCollectionOverdue ARCO
+		tblARCollectionOverdue ARCO WITH (NOLOCK)
 	INNER JOIN (SELECT 
 					intEntityCustomerId
 					, strCustomerNumber
@@ -647,12 +646,12 @@ BEGIN
 							strEntityNo,
 							strCustomerName		= strName
 						FROM 
-							tblEMEntity) EME
+							tblEMEntity WITH (NOLOCK)) EME
 						INNER JOIN (SELECT 
 										ARC.intEntityCustomerId
 										, ARC.strCustomerNumber
 									FROM 
-										tblARCustomer ARC
+										tblARCustomer ARC WITH (NOLOCK)
 									INNER JOIN (SELECT 
 													intEntityCustomerId 
 												FROM 
@@ -677,7 +676,7 @@ BEGIN
 	SELECT 
 		ARCO.intEntityCustomerId
 	FROM 
-		tblARCollectionOverdue ARCO
+		tblARCollectionOverdue ARCO WITH (NOLOCK)
 	INNER JOIN (SELECT 
 					intEntityCustomerId
 				FROM 
@@ -687,7 +686,7 @@ BEGIN
 						(SELECT 
 							intEntityId
 						FROM 
-							tblEMEntity) EME
+							tblEMEntity WITH (NOLOCK)) EME
 						INNER JOIN (SELECT 
 										ARC.intEntityCustomerId									 
 									FROM 
@@ -695,7 +694,7 @@ BEGIN
 									INNER JOIN (SELECT 
 													intEntityCustomerId
 												FROM 
-													tblARCollectionOverdue) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
+													tblARCollectionOverdue WITH (NOLOCK)) ARCO ON ARC.intEntityCustomerId = ARCO.intEntityCustomerId
 									 WHERE
 										ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
 					) Cus						
@@ -727,7 +726,7 @@ BEGIN
 		, strCustomerNumber
 		, strCustomerName 
 	FROM 
-		tblARCollectionOverdue ARCO
+		tblARCollectionOverdue ARCO WITH (NOLOCK)
 	INNER JOIN (SELECT 
 					intEntityCustomerId
 					, strCustomerNumber
@@ -743,12 +742,12 @@ BEGIN
 							strEntityNo,
 							strCustomerName		= strName
 						FROM 
-							tblEMEntity) EME
+							tblEMEntity WITH (NOLOCK)) EME
 						INNER JOIN (SELECT 
 										ARC.intEntityCustomerId
 										, ARC.strCustomerNumber
 									FROM 
-										tblARCustomer ARC
+										tblARCustomer ARC WITH (NOLOCK)
 									INNER JOIN (SELECT 
 													intEntityCustomerId 
 												FROM 
@@ -779,11 +778,11 @@ BEGIN
 			(SELECT 
 				intEntityId
 			FROM 
-				tblEMEntity) EME
+				tblEMEntity WITH (NOLOCK)) EME
 			INNER JOIN (SELECT 
 							ARC.intEntityCustomerId									 
 						FROM 
-							tblARCustomer ARC
+							tblARCustomer ARC WITH (NOLOCK)
 			            WHERE
 							dblCreditLimit = 0 AND ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
 		) Cus
@@ -822,12 +821,12 @@ BEGIN
 				strEntityNo,
 				strCustomerName		= strName
 			FROM 
-				tblEMEntity) EME
+				tblEMEntity WITH (NOLOCK)) EME
 			INNER JOIN (SELECT 
 							ARC.intEntityCustomerId
 							, ARC.strCustomerNumber
 						FROM 
-							tblARCustomer ARC
+							tblARCustomer ARC WITH (NOLOCK)
 						INNER JOIN (SELECT 
 										intEntityCustomerId 
 									FROM 
@@ -855,11 +854,11 @@ BEGIN
 			(SELECT 
 				intEntityId
 			FROM 
-				tblEMEntity) EME
+				tblEMEntity WITH (NOLOCK)) EME
 			INNER JOIN (SELECT 
 							ARC.intEntityCustomerId									 
 						FROM 
-							tblARCustomer ARC
+							tblARCustomer ARC WITH (NOLOCK)
 						 WHERE
 							ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
 		) Cus
@@ -897,12 +896,12 @@ BEGIN
 				strEntityNo,
 				strCustomerName		= strName
 			FROM 
-				tblEMEntity) EME
+				tblEMEntity WITH (NOLOCK)) EME
 			INNER JOIN (SELECT 
 							ARC.intEntityCustomerId
 							, ARC.strCustomerNumber
 						FROM 
-							tblARCustomer ARC
+							tblARCustomer ARC WITH (NOLOCK)
 						INNER JOIN (SELECT 
 										intEntityCustomerId 
 									FROM 
@@ -930,12 +929,11 @@ BEGIN
 			(SELECT 
 				intEntityId
 			FROM 
-				tblEMEntity) EME
+				tblEMEntity WITH (NOLOCK)) EME
 			INNER JOIN (SELECT 
 							ARC.intEntityCustomerId									 
 						FROM 
-							tblARCustomer ARC
-						 
+							tblARCustomer ARC WITH (NOLOCK)						 
 						 WHERE
 							ARC.dblCreditLimit > 0 AND ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
 		) Cus	
@@ -974,12 +972,12 @@ BEGIN
 				strEntityNo,
 				strCustomerName		= strName
 			FROM 
-				tblEMEntity) EME
+				tblEMEntity WITH (NOLOCK)) EME
 			INNER JOIN (SELECT 
 							ARC.intEntityCustomerId
 							, ARC.strCustomerNumber
 						FROM 
-							tblARCustomer ARC
+							tblARCustomer ARC WITH (NOLOCK)
 						INNER JOIN (SELECT 
 										intEntityCustomerId 
 									FROM 
@@ -991,6 +989,44 @@ BEGIN
 		strCustomerName
 	SET NOCOUNT OFF;
 END
+
+ELSE IF  @strLetterName = 'Service Charge Invoices Letter'
+BEGIN
+	SET NOCOUNT ON;
+	SELECT DISTINCT intEntityCustomerId
+		, strCustomerNumber
+		, strCustomerName 
+	FROM 
+		(SELECT
+			intEntityCustomerId,
+			strCustomerNumber		= ISNULL(ARC.strCustomerNumber, EME.strEntityNo),
+			strCustomerName
+		 FROM 
+			(SELECT 
+				intEntityId,
+				strEntityNo,
+				strCustomerName		= strName
+			FROM 
+				tblEMEntity WITH (NOLOCK)) EME
+			INNER JOIN (SELECT 
+							ARC.intEntityCustomerId
+							, ARC.strCustomerNumber
+						FROM 
+							tblARCustomer ARC WITH (NOLOCK)
+						INNER JOIN (SELECT 
+										intEntityCustomerId 
+									FROM 
+										tblARInvoice WITH (NOLOCK)
+									WHERE 
+										strType = 'Service Charge') TempCustomer ON ARC.intEntityCustomerId = TempCustomer.intEntityCustomerId
+						 WHERE
+							ARC.ysnActive = 1) ARC ON EME.intEntityId = ARC.intEntityCustomerId
+		) Cus		
+	ORDER BY 
+		strCustomerName
+	SET NOCOUNT OFF;	
+END
+
 ELSE
 BEGIN
 	GOTO GetActiveCustomers
