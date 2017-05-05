@@ -12,9 +12,12 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 
 		SELECT	i21.intBankAccountId
 				,i21.intBankId
+				,strBankName = (SELECT strBankName FROM dbo.tblCMBank WHERE intBankId = i21.intBankId)
 				,i21.ysnActive
 				,i21.intGLAccountId
+				,strGLAccountId = (SELECT strAccountId FROM dbo.tblGLAccount WHERE intAccountId = i21.intGLAccountId)
 				,i21.intCurrencyId
+				,strCurrency = (SELECT strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = i21.intCurrencyId)
 				,i21.intBankAccountType
 				,i21.strContact
 				,i21.strBankAccountHolder
@@ -41,8 +44,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.intBackupCheckEndingNo
 				,i21.intEFTNextNo
 				,i21.intBankStatementImportId
+				,strBankStatementFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intBankStatementImportId)
 				,i21.intEFTBankFileFormatId
+				,strACHFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intEFTBankFileFormatId)
 				,i21.intPositivePayBankFileFormatId
+				,strPositivePayFormat = (SELECT strName FROM dbo.tblCMBankFileFormat WHERE intBankFileFormatId = i21.intPositivePayBankFileFormatId)
 				,i21.strEFTCompanyId
 				,i21.strEFTBankName
 				,i21.strMICRDescription
