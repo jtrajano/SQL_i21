@@ -119,8 +119,8 @@ BEGIN
 				-- Fields used in the calculation of the taxes
 
 				SELECT TOP 1
-					 @Amount = Charge.dblAmount
-					,@Qty	 = 1
+						 @Amount = Charge.dblAmount
+						,@Qty	 = 1
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
 							ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
@@ -199,12 +199,4 @@ BEGIN
 				) Taxes
 					ON Charge.intInventoryReceiptChargeId = Taxes.intInventoryReceiptChargeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-
-		-- Update Other Charge Tax Table
-		UPDATE ChargeTax
-		SET dblTax = Charge.dblTax
-		FROM dbo.tblICInventoryReceiptChargeTax ChargeTax
-			 INNER JOIN dbo.tblICInventoryReceiptCharge Charge
-			 ON Charge.intInventoryReceiptChargeId = ChargeTax.intInventoryReceiptChargeId
-		WHERE Charge.intInventoryReceiptId = @intInventoryReceiptId
 END
