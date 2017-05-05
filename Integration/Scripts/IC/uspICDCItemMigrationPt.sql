@@ -38,6 +38,7 @@ INSERT INTO tblICItem (
 	,strBarcodePrint
 	,ysnMSDSRequired
 	,ysnAvailableTM
+	,dblDefaultFull
 	,ysnExtendPickTicket
 	,ysnExportEDI
 	,ysnHazardMaterial
