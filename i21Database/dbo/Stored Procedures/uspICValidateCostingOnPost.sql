@@ -29,7 +29,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT 
-		,@strLocationName AS NVARCHAR(MAX)
+		,@strLocationName AS NVARCHAR(2000)
 		,@strTransactionId AS NVARCHAR(50) 
 		,@strCurrencyId AS NVARCHAR(50)
 		,@strFunctionalCurrencyId AS NVARCHAR(50)
