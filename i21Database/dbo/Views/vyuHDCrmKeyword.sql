@@ -49,26 +49,28 @@
 		union all
 
 		select
-			intEntityId = tblEMEntity.intEntityId
+			intEntityId = a.intEntityId
 			,strKeyword = '{Phone}'
 			,strDescription = 'Sales Person Phone Number'
-			,strCurrentValue = tblEMEntity.strPhone
+			,strCurrentValue = b.strPhone
 			,imgCurrentValue = null
-			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
+			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = a.intEntityId))
 		from
-			tblEMEntity
+			tblEMEntity a
+			left join tblEMEntityPhoneNumber b on b.intEntityId = a.intEntityId
 
 		union all
 
 		select
-			intEntityId = tblEMEntity.intEntityId
+			intEntityId = a.intEntityId
 			,strKeyword = '{Mobile}'
 			,strDescription = 'Sales Person Mobile Number'
-			,strCurrentValue = tblEMEntity.strMobile
+			,strCurrentValue = b.strPhone
 			,imgCurrentValue = null
-			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
+			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = a.intEntityId))
 		from
-			tblEMEntity
+			tblEMEntity a
+			left join tblEMEntityMobileNumber b on b.intEntityId = a.intEntityId
 
 		union all
 
@@ -80,7 +82,20 @@
 			,imgCurrentValue = null
 			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId))
 		from
-			tblEMEntity
+			tblEMEntity where tblEMEntity.intEntityId in (select intEntityContactId from tblEMEntityToContact)
+
+		union all
+
+		select
+			intEntityId = a.intEntityId
+			,strKeyword = '{Email}'
+			,strDescription = 'Sales Person Email Address'
+			,strCurrentValue = c.strEmail
+			,imgCurrentValue = null
+			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 [tblEMEntityToContact].intEntityId from [tblEMEntityToContact] where [tblEMEntityToContact].intEntityContactId = a.intEntityId))
+		from
+			tblEMEntity a, tblEMEntityToContact b, tblEMEntity c
+		where b.intEntityId = a.intEntityId and c.intEntityId = b.intEntityContactId
 
 		union all
 
