@@ -1227,7 +1227,7 @@ BEGIN TRY
 			,intItemId = SV.intItemId
 			,intContractHeaderId = NULL
 			,intContractDetailId = NULL
-			,dblTotal = @dblUnits * SV.dblCashPrice 					
+			,dblTotal = ROUND(@dblUnits * SV.dblCashPrice,2) 					
 			,dblQtyOrdered =  CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END
 			,dblQtyReceived = CASE WHEN SV.dblCashPrice <0 THEN -1 ELSE 1 END			
 			,dblRate = 0
@@ -1257,7 +1257,7 @@ BEGIN TRY
 			
 			UPDATE	tblAPBill 
 			SET		strVendorOrderNumber = 'STR-'+@strStorageTicketNumber+'/'+strBillId
-					,dblTotal = (SELECT SUM(bd.dblTotal) FROM tblAPBillDetail bd WHERE bd.intBillId = @intBillId)
+					,dblTotal = (SELECT ROUND(SUM(bd.dblTotal),2) FROM tblAPBillDetail bd WHERE bd.intBillId = @intBillId)
 			WHERE	intBillId = @intBillId
 
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
