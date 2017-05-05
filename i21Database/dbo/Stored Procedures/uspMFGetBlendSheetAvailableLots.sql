@@ -105,7 +105,8 @@ ri.dblQuantity/@dblRecipeQty AS dblConfigRatio,
 CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
 CAST(ISNULL(q.Score,0) AS decimal) AS dblScore,
 l.intParentLotId,
-sl.intStorageLocationId
+sl.intStorageLocationId,
+u1.strUnitMeasure AS strPhysicalItemUOM
 into #tempLot
 from tblICLot l
 --Left Join @tblReservedQty c on l.intLotId=c.intLotId
@@ -117,6 +118,7 @@ Left Join tblSMCompanyLocationSubLocation sbl on sbl.intCompanyLocationSubLocati
 Left Join tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
 Left Join tblICStorageUnitType ut on sl.intStorageUnitTypeId=ut.intStorageUnitTypeId AND ut.strInternalCode <> 'PROD_STAGING'
 Join tblICItemUOM iu1 on l.intItemUOMId=iu1.intItemUOMId
+Join tblICUnitMeasure u1 on iu1.intUnitMeasureId=u1.intUnitMeasureId
 --Left Join vyuAPVendor v on l.intVendorId=v.intVendorId
 Left Join tblMFRecipeItem ri on ri.intItemId=i.intItemId and ri.intRecipeItemId=@intRecipeItemId
 Left Join vyuQMGetLotQuality q on l.intLotId=q.intLotId
@@ -138,7 +140,7 @@ Begin
 		tl.intPhysicalItemUOMId, tl.dtmReceiveDate, tl.dtmExpiryDate, tl.strVendorId, tl.strVendorLotNo, 
 		tl.strGarden, tl.intLocationId, tl.strLocationName, tl.strSubLocationName, tl.strStorageLocationName,tl.intStorageLocationId, 
 		tl.strRemarks, tl.dblRiskScore, tl.dblConfigRatio, tl.dblDensity, tl.dblScore, tl.intParentLotId,
-		CAST(0 AS bit) AS ysnParentLot 
+		CAST(0 AS bit) AS ysnParentLot,tl.strPhysicalItemUOM 
 		from #tempLot tl Left Join @tblReservedQty r on tl.intLotId=r.intLotId
 End
 Else
