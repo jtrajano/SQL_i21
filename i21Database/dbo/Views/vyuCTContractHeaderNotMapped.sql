@@ -56,7 +56,14 @@ AS
 						YR.strCropYear,					
 						SL.strSubLocationName,
 						CT.strCity					AS	strINCOLocation,
-						AB.strCity					AS	strArbitration
+						AB.strCity					AS	strArbitration,
+						MA.strFutMarketName			AS	strFutureMarket,
+						REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') strFutureMonthYear,
+						U6.strUnitMeasure			AS	strMarketUnitMeasure,
+						MA.dblContractSize			AS	dblMarketContractSize,
+						CA.strCommodityAttributeId,
+						EY.intDefaultLocationId		AS	intEntityDefaultLocationId,
+						PO.intNoOfDays				AS	intPositionNoOfDays
 
 				FROM	tblCTContractHeader					CH	
 				
@@ -82,20 +89,24 @@ AS
 				JOIN	tblSMCity							CT	ON	CT.intCityId						=		CH.intINCOLocationTypeId			LEFT
 				JOIN	tblSMCity							AB	ON	AB.intCityId						=		CH.intArbitrationId					LEFT
 				JOIN	tblCTPricingType					PT	ON	PT.intPricingTypeId					=		CH.intPricingTypeId					LEFT
-				
+				JOIN	tblRKFutureMarket					MA	ON	MA.intFutureMarketId				=		CH.intFutureMarketId				LEFT
+				JOIN	tblRKFuturesMonth					MO	ON	MO.intFutureMonthId					=		CH.intFutureMonthId					LEFT
+				JOIN	tblRKCommodityMarketMapping			CA	ON	CA.intFutureMarketId				=		CH.intFutureMarketId					
+																AND	CA.intCommodityId					=		CH.intCommodityId					LEFT
+
 				JOIN	tblICCommodityUnitMeasure			CM	ON	CM.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
 				JOIN	tblICCommodityUnitMeasure			CL	ON	CL.intCommodityUnitMeasureId		=		CH.intLoadUOMId						LEFT
 				JOIN	tblICUnitMeasure					U2	ON	U2.intUnitMeasureId					=		CM.intUnitMeasureId					LEFT
 				JOIN	tblICUnitMeasure					U3	ON	U3.intUnitMeasureId					=		CL.intUnitMeasureId					LEFT
 				JOIN	tblICUnitMeasure					U4	ON	U4.intUnitMeasureId					=		CH.intCategoryUnitMeasureId			LEFT
 				JOIN	tblICUnitMeasure					U5	ON	U5.intUnitMeasureId					=		CH.intLoadCategoryUnitMeasureId		LEFT
+				JOIN	tblICUnitMeasure					U6	ON	U6.intUnitMeasureId					=		MA.intUnitMeasureId					LEFT
 				
 				JOIN	tblSMCompanyLocationPricingLevel	PL	ON	PL.intCompanyLocationPricingLevelId	=		CH.intCompanyLocationPricingLevelId LEFT
 				JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intINCOLocationTypeId			LEFT
 				JOIN	tblCTContractPlan					CP	ON	CP.intContractPlanId				=		CH.intContractPlanId				LEFT
 				JOIN	tblCTCropYear						YR	ON	YR.intCropYearId					=		CH.intCropYearId					LEFT
-				JOIN	tblRKFutureMarket					MA	ON	MA.intFutureMarketId				=		CH.intFutureMarketId				LEFT
-				JOIN	tblRKFuturesMonth					MO	ON	MO.intFutureMonthId					=		CH.intFutureMonthId					LEFT
+				
 
 				JOIN	tblCTPriceFixation					PF	ON	CH.intContractHeaderId				=		PF.intContractHeaderId 
 																AND CH.ysnMultiplePriceFixation			=		1							

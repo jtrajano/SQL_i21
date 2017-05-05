@@ -42,7 +42,15 @@ AS
 			NM.strCropYear,
 			NM.strSubLocationName,
 			NM.strINCOLocation,
-			NM.strArbitration
+			NM.strArbitration,
+			NM.strAssociationName,
+			NM.strFutureMarket,
+			NM.strFutureMonthYear,
+			NM.strMarketUnitMeasure,
+			NM.dblMarketContractSize,
+			NM.strCommodityAttributeId,
+			NM.intEntityDefaultLocationId,
+			NM.intPositionNoOfDays
 
 	FROM	tblCTContractHeader				CH
 	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
