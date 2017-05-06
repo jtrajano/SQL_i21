@@ -67,6 +67,8 @@ SELECT C.intManufacturingCellId
 	,W.intCountStatusId
 	,I.intLayerPerPallet
 	,I.intUnitPerLayer
+	,csl.strSubLocationName
+	,cs.strName AS strCustomerName
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
@@ -94,3 +96,5 @@ LEFT JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 		WHERE S.intScheduleId = SW.intScheduleId
 			AND S.ysnStandard = 1
 		)
+LEFT JOIN tblSMCompanyLocationSubLocation csl on W.intSubLocationId=csl.intCompanyLocationSubLocationId
+LEFT JOIN vyuARCustomer cs on W.intCustomerId=cs.intEntityId
