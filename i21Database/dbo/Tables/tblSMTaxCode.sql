@@ -16,6 +16,8 @@
 	[intSalesTaxAccountId]		INT		NULL, 
     [intPurchaseTaxAccountId]	INT		NULL, 
     [strTaxableByOtherTaxes]	NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS NULL,
+	[ysnTaxOnly]				BIT		NOT NULL	DEFAULT 0,
+	[ysnBalance]				BIT		NOT NULL	DEFAULT 0,
 	[ysnCheckoffTax]			BIT		NOT NULL	DEFAULT 0,
 	[intTaxCategoryId]			INT		NULL, 
 	[strStoreTaxNumber]			NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
