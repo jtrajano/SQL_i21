@@ -3512,6 +3512,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document 
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.DocumentType', intSort = 4 WHERE strMenuName = 'Document Type' AND strModuleName = 'System Manager' AND intParentMenuID = @DocumentManagementParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document Configuration' AND strModuleName = 'System Manager' AND intParentMenuID = @DocumentManagementParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Document Configuration', N'System Manager', @DocumentManagementParentMenuId, N'Document Configuration', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.DocumentConfiguration', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.DocumentConfiguration', intSort = 5 WHERE strMenuName = 'Document Configuration' AND strModuleName = 'System Manager' AND intParentMenuID = @DocumentManagementParentMenuId
+
 /* TRANSPORTS */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transports' AND strModuleName = 'Transports' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
