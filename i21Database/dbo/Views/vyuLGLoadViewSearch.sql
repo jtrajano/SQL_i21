@@ -107,13 +107,33 @@ SELECT L.intLoadId
 			THEN 'Vessel Nomination'
 		ELSE ''
 		END COLLATE Latin1_General_CI_AS
+	,CT.strContainerType
+	,ForwardingAgent.strName AS strForwardingAgent
+	,ShippingLine.strName AS strShippingLine
+	,Insurer.strName AS strInsurer
+	,Terminal.strName AS strTerminal
+	,BLDraftToBeSent.strName AS strBLDraftToBeSent
+	,DocPresentation.strName AS strDocPresentationVal
+	,Currency.strCurrency AS strInsuranceCurrency
+	,DemurrangeCurrency.strCurrency AS strDemurrangeCurrency
+	,DespatchCurrency.strCurrency AS strDespatchCurrency
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
+LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
+LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
+LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
+LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = L.intBLDraftToBeSentId
+LEFT JOIN tblEMEntity DocPresentation ON DocPresentation.intEntityId = L.intDocPresentationId
 LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
+LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
+LEFT JOIN tblSMCurrency DemurrangeCurrency ON DemurrangeCurrency.intCurrencyID = L.intDemurrageCurrencyId
+LEFT JOIN tblSMCurrency DespatchCurrency ON DespatchCurrency.intCurrencyID = L.intDispatcherId

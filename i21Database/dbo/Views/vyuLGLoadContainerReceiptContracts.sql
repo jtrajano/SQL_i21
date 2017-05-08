@@ -64,6 +64,9 @@ SELECT
 	,ysnPosted
 	,intStorageLocationId = SL.intStorageLocationId
 	,strStorageLocationName = SL.strName 
+	, LD.strPSubLocationName
+	, LD.strSSubLocationName
+
 FROM vyuLGLoadDetailView LD
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = LD.intLoadId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
@@ -136,4 +139,6 @@ SELECT
 	,ysnPosted
 	,intStorageLocationId = intStorageLocationId 
 	,strStorageLocationName = strStorageLocationName COLLATE Latin1_General_CI_AS
+	,strPSubLocationName
+	,strSSubLocationName
 FROM vyuLGLoadContainerPurchaseContracts
