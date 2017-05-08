@@ -2,15 +2,14 @@
 AS
 SELECT 
 	ARI.intInvoiceId
-	, ARID.intInvoiceDetailId
-	, ARI.intEntityId
+	, ARID.intInvoiceDetailId	
 	, ARI.strInvoiceNumber
 	, ARI.dtmDate
 	, ARI.dtmDueDate
 	, ARI.intTermId
 	, SMT.strTerm
-	, ARI.dblInvoiceTotal
-	, ARI.dblBaseInvoiceTotal
+	, dblInvoiceTotal			= Summary.dblTotal
+	, dblBaseInvoiceTotal		= Summary.dblBaseTotal
 	, dblTotalDue				= ARID.dblTotal
 	, dblBaseTotalDue			= ARID.dblBaseTotal
 	, ARI.intEntityCustomerId
@@ -23,28 +22,30 @@ SELECT
 	, strCompanyPhone			= SMCS.strCompanyPhone
 	, strCompanyFax				= SMCS.strCompanyFax
 	, strCompanyEmail			= SMCS.strCompanyEmail
+	, dtmLetterDate					= GETDATE()
 FROM 
 	(SELECT intInvoiceId
-		, intEntityId
+		, intEntityCustomerId
 		, strInvoiceNumber
 		, dtmDate
 		, dtmDueDate
 		, intTermId
 		, dblInvoiceTotal
-		, dblBaseInvoiceTotal
-		, intEntityCustomerId
+		, dblBaseInvoiceTotal		
 	 FROM 
 		tblARInvoice WITH (NOLOCK)
 	 WHERE 
 		strType = 'Service Charge') ARI 
 INNER JOIN 
-	(SELECT 
-		intInvoiceId
-		, dblTotal
-		, dblBaseTotal
-		, intInvoiceDetailId
-	 FROM 
-		tblARInvoiceDetail WITH (NOLOCK)) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
+	(
+		SELECT 
+			intInvoiceId
+			, intInvoiceDetailId
+			, dblTotal
+			, dblBaseTotal
+		FROM	
+			tblARInvoiceDetail
+	) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
 INNER JOIN
 	(SELECT 
 		intTermID
@@ -72,6 +73,31 @@ INNER JOIN (SELECT intEntityId
 			FROM 
 				tblEMEntityLocation WITH(NOLOCK)
 			) EMELoc ON ARC.intEntityCustomerId = EMELoc.intEntityId AND ARC.intBillToId = EMELoc.intEntityLocationId
+INNER JOIN 	
+	(
+		SELECT intEntityCustomerId
+			, dblTotal				= SUM(dblTotal)
+			, dblBaseTotal			= SUM(dblBaseTotal)
+		FROM 
+			(
+				SELECT 
+					ARI.intEntityCustomerId  
+					, ARID.dblTotal
+					, ARID.dblBaseTotal
+				FROM 
+					tblARInvoice ARI WITH (NOLOCK) 
+				INNER JOIN 
+					(SELECT 
+						intInvoiceId
+						, dblTotal
+						, dblBaseTotal
+					 FROM 
+						tblARInvoiceDetail WITH (NOLOCK)) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
+				WHERE 
+					ARI.strType = 'Service Charge'
+			)  Totals
+		GROUP BY intEntityCustomerId
+	) Summary ON ARC.intEntityCustomerId = Summary.intEntityCustomerId
  CROSS JOIN (SELECT intCompanyLocationId	= intCompanySetupID
 					, strCompanyName		= strCompanyName
 					, strCompanyAddress		= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL)
