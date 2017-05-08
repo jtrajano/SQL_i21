@@ -41,9 +41,12 @@ namespace iRely.Inventory.BusinessLayer
         {
             var sql = string.Empty;
             var lob = GlobalSettings.Instance.LineOfBusiness;
+            var intEntityUserSecurityId = Security.GetEntityId();
+
             SqlParameter pLob = new SqlParameter("@strLineOfBusiness", lob);
             SqlParameter pType = new SqlParameter("@strType", type);
-            sql = "EXEC dbo.uspICImportDataFromOrigin @strLineOfBusiness, @strType";
+            SqlParameter pEntityId = new SqlParameter("@intEntityUserSecurityId", type);
+            sql = "EXEC dbo.uspICImportDataFromOrigin @strLineOfBusiness, @strType, @intEntityUserSecurityId";
 
             var res = new ImportDataResult()
             {
@@ -53,7 +56,7 @@ namespace iRely.Inventory.BusinessLayer
 
             try
             {
-                await context.ContextManager.Database.ExecuteSqlCommandAsync(sql, pLob, pType);
+                await context.ContextManager.Database.ExecuteSqlCommandAsync(sql, pLob, pType, pEntityId);
             }
             catch (Exception ex)
             {
