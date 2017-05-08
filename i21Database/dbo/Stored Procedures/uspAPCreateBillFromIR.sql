@@ -11,7 +11,9 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @totalReceipts INT;
 DECLARE @totalReceiptDetails INT;
+DECLARE @totalChargesCount INT;
 DECLARE @counter INT = 0;
+DECLARE @chargeCounter INT = 0;
 DECLARE @counter2 INT = 0;
 DECLARE @receiptId INT;
 DECLARE @receiptDetailId INT;
@@ -32,6 +34,10 @@ DECLARE @receiptType INT;
 DECLARE @contractTermId INT;
 DECLARE @balanceDue INT;
 DECLARE @receipttDate DATETIME;
+DECLARE @intThirdPartyVendorId AS INT;
+DECLARE @ysnThirdPartyVendor AS BIT;
+DECLARE @ysnPrice AS BIT;
+
 
 
 CREATE TABLE #tmpReceiptIds (
@@ -71,6 +77,8 @@ INNER JOIN tblICInventoryReceiptItem IRDetail ON IRDetailTax.intInventoryReceipt
 INNER JOIN #tmpReceiptIds tIR ON IRDetail.intInventoryReceiptId = tIR.intInventoryReceiptId
 
 SET @totalReceipts = (SELECT COUNT(*) FROM #tmpReceiptIds)
+
+SET @totalChargesCount = (SELECT COUNT(*) FROM dbo.tblICInventoryReceiptCharge WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds))
 
 SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId);
 
@@ -113,6 +121,7 @@ ELSE
 BEGIN
 	DECLARE @availableQty INT;
 	DECLARE @chargeQty INT;
+	DECLARE @thridPartyQty INT;
 	DECLARE @rtype NVARCHAR(50);
 	SET @rtype =  (SELECT TOP 1 strReceiptType FROM #tmpReceiptData) 
 
@@ -134,24 +143,55 @@ BEGIN
 	ELSE
 				BEGIN
 					SET @chargeQty = 1
-				END              
+				END
+				
+	IF EXISTS (SELECT B.intInventoryReceiptChargeId
+						FROM dbo.tblICInventoryReceipt A
+						INNER JOIN dbo.tblICInventoryReceiptCharge B ON  A.intInventoryReceiptId = B.intInventoryReceiptId 
+						INNER JOIN dbo.tblAPBillDetail C ON C.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+						INNER JOIN dbo.tblAPBill D ON D.intBillId = C.intBillId
+						WHERE A.intInventoryReceiptId IN ((SELECT intInventoryReceiptId FROM #tmpReceiptIds)) AND A.intEntityVendorId != B.intEntityVendorId AND B.intEntityVendorId = D.intEntityVendorId)
+				BEGIN				              
+					SET @chargeQty = 0
+					SET @thridPartyQty = 0
+				END 
+	ELSE
+				BEGIN
+					SET @thridPartyQty = 1               
+				END				       
 		
 	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblICInventoryReceiptCharge WHERE intInventoryReceiptId IN ((SELECT intInventoryReceiptId FROM #tmpReceiptIds)))
 	BEGIN
 		IF(@availableQty = 0 AND  @chargeQty = 0)
-		BEGIN 
-			-- Debit Memo is no longer needed. All items have Debit Memo.
-			IF(@rtype = 'Inventory Return')
+		BEGIN	
+			IF EXISTS (SELECT TOP 1 A.intInventoryReceiptId FROM dbo.tblICInventoryReceipt A
+			INNER JOIN dbo.tblICInventoryReceiptCharge B ON A.intInventoryReceiptId = B.intInventoryReceiptId
+			WHERE A.intEntityVendorId ! = B.intEntityVendorId AND A.intInventoryReceiptId IN ((SELECT intInventoryReceiptId FROM #tmpReceiptIds)))
 				BEGIN
-					EXEC uspICRaiseError 80110;
-					GOTO Post_Exit           
-				END              
+					IF (@thridPartyQty = 0)
+					BEGIN
+						-- Voucher is no longer needed. All items have Voucher.      
+						BEGIN
+							EXEC uspICRaiseError 80111;
+							GOTO Post_Exit
+						END              
+					END           
+				END
 			ELSE
-			-- Voucher is no longer needed. All items have Voucher.      
-				BEGIN
-					EXEC uspICRaiseError 80111; 
-					GOTO Post_Exit
-				END   
+				BEGIN 
+					-- Debit Memo is no longer needed. All items have Debit Memo.
+					IF(@rtype = 'Inventory Return')
+						BEGIN
+							EXEC uspICRaiseError 80110;
+							GOTO Post_Exit           
+						END              
+					ELSE
+					-- Voucher is no longer needed. All items have Voucher.      
+						BEGIN
+							EXEC uspICRaiseError 80111;
+							GOTO Post_Exit
+						END   
+				END
 		END
 	END
 	ELSE
@@ -262,7 +302,7 @@ BEGIN
 
 			EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
 			--process the inventory receipt/inventory return to voucher/debit memo. 
-			IF @intProducerId IS NULL
+			IF @intProducerId IS NULL AND @availableQty != 0
 			BEGIN
 				INSERT INTO tblAPBill(
 				[intEntityVendorId],
@@ -379,7 +419,7 @@ BEGIN
 
 			EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
 			--process the inventory inventory return to debit memo with producer consideration.
-			IF @intProducerId IS NOT NULL 
+			IF @intProducerId IS NOT NULL AND @availableQty != 0
 			BEGIN
 				INSERT INTO tblAPBill(
 					[intEntityVendorId],
@@ -696,96 +736,281 @@ BEGIN
 	END  
 
 	--ADD CHARGES
-	IF(@chargeQty != 0 )
-	BEGIN
-	INSERT INTO tblAPBillDetail(
-		[intBillId],
-		[intItemId],
-		[intInventoryReceiptItemId],
-		[intInventoryReceiptChargeId],
-		[intPurchaseDetailId],
-		[dblQtyOrdered],
-		[dblQtyReceived],
-		[dblTax],
-		[dblRate],
-		[intCurrencyExchangeRateTypeId],
-		[ysnSubCurrency],
-		[intTaxGroupId],
-		[intAccountId],
-		[dblTotal],
-		[dblCost],
-		[dblOldCost],
-		[dblClaimAmount],
-		[dblNetWeight],
-		[dblNetShippedWeight],
-		[dblWeightLoss],
-		[dblFranchiseWeight],
-		[intContractDetailId],
-		[intContractHeaderId],
-		[intUnitOfMeasureId],
-		[intCostUOMId],
-		[intWeightUOMId],
-		[intLineNo],
-		[dblWeightUnitQty],
-		[dblCostUnitQty],
-		[dblUnitQty],
-		[intCurrencyId],
-		[intStorageLocationId],
-		[int1099Form],
-		[int1099Category]
-	)
-	OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
-	SELECT DISTINCT
-		[intBillId]					=	@generatedBillId,
-		[intItemId]					=	A.intItemId,
-		[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
-		[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
-		[intPODetailId]				=	NULL,
-		[dblQtyOrdered]				=	A.dblOrderQty,
-		[dblQtyReceived]			=	A.dblQuantityToBill,
-		[dblTax]					=	ISNULL(A.dblTax,0),
-		[dblForexRate]				=	ISNULL(A.dblForexRate,0),
-		[intForexRateTypeId]		=   A.intForexRateTypeId,
-		[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
-		[intTaxGroupId]				=	NULL,
-		[intAccountId]				=	A.intAccountId,
-		[dblTotal]					=	CASE WHEN C.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
-											 ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
-										END,
-		[dblCost]					=	ABS(A.dblUnitCost),
-		[dblOldCost]				=	NULL,
-		[dblClaimAmount]			=	0,
-		[dblNetWeight]				=	0,
-		[dblNetShippedWeight]		=	0,
-		[dblWeightLoss]				=	0,
-		[dblFranchiseWeight]		=	0,
-		[intContractDetailId]		=	A.intContractDetailId,
-		[intContractHeaderId]		=	A.intContractHeaderId,
-		[intUnitOfMeasureId]		=	NULL,
-		[intCostUOMId]              =    A.intCostUnitMeasureId,
-		[intWeightUOMId]			=	NULL,
-		[intLineNo]					=	1,
-		[dblWeightUnitQty]			=	1,
-		[dblCostUnitQty]			=	1,
-		[dblUnitQty]				=	1,
-		[intCurrencyId]				=	ISNULL(A.intCurrencyId,0),
-		[intStorageLocationId]		=	NULL,
-		[int1099Form]				=	0,
-		[int1099Category]			=	0       
-	FROM [vyuICChargesForBilling] A
-	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
-	AND A.intInventoryReceiptId = B.intInventoryReceiptId
-	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
-											--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = C.intCurrencyId)
-	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
-	--LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
-	OUTER APPLY(
-		SELECT ysnPrice FROM tblICInventoryReceiptCharge RC
-		WHERE RC.intInventoryReceiptId = A.intInventoryReceiptId AND RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-	) C   
-	WHERE A.intInventoryReceiptId = @receiptId
-	END
 	
+	BEGIN
+	DECLARE @intReceiptChargeId AS INT
+	IF(@chargeQty != 0)
+	BEGIN 
+					INSERT INTO tblAPBillDetail(
+					[intBillId],
+					[intItemId],
+					[intInventoryReceiptItemId],
+					[intInventoryReceiptChargeId],
+					[intPurchaseDetailId],
+					[dblQtyOrdered],
+					[dblQtyReceived],
+					[dblTax],
+					[dblRate],
+					[intCurrencyExchangeRateTypeId],
+					[ysnSubCurrency],
+					[intTaxGroupId],
+					[intAccountId],
+					[dblTotal],
+					[dblCost],
+					[dblOldCost],
+					[dblClaimAmount],
+					[dblNetWeight],
+					[dblNetShippedWeight],
+					[dblWeightLoss],
+					[dblFranchiseWeight],
+					[intContractDetailId],
+					[intContractHeaderId],
+					[intUnitOfMeasureId],
+					[intCostUOMId],
+					[intWeightUOMId],
+					[intLineNo],
+					[dblWeightUnitQty],
+					[dblCostUnitQty],
+					[dblUnitQty],
+					[intCurrencyId],
+					[intStorageLocationId],
+					[int1099Form],
+					[int1099Category]
+				)
+				OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
+				SELECT DISTINCT
+					[intBillId]					=	@generatedBillId,
+					[intItemId]					=	A.intItemId,
+					[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
+					[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
+					[intPODetailId]				=	NULL,
+					[dblQtyOrdered]				=	A.dblOrderQty,
+					[dblQtyReceived]			=	A.dblQuantityToBill,
+					[dblTax]					=	ISNULL(A.dblTax,0),
+					[dblForexRate]				=	ISNULL(A.dblForexRate,0),
+					[intForexRateTypeId]		=   A.intForexRateTypeId,
+					[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
+					[intTaxGroupId]				=	NULL,
+					[intAccountId]				=	A.intAccountId,
+					[dblTotal]					=	CASE WHEN C.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
+														 ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
+													END,
+					[dblCost]					=	ABS(A.dblUnitCost),
+					[dblOldCost]				=	NULL,
+					[dblClaimAmount]			=	0,
+					[dblNetWeight]				=	0,
+					[dblNetShippedWeight]		=	0,
+					[dblWeightLoss]				=	0,
+					[dblFranchiseWeight]		=	0,
+					[intContractDetailId]		=	A.intContractDetailId,
+					[intContractHeaderId]		=	A.intContractHeaderId,
+					[intUnitOfMeasureId]		=	NULL,
+					[intCostUOMId]              =    A.intCostUnitMeasureId,
+					[intWeightUOMId]			=	NULL,
+					[intLineNo]					=	1,
+					[dblWeightUnitQty]			=	1,
+					[dblCostUnitQty]			=	1,
+					[dblUnitQty]				=	1,
+					[intCurrencyId]				=	ISNULL(A.intCurrencyId,0),
+					[intStorageLocationId]		=	NULL,
+					[int1099Form]				=	0,
+					[int1099Category]			=	0       
+				FROM [vyuICChargesForBilling] A
+				INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
+				AND A.intInventoryReceiptId = B.intInventoryReceiptId
+				LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
+														--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = C.intCurrencyId)
+				LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
+				--LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
+				OUTER APPLY(
+					SELECT ysnPrice FROM tblICInventoryReceiptCharge RC
+					WHERE RC.intInventoryReceiptId = A.intInventoryReceiptId AND RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+				) C   
+				WHERE A.intInventoryReceiptId = @receiptId
+	END    
+
+	IF(@thridPartyQty != 0)
+	BEGIN
+	WHILE @chargeCounter != @totalChargesCount
+		BEGIN
+	       SELECT TOP(1) @intReceiptChargeId = intInventoryReceiptChargeId FROM tblICInventoryReceiptCharge WHERE intInventoryReceiptId = @receiptId
+		   SELECT @intThirdPartyVendorId = (CASE WHEN (A.intEntityVendorId != B.intEntityVendorId) THEN B.intEntityVendorId ELSE A.intEntityVendorId END), 
+							   @ysnThirdPartyVendor = (CASE WHEN (A.intEntityVendorId != B.intEntityVendorId) THEN 1 ELSE 0 END),
+							   @ysnPrice = (CASE WHEN (A.intEntityVendorId != B.intEntityVendorId) AND ysnPrice > 0 THEN 1 ELSE 0 END)
+						FROM dbo.tblICInventoryReceipt A
+						INNER JOIN dbo.tblICInventoryReceiptCharge B ON  A.intInventoryReceiptId = B.intInventoryReceiptId 
+						WHERE intInventoryReceiptChargeId = @intReceiptChargeId 
+			SET @chargeCounter = @chargeCounter + 1;
+			EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
+				
+				--process the inventory inventory receipt to Vocuher for 3rd Party.
+				IF @intThirdPartyVendorId IS NOT NULL AND @ysnThirdPartyVendor > 0
+				BEGIN
+					INSERT INTO tblAPBill(
+						[intEntityVendorId],
+						[strVendorOrderNumber], 
+						[intTermsId], 
+						[intShipViaId],
+						[intShipFromId],
+						[intShipToId],
+						[dtmDate], 
+						[dtmDateCreated], 
+						[dtmBillDate],
+						[dtmDueDate], 
+						[intCurrencyId],
+						[intAccountId], 
+						[strBillId],
+						[strReference], 
+						[dblTotal], 
+						[dblAmountDue],
+						[intEntityId],
+						[ysnPosted],
+						[ysnPaid],
+						[intTransactionType],
+						[dblDiscount],
+						[dblWithheld],
+						[intStoreLocationId],
+						[intPayToAddressId],
+						[intSubCurrencyCents]
+		
+					)
+					OUTPUT inserted.intBillId, @receiptId, @intThirdPartyVendorId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId, intEntityVendorId)
+					SELECT
+						[intEntityVendorId]		=	@intThirdPartyVendorId
+						,[strVendorOrderNumber] =	A.strVendorRefNo
+						,[intTermsId] 			=	ISNULL(Terms.intTermsId,(SELECT TOP 1 intTermID FROM tblSMTerm WHERE LOWER(strTerm) = 'due on receipt'))
+						,[intShipViaId]			=	A.intShipViaId
+						,[intShipFromId]		=	NULLIF(A.intShipFromId,0)
+						,[intShipToId]			=	A.intLocationId
+						,[dtmDate] 				=	GETDATE()
+						,[dtmDateCreated] 		=	GETDATE()
+						,[dtmBillDate] 			=	GETDATE()
+						,[dtmDueDate] 			=	GETDATE()
+						,[intCurrencyId]		=	ISNULL(A.intCurrencyId,CAST((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') AS INT))
+						,[intAccountId] 		=	@APAccount
+						,[strBillId]			=	@generatedBillRecordId
+						,[strReference] 		=	A.strBillOfLading
+						,[dblTotal] 			=	0
+						,[dblAmountDue]			=	0
+						,[intEntityId]			=	@userId
+						,[ysnPosted]			=	0
+						,[ysnPaid]				=	0
+						,[intTransactionType]	=	1 
+						,[dblDiscount]			=	0
+						,[dblWithheld]			=	0
+						,[intStoreLocationId]	=	A.intLocationId
+						,[intPayToAddressId]	=	A.intShipFromId
+						,[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,1)
+					FROM #tmpReceiptData A
+					OUTER APPLY 
+					(
+						SELECT 
+								C.intTermsId
+						FROM	tblAPVendor B INNER JOIN tblEMEntityLocation C 
+									ON B.intEntityVendorId = C.intEntityId 
+									AND C.ysnDefaultLocation = 1
+						WHERE	B.intEntityVendorId = @intProducerId
+					) Terms	
+					WHERE	A.intInventoryReceiptId = @receiptId 
+							AND A.ysnPosted = 1
+
+					SET @generatedBillId = SCOPE_IDENTITY()
+
+					IF(@ysnThirdPartyVendor > 0)
+					BEGIN
+						INSERT INTO tblAPBillDetail(
+						[intBillId],
+						[intItemId],
+						[intInventoryReceiptItemId],
+						[intInventoryReceiptChargeId],
+						[intPurchaseDetailId],
+						[dblQtyOrdered],
+						[dblQtyReceived],
+						[dblTax],
+						[dblRate],
+						[intCurrencyExchangeRateTypeId],
+						[ysnSubCurrency],
+						[intTaxGroupId],
+						[intAccountId],
+						[dblTotal],
+						[dblCost],
+						[dblOldCost],
+						[dblClaimAmount],
+						[dblNetWeight],
+						[dblNetShippedWeight],
+						[dblWeightLoss],
+						[dblFranchiseWeight],
+						[intContractDetailId],
+						[intContractHeaderId],
+						[intUnitOfMeasureId],
+						[intCostUOMId],
+						[intWeightUOMId],
+						[intLineNo],
+						[dblWeightUnitQty],
+						[dblCostUnitQty],
+						[dblUnitQty],
+						[intCurrencyId],
+						[intStorageLocationId],
+						[int1099Form],
+						[int1099Category]
+					)
+					OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
+					SELECT DISTINCT
+						[intBillId]					=	@generatedBillId,
+						[intItemId]					=	A.intItemId,
+						[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
+						[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
+						[intPODetailId]				=	NULL,
+						[dblQtyOrdered]				=	A.dblOrderQty,
+						[dblQtyReceived]			=	A.dblQuantityToBill,
+						[dblTax]					=	(CASE WHEN ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
+															  WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
+															ELSE ISNULL(A.dblTax,0) END),
+						[dblForexRate]				=	ISNULL(A.dblForexRate,0),
+						[intForexRateTypeId]		=   A.intForexRateTypeId,
+						[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
+						[intTaxGroupId]				=	NULL,
+						[intAccountId]				=	A.intAccountId,
+						[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
+						[dblCost]					=	ABS(A.dblUnitCost),
+						[dblOldCost]				=	NULL,
+						[dblClaimAmount]			=	0,
+						[dblNetWeight]				=	0,
+						[dblNetShippedWeight]		=	0,
+						[dblWeightLoss]				=	0,
+						[dblFranchiseWeight]		=	0,
+						[intContractDetailId]		=	A.intContractDetailId,
+						[intContractHeaderId]		=	A.intContractHeaderId,
+						[intUnitOfMeasureId]		=	NULL,
+						[intCostUOMId]              =    A.intCostUnitMeasureId,
+						[intWeightUOMId]			=	NULL,
+						[intLineNo]					=	1,
+						[dblWeightUnitQty]			=	1,
+						[dblCostUnitQty]			=	1,
+						[dblUnitQty]				=	1,
+						[intCurrencyId]				=	ISNULL(A.intCurrencyId,0),
+						[intStorageLocationId]		=	NULL,
+						[int1099Form]				=	0,
+						[int1099Category]			=	0       
+					FROM [vyuICChargesForBilling] A
+					LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
+					LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
+					OUTER APPLY(
+						SELECT ysnPrice FROM tblICInventoryReceiptCharge RC
+						WHERE RC.intInventoryReceiptId = A.intInventoryReceiptId AND RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+					) C   
+					OUTER APPLY(
+						SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax CT
+						WHERE CT.intInventoryReceiptChargeId = @intReceiptChargeId
+					) CT   
+					WHERE A.intInventoryReceiptChargeId = @intReceiptChargeId AND A.intEntityVendorId = @intThirdPartyVendorId
+					END                   
+					
+				END
+				     
+		END
+	END
+	END
 END
 
 --UPDATE VOUCHER DATA
@@ -814,7 +1039,7 @@ BEGIN
 	FROM tblAPBill A
 	CROSS APPLY (
 		SELECT
-			SUM(ISNULL(dblTotal,0) + ISNULL(dblTax,0)) AS dblTotal
+			ISNULL(SUM(ISNULL(dblTotal,0) + ISNULL(dblTax,0)),0) AS dblTotal
 		FROM tblAPBillDetail B
 		WHERE B.intBillId = A.intBillId
 	) Details
@@ -877,8 +1102,12 @@ BEGIN
 		[strCalculationMethod]	=	A.strCalculationMethod, 
 		[dblRate]				=	A.dblRate, 
 		[intAccountId]			=	A.intTaxAccountId, 
-		[dblTax]				=	A.dblTax, 
-		[dblAdjustedTax]		=	ISNULL(A.dblAdjustedTax,0), 
+		[dblTax]				=	(CASE WHEN B.intEntityVendorId != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
+											WHEN B.intEntityVendorId != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 THEN A.dblTax * -1
+											ELSE A.dblTax END), 
+		[dblAdjustedTax]		=	(CASE WHEN B.intEntityVendorId != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 THEN ABS(dblAdjustedTax) 
+											WHEN B.intEntityVendorId != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 THEN dblAdjustedTax * -1
+											ELSE dblAdjustedTax END), 
 		[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	0, 
 		[ysnCheckOffTax]		=	A.ysnCheckoffTax
