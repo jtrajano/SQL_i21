@@ -41,7 +41,8 @@
 	[intCurrencyDecimal] INT NOT NULL DEFAULT 2,
 	[intLockedRecordExpiration] INT NOT NULL DEFAULT 60,
 	[ysnValidatePassword] BIT NOT NULL DEFAULT 0, 
-	[intCompanySetupId] INT NOT NULL,
+	[intDefaultTermId] INT NULL, 
+    [intCompanySetupId] INT NOT NULL,
 	[intMultiCurrencyId] INT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )
