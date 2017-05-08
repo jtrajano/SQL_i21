@@ -232,6 +232,27 @@ Ext.define('Inventory.search.InventoryReceipt', {
         }
     ],
 
+    processReceiptToVoucher: function (receiptId, callback) {
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryReceipt/ProcessBill',
+            params:{
+                id: receiptId
+            },
+            method: 'get'  
+        })
+        .subscribe(
+            function(successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+                callback(jsonData);
+            }
+            ,function(failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                var message = jsonData.message; 
+                iRely.Functions.showErrorDialog(message.statusText);
+            }
+        );          
+    },    
+
     onRefreshVoucherClick: function (control) {
         ic.utils.ajax({
             url: '../Inventory/api/InventoryReceipt/UpdateReceiptVoucher',

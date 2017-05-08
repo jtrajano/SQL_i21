@@ -108,25 +108,38 @@ Ext.define('Inventory.search.InventoryShipment', {
                 read: '../Inventory/api/InventoryShipment/SearchShipmentInvoice'
             },
             columns: [
-                { dataIndex: 'intInventoryShipmentItemId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
-                { dataIndex: 'strShipmentNumber', text: 'Shipment No', flex: 1, dataType: 'string', drillDownText: 'View Shipment', drillDownClick: 'onViewShipmentNo' },
-                { dataIndex: 'strInvoiceNumber', text: 'Invoice No', flex: 1, dataType: 'string', drillDownText: 'View Invoice', drillDownClick: 'onViewInvoice' },
-                { dataIndex: 'dtmDateInvoiced', text: 'Date Invoiced', flex: 1, dataType: 'date', xtype: 'datecolumn' },
-                { dataIndex: 'strCustomerName', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Customer', drillDownClick: 'onViewCustomerName' },
-                { dataIndex: 'strDestination', text: 'Destination', flex: 1, dataType: 'string' },
-                { dataIndex: 'dtmShipDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
-                { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string' },
-                { dataIndex: 'strItemNo', text: 'Item', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
-                { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float' },
-                { xtype: 'numbercolumn', dataIndex: 'dblQtyShipped', text: 'Qty Shipped', flex: 1, dataType: 'float' },
-                { xtype: 'numbercolumn', format: '#,##0.0000', aggregateFormat: '#,##0.0000', aggregate: 'sum', dataIndex: 'dblShipmentAmount', text: 'Shipment Amount', flex: 1, dataType: 'float' },
-                { xtype: 'numbercolumn', format: '#,##0.0000', aggregateFormat: '#,##0.0000', aggregate: 'sum', dataIndex: 'dblInTransitAmount', text: 'In Transit Amount', flex: 1, dataType: 'float' },
-                { xtype: 'numbercolumn', format: '#,##0.0000', aggregateFormat: '#,##0.0000', aggregate: 'sum', dataIndex: 'dblCOGSAmount', text: 'COGS Amount', flex: 1, dataType: 'float' },
-                { xtype: 'numbercolumn', dataIndex: 'dblQtyToInvoice', text: 'Qty to Invoice', flex: 1, dataType: 'float' },
-                { xtype: 'numbercolumn', dataIndex: 'dblQtyInvoiced', text: 'Qty Invoiced', flex: 1, dataType: 'float' },
-                { dataIndex: 'strOrderType', text: 'Order Type', flex: 1, dataType: 'string' },
-                { dataIndex: 'strBOLNumber', text: 'BOL No', flex: 1, dataType: 'string' }
-            ]
+                { dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, dataType: 'numeric', key: true, hidden: true},
+                { dataIndex: 'intInventoryShipmentItemId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true},
+                { dataIndex: 'intInventoryShipmentChargeId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true},
+                { dataIndex: 'strAllVouchers', text: 'Invoice Nos.', width: 100, dataType: 'string', drillDownText: 'View Invoice', drillDownClick: 'onViewInvoice' },
+                { dataIndex: 'strShipmentNumber', text: 'Shipment No.', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'string'},
+                { dataIndex: 'dtmShipDate', text: 'Ship Date', width: 100, dataType: 'date', xtype: 'datecolumn'},
+                { dataIndex: 'strCustomer', text: 'Customer', width: 300, dataType: 'string' },
+                { dataIndex: 'strLocationName', text: 'Ship From', width: 200, dataType: 'string' },
+                { dataIndex: 'strDestination', text: 'Ship To', width: 200, dataType: 'string' },
+                { dataIndex: 'strBOLNumber', text: 'Bill of Lading', width: 100, dataType: 'string' },
+                { dataIndex: 'strOrderType', text: 'Order Type', width: 120, dataType: 'string' },
+                { dataIndex: 'strItemNo', text: 'Item No.', width: 100, dataType: 'string' },
+                { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Cost', width: 100, dataType: 'float', xtype: 'numbercolumn'},
+                { xtype: 'numbercolumn', dataIndex: 'dblShipmentQty', text: 'Shipped Qty', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                { xtype: 'numbercolumn', dataIndex: 'dblInTransitQty', text: 'In-Transit Qty', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                { xtype: 'numbercolumn', dataIndex: 'dblInvoiceQty', text: 'Invoiced Qty', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                { xtype: 'numbercolumn', dataIndex: 'dblShipmentLineTotal', text: 'Shipment Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},                        
+                { xtype: 'numbercolumn', dataIndex: 'dblInvoiceLineTotal', text: 'Invoice Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                { xtype: 'numbercolumn', dataIndex: 'dblOpenQty', text: 'Uncleared Qty', width: 150, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                { xtype: 'numbercolumn', dataIndex: 'dblInTransitTotal', text: 'Uncleared Items Total', width: 150, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                { dataIndex: 'dtmLastInvoiceDate', text: 'Last Invoice Date', width: 120, dataType: 'date', xtype: 'datecolumn' },
+                { dataIndex: 'strFilterString', text: 'Voucher Nos.', flex: 1, dataType: 'string', required: true, hidden: true }               
+                
+            ],
+            buttons: [
+                {
+                    text: 'Refresh Invoices',
+                    itemId: 'btnRefreshInvoices',
+                    clickHandler: 'onRefreshInvoicesClick',
+                    width: 400
+                }                        
+            ]                                        
         }
     ],
 
@@ -169,6 +182,29 @@ Ext.define('Inventory.search.InventoryShipment', {
         }
     ],
 
+    /*Support functions*/
+    processShipmentToInvoice: function (shipmentId, callback) {
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryShipment/ProcessInvoice',
+            params:{
+                id: shipmentId
+            },
+            method: 'post'  
+        })
+        .subscribe(
+            function(successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+                callback(jsonData);
+            }
+            ,function(failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                var message = jsonData.message; 
+                iRely.Functions.showErrorDialog(message.statusText);
+            }
+        );          
+    },      
+
+    /*Button Event Handlers*/
     onItemClick: function () {
         iRely.Functions.openScreen('Inventory.view.Item', { action: 'new', viewConfig: { modal: true } });
     },
@@ -192,15 +228,84 @@ Ext.define('Inventory.search.InventoryShipment', {
     onViewCustomerClick: function () {
         iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityCustomer', { action: 'view' });
     },
+    
+    onRefreshInvoicesClick: function (control) {
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryShipment/UpdateShipmentInvoice',
+            method: 'post'  
+        })
+        .subscribe(
+            function(successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+                var panel = control.up('panel');
+                var grdSearch = panel ? panel.query('#grdSearch') : null;
+
+                if (grdSearch && grdSearch.length > 0){
+                    grdSearch.forEach(function (grid) {
+                        if (grid && grid.url == '../Inventory/api/InventoryShipment/SearchShipmentInvoice'){
+                            var store = grid ? grid.getStore() : null;
+                            if (store){
+                                store.reload({
+                                    callback: function(){
+                                        grid.getView().refresh();
+                                    }
+                                });                    
+                            }
+                        }
+                    }); 
+                }                
+            }
+            , function(failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                iRely.Functions.showErrorDialog(jsonData.message.statusText);
+            }
+        );        
+    },
 
     /* Drilldown Handlers */
     onViewShipmentNo: function (value, record) {
         i21.ModuleMgr.Inventory.showScreen(value, 'ShipmentNo');
     },
 
-    onViewInvoice: function (value, record) {
-        var strName = record.get('strInvoiceNumber');
-        i21.ModuleMgr.Inventory.showScreen(strName, 'Invoice');
+    onViewInvoice: function (value, record, dashboard) {
+        var me = this;
+
+        if (value === 'New Invoice') {
+            if(record.get('strOrderType') === 'Transfer Order') {
+                iRely.Functions.showErrorDialog('Invalid order type. An invoice is not applicable on transfer orders.');
+                return;
+            }
+
+            me.processShipmentToInvoice(record.get('intInventoryShipmentId'), function(data) {
+                iRely.Functions.openScreen('AccountsReceivable.view.Invoice', {
+                    filters: [
+                        {
+                            column: 'intInvoiceId',
+                            value: data.message.InvoiceId
+                        }
+                    ],
+                    action: 'view',
+                    listeners: {
+                        close: function(e) {
+                            dashboard.$initParent.grid.controller.reload();  
+                        }
+                    }
+                });        
+            });            
+            
+        }
+        else {
+            var invoices = record.get('strFilterString');
+            iRely.Functions.openScreen('AccountsReceivable.view.Invoice', {
+                filters: [
+                    {
+                        column: 'intInvoiceId',
+                        value: invoices
+                    }
+                ],
+                action: 'view'
+            });        
+        }
     },
 
     onViewCustomerNo: function (value, record) {
@@ -215,5 +320,5 @@ Ext.define('Inventory.search.InventoryShipment', {
     onViewItemNo: function(value, record) {
         var itemNo = record.get('strItemNo');
         i21.ModuleMgr.Inventory.showScreen(itemNo, 'ItemNo');
-    }
+    }    
 });
