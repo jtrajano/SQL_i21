@@ -1699,9 +1699,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Sales Entities', N'CRM', @CRMParentMenuId, N'Sales Entities', N'Activity', N'Screen', N'EntityManagement.view.Entity?showSearch=true&searchCommand=searchEntityProspect', N'small-menu-activity', 0, 0, 0, 1, 11, 1)
+	VALUES (N'Sales Entities', N'CRM', @CRMParentMenuId, N'Sales Entities', N'Activity', N'Screen', N'AccountsReceivable.view.EntityProspect?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 11, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'EntityManagement.view.Entity?showSearch=true&searchCommand=searchEntityProspect' WHERE strMenuName = 'Sales Entities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'AccountsReceivable.view.EntityProspect?showSearch=true' WHERE strMenuName = 'Sales Entities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Leads' AND strModuleName = 'CRM' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
