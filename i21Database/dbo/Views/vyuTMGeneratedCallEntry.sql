@@ -41,6 +41,7 @@ AS
 		,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
 		,intFillMethodId = B.intFillMethodId
 		,strFillMethod = L.strFillMethod
+		,ysnHold = B.ysnOnHold
 	FROM tblTMDispatch A
 	INNER JOIN tblTMSite B
 		ON A.intSiteID = B.intSiteID
