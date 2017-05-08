@@ -175,6 +175,27 @@ namespace iRely.Inventory.WebApi
             var customer = await ctx.ToListAsync();
             return Request.CreateResponse(HttpStatusCode.OK, customer.AsQueryable());
         }
+
+        [HttpPost]
+        [ActionName("UpdateShipmentInvoice")]
+        public HttpResponseMessage UpdateShipmentInvoice()
+        {
+            var result = _bl.UpdateShipmentInvoice();
+
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
     }
 
     class Customer

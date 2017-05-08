@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsf357756693a222913336117fa0609518b2b27c90793a109c6e6ded7aabd75f2e))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets2f94ab2d5310c644305cf97c394b2eb31cc6ea10d5af335b44f5806a5339895e))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsf357756693a222913336117fa0609518b2b27c90793a109c6e6ded7aabd75f2e : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets2f94ab2d5310c644305cf97c394b2eb31cc6ea10d5af335b44f5806a5339895e : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "f357756693a222913336117fa0609518b2b27c90793a109c6e6ded7aabd75f2e"; }
+            get { return "2f94ab2d5310c644305cf97c394b2eb31cc6ea10d5af335b44f5806a5339895e"; }
         }
 
         /// <summary>
@@ -10453,30 +10453,41 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICShipmentInvoice
-        [CodeFirstDatabaseSchema.vyuICShipmentInvoice](T1.vyuICShipmentInvoice_intInventoryShipmentItemId, T1.vyuICShipmentInvoice_strInvoiceNumber, T1.vyuICShipmentInvoice_dtmDateInvoiced, T1.vyuICShipmentInvoice_strCustomerName, T1.vyuICShipmentInvoice_strDestination, T1.vyuICShipmentInvoice_strShipmentNumber, T1.vyuICShipmentInvoice_dtmShipDate, T1.vyuICShipmentInvoice_strBOLNumber, T1.vyuICShipmentInvoice_intOrderType, T1.vyuICShipmentInvoice_strOrderType, T1.vyuICShipmentInvoice_strItemNo, T1.[vyuICShipmentInvoice_dblUnitCost ], T1.vyuICShipmentInvoice_dblShipmentAmount, T1.vyuICShipmentInvoice_dblTotal, T1.vyuICShipmentInvoice_dblQtyInvoiced, T1.vyuICShipmentInvoice_dblQtyShipped, T1.vyuICShipmentInvoice_dblCOGSAmount, T1.vyuICShipmentInvoice_dblQtyToInvoice, T1.vyuICShipmentInvoice_dblInTransitAmount, T1.vyuICShipmentInvoice_intCurrencyId, T1.vyuICShipmentInvoice_strCurrency)
+        [CodeFirstDatabaseSchema.vyuICShipmentInvoice](T1.vyuICShipmentInvoice_intInventoryShipmentItemId, T1.vyuICShipmentInvoice_intInventoryShipmentId, T1.vyuICShipmentInvoice_intInventoryShipmentChargeId, T1.vyuICShipmentInvoice_strShipmentNumber, T1.vyuICShipmentInvoice_dtmShipDate, T1.vyuICShipmentInvoice_strCustomer, T1.vyuICShipmentInvoice_strLocationName, T1.vyuICShipmentInvoice_strDestination, T1.vyuICShipmentInvoice_strBOLNumber, T1.vyuICShipmentInvoice_strOrderType, T1.vyuICShipmentInvoice_strItemNo, T1.vyuICShipmentInvoice_strItemDescription, T1.vyuICShipmentInvoice_dblUnitCost, T1.vyuICShipmentInvoice_dblShipmentQty, T1.vyuICShipmentInvoice_dblInTransitQty, T1.vyuICShipmentInvoice_dblInvoiceQty, T1.vyuICShipmentInvoice_dblShipmentLineTotal, T1.vyuICShipmentInvoice_dblInTransitTotal, T1.vyuICShipmentInvoice_dblInvoiceLineTotal, T1.vyuICShipmentInvoice_dblShipmentTax, T1.vyuICShipmentInvoice_dblInvoiceTax, T1.vyuICShipmentInvoice_dblOpenQty, T1.vyuICShipmentInvoice_dblItemsReceivable, T1.vyuICShipmentInvoice_dblTaxesReceivable, T1.vyuICShipmentInvoice_dtmLastInvoiceDate, T1.vyuICShipmentInvoice_strAllVouchers, T1.vyuICShipmentInvoice_strFilterString, T1.vyuICShipmentInvoice_dtmCreated, T1.vyuICShipmentInvoice_intCurrencyId, T1.vyuICShipmentInvoice_strCurrency, T1.vyuICShipmentInvoice_strItemUOM, T1.vyuICShipmentInvoice_intItemUOMId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS vyuICShipmentInvoice_intInventoryShipmentItemId, 
-            T.strInvoiceNumber AS vyuICShipmentInvoice_strInvoiceNumber, 
-            T.dtmDateInvoiced AS vyuICShipmentInvoice_dtmDateInvoiced, 
-            T.strCustomerName AS vyuICShipmentInvoice_strCustomerName, 
-            T.strDestination AS vyuICShipmentInvoice_strDestination, 
+            T.intInventoryShipmentId AS vyuICShipmentInvoice_intInventoryShipmentId, 
+            T.intInventoryShipmentChargeId AS vyuICShipmentInvoice_intInventoryShipmentChargeId, 
             T.strShipmentNumber AS vyuICShipmentInvoice_strShipmentNumber, 
             T.dtmShipDate AS vyuICShipmentInvoice_dtmShipDate, 
+            T.strCustomer AS vyuICShipmentInvoice_strCustomer, 
+            T.strLocationName AS vyuICShipmentInvoice_strLocationName, 
+            T.strDestination AS vyuICShipmentInvoice_strDestination, 
             T.strBOLNumber AS vyuICShipmentInvoice_strBOLNumber, 
-            T.intOrderType AS vyuICShipmentInvoice_intOrderType, 
             T.strOrderType AS vyuICShipmentInvoice_strOrderType, 
             T.strItemNo AS vyuICShipmentInvoice_strItemNo, 
-            T.dblUnitCost AS [vyuICShipmentInvoice_dblUnitCost ], 
-            T.dblShipmentAmount AS vyuICShipmentInvoice_dblShipmentAmount, 
-            T.dblTotal AS vyuICShipmentInvoice_dblTotal, 
-            T.dblQtyInvoiced AS vyuICShipmentInvoice_dblQtyInvoiced, 
-            T.dblQtyShipped AS vyuICShipmentInvoice_dblQtyShipped, 
-            T.dblCOGSAmount AS vyuICShipmentInvoice_dblCOGSAmount, 
-            T.dblQtyToInvoice AS vyuICShipmentInvoice_dblQtyToInvoice, 
-            T.dblInTransitAmount AS vyuICShipmentInvoice_dblInTransitAmount, 
+            T.strItemDescription AS vyuICShipmentInvoice_strItemDescription, 
+            T.dblUnitCost AS vyuICShipmentInvoice_dblUnitCost, 
+            T.dblShipmentQty AS vyuICShipmentInvoice_dblShipmentQty, 
+            T.dblInTransitQty AS vyuICShipmentInvoice_dblInTransitQty, 
+            T.dblInvoiceQty AS vyuICShipmentInvoice_dblInvoiceQty, 
+            T.dblShipmentLineTotal AS vyuICShipmentInvoice_dblShipmentLineTotal, 
+            T.dblInTransitTotal AS vyuICShipmentInvoice_dblInTransitTotal, 
+            T.dblInvoiceLineTotal AS vyuICShipmentInvoice_dblInvoiceLineTotal, 
+            T.dblShipmentTax AS vyuICShipmentInvoice_dblShipmentTax, 
+            T.dblInvoiceTax AS vyuICShipmentInvoice_dblInvoiceTax, 
+            T.dblOpenQty AS vyuICShipmentInvoice_dblOpenQty, 
+            T.dblItemsReceivable AS vyuICShipmentInvoice_dblItemsReceivable, 
+            T.dblTaxesReceivable AS vyuICShipmentInvoice_dblTaxesReceivable, 
+            T.dtmLastInvoiceDate AS vyuICShipmentInvoice_dtmLastInvoiceDate, 
+            T.strAllVouchers AS vyuICShipmentInvoice_strAllVouchers, 
+            T.strFilterString AS vyuICShipmentInvoice_strFilterString, 
+            T.dtmCreated AS vyuICShipmentInvoice_dtmCreated, 
             T.intCurrencyId AS vyuICShipmentInvoice_intCurrencyId, 
             T.strCurrency AS vyuICShipmentInvoice_strCurrency, 
+            T.strItemUOM AS vyuICShipmentInvoice_strItemUOM, 
+            T.intItemUOMId AS vyuICShipmentInvoice_intItemUOMId, 
             True AS _from0
         FROM InventoryEntities.vyuICShipmentInvoices AS T
     ) AS T1");
@@ -10490,30 +10501,41 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICShipmentInvoices
-        [iRely.Inventory.Model.vyuICShipmentInvoice](T1.vyuICShipmentInvoice_intInventoryShipmentItemId, T1.vyuICShipmentInvoice_strInvoiceNumber, T1.vyuICShipmentInvoice_dtmDateInvoiced, T1.vyuICShipmentInvoice_strCustomerName, T1.vyuICShipmentInvoice_strDestination, T1.vyuICShipmentInvoice_strShipmentNumber, T1.vyuICShipmentInvoice_dtmShipDate, T1.vyuICShipmentInvoice_strBOLNumber, T1.vyuICShipmentInvoice_intOrderType, T1.vyuICShipmentInvoice_strOrderType, T1.vyuICShipmentInvoice_strItemNo, T1.vyuICShipmentInvoice_dblUnitCost, T1.vyuICShipmentInvoice_dblShipmentAmount, T1.vyuICShipmentInvoice_dblTotal, T1.vyuICShipmentInvoice_dblQtyInvoiced, T1.vyuICShipmentInvoice_dblQtyShipped, T1.vyuICShipmentInvoice_dblCOGSAmount, T1.vyuICShipmentInvoice_dblQtyToInvoice, T1.vyuICShipmentInvoice_dblInTransitAmount, T1.vyuICShipmentInvoice_intCurrencyId, T1.vyuICShipmentInvoice_strCurrency)
+        [iRely.Inventory.Model.vyuICShipmentInvoice](T1.vyuICShipmentInvoice_intInventoryShipmentItemId, T1.vyuICShipmentInvoice_intInventoryShipmentId, T1.vyuICShipmentInvoice_intInventoryShipmentChargeId, T1.vyuICShipmentInvoice_strShipmentNumber, T1.vyuICShipmentInvoice_dtmShipDate, T1.vyuICShipmentInvoice_strCustomer, T1.vyuICShipmentInvoice_strLocationName, T1.vyuICShipmentInvoice_strDestination, T1.vyuICShipmentInvoice_strBOLNumber, T1.vyuICShipmentInvoice_strOrderType, T1.vyuICShipmentInvoice_strItemNo, T1.vyuICShipmentInvoice_strItemDescription, T1.vyuICShipmentInvoice_dblUnitCost, T1.vyuICShipmentInvoice_dblShipmentQty, T1.vyuICShipmentInvoice_dblInTransitQty, T1.vyuICShipmentInvoice_dblInvoiceQty, T1.vyuICShipmentInvoice_dblShipmentLineTotal, T1.vyuICShipmentInvoice_dblInTransitTotal, T1.vyuICShipmentInvoice_dblInvoiceLineTotal, T1.vyuICShipmentInvoice_dblShipmentTax, T1.vyuICShipmentInvoice_dblInvoiceTax, T1.vyuICShipmentInvoice_dblOpenQty, T1.vyuICShipmentInvoice_dblItemsReceivable, T1.vyuICShipmentInvoice_dblTaxesReceivable, T1.vyuICShipmentInvoice_dtmLastInvoiceDate, T1.vyuICShipmentInvoice_strAllVouchers, T1.vyuICShipmentInvoice_strFilterString, T1.vyuICShipmentInvoice_dtmCreated, T1.vyuICShipmentInvoice_intCurrencyId, T1.vyuICShipmentInvoice_strCurrency, T1.vyuICShipmentInvoice_strItemUOM, T1.vyuICShipmentInvoice_intItemUOMId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS vyuICShipmentInvoice_intInventoryShipmentItemId, 
-            T.strInvoiceNumber AS vyuICShipmentInvoice_strInvoiceNumber, 
-            T.dtmDateInvoiced AS vyuICShipmentInvoice_dtmDateInvoiced, 
-            T.strCustomerName AS vyuICShipmentInvoice_strCustomerName, 
-            T.strDestination AS vyuICShipmentInvoice_strDestination, 
+            T.intInventoryShipmentId AS vyuICShipmentInvoice_intInventoryShipmentId, 
+            T.intInventoryShipmentChargeId AS vyuICShipmentInvoice_intInventoryShipmentChargeId, 
             T.strShipmentNumber AS vyuICShipmentInvoice_strShipmentNumber, 
             T.dtmShipDate AS vyuICShipmentInvoice_dtmShipDate, 
+            T.strCustomer AS vyuICShipmentInvoice_strCustomer, 
+            T.strLocationName AS vyuICShipmentInvoice_strLocationName, 
+            T.strDestination AS vyuICShipmentInvoice_strDestination, 
             T.strBOLNumber AS vyuICShipmentInvoice_strBOLNumber, 
-            T.intOrderType AS vyuICShipmentInvoice_intOrderType, 
             T.strOrderType AS vyuICShipmentInvoice_strOrderType, 
             T.strItemNo AS vyuICShipmentInvoice_strItemNo, 
-            T.[dblUnitCost ] AS vyuICShipmentInvoice_dblUnitCost, 
-            T.dblShipmentAmount AS vyuICShipmentInvoice_dblShipmentAmount, 
-            T.dblTotal AS vyuICShipmentInvoice_dblTotal, 
-            T.dblQtyInvoiced AS vyuICShipmentInvoice_dblQtyInvoiced, 
-            T.dblQtyShipped AS vyuICShipmentInvoice_dblQtyShipped, 
-            T.dblCOGSAmount AS vyuICShipmentInvoice_dblCOGSAmount, 
-            T.dblQtyToInvoice AS vyuICShipmentInvoice_dblQtyToInvoice, 
-            T.dblInTransitAmount AS vyuICShipmentInvoice_dblInTransitAmount, 
+            T.strItemDescription AS vyuICShipmentInvoice_strItemDescription, 
+            T.dblUnitCost AS vyuICShipmentInvoice_dblUnitCost, 
+            T.dblShipmentQty AS vyuICShipmentInvoice_dblShipmentQty, 
+            T.dblInTransitQty AS vyuICShipmentInvoice_dblInTransitQty, 
+            T.dblInvoiceQty AS vyuICShipmentInvoice_dblInvoiceQty, 
+            T.dblShipmentLineTotal AS vyuICShipmentInvoice_dblShipmentLineTotal, 
+            T.dblInTransitTotal AS vyuICShipmentInvoice_dblInTransitTotal, 
+            T.dblInvoiceLineTotal AS vyuICShipmentInvoice_dblInvoiceLineTotal, 
+            T.dblShipmentTax AS vyuICShipmentInvoice_dblShipmentTax, 
+            T.dblInvoiceTax AS vyuICShipmentInvoice_dblInvoiceTax, 
+            T.dblOpenQty AS vyuICShipmentInvoice_dblOpenQty, 
+            T.dblItemsReceivable AS vyuICShipmentInvoice_dblItemsReceivable, 
+            T.dblTaxesReceivable AS vyuICShipmentInvoice_dblTaxesReceivable, 
+            T.dtmLastInvoiceDate AS vyuICShipmentInvoice_dtmLastInvoiceDate, 
+            T.strAllVouchers AS vyuICShipmentInvoice_strAllVouchers, 
+            T.strFilterString AS vyuICShipmentInvoice_strFilterString, 
+            T.dtmCreated AS vyuICShipmentInvoice_dtmCreated, 
             T.intCurrencyId AS vyuICShipmentInvoice_intCurrencyId, 
             T.strCurrency AS vyuICShipmentInvoice_strCurrency, 
+            T.strItemUOM AS vyuICShipmentInvoice_strItemUOM, 
+            T.intItemUOMId AS vyuICShipmentInvoice_intItemUOMId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICShipmentInvoice AS T
     ) AS T1");

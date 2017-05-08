@@ -426,5 +426,25 @@ namespace iRely.Inventory.BusinessLayer
             }
             return saveResult;
         }
+
+        public SaveResult UpdateShipmentInvoice()
+        {
+            SaveResult saveResult = new SaveResult();
+
+            // Populate the Shipment Invoice 
+            try
+            {
+                var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                db.PopulateShipmentInvoice();
+                saveResult.HasError = false;
+            }
+            catch (Exception ex)
+            {
+                saveResult.BaseException = ex;
+                saveResult.HasError = true;
+                saveResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return saveResult;
+        }
     }
 }
