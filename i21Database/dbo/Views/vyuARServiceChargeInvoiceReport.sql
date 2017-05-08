@@ -51,16 +51,16 @@ INNER JOIN
 		, strTerm 
 	 FROM 
 		tblSMTerm WITH (NOLOCK)) SMT ON ARI.intTermId = SMT.intTermID
-INNER JOIN (SELECT intEntityCustomerId
+INNER JOIN (SELECT intEntityId
 				, strCustomerNumber
 				, strAccountNumber
 				, intBillToId 
 		    FROM 
-				tblARCustomer WITH(NOLOCK)) ARC ON ARI.intEntityCustomerId = ARC.intEntityCustomerId
+				tblARCustomer WITH(NOLOCK)) ARC ON ARI.intEntityCustomerId = ARC.intEntityId
 INNER JOIN (SELECT intEntityId
 				, strName 
 			FROM 
-				tblEMEntity WITH(NOLOCK)) EME ON ARC.intEntityCustomerId = EME.intEntityId
+				tblEMEntity WITH(NOLOCK)) EME ON ARC.intEntityId = EME.intEntityId
 INNER JOIN (SELECT intEntityId
 				, intEntityLocationId
 				, strBillToAddress		= strAddress
@@ -71,7 +71,7 @@ INNER JOIN (SELECT intEntityId
 				, strBillToZipCode		= strZipCode
 			FROM 
 				tblEMEntityLocation WITH(NOLOCK)
-			) EMELoc ON ARC.intEntityCustomerId = EMELoc.intEntityId AND ARC.intBillToId = EMELoc.intEntityLocationId
+			) EMELoc ON ARC.intEntityId = EMELoc.intEntityId AND ARC.intBillToId = EMELoc.intEntityLocationId
  CROSS JOIN (SELECT intCompanyLocationId	= intCompanySetupID
 					, strCompanyName		= strCompanyName
 					, strCompanyAddress		= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL)
