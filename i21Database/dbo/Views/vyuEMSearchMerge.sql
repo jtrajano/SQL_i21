@@ -4,6 +4,7 @@ select
 	A.intEntityId,
 	AB.intEntityContactId,
 	strEntityNo = A.strEntityNo,
+	strLocation = C.strLocationName,
 	strEntityName = A.strName,
 	strEmail = B.strEmail,
 	strPhone =	E.strPhone,
