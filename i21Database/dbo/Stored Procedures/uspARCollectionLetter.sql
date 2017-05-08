@@ -60,7 +60,7 @@ BEGIN
 		
 	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
 
-	SELECT @strLetterName = strName FROM tblSMLetter WHERE intLetterId = @intLetterId
+	SELECT @strLetterName = strName FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
 
 	IF (@strCustomerIds IS NULL OR @strCustomerIds = '')
 	BEGIN
@@ -70,7 +70,7 @@ BEGIN
 			SELECT 
 				CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
 			FROM 
-				tblARCollectionOverdue
+				tblARCollectionOverdue WITH(NOLOCK)
 			FOR XML PATH ('')
 		) c (intEntityCustomerId)
 	END
@@ -86,7 +86,7 @@ BEGIN
 	SELECT
 		@strMessage = CONVERT(VARCHAR(MAX), blbMessage)
 	FROM
-		tblSMLetter
+		tblSMLetter WITH(NOLOCK)
 	WHERE
 		intLetterId  = @strLetterId		
 
@@ -97,7 +97,7 @@ BEGIN
 		, strPlaceHolderDescription		NVARCHAR(200)	COLLATE Latin1_General_CI_AS
 		, strSourceTable				NVARCHAR(200)	COLLATE Latin1_General_CI_AS
 		, ysnTable						INT
-		, strDataType					NVARCHAR(100)	COLLATE Latin1_General_CI_AS
+		, strDataType					VARCHAR(MAX)	COLLATE Latin1_General_CI_AS
 	);
 				
  	DECLARE @SelectedCustomer TABLE  (
@@ -138,7 +138,7 @@ BEGIN
  	SELECT 
 		@blb = blbMessage 
 	FROM 
-		tblSMLetter 
+		tblSMLetter WITH(NOLOCK)
 	WHERE 
 		intLetterId =@strLetterId
 
@@ -171,7 +171,7 @@ BEGIN
 		, ysnTable
 		, strDataType
 	FROM 
-		tblARLetterPlaceHolder 
+		tblARLetterPlaceHolder WITH(NOLOCK)
 	WHERE 
 		CHARINDEX ( dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML) ) <> 0
 			
@@ -184,9 +184,7 @@ BEGIN
 			@SelectedCustomer 
 		ORDER BY 
 			intEntityCustomerId
-
  
-
 	IF @strLetterName = 'Recent Overdue Collection Letter'
 	BEGIN		
 		INSERT INTO #TransactionLetterDetail
@@ -219,27 +217,27 @@ BEGIN
 			, NULL
 		FROM
 		( 
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl10Days <> 0
 			UNION ALL 
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl30Days  <> 0
 			UNION ALL
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl60Days  <> 0
 			UNION ALL
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl90Days  <> 0
 			UNION ALL
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl120Days  <> 0
 			UNION ALL
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl121Days  <> 0
 		) ABC
@@ -283,19 +281,19 @@ BEGIN
 			, NULL
 		FROM
 		( 
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl60Days  <> 0
 			UNION ALL
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl90Days  <> 0
 			UNION ALL
-			SELECT intEntityCustomerId,strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId,strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl120Days  <> 0
 			UNION ALL
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl121Days  <> 0
 		) ABC
@@ -339,15 +337,15 @@ BEGIN
 			, NULL
 		FROM
 		( 
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl90Days  <> 0
 			UNION ALL
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl120Days  <> 0
 			UNION ALL
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl121Days  <> 0
 		) ABC
@@ -390,11 +388,11 @@ BEGIN
 			, NULL
 		FROM
 		( 
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl120Days  <> 0
 			UNION ALL
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl121Days  <> 0
 		) ABC
@@ -437,7 +435,7 @@ BEGIN
 			, NULL
 		FROM
 		( 
-			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail 
+			SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
 			WHERE intEntityCustomerId = @CustomerId
 			AND dbl121Days  <> 0
 		) ABC
@@ -452,36 +450,35 @@ BEGIN
 	
 	ELSE IF @strLetterName = 'Service Charge Invoices Letter'
 		BEGIN
-		INSERT INTO #TransactionLetterDetail
-		(
-			intEntityCustomerId
-			,strInvoiceNumber	 
-			,dtmDate				 
-			,dbl10Days			 
-			,dbl30Days			 
-			,dbl60Days			  
-			,dbl90Days			 
-			,dbl120Days			 
-			,dbl121Days		
-			,dblAmount	 
-			,dtmDueDate
-			,strTerm
-		)
-		SELECT intEntityCustomerId
-			, strInvoiceNumber
-			, dtmDate							 
-			, 0	dbl10Days		 
-			, 0	dbl30Days		 
-			, 0	dbl60Days		  
-			, 0 dbl90Days			 
-			, 0 dbl120Days			 
-			, 0	dbl121Days		
-			, dblTotalDue
-			, dtmDueDate
-			, strTerm
-		FROM 
-			vyuARServiceChargeInvoiceReport
-
+			INSERT INTO #TransactionLetterDetail
+			(
+				intEntityCustomerId
+				,strInvoiceNumber	 
+				,dtmDate				 
+				,dbl10Days			 
+				,dbl30Days			 
+				,dbl60Days			  
+				,dbl90Days			 
+				,dbl120Days			 
+				,dbl121Days		
+				,dblAmount	 
+				,dtmDueDate
+				,strTerm
+			)
+			SELECT intEntityCustomerId
+				, strInvoiceNumber
+				, dtmDate							 
+				, 0	dbl10Days		 
+				, 0	dbl30Days		 
+				, 0	dbl60Days		  
+				, 0 dbl90Days			 
+				, 0 dbl120Days			 
+				, 0	dbl121Days		
+				, dblTotalDue
+				, dtmDueDate
+				, strTerm
+			FROM 
+				vyuARServiceChargeInvoiceReport WITH(NOLOCK)
 		END
 								
 		WHILE EXISTS(SELECT NULL FROM @SelectedPlaceHolderTable)
@@ -493,7 +490,7 @@ BEGIN
 					,@SourceTable				VARCHAR(MAX)
 					,@Table						BIT
 					,@PlaceHolderValue			VARCHAR(MAX)
-					,@DataType					NVARCHAR(100)
+					,@DataType					VARCHAR(MAX)
 
 			SELECT TOP 1 
 				@PlaceHolderId				= [intPlaceHolderId]
@@ -507,6 +504,7 @@ BEGIN
 				@SelectedPlaceHolderTable 
 			ORDER BY [intPlaceHolderId]				
 		 
+
 			IF @Table = 0
 			BEGIN
 				DECLARE @PHQuery		VARCHAR(MAX)  
@@ -522,8 +520,7 @@ BEGIN
 											intEntityCustomerId				INT,
 											strValues		VARCHAR(MAX)	COLLATE Latin1_General_CI_AS,
 											strDataType		VARCHAR(MAX)	COLLATE Latin1_General_CI_AS								
-										)		
- 																 
+										)						 
 
 										DECLARE @TermTable TABLE
 										(
@@ -568,8 +565,8 @@ BEGIN
 										FROM 
 											@TermTable t
 										GROUP BY 
-											intEntityCustomerId						 
- 				
+											intEntityCustomerId		
+																					
 						 				UPDATE 
 											#Records
 										SET strValues = 
@@ -626,8 +623,6 @@ BEGIN
 				SET @ColumnCounter = 1
 				
 				SELECT @ColumnCount = COUNT(RowId) FROM #TempTableColumnHeaders
-				 
-				 
 
 				WHILE (@ColumnCount >= @ColumnCounter)
 				BEGIN
@@ -661,20 +656,29 @@ BEGIN
 				INTO 
 					#TempTableColumns
 				FROM 
-					fnARGetRowsFromDelimitedValues(@SourceColumn)								 
-					 
+					fnARGetRowsFromDelimitedValues(@SourceColumn)						
+ 
 				IF OBJECT_ID('tempdb..#TempDataType') IS NOT NULL DROP TABLE #TempDataType
 				SELECT 
 					RowId	= ROW_NUMBER() OVER (ORDER BY (SELECT NULL))			
 					, * 
 				INTO  
 					#TempDataType 
-				FROM dbo.fnARSplitValues(@DataType, ',')			
+				FROM  
+					dbo.fnARSplitValues(@DataType, ',')			
+				 
+				UPDATE #TempDataType  
+				SET strDataType = 'datetime'
+				WHERE strDataType LIKE '%time%'
+
+				UPDATE #TempDataType  
+				SET strDataType = 'nvarchar'
+				WHERE strDataType LIKE '%char%'
 
 				UPDATE 
 					#TempTableColumns 
 				SET 
-					strDataType = TDT.strDataType
+					strDataType = TDT.strDataType  
 				FROM 
 					#TempDataType TDT
 				INNER JOIN 
@@ -732,6 +736,7 @@ BEGIN
 						[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))
 					+ ' AND strInvoiceNumber IN (SELECT strInvoiceNumber FROM #TransactionLetterDetail) ORDER BY intInvoiceId DESC
 
+					
    					IF OBJECT_ID(''tempdb..#RecordsNoRowId'') IS NOT NULL DROP TABLE #RecordsNoRowId
 					SELECT 		
 						RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))						
@@ -762,7 +767,7 @@ BEGIN
 										strInvoiceNumber
 										, dtmDate
 								FROM 
-									tblARInvoice
+									tblARInvoice WITH(NOLOCK)
 								WHERE 
 									strInvoiceNumber IN (SELECT 
 																strInvoiceNumber 
@@ -770,7 +775,6 @@ BEGIN
 															#RecordsNoRowId) ) INV ON #RecordsNoRowId.strInvoiceNumber = INV.strInvoiceNumber				
 					ORDER BY INV.dtmDate 
   		
-																		 
 					DECLARE @HTMLTableRows VARCHAR(MAX)
 					SET @HTMLTableRows = ''''
 
@@ -808,8 +812,8 @@ BEGIN
 							FROM
 								#TempTableColumns
 							WHERE
-								RowId = @ColumnCounter1								
-						
+								RowId = @ColumnCounter1		
+															
 							IF OBJECT_ID(''tempdb..#Field'') IS NOT NULL DROP TABLE #Field
 							CREATE TABLE #Field(
 								strDataType		VARCHAR(MAX), 
@@ -826,14 +830,14 @@ BEGIN
 								RowId = '' + CAST(@RowId AS NVARCHAR(100)) 		
 
 							EXEC sp_sqlexec @SetQuery	
-
+							
 							UPDATE 
 								#Field 
 							SET strField = 
-								CASE WHEN strDataType = ''datetime'' 
+								CASE WHEN strDataType LIKE ''datetime'' 
 									THEN CAST(month(strField) AS VARCHAR(2)) + ''/'' + CAST(day(strField) AS VARCHAR(2)) + ''/'' + CAST(year(strField) AS VARCHAR(4)) 
-								ELSE strField END
-
+								ELSE strField END 
+ 			 
 							UPDATE 
 								#Field 
 							SET 												
@@ -917,7 +921,7 @@ BEGIN
 										strInvoiceNumber
 										, dtmDate
 								FROM 
-									tblARInvoice
+									tblARInvoice WITH(NOLOCK)
 								WHERE 
 									strInvoiceNumber IN (SELECT 
 																strInvoiceNumber 
@@ -1080,7 +1084,7 @@ BEGIN
 			, ysnTable
 			, strDataType
 		FROM 
-			tblARLetterPlaceHolder 
+			tblARLetterPlaceHolder WITH(NOLOCK)
 		WHERE 
 			CHARINDEX ( dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML) ) <> 0
 	END
@@ -1099,7 +1103,7 @@ BEGIN
 		@strCompanyFax		= strFax,
 		@strCompanyEmail	= strEmail
 	FROM 
-		tblSMCompanySetup
+		tblSMCompanySetup WITH(NOLOCK)
 
 	INSERT INTO @PlaceHolderTable(
 		intPlaceHolderId
@@ -1128,9 +1132,9 @@ BEGIN
 		, strCompanyName		= @strCompanyName
 		, strCompanyAddress		= @strCompanyAddress
 		, strCompanyPhone		= @strCompanyPhone
-		, strCustomerAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, Cus.strName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, NULL, NULL)
+		, strCustomerAddress	= [dbo].fnARFormatLetterAddress(Cus.strBillToPhone, NULL, Cus.strName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, NULL, NULL)
 								  + CHAR(13) + (SELECT ISNULL(strAccountNumber,'') FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
-		, strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
+		, strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WITH(NOLOCK) WHERE intEntityCustomerId = SC.intEntityCustomerId)
 		, strCompanyFax			= @strCompanyFax
 		, strCompanyEmail		= @strCompanyEmail			
 	FROM
@@ -1145,6 +1149,7 @@ BEGIN
 				strBillToLocationName, 
 				strBillToState, 
 				strBillToZipCode, 
+				strBillToPhone,
 				intTermsId, 
 				strName
 			FROM 
@@ -1159,6 +1164,7 @@ BEGIN
 				, BillToLoc.strBillToLocationName
 				, BillToLoc.strBillToState
 				, BillToLoc.strBillToZipCode
+				, BillToLoc.strBillToPhone
 				, ARC.intTermsId
 				, ARC.strTerm
 			FROM 
@@ -1170,20 +1176,20 @@ BEGIN
 					strTerm	
 								
 				FROM 
-					tblARCustomer ARC
+					tblARCustomer ARC WITH(NOLOCK)
 				INNER JOIN (
 							SELECT 
 								intTermID,
 								strTerm 
 							FROM 
-								tblSMTerm) SMT ON ARC.intTermsId = SMT.intTermID ) ARC
+								tblSMTerm WITH(NOLOCK)) SMT ON ARC.intTermsId = SMT.intTermID ) ARC
 				INNER JOIN (
 							SELECT 
 								intEntityId, 
 								strEntityNo, 
 								strName								 
 							FROM 
-								tblEMEntity
+								tblEMEntity WITH(NOLOCK)
 							) EME ON ARC.intEntityCustomerId = EME.intEntityId
 				LEFT JOIN (
 							SELECT 
@@ -1192,13 +1198,13 @@ BEGIN
 								Loc.intTermsId,
 								SMT.strTerm																
 							FROM 
-								tblEMEntityLocation Loc
+								tblEMEntityLocation Loc WITH(NOLOCK)
 							INNER JOIN (
 										SELECT 
 											intTermID,
 											strTerm 
 										FROM 
-											tblSMTerm) SMT ON Loc.intTermsId = SMT.intTermID
+											tblSMTerm WITH(NOLOCK)) SMT ON Loc.intTermsId = SMT.intTermID
 							WHERE Loc.ysnDefaultLocation = 1
 							) EMEL ON ARC.intEntityCustomerId = EMEL.intEntityId
 				LEFT JOIN (
@@ -1210,13 +1216,11 @@ BEGIN
 								strBillToLocationName	= strLocationName,
 								strBillToCountry		= strCountry,
 								strBillToState			= strState,
-								strBillToZipCode		= strZipCode
+								strBillToZipCode		= strZipCode,
+								strBillToPhone			= strPhone
 							FROM 
-								tblEMEntityLocation
+								tblEMEntityLocation WITH(NOLOCK)
 							) BillToLoc ON ARC.intEntityCustomerId = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
 			) Cus
 		) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
-
- 
-
 END

@@ -5195,6 +5195,7 @@
     <Build Include="dbo\Views\vyuCTSequenceCombo.sql" />
     <Build Include="dbo\Views\vyuAPQuickVoucherSearch.sql" />
     <Build Include="dbo\Views\vyuARServiceChargeInvoiceReport.sql" />
+    <Build Include="dbo\Functions\fnARFormatLetterAddress.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
