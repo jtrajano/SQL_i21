@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspICImportDataFromOrigin]
 	@strLineOfBusiness VARCHAR(50),
 	@strType VARCHAR(50),
-	@intEntityUserSecurityId INT
+	@intEntityUserSecurityId INT = 0
+
 AS
 
 IF @strLineOfBusiness IS NULL OR LTRIM(RTRIM(@strLineOfBusiness)) = ''
@@ -25,8 +26,9 @@ BEGIN
 	ELSE IF @strType = 'AdditionalGLAccts'	EXEC dbo.uspICDCCatExtraGLAccounts
 	ELSE IF @strType = 'Items'				EXEC dbo.uspICDCItemMigrationPt
 	ELSE IF @strType = 'ItemGLAccts'		EXEC dbo.uspICDCItmGLAcctsMigrationPt
-	ELSE IF @strType = 'Balance'			EXEC dbo.uspICDCBeginInventoryPt
-	ELSE IF @strType = 'RecipeFormula'		EXEC dbo.uspICDCRecipeFormulaMigrationPt @intEntityUserSecurityId
+	ELSE IF @strType = 'Balance'			EXEC dbo.uspICDCBeginInventoryPt NULL, NULL, @intEntityUserSecurityId
+	ELSE IF @strType = 'RecipeFormula'		EXEC dbo.uspICDCRecipeFormulaMigrationPt @intEntityUserSecurityId	
+
 END
 ELSE IF @strLineOfBusiness = 'Ag'
 BEGIN
@@ -37,7 +39,7 @@ BEGIN
 	ELSE IF @strType = 'AdditionalGLAccts'	EXEC dbo.uspICDCCatExtraGLAccounts
 	ELSE IF @strType = 'Items'				EXEC dbo.uspICDCItemMigrationAg
 	ELSE IF @strType = 'ItemGLAccts'		EXEC dbo.uspICDCItmGLAcctsMigrationAg
-	ELSE IF @strType = 'Balance'			EXEC dbo.uspICDCBeginInventoryAg
+	ELSE IF @strType = 'Balance'			EXEC dbo.uspICDCBeginInventoryAg NULL, NULL, @intEntityUserSecurityId
 END
 ELSE IF @strLineOfBusiness = 'Grain'
 BEGIN
