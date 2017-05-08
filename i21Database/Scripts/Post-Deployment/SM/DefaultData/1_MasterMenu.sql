@@ -2897,27 +2897,27 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Mark Up/Down' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Mark Up/Down', N'Store', @StoreParentMenuId, N'Mark Up/Down', N'Activity', N'Screen', N'Store.view.MarkUpDown', N'small-menu-activity', 1, 0, 0, 1, 5, 1)
+	VALUES (N'Mark Up/Down', N'Store', @StoreParentMenuId, N'Mark Up/Down', N'Activity', N'Screen', N'Store.view.MarkUpDown?showSearch=true&searchCommand=SearchMarkUpDown', N'small-menu-activity', 1, 0, 0, 1, 5, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET  intSort = 5, strCommand = N'Store.view.MarkUpDown' , ysnVisible = 1 WHERE strMenuName = 'Mark Up/Down' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
+	UPDATE tblSMMasterMenu SET  intSort = 5, strCommand = N'Store.view.MarkUpDown?showSearch=true&searchCommand=SearchMarkUpDown' , ysnVisible = 1 WHERE strMenuName = 'Mark Up/Down' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Checkout' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Checkout', N'Store', @StoreParentMenuId, N'Checkout', N'Activity', N'Screen', N'Store.view.CheckoutHeader', N'small-menu-activity', 1, 0, 0, 1, 6, 1)
+	VALUES (N'Checkout', N'Store', @StoreParentMenuId, N'Checkout', N'Activity', N'Screen', N'Store.view.CheckoutHeader?showSearch=true&searchCommand=SearchCheckoutHeader', N'small-menu-activity', 1, 0, 0, 1, 6, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET  intSort = 6, strCommand = N'Store.view.CheckoutHeader', ysnVisible = 1 WHERE strMenuName = 'Checkout' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
+	UPDATE tblSMMasterMenu SET  intSort = 6, strCommand = N'Store.view.CheckoutHeader?showSearch=true&searchCommand=SearchCheckoutHeader', ysnVisible = 1 WHERE strMenuName = 'Checkout' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stores' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Stores', N'Store', @StoreParentMenuId, N'Stores', N'Maintenance', N'Screen', N'Store.view.Store', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
+	VALUES (N'Stores', N'Store', @StoreParentMenuId, N'Stores', N'Maintenance', N'Screen', N'Store.view.Store?showSearch=true&searchCommand=SearchStore', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Store.view.Store' WHERE strMenuName = 'Stores' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Store.view.Store?showSearch=true&searchCommand=SearchStore' WHERE strMenuName = 'Stores' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Registers' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Registers', N'Store', @StoreParentMenuId, N'Registers', N'Maintenance', N'Screen', N'Store.view.Register', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
+	VALUES (N'Registers', N'Store', @StoreParentMenuId, N'Registers', N'Maintenance', N'Screen', N'Store.view.Register?showSearch=true&searchCommand=SearchRegister', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Store.view.Register' WHERE strMenuName = 'Registers' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Store.view.Register?showSearch=true&searchCommand=SearchRegister' WHERE strMenuName = 'Registers' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Subcategories' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -2927,15 +2927,15 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Retail Price Adjustments' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Retail Price Adjustments', N'Store', @StoreParentMenuId, N'Retail Price Adjustments', N'Maintenance', N'Screen', N'Store.view.RetailPriceAdjustment', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
+	VALUES (N'Retail Price Adjustments', N'Store', @StoreParentMenuId, N'Retail Price Adjustments', N'Maintenance', N'Screen', N'Store.view.RetailPriceAdjustment?showSearch=true&searchCommand=SearchRetailPriceAdjustment', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'Store.view.RetailPriceAdjustment' WHERE strMenuName = 'Retail Price Adjustments' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'Store.view.RetailPriceAdjustment?showSearch=true&searchCommand=SearchRetailPriceAdjustment' WHERE strMenuName = 'Retail Price Adjustments' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Promotions' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Promotions', N'Store', @StoreParentMenuId, N'Promotions', N'Maintenance', N'Screen', N'Store.view.Promotions', N'small-menu-maintenance', 0, 0, 0, 1, 11, 1)
+	VALUES (N'Promotions', N'Store', @StoreParentMenuId, N'Promotions', N'Maintenance', N'Screen', N'Store.view.Promotions?showSearch=true&searchCommand=SearchPromotions', N'small-menu-maintenance', 0, 0, 0, 1, 11, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'Store.view.Promotions' WHERE strMenuName = 'Promotions' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'Store.view.Promotions?showSearch=true&searchCommand=SearchPromotions' WHERE strMenuName = 'Promotions' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Generate Vendor Rebate File' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
