@@ -115,7 +115,7 @@ SELECT DISTINCT
 	OUTER APPLY fnGetItemTaxComputationForVendor(A.intItemId, A.intEntityVendorId, A.dtmDate, A.dblUnitCost, 1, (CASE WHEN VST.intTaxGroupId > 0 THEN VST.intTaxGroupId
 																													  WHEN CL.intTaxGroupId  > 0 THEN CL.intTaxGroupId 
 																													  WHEN EL.intTaxGroupId > 0  THEN EL.intTaxGroupId ELSE 0 END), CL.intCompanyLocationId, D1.intShipFromId , 0, NULL, 0) Taxes
-	WHERE Taxes.intTaxCodeId IS NOT NULL																													
+	WHERE Taxes.intTaxCodeId IS NOT NULL AND Taxes.intTaxCodeId = D.intTaxCodeId																														
 UNION ALL
 --INVENTORY CHARGES
 SELECT DISTINCT
