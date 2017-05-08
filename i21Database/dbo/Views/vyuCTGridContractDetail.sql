@@ -9,7 +9,7 @@ AS
 			XM.strUnitMeasure strAdjustmentUOM,
 			CL.strLocationName,
 			FT.strFreightTerm,
-			SV.strShipVia,
+			SV.strName AS strShipVia,
 			CU.strCurrency,
 			CY.strCurrency	strMainCurrency,
 			CU.ysnSubCurrency,
@@ -67,95 +67,135 @@ AS
 			MA.intCurrencyId				AS intMarketCurrencyId,
 			MU.strUnitMeasure				AS strMarketUnitMeasure,
 			XM.strUnitType					AS strQtyUnitType,
-			CAST(ISNULL(LG.intLoadDetailId,0) AS BIT) AS ysnLoadAvailable
+			CAST(ISNULL(LG.intLoadDetailId,0) AS BIT) AS ysnLoadAvailable,
 
-FROM		tblCTContractDetail			CD
-	 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=		CD.intContractHeaderId	
-LEFT JOIN	tblARMarketZone				MZ	ON	MZ.intMarketZoneId				=		CD.intMarketZoneId
-LEFT JOIN	tblICItem					IM	ON	IM.intItemId					=		CD.intItemId
-LEFT JOIN	tblICItemUOM				XU	ON	XU.intItemUOMId					=		CD.intItemUOMId
-LEFT JOIN	tblICUnitMeasure			XM	ON	XM.intUnitMeasureId				=		XU.intUnitMeasureId
-LEFT JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId			=		CD.intCompanyLocationId
-LEFT JOIN	tblSMFreightTerms			FT	ON	FT.intFreightTermId				=		CD.intFreightTermId
-LEFT JOIN	tblSMShipVia				SV	ON	SV.[intEntityId]			=		CD.intShipViaId
-LEFT JOIN	tblCTFreightRate			FR	ON	FR.intFreightRateId				=		CD.intFreightRateId
-LEFT JOIN	tblCTRailGrade				RG	ON	RG.intRailGradeId				=		CD.intRailGradeId
-LEFT JOIN	tblCTPricingType			PT	ON	PT.intPricingTypeId				=		CD.intPricingTypeId
-LEFT JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=		CD.intFutureMarketId
-LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId				=		MA.intUnitMeasureId
-LEFT JOIN	tblCTContractOptHeader		OH	ON	OH.intContractOptHeaderId		=		CD.intContractOptHeaderId
-LEFT JOIN	tblCTDiscountType			DT	ON	DT.intDiscountTypeId			=		CD.intDiscountTypeId
-LEFT JOIN	tblGRDiscountId				DC	ON	DC.intDiscountId				=		CD.intDiscountId
-LEFT JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=		CD.intFutureMonthId
-LEFT JOIN	tblCTIndex					IX	ON	IX.intIndexId					=		CD.intIndexId
-LEFT JOIN	tblCTContractStatus			CS	ON	CS.intContractStatusId			=		CD.intContractStatusId
+			
+			BK.strBook,
+			SK.strSubBook,
+			BT.strName	AS	strBillTo,
+			SH.strName	AS	strShipper,
+			SN.strName	AS	strShippingLine,
+			EF.strFarmNumber,
+			ES.strSplitNumber,
+			DS.strDiscountDescription,
+			SI.strDescription AS strScheduleCode,
+			SR.strScheduleDescription,
+			CG.strCategoryCode,
+			CQ.strContainerType,
+			DY.strCity	AS	strDestinationCity,
+			IY.strCurrency AS strInvoiceCurrency,
+			FY.strCurrency + '/' + TY.strCurrency AS strExchangeRate,
+			PG.strName	AS	strPurchasingGroup
 
-LEFT JOIN	tblICItemContract			IC	ON	IC.intItemContractId			=		CD.intItemContractId		
-LEFT JOIN	tblSMCountry				RY	ON	RY.intCountryID					=		IC.intCountryId
-LEFT JOIN	tblICCommodityAttribute		CA	ON	CA.intCommodityAttributeId		=		IM.intOriginId
-											AND	CA.strType						=		'Origin'			
-LEFT JOIN	tblSMCountry				OG	ON	OG.intCountryID					=		CA.intCountryID						
-LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=		CD.intCurrencyId			
-LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=		CU.intMainCurrencyId		
-
-LEFT JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId					=		CD.intItemUOMId				
-LEFT JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId				=		QU.intUnitMeasureId			
-
-LEFT JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId					=		CD.intNetWeightUOMId		
-LEFT JOIN	tblICUnitMeasure			WM	ON	WM.intUnitMeasureId				=		WU.intUnitMeasureId			
-
-LEFT JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId					=		CD.intPriceItemUOMId		
-LEFT JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId				=		PU.intUnitMeasureId			
-
-LEFT JOIN	tblICCommodityUnitMeasure	CO	ON	CO.intCommodityUnitMeasureId	=		CH.intCommodityUOMId		
-LEFT JOIN	tblICItemUOM				CM	ON	CM.intItemId					=		CD.intItemId				
-											AND	CM.intUnitMeasureId				=		CO.intUnitMeasureId			
-LEFT JOIN	tblICCategoryUOM			YU	ON	YU.intCategoryUOMId				=		CD.intCategoryUOMId			
-LEFT JOIN	tblICUnitMeasure			YM	ON	YM.intUnitMeasureId				=		YU.intUnitMeasureId			
-LEFT JOIN	tblICCategoryUOM			GU	ON	GU.intCategoryId				=		CD.intCategoryId			
-											AND	GU.intUnitMeasureId				=		CH.intCategoryUnitMeasureId		
-LEFT JOIN	tblCTPriceFixation			PF	ON	CD.intContractDetailId			=		PF.intContractDetailId		
-LEFT JOIN	(
-				SELECT	 intPriceFixationId,
-						 COUNT(intPriceFixationDetailId) intPFDCount,
-						 SUM(dblQuantity) dblQuantityPriceFixed,
-						 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
-				FROM	 tblCTPriceFixationDetail
-				GROUP BY intPriceFixationId
-			)							PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
-LEFT JOIN	(
-				SELECT	CQ.intContainerTypeId,
-						CQ.intCommodityAttributeId,
-						CQ.intUnitMeasureId,
-						CQ.dblBulkQuantity ,
-						CQ.dblQuantity AS dblBagQuantity,
-						CQ.intCommodityId,
-						CA.intCountryID AS intCountryId
-				FROM	tblLGContainerTypeCommodityQty	CQ	
-				JOIN	tblICCommodityAttribute			CA	ON	CQ.intCommodityAttributeId	=	CA.intCommodityAttributeId
-			)							CQ	ON	CQ.intCommodityId			=	CH.intCommodityId 
-											AND CQ.intContainerTypeId		=	CD.intContainerTypeId 
-											AND CQ.intCountryId				=	ISNULL(IC.intCountryId,CA.intCountryID)
-LEFT JOIN	tblICUnitMeasure				RM	ON	RM.intUnitMeasureId			=	CQ.intUnitMeasureId
-LEFT JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			
-LEFT JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intDestinationPortId		
-LEFT JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= CD.intSubLocationId 	
-LEFT JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	CD.intStorageLocationId		
-LEFT JOIN	(
-					SELECT * FROM 
-					(
-						SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY AP.intApprovalId DESC) intRowNum,
-								TR.intRecordId, AP.strStatus AS strApprovalStatus 
-						FROM	tblSMApproval		AP
-						JOIN	tblSMTransaction	TR	ON	TR.intTransactionId =	AP.intTransactionId
-						JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
-						WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
-													'ContractManagement.view.Amendments')
-					) t
-					WHERE intRowNum = 1
-			) AP ON AP.intRecordId = CD.intContractHeaderId		
-LEFT JOIN	(
-				SELECT ROW_NUMBER() OVER (PARTITION BY ISNULL(intPContractDetailId,intSContractDetailId) ORDER BY intLoadDetailId DESC) intRowNum,ISNULL(intPContractDetailId,intSContractDetailId)intContractDetailId,intLoadDetailId 
-				FROM tblLGLoadDetail
-			)LG ON LG.intRowNum = 1 AND LG.intContractDetailId = CD.intContractDetailId
-OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
+	FROM			tblCTContractDetail				CD
+			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
+	LEFT	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId					=		CD.intMarketZoneId			--strMarketZoneCode
+	LEFT	JOIN	tblCTBook						BK	ON	BK.intBookId						=		CD.intBookId				--strBook
+	LEFT    JOIN	tblCTContractOptHeader			OH	ON	OH.intContractOptHeaderId			=		CD.intContractOptHeaderId	--strContractOptDesc
+	LEFT    JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId				=		CD.intContractStatusId		--strContractStatus
+	LEFT    JOIN	tblCTDiscountType				DT	ON	DT.intDiscountTypeId				=		CD.intDiscountTypeId		--strDiscountType
+	LEFT    JOIN	tblCTFreightRate				FR	ON	FR.intFreightRateId					=		CD.intFreightRateId			--strOriginDest
+	LEFT    JOIN	tblCTIndex						IX	ON	IX.intIndexId						=		CD.intIndexId				--strIndex
+	LEFT    JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId					=		CD.intPricingTypeId			--strPricingType
+	LEFT    JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId					=		CD.intRailGradeId
+	LEFT	JOIN	tblCTSubBook					SK	ON	SK.intSubBookId						=		CD.intSubBookId				--strSubBook
+	
+	LEFT	JOIN	tblEMEntity						BT	ON	BT.intEntityId						=		CD.intBillTo				--strBillTo
+	LEFT	JOIN	tblEMEntity						SH	ON	SH.intEntityId						=		CD.intShipperId				--strShipper
+	LEFT	JOIN	tblEMEntity						SN	ON	SN.intEntityId						=		CD.intShippingLineId		--strShippingLine
+	LEFT    JOIN	tblEMEntity						SV	ON	SV.intEntityId						=		CD.intShipViaId				--strShipVia
+	LEFT	JOIN	tblEMEntityFarm					EF	ON	EF.intFarmFieldId					=		CD.intFarmFieldId			--strFarmNumber
+	LEFT	JOIN	tblEMEntitySplit				ES	ON	ES.intSplitId						=		CD.intSplitId				--strSplitNumber
+	
+	LEFT    JOIN	tblGRDiscountId					DC	ON	DC.intDiscountId					=		CD.intDiscountId			--strDiscountId
+	LEFT    JOIN	tblGRDiscountSchedule			DS	ON	DS.intDiscountScheduleId			=		CD.intDiscountScheduleId	--strDiscountDescription
+	LEFT    JOIN	tblGRDiscountScheduleCode		SC	ON	SC.intDiscountScheduleCodeId		=		CD.intDiscountScheduleCodeId	
+	LEFT	JOIN	tblICItem						SI	ON	SI.intItemId						=		SC.intItemId				--strScheduleCode
+	LEFT    JOIN	tblGRStorageScheduleRule		SR	ON	SR.intStorageScheduleRuleId			=		CD.intStorageScheduleRuleId	--strScheduleDescription
+	
+	LEFT    JOIN	tblICCategory					CG	ON	CG.intCategoryId					=		CD.intCategoryId			--strCategoryCode
+	LEFT    JOIN	tblICCategoryUOM				YU	ON	YU.intCategoryUOMId					=		CD.intCategoryUOMId	
+	LEFT    JOIN	tblICUnitMeasure				YM	ON	YM.intUnitMeasureId					=		YU.intUnitMeasureId			--strUOM
+	LEFT    JOIN	tblICItem						IM	ON	IM.intItemId						=		CD.intItemId				--strItemNo
+	LEFT    JOIN	tblICItemContract				IC	ON	IC.intItemContractId				=		CD.intItemContractId		--strContractItemName
+	LEFT    JOIN	tblICItemUOM					QU	ON	QU.intItemUOMId						=		CD.intItemUOMId				
+	LEFT    JOIN	tblICUnitMeasure				QM	ON	QM.intUnitMeasureId					=		QU.intUnitMeasureId			--strUOM
+	LEFT    JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId						=		CD.intNetWeightUOMId		
+	LEFT    JOIN	tblICUnitMeasure				WM	ON	WM.intUnitMeasureId					=		WU.intUnitMeasureId			--strNetWeightUOM
+	LEFT    JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId						=		CD.intPriceItemUOMId		
+	LEFT    JOIN	tblICUnitMeasure				PM	ON	PM.intUnitMeasureId					=		PU.intUnitMeasureId			--strPriceUOM
+	LEFT    JOIN	tblICItemUOM					XU	ON	XU.intItemUOMId						=		CD.intAdjItemUOMId
+	LEFT    JOIN	tblICUnitMeasure				XM	ON	XM.intUnitMeasureId					=		XU.intUnitMeasureId			--strAdjustmentUOM
+	LEFT    JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId				=		CD.intStorageLocationId		--strStorageLocationName
+	
+	LEFT    JOIN	tblRKFutureMarket				MA	ON	MA.intFutureMarketId				=		CD.intFutureMarketId		--strFutureMarket
+	LEFT    JOIN	tblICUnitMeasure				MU	ON	MU.intUnitMeasureId					=		MA.intUnitMeasureId
+	LEFT    JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId					=		CD.intFutureMonthId			--strFutureMonth
+	
+	LEFT    JOIN	tblSMCity						DY	ON	DY.intCityId						=		CD.intDestinationCityId		--strDestinationCity
+	LEFT    JOIN	tblSMCity						DP	ON	DP.intCityId						=		CD.intDestinationPortId		--strDestinationPort
+	LEFT    JOIN	tblSMCity						LP	ON	LP.intCityId						=		CD.intLoadingPortId			--strLoadingPort
+	LEFT    JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId				=		CD.intCompanyLocationId		--strLocationName
+	LEFT    JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID					=		CD.intCurrencyId			--strCurrency
+	LEFT    JOIN	tblSMCurrency					CY	ON	CY.intCurrencyID					=		CU.intMainCurrencyId
+	LEFT    JOIN	tblSMCurrency					IY	ON	IY.intCurrencyID					=		CD.intInvoiceCurrencyId		--strInvoiceCurrency
+	LEFT    JOIN	tblSMCurrencyExchangeRate		ER	ON	ER.intCurrencyExchangeRateId		=		CD.intCurrencyExchangeRateId--strExchangeRate
+	LEFT    JOIN	tblSMCurrency					FY	ON	FY.intCurrencyID					=		ER.intFromCurrencyId			
+	LEFT    JOIN	tblSMCurrency					TY	ON	TY.intCurrencyID					=		ER.intToCurrencyId	
+	LEFT    JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CD.intRateTypeId
+	LEFT    JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId					=		CD.intFreightTermId			--strFreightTerm
+	LEFT	JOIN	tblSMPurchasingGroup			PG	ON	PG.intPurchasingGroupId				=		CD.intPurchasingGroupId		--strPurchasingGroup
+	LEFT    JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	=		CD.intSubLocationId 		--strLocationName
+	
+	LEFT    JOIN	tblSMCountry					RY	ON	RY.intCountryID						=		IC.intCountryId
+	LEFT    JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId			=		IM.intOriginId												
+														AND	CA.strType							=		'Origin'			
+	LEFT    JOIN	tblSMCountry					OG	ON	OG.intCountryID						=		CA.intCountryID	
+	LEFT	JOIN	tblICCommodityUnitMeasure		CO	ON	CO.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				
+	LEFT    JOIN	tblICItemUOM					CM	ON	CM.intItemId						=		CD.intItemId		
+														AND	CM.intUnitMeasureId					=		CO.intUnitMeasureId		
+	LEFT    JOIN	tblICCategoryUOM				GU	ON	GU.intCategoryId					=		CD.intCategoryId																	
+														AND	GU.intUnitMeasureId					=		CH.intCategoryUnitMeasureId		
+	LEFT    JOIN	tblCTPriceFixation				PF	ON	CD.intContractDetailId				=		PF.intContractDetailId		
+	LEFT    JOIN	(
+						SELECT	 intPriceFixationId,
+								 COUNT(intPriceFixationDetailId) intPFDCount,
+								 SUM(dblQuantity) dblQuantityPriceFixed,
+								 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
+						FROM	 tblCTPriceFixationDetail
+						GROUP BY intPriceFixationId
+					)								PD	ON	PD.intPriceFixationId				=		PF.intPriceFixationId
+	LEFT    JOIN	(
+						SELECT	CQ.intContainerTypeId,
+								CQ.intCommodityAttributeId,
+								CQ.intUnitMeasureId,
+								CQ.dblBulkQuantity ,
+								CQ.dblQuantity AS dblBagQuantity,
+								CQ.intCommodityId,
+								CA.intCountryID AS intCountryId,
+								CT.strContainerType
+						FROM	tblLGContainerTypeCommodityQty	CQ	
+						JOIN	tblLGContainerType				CT	ON	CT.intContainerTypeId		=	CQ.intContainerTypeId
+						JOIN	tblICCommodityAttribute			CA	ON	CQ.intCommodityAttributeId	=	CA.intCommodityAttributeId
+					)								CQ	ON	CQ.intCommodityId					=		CH.intCommodityId 
+														AND CQ.intContainerTypeId				=		CD.intContainerTypeId 
+														AND CQ.intCountryId						=		ISNULL(IC.intCountryId,CA.intCountryID)
+	LEFT    JOIN	tblICUnitMeasure				RM	ON	RM.intUnitMeasureId					=		CQ.intUnitMeasureId
+	LEFT    JOIN	(
+						SELECT * FROM 
+						(
+							SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY AP.intApprovalId DESC) intRowNum,
+									TR.intRecordId, AP.strStatus AS strApprovalStatus 
+							FROM	tblSMApproval		AP
+							JOIN	tblSMTransaction	TR	ON	TR.intTransactionId =	AP.intTransactionId
+							JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
+							WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
+														'ContractManagement.view.Amendments')
+						) t
+						WHERE intRowNum = 1
+					)								AP	ON	AP.intRecordId						=		CD.intContractHeaderId		
+	LEFT    JOIN	(
+					SELECT ROW_NUMBER() OVER (PARTITION BY ISNULL(intPContractDetailId,intSContractDetailId) ORDER BY intLoadDetailId DESC) intRowNum,ISNULL(intPContractDetailId,intSContractDetailId)intContractDetailId,intLoadDetailId 
+					FROM tblLGLoadDetail
+				)LG ON LG.intRowNum = 1 AND LG.intContractDetailId = CD.intContractDetailId
+	OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
