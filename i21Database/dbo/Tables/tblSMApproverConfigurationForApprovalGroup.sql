@@ -4,6 +4,6 @@
     [intApprovalId]										INT												NOT NULL, 
 	[intApproverId]										INT												NOT NULL, 
 	[intConcurrencyId]									INT												NOT NULL	DEFAULT 1, 
-	CONSTRAINT [FK_tblSMApproverConfigurationForApprovalGroup_tblSMApproval] FOREIGN KEY ([intApprovalId]) REFERENCES [tblSMApproval]([intApprovalId])
+	CONSTRAINT [FK_tblSMApproverConfigurationForApprovalGroup_tblSMApproval] FOREIGN KEY ([intApprovalId]) REFERENCES [tblSMApproval]([intApprovalId]) ON DELETE CASCADE
     
 )
