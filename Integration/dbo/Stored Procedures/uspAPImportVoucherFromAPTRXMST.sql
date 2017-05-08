@@ -74,7 +74,7 @@ SELECT
 	@shipToAttention	= A.strAddress
 FROM tblSMCompanyLocation A
 	INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
-WHERE intEntityUserSecurityId = @UserId
+WHERE intEntityId = @UserId
 
 --GET DEFAULT TERM TO USE
 SELECT TOP 1 @defaultTermId = intTermID FROM tblSMTerm WHERE strTerm = 'Due on Receipt'
@@ -91,10 +91,10 @@ MERGE INTO tblAPBill AS destination
 USING
 (
 SELECT
-	[intEntityVendorId]			=	D.intEntityVendorId,
+	[intEntityVendorId]			=	D.intEntityId,
 	[strVendorOrderNumber] 		=	A.aptrx_ivc_no,
 	[intTermsId] 				=	ISNULL((SELECT TOP 1 intTermsId FROM tblEMEntityLocation
-											WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor
+											WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
 												WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), @defaultTermId),
 	[dtmDate] 					=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE 
 										(CASE WHEN ISDATE(A.aptrx_ivc_rev_dt) = 1 THEN  CONVERT(DATE, CAST(A.aptrx_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END)
@@ -156,7 +156,7 @@ FROM tmp_aptrxmstImport A
 	INNER JOIN tblAPVendor D
 		ON A.aptrx_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 	LEFT JOIN tblEMEntityLocation loc
-		ON D.intEntityVendorId = loc.intEntityId AND loc.ysnDefaultLocation = 1
+		ON D.intEntityId = loc.intEntityId AND loc.ysnDefaultLocation = 1
 ) AS SourceData
 ON (1=0)
 WHEN NOT MATCHED THEN
@@ -357,7 +357,7 @@ SELECT
 	[intLineNo]				=	C.apegl_dist_no
 FROM tblAPBill A
 	INNER JOIN tblAPVendor B
-		ON A.intEntityVendorId = B.intEntityVendorId
+		ON A.intEntityVendorId = B.intEntityId
 	INNER JOIN (tmp_aptrxmstImport C2 INNER JOIN tmp_apeglmstImport C 
 					ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 					AND C2.aptrx_vnd_no = C.apegl_vnd_no)
