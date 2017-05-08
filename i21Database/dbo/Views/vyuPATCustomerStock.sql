@@ -2,7 +2,7 @@
 	AS
 SELECT	CS.intCustomerStockId,
 		CS.intCustomerPatronId,
-		C.strName AS strCustomerPatronId,
+		C.strName,
 		CS.intStockId,
 		PC.strStockName,
 		CS.strCertificateNo,

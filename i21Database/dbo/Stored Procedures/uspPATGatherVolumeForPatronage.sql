@@ -48,7 +48,7 @@ SET ANSI_WARNINGS OFF
 			CROSS APPLY tblGLFiscalYear FY
 			WHERE AB.intBillId IN (SELECT intID FROM #tempTransactionIds) AND AB.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
 				AND IC.intPatronageCategoryId IS NOT NULL
-			GROUP BY	AB.intEntityId,
+			GROUP BY	ARC.intEntityId,
 						IC.intPatronageCategoryId,
 						FY.intFiscalYearId,
 						AB.ysnPosted
@@ -77,7 +77,7 @@ SET ANSI_WARNINGS OFF
 			CROSS APPLY tblGLFiscalYear FY
 			WHERE AR.intInvoiceId IN (SELECT intID FROM #tempTransactionIds) AND AR.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
 				   AND IC.intPatronageCategoryId IS NOT NULL
-				   GROUP BY AR.intEntityId,
+				   GROUP BY ARC.intEntityId,
 					   IC.intPatronageCategoryId,
 					   FY.intFiscalYearId,
 					   AR.ysnPosted

@@ -5233,6 +5233,7 @@
     <Build Include="dbo\Views\vyuCFCalculatedInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceToStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPQuickVoucherSearch.sql" />
+    <Build Include="vyuPATRefundRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
