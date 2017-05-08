@@ -4,7 +4,7 @@ set @build_m = 0
 if EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMBuildNumber' and [COLUMN_NAME] = 'strVersionNo')
 BEGIN
 
-	exec sp_executesql N'select @build_m = intVersionID from tblSMBuildNumber where strVersionNo like ''%16.1%'' '  , 
+	exec sp_executesql N'select top 1 @build_m = intVersionID from tblSMBuildNumber where cast(substring(strVersionNo,1,2) as float) >= 16 '  , 
 		N'@build_m int output', @build_m output;
 END
 
