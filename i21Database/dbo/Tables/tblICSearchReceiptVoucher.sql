@@ -17,7 +17,7 @@ Data here is used in the Voucher tab/grid.
 		[intInventoryReceiptId] INT NOT NULL, 
 		[intInventoryReceiptItemId] INT NULL,
 		[dtmReceiptDate] DATETIME NULL, 
-		[strVendor] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+		[strVendor] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
 		[strLocationName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 		[strReceiptNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strBillOfLading] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
