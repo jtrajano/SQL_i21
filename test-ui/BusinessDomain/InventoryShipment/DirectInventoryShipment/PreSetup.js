@@ -21,8 +21,8 @@ StartTest (function (t) {
             (t,next,
                 'DS - NLTI - 01'
                 , 'Test Non Lotted Item Description'
-                , 'TestGrains2'
-                , 'TestCorn2'
+                , 'TestGrains3'
+                , 'TestCorn3'
                 , 4
                 , 'LB'
                 , 'LB'
@@ -38,8 +38,8 @@ StartTest (function (t) {
             (t,next,
                 'DS - LTI - 01'
                 , 'Test Lotted Item Description'
-                , 'TestGrains2'
-                , 'TestCorn2'
+                , 'TestGrains3'
+                , 'TestCorn3'
                 , 3
                 , 'LB'
                 , 'LB'
@@ -55,8 +55,8 @@ StartTest (function (t) {
             (t,next,
                 'DS - NLTI - 02'
                 , 'Test Non Lotted Item Description'
-                , 'TestGrains2'
-                , 'TestCorn'
+                , 'TestGrains3'
+                , 'TestCorn3'
                 , 4
                 , 'LB'
                 , 'LB'
@@ -73,7 +73,7 @@ StartTest (function (t) {
                 'DS - LTI - 02'
                 , 'Test Lotted Item Description'
                 , 'TestGrains2'
-                , 'TestCorn'
+                , 'TestCorn3'
                 , 3
                 , 'LB'
                 , 'LB'

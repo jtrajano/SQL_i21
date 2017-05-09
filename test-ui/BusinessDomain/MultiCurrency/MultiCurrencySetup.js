@@ -328,6 +328,7 @@ StartTest (function (t) {
         .displayText('===== 5b. Set Unrealized Gain or Loss Foreign Currency Done  =====')
 
         .displayText('===== 5c. Set Unrealized Gain or Loss Foreign Currency Offset =====')
+
         .selectComboBoxRowValue('AccountsPayableOffset','20040-0002-001', 'AccountsPayableOffsetId', 1,1)
         .selectComboBoxRowValue('AccountsReceivableOffset','12040-0002-001', 'AccountsReceivableOffsetId', 1,1)
         .selectComboBoxRowValue('InventoryOffset','16140-0002-001', 'InventoryOffsetId', 1,1)

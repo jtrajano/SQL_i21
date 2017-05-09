@@ -20,8 +20,8 @@ if(_url.indexOf('version=TF') < 1) {
         defaultTimeout: 300000,
         waitForTimeout: 300000,
         maintainViewportSize: true,
-        viewportHeight: 1100,
-        viewportWidth: 1800,
+        viewportHeight: 950,
+        viewportWidth: 1450,
         preload: [
             functionalTest
         ]
