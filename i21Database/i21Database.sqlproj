@@ -5239,6 +5239,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryShipmentInvoicePriceCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICPopulateShipmentInvoice.sql" />
     <Build Include="dbo\Views\vyuICShipmentInvoice2.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeChangeLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
