@@ -95,7 +95,8 @@ namespace iRely.Inventory.WebApi
             int? newInvoice = null;
             var result = _bl.ProcessInvoice(p.id, out newInvoice);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            HttpStatusCode httpStatusCode = result.HasError ? HttpStatusCode.Conflict : HttpStatusCode.Accepted;            
+            return Request.CreateResponse(httpStatusCode, new
             {
                 success = !result.HasError,
                 message = new
@@ -159,6 +160,27 @@ namespace iRely.Inventory.WebApi
         public async Task<HttpResponseMessage> GetCustomerCurrency(GetParameter param, int? entityId)
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchCustomerCurrency(param, entityId));
+        }
+
+        [HttpPost]
+        [ActionName("UpdateShipmentInvoice")]
+        public HttpResponseMessage UpdateShipmentInvoice()
+        {
+            var result = _bl.UpdateShipmentInvoice();
+
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
         }
     }
 }
