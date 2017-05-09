@@ -10,47 +10,47 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 	USING	(
 			SELECT id = 1,name = 'AP Account'UNION ALL 
 			SELECT id = 2,name = 'AR Account'UNION ALL 
-			SELECT id = 3,name = 'Begin Inventory'UNION ALL 
-			SELECT id = 4,name = 'Broker Expense'UNION ALL 
+			--SELECT id = 3,name = 'Begin Inventory'UNION ALL 
+			--SELECT id = 4,name = 'Broker Expense'UNION ALL 
 			SELECT id = 5,name = 'Cash Account'UNION ALL 
-			SELECT id = 6,name = 'Cash Over/Short'UNION ALL 
-			SELECT id = 7,name = 'Contract Equity'UNION ALL 
-			SELECT id = 8,name = 'Contract Purchase Gain/Loss'UNION ALL 
-			SELECT id = 9,name = 'Contract Sales Gain/Loss'UNION ALL 
+			--SELECT id = 6,name = 'Cash Over/Short'UNION ALL 
+			--SELECT id = 7,name = 'Contract Equity'UNION ALL 
+			--SELECT id = 8,name = 'Contract Purchase Gain/Loss'UNION ALL 
+			--SELECT id = 9,name = 'Contract Sales Gain/Loss'UNION ALL 
 			SELECT id = 10,name = 'Cost of Goods'UNION ALL 
-			SELECT id = 11,name = 'Credit Card Fee'UNION ALL 
-			SELECT id = 12,name = 'Currency Equity'UNION ALL 
-			SELECT id = 13,name = 'Currency Purchase Gain/Loss'UNION ALL 
-			SELECT id = 14,name = 'Currency Sales Gain/Loss'UNION ALL 
-			SELECT id = 15,name = 'Deposit Account'UNION ALL 
+			--SELECT id = 11,name = 'Credit Card Fee'UNION ALL 
+			--SELECT id = 12,name = 'Currency Equity'UNION ALL 
+			--SELECT id = 13,name = 'Currency Purchase Gain/Loss'UNION ALL 
+			--SELECT id = 14,name = 'Currency Sales Gain/Loss'UNION ALL 
+			--SELECT id = 15,name = 'Deposit Account'UNION ALL 
 			SELECT id = 16,name = 'Discount Receivable'UNION ALL 
 			SELECT id = 17,name = 'DP Income'UNION ALL 
 			SELECT id = 18,name = 'DP Liability'UNION ALL 
-			SELECT id = 19,name = 'End Inventory'UNION ALL 
-			SELECT id = 20,name = 'Fee Expense'UNION ALL 
-			SELECT id = 21,name = 'Fee Income'UNION ALL 
-			SELECT id = 22,name = 'Freight AP Account'UNION ALL 
-			SELECT id = 23,name = 'Freight Expenses'UNION ALL 
-			SELECT id = 24,name = 'Freight Income'UNION ALL 
-			SELECT id = 25,name = 'Interest Expense'UNION ALL 
+			--SELECT id = 19,name = 'End Inventory'UNION ALL 
+			--SELECT id = 20,name = 'Fee Expense'UNION ALL 
+			--SELECT id = 21,name = 'Fee Income'UNION ALL 
+			--SELECT id = 22,name = 'Freight AP Account'UNION ALL 
+			--SELECT id = 23,name = 'Freight Expenses'UNION ALL 
+			--SELECT id = 24,name = 'Freight Income'UNION ALL 
+			--SELECT id = 25,name = 'Interest Expense'UNION ALL 
 			SELECT id = 26,name = 'Interest Income'UNION ALL 
 			SELECT id = 27,name = 'Inventory' UNION ALL 
-			SELECT id = 28,name = 'Options Expense'UNION ALL 
-			SELECT id = 29,name = 'Options Income'UNION ALL 
-			SELECT id = 30,name = 'Purchase Account'UNION ALL 
+			--SELECT id = 28,name = 'Options Expense'UNION ALL 
+			--SELECT id = 29,name = 'Options Income'UNION ALL 
+			--SELECT id = 30,name = 'Purchase Account'UNION ALL 
 			SELECT id = 31,name = 'Purchase Adv Account'UNION ALL 
 			SELECT id = 32,name = 'Rail Freight'UNION ALL 
 			SELECT id = 33,name = 'Sales Account'UNION ALL 
 			SELECT id = 34,name = 'Sales Adv Account'UNION ALL 
 			SELECT id = 35,name = 'Sales Discount'UNION ALL 
 			SELECT id = 36,name = 'Service Charges'UNION ALL 
-			SELECT id = 37,name = 'Storage Expense'UNION ALL 
-			SELECT id = 38,name = 'Storage Income'UNION ALL 
-			SELECT id = 39,name = 'Storage Receivable'UNION ALL 
-			SELECT id = 40,name = 'Variance Account'UNION ALL 
+			--SELECT id = 37,name = 'Storage Expense'UNION ALL 
+			--SELECT id = 38,name = 'Storage Income'UNION ALL 
+			--SELECT id = 39,name = 'Storage Receivable'UNION ALL 
+			--SELECT id = 40,name = 'Variance Account'UNION ALL 
 			SELECT id = 41,name = 'Write Off'UNION ALL 
-			SELECT id = 42,name = 'Write-Off Sold'UNION ALL 
-			SELECT id = 43,name = 'Revalue Sold'UNION ALL 
+			--SELECT id = 42,name = 'Write-Off Sold'UNION ALL 
+			--SELECT id = 43,name = 'Revalue Sold'UNION ALL 
 			SELECT id = 44,name = 'Auto-Variance'UNION ALL 
 			SELECT id = 45,name = 'AP Clearing'UNION ALL 
 			SELECT id = 46,name = 'Inventory In-Transit'UNION ALL 
@@ -66,7 +66,7 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 56,name = 'Other Charge Income' UNION ALL 
 			SELECT id = 57,name = 'Maintenance Sales' UNION ALL
 			SELECT id = 58,name = 'Deferred Revenue' UNION ALL
-			SELECT id = 59,name = 'Deferred Payable'UNION ALL
+			--SELECT id = 59,name = 'Deferred Payable'UNION ALL
 			SELECT id = 60,name = 'Unrealized Gain or Loss Accounts Receivable' UNION ALL --GL-3286
 			SELECT id = 61,name = 'Unrealized Gain or Loss Accounts Payable' UNION ALL --GL-3286
 			SELECT id = 62,name = 'Unrealized Gain or Loss Cash Management' UNION ALL --GL-3286
@@ -125,17 +125,17 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Sales Account'
 	END
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Storage Expense')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Storage Expense'
-	END
+	-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Storage Expense')
+	-- BEGIN
+	-- 	INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+	-- 	SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Storage Expense'
+	-- END
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Revalue Sold')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Revalue Sold'
-	END
+	-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Revalue Sold')
+	-- BEGIN
+	-- 	INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+	-- 	SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Revalue Sold'
+	-- END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'AP Clearing')
 	BEGIN
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
@@ -147,11 +147,11 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Inventory In-Transit'
 	END
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory =  'Write-Off Sold')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Write-Off Sold'
-	END
+	-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory =  'Write-Off Sold')
+	-- BEGIN
+	-- 	INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+	-- 	SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Write-Off Sold'
+	-- END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Auto-Variance')
 	BEGIN
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)

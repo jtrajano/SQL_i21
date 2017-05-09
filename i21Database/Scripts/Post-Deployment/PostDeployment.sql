@@ -153,6 +153,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1c_AccountGroup.sql
 :r .\GL\DefaultData\1d_RemoveDuplicateCOGSales_AccountGroup.sql
 :r .\GL\DefaultData\1e_AccountCategory.sql
+:r .\GL\DefaultData\1e_AccountCategoryMaintenance.sql
 :r .\GL\DefaultData\1f_AccountTemplate.sql
 :r .\GL\DefaultData\1g_AccountSegmentTemplate.sql
 :r .\GL\DefaultData\1h_AccountRange.sql
