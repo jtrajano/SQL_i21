@@ -5243,6 +5243,7 @@
     <Build Include="dbo\Stored Procedures\uspPRPopulateEmployeeChangeLog.sql" />
     <Build Include="dbo\Views\vyuQMPropertyNotMapped.sql" />
     <Build Include="dbo\Views\vyuQMProductPropertyNotMapped.sql" />
+    <Build Include="dbo\Views\vyuLGCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
