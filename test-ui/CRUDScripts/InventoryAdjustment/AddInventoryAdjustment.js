@@ -5,6 +5,132 @@ StartTest (function (t) {
 
         .displayText('===== Pre-setup =====')
 
+        /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
+        //region
+        .displayText('===== 1. Add Indianapolis for Company Location for irelyadmin User =====')
+        .clickMenuFolder('System Manager','Folder')
+        .clickMenuScreen('Users','Screen')
+        .waitUntilLoaded()
+        .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+        .waitUntilLoaded('ementity')
+        .waitUntilLoaded()
+        .selectComboBoxRowValue('Timezone', '(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi', 'Timezone',0)
+        .clickTab('User')
+        .waitUntilLoaded()
+        .clickTab('User Roles')
+
+        .waitUntilLoaded()
+        .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
+        .waitUntilLoaded()
+
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Location already exists.')
+                return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() == 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+
+                    .displayText('Location is not yet existing.')
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .clickMessageBoxButton('no')
+                    .waitUntilLoaded()
+                    .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+                    .waitUntilLoaded('ementity')
+                    .clickTab('User')
+                    .waitUntilLoaded()
+                    .clickTab('User Roles')
+                    .waitUntilLoaded()
+                    .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 'Dummy','strLocationName', '0002 - Indianapolis','strLocationName', 1)
+                    .selectGridComboBoxBottomRowValue('UserRoleCompanyLocationRolePermission', 'strUserRole', 'ADMIN', 'strUserRole', 1)
+                    .clickTab('Detail')
+                    .waitUntilLoaded()
+                    .selectComboBoxRowValue('UserNumberFormat', '1,234,567.89', 'UserNumberFormat',1)
+                    .clickButton('Save')
+                    .waitUntilLoaded()
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+                    .waitUntilLoaded('ementity')
+                    .clickTab('User')
+                    .waitUntilLoaded()
+                    .clickTab('User Roles')
+                    .waitUntilLoaded()
+                    .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
+                    .waitUntilLoaded()
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Location already exists.')
+                return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() != 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .clickMessageBoxButton('no')
+                    .waitUntilLoaded()
+                    .clickMenuFolder('System Manager','Folder')
+                    .waitUntilLoaded()
+                    .done();
+            },
+            continueOnFail: true
+        })
+
+        //endregion
+
+
+        /*====================================== Add Storage Location for Indianapolis======================================*/
+        //region
+        .clickMenuFolder('Inventory','Folder')
+        .waitUntilLoaded()
+        .clickMenuScreen('Storage Locations','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('===== Scenario 1: Add New Storage Location. =====')
+                    .clickMenuScreen('Storage Locations','Screen')
+                    .clickButton('New')
+                    .waitUntilLoaded('icstorageunit')
+                    .enterData('Text Field','Name','Indy Storage')
+                    .enterData('Text Field','Description','Indy Storage')
+                    .selectComboBoxRowNumber('UnitType',6,0)
+                    .selectComboBoxRowNumber('Location',2,0)
+                    .selectComboBoxRowNumber('SubLocation',1,0)
+                    .selectComboBoxRowNumber('ParentUnit',1,0)
+                    .enterData('Text Field','Aisle','Test Aisle - 01')
+                    .clickCheckBox('AllowConsume', true)
+                    .clickCheckBox('AllowMultipleItems', true)
+                    .clickCheckBox('AllowMultipleLots', true)
+                    .clickCheckBox('CycleCounted', true)
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .verifyStatusMessage('Saved')
+                    .clickButton('Close')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickMenuFolder('Inventory','Folder')
+        //endregion
+
+
+
         /*====================================== Add Category ======================================*/
         //region
         .clickMenuFolder('Inventory','Folder')
