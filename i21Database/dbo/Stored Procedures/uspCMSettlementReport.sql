@@ -182,6 +182,11 @@ BEGIN
 		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END AS dblShrinkWeight,
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
+		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)	
+		ELSE
+		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
+		END AS dblTareWeight,
+	CASE WHEN INVRCPT.intSourceType = 4 THEN
 		(SELECT TOP 1  ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
 		ELSE
 		(SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
@@ -342,6 +347,11 @@ BEGIN
 		ELSE
 		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
 		END AS dblShrinkWeight,
+	CASE WHEN INVSHIP.intSourceType = 4 THEN
+		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)	
+		ELSE
+		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
+		END AS dblTareWeight,
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
 		(SELECT TOP 1  ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)
 		ELSE
@@ -506,6 +516,11 @@ BEGIN
 		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
 		END AS dblShrinkWeight,
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
+		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)	
+		ELSE
+		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
+		END AS dblTareWeight,
+	CASE WHEN INVRCPT.intSourceType = 4 THEN
 		(SELECT TOP 1  ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
 		ELSE
 		(SELECT TOP 1 ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
@@ -666,6 +681,11 @@ BEGIN
 		ELSE
 		(SELECT TOP 1 ISNULL(SC.dblShrink,0) / ISNULL(SC.dblConvertedUOMQty,1) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
 		END AS dblShrinkWeight,
+	CASE WHEN INVSHIP.intSourceType = 4 THEN
+		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)	
+		ELSE
+		(SELECT TOP 1 ISNULL(SC.dblTareWeight,0) FROM tblSCTicket SC WHERE intTicketId = INVSHIPITEM.intSourceId)
+		END AS dblTareWeight,
 	CASE WHEN INVSHIP.intSourceType = 4 THEN
 		(SELECT TOP 1  ISNULL(SC.dblGrossWeight,0) - ISNULL(SC.dblTareWeight,0) FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVSHIPITEM.intSourceId)
 		ELSE
