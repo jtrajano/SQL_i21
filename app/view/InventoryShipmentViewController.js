@@ -1492,7 +1492,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            if(current.get('strOrderType') === 'Transfer Order') {
+            if(current.get('intOrderType') === 3) { //'Transfer Order'
                 iRely.Functions.showErrorDialog('Invalid order type. An invoice is not applicable on transfer orders.');
                 return;
             }
