@@ -13,15 +13,15 @@ SELECT	intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEn
 		,strItemNo = receiptAndVoucheredCharges.strItemNo
 		,strItemDescription = receiptAndVoucheredCharges.strItemDescription
 		,dblUnitCost = receiptAndVoucheredCharges.dblUnitCost
-		,dblReceiptQty = receiptAndVoucheredCharges.dblReceiptQty
-		,dblVoucherQty  = receiptAndVoucheredCharges.dblVoucherQty
-		,dblReceiptLineTotal = receiptAndVoucheredCharges.dblReceiptLineTotal
-		,dblVoucherLineTotal = receiptAndVoucheredCharges.dblVoucherLineTotal
-		,dblReceiptTax = receiptAndVoucheredCharges.dblReceiptTax
-		,dblVoucherTax = receiptAndVoucheredCharges.dblVoucherTax
-		,dblOpenQty = receiptAndVoucheredCharges.dblOpenQty  
-		,dblItemsPayable = receiptAndVoucheredCharges.dblItemsPayable
-		,dblTaxesPayable = receiptAndVoucheredCharges.dblTaxesPayable
+		,dblReceiptQty = CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN -receiptAndVoucheredCharges.dblReceiptQty ELSE receiptAndVoucheredCharges.dblReceiptQty END 
+		,dblVoucherQty  = CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN -receiptAndVoucheredCharges.dblVoucherQty ELSE receiptAndVoucheredCharges.dblVoucherQty END 
+		,dblReceiptLineTotal = CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN -receiptAndVoucheredCharges.dblReceiptLineTotal ELSE receiptAndVoucheredCharges.dblReceiptLineTotal END 
+		,dblVoucherLineTotal = CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN -receiptAndVoucheredCharges.dblVoucherLineTotal ELSE receiptAndVoucheredCharges.dblVoucherLineTotal END 
+		,dblReceiptTax = CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN -receiptAndVoucheredCharges.dblReceiptTax ELSE receiptAndVoucheredCharges.dblReceiptTax END 
+		,dblVoucherTax = CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN -receiptAndVoucheredCharges.dblVoucherTax ELSE receiptAndVoucheredCharges.dblVoucherTax END 
+		,dblOpenQty = CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN -receiptAndVoucheredCharges.dblOpenQty ELSE receiptAndVoucheredCharges.dblOpenQty END 
+		,dblItemsPayable = CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN -receiptAndVoucheredCharges.dblItemsPayable ELSE receiptAndVoucheredCharges.dblItemsPayable END 
+		,dblTaxesPayable = CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN -receiptAndVoucheredCharges.dblTaxesPayable ELSE receiptAndVoucheredCharges.dblTaxesPayable END 
 		,dtmLastVoucherDate = topVoucher.dtmBillDate			
 		,receiptAndVoucheredCharges.intCurrencyId
 		,receiptAndVoucheredCharges.strCurrency
