@@ -35,6 +35,7 @@ BEGIN TRY
 	DECLARE @intCompanyLocationSubLocationId INT
 	DECLARE @intStorageLocationId INT
 	DECLARE @ysnDPOwnedType BIT
+	DECLARE @intInventoryItemStockUOMId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -44,17 +45,18 @@ BEGIN TRY
 
 	SELECT @StrUserName=strUserName FROM tblSMUserSecurity Where intEntityUserSecurityId=@intEntityUserSecurityId
 	
-	SELECT @intCustomerStorageId = intCustomerStorageId 
-		,@intTransactionTypeId = intTransactionTypeId
-		,@dblUnits = ISNULL(dblUnits, 0)
-		,@NegativeUnits= - ISNULL(dblUnits, 0)
-		,@dblAmount = ISNULL(dblPaidAmount, 0)
-		,@intBillId=intBillId
-		,@ContractId=intInventoryReceiptId
-		,@TicketNo=strSettleTicket
-	FROM tblGRStorageHistory
-	WHERE intStorageHistoryId = @intStorageHistoryId
-
+	SELECT @intCustomerStorageId = SH.intCustomerStorageId 
+		,@intTransactionTypeId = SH.intTransactionTypeId
+		,@dblUnits = ISNULL(SH.dblUnits, 0)		
+		,@dblAmount = ISNULL(SH.dblPaidAmount, 0)
+		,@intBillId=SH.intBillId
+		,@ContractId=SH.intInventoryReceiptId
+		,@TicketNo=SH.strSettleTicket
+	FROM tblGRStorageHistory SH
+	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
+	JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1	
+	WHERE intStorageHistoryId = @intStorageHistoryId	
+	
 	SELECT
 	 @ItemId = CS.intItemId
 	,@intCurrencyId=CS.intCurrencyId 
@@ -65,6 +67,8 @@ BEGIN TRY
 	FROM tblGRCustomerStorage CS
 	JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId
 	WHERE intCustomerStorageId = @intCustomerStorageId
+
+	SELECT @intInventoryItemStockUOMId=intItemUOMId FROM tblICItemStockUOM Where intItemId=@ItemId
 	
 	
 	SELECT	@intUnitMeasureId = a.intUnitMeasureId
@@ -82,6 +86,16 @@ BEGIN TRY
 		FROM	tblICItemLocation 
 		WHERE	intItemId = @ItemId 
 				AND intLocationId=@LocationId
+
+   SELECT @NegativeUnits =  dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,@dblUnits)
+							 FROM tblGRCustomerStorage CS
+							 JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
+							 WHERE intCustomerStorageId = @intCustomerStorageId
+
+   SELECT @NegativeUnits= - dbo.fnCTConvertQtyToTargetItemUOM(@intSourceItemUOMId,intItemUOMId,@NegativeUnits) 
+   FROM	tblCTContractDetail 
+   WHERE	intContractDetailId = @ContractId
+
 
 	IF @intTransactionTypeId =2
 	BEGIN
@@ -195,7 +209,7 @@ BEGIN TRY
 		SELECT  
 			 intItemId = @ItemId
 			,intItemLocationId = @intItemLocationId	
-			,intItemUOMId = @intSourceItemUOMId
+			,intItemUOMId = @intInventoryItemStockUOMId
 			,dtmDate = GETDATE() 
 			,dblQty = @dblUnits
 			,dblUOMQty = @dblUOMQty
@@ -240,9 +254,9 @@ BEGIN TRY
 			SELECT  
 				 intItemId = @ItemId
 				,intItemLocationId = @intItemLocationId	
-				,intItemUOMId = @intSourceItemUOMId
+				,intItemUOMId = @intInventoryItemStockUOMId
 				,dtmDate = GETDATE() 
-				,dblQty = @NegativeUnits
+				,dblQty = - @dblUnits
 				,dblUOMQty = @dblUOMQty
 				,dblCost = CASE WHEN @ysnDPOwnedType = 0 THEN @dblAmount ELSE 0 END
 				,dblSalesPrice = 0.00
