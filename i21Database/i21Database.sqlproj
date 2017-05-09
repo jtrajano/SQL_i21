@@ -5244,6 +5244,7 @@
     <Build Include="dbo\Views\vyuQMPropertyNotMapped.sql" />
     <Build Include="dbo\Views\vyuQMProductPropertyNotMapped.sql" />
     <Build Include="dbo\Views\vyuLGCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuCTContractPlan.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

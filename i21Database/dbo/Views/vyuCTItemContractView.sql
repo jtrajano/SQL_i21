@@ -22,7 +22,8 @@ AS
 			CL.intCompanyLocationId AS	intLocationId,
 			IM.strStatus,
 			IM.intProductTypeId,
-			CA.intPurchasingGroupId
+			CA.intPurchasingGroupId,
+			PG.strName	AS	strPurchasingGroup
 
 	FROM	tblICItemContract		IC
 	JOIN	tblICItem				IM	ON	IM.intItemId			=	IC.intItemId
@@ -31,6 +32,7 @@ AS
 	JOIN	tblSMCountry			RY	ON	RY.intCountryID			=	IC.intCountryId			LEFT
 	JOIN	tblICCommodityAttribute	CA	ON	CA.intCountryID			=	IC.intCountryId
 										AND	CA.intCommodityId		=	IM.intCommodityId
-										AND	CA.strType				=	'Origin'
+										AND	CA.strType				=	'Origin'				LEFT
+	JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId	=	CA.intPurchasingGroupId
 	
 

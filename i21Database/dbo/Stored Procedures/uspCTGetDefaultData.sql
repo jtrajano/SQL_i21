@@ -17,7 +17,8 @@ BEGIN
 			@strFutureMonthYear NVARCHAR(100),
 			@strSubLocationName NVARCHAR(100),
 			@strStorageLocation NVARCHAR(100),
-			@strContractItemNo NVARCHAR(100)
+			@strContractItemNo NVARCHAR(100),
+			@strContractItemName	NVARCHAR(100)
 
 	DECLARE @intVendorId INT, @strCity NVARCHAR(100),@intCityId INT, @ysnPort BIT, @ysnRegion BIT
 
@@ -30,7 +31,11 @@ BEGIN
 		intProductTypeId		INT,
 		intSubLocationId		INT,
 		intStorageLocationId	INT,
-		intItemContractId		INT
+		intItemContractId		INT,
+		strPurchasingGroup		NVARCHAR(100),
+		strSubLocationName		NVARCHAR(100),
+		strStorageLocationName	NVARCHAR(100),
+		strContractItemName		NVARCHAR(100)
 	)
 
 	IF @strType = 'FutureMarket'
@@ -40,19 +45,25 @@ BEGIN
 
 		IF	ISNULL(@intFutureMarketId,0) > 0
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure 
-			FROM tblRKFutureMarket M 
-			LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId				=		M.intUnitMeasureId
-			LEFT JOIN tblICItemUOM IU ON IU.intItemId = @intItemId AND IU.intUnitMeasureId = M.intUnitMeasureId
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency
+			FROM		tblRKFutureMarket M 
+			LEFT JOIN	tblICUnitMeasure	MU	ON	MU.intUnitMeasureId	=	M.intUnitMeasureId
+			LEFT JOIN	tblICItemUOM		IU	ON	IU.intItemId		=	@intItemId 
+												AND IU.intUnitMeasureId =	M.intUnitMeasureId
+			LEFT JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId =	IU.intUnitMeasureId
+			LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID	=	M.intCurrencyId
 			WHERE M.intFutureMarketId = @intFutureMarketId
 		END
 		ELSE
 		BEGIN
-			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure 
-			FROM tblRKFutureMarket M 
-			LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId				=		M.intUnitMeasureId
-			JOIN tblRKCommodityMarketMapping C ON C.intFutureMarketId = M.intFutureMarketId 
-			LEFT JOIN tblICItemUOM IU ON IU.intItemId = @intItemId AND IU.intUnitMeasureId = M.intUnitMeasureId
+			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency 
+			FROM		tblRKFutureMarket			M 
+			LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId	=	M.intUnitMeasureId
+			LEFT JOIN	tblRKCommodityMarketMapping C	ON	C.intFutureMarketId =	M.intFutureMarketId 
+			LEFT JOIN	tblICItemUOM				IU	ON	IU.intItemId		=	@intItemId 
+														AND IU.intUnitMeasureId =	M.intUnitMeasureId
+			LEFT JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId =	IU.intUnitMeasureId
+			LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID	=	M.intCurrencyId
 			WHERE C.intCommodityId = @intCommodityId  ORDER BY M.intFutureMarketId ASC
 		END
 	END
@@ -110,19 +121,19 @@ BEGIN
 	BEGIN
 		SELECT @strSubLocationName = strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSubLocationId 
 		SELECT @strStorageLocation = strName FROM tblICStorageLocation WHERE intStorageLocationId = @intStorageLocationId 
-		SELECT @strContractItemNo  = strContractItemNo FROM tblICItemContract WHERE intItemContractId = ISNULL(@intItemContractId,0)
+		SELECT @strContractItemNo  = strContractItemNo,@strContractItemName = strContractItemName FROM tblICItemContract WHERE intItemContractId = ISNULL(@intItemContractId,0)
 
 		IF ISNULL(@intItemId,0) > 0
 		BEGIN 
 			IF EXISTS(SELECT * FROM vyuCTInventoryItem WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId AND intItemId = @intItemId)
 			BEGIN
 				INSERT INTO @Item
-				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null  FROM vyuCTInventoryItem WHERE intItemId = @intItemId
+				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null  FROM vyuCTInventoryItem WHERE intItemId = @intItemId
 			END
 			ELSE
 			BEGIN
 				INSERT INTO @Item
-				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null  FROM vyuCTInventoryItem 
+				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null  FROM vyuCTInventoryItem 
 				WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId
 				ORDER BY intItemId ASC
 			END
@@ -130,7 +141,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @Item
-			SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null FROM vyuCTInventoryItem 
+			SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null FROM vyuCTInventoryItem 
 			WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId
 			ORDER BY intItemId ASC
 		END
@@ -152,7 +163,8 @@ BEGIN
 		JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId	=	IC.intItemLocationId
 		WHERE	IC.strContractItemNo = @strContractItemNo AND IL.intLocationId = @intLocationId AND IC.intItemId = @intItemId
 			
-		UPDATE @Item SET intSubLocationId = @intSubLocationId,intStorageLocationId = @intStorageLocationId,intItemContractId = @intItemContractId 
+		UPDATE @Item SET intSubLocationId = @intSubLocationId,intStorageLocationId = @intStorageLocationId,intItemContractId = @intItemContractId ,
+							strStorageLocationName = @strStorageLocation,strSubLocationName = @strSubLocationName,strContractItemName = @strContractItemName
 
 		SELECT * FROM @Item
 	END

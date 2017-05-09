@@ -30,5 +30,18 @@
 	CONSTRAINT [PK_tblCTContractPlan_intContractPlanId] PRIMARY KEY CLUSTERED ([intContractPlanId] ASC),
 	CONSTRAINT [FK_tblCTContractPlan_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblCTContractPlan_tblCTContractBasis_intContractBasisId] FOREIGN KEY ([intContractBasisId]) REFERENCES [tblCTContractBasis]([intContractBasisId]),
-	CONSTRAINT [FK_tblCTContractPlan_tblICCategory_intCategoryId] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId])
+	CONSTRAINT [FK_tblCTContractPlan_tblICCategory_intCategoryId] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
+
+	CONSTRAINT [FK_tblCTContractPlan_tblCTAssociation_intAssociationId] FOREIGN KEY (intAssociationId) REFERENCES tblCTAssociation(intAssociationId),
+	CONSTRAINT [FK_tblCTContractPlan_tblICCommodity_intCommodityId] FOREIGN KEY (intCommodityId) REFERENCES tblICCommodity(intCommodityId),
+	CONSTRAINT [FK_tblCTContractPlan_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY (intCompanyLocationId) REFERENCES tblSMCompanyLocation(intCompanyLocationId),
+	CONSTRAINT [FK_tblCTContractPlan_tblCTContractText_intContractTextId] FOREIGN KEY (intContractTextId) REFERENCES tblCTContractText(intContractTextId),
+	CONSTRAINT [FK_tblCTContractPlan_tblCTContractType_intContractTypeId] FOREIGN KEY (intContractTypeId) REFERENCES tblCTContractType(intContractTypeId),
+	CONSTRAINT [FK_tblCTContractPlan_tblCTCropYear_intCropYearId] FOREIGN KEY (intCropYearId) REFERENCES tblCTCropYear(intCropYearId),
+	CONSTRAINT [FK_tblCTContractPlan_tblCTWeightGrade_intGradeId] FOREIGN KEY (intGradeId) REFERENCES tblCTWeightGrade(intWeightGradeId),
+	CONSTRAINT [FK_tblCTContractPlan_tblCTPosition_intPositionId] FOREIGN KEY (intPositionId) REFERENCES tblCTPosition(intPositionId),
+	CONSTRAINT [FK_tblCTContractPlan_tblCTPricingType_intPricingTypeId] FOREIGN KEY (intPricingTypeId) REFERENCES tblCTPricingType(intPricingTypeId),
+	CONSTRAINT [FK_tblCTContractPlan_tblEMEntity_intSalespersonId] FOREIGN KEY (intSalespersonId) REFERENCES tblEMEntity(intEntityId),
+	CONSTRAINT [FK_tblCTContractPlan_tblSMTerm_intTermId] FOREIGN KEY (intTermId) REFERENCES tblSMTerm(intTermID),
+	CONSTRAINT [FK_tblCTContractPlan_tblCTWeightGrade_intWeightId] FOREIGN KEY (intWeightId) REFERENCES tblCTWeightGrade(intWeightGradeId)
 )
