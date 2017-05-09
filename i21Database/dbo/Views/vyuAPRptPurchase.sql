@@ -31,6 +31,7 @@ SELECT
 	,D.strItemNo
 	,B.strMiscDescription AS strDescription
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+	,F.strFreightTerm
 FROM dbo.tblPOPurchase A
 	INNER JOIN (dbo.tblAPVendor C INNER JOIN dbo.tblEMEntity C1 ON C.[intEntityId] = C1.intEntityId)
 			ON A.[intEntityVendorId] = C.[intEntityId]
@@ -39,4 +40,5 @@ FROM dbo.tblPOPurchase A
 	LEFT JOIN (dbo.tblICItemUOM E1 
 				INNER JOIN dbo.tblICUnitMeasure E ON E1.intUnitMeasureId = E.intUnitMeasureId)
 				ON B.intUnitOfMeasureId = E1.intItemUOMId
+	LEFT JOIN tblSMFreightTerms F ON F.intFreightTermId = A.intFreightTermId
 	
