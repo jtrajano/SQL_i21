@@ -49,10 +49,16 @@
 		VALUES(8, 'Prepay', NULL, 0, NULL, 1, 0)
 	END
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Prepay')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'CF Invoice')
 	BEGIN
 		INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
 		VALUES(9, 'CF Invoice', NULL, 0, NULL, 1, 0)
+	END
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Cash')
+	BEGIN
+		INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
+		VALUES(10, 'Cash', NULL, 0, NULL, 1, 0)
 	END
 
 	SET IDENTITY_INSERT tblSMPaymentMethod OFF
