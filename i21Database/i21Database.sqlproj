@@ -5240,6 +5240,7 @@
     <Build Include="dbo\Stored Procedures\uspICPopulateShipmentInvoice.sql" />
     <Build Include="dbo\Views\vyuICShipmentInvoice2.sql" />
     <Build Include="dbo\Tables\tblPREmployeeChangeLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRPopulateEmployeeChangeLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
