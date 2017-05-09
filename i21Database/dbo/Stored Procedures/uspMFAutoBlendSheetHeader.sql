@@ -48,10 +48,13 @@ AS
 	SELECT 0 AS intWorkOrderId,'' AS strWorkOrderNo,i.intItemId,i.strItemNo,@dblQtyToProduce AS dblQuantity,@dblQtyToProduce AS dblPlannedQuantity,iu.intItemUOMId,
 	um.strUnitMeasure AS strUOM,2 AS intStatusId,br.intManufacturingCellId,br.intMachineId,br.dtmDueDate AS dtmExpectedDate,
 	br.dblBlenderSize AS dblBinSize,br.intBlendRequirementId,CAST(0 AS BIT) AS ysnUseTemplate,CAST(0 AS BIT) AS ysnKittingEnabled,br.strDemandNo AS strComment,
-	br.intLocationId,Cast(0 AS decimal) AS dblBalancedQtyToProduce,ip.dblStandardCost,CAST(ISNULL(Ceiling(br.dblEstNoOfBlendSheet),1) AS decimal) AS dblEstNoOfBlendSheet
+	br.intLocationId,Cast(0 AS decimal) AS dblBalancedQtyToProduce,ip.dblStandardCost,CAST(ISNULL(Ceiling(br.dblEstNoOfBlendSheet),1) AS decimal) AS dblEstNoOfBlendSheet,
+	mc.strCellName,m.strName AS strMachineName
 	FROM tblMFBlendRequirement br JOIN tblICItem i ON br.intItemId=i.intItemId 
 	Join tblICItemUOM iu on i.intItemId=iu.intItemId and br.intUOMId=iu.intUnitMeasureId 
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Left Join tblICItemLocation il on i.intItemId=il.intItemId and il.intLocationId=@intLocationId
 	Left Join tblICItemPricing ip on ip.intItemId=i.intItemId And ip.intItemLocationId=il.intItemLocationId
+	Left Join tblMFManufacturingCell mc on br.intManufacturingCellId=mc.intManufacturingCellId
+	Left Join tblMFMachine m on br.intMachineId=m.intMachineId
 	WHERE br.intBlendRequirementId=@intBlendRequirementId

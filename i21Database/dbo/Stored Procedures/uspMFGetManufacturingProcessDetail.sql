@@ -5,6 +5,7 @@ BEGIN
 		,@strLocationName NVARCHAR(50)
 		,@dtmBusinessDate DATETIME
 		,@intShiftId INT
+		,@strShiftName NVARCHAR(50)
 		,@dtmCurrentDate DateTime
 		,@intEndOffset int
 		,@dtmShiftEndTime DateTime
@@ -18,7 +19,7 @@ BEGIN
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate,@intCompanyLocationId) 
 
-	SELECT @intShiftId = intShiftId,@intEndOffset=intEndOffset,@dtmShiftEndTime=dtmShiftEndTime
+	SELECT @intShiftId = intShiftId,@strShiftName=strShiftName,@intEndOffset=intEndOffset,@dtmShiftEndTime=dtmShiftEndTime
 	FROM dbo.tblMFShift
 	WHERE intLocationId = @intCompanyLocationId
 		AND @dtmCurrentDate BETWEEN @dtmBusinessDate+dtmShiftStartTime+intStartOffset
@@ -33,6 +34,7 @@ BEGIN
 			,@strLocationName AS strLocationName
 			,@dtmBusinessDate AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
+			,@strShiftName AS strShiftName
 			,@intEndOffset as intEndOffset
 			,@dtmShiftEndTime as dtmShiftEndTime
 			,@dtmCurrentDate as dtmCurrentDate
@@ -49,6 +51,7 @@ BEGIN
 			,@strLocationName AS strLocationName
 			,@dtmBusinessDate AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
+			,@strShiftName AS strShiftName
 			,@intEndOffset as intEndOffset
 			,@dtmShiftEndTime as dtmShiftEndTime
 			,@dtmCurrentDate as dtmCurrentDate
