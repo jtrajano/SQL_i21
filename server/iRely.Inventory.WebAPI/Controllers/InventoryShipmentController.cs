@@ -95,7 +95,8 @@ namespace iRely.Inventory.WebApi
             int? newInvoice = null;
             var result = _bl.ProcessInvoice(p.id, out newInvoice);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            HttpStatusCode httpStatusCode = result.HasError ? HttpStatusCode.Conflict : HttpStatusCode.Accepted;            
+            return Request.CreateResponse(httpStatusCode, new
             {
                 success = !result.HasError,
                 message = new

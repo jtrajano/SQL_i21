@@ -179,6 +179,7 @@ Ext.define('Inventory.search.InventoryShipment', {
             itemId: 'btnCustomer',
             clickHandler: 'onViewCustomerClick',
             width: 80
+
         }
     ],
 
@@ -291,8 +292,7 @@ Ext.define('Inventory.search.InventoryShipment', {
                         }
                     }
                 });        
-            });            
-            
+            });                        
         }
         else {
             var invoices = record.get('strFilterString');
