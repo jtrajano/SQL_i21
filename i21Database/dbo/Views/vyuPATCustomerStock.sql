@@ -5,6 +5,7 @@ SELECT	CS.intCustomerStockId,
 		C.strName AS strCustomerPatronId,
 		CS.intStockId,
 		PC.strStockName,
+		FY.intFiscalYearId,
 		CS.strCertificateNo,
 		CS.strStockStatus,
 		CS.dblSharesNo,
@@ -39,3 +40,8 @@ SELECT	CS.intCustomerStockId,
 		ON APPAY.intBillId = CS.intBillId
 	LEFT OUTER JOIN (SELECT A.strPaymentInfo, B.intInvoiceId, A.dtmDatePaid, B.dblPayment FROM tblARPayment A INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId) ARPAY
 		ON ARPAY.intInvoiceId = CS.intInvoiceId
+	OUTER APPLY (
+		SELECT intFiscalYearId
+		FROM tblGLFiscalYear FY
+		WHERE CS.dtmIssueDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
+	) FY	
