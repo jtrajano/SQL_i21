@@ -2514,6 +2514,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
+                                                                                itemId: 'btnFetch',
+                                                                                iconCls: 'small-copy-address',
+                                                                                text: 'Fetch Costs from Contracts'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
                                                                                 itemId: 'btnChargeTaxDetails',
                                                                                 iconCls: 'small-open',
                                                                                 text: 'View Tax Details'

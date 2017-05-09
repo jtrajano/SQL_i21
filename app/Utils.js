@@ -16,10 +16,12 @@ Ext.define('Inventory.Utils', {
         
         ajax: function (options) {
             /* Prevent SQL injection attacks by sanitizing all the concatenated parameters in the URL path and place them to the param property of the ajax configuration. */
-            var urlObject = ic.utils.getUrlObject(options.url);
-            if (urlObject && urlObject.search) {
-                options.url = options.url.replace(urlObject.search, '');
-                options.params = _.extend(options.params, urlObject.searchObject);
+            if(!options.forceUrlParams) {
+                var urlObject = ic.utils.getUrlObject(options.url);
+                if (urlObject && urlObject.search) {
+                    options.url = options.url.replace(urlObject.search, '');
+                    options.params = _.extend(options.params ? options.params : {}, urlObject.searchObject);
+                }
             }
             /* Defaults method to 'GET' when method is not defined. */
             if (!options.method)
