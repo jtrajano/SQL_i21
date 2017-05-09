@@ -1712,16 +1712,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 method: 'post'
             })
             .subscribe(
-                function(response){
-                    var jsonData = Ext.decode(response.responseText);
-                    if (jsonData.success) {
+                function(successResponse){
+                    var jsonData = Ext.decode(successResponse.responseText);
+                    var message = jsonData.message; 
+                    if (message && message.InvoiceId){
                         var buttonAction = function(button) {
                             if (button === 'yes') {
                                 iRely.Functions.openScreen('AccountsReceivable.view.Invoice', {
                                     filters: [
                                         {
                                             column: 'intInvoiceId',
-                                            value: jsonData.message.InvoiceId
+                                            value: message.InvoiceId
                                         }
                                     ],
                                     action: 'view'
@@ -1731,24 +1732,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         };
                         iRely.Functions.showCustomDialog('question', 'yesno', 'Invoice successfully processed. Do you want to view this Invoice?', buttonAction);
                     }
-                    else {
-                        var jsonData = Ext.decode(response.responseText);
-                        var msg = jsonData.ExceptionMessage;
-                        if(!jsonData.success) {
-                            if(jsonData.message.statusText === " " && jsonData.message.status === 9998)
-                                msg = "Can't process Invoice for Items that don't have order number.";
-                        }
-                        iRely.Functions.showErrorDialog(msg);
-                    }
                 },
-                function(response) {
-                    var jsonData = Ext.decode(response.responseText);
-                    var msg = jsonData.ExceptionMessage;
-                    if(!jsonData.success) {
-                        if(jsonData.message.statusText === " " && jsonData.message.status === 9998)
-                                msg = "Can't process Invoice for Items that don't have order number.";
-                    }
-                    iRely.Functions.showErrorDialog(msg);
+                function(failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    var message = jsonData.message; 
+                    iRely.Functions.showErrorDialog(message.statusText);
                 }
             );
         }
