@@ -117,6 +117,11 @@ SELECT L.intLoadId
 	,Currency.strCurrency AS strInsuranceCurrency
 	,DemurrangeCurrency.strCurrency AS strDemurrangeCurrency
 	,DespatchCurrency.strCurrency AS strDespatchCurrency
+	,LoadingUnitMeasure.strUnitMeasure AS strLoadingUnitMeasure
+	,DischargeUnitMeasure.strUnitMeasure AS strDischargeUnitMeasure
+	,ETAPOLRC.strReasonCodeDescription AS strETAPOLReasonCode
+	,ETSPOLRC.strReasonCodeDescription AS strETSPOLReasonCode
+	,ETAPODRC.strReasonCodeDescription AS strETAPODReasonCode
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -136,4 +141,9 @@ LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
 LEFT JOIN tblSMCurrency DemurrangeCurrency ON DemurrangeCurrency.intCurrencyID = L.intDemurrageCurrencyId
-LEFT JOIN tblSMCurrency DespatchCurrency ON DespatchCurrency.intCurrencyID = L.intDispatcherId
+LEFT JOIN tblSMCurrency DespatchCurrency ON DespatchCurrency.intCurrencyID = L.intDespatchCurrencyId
+LEFT JOIN tblICUnitMeasure LoadingUnitMeasure ON LoadingUnitMeasure.intUnitMeasureId = L.intLoadingUnitMeasureId
+LEFT JOIN tblICUnitMeasure DischargeUnitMeasure ON DischargeUnitMeasure .intUnitMeasureId = L.intDischargeUnitMeasureId
+LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReasonCodeId
+LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
+LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReasonCodeId
