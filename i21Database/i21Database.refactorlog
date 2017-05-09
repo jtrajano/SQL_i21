@@ -6006,4 +6006,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnActive" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="54582190-434b-42e5-9556-3ae1a7c28429" ChangeDateTime="05/09/2017 08:40:58">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketScaleOperator].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketScaleOperator]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intScaleOperatorId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="13e19da8-82c9-4fd1-8a40-49a4cab2836f" ChangeDateTime="05/09/2017 08:41:12">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketScaleOperator].[intEntityID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketScaleOperator]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityId" />
+  </Operation>
 </Operations>
