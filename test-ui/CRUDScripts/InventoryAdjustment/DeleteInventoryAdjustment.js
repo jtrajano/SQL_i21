@@ -192,7 +192,7 @@ StartTest (function (t) {
         //region
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'ALTI - 108')
+        .filterGridRecords('Search', 'FilterGrid', 'ALTI - 109')
         .waitUntilLoaded()
         .continueIf({
             expected: true,
@@ -209,7 +209,7 @@ StartTest (function (t) {
                     .addFunction(function(next){
                         commonIC.addInventoryItem
                         (t,next,
-                            'ALTI - 108'
+                            'ALTI - 109'
                             , 'Test Item for Adjustment'
                             , 'TestGrains1'
                             , 'TestCorn1'
@@ -233,7 +233,7 @@ StartTest (function (t) {
         /*======================= Create inventory Receipt for Stock ==========================*/
         .displayText('=====  Creating Direct Inventory Receipt =====')
         .addFunction(function(next){
-            commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'ALTI - 108','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+            commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'ALTI - 109','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
         })
         .displayText('===== Create Direct Inventory Receipt for Lotted Item Done =====')
 
@@ -241,7 +241,7 @@ StartTest (function (t) {
         .displayText('=====  Checking Item Stock =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 109', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -272,7 +272,7 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('AdjustmentType',1,0)
         .enterData('Text Field','Description','Test Quantity Change')
 
-        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 108','strItemNo')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 109','strItemNo')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strSubLocation','Raw Station','strSubLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strStorageLocation','RM Storage','strStorageLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strLotNumber','LOT-01','strLotNumber')
@@ -297,7 +297,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 109', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -332,7 +332,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 109', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -371,7 +371,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 109', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -406,7 +406,7 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('AdjustmentType',5,0)
         .enterData('Text Field','Description','Test Split Lot')
 
-        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 108','strItemNo')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 109','strItemNo')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strSubLocation','Raw Station','strSubLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strStorageLocation','RM Storage','strStorageLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strLotNumber','LOT-01','strLotNumber')
@@ -440,7 +440,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 109', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -489,7 +489,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 109', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -543,7 +543,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 109', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -592,7 +592,7 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('AdjustmentType',8,0)
         .enterData('Text Field','Description','Test Lot Move')
 
-        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 108','strItemNo')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 109','strItemNo')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strSubLocation','Raw Station','strSubLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strStorageLocation','RM Storage','strStorageLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strLotNumber','LOT-01','strLotNumber')
@@ -624,7 +624,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 109', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -673,7 +673,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 109', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -727,7 +727,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 109', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
