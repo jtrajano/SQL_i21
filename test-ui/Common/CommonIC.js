@@ -391,7 +391,7 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
 
-            .displayText('===== Creeating Direct IR for Non Lotted Item  =====')
+            .displayText('===== Creeating Direct IR for Lotted Item  =====')
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Receipts','Screen')
             .waitUntilLoaded()
@@ -2002,6 +2002,34 @@ Ext.define('Inventory.CommonIC', {
             .done();
 
     },
+
+
+    glGridFilter: function (t, next, filter){
+
+        t.chain(
+            { click: ">>#pnlMain #pnlIntegratedDashboard #pnlIntegratedDashboardGridPanel #searchTabPanel #mainTab-sorted #grdSearch #tlbGridOptions #btnInsertCriteria"},
+            { click: "#pnlMain #pnlIntegratedDashboard #pnlIntegratedDashboardGridPanel #searchTabPanel #mainTab-sorted #grdSearch #pnlFilter #con0 #cboColumns => .x-form-trigger"},
+            { click: "#cboColumns.getPicker() => .x-boundlist-item:contains(Account Id)"},
+            { click: "#pnlMain #pnlIntegratedDashboard #pnlIntegratedDashboardGridPanel #searchTabPanel #mainTab-sorted #grdSearch #pnlFilter #con0 #cboValueStoreFrom => .x-form-text"},
+            { action: "type", options: { shiftKey: true}, text: filter + '[RETURN]'}
+        );
+        next();
+
+    },
+
+    gridClearFilter: function (t, next){
+
+        t.chain(
+            { click: "#pnlMain #pnlIntegratedDashboard #pnlIntegratedDashboardGridPanel #searchTabPanel #mainTab-sorted #grdSearch #pnlFilter #con0 #filterDeleteButton => .small-delete"}
+        );
+        next();
+
+    },
+
+
+
+
+
 ////////////////////////////////////////////////////////////////////////    
 //Start Jerome Paul Fazon Codes
 ////////////////////////////////////////////////////////////////////////    
@@ -2136,7 +2164,7 @@ createPurchaseOrder: function (t,next,ProductID){
      *
      */
 
-createInventoryReceipt: function (t,next,itemQty,toPost) {
+createInventoryReceipt: function (t,next,itemQty,toPost,cost) {
                 new iRely.FunctionalTest().start(t, next)
                 //.displayText(PONumber)
                 
@@ -2150,10 +2178,12 @@ createInventoryReceipt: function (t,next,itemQty,toPost) {
                 .selectSearchRowNumber(1)
                 .clickButton('OpenSelected')
                 .waitUntilLoaded('icinventoryreceipt')
-                .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1) 
+//               .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
                 .selectGridRowNumber('InventoryReceipt', 1)
-                .selectGridComboBoxRowValue('InventoryReceipt',1,'colWeightUOM', 'Bushels' ,'strWeightUOM',1) 
                 .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure',itemQty, 'Bushels')
+                 .waitUntilLoaded()
+                .enterGridData('InventoryReceipt', 1, 'colUnitCost', cost)
+                .selectGridComboBoxRowValue('InventoryReceipt',1,'colWeightUOM', 'Bushels' ,'strWeightUOM',1)
                 .enterGridData('LotTracking',1,'colLotId','Sample Parent Lot [TAB]')
                 .enterGridData('LotTracking',1,'colLotQuantity',itemQty)
                 .selectGridRowNumber('InventoryReceipt', 1)                  

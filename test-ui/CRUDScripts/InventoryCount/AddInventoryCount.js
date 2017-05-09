@@ -70,13 +70,6 @@ StartTest (function (t) {
         .waitUntilLoaded()
         .clickButton('LockInventory')
         .waitUntilLoaded()
-        .isControlVisible('tlb',
-        [
-           'PrintVariance'
-            , 'LockInventory'
-            , 'Post'
-            , 'Recap'
-        ], true)
         .clickButton('Close')
         .waitUntilLoaded()
 
@@ -94,17 +87,6 @@ StartTest (function (t) {
         .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Gallon')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblTotal').text;
-            if (total == 'Total: 1,000.00') {
-                t.ok(true, 'Total is correct.');
-            }
-            else {
-                t.ok(false, 'Total is incorrect.');
-            }
-            next();
-        })
 
         .clickButton('Recap')
         .waitUntilLoaded('')
@@ -132,15 +114,6 @@ StartTest (function (t) {
 
         .displayText('===== Check Updated Fields =====')
         .doubleClickSearchRowValue('GAS', 'strCategory', 1)
-        .isControlVisible('tlb',
-        [
-            'New'
-            , 'LockInventory'
-            , 'Save'
-            , 'Delete'
-            , 'Undo'
-            , 'Close'
-        ], true)
         .clickButton('Close')
         .waitUntilLoaded()
 
@@ -159,17 +132,7 @@ StartTest (function (t) {
         .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'Gallon')
         .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '1000')
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblTotal').text;
-            if (total == 'Total: 1,000.00') {
-                t.ok(true, 'Total is correct.');
-            }
-            else {
-                t.ok(false, 'Total is incorrect.');
-            }
-            next();
-        })
+
 
         .clickButton('Recap')
         .waitUntilLoaded('cmcmrecaptransaction')

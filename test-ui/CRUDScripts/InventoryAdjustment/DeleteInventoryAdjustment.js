@@ -1,155 +1,247 @@
 StartTest (function (t) {
+    var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
-        //region Scenario 1. Create Inventory Adjustment for Lotted Item Delete IA
-        //Receive Items for Stock
-        .displayText('=====  Scenario 1. Create Inventory Adjustment Quantity Change for Lotted Item Delete IA =====')
-        //Create NON Lotted Item.
-        .displayText('===== Pre setup: Items for Delete Inventory Shipment Script =====')
-        .displayText('===== Creating Lotted Item =====')
+        /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
+        //region
+        .displayText('===== 1. Add Indianapolis for Company Location for irelyadmin User =====')
+        .clickMenuFolder('System Manager','Folder')
+        .clickMenuScreen('Users','Screen')
+        .waitUntilLoaded()
+        .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+        .waitUntilLoaded('ementity')
+        .waitUntilLoaded()
+        .selectComboBoxRowValue('Timezone', '(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi', 'Timezone',0)
+        .clickTab('User')
+        .waitUntilLoaded()
+        .clickTab('User Roles')
+
+        .waitUntilLoaded()
+        .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
+        .waitUntilLoaded()
+
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Location already exists.')
+                return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() == 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+
+                    .displayText('Location is not yet existing.')
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .clickMessageBoxButton('no')
+                    .waitUntilLoaded()
+                    .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+                    .waitUntilLoaded('ementity')
+                    .clickTab('User')
+                    .waitUntilLoaded()
+                    .clickTab('User Roles')
+                    .waitUntilLoaded()
+                    .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 'Dummy','strLocationName', '0002 - Indianapolis','strLocationName', 1)
+                    .selectGridComboBoxBottomRowValue('UserRoleCompanyLocationRolePermission', 'strUserRole', 'ADMIN', 'strUserRole', 1)
+                    .clickTab('Detail')
+                    .waitUntilLoaded()
+                    .selectComboBoxRowValue('UserNumberFormat', '1,234,567.89', 'UserNumberFormat',1)
+                    .clickButton('Save')
+                    .waitUntilLoaded()
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+                    .waitUntilLoaded('ementity')
+                    .clickTab('User')
+                    .waitUntilLoaded()
+                    .clickTab('User Roles')
+                    .waitUntilLoaded()
+                    .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
+                    .waitUntilLoaded()
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Location already exists.')
+                return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() != 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .clickMessageBoxButton('no')
+                    .waitUntilLoaded()
+                    .clickMenuFolder('System Manager','Folder')
+                    .waitUntilLoaded()
+                    .done();
+            },
+            continueOnFail: true
+        })
+
+        //endregion
+
+
+        /*====================================== Add Storage Location for Indianapolis======================================*/
+        //region
+        .clickMenuFolder('Inventory','Folder')
+        .waitUntilLoaded()
+        .clickMenuScreen('Storage Locations','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('===== Scenario 1: Add New Storage Location. =====')
+                    .clickMenuScreen('Storage Locations','Screen')
+                    .clickButton('New')
+                    .waitUntilLoaded('icstorageunit')
+                    .enterData('Text Field','Name','Indy Storage')
+                    .enterData('Text Field','Description','Indy Storage')
+                    .selectComboBoxRowNumber('UnitType',6,0)
+                    .selectComboBoxRowNumber('Location',2,0)
+                    .selectComboBoxRowNumber('SubLocation',1,0)
+                    .selectComboBoxRowNumber('ParentUnit',1,0)
+                    .enterData('Text Field','Aisle','Test Aisle - 01')
+                    .clickCheckBox('AllowConsume', true)
+                    .clickCheckBox('AllowMultipleItems', true)
+                    .clickCheckBox('AllowMultipleLots', true)
+                    .clickCheckBox('CycleCounted', true)
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .verifyStatusMessage('Saved')
+                    .clickButton('Close')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickMenuFolder('Inventory','Folder')
+        //endregion
+
+        //region
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Categories','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'TestGrains1')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Category already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    //Add Category
+                    .displayText('===== Add Category =====')
+                    .clickMenuFolder('Inventory','Folder')
+                    .addFunction(function(next){
+                        commonIC.addCategory (t,next, 'TestGrains1', 'Test Smoke Category Description', 2)
+                    })
+                    .clickMenuFolder('Inventory','Folder')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickMenuFolder('Inventory','Folder')
+        //endregion
+
+
+        /*====================================== Add Commodity ======================================*/
+        //region
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Commodities','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'TestCorn1')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Commodity already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickMenuFolder('Inventory','Folder')
+                    //Add Commodity
+                    .displayText('=====  Add Commodity =====')
+                    .addFunction(function(next){
+                        commonIC.addCommodity (t,next, 'TestCorn1', 'Test Smoke Commodity Description')
+                    })
+                    .clickMenuFolder('Inventory','Folder')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        //endregion
+        .clickMenuFolder('Inventory','Folder')
+
+        /*====================================== Add Lotted Item ======================================*/
+        //region
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
-        .clickButton('New')
-        .enterData('Text Field','ItemNo','ALTI - 05')
-        .enterData('Text Field','Description','Non Lotted for Delete IT')
-        .selectComboBoxRowValue('Category', 'Grains', 'Category',0)
-        .selectComboBoxRowValue('Commodity', 'Corn', 'Commodity',0)
-        .selectComboBoxRowNumber('LotTracking',1,0)
-        .verifyData('Combo Box','Tracking','Lot Level')
-
-        .displayText('===== Setup Item UOM=====')
-        .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','LB','strUnitMeasure')
-        .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
-        .clickGridCheckBox('UnitOfMeasure',0, 'strUnitMeasure', 'LB', 'ysnStockUnit', true)
-        .waitUntilLoaded('')
-        .verifyGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
-        .verifyGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '50')
-
-        .displayText('===== Setup Item Location=====')
-        .clickTab('Setup')
-        .clickTab('Location')
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('Location', '0002 - Indianapolis', 'Location',0)
-        .selectComboBoxRowValue('SubLocation', 'Indy', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'Indy Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-
-        .displayText('===== Setup Item Pricing=====')
-        .clickTab('Pricing')
-        .waitUntilLoaded('')
-        .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
-        .enterGridData('Pricing', 1, 'dblLastCost', '10')
-        .enterGridData('Pricing', 1, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
-        .enterGridData('Pricing', 1, 'dblAmountPercent', '40')
-
-        .verifyGridData('Pricing', 2, 'strLocationName', '0002 - Indianapolis')
-        .enterGridData('Pricing', 2, 'dblLastCost', '10')
-        .enterGridData('Pricing', 2, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('Pricing', 2, 'strPricingMethod',3)
-        .enterGridData('Pricing', 2, 'dblAmountPercent', '40')
-        .clickButton('Save')
-        .clickButton('Close')
-        .displayText('===== None Lotted Item Created =====')
-
-        //Create inventory Receipt for Stock
-        .displayText('=====  Creating Direct Inventory Receipt =====')
-        .clickMenuScreen('Inventory Receipts','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'ALTI - 108')
         .waitUntilLoaded()
-        .clickButton('New')
-        .waitUntilLoaded('icinventoryreceipt')
-        .selectComboBoxRowNumber('ReceiptType',4,0)
-        .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
-        .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','ALTI - 05','strItemNo')
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'strUnitMeasure','LB','strUnitMeasure')
-        .enterGridData('InventoryReceipt', 1, 'colQtyToReceive', '1000')
-        .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
-        .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
-        .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colWeightUOM', 'LB')
-        .verifyGridData('InventoryReceipt', 1, 'colGross', '1000')
-        .verifyGridData('InventoryReceipt', 1, 'colNet', '1000')
-        .verifyGridData('InventoryReceipt', 1, 'colLineTotal', '10000')
-        .verifyGridData('InventoryReceipt', 1, 'colSubLocation', 'Raw Station')
-        .verifyGridData('InventoryReceipt', 1, 'colStorageLocation', 'RM Storage')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Item already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
 
-        .enterGridData('LotTracking', 1, 'colLotId', 'LOT-01')
-        .selectGridComboBoxRowValue('LotTracking',1,'strUnitMeasure','LB','strUnitMeasure')
-        .enterGridData('LotTracking', 1, 'colLotQuantity', '1000')
-        .verifyGridData('LotTracking', 1, 'colLotGrossWeight', '1000')
-        .verifyGridData('LotTracking', 1, 'colLotTareWeight', '0')
-        .verifyGridData('LotTracking', 1, 'colLotNetWeight', '1000')
-        .verifyGridData('LotTracking', 1, 'colLotWeightUOM', 'LB')
-        .verifyGridData('LotTracking', 1, 'colLotStorageLocation', 'RM Storage')
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickMenuFolder('Inventory','Folder')
+                    .displayText('===== Scenario 5: Add Lotted Item =====')
+                    .addFunction(function(next){
+                        commonIC.addInventoryItem
+                        (t,next,
+                            'ALTI - 108'
+                            , 'Test Item for Adjustment'
+                            , 'TestGrains1'
+                            , 'TestCorn1'
+                            , 3
+                            , 'LB'
+                            , 'LB'
+                            , 10
+                            , 10
+                            , 40
+                        )
+                    })
+                    .clickMenuFolder('Inventory','Folder')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickMenuFolder('Inventory','Folder')
+        //endregion
 
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblGrossWgt').text;
-            if (total == 'Gross: 1,000.00') {
-                t.ok(true, 'Gross is correct.');
-            }
-            else {
-                t.ok(false, 'Gross is incorrect.');
-            }
-            next();
-        })
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblNetWgt').text;
-            if (total == 'Net: 1,000.00') {
-                t.ok(true, 'Net is correct.');
-            }
-            else {
-                t.ok(false, 'Net is incorrect.');
-            }
-            next();
-        })
-        .addFunction(function (next){
-            var win =  Ext.WindowManager.getActive(),
-                total = win.down('#lblTotal').text;
-            if (total == 'Total: 10,000.00') {
-                t.ok(true, 'Total is correct.');
-            }
-            else {
-                t.ok(false, 'Total is incorrect.');
-            }
-            next();
-        })
 
-        .clickButton('Recap')
-        .waitUntilLoaded('cmcmrecaptransaction')
-        .waitUntilLoaded('')
-        .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
-        .verifyGridData('RecapTransaction', 1, 'colRecapDebit', '10000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapAccountId', '21000-0001-000')
-        .verifyGridData('RecapTransaction', 2, 'colRecapCredit', '10000')
-        .clickButton('Post')
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',2000)
-        .waitUntilLoaded('')
-        .addResult('Successfully Posted',1500)
-        .clickButton('Close')
-        .waitUntilLoaded('')
-        .displayText('===== Create Direct Inventory Receipt for Lotted Item=====')
+        /*======================= Create inventory Receipt for Stock ==========================*/
+        .displayText('=====  Creating Direct Inventory Receipt =====')
+        .addFunction(function(next){
+            commonIC.addDirectIRLotted (t,next, 'ABC Trucking', 1, 'ALTI - 108','LB', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'LB')
+        })
+        .displayText('===== Create Direct Inventory Receipt for Lotted Item Done =====')
 
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
+        .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 05', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -180,7 +272,7 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('AdjustmentType',1,0)
         .enterData('Text Field','Description','Test Quantity Change')
 
-        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 05','strItemNo')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 108','strItemNo')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strSubLocation','Raw Station','strSubLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strStorageLocation','RM Storage','strStorageLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strLotNumber','LOT-01','strLotNumber')
@@ -188,7 +280,7 @@ StartTest (function (t) {
         .verifyGridData('InventoryAdjustment', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryAdjustment', 1, 'colNewUnitCost', '10')
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -205,7 +297,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 05', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -240,7 +332,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 05', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -279,7 +371,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 05', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -314,7 +406,7 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('AdjustmentType',5,0)
         .enterData('Text Field','Description','Test Split Lot')
 
-        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 05','strItemNo')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 108','strItemNo')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strSubLocation','Raw Station','strSubLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strStorageLocation','RM Storage','strStorageLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strLotNumber','LOT-01','strLotNumber')
@@ -324,8 +416,10 @@ StartTest (function (t) {
         .verifyGridData('InventoryAdjustment', 1, 'colNewUnitCost', '10')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strNewSubLocation','Indy','strNewSubLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strNewStorageLocation','Indy Storage','strNewStorageLocation')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strNewItemUOM','LB','strNewSubLocation')
+        .enterGridData('InventoryAdjustment', 1, 'colNewSplitLotQuantity', '100')
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -346,7 +440,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 05', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -395,7 +489,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 05', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -449,7 +543,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 05', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -498,7 +592,7 @@ StartTest (function (t) {
         .selectComboBoxRowNumber('AdjustmentType',8,0)
         .enterData('Text Field','Description','Test Lot Move')
 
-        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 05','strItemNo')
+        .selectGridComboBoxRowValue('InventoryAdjustment',1,'strItemNo','ALTI - 108','strItemNo')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strSubLocation','Raw Station','strSubLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strStorageLocation','RM Storage','strStorageLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strLotNumber','LOT-01','strLotNumber')
@@ -509,7 +603,7 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strNewSubLocation','Indy','strNewSubLocation')
         .selectGridComboBoxRowValue('InventoryAdjustment',1,'strNewStorageLocation','Indy Storage','strNewStorageLocation')
 
-        .clickButton('Recap')
+        .clickButton('PostPreview')
         .waitUntilLoaded('cmcmrecaptransaction')
         .waitUntilLoaded('')
         .verifyGridData('RecapTransaction', 1, 'colRecapAccountId', '16000-0001-000')
@@ -530,7 +624,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 05', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -579,7 +673,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 05', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
@@ -633,7 +727,7 @@ StartTest (function (t) {
         //Check Stock of the Item
         .displayText('=====  Checking Item Stock =====')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('ALTI - 05', 'strItemNo', 1)
+        .doubleClickSearchRowValue('ALTI - 108', 'strItemNo', 1)
         .waitUntilLoaded('icitem')
         .clickTab('Stock')
         .waitUntilLoaded()
