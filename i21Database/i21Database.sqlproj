@@ -5241,6 +5241,8 @@
     <Build Include="dbo\Views\vyuICShipmentInvoice2.sql" />
     <Build Include="dbo\Tables\tblPREmployeeChangeLog.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPopulateEmployeeChangeLog.sql" />
+    <Build Include="dbo\Views\vyuQMPropertyNotMapped.sql" />
+    <Build Include="dbo\Views\vyuQMProductPropertyNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
