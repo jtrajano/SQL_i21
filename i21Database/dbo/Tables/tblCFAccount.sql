@@ -47,10 +47,12 @@
     CONSTRAINT [FK_tblCFAccount_tblCFDiscountSchedule] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [dbo].[tblCFDiscountSchedule] ([intDiscountScheduleId]),
     CONSTRAINT [FK_tblCFAccount_tblCFFeeProfile] FOREIGN KEY ([intFeeProfileId]) REFERENCES [dbo].[tblCFFeeProfile] ([intFeeProfileId]),
     CONSTRAINT [FK_tblCFAccount_tblCFInvoiceCycle] FOREIGN KEY ([intInvoiceCycle]) REFERENCES [dbo].[tblCFInvoiceCycle] ([intInvoiceCycleId]),
-    CONSTRAINT [FK_tblCFAccount_tblCFPriceProfileHeader] FOREIGN KEY ([intRemotePriceProfileId]) REFERENCES [dbo].[tblCFPriceProfileHeader] ([intPriceProfileHeaderId]),
     CONSTRAINT [FK_tblCFAccount_tblCFPriceRuleGroup] FOREIGN KEY ([intPriceRuleGroup]) REFERENCES [dbo].[tblCFPriceRuleGroup] ([intPriceRuleGroupId]),
     CONSTRAINT [FK_tblCFAccount_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId]),
-    CONSTRAINT [FK_tblCFAccount_tblSMTerm] FOREIGN KEY ([intTermsCode]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
+    CONSTRAINT [FK_tblCFAccount_tblSMTerm] FOREIGN KEY ([intTermsCode]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
+	CONSTRAINT [FK_tblCFAccount_tblCFPriceProfileHeader] FOREIGN KEY ([intRemotePriceProfileId]) REFERENCES [dbo].[tblCFPriceProfileHeader] ([intPriceProfileHeaderId]),
+	CONSTRAINT [FK_tblCFAccount_tblCFPriceProfileHeader1] FOREIGN KEY ([intExtRemotePriceProfileId]) REFERENCES [dbo].[tblCFPriceProfileHeader] ([intPriceProfileHeaderId]),
+	CONSTRAINT [FK_tblCFAccount_tblCFPriceProfileHeader2] FOREIGN KEY ([intLocalPriceProfileId]) REFERENCES [dbo].[tblCFPriceProfileHeader] ([intPriceProfileHeaderId])
 );
 
 
