@@ -149,6 +149,52 @@ SELECT * FROM (
 		WHERE	F.intTransactionId =ISNULL(@intTransactionIdFrom, F.intTransactionId)
 				AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
 
+		UNION ALL SELECT  
+			intTransactionId = F.intTransactionId
+			,strBillId = preBILL.strBillId
+			,strInvoice = preBILL.strVendorOrderNumber
+			,dtmDate = preBILL.dtmBillDate
+			,strComment = SUBSTRING(preBILL.strComment,1,25)
+			,dblAmount = CASE WHEN preBILL.intTransactionType = 3
+						THEN preBILL.dblTotal * -1
+						ELSE preBILL.dblTotal
+						END
+			,dblDiscount = CASE WHEN prePYMTDetail.dblDiscount <> 0 
+						THEN prePYMTDetail.dblDiscount 
+						ELSE  prePYMTDetail.dblInterest 
+						END
+			,dblNet = CASE WHEN preBILL.intTransactionType = 3
+						THEN prePYMTDetail.dblPayment * -1
+						ELSE prePYMTDetail.dblPayment
+						END
+			--,CONTRACTHEADER.strContractNumber
+			--,strPPDType = CASE WHEN BILLDETAIL.intPrepayTypeId = 3
+			--			THEN 'Percentage'
+			--			WHEN BILLDETAIL.intPrepayTypeId = 2
+			--			THEN 'Unit'
+			--			ELSE 'Standard'
+			--			END
+			--,BILLDETAIL.dblTotal
+			--,BILLDETAIL.dblQtyOrdered
+			,preBILL.intTransactionType
+			--,ITEM.strItemNo
+			--,ITEM.strDescription
+			,prePYMTDetail.intPaymentDetailId
+		FROM	[dbo].[tblAPAppliedPrepaidAndDebit] PreAndDeb INNER JOIN [dbo].[tblAPBill] preBILL
+					ON preBILL.intBillId = PreAndDeb.intTransactionId
+			INNER JOIN [dbo].[tblAPPaymentDetail] prePYMTDetail
+					ON preBILL.intBillId = prePYMTDetail.intBillId
+			INNER JOIN [dbo].[tblAPBill] BILL
+					ON PreAndDeb.intBillId = BILL.intBillId
+			INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
+					ON BILL.intBillId = PYMTDetail.intBillId
+			INNER JOIN [dbo].[tblAPPayment] PYMT
+					ON PYMTDetail.intPaymentId = PYMT.intPaymentId
+			INNER JOIN [dbo].[tblCMBankTransaction] F
+					ON PYMT.strPaymentRecordNum = F.strTransactionId
+			WHERE  PreAndDeb.ysnApplied = 1 AND 
+					F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
+
 		UNION ALL SELECT 
 				intTransactionId = F.intTransactionId
 				,strBillId = INV.strInvoiceNumber
