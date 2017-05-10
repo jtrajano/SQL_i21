@@ -1,12 +1,10 @@
 StartTest (function (t) {
-
     var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
-        .displayText('===== Pre-setup =====')
-
-        /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
         //region
+        .displayText('===== Pre-setup =====')
+        /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
         .displayText('===== 1. Add Indianapolis for Company Location for irelyadmin User =====')
         .clickMenuFolder('System Manager','Folder')
         .clickMenuScreen('Users','Screen')
@@ -85,11 +83,9 @@ StartTest (function (t) {
             continueOnFail: true
         })
 
-        //endregion
 
 
         /*====================================== Add Storage Location for Indianapolis======================================*/
-        //region
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
         .clickMenuScreen('Storage Locations','Screen')
@@ -127,10 +123,6 @@ StartTest (function (t) {
             continueOnFail: true
         })
         .clickMenuFolder('Inventory','Folder')
-        //endregion
-
-
-
         /*====================================== Add Category ======================================*/
         //region
         .clickMenuFolder('Inventory','Folder')

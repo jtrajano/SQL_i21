@@ -373,6 +373,8 @@ Ext.define('Inventory.CommonIC', {
             .displayText('===== Creating Direct IR for Non Lotted Done =====')
             .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
+            .waitUntilLoaded('')
+
 
             .done();
     },
@@ -436,6 +438,8 @@ Ext.define('Inventory.CommonIC', {
             .displayText('===== Creating Direct IR for Non Lotted Done =====')
             .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
+            .waitUntilLoaded('')
+
 
             .done();
     },
