@@ -4,7 +4,6 @@ SELECT DISTINCT intCustomerId = CS.intCustomerPatronId,
 		ENT.strName,
 		ARC.strStockStatus,
 		APV.ysnWithholding,
-		CS.dtmIssueDate,
 		TC.strTaxCode,
 		dtmLastActivityDate = ARC.dtmLastActivityDate
 	FROM tblPATStockClassification SC
