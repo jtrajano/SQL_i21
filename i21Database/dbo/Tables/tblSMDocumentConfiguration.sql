@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSMDocumentConfiguration]
 (
 	intDocumentConfigurationId INT IDENTITY (1, 1) NOT NULL PRIMARY KEY, 
-    [intScreenId] INT UNIQUE NULL,
+    [intScreenId] INT NULL,
 	[intScreenReportId] INT NULL,
 	[intDocumentSourceFolderId] INT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT 0,
