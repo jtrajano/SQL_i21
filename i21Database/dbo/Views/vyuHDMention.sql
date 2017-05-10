@@ -2,12 +2,12 @@
 	AS
 	select
 		strId = NEWID()
-		,cu.[intEntityId]
+		,intEntityCustomerId = cu.[intEntityId]
 		,cu.strCustomerNumber
 		,intEntityContactId = con.intEntityId
 		,con.strName
 		,con.strEmail
-		,con.imgPhoto
+		,imgPhoto = null
 		,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = cu.[intEntityId] and et.strType in ('Customer','Prospect'))
 	from
 		tblARCustomer cu
@@ -23,7 +23,7 @@
 		,intEntityContactId = con.intEntityId
 		,con.strName
 		,con.strEmail
-		,con.imgPhoto
+		,imgPhoto = null
 		,strEntityType = 'Agent'
 	from
 		tblSMUserSecurity us
