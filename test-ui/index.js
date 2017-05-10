@@ -267,6 +267,7 @@ if(_url.indexOf('version=TF') < 1) {
 
                 { group: 'InventoryReceipt',
                     items: [
+
                         {
                             url: 'CRUDScripts/InventoryReceipt/PreSetup.js?v='+version,
                             title: 'PreSetup',
