@@ -18,75 +18,70 @@ SELECT Shipment.intInventoryShipmentId
 				END) COLLATE Latin1_General_CI_AS
 , Shipment.strReferenceNumber
 , Shipment.dtmRequestedArrivalDate
+
+-- Ship From Name and Address
 , Shipment.intShipFromLocationId
 , strShipFromLocation = ShipFromLocation.strLocationName
-, strShipFromAddress = ShipFromLocation.strAddress
+, strShipFromStreet = ShipFromLocation.strAddress
+, strShipFromCity = ShipFromLocation.strCity
+, strShipFromState = ShipFromLocation.strStateProvince
+, strShipFromZipPostalCode = ShipFromLocation.strZipPostalCode
+, strShipFromCountry = ShipFromLocation.strCountry
+-- Ship From Complete Address
+, strShipFromAddress = [dbo].[fnARFormatCustomerAddress](
+			DEFAULT
+			,DEFAULT 
+			,DEFAULT 
+			,ShipFromLocation.strAddress
+			,ShipFromLocation.strCity
+			,ShipFromLocation.strStateProvince
+			,ShipFromLocation.strZipPostalCode
+			,ShipFromLocation.strCountry
+			,DEFAULT 
+			,DEFAULT 
+		)
+-- Ship To Name and Address
+, Shipment.intShipToCompanyLocationId
+, strShipToLocation = CASE WHEN Shipment.intOrderType = 3  THEN ShipToCompanyLocation.strLocationName ELSE ShipToLocation.strLocationName END 
+, strShipToStreet = CASE WHEN Shipment.intOrderType = 3  THEN ShipToCompanyLocation.strAddress ELSE ShipToLocation.strAddress END 
+, strShipToCity = CASE WHEN Shipment.intOrderType = 3  THEN ShipToCompanyLocation.strCity ELSE ShipToLocation.strCity END
+, strShipToState = CASE WHEN Shipment.intOrderType = 3  THEN ShipToCompanyLocation.strStateProvince ELSE ShipToLocation.strState END
+, strShipToZipPostalCode = CASE WHEN Shipment.intOrderType = 3  THEN ShipToCompanyLocation.strZipPostalCode ELSE ShipToLocation.strZipCode END
+, strShipToCountry = CASE WHEN Shipment.intOrderType = 3  THEN ShipToCompanyLocation.strCountry ELSE ShipToLocation.strCountry END
+-- Ship To Complete Address
+, strShipToAddress = 
+		CASE	WHEN Shipment.intOrderType = 3 THEN -- Transfer Order
+					[dbo].[fnARFormatCustomerAddress](
+						DEFAULT
+						,DEFAULT 
+						,DEFAULT 
+						,ShipToCompanyLocation.strAddress
+						,ShipToCompanyLocation.strCity
+						,ShipToCompanyLocation.strStateProvince
+						,ShipToCompanyLocation.strZipPostalCode
+						,ShipToCompanyLocation.strCountry
+						,DEFAULT 
+						,DEFAULT 
+					)
+				ELSE 
+
+					[dbo].[fnARFormatCustomerAddress](
+						DEFAULT
+						,DEFAULT 
+						,DEFAULT 
+						,ShipToLocation.strAddress
+						,ShipToLocation.strCity
+						,ShipToLocation.strState
+						,ShipToLocation.strZipCode
+						,ShipToLocation.strCountry
+						,DEFAULT 
+						,DEFAULT 
+					)
+				END 
 , Shipment.intEntityCustomerId
 , Customer.strCustomerNumber
 , strCustomerName = Customer.strName
 , Shipment.intShipToLocationId
-, Shipment.intShipToCompanyLocationId
-, strShipToLocation = ShipToLocation.strLocationName
-, strShipToAddress = 
-  CASE 
-	WHEN ShipToLocation.strAddress IS NULL
-	THEN 
-		CASE 
-					WHEN ShipToCompanyLocation.strAddress IS NULL OR ShipToCompanyLocation.strAddress = ' '
-					THEN ''
-					ELSE ShipToCompanyLocation.strAddress 
-				 END + 
-				 CASE 
-					WHEN ShipToCompanyLocation.strCity IS NULL OR ShipToCompanyLocation.strCity = ' '
-					THEN ''
-					WHEN ShipToCompanyLocation.strAddress IS NULL OR ShipToCompanyLocation.strAddress = ' '
-					THEN ShipToCompanyLocation.strCity
-					ELSE', ' + ShipToCompanyLocation.strCity 
-				 END + 
-				 CASE 
-					WHEN ShipToCompanyLocation.strStateProvince IS NULL OR ShipToCompanyLocation.strStateProvince = ' '
-					THEN ''
-					ELSE ', ' + ShipToCompanyLocation.strStateProvince 
-				 END + 
-				 CASE
-					WHEN ShipToCompanyLocation.strZipPostalCode IS NULL OR ShipToCompanyLocation.strZipPostalCode = ' '
-					THEN ''
-					ELSE ', ' + ShipToCompanyLocation.strZipPostalCode 
-				 END + 
-				 CASE 
-					WHEN ShipToCompanyLocation.strCountry IS NULL OR ShipToCompanyLocation.strCountry = ' '
-					THEN ''
-					ELSE ', ' + ShipToCompanyLocation.strCountry
-				 END
-	ELSE 
-			CASE 
-					WHEN ShipToLocation.strAddress IS NULL OR ShipToLocation.strAddress = ' '
-					THEN ''
-					ELSE ShipToLocation.strAddress 
-				 END + 
-				 CASE 
-					WHEN ShipToLocation.strCity IS NULL OR ShipToLocation.strCity = ' '
-					THEN ''
-					WHEN ShipToLocation.strAddress IS NULL OR ShipToLocation.strAddress = ' '
-					THEN ShipToLocation.strCity
-					ELSE', ' + ShipToLocation.strCity 
-				 END + 
-				 CASE 
-					WHEN ShipToLocation.strState IS NULL OR ShipToLocation.strState = ' '
-					THEN ''
-					ELSE ', ' + ShipToLocation.strState 
-				 END + 
-				 CASE
-					WHEN ShipToLocation.strZipCode IS NULL OR ShipToLocation.strZipCode = ' '
-					THEN ''
-					ELSE ', ' + ShipToLocation.strZipCode 
-				 END + 
-				 CASE 
-					WHEN ShipToLocation.strCountry IS NULL OR ShipToLocation.strCountry = ' '
-					THEN ''
-					ELSE ', ' + ShipToLocation.strCountry
-				 END
-	END
 , Shipment.intFreightTermId
 , FreightTerm.strFreightTerm
 , FreightTerm.strFobPoint
@@ -107,9 +102,7 @@ SELECT Shipment.intInventoryShipmentId
 , Shipment.strComment
 , Shipment.ysnPosted
 , WarehouseInstruction.intWarehouseInstructionHeaderId
-, CASE WHEN Location.strUseLocationAddress = 'Letterhead' THEN '' ELSE
-                             (SELECT        TOP 1 strCompanyName
-                               FROM            tblSMCompanySetup) END AS strCompanyName
+, strCompanyName = CASE WHEN Location.strUseLocationAddress = 'Letterhead' THEN '' ELSE (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup) END
 , CASE WHEN Location.strUseLocationAddress IS NULL OR
           Location.strUseLocationAddress = 'No' OR
           Location.strUseLocationAddress = '' OR
