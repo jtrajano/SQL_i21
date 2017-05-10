@@ -1345,6 +1345,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var defaultReceiptType = i21.ModuleMgr.Inventory.getCompanyPreference('strReceiptType');
         var defaultSourceType = i21.ModuleMgr.Inventory.getCompanyPreference('intReceiptSourceType');
         var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
+
         if (defaultReceiptType !== null) {
             record.set('strReceiptType', defaultReceiptType);
         }
@@ -1359,10 +1361,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             record.set('intSourceType', 0);
         }
 
-        if (app.DefaultLocation > 0)
-            record.set('intLocationId', app.DefaultLocation);
+        if (defaultLocation)
+            record.set('intLocationId', defaultLocation);
+
         if (iRely.config.Security.EntityId > 0)
             record.set('intReceiverId', iRely.config.Security.EntityId);
+            
         record.set('dtmReceiptDate', today);
         record.set('intBlanketRelease', 0);
         record.set('ysnPosted', false);
