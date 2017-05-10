@@ -64,6 +64,7 @@
 	[ysnRequireContractForInTransitTicket] BIT NOT NULL,
 	[intDefaultFeeItemId] INT NULL,
 	[intFreightItemId] INT NULL,
+	[intEntityId] INT NOT NULL,
 	[ysnActive] BIT NOT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCScaleSetup_intScaleSetupId] PRIMARY KEY ([intScaleSetupId]), 
@@ -80,7 +81,8 @@
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMUserSecurity_intLastPurgeUserId] FOREIGN KEY ([intLastPurgeUserId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblICItem_intDefaultFeeItemId] FOREIGN KEY ([intDefaultFeeItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblICItem_intFreightItemId] FOREIGN KEY ([intFreightItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblSCScaleSetup_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure](intUnitMeasureId)
+	CONSTRAINT [FK_tblSCScaleSetup_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure](intUnitMeasureId),
+	CONSTRAINT [FK_tblSCScaleSetup_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId])
 	)
 
 GO
