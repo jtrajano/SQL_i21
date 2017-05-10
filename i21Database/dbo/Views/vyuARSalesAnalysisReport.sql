@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARSalesAnalysisReport]
 AS
-SELECT 
+SELECT DISTINCT
 		strRecordNumber			= SAR.strRecordNumber
 	  , intTransactionId		= SAR.intTransactionId
 	  , intAccountId			= SAR.intAccountId
