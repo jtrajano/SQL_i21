@@ -191,5 +191,59 @@ SELECT
 ,compLoc.[ysnPrintInvTagOnReceivingComplete]
 ,compLoc.[intConcurrencyId]
 ,ISNULL(acctSgmt.strCode, '') strCode
+,ISNULL(cash.[strAccountId], '') as strCashAccount
+,ISNULL(deposit.[strAccountId], '') as strDepositAccount
+,ISNULL(arAccount.[strAccountId], '') as strARAccount
+,ISNULL(apAccount.[strAccountId], '') as strAPAccount
+,ISNULL(salesAdvAcct.[strAccountId], '') as strSalesAdvAcct
+,ISNULL(purchaseAdvAccount.[strAccountId], '') as strPurchaseAdvAccount
+,ISNULL(freightAPAccount.[strAccountId], '') as strFreightAPAccount
+,ISNULL(freightExpenses.[strAccountId], '') as strFreightExpenses
+,ISNULL(freightIncome.[strAccountId], '') as strFreightIncome
+,ISNULL(serviceCharges.[strAccountId], '') as strServiceCharges
+,ISNULL(salesDiscounts.[strAccountId], '') as strSalesDiscounts
+,ISNULL(cashOverShort.[strAccountId], '') as strCashOverShort
+,ISNULL(writeOff.[strAccountId], '') as strWriteOff
+,ISNULL(creditCardFee.[strAccountId], '') as strCreditCardFee
+,ISNULL(salesAccount.[strAccountId], '') as strSalesAccount
+,ISNULL(costofGoodsSold.[strAccountId], '') as strCostofGoodsSold
+,ISNULL(inventory.[strAccountId], '') as strInventory
+,ISNULL(writeOffSold.[strAccountId], '') as strWriteOffSold
+,ISNULL(revalueSold.[strAccountId], '') as strRevalueSold
+,ISNULL(autoNegativeSold.[strAccountId], '') as strAutoNegativeSold
+,ISNULL(apClearing.[strAccountId], '') as strAPClearing
+,ISNULL(inventoryInTransit.[strAccountId], '') as strInventoryInTransit
+,ISNULL(withholdAccountId.[strAccountId], '') as strWithholdAccountId
+,ISNULL(discountAccountId.[strAccountId], '') as strDiscountAccountId
+,ISNULL(interestAccountId.[strAccountId], '') as strstrerestAccountId
+,ISNULL(prepaidAccountId.[strAccountId], '') as strPrepaidAccountId
+,ISNULL(undepositedFundsId.[strAccountId], '') as strUndepositedFundsId
 FROM tblSMCompanyLocation compLoc
 LEFT OUTER JOIN dbo.tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
+LEFT JOIN tblGLAccount cash ON compLoc.intCashAccount = cash.intAccountId
+LEFT JOIN tblGLAccount deposit ON compLoc.intDepositAccount = deposit.intAccountId
+LEFT JOIN tblGLAccount arAccount ON compLoc.intARAccount = arAccount.intAccountId
+LEFT JOIN tblGLAccount apAccount ON compLoc.intAPAccount = apAccount.intAccountId
+LEFT JOIN tblGLAccount salesAdvAcct ON compLoc.intSalesAdvAcct = salesAdvAcct.intAccountId
+LEFT JOIN tblGLAccount purchaseAdvAccount ON compLoc.intPurchaseAdvAccount = purchaseAdvAccount.intAccountId
+LEFT JOIN tblGLAccount freightAPAccount ON compLoc.intFreightAPAccount = freightAPAccount.intAccountId
+LEFT JOIN tblGLAccount freightExpenses ON compLoc.intFreightExpenses = freightExpenses.intAccountId
+LEFT JOIN tblGLAccount freightIncome ON compLoc.intFreightIncome = freightIncome.intAccountId
+LEFT JOIN tblGLAccount serviceCharges ON compLoc.intServiceCharges = serviceCharges.intAccountId
+LEFT JOIN tblGLAccount salesDiscounts ON compLoc.intSalesDiscounts = salesDiscounts.intAccountId
+LEFT JOIN tblGLAccount cashOverShort ON compLoc.intCashOverShort = cashOverShort.intAccountId
+LEFT JOIN tblGLAccount writeOff ON compLoc.intWriteOff = writeOff.intAccountId
+LEFT JOIN tblGLAccount creditCardFee ON compLoc.intCreditCardFee = creditCardFee.intAccountId
+LEFT JOIN tblGLAccount salesAccount ON compLoc.intSalesAccount = salesAccount.intAccountId
+LEFT JOIN tblGLAccount costofGoodsSold ON compLoc.intCostofGoodsSold = costofGoodsSold.intAccountId
+LEFT JOIN tblGLAccount inventory ON compLoc.intInventory = inventory.intAccountId
+LEFT JOIN tblGLAccount writeOffSold ON compLoc.intWriteOffSold = writeOffSold.intAccountId
+LEFT JOIN tblGLAccount revalueSold ON compLoc.intRevalueSold = revalueSold.intAccountId
+LEFT JOIN tblGLAccount autoNegativeSold ON compLoc.intAutoNegativeSold = autoNegativeSold.intAccountId
+LEFT JOIN tblGLAccount apClearing ON compLoc.intAPClearing = apClearing.intAccountId
+LEFT JOIN tblGLAccount inventoryInTransit ON compLoc.intInventoryInTransit = inventoryInTransit.intAccountId
+LEFT JOIN tblGLAccount withholdAccountId ON compLoc.intWithholdAccountId = withholdAccountId.intAccountId
+LEFT JOIN tblGLAccount discountAccountId ON compLoc.intDiscountAccountId = discountAccountId.intAccountId
+LEFT JOIN tblGLAccount interestAccountId ON compLoc.intInterestAccountId = interestAccountId.intAccountId
+LEFT JOIN tblGLAccount prepaidAccountId ON compLoc.intPrepaidAccountId = prepaidAccountId.intAccountId
+LEFT JOIN tblGLAccount undepositedFundsId ON compLoc.intUndepositedFundsId = undepositedFundsId.intAccountId
