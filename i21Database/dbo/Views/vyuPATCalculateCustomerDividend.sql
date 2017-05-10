@@ -3,7 +3,6 @@
 SELECT CS.intCustomerStockId,
 	CS.intCustomerPatronId AS intCustomerId,
 	NEWID() as id,
-	FY.intFiscalYearId,
 	CS.intStockId,
 	SC.strStockName,
 	CS.strCertificateNo,
@@ -19,8 +18,4 @@ INNER JOIN tblEMEntity ENT
 	ON ENT.intEntityId = CS.intCustomerPatronId
 INNER JOIN tblARCustomer ARC
 	ON ARC.intEntityCustomerId = ENT.intEntityId
-OUTER APPLY(
-	SELECT intFiscalYearId
-	FROM tblGLFiscalYear FY
-	WHERE  CS.dtmIssueDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
-) FY
+WHERE CS.strActivityStatus = 'Open'
