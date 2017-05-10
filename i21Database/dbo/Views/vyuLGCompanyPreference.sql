@@ -124,6 +124,8 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 2
 			THEN ''
 		END strCarrierShipmentOrderReportFormat
+	,CP.strSignature
+	,CP.ysnContractSlspnOnEmail
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId
