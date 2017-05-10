@@ -320,7 +320,7 @@ IF EXISTS (SELECT * FROM tblSMLetter WHERE strName  = 'Service Charge Invoices L
 			, [strModuleName]		= 'Sales'
 			, [intConcurrencyId]	= 0			
 		WHERE 
-			strName  = 'Credit Review'
+			strName  = 'Service Charge Invoices Letter'
 	END
 ELSE
 	BEGIN
