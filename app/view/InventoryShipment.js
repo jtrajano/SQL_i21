@@ -306,8 +306,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     }
                                                                 ],
                                                                 enableDrillDown: true,
-                                                                flex: 1.5,
                                                                 lookUpField: true,
+                                                                flex: 1.5,
                                                                 itemId: 'cboCustomer',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Customer',
@@ -501,6 +501,30 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                         dataType: 'string',
                                                                                         text: 'Address',
                                                                                         hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCity',
+                                                                                        dataType: 'string',
+                                                                                        text: 'City',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strStateProvince',
+                                                                                        dataType: 'string',
+                                                                                        text: 'State',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strZipPostalCode',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Zip Code',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCountry',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Country',
+                                                                                        hidden: true
                                                                                     }
                                                                                 ],
                                                                                 margins: '0 0 0 5',
@@ -549,6 +573,30 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                         dataType: 'string',
                                                                                         text: 'Address',
                                                                                         hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCity',
+                                                                                        dataType: 'string',
+                                                                                        text: 'City',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strState',
+                                                                                        dataType: 'string',
+                                                                                        text: 'State',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strZipCode',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Zip Code',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCountry',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Country',
+                                                                                        hidden: true
                                                                                     }
                                                                                 ],
                                                                                 itemId: 'cboShipToAddress',
@@ -582,6 +630,30 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                         dataIndex: 'strAddress',
                                                                                         dataType: 'string',
                                                                                         text: 'Address',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCity',
+                                                                                        dataType: 'string',
+                                                                                        text: 'City',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strStateProvince',
+                                                                                        dataType: 'string',
+                                                                                        text: 'State',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strZipPostalCode',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Zip Code',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCountry',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Country',
                                                                                         hidden: true
                                                                                     }
                                                                                 ],
