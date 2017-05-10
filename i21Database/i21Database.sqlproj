@@ -5204,6 +5204,7 @@
     <Build Include="dbo\Tables\tblSCTicketScaleOperator.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAddScaleOperator.sql" />
     <Build Include="dbo\Tables\tblAPPaymentDetailDeleted.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
