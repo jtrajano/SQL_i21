@@ -4537,12 +4537,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
 
                 if (!current.phantom && !current.dirty) {
-                    win.down("#grdLotTracking").setLoading("Loading lots...");
-                    current.tblICInventoryReceiptItemLots().load({
-                        callback: function (records, operation, success) {
-                            win.down("#grdLotTracking").setLoading(false);
-                        }
-                    });
+                    if(current.tblICInventoryReceiptItemLots().data.items.length === 0) {
+                        win.down("#grdLotTracking").setLoading("Loading lots...");
+                        current.tblICInventoryReceiptItemLots().load({
+                            callback: function(records, operation, success) {
+                                win.down("#grdLotTracking").setLoading(false);
+                            }
+                        });
+                    }
                 }
             }
             else {
