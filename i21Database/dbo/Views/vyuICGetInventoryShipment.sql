@@ -40,6 +40,7 @@ SELECT Shipment.intInventoryShipmentId
 			,DEFAULT 
 			,DEFAULT 
 		)
+		COLLATE Latin1_General_CI_AS
 -- Ship To Name and Address
 , Shipment.intShipToCompanyLocationId
 , strShipToLocation = CASE WHEN Shipment.intOrderType = 3  THEN ShipToCompanyLocation.strLocationName ELSE ShipToLocation.strLocationName END 
@@ -77,7 +78,8 @@ SELECT Shipment.intInventoryShipmentId
 						,DEFAULT 
 						,DEFAULT 
 					)
-				END 
+		END 
+		COLLATE Latin1_General_CI_AS
 , Shipment.intEntityCustomerId
 , Customer.strCustomerNumber
 , strCustomerName = Customer.strName
