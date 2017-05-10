@@ -49,7 +49,8 @@ AS
 					CD.dtmStartDate,
 					CD.dtmEndDate,
 					CD.strBook,
-					CD.strSubBook
+					CD.strSubBook,
+					CD.strPriceUOM
 
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
@@ -108,7 +109,8 @@ AS
 					MAX(CD.dtmStartDate)		AS	dtmStartDate,
 					MAX(CD.dtmEndDate)			AS	dtmEndDate,
 					CD.strBook,
-					CD.strSubBook
+					CD.strSubBook,
+					CD.strPriceUOM
 
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
@@ -136,7 +138,8 @@ AS
 					CH.dblNoOfLots,
 					CD.strEntityContract,
 					CD.strBook,
-					CD.strSubBook
+					CD.strSubBook,
+					CD.strPriceUOM
 
 		UNION ALL
 
@@ -188,7 +191,8 @@ AS
 					CD.dtmStartDate,
 					CD.dtmEndDate,
 					CD.strBook,
-					CD.strSubBook
+					CD.strSubBook,
+					CD.strPriceUOM
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractSequence		CD	ON	CD.intContractDetailId = PF.intContractDetailId
@@ -249,7 +253,8 @@ AS
 					MAX(CD.dtmStartDate)		AS	dtmStartDate,
 					MAX(CD.dtmEndDate)			AS	dtmEndDate,
 					CD.strBook,
-					CD.strSubBook
+					CD.strSubBook,
+					CD.strPriceUOM
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractSequence		CD	ON	CD.intContractHeaderId = PF.intContractHeaderId
@@ -278,5 +283,6 @@ AS
 					CD.strEntityContract,
 					PF.intPriceContractId,
 					CD.strBook,
-					CD.strSubBook
+					CD.strSubBook,
+					CD.strPriceUOM
 	)t
