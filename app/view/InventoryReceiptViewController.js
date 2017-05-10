@@ -1918,6 +1918,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (!masterRecord) return;
         if (!detailRecord) return;
         if (iRely.Functions.isEmpty(detailRecord.get('intItemId'))) return;
+        //if (detailRecord.get('intOwnershipType') === 2) return; // Do not compute the tax if item ownership is Storage. 
 
         //if (reset !== false) reset = true;
 
@@ -1932,8 +1933,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 unitCost = detailRecord.get('dblUnitCost'),
                 taxGroupId = 0,
                 taxGroupName = null;
-
-            // if (reset !== false) reset = true;
 
             // Adjust the item price by the sub currency
             {
@@ -1980,62 +1979,64 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 unitCost = unitCost * (netWgtCF / costCF);
             }
 
+            // Do not compute the tax if item ownership is 'Storage'. 
+            if (detailRecord.get('intOwnershipType') != 2) {
+                Ext.Array.each(itemTaxes, function (itemDetailTax) {
+                    var taxableAmount,
+                        taxAmount;
 
-            Ext.Array.each(itemTaxes, function (itemDetailTax) {
-                var taxableAmount,
-                    taxAmount;
+                    taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
+                    if (itemDetailTax.strCalculationMethod === 'Percentage') {
+                        taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
+                    } else {
+                        taxAmount = qtyOrdered * itemDetailTax.dblRate;
+                    }
 
-                taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
-                if (itemDetailTax.strCalculationMethod === 'Percentage') {
-                    taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
-                } else {
-                    taxAmount = qtyOrdered * itemDetailTax.dblRate;
-                }
+                    if (itemDetailTax.ysnCheckoffTax) {
+                        taxAmount = taxAmount * -1;
+                    }
 
-                if (itemDetailTax.ysnCheckoffTax) {
-                    taxAmount = taxAmount * -1;
-                }
+                    taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
 
-                taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
+                    if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
+                        if (itemDetailTax.ysnTaxExempt)
+                            taxAmount = 0.00;
+                        itemDetailTax.dblTax = taxAmount;
+                        itemDetailTax.dblAdjustedTax = taxAmount;
+                    }
+                    else {
+                        itemDetailTax.dblTax = taxAmount;
+                        itemDetailTax.dblAdjustedTax = itemDetailTax.dblAdjustedTax;
+                        itemDetailTax.ysnTaxAdjusted = true;
+                    }
+                    totalItemTax = totalItemTax + itemDetailTax.dblAdjustedTax;
+                    taxGroupId = itemDetailTax.intTaxGroupId;
+                    taxGroupName = itemDetailTax.strTaxGroup;
 
-                if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
-                    if (itemDetailTax.ysnTaxExempt)
-                        taxAmount = 0.00;
-                    itemDetailTax.dblTax = taxAmount;
-                    itemDetailTax.dblAdjustedTax = taxAmount;
-                }
-                else {
-                    itemDetailTax.dblTax = taxAmount;
-                    itemDetailTax.dblAdjustedTax = itemDetailTax.dblAdjustedTax;
-                    itemDetailTax.ysnTaxAdjusted = true;
-                }
-                totalItemTax = totalItemTax + itemDetailTax.dblAdjustedTax;
-                taxGroupId = itemDetailTax.intTaxGroupId;
-                taxGroupName = itemDetailTax.strTaxGroup;
-
-                var newItemTax = Ext.create('Inventory.model.ReceiptItemTax', {
-                    intTaxGroupMasterId: itemDetailTax.intTaxGroupMasterId,
-                    intTaxGroupId: itemDetailTax.intTaxGroupId,
-                    intTaxCodeId: itemDetailTax.intTaxCodeId,
-                    intTaxClassId: itemDetailTax.intTaxClassId,
-                    strTaxCode: itemDetailTax.strTaxCode,
-                    strTaxableByOtherTaxes: itemDetailTax.strTaxableByOtherTaxes,
-                    strCalculationMethod: itemDetailTax.strCalculationMethod,
-                    dblRate: itemDetailTax.dblRate,
-                    dblTax: itemDetailTax.dblTax,
-                    dblAdjustedTax: itemDetailTax.dblAdjustedTax,
-                    intTaxAccountId: itemDetailTax.intTaxAccountId,
-                    ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
-                    ysnSeparateOnInvoice: itemDetailTax.ysnSeparateOnInvoice,
-                    ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
+                    var newItemTax = Ext.create('Inventory.model.ReceiptItemTax', {
+                        intTaxGroupMasterId: itemDetailTax.intTaxGroupMasterId,
+                        intTaxGroupId: itemDetailTax.intTaxGroupId,
+                        intTaxCodeId: itemDetailTax.intTaxCodeId,
+                        intTaxClassId: itemDetailTax.intTaxClassId,
+                        strTaxCode: itemDetailTax.strTaxCode,
+                        strTaxableByOtherTaxes: itemDetailTax.strTaxableByOtherTaxes,
+                        strCalculationMethod: itemDetailTax.strCalculationMethod,
+                        dblRate: itemDetailTax.dblRate,
+                        dblTax: itemDetailTax.dblTax,
+                        dblAdjustedTax: itemDetailTax.dblAdjustedTax,
+                        intTaxAccountId: itemDetailTax.intTaxAccountId,
+                        ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
+                        ysnSeparateOnInvoice: itemDetailTax.ysnSeparateOnInvoice,
+                        ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
+                    });
+                    detailRecord.tblICInventoryReceiptItemTaxes().add(newItemTax);
                 });
-                detailRecord.tblICInventoryReceiptItemTaxes().add(newItemTax);
-            });
 
-            //Set Value for Item Tax Group
-            if (iRely.Functions.isEmpty(detailRecord.get('intTaxGroupId'))) {
-                detailRecord.set('intTaxGroupId', taxGroupId);
-                detailRecord.set('strTaxGroup', taxGroupName);
+                //Set Value for Item Tax Group
+                if(iRely.Functions.isEmpty(detailRecord.get('intTaxGroupId'))) {
+                    detailRecord.set('intTaxGroupId', taxGroupId);
+                    detailRecord.set('strTaxGroup', taxGroupName);
+                }
             }
 
             detailRecord.set('dblTax', totalItemTax);
@@ -2057,42 +2058,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 IncludeExemptedCodes: false
             };
 
-            iRely.Functions.getItemTaxes(current, computeItemTax, me);
-
-            /* if (reset)
-                 iRely.Functions.getItemTaxes(current, computeItemTax, me);
-             else {
-                 var receiptItemTaxes = detailRecord.tblICInventoryReceiptItemTaxes();
-                 if (receiptItemTaxes) {
-                     if (receiptItemTaxes.data.items.length > 0) {
-                         var ItemTaxes = new Array();
-                         Ext.Array.each(receiptItemTaxes.data.items, function (itemDetailTax) {
-                             var taxes = {
-                                 intTaxGroupMasterId: itemDetailTax.get('intTaxGroupMasterId'),
-                                 intTaxGroupId: itemDetailTax.get('intTaxGroupId'),
-                                 intTaxCodeId: itemDetailTax.get('intTaxCodeId'),
-                                 intTaxClassId: itemDetailTax.get('intTaxClassId'),
-                                 strTaxCode: itemDetailTax.get('strTaxCode'),
-                                 strTaxableByOtherTaxes: itemDetailTax.get('strTaxableByOtherTaxes'),
-                                 strCalculationMethod: itemDetailTax.get('strCalculationMethod'),
-                                 dblRate: itemDetailTax.get('dblRate'),
-                                 dblTax: itemDetailTax.get('dblTax'),
-                                 dblAdjustedTax: itemDetailTax.get('dblAdjustedTax'),
-                                 intTaxAccountId: itemDetailTax.get('intTaxAccountId'),
-                                 ysnTaxAdjusted: itemDetailTax.get('ysnTaxAdjusted'),
-                                 ysnSeparateOnInvoice: itemDetailTax.get('ysnSeparateOnInvoice'),
-                                 ysnCheckoffTax: itemDetailTax.get('ysnCheckoffTax')
-                             };
-                             ItemTaxes.push(taxes);
-                         });
- 
-                         computeItemTax(ItemTaxes, me, reset);
-                     }
-                     else {
-                         iRely.Functions.getItemTaxes(current, computeItemTax, me);
-                     }
-                 }
-             }*/
+            iRely.Functions.getItemTaxes(current, computeItemTax, me);            
         }
     },
 
