@@ -3802,9 +3802,9 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Tax Authorities' WHERE strMenuName = '
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Authorities' AND strModuleName = 'Tax Form' AND intParentMenuID = @TaxParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Tax Authorities', N'Tax Form', @TaxParentMenuId, N'Tax Authorities', N'Maintenance', N'Screen', N'TaxForm.view.TaxAuthority', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Tax Authorities', N'Tax Form', @TaxParentMenuId, N'Tax Authorities', N'Maintenance', N'Screen', N'TaxForm.view.TaxAuthority?showSearch=true&searchCommand=TaxAuthority', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'TaxForm.view.TaxAuthority' WHERE strMenuName = 'Tax Authorities' AND strModuleName = 'Tax Form' AND intParentMenuID = @TaxParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'TaxForm.view.TaxAuthority?showSearch=true&searchCommand=TaxAuthority' WHERE strMenuName = 'Tax Authorities' AND strModuleName = 'Tax Form' AND intParentMenuID = @TaxParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Integration' AND strModuleName = 'Tax Form' AND intParentMenuID = @TaxParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
