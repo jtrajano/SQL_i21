@@ -681,6 +681,15 @@ if(_url.indexOf('version=TF') < 1) {
                                 commonIC
 
                             ]
+                        },
+                        {
+                            url: 'BusinessDomain/StockChecking/IRCheckStockS3.js?v=' + version,
+                            title: 'IRCheckStockS3',
+                            preload: [
+                                functionalTest,
+                                commonIC
+
+                            ]
                         }
 
                     ]
