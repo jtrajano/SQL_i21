@@ -1,6 +1,7 @@
 /**
- * Created by RQuidato on 5/9/2017.
+ * Created by RQuidato on 5/11/2017.
  */
+
 StartTest (function (t) {
 //    var commonGL = Ext.create('GeneralLedger.commonGL');
     var commonIC = Ext.create('Inventory.CommonIC');
@@ -9,16 +10,16 @@ StartTest (function (t) {
 
 
         //Add Item
-        .displayText('===== Scenario 2: Direct Inventory Receipt - Posted =====')
+        .displayText('===== Scenario 3: Direct Inventory Receipt - Unposted =====')
         .displayText('===== 1. Create Item =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
         .waitUntilLoaded('',3000)
         .clickButton('New')
         .waitUntilLoaded('icitem',3000)
-        .enterData('Text Field','ItemNo','Item StockCheckIR-2')
+        .enterData('Text Field','ItemNo','Item StockCheckIR-3')
         .selectComboBoxRowNumber('Type',2,0)
-        .enterData('Text Field','Description','Item StockCheckIR-2 desc')
+        .enterData('Text Field','Description','Item StockCheckIR-3 desc')
         .selectComboBoxRowValue('Category', 'Item Category1', 'Category',1)
         .selectComboBoxRowValue('Commodity', 'Commodity1', 'Commodity',1)
         .selectComboBoxRowNumber('LotTracking',1,0)
@@ -141,7 +142,7 @@ StartTest (function (t) {
         .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
         .verifyData('Combo Box','Currency','USD')
         .verifyGridColumnNames ('InventoryReceipt', [{ dataIndex: 'strItemNo',text: 'Item No.'}])
-        .selectGridComboBoxRowValue('InventoryReceipt',1,'colItemNo','Item StockCheckIR-2','strItemNo',1)
+        .selectGridComboBoxRowValue('InventoryReceipt',1,'colItemNo','Item StockCheckIR-3','strItemNo',1)
         .waitUntilLoaded('',3000)
         .waitUntilLoaded('',3000)
 
@@ -330,6 +331,33 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .addResult('Successfully Posted',3000)
         .waitUntilLoaded('',3000)
+        .clickTab('Unpost Preview')
+        .waitUntilLoaded('',3000)
+        .waitUntilLoaded('',3000)
+        .clickTab('Details')
+        .waitUntilLoaded('',3000)
+        .waitUntilLoaded('',3000)
+        .clickTab('Unpost Preview')
+        .waitUntilLoaded('',3000)
+        .waitUntilLoaded('',3000)
+        .displayText('===== Verify GL entries when transaction is Unposted =====')
+        .verifyGridColumnNames ('RecapTransaction', [{ dataIndex: 'strAccountId',text: 'Account ID'}])
+        .verifyGridData('RecapTransaction', 1, 'colAccountId', '15012-0001-001')//Inventory
+
+        .verifyGridColumnNames ('RecapTransaction', [{ dataIndex: 'dblCredit',text: 'Credit'}])
+        .verifyGridData('RecapTransaction', 1, 'colCredit', '1000')
+
+        .verifyGridColumnNames ('RecapTransaction', [{ dataIndex: 'strAccountId',text: 'Account ID'}])
+        .verifyGridData('RecapTransaction', 2, 'colAccountId', '20022-0001-001')//AP Clearing - Item
+
+        .verifyGridColumnNames ('RecapTransaction', [{ dataIndex: 'dblDebit',text: 'Debit'}])
+        .verifyGridData('RecapTransaction', 2, 'colDebit', '1000')
+        .displayText('===== Verify GL entries when transaction is Unposted DONE =====')
+
+        .clickButton('Unpost')
+        .waitUntilLoaded('')
+        .addResult('Successfully Unposted',3000)
+        .waitUntilLoaded('',3000)
         .displayText('===== 2. Create Inventory Receipt DONE =====')
         .clickButton('Close')
         .waitUntilLoaded('',3000)
@@ -346,7 +374,7 @@ StartTest (function (t) {
         .waitUntilLoaded('iclotdetail',3000)
         .waitUntilLoaded('iclotdetail',3000)
         .addResult('Opened Lot Detail',3000)
-        .selectSearchRowValue('Item StockCheckIR-2','strItemNo',1,0)
+        .selectSearchRowValue('Item StockCheckIR-3','strItemNo',1,0)
         .waitUntilLoaded('',3000)
         .displayText('This counts the number of records in the search grid.')
         .verifyGridRecordCount('Search', 1)
@@ -355,10 +383,10 @@ StartTest (function (t) {
         .waitTillLoaded('',3000)
 
         .verifyGridColumnNames ('Search', [{ dataIndex: 'strItemNo',text: 'Item No'}])
-        .verifyGridData('Search', 1, 'strItemNo', 'Item StockCheckIR-2')
+        .verifyGridData('Search', 1, 'strItemNo', 'Item StockCheckIR-3')
 
         .verifyGridColumnNames ('Search', [{ dataIndex: 'strItemDescription',text: 'Description'}])
-        .verifyGridData('Search', 1, 'strItemDescription', 'Item StockCheckIR-2 desc')
+        .verifyGridData('Search', 1, 'strItemDescription', 'Item StockCheckIR-3 desc')
 
         .verifyGridColumnNames ('Search', [{ dataIndex: 'strProductType',text: 'Product Type'}])
         .verifyGridData('Search', 1, 'strProductType', null)
@@ -376,13 +404,13 @@ StartTest (function (t) {
         .verifyGridData('Search', 1, 'strLotNumber', 'LOT-1')
 
         .verifyGridColumnNames ('Search', [{ dataIndex: 'dblQty',text: 'Quantity'}])
-        .verifyGridData('Search', 1, 'dblQty', '100.00')
+        .verifyGridData('Search', 1, 'dblQty', '0.00')
 
         .verifyGridColumnNames ('Search', [{ dataIndex: 'strItemUOM',text: 'Quantity UOM'}])
         .verifyGridData('Search', 1, 'strItemUOM', 'lb1')
 
         .verifyGridColumnNames ('Search', [{ dataIndex: 'dblWeight',text: 'Weight'}])
-        .verifyGridData('Search', 1, 'dblQty', '100.00')
+        .verifyGridData('Search', 1, 'dblQty', '0.00')
 
         .verifyGridColumnNames ('Search', [{ dataIndex: 'strWeightUOM',text: 'Weight UOM'}])
         .verifyGridData('Search', 1, 'strWeightUOM', 'lb1')
@@ -405,7 +433,7 @@ StartTest (function (t) {
         .clickMenuScreen ('Stock Details','Screen')
         .waitUntilLoaded('icstockdetail',3000)
         .addResult('Opened Stock Details',3000)
-//        .selectSearchRowValue('Item StockCheckIR-2','strItemNo',1,2)
+//        .selectSearchRowValue('Item StockCheckIR-3','strItemNo',1,2)
 //        .waitUntilLoaded('',3000)
 
 //        .displayText('This counts the number of records in the search grid.')
@@ -415,10 +443,10 @@ StartTest (function (t) {
 //
 //        .displayText('=====  Verify Location: 0001 - Fort Wayne =====')
 //        .verifyGridColumnNames ('Search', [{ dataIndex: 'strItemNo',text: 'Item No'}])
-//        .verifyGridData('Search', 1, 'strItemNo', 'Item StockCheckIR-2')
+//        .verifyGridData('Search', 1, 'strItemNo', 'Item StockCheckIR-3')
 //
 //        .verifyGridColumnNames ('Search', [{ dataIndex: 'strDescription',text: 'Description'}])
-//        .verifyGridData('Search', 1, 'strDescription', 'Item StockCheckIR-2 desc')
+//        .verifyGridData('Search', 1, 'strDescription', 'Item StockCheckIR-3 desc')
 //
 //        .verifyGridColumnNames ('Search', [{ dataIndex: 'strType',text: 'Item Type'}])
 //        .verifyGridData('Search', 1, 'strType', 'Inventory')
@@ -442,7 +470,7 @@ StartTest (function (t) {
 //        .verifyGridData('Search', 1, 'strStockUOM', 'lb1')
 //
 //        .verifyGridColumnNames ('Search', [{ dataIndex: 'dblUnitOnHand',text: 'On Hand'}])
-//        .verifyGridData('Search', 1, 'dblUnitOnHand', '100.00')
+//        .verifyGridData('Search', 1, 'dblUnitOnHand', '0.00')
 //
 //        .verifyGridColumnNames ('Search', [{ dataIndex: 'dblOnOrder',text: 'On Order'}])
 //        .verifyGridData('Search', 1, 'dblOnOrder', '0.00')
@@ -469,7 +497,7 @@ StartTest (function (t) {
 //        .verifyGridData('Search', 1, 'dblConsignedSale', '0.00')
 //
 //        .verifyGridColumnNames ('Search', [{ dataIndex: 'dblAvailable',text: 'Available'}])
-//        .verifyGridData('Search', 1, 'dblAvailable', '100.00')
+//        .verifyGridData('Search', 1, 'dblAvailable', '0.00')
 //
 //        .verifyGridColumnNames ('Search', [{ dataIndex: 'dblReorderPoint',text: 'Reorder Point'}])
 //        .verifyGridData('Search', 1, 'dblReorderPoint', '0.00')
@@ -487,15 +515,15 @@ StartTest (function (t) {
 //        .verifyGridData('Search', 1, 'dblSalePrice', '14.00')
 //
 //        .verifyGridColumnNames ('Search', [{ dataIndex: 'dblExtendedCost',text: 'Extended Cost'}])
-//        .verifyGridData('Search', 1, 'dblExtendedCost', '1,000.00')
+//        .verifyGridData('Search', 1, 'dblExtendedCost', '0.00')
 //        .displayText('=====  Verify Location: 0001 - Fort Wayne DONE =====')
 //
 //        .displayText('=====  Verify Location: 0002 - Indianapolis =====')
 //        .verifyGridColumnNames ('Search', [{ dataIndex: 'strItemNo',text: 'Item No'}])
-//        .verifyGridData('Search', 2, 'strItemNo', 'Item StockCheckIR-2')
+//        .verifyGridData('Search', 2, 'strItemNo', 'Item StockCheckIR-3')
 //
 //        .verifyGridColumnNames ('Search', [{ dataIndex: 'strDescription',text: 'Description'}])
-//        .verifyGridData('Search', 2, 'strDescription', 'Item StockCheckIR-2 desc')
+//        .verifyGridData('Search', 2, 'strDescription', 'Item StockCheckIR-3 desc')
 //
 //        .verifyGridColumnNames ('Search', [{ dataIndex: 'strType',text: 'Item Type'}])
 //        .verifyGridData('Search', 2, 'strType', 'Inventory')
@@ -575,7 +603,7 @@ StartTest (function (t) {
         .displayText('=====  Verify Item - Stock tab  =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
-        .doubleClickSearchRowValue('Item StockCheckIR-2', 1)
+        .doubleClickSearchRowValue('Item StockCheckIR-3', 1)
         .waitUntilLoaded('icitem',3000)
         .clickTab('Stock')
 
@@ -596,7 +624,7 @@ StartTest (function (t) {
         .verifyGridData('Stock', 1, 'dblInTransitInbound', '0.00')
 
         .verifyGridColumnNames ('Stock', [{ dataIndex: 'dblUnitOnHand',text: 'On Hand'}])
-        .verifyGridData('Stock', 1, 'dblUnitOnHand', '100.00')
+        .verifyGridData('Stock', 1, 'dblUnitOnHand', '0.00')
 
         .verifyGridColumnNames ('Stock', [{ dataIndex: 'dblInTransitOutbound',text: 'In Transit Outbound'}])
         .verifyGridData('Stock', 1, 'dblInTransitOutbound', '0.00')
@@ -620,7 +648,7 @@ StartTest (function (t) {
         .verifyGridData('Stock', 1, 'dblUnitReserved', '0.00')
 
         .verifyGridColumnNames ('Stock', [{ dataIndex: 'dblAvailable',text: 'Available'}])
-        .verifyGridData('Stock', 1, 'dblAvailable', '100.00')
+        .verifyGridData('Stock', 1, 'dblAvailable', '0.00')
 
         .displayText('=====  Verify Item - Stock tab DONE =====')
         .clickButton('Close')
@@ -637,130 +665,131 @@ StartTest (function (t) {
         .waitUntilLoaded('icinventoryvaluation',3000)
         .waitUntilLoaded('icinventoryvaluation',3000)
         .addResult('Opened Inventory Valuation',3000)
-        .selectSearchRowValue('Item StockCheckIR-2','strItemNo',1,0)
+        .selectSearchRowValue('Item StockCheckIR-3','strItemNo',1,0)
+        .waitUntilLoaded('',3000)
+        .displayText('This counts the number of records in the search grid.')
+        .verifyGridRecordCount('Search', 2)
+        .waitTillLoaded('',3000)
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strItemNo',text: 'Item No'}])
+        .verifyGridData('Search', 2, 'strItemNo', 'Item StockCheckIR-3')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strItemDescription',text: 'Description'}])
+        .verifyGridData('Search', 2, 'strItemDescription', 'Item StockCheckIR-3 desc')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strCategory',text: 'Category'}])
+        .verifyGridData('Search', 2, 'strCategory', 'Item Category1')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strStockUOM',text: 'Stock UOM'}])
+        .verifyGridData('Search', 2, 'strStockUOM', 'lb1')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strLocationName',text: 'Location'}])
+        .verifyGridData('Search', 2, 'strLocationName', '0001 - Fort Wayne')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strBOLNumber',text: 'BOL Number'}])
+        .verifyGridData('Search', 2, 'strBOLNumber', null)
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strEntity',text: 'Entity'}])
+        .verifyGridData('Search', 2, 'strEntity', 'Item Vendor1')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strLotNumber',text: 'Lot Number'}])
+        .verifyGridData('Search', 2, 'strLotNumber', 'LOT-1')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strAdjustedTransaction',text: 'Adjusted Transaction'}])
+        .verifyGridData('Search', 2, 'strAdjustedTransaction', null)
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strCostingMethod',text: 'Costing Method'}])
+        .verifyGridData('Search', 2, 'strCostingMethod', 'LOT COST')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dtmDate',text: 'Date'}])
+        .addFunction (function (next){
+        var date = new Date().toLocaleDateString();
+        new iRely.FunctionalTest().start(t, next)
+            .verifyGridData('Search', 2, 'dtmDate', date)
+            .done();})
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strTransactionType',text: 'Transaction Type'}])
+        .verifyGridData('Search', 2, 'strTransactionType', 'Inventory Receipt')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strTransactionId',text: 'Transaction Id'}])
+        .verifyGridData('Search', 2, 'strTransactionId', 'IR-','like')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dblBeginningQtyBalance',text: 'Begin Qty'}])
+        .verifyGridData('Search', 2, 'dblBeginningQtyBalance', '100.00')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dblQuantityInStockUOM',text: 'Qty'}])
+        .verifyGridData('Search', 2, 'dblQuantityInStockUOM', '-100.00')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dblRunningQtyBalance',text: 'Running Qty'}])
+        .verifyGridData('Search', 2, 'dblRunningQtyBalance', '0.00')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dblCostInStockUOM',text: 'Cost'}])
+        .verifyGridData('Search', 2, 'dblCostInStockUOM', '10.00')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dblBeginningBalance',text: 'Begin Value'}])
+        .verifyGridData('Search', 2, 'dblBeginningBalance', '1000.00')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dblValue',text: 'Value'}])
+        .verifyGridData('Search', 2, 'dblValue', '-1000.00')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dblRunningBalance',text: 'Running Value'}])
+        .verifyGridData('Search', 2, 'dblRunningBalance', '0.00')
+        .displayText('=====  Verify Inventory Valuation DONE  =====')
+        .clickMenuFolder('Inventory','Folder')
+
+        //Verify Item1 - Inventory Valuation Summary
+        .displayText('=====  Verify Inventory Valuation Summary =====')
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen ('Inventory Valuation Summary','Screen')
+        .waitUntilLoaded('icinventoryvaluationsummary',3000)
+        .waitUntilLoaded('icinventoryvaluationsummary',3000)
+        .waitUntilLoaded('icinventoryvaluationsummary',3000)
+        .waitUntilLoaded('icinventoryvaluationsummary',3000)
+        .addResult('Opened Inventory Valuation',3000)
+        .selectSearchRowValue('Item StockCheckIR-3','strItemNo',1,0)
         .waitUntilLoaded('',3000)
         .displayText('This counts the number of records in the search grid.')
         .verifyGridRecordCount('Search', 1)
         .waitTillLoaded('',3000)
 
         .verifyGridColumnNames ('Search', [{dataIndex: 'strItemNo',text: 'Item No'}])
-        .verifyGridData('Search', 1, 'strItemNo', 'Item StockCheckIR-2')
+        .verifyGridData('Search', 1, 'strItemNo', 'Item StockCheckIR-3')
 
         .verifyGridColumnNames ('Search', [{dataIndex: 'strItemDescription',text: 'Description'}])
-        .verifyGridData('Search', 1, 'strItemDescription', 'Item StockCheckIR-2 desc')
-
-        .verifyGridColumnNames ('Search', [{dataIndex: 'strCategory',text: 'Category'}])
-        .verifyGridData('Search', 1, 'strCategory', 'Item Category1')
-
-        .verifyGridColumnNames ('Search', [{dataIndex: 'strStockUOM',text: 'Stock UOM'}])
-        .verifyGridData('Search', 1, 'strStockUOM', 'lb1')
+        .verifyGridData('Search', 1, 'strItemDescription', 'Item StockCheckIR-3 desc')
 
         .verifyGridColumnNames ('Search', [{dataIndex: 'strLocationName',text: 'Location'}])
         .verifyGridData('Search', 1, 'strLocationName', '0001 - Fort Wayne')
 
-        .verifyGridColumnNames ('Search', [{dataIndex: 'strBOLNumber',text: 'BOL Number'}])
-        .verifyGridData('Search', 1, 'strBOLNumber', null)
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strSubLocationName',text: 'Sub Location'}])
+        .verifyGridData('Search', 1, 'strSubLocationName', 'Raw Station')
 
-        .verifyGridColumnNames ('Search', [{dataIndex: 'strEntity',text: 'Entity'}])
-        .verifyGridData('Search', 1, 'strEntity', 'Item Vendor1')
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strCategoryCode',text: 'Category'}])
+        .verifyGridData('Search', 1, 'strCategoryCode', 'Item Category1')
 
-        .verifyGridColumnNames ('Search', [{dataIndex: 'strLotNumber',text: 'Lot Number'}])
-        .verifyGridData('Search', 1, 'strLotNumber', 'LOT-1')
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strCommodityCode',text: 'Commodity'}])
+        .verifyGridData('Search', 1, 'strCommodityCode', 'Commodity1')
 
-        .verifyGridColumnNames ('Search', [{dataIndex: 'strAdjustedTransaction',text: 'Adjusted Transaction'}])
-        .verifyGridData('Search', 1, 'strAdjustedTransaction', null)
+        .verifyGridColumnNames ('Search', [{dataIndex: 'strStockUOM',text: 'Stock UOM'}])
+        .verifyGridData('Search', 1, 'strStockUOM', 'lb1')
 
-        .verifyGridColumnNames ('Search', [{dataIndex: 'strCostingMethod',text: 'Costing Method'}])
-        .verifyGridData('Search', 1, 'strCostingMethod', 'LOT COST')
-
-        .verifyGridColumnNames ('Search', [{dataIndex: 'dtmDate',text: 'Date'}])
-        .addFunction (function (next){
-        var date = new Date().toLocaleDateString();
-        new iRely.FunctionalTest().start(t, next)
-            .verifyGridData('Search', 1, 'dtmDate', date)
-            .done();})
-        .verifyGridColumnNames ('Search', [{dataIndex: 'strTransactionType',text: 'Transaction Type'}])
-        .verifyGridData('Search', 1, 'strTransactionType', 'Inventory Receipt')
-
-        .verifyGridColumnNames ('Search', [{dataIndex: 'strTransactionId',text: 'Transaction Id'}])
-        .verifyGridData('Search', 1, 'strTransactionId', 'IR-', 'like')
-
-        .verifyGridColumnNames ('Search', [{dataIndex: 'dblBeginningQtyBalance',text: 'Begin Qty'}])
-        .verifyGridData('Search', 1, 'dblBeginningQtyBalance', '0.00')
-
-        .verifyGridColumnNames ('Search', [{dataIndex: 'dblQuantityInStockUOM',text: 'Qty'}])
-        .verifyGridData('Search', 1, 'dblQuantityInStockUOM', '100.00')
-
-        .verifyGridColumnNames ('Search', [{dataIndex: 'dblRunningQtyBalance',text: 'Running Qty'}])
-        .verifyGridData('Search', 1, 'dblRunningQtyBalance', '100.00')
-
-        .verifyGridColumnNames ('Search', [{dataIndex: 'dblCostInStockUOM',text: 'Cost'}])
-        .verifyGridData('Search', 1, 'dblCostInStockUOM', '10.00')
-
-        .verifyGridColumnNames ('Search', [{dataIndex: 'dblBeginningBalance',text: 'Begin Value'}])
-        .verifyGridData('Search', 1, 'dblBeginningBalance', '0.00')
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dblQuantityInStockUOM',text: 'Stock Quantity'}])
+        .verifyGridData('Search', 1, 'dblQuantityInStockUOM', '0')
 
         .verifyGridColumnNames ('Search', [{dataIndex: 'dblValue',text: 'Value'}])
-        .verifyGridData('Search', 1, 'dblValue', '1000.00')
+        .verifyGridData('Search', 1, 'dblValue', '0')
 
-        .verifyGridColumnNames ('Search', [{dataIndex: 'dblRunningBalance',text: 'Running Value'}])
-        .verifyGridData('Search', 1, 'dblRunningBalance', '1000.00')
-        .displayText('=====  Verify Inventory Valuation DONE  =====')
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dblLastCost',text: 'Last Cost'}])
+        .verifyGridData('Search', 1, 'dblLastCost', '0')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dblStandardCost',text: 'Standard Cost'}])
+        .verifyGridData('Search', 1, 'dblStandardCost', '0')
+
+        .verifyGridColumnNames ('Search', [{dataIndex: 'dblAverageCost',text: 'Average Cost'}])
+        .verifyGridData('Search', 1, 'dblAverageCost', '0')
+
+        .displayText('=====  Verify Inventory Valuation Summary DONE  =====')
         .clickMenuFolder('Inventory','Folder')
-//
-//        //Verify Item1 - Inventory Valuation Summary
-//        .displayText('=====  Verify Inventory Valuation Summary =====')
-//        .clickMenuFolder('Inventory','Folder')
-//        .clickMenuScreen ('Inventory Valuation Summary','Screen')
-//        .waitUntilLoaded('icinventoryvaluationsummary',3000)
-//        .waitUntilLoaded('icinventoryvaluationsummary',3000)
-//        .waitUntilLoaded('icinventoryvaluationsummary',3000)
-//        .waitUntilLoaded('icinventoryvaluationsummary',3000)
-//        .addResult('Opened Inventory Valuation',3000)
-//        .selectSearchRowValue('Item StockCheckIR-2','strItemNo',1,0)
-//        .waitUntilLoaded('',3000)
-//        .displayText('This counts the number of records in the search grid.')
-//        .verifyGridRecordCount('Search', 1)
-//        .waitTillLoaded('',3000)
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'strItemNo',text: 'Item No'}])
-//        .verifyGridData('Search', 1, 'strItemNo', 'Item StockCheckIR-2')
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'strItemDescription',text: 'Description'}])
-//        .verifyGridData('Search', 1, 'strItemDescription', 'Item StockCheckIR-2 desc')
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'strLocationName',text: 'Location'}])
-//        .verifyGridData('Search', 1, 'strLocationName', '0001 - Fort Wayne')
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'strSubLocationName',text: 'Sub Location'}])
-//        .verifyGridData('Search', 1, 'strSubLocationName', 'Raw Station')
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'strCategoryCode',text: 'Category'}])
-//        .verifyGridData('Search', 1, 'strCategoryCode', 'Item Category1')
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'strCommodityCode',text: 'Commodity'}])
-//        .verifyGridData('Search', 1, 'strCommodityCode', 'Commodity1')
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'strStockUOM',text: 'Stock UOM'}])
-//        .verifyGridData('Search', 1, 'strStockUOM', 'lb1')
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'dblQuantityInStockUOM',text: 'Stock Quantity'}])
-//        .verifyGridData('Search', 1, 'dblQuantityInStockUOM', '100')
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'dblValue',text: 'Value'}])
-//        .verifyGridData('Search', 1, 'dblValue', '1000')
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'dblLastCost',text: 'Last Cost'}])
-//        .verifyGridData('Search', 1, 'dblLastCost', '1000')
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'dblStandardCost',text: 'Standard Cost'}])
-//        .verifyGridData('Search', 1, 'dblStandardCost', '1000')
-//
-//        .verifyGridColumnNames ('Search', [{dataIndex: 'dblAverageCost',text: 'Average Cost'}])
-//        .verifyGridData('Search', 1, 'dblAverageCost', '1000')
-//
-//        .displayText('=====  Verify Inventory Valuation Summary DONE  =====')
-//        .clickMenuFolder('Inventory','Folder')
 
 
 
