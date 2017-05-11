@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE uspMFGetShiftActivityDetail
-	@intShiftActivityId INT
+﻿CREATE PROCEDURE uspMFGetShiftActivityDetail @intShiftActivityId INT
 	,@intLocationId INT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -10,8 +9,16 @@ SET ANSI_WARNINGS OFF
 
 BEGIN
 	-- Shift Activity
-	SELECT *
-	FROM dbo.tblMFShiftActivity SA
+	SELECT SA.*
+		,MC.strCellName
+		,S.strShiftName
+		,UOM.strUnitMeasure AS strSKUUnitMeasure
+		,UOM1.strUnitMeasure AS strWeightUnitMeasure
+	FROM tblMFShiftActivity SA
+	JOIN tblMFManufacturingCell MC ON MC.intManufacturingCellId = SA.intManufacturingCellId
+	JOIN tblMFShift S ON S.intShiftId = SA.intShiftId
+	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = SA.intSKUUnitMeasureId
+	LEFT JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = SA.intWeightUnitMeasureId
 	WHERE SA.intShiftActivityId = @intShiftActivityId
 
 	-- Downtime
