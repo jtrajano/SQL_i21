@@ -291,14 +291,6 @@ if(_url.indexOf('version=TF') < 1) {
                     items: [
 
                         {
-                            url: 'CRUDScripts/InventoryShipment/PreSetup.js?v='+version,
-                            title: 'PreSetup',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
                             url: 'CRUDScripts/InventoryShipment/AddInventoryShipment.js?v='+version,
                             title: 'AddInventoryShipment',
                             preload: [
