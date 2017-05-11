@@ -167,18 +167,10 @@ SELECT * FROM (
 						THEN prePYMTDetail.dblPayment * -1
 						ELSE prePYMTDetail.dblPayment
 						END
-			--,CONTRACTHEADER.strContractNumber
-			--,strPPDType = CASE WHEN BILLDETAIL.intPrepayTypeId = 3
-			--			THEN 'Percentage'
-			--			WHEN BILLDETAIL.intPrepayTypeId = 2
-			--			THEN 'Unit'
-			--			ELSE 'Standard'
-			--			END
-			--,BILLDETAIL.dblTotal
-			--,BILLDETAIL.dblQtyOrdered
-			,preBILL.intTransactionType
-			--,ITEM.strItemNo
-			--,ITEM.strDescription
+			,strPaymentRecordNum  = PYMT.strPaymentRecordNum
+			,dblTotalAmount = F.dblAmount
+			,dtmCheckDate = F.dtmDate
+			,strCheckNumber = F.strReferenceNo
 			,prePYMTDetail.intPaymentDetailId
 		FROM	[dbo].[tblAPAppliedPrepaidAndDebit] PreAndDeb INNER JOIN [dbo].[tblAPBill] preBILL
 					ON preBILL.intBillId = PreAndDeb.intTransactionId
