@@ -683,7 +683,7 @@ StartTest (function (t) {
         .verifyGridData('Search', 1, 'strTransactionType', 'Inventory Receipt')
 
         .verifyGridColumnNames ('Search', [{dataIndex: 'strTransactionId',text: 'Transaction Id'}])
-        .verifyGridData('Search', 1, 'strTransactionId', 'IR-')
+        .verifyGridData('Search', 1, 'strTransactionId', 'IR-', 'like')
 
         .verifyGridColumnNames ('Search', [{dataIndex: 'dblBeginningQtyBalance',text: 'Begin Qty'}])
         .verifyGridData('Search', 1, 'dblBeginningQtyBalance', '0.00')
