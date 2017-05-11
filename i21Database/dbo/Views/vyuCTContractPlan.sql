@@ -3,6 +3,7 @@
 AS	
 	SELECT	CP.*,
 			CY.strCommodityCode,
+			CY.ysnExchangeTraded,
 			SP.strName					AS	strSalesperson,
 			PO.strPosition,
 			PT.strPricingType,
@@ -14,11 +15,12 @@ AS
 			YR.strCropYear,
 			AN.strName					AS	strAssociationName,
 			CB.strContractBasis,
+			CB.strINCOLocationType,
 			IM.strItemNo,
 			CL.strLocationName,
 			CG.strCategoryCode
 
-	FROM	tblCTContractPlan		CP	
+	FROM	tblCTContractPlan		CP	LEFT
 	JOIN	tblEMEntity				SP	ON	SP.intEntityId				=		CP.intSalespersonId					LEFT
 	JOIN	tblICCommodity			CY	ON	CY.intCommodityId			=		CP.intCommodityId					LEFT
 	JOIN	tblCTPosition			PO	ON	PO.intPositionId			=		CP.intPositionId					LEFT	
