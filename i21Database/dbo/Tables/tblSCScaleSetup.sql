@@ -56,6 +56,7 @@
     [ysnDefaultDriverOffTruck] BIT NOT NULL, 
     [ysnAutomateTakeOutTicket] BIT NOT NULL, 
     [ysnDefaultDeductFreightFromFarmer] BIT NOT NULL,  
+    [ysnDefaultDeductFeeFromCusVen] BIT NOT NULL,  
     [intStoreScaleOperator] INT NOT NULL, 
     [intDefaultStorageTypeId] INT NULL, 
     [intGrainBankStorageTypeId] INT NULL, 

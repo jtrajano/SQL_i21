@@ -18,6 +18,7 @@ DECLARE @ShipmentNumber AS NVARCHAR(20)
 
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
+		,@ysnDeductFeesCusVen AS BIT;
 DECLARE @strTicketNumber AS NVARCHAR(40)
 DECLARE @dblTicketFees AS DECIMAL(7, 2)
 DECLARE @checkContract AS INT
@@ -188,8 +189,11 @@ END
 
 -- Insert the Inventory Shipment detail items 
 BEGIN 
-	SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTIicket.intHaulerId, @ysnDeductFreightFarmer = SCTIicket.ysnFarmerPaysFreight FROM tblSCScaleSetup SCSetup
-	LEFT JOIN tblSCTicket SCTIicket ON SCSetup.intScaleSetupId = SCTIicket.intScaleSetupId
+	SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTicket.intHaulerId
+	, @ysnDeductFreightFarmer = SCTicket.ysnFarmerPaysFreight 
+	, @ysnDeductFeesCusVen = SCTicket.ysnCusVenPaysFees
+	FROM tblSCScaleSetup SCSetup
+	LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId
 	WHERE intTicketId = @intTicketId
 
 	INSERT INTO @ShipmentChargeStagingTable
@@ -305,17 +309,25 @@ BEGIN
 	,[intChargeId]						= IC.intItemId
 	,[strCostMethod]					= IC.strCostMethod
 	,[dblRate]							= CASE
-											WHEN IC.strCostMethod = 'Per Unit' THEN SC.dblTicketFees
+											WHEN IC.strCostMethod = 'Per Unit' THEN 
+											CASE
+												WHEN @ysnDeductFeesCusVen = 1 THEN SC.dblTicketFees
+												WHEN @ysnDeductFeesCusVen = 0 THEN (SC.dblTicketFees * -1)
+											END
 											WHEN IC.strCostMethod = 'Amount' THEN 0
 										END
 	,[intCostUOMId]						= @intTicketItemUOMId
 	,[intOtherChargeEntityVendorId]		= SE.intEntityCustomerId
 	,[dblAmount]						= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 0
-											WHEN IC.strCostMethod = 'Amount' THEN SC.dblTicketFees
+											WHEN IC.strCostMethod = 'Amount' THEN 
+											CASE
+												WHEN @ysnDeductFeesCusVen = 1 THEN SC.dblTicketFees
+												WHEN @ysnDeductFeesCusVen = 0 THEN (SC.dblTicketFees * -1)
+											END
 										END
-	,[ysnAccrue]						= IC.ysnAccrue
-	,[ysnPrice]							= IC.ysnPrice
+	,[ysnAccrue]						= 0
+	,[ysnPrice]							= 1
 	FROM @ShipmentStagingTable SE
 	INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId

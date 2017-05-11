@@ -65,6 +65,7 @@
     [dblFreightCurrencyRate] DECIMAL(15, 8) NULL, 
     [strFreightCContractNumber] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL, 
     [ysnFarmerPaysFreight] BIT NULL, 
+    [ysnCusVenPaysFees] BIT NOT NULL, 
     [strLoadNumber] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL, 
     [intLoadLocationId] INT NULL, 
     [intAxleCount] INT NULL, 

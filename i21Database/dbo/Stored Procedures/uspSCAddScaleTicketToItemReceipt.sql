@@ -22,6 +22,7 @@ DECLARE @intScaleStationId AS INT
 --DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
+		,@ysnDeductFeesCusVen AS BIT;
 DECLARE @strTicketNumber AS NVARCHAR(40)
 DECLARE @dblTicketFees AS DECIMAL(7, 2)
 DECLARE @checkContract AS INT
@@ -36,7 +37,7 @@ DECLARE @intContractDetailId AS INT,
 		@batchId AS NVARCHAR(40),
 		@ticketBatchId AS NVARCHAR(40),
 		@splitDistribution AS NVARCHAR(40);
-
+		
 BEGIN 
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intFutureMarketId = IC.intFutureMarketId, @splitDistribution = SC.strDistributionOption
 	FROM	dbo.tblSCTicket SC 
@@ -186,7 +187,9 @@ BEGIN
 	RETURN;
 END
 
-SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTicket.intHaulerId, @ysnDeductFreightFarmer = SCTicket.ysnFarmerPaysFreight 
+SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTicket.intHaulerId
+	, @ysnDeductFreightFarmer = SCTicket.ysnFarmerPaysFreight 
+	, @ysnDeductFeesCusVen = SCTicket.ysnCusVenPaysFees
 FROM tblSCScaleSetup SCSetup LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
 WHERE SCTicket.intTicketId = @intTicketId
 
@@ -338,8 +341,14 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[strAllocateCostBy]				= NULL
 		,[intContractHeaderId]				= NULL
 		,[intContractDetailId]				= NULL
-		,[ysnAccrue]						= IC.ysnAccrue
-		,[ysnPrice]							= IC.ysnPrice
+		,[ysnAccrue]						= CASE 
+												WHEN @ysnDeductFeesCusVen = 1 THEN 1
+												WHEN @ysnDeductFeesCusVen = 0 THEN 0
+											END
+		,[ysnPrice]							= CASE 
+												WHEN @ysnDeductFeesCusVen = 1 THEN 0
+												WHEN @ysnDeductFeesCusVen = 0 THEN 1
+											END
 		FROM @ReceiptStagingTable RE
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 		INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
