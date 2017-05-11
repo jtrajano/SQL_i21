@@ -5,7 +5,8 @@ var config = require('../config');
 var browserify = require('gulp-browserify');
 
 gulp.task('js', function () {
-    return gulp.src('app/view/**/*.{js,css}')
+    return gulp.src(['app/view/**/*.{js,css}', 'app/model/**/*.{js,css}', 
+        'app/search/**/*.{js,css}', 'app/store/**/*.{js,css}', 'app/ux/**/*.{js,css}', 'app/controller/**/*.{js,css}'])
         .pipe(browserify())
         .pipe(gulp.dest(config.path.dest));
 });
