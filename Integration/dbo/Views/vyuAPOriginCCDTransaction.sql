@@ -1,11 +1,11 @@
 ﻿GO
 
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
-BEGIN
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPOriginCCDTransaction')
 	DROP VIEW vyuAPOriginCCDTransaction
+GO
 
-	EXEC ('
+BEGIN
+EXEC ('
 	CREATE VIEW [dbo].[vyuAPOriginCCDTransaction]
 	AS
 	
@@ -55,4 +55,3 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAP
 		WHERE intBillId IS NULL
 		')
 END
-GO
