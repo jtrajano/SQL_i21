@@ -29,6 +29,10 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAP
 	DROP VIEW vyuAPPayables
 GO
 
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPOriginCCDTransaction')
+	DROP VIEW vyuAPOriginCCDTransaction
+GO
+
 PRINT 'END DROPPING AP VIEWS'
 GO
 
