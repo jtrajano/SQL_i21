@@ -1140,6 +1140,35 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
 
+        if (defaultCurrency){
+            record.set('intCurrencyId', defaultCurrency);
+            Ext.create('i21.store.CurrencyBuffered', {
+                storeId: 'icReceiptCurrency',
+                autoLoad: {
+                    filters: [
+                        {
+                            dataIndex: 'intCurrencyID',
+                            value: defaultCurrency,
+                            condition: 'eq'
+                        }
+                    ],
+                    params: {
+                        columns: 'strCurrency:'
+                    },
+                    callback: function(records, operation, success){
+                        var companyLocation; 
+                        if (records && records.length > 0) {
+                            companyLocation = records[0];
+                        }
+
+                        if(success && companyLocation){
+                            record.set('strCurrency', companyLocation.get('strCurrency'));
+                        }
+                    }
+                }
+            });
+        }  
+
         if (defaultReceiptType !== null) {
             record.set('strReceiptType', defaultReceiptType);
         }
@@ -1162,8 +1191,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             
         record.set('dtmReceiptDate', today);
         record.set('intBlanketRelease', 0);
-        record.set('ysnPosted', false);
-        record.set('intCurrencyId', defaultCurrency);
+        record.set('ysnPosted', false);        
         config.viewModel.set('locationFromTransferOrder', null);
         action(record);
     },

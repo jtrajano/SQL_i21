@@ -140,7 +140,7 @@
 	, ShipmentItemLot.strLotUOM
 	, ShipmentItemLot.dblNetWeight
 	, intWarehouseInstructionHeaderId = ISNULL (WarehouseInstruction.intWarehouseInstructionHeaderId, 0)
-FROM vyuICGetInventoryShipment Shipment
+FROM vyuICGetInventoryShipmentLookUp Shipment
 	LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 	LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId 
