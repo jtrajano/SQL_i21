@@ -21,10 +21,13 @@ Ext.define('Inventory.model.Shipment', {
         { name: 'strReferenceNumber', type: 'string' },
         { name: 'dtmRequestedArrivalDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intShipFromLocationId', type: 'int', allowNull: true },
+        { name: 'strShipFromLocation', type: 'string' },
         { name: 'intEntityCustomerId', type: 'int', allowNull: true },
         { name: 'intShipToLocationId', type: 'int', allowNull: true },
         { name: 'intFreightTermId', type: 'int', allowNull: true },
+        { name: 'strFreightTerm', type: 'string' },
         { name: 'intCurrencyId', type: 'int', allowNull: true },
+        { name: 'strCurrency', type: 'string' },
         { name: 'strBOLNumber', type: 'string' },
         { name: 'intShipViaId', type: 'int', allowNull: true },
         { name: 'strVessel', type: 'string' },
@@ -46,16 +49,18 @@ Ext.define('Inventory.model.Shipment', {
         { name: 'strOrderType', type: 'string'},
         { name: 'strShipFromAddress', type: 'string'},
         { name: 'strShipToAddress', type: 'string'},
-        { name: 'intShipToCompanyLocationId', type: 'int', allowNull: true }
+        { name: 'intShipToCompanyLocationId', type: 'int', allowNull: true },
+        { name: 'strShipToLocation', type: 'string'}
+
     ],
 
     validators: [
         {type: 'presence', field: 'dtmShipDate'},
         {type: 'presence', field: 'intOrderType'},
-        {type: 'presence', field: 'intShipFromLocationId'},
-        //{type: 'presence', field: 'intShipToLocationId'},
-        {type: 'presence', field: 'intFreightTermId'},
-        {type: 'presence', field: 'intCurrencyId'}
+        {type: 'presence', field: 'strShipFromLocation'},
+        {type: 'presence', field: 'strShipToLocation'},
+        {type: 'presence', field: 'strFreightTerm'},
+        {type: 'presence', field: 'strCurrency'}
     ],
 
     validate: function(options) {
@@ -69,21 +74,21 @@ Ext.define('Inventory.model.Shipment', {
             })
         }
 
-        // If not Transfer order, require to add a Ship To Location.
-        if (this.get('intOrderType') !== 3 && iRely.Functions.isEmpty(this.get('intShipToLocationId'))) {
-            errors.add({
-                field: 'intShipToLocationId',
-                message: 'Ship To must not be empty.'
-            })
-        }
+        // // If not Transfer order, require to add a Ship To Location.
+        // if (this.get('intOrderType') !== 3 && iRely.Functions.isEmpty(this.get('intShipToLocationId'))) {
+        //     errors.add({
+        //         field: 'strShipToLocation',
+        //         message: 'Ship To must not be empty.'
+        //     })
+        // }
 
-        // If it is a Transfer Order, require the Ship To Company Location Id
-        if (this.get('intOrderType') === 3 && iRely.Functions.isEmpty(this.get('intShipToCompanyLocationId'))) {
-            errors.add({
-                field: 'intShipToCompanyLocationId',
-                message: 'Ship To must not be empty.'
-            })
-        }
+        // // If it is a Transfer Order, require the Ship To Company Location Id
+        // if (this.get('intOrderType') === 3 && iRely.Functions.isEmpty(this.get('intShipToCompanyLocationId'))) {
+        //     errors.add({
+        //         field: 'strShipToLocation',
+        //         message: 'Ship To must not be empty.'
+        //     })
+        // }
 
         return errors;
     }

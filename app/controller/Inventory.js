@@ -106,11 +106,11 @@ Ext.define('Inventory.controller.Inventory', {
         Ext.Loader.loadScript("../Inventory/app/lib/rx.all.js");
         Ext.Loader.loadScript("../Inventory/app/lib/numeraljs/numeral.js");
         
-        Ext.Ajax.request({
-            timeout: 120000,
-            url: '../Inventory/api/Item/GetEmpty',
-            method: 'GET'
-        });
+        // Ext.Ajax.request({
+        //     timeout: 120000,
+        //     url: '../Inventory/api/Item/GetEmpty',
+        //     method: 'GET'
+        // });
 
         this.companyPreferenceStore = Ext.create('Inventory.store.CompanyPreference');
         this.companyPreferenceStore.load();

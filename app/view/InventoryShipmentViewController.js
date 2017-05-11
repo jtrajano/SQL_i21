@@ -1,5 +1,6 @@
 Ext.define('Inventory.view.InventoryShipmentViewController', {
-    extend: 'Inventory.view.InventoryBaseViewController',
+    //extend: 'Inventory.view.InventoryBaseViewController',
+    extend: 'Ext.app.ViewController',
     alias: 'controller.icinventoryshipment',
     requires: [
         'CashManagement.common.Text',
@@ -644,8 +645,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
-            onSaveClick: me.saveAndPokeGrid(win, grdInventoryShipment),
-            include: 'vyuICGetInventoryShipment, ' +
+            //onSaveClick: me.saveAndPokeGrid(win, grdInventoryShipment),
+            include: 
+            'vyuICGetInventoryShipmentLookUp, ' +
             'tblICInventoryShipmentCharges.vyuICGetInventoryShipmentCharge, ' +
             'tblICInventoryShipmentItems.vyuICGetInventoryShipmentItem, ' +
             'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot',
@@ -774,6 +776,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var record = Ext.create('Inventory.model.Shipment');
         var defaultShipmentType = i21.ModuleMgr.Inventory.getCompanyPreference('intShipmentOrderType');
         var defaultSourceType = i21.ModuleMgr.Inventory.getCompanyPreference('intShipmentSourceType');
+        var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
         
         if (defaultLocation){
@@ -798,6 +801,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         }
 
                         if(success && companyLocation){
+                            record.set('strShipFromLocation', companyLocation.get('strLocationName'));
                             record.set('strShipFromStreet', companyLocation.get('strAddress'));
                             record.set('strShipFromCity', companyLocation.get('strCity'));
                             record.set('strShipFromState', companyLocation.get('strStateProvince'));
@@ -808,22 +812,51 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 }
             });
         }
+
+        if (defaultCurrency){
+            record.set('intCurrencyId', defaultCurrency);
+            Ext.create('i21.store.CurrencyBuffered', {
+                storeId: 'icShipmentCurrency',
+                autoLoad: {
+                    filters: [
+                        {
+                            dataIndex: 'intCurrencyID',
+                            value: defaultCurrency,
+                            condition: 'eq'
+                        }
+                    ],
+                    params: {
+                        columns: 'strCurrency:'
+                    },
+                    callback: function(records, operation, success){
+                        var companyLocation; 
+                        if (records && records.length > 0) {
+                            companyLocation = records[0];
+                        }
+
+                        if(success && companyLocation){
+                            record.set('strCurrency', companyLocation.get('strCurrency'));
+                        }
+                    }
+                }
+            });
+        }        
             
-        record.set('dtmShipDate', today);
+        record.set('dtmShipDate', today);        
 
         if(defaultShipmentType !== null) {
             record.set('intOrderType', defaultShipmentType);
         }
-            else {
-                record.set('intOrderType', 2);
-            }
-        
+        else {
+            record.set('intOrderType', 2);
+        }
+    
         if(defaultSourceType !== null) {
             record.set('intSourceType', defaultSourceType);
         }
-            else {
-                record.set('intSourceType', 0);
-            }
+        else {
+            record.set('intSourceType', 0);
+        }
         
         action(record);
     },
@@ -955,17 +988,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var cboShipToAddress = win.down('#cboShipToAddress');
 
         if (current && record){            
-            current.set('intEntityCustomerId', record.get('intEntityCustomerId'));
+            current.set('intEntityCustomerId', record.get('intEntityId'));
             current.set('strCustomerName', record.get('strName'));
 
-            //current.set('intShipToLocationId'), record.get('intShipToId');   
+            current.set('intShipToLocationId', record.get('intShipToId'));   
+            current.set('strShipToLocation', record.get('strShipToLocationName'));   
             current.set('strShipToStreet', record.get('strShipToAddress'));
             current.set('strShipToCity', record.get('strShipToCity'));
             current.set('strShipToState', record.get('strShipToState'));
             current.set('strShipToZipPostalCode', record.get('strShipToZipCode'));
-            current.set('strShipToCountry', record.get('strShipToCountry'));
-
-            if (cboShipToAddress) cboShipToAddress.setValue(record.get('intShipToId'));
+            current.set('strShipToCountry', record.get('strShipToCountry'));            
         }
 
         var isHidden = true;
