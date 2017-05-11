@@ -7,7 +7,9 @@
     "test": "karma start"
   },
   "dependencies": {
+    "browser-sync": "^2.18.8",
     "gulp": "^3.9.1",
+    "gulp-browserify": "^0.5.1",
     "gulp-extjs-spec-generator": "^1.1.12",
     "karma": "^1.2.0",
     "karma-chai": "^0.1.0",
