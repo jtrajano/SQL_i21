@@ -189,7 +189,7 @@ AS
 										   GROUP BY PD.intInvoiceId
 								) AS PAYMENTDATE ON PAYMENTDATE.intInvoiceId = I.intInvoiceId 
 							WHERE I.ysnPosted = 1 							  
-								AND (I.strTransactionType = 'Invoice' OR (I.strTransactionType = 'Debit Memo' AND I.strType = 'CF Invoice'))
+								AND I.strTransactionType IN ('Invoice', 'Debit Memo')
 								AND I.strType NOT IN ('CF Tran')
 								AND I.intEntityCustomerId = @entityId
 								AND DATEADD(DAY, SC.intGracePeriod, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END) < @asOfDate
