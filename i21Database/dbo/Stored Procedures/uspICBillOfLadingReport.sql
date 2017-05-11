@@ -109,7 +109,7 @@ BEGIN TRY
 				,Shipment.strCustomerName
 				,strShipFromLocation = Shipment.strShipFromLocation
 				,Shipment.strReferenceNumber
-			FROM vyuICGetInventoryShipment Shipment
+			FROM vyuICGetInventoryShipmentBillOfLading Shipment
 			LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 			LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId
