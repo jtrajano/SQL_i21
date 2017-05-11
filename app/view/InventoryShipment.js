@@ -26,11 +26,11 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.form.field.ComboBox',
         'Ext.form.field.Date',
         'Ext.form.field.TextArea',
+        'Ext.form.field.Number',
         'Ext.grid.Panel',
         'Ext.form.Label',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
-        'Ext.form.field.Number',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.grid.column.Check',
@@ -824,7 +824,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'textfield',
+                                                                        xtype: 'timefield',
                                                                         flex: 1,
                                                                         itemId: 'txtAppointmentTime',
                                                                         margin: '0 5 0 0',
@@ -832,7 +832,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'textfield',
+                                                                        xtype: 'timefield',
                                                                         flex: 1,
                                                                         itemId: 'txtDepartureTime',
                                                                         margin: '0 5 0 0',
@@ -840,7 +840,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcombobox',
+                                                                        xtype: 'timefield',
                                                                         flex: 1,
                                                                         itemId: 'txtArrivalTime',
                                                                         margin: '0 5 0 0',
@@ -866,12 +866,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'datefield',
+                                                                        xtype: 'numberfield',
                                                                         flex: 1,
-                                                                        itemId: 'dtmFreeTime',
+                                                                        itemId: 'txtFreeTime',
                                                                         margin: '0 5 0 0',
                                                                         fieldLabel: 'Free Time',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 110,
+                                                                        minValue: 0
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
