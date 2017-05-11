@@ -51,7 +51,7 @@ BEGIN TRY
 			BEGIN
 				-- MFT-517 -- Hard Code Terminal Control Number to 'BULK'
 				UPDATE tblTFTransaction
-				SET strTerminalControlNumber = 'BULK'
+				SET strTerminalControlNumber = 'BULK   '
 				WHERE intTransactionId IN (SELECT DISTINCT intTransactionId FROM #tmpTransaction)
 			END			
 		END
