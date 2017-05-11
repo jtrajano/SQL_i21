@@ -42,7 +42,7 @@ BEGIN
 	INNER JOIN tblICCategoryTax CAT ON CAT.intCategoryId = ITM.intCategoryId
 	WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL 
 				   AND IVC.strInvoiceOriginId <> ''	AND STM.agstm_tax_state is not null
-				   and agstm_itm_no not in (select strOrgItemNo from tblSMTaxXRef)
+				   and agstm_itm_no COLLATE Latin1_General_CI_AS not in (select strOrgItemNo COLLATE Latin1_General_CI_AS from tblSMTaxXRef)
 
 	------------------------------------------------------------------------------------------------------------------------------------------
 	---** INSERT SET TAX DETAILS **---
@@ -446,7 +446,7 @@ BEGIN
 	INNER JOIN tblICCategoryTax CAT ON CAT.intCategoryId = ITM.intCategoryId
 	WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL 
 				   AND IVC.strInvoiceOriginId <> ''	AND STM.agstm_tax_state is null
-				   and agstm_itm_no not in (select strOrgItemNo from tblSMTaxXRef)			  
+				   and agstm_itm_no COLLATE Latin1_General_CI_AS not in (select strOrgItemNo COLLATE Latin1_General_CI_AS from tblSMTaxXRef)			  
 	-----------------------------------------------------------------------------------------------------------------------			   			   			  		   
 
 	---** INSERT SET TAX DETAILS **---
@@ -859,7 +859,7 @@ BEGIN
 	AND STM.agstm_bill_to_cus COLLATE Latin1_General_CI_AS = ENT.strEntityNo
 	INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = STM.agstm_itm_no  COLLATE Latin1_General_CI_AS
 	WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL AND IVC.strInvoiceOriginId <> ''	
-	and agstm_itm_no in (select strOrgItemNo from tblSMTaxXRef)
+	and agstm_itm_no COLLATE Latin1_General_CI_AS in (select strOrgItemNo COLLATE Latin1_General_CI_AS from tblSMTaxXRef)
 
 	--------------------------------------------------------------------------------------------------------------------------------------
 	---** INSERT SET TAX DETAILS **---
