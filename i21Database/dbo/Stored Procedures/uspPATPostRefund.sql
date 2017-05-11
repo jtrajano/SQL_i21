@@ -177,7 +177,7 @@ END CATCH
 	IF(@ysnPosted = 1)
 	BEGIN
 		UPDATE CV
-		SET CV.intRefundCustomerId = tRD.intRefundCustomerId
+		SET CV.intRefundCustomerId = tRD.intRefundCustomerId, CV.ysnRefundProcessed = @ysnPosted
 		FROM tblPATCustomerVolume CV
 		INNER JOIN #tmpRefundData tRD
 			ON CV.intCustomerPatronId = tRD.intCustomerId AND CV.intFiscalYear = tRD.intFiscalYearId 
@@ -186,15 +186,11 @@ END CATCH
 	ELSE
 	BEGIN
 		UPDATE CV
-		SET CV.intRefundCustomerId = null
+		SET CV.intRefundCustomerId = null, ysnRefundProcessed = @ysnPosted
 		FROM tblPATCustomerVolume CV
 		INNER JOIN #tmpRefundData tRD
 			ON CV.intRefundCustomerId = tRD.intRefundCustomerId
 	END
-
-	UPDATE tblPATCustomerVolume
-	SET ysnRefundProcessed = @ysnPosted
-	WHERE intFiscalYear = @intFiscalYearId AND intCustomerPatronId IN (SELECT DISTINCT intCustomerId FROM #tmpRefundData)
 	
 
 ---------------------------------------------------------------------------------------------------------------------------------------
