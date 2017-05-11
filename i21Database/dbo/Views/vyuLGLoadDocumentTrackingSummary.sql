@@ -11,16 +11,17 @@ SELECT DT.strContractNumber
 	,(
 		SELECT COUNT(*)
 		FROM vyuLGLoadDocumentTracking T
-		JOIN tblLGLoad L ON L.intLoadId = T.intLoadId
-		WHERE T.intContractHeaderId = DT.intContractHeaderId AND L.intShipmentType = 1
+		JOIN tblLGLoad LO ON LO.intLoadId = T.intLoadId
+		WHERE T.intContractHeaderId = DT.intContractHeaderId AND LO.intShipmentType = 1 AND L.intLoadId = LO.intLoadId
 		) intDocsCount
 	,(
 		SELECT COUNT(*)
 		FROM vyuLGLoadDocumentTracking T
-		JOIN tblLGLoad L ON L.intLoadId = T.intLoadId
+		JOIN tblLGLoad LO ON LO.intLoadId = T.intLoadId
 		WHERE T.intContractHeaderId = DT.intContractHeaderId
-			AND L.intShipmentType = 1
+			AND LO.intShipmentType = 1
 			AND ISNULL(T.ysnReceived, 0) = 1
+			AND L.intLoadId = LO.intLoadId
 		) intReceivedDocsCount
 	,(SELECT MAX(dtmStartDate) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId) AS dtmStartDate
 	,(SELECT MAX(dtmEndDate) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId) AS dtmEndDate
@@ -58,3 +59,4 @@ GROUP BY DT.strContractNumber
 	,DT.dtmScheduledDate
 	,DT.dtmETAPOD
 	,SI.dtmETAPOD
+	,L.intLoadId
