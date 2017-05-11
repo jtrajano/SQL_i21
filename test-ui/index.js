@@ -312,15 +312,6 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'InventoryTransfer',
                     items: [
 
-
-                        {
-                            url: 'CRUDScripts/InventoryTransfer/PreSetup.js?v='+version,
-                            title: 'PreSetup',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
                         {
                             url: 'CRUDScripts/InventoryTransfer/AddInventoryTransfer.js?v='+version,
                             title: 'AddInventoryTransfer',
