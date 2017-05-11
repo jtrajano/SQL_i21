@@ -33,8 +33,8 @@
 	[ysnStoreManager]				BIT NOT NULL DEFAULT(0), 
 
 	[intScaleSetupId]				INT NULL,
-	[dtmScaleDate]				DATETIME NULL,
-	[intScaleTruckDriverReferenceId]				INT  NULL,
+	[dtmScaleDate]				DATE NULL,
+	[intEntityScaleOperatorId]				INT  NULL,
 
     [intConcurrencyId]				INT	DEFAULT (1) NOT NULL,
 	[intEntityIdOld]				INT NULL,
@@ -43,6 +43,7 @@
     CONSTRAINT [FK_UserSecurity_tblSMSecurityPolicy] FOREIGN KEY ([intSecurityPolicyId]) REFERENCES [dbo].[tblSMSecurityPolicy] ([intSecurityPolicyId]),
     CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]),
 	CONSTRAINT [FK_UserSecurity_Entity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_UserSecurity_EntityScaleOperator] FOREIGN KEY ([intEntityScaleOperatorId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ,
 	CONSTRAINT [FK_UserSecurity_CompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]), 
 	CONSTRAINT [FK_UserSecurity_tblSCScaleSetup] FOREIGN KEY ([intScaleSetupId]) REFERENCES [dbo].tblSCScaleSetup ([intScaleSetupId]), 	
 
