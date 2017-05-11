@@ -274,11 +274,26 @@ GO
                                                     FROM tblSMTransaction 
                                                     WHERE strApprovalStatus = ''Approved''
                                                 ) and ysnCurrent = 1  and strStatus = ''Approved'' 
-                                                AND intSubmittedById = {0}
+                                                AND (intSubmittedById = {0} OR intApproverId = {0})
                                                 GROUP BY intTransactionId',
 				[strNamespace]      =        N'i21.view.Approval?activeTab=Approved',
 				[intSort]           =        12
 
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMReminderList]
+		SET	[strQuery] =       N'SELECT 
+                                        intTransactionId 
+                                    FROM tblSMApproval 
+                                    WHERE intTransactionId IN (
+                                        SELECT intTransactionId 
+                                        FROM tblSMTransaction 
+                                        WHERE strApprovalStatus = ''Approved''
+                                    ) and ysnCurrent = 1  and strStatus = ''Approved'' 
+                                    AND (intSubmittedById = {0} OR intApproverId = {0})
+                                    GROUP BY intTransactionId'
+		WHERE [strReminder] = N'Approved' AND [strType] = N'Transaction'
 	END
 
     IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Closed' AND [strType] = N'Transaction')
