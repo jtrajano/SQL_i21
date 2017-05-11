@@ -16,7 +16,14 @@ SELECT
 		h.intUserRoleID,
 		strDefaultUserRole = h.strName,
 		dtmLastLogin = u.dtmDate,
-		ysnHasSMTP = Cast( case when isnull(j.intSMTPInformationId, 0) > 0 then 1 else 0 end as bit)
+		ysnHasSMTP = Cast( case when isnull(j.intSMTPInformationId, 0) > 0 then 1 else 0 end as bit),
+
+
+		c.intScaleSetupId,
+		intEntityScaleOperatorId,
+		dtmScaleDate,
+		strStationShortDescription = k.strStationShortDescription,
+		strEntityScaleOperatorName = l.strName
     FROM         
             tblEMEntity a
         join [tblEMEntityType] b
@@ -35,6 +42,10 @@ SELECT
 			on i.intEntityId = g.intEntityId
 		left join tblEMEntitySMTPInformation j
 			on g.intEntityId = j.intEntityId
+		left join tblSCScaleSetup k
+			on c.intScaleSetupId = k.intScaleSetupId
+		left join tblEMEntity l
+			on l.intEntityId = c.intEntityScaleOperatorId
 		outer apply 
 		(
 			SELECT TOP 1 dtmDate FROM tblSMUserLogin u WHERE u.intEntityId = c.[intEntityId] ORDER BY dtmDate DESC
