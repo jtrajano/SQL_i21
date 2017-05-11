@@ -5249,6 +5249,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryShipmentLookUp.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentBillOfLading.sql" />
     <Build Include="dbo\Views\vyuLGStockSales.sql" />
+    <Build Include="dbo\Views\vyuLGGenerateLoad.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
