@@ -243,18 +243,13 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
-:r .\IC\02_MaterialNMFC.sql 
 :r .\IC\03_DefaultData.sql 
 :r .\IC\04_CostingMethods.sql 
 :r .\IC\05_LotStatus.sql
 :r .\IC\07_Status.sql
 :r .\IC\08_InventoryTransactionPostingIntegration.sql
 :r .\IC\09_InventoryTransactionsWithNoCounterAccountCategory.sql
-:r .\IC\14_Fix_Blank_Costing_Method_In_tblICInventoryTransaction.sql
 :r .\IC\15_InventoryCostAdjustmentTypes.sql
-:r .\IC\16_Fix_Allow_Negative_Stock_Option.sql
-:r .\IC\17_Update_Blank_Description_tblICItem.sql
-:r .\IC\1620_to_1630.sql
 :r .\IC\18_FOBPointTypes.sql
 :r .\IC\19_M2MComputations.sql
 

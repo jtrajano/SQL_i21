@@ -100,17 +100,6 @@
 :r .\10_RPT\1_1430_to_1430.sql
 
 -- IC
-:r .\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql
-:r .\11_IC\Remove_Duplicate_Storage_Unit_Type.sql
---:r .\11_IC\01_Delete_Charges_No_Shipment.sql
-:r .\11_IC\Rename_IC_Database_Objects.sql 
-:r .\11_IC\Remove_Unused_Shipment_Charges.sql
-:r .\11_IC\Clean_Cost_Bucket_Indexes.sql
-:r .\11_IC\Update_M2M_Computation_Setup.sql
-:r .\11_IC\Rename_tblICItemOwner_Fields.sql
-:r .\11_IC\Clean_Valuation_Indexes.sql
-:r .\11_IC\Relink_Line_Of_Business.sql
-:r .\11_IC\Remove_Unused_Shipment_Item_Fields.sql 
 :r .\11_IC\Remove_Accounts_With_Deleted_Category.sql
 
 -- EM

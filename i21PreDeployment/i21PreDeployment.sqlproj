@@ -71,7 +71,6 @@
     <Folder Include="Scripts\Pre-Deployment\8_AP" />
     <Folder Include="Scripts\Pre-Deployment\9_FRD" />
     <Folder Include="Scripts\Pre-Deployment\10_RPT" />
-    <Folder Include="Scripts\Pre-Deployment\11_IC" />
     <Folder Include="Scripts\Pre-Deployment\12_EM" />
     <Folder Include="Scripts\Pre-Deployment\13_RK" />
     <Folder Include="Scripts\Pre-Deployment\14_CT" />
@@ -88,6 +87,7 @@
     <Folder Include="Scripts\Pre-Deployment\22_PAT" />
     <Folder Include="Scripts\Pre-Deployment\21_PR" />
     <Folder Include="Scripts\Pre-Deployment\23_MFT" />
+    <Folder Include="Scripts\Pre-Deployment\11_IC\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -145,12 +145,8 @@
     <None Include="Scripts\Pre-Deployment\12_EM\18_FixDuplicateLocationEntry.sql" />
     <None Include="Scripts\Pre-Deployment\16_HD\OpportunitySourceDataFix.sql" />
     <None Include="stroh1620.publish.xml" />
-    <None Include="Scripts\Pre-Deployment\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql" />
-    <None Include="Scripts\Pre-Deployment\11_IC\Remove_Duplicate_Storage_Unit_Type.sql" />
     <None Include="Scripts\Pre-Deployment\21_PR\2_1630_to_1640.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\20_CleanCustomerSpecialPrice.sql" />
-    <None Include="Scripts\Pre-Deployment\11_IC\Remove_Unused_Shipment_Charges.sql" />
-    <None Include="Scripts\Pre-Deployment\11_IC\Update_M2M_Computation_Setup.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\9_DropTblSMAlternateApproverGroup.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\10_DropTblSMApproverConfigurationForTransaction.sql" />
     <None Include="Scripts\Pre-Deployment\23_MFT\0_Remove_Unused_Tables_FK.sql" />
@@ -290,26 +286,9 @@
     <None Include="Scripts\Pre-Deployment\7_AR\5_InvoiceCurrencyCleanUp.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\11_IC\Rename_IC_Database_Objects.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\11_IC\Clean_Cost_Bucket_Indexes.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\11_IC\Rename_tblICItemOwner_Fields.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\11_IC\Clean_Valuation_Indexes.sql" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\6_PaymentDetailInvoiceCleanUp.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\11_IC\Relink_Line_Of_Business.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\21_PR\4_1710_to_1720.sql" />
-    <None Include="Scripts\Pre-Deployment\11_IC\Remove_Unused_Shipment_Item_Fields.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\21_CleanAPBillMissingContact.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -317,5 +296,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\7_CompanyPreferenceCleanUp.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\21_PR\4_1710_to_1720.sql" />
   </ItemGroup>
 </Project>
