@@ -5276,7 +5276,6 @@
     <None Include="Scripts\Post-Deployment\EM\008_MoveTruckerData.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddPurchaseContractToInventoryReceipt.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateApprovalRecords.sql" />
-    <None Include="Scripts\Post-Deployment\CT\2_DataMigration.sql" />
     <None Include="Scripts\Post-Deployment\EM\009_UpdateEntityContactTypeData.sql" />
     <None Include="Scripts\Post-Deployment\EM\010_UpdateVendorAccountNumber.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckTax.sql" />
@@ -5301,7 +5300,6 @@
     <None Include="Scripts\Post-Deployment\ST\4_FileFieldMapping_PricebookMixMatch.sql" />
     <None Include="Scripts\Post-Deployment\ST\5_FileFieldMapping_PricebookSendSapphire.sql" />
     <None Include="Scripts\Post-Deployment\EM\017_MoveSplitCategoryToNewTable.sql" />
-    <None Include="Scripts\Post-Deployment\CT\3_Miscellaneous.sql" />
     <None Include="Scripts\Post-Deployment\EM\018_UpdateRoleId_ForEntityCredential.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\uspICRepostCosting.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\Do Stock Repost.sql" />

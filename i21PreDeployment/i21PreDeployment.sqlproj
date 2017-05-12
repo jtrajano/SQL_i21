@@ -99,7 +99,6 @@
     <None Include="Scripts\Pre-Deployment\8_AP\DropTriggers.sql" />
     <None Include="Scripts\Pre-Deployment\9_FRD\2_1440_to_1510.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\AddPOVendorConstraint.sql" />
-    <None Include="Scripts\Pre-Deployment\14_CT\01_Make_Column_Null.sql" />
     <None Include="i21PreDeployment_1.publish.xml" />
     <None Include="i21PreDeployment_2.publish.xml" />
     <None Include="Scripts\Pre-Deployment\12_EM\02_UpdateGroupIdFromNonExistence.sql" />
