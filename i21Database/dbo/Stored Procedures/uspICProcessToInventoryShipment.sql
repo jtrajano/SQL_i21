@@ -32,7 +32,7 @@ BEGIN TRY
 		intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId, intFreightTermId
 		, strSourceScreenName, strReferenceNumber, dtmRequestedArrivalDate, intShipToCompanyLocationId, strBOLNumber, intShipViaId
 		, strVessel, strProNumber, strDriverId, strSealNumber, strDeliveryInstruction, dtmAppointmentTime, dtmDepartureTime
-		, dtmArrivalTime, dtmDeliveredDate, dtmFreeTime, strReceivedBy, strComment, intItemId, intOwnershipType, dblQuantity
+		, dtmArrivalTime, dtmDeliveredDate, dtmFreeTime, strFreeTime, strReceivedBy, strComment, intItemId, intOwnershipType, dblQuantity
 		, intItemUOMId, intItemLotGroup, intOrderId, intSourceId, intLineNo, intSubLocationId, intStorageLocationId, intCurrencyId
 		, intWeightUOMId, dblUnitPrice, intDockDoorId, strNotes, intGradeId, intDiscountSchedule, intStorageScheduleTypeId
 		, intForexRateTypeId, dblForexRate	
@@ -61,6 +61,7 @@ BEGIN TRY
 		, dtmArrivalTime				= NULL
 		, dtmDeliveredDate				= NULL
 		, dtmFreeTime					= NULL
+		, strFreeTime					= NULL
 		, strReceivedBy					= NULL
 		, strComment					= SO.strComments
 		, intItemId						= SODetail.intItemId

@@ -47,6 +47,7 @@ BEGIN
 				,dtmArrivalTime
 				,dtmDeliveredDate
 				,dtmFreeTime
+				,strFreeTime
 				,strReceivedBy
 				,strComment
 				,intCurrencyId
@@ -74,7 +75,8 @@ BEGIN
 				,dtmDepartureTime			= NULL 
 				,dtmArrivalTime				= NULL 
 				,dtmDeliveredDate			= NULL 
-				,dtmFreeTime				= NULL 
+				,dtmFreeTime				= NULL
+				,strFreeTime				= NULL 
 				,strReceivedBy				= NULL 
 				,strComment					= SO.strComments
 				,intCurrencyId				= SO.intCurrencyId

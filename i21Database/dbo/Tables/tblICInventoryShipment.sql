@@ -36,7 +36,8 @@ Type the overview for the table here.
 		[dtmDepartureTime] DATETIME NULL, 
 		[dtmArrivalTime] DATETIME NULL, 
 		[dtmDeliveredDate] DATETIME NULL, 
-		[dtmFreeTime] DATETIME NULL, 
+		[dtmFreeTime] DATETIME NULL,
+		[strFreeTime] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strReceivedBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[ysnPosted] BIT DEFAULT((0)),
@@ -231,6 +232,15 @@ Type the overview for the table here.
 		@level1name = N'tblICInventoryShipment',
 		@level2type = N'COLUMN',
 		@level2name = N'dtmFreeTime'
+	GO
+	EXEC sp_addextendedproperty @name = N'MS_Description',
+		@value = N'Free Time',
+		@level0type = N'SCHEMA',
+		@level0name = N'dbo',
+		@level1type = N'TABLE',
+		@level1name = N'tblICInventoryShipment',
+		@level2type = N'COLUMN',
+		@level2name = N'strFreeTime'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Received By',

@@ -52,6 +52,7 @@ SELECT
 	, Shipment.dtmArrivalTime
 	, Shipment.dtmDeliveredDate
 	, Shipment.dtmFreeTime
+, Shipment.strFreeTime
 	, Shipment.strReceivedBy
 	, Shipment.strComment
 	, Shipment.ysnPosted
