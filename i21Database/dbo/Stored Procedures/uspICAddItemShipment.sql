@@ -69,6 +69,7 @@ INSERT INTO @ShipmentEntries(
 		, dtmArrivalTime
 		, dtmDeliveredDate
 		, dtmFreeTime
+		, strFreeTime
 		, strReceivedBy
 		, strComment
 		, intCurrencyId
@@ -119,6 +120,7 @@ SELECT
 		, dtmArrivalTime
 		, dtmDeliveredDate
 		, dtmFreeTime
+		, strFreeTime
 		, strReceivedBy
 		, strComment
 		, intCurrencyId
