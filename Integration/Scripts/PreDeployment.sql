@@ -23,13 +23,13 @@
 :r "..\dbo\Stored Procedures\uspSMImportTaxRate.sql"
 
 -- GENERAL LEDGER
-:r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
+--:r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
 :r "..\dbo\Stored Procedures\uspGLAccountOriginSync.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildAccount.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildAccountTemporary.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildOriginAccount.sql"
-:r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
-:r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
+--:r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
+--:r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
 :r "..\dbo\Stored Procedures\uspGLImportOriginReallocation.sql"
 :r "..\dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql"
 :r "..\dbo\Views\vyuGLPTDrillDownDifference.sql"

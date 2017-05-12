@@ -411,5 +411,6 @@
     <Build Include="dbo\Tables\tblARagordmst.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateImportTankMonitorSP.sql" />
     <None Include="Scripts\TM\CheckOriginTableAndTMPreference.sql" />
+    <Build Include="dbo\Tables\tblAPapivcmst.sql" />
   </ItemGroup>
 </Project>

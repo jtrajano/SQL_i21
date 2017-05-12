@@ -41,7 +41,9 @@ GO
 
 --General Ledger
 :r "..\Scripts\GL\1a_OriginCrossReferenceMapping.sql"
-
+:r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
+:r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
+:r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
 --Inventory Receipt
 GO 
 :r "..\Scripts\IC\uspICImportInventoryReceipts_CreateTrigger.sql"

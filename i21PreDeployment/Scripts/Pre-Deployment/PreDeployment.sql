@@ -80,7 +80,7 @@
 :r .\8_AP\UpdatePaymentMethod.sql
 :r .\8_AP\Update1099BillDetailData.sql
 :r .\8_AP\UpdateVoucherCurrency.SQL
-:r .\8_AP\tblAPapivcmst.sql
+--:r .\8_AP\tblAPapivcmst.sql
 --:r .\8_AP\UpdateBillToReceiptAssociation.sql
 
 --:r .\8_AP\UpdateMissingPaymentInfo.sql
