@@ -6566,4 +6566,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[PK_tblGRShrinkCalculationOption_intShrinkCalculationOptionId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d1eb1515-393d-45a3-a4cf-305ed194504f" ChangeDateTime="02/23/2017 02:21:23">
+    <Property Name="ElementName" Value="[dbo].[tblMigrationLog]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblSMMigrationLog]" />
+  </Operation>
 </Operations>

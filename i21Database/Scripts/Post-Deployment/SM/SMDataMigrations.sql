@@ -169,7 +169,7 @@ GO
 	PRINT N'Updating strHelperUrlDomain in tblSMCompanyPreference'
 	UPDATE tblSMCompanyPreference SET strHelperUrlDomain = N'http://help.irelyserver.com'
 GO
---	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'User Roles per Company Location')
+--	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'User Roles per Company Location')
 --	BEGIN
 --		-- MIGRATE USER ROLE PER LOCATION AND PER USER
 --		DECLARE @currentRow INT
@@ -231,8 +231,8 @@ GO
 --		SET @currentRow = @currentRow + 1
 --		END
 		
---		PRINT N'ADD LOG TO tblMigrationLog'
---		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+--		PRINT N'ADD LOG TO tblSMMigrationLog'
+--		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 --		VALUES('System Manager', 'User Roles per Company Location', 'Migration of User Roles per Company Location', GETDATE())
 --	END
 --GO
@@ -255,7 +255,7 @@ GO
 GO
 
 	/* MIGRATE HD ANNOUNCEMENT TO SM ANNOUNCEMENT */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Migrate HD Announcement to SM Announcement')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Migrate HD Announcement to SM Announcement')
 	BEGIN
 		INSERT INTO tblSMAnnouncementType(strAnnouncementType, strDescription, strDisplayTo, strFontColor, strBackColor, intSort)
 		SELECT strAnnouncementType, strDescription, strDisplayTo, strFontColor, strBackColor, intSort FROM tblHDAnnouncementType
@@ -274,8 +274,8 @@ GO
 		INNER JOIN tblHDAnnouncement Announcement2 ON Announcement1.strImageId = Announcement2.strImageId
 		INNER JOIN tblHDAnnouncementDisplay AnnouncementDisplay ON AnnouncementDisplay.intAnnouncementId = Announcement2.intAnnouncementId
 
-		PRINT N'ADD LOG TO tblMigrationLog'
-		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		PRINT N'ADD LOG TO tblSMMigrationLog'
+		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 		VALUES('System Manager', 'Migrate HD Announcement to SM Announcement', 'Migrate HD Announcement to SM Announcement', GETDATE())
 	END
 
@@ -334,7 +334,7 @@ GO
 	END
 	
 GO
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Migrate All Entity Roles - tblEMEntityToContact')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Migrate All Entity Roles - tblEMEntityToContact')
 	BEGIN
 		-- Loop through customers
 		DECLARE @currentRow INT
@@ -510,8 +510,8 @@ GO
 		--												FROM tblEMEntityToContact 
 		--												WHERE intEntityRoleId IS NOT NULL))
 				
-		PRINT N'ADD LOG TO tblMigrationLog'
-		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		PRINT N'ADD LOG TO tblSMMigrationLog'
+		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 		VALUES('System Manager', 'Migrate All Entity Roles - tblEMEntityToContact', 'Migrate All Entity Roles - tblEMEntityToContact', GETDATE())
 	END	
 GO
@@ -551,7 +551,7 @@ GO
 --	SET @currentRow = @currentRow + 1
 --	END
 --GO
---	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Update Level/Sorting Order - Approval List')
+--	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Update Level/Sorting Order - Approval List')
 --	BEGIN
 
 --		DECLARE @currentRow INT
@@ -582,8 +582,8 @@ GO
 --		SET @currentRow = @currentRow + 1
 --		END
 		
---		PRINT N'ADD LOG TO tblMigrationLog'
---		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+--		PRINT N'ADD LOG TO tblSMMigrationLog'
+--		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 --		VALUES('System Manager', 'Update Level/Sorting Order - Approval List', 'Update Level/Sorting Order - Approval List', GETDATE())
 
 --	END
@@ -606,15 +606,15 @@ GO
 GO
 	PRINT N'UPDATE COMPANY LOCATION SUB LOCATION COUNTRY'
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Update Sub Location Country - Company Location')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Update Sub Location Country - Company Location')
 	BEGIN
 		UPDATE SubLocation SET SubLocation.intCountryId = ZipCode.intCountryID
 		FROM tblSMCompanyLocationSubLocation SubLocation
 		INNER JOIN tblSMZipCode ZipCode ON SubLocation.strZipCode = ZipCode.strZipCode
 		WHERE SubLocation.intCountryId IS NULL AND SubLocation.strZipCode <> ''
 		
-		PRINT N'ADD LOG TO tblMigrationLog'
-		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		PRINT N'ADD LOG TO tblSMMigrationLog'
+		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 		VALUES('System Manager', 'Update Sub Location Country - Company Location', 'Update Sub Location Country - Company Location', GETDATE())
 	END
 GO

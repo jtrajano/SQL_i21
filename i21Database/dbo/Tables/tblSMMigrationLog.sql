@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblMigrationLog]
+﻿CREATE TABLE [dbo].[tblSMMigrationLog]
 (
 	[MigrationLogId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [strModule] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 

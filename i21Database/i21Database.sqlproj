@@ -2309,7 +2309,7 @@
     <Build Include="dbo\Views\vyuTMSiteDeliveryHistory.sql" />
     <Build Include="dbo\Views\vyuTMSiteEventHistory.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityCompanyLocationRolePermission.sql" />
-    <Build Include="dbo\Tables\tblMigrationLog.sql" />
+    <Build Include="dbo\Tables\tblSMMigrationLog.sql" />
     <Build Include="dbo\Views\vyuTMSiteCustomer.sql" />
     <Build Include="dbo\Tables\tblHDTicketLink.sql" />
     <Build Include="dbo\Tables\tblHDTicketLinkType.sql" />
