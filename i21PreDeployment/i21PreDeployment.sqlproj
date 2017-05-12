@@ -136,7 +136,6 @@
     <None Include="Scripts\Pre-Deployment\12_EM\14_EntityUserSecuritySchemaUpdateForTM06.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\15_DropSMUserSecurityTrigger.sql" />
     <None Include="Scripts\Pre-Deployment\16_HD\HDGroupUserConfigDataEntryFix.sql" />
-    <None Include="Scripts\Pre-Deployment\19_MF\01_Recipe_UOM_Update.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\16_Drop_tblEntity_related_constraints.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\18_FixDuplicateLocationEntry.sql" />
     <None Include="Scripts\Pre-Deployment\16_HD\OpportunitySourceDataFix.sql" />
