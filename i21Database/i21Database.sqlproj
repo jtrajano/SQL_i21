@@ -5236,6 +5236,7 @@
     <Build Include="dbo\Views\vyuLGGenerateLoad.sql" />
     <Build Include="dbo\Views\vyuPATRefundRate.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAddOppositeRateDetail.sql" />
+    <Build Include="dbo\Views\vyuRKFuturesPSHeaderNotMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
