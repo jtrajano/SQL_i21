@@ -19,7 +19,7 @@
        tblSCTicket.dtmTicketVoidDateTime,
        tblSCTicket.intProcessingLocationId,
        tblSCTicket.strScaleOperatorUser,
-       tblSCTicket.intScaleOperatorId,
+       tblSCTicket.intEntityScaleOperatorId,
        tblSCTicket.strPurchaseOrderNumber,
        tblSCTicket.strTruckName,
        tblSCTicket.strDriverName,
