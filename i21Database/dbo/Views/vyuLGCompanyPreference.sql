@@ -34,6 +34,7 @@ SELECT CP.intCompanyPreferenceId
 		END AS strDefaultTransportationMode
 	,CP.intDefaultPositionId
 	,PO.strPosition
+	,PO.strPositionType
 	,CP.intDefaultLeastCostSourceType
 	,CASE CP.intDefaultLeastCostSourceType
 		WHEN 1
