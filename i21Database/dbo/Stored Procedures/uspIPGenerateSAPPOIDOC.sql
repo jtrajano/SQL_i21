@@ -59,7 +59,8 @@ Declare @intMinSeq					INT,
 		@strProductType				NVARCHAR(100),
 		@strVendorBatch				NVARCHAR(100),
 		@str10Zeros					NVARCHAR(50)='0000000000',
-		@strLoadingPoint			NVARCHAR(200)
+		@strLoadingPoint			NVARCHAR(200),
+		@strPackingDescription		NVARCHAR(50)
 
 Declare @tblOutput AS Table
 (
@@ -140,7 +141,12 @@ Begin
 					Where intContractHeaderId=@intContractHeaderId AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'
 				End
 			Else
-				Set @strHeaderState='ADDED'
+				Begin	
+					If Exists (Select 1 From tblCTContractFeed Where intContractHeaderId=@intContractHeaderId AND ISNULL(strFeedStatus,'')='' AND UPPER(strRowState)='DELETE')
+						Set @strHeaderState='MODIFIED'
+					Else
+						Set @strHeaderState='ADDED'
+				End
 		End
 		Else
 		Begin
@@ -157,7 +163,12 @@ Begin
 					AND ISNULL(strFeedStatus,'')='' AND UPPER(strCommodityCode)='TEA'		
 				End
 			Else
-				Set @strHeaderState='ADDED'
+				Begin	
+					If Exists (Select 1 From tblCTContractFeed Where intContractHeaderId=@intContractHeaderId AND ISNULL(strFeedStatus,'')='' AND UPPER(strRowState)='DELETE')
+						Set @strHeaderState='MODIFIED'
+					Else
+						Set @strHeaderState='ADDED'
+				End
 		End
 	End
 
@@ -210,7 +221,8 @@ Begin
 			@strFeedStatus				= strFeedStatus,
 			@strContractItemNo			= strContractItemNo,
 			@strOrigin					= strOrigin,
-			@strLoadingPoint			= strLoadingPoint	
+			@strLoadingPoint			= strLoadingPoint,
+			@strPackingDescription		= strPackingDescription	
 		From tblCTContractFeed Where intContractFeedId=@intMinSeq
 
 		Set @strSeq=ISNULL(@strSeq,'') + CONVERT(VARCHAR,@intContractSeq) + ','
@@ -375,6 +387,7 @@ Begin
 					Set @strItemXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
 				Else
 					Set @strItemXml += '<FREE_ITEM>'	+ ' '	+ '</FREE_ITEM>'
+				Set @strItemXml += '<SHIPPING>'	+ CASE WHEN UPPER(@strPackingDescription)='BULK' THEN '13' ELSE '12' END + '</SHIPPING>'
 				Set @strItemXml += '<CONF_CTRL>'	+ 'SL08'							+ '</CONF_CTRL>'
 				If UPPER(@strCommodityCode)='COFFEE'
 					Set @strItemXml += '<VEND_PART>'	+ ISNULL(@strTerm,'')			+ '</VEND_PART>'
@@ -413,6 +426,7 @@ Begin
 				Set @strItemXXml += '<FREE_ITEM>'	+ 'X'	+ '</FREE_ITEM>'
 				If @strDocType='ZHUB'
 					Set @strItemXXml += '<GR_BASEDIV>'	+ 'X'	+ '</GR_BASEDIV>'	
+				Set @strItemXXml += '<SHIPPING>'		+ 'X'	+ '</SHIPPING>'
 				Set @strItemXXml += '<CONF_CTRL>'		+ 'X'	+ '</CONF_CTRL>'
 				If @strTerm IS NOT NULL AND UPPER(@strCommodityCode)='COFFEE'
 					Set @strItemXXml += '<VEND_PART>'	+ 'X'		+ '</VEND_PART>'
