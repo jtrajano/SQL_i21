@@ -43,7 +43,8 @@ AS
 							END	
 					ELSE	0
 			END	dblCashPrice,
-			LP.strCity			AS	strLoadingPoint
+			LP.strCity			AS	strLoadingPoint,
+			DL.strPackingDescription
 			
 	FROM	vyuCTContractSequence	CD
 	JOIN	tblCTContractDetail		DL	ON	DL.intContractDetailId		=	CD.intContractDetailId
