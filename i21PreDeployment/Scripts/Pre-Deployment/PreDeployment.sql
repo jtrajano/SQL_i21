@@ -31,8 +31,6 @@
 
 -- CM
 :r .\2_CM\1_CM.sql
-:r .\2_CM\2_1410_to_1420.sql
-:r .\2_CM\3_1420_to_1430.sql
 
 -- DB
 :r .\3_DB\1_1340_to_1410.sql
@@ -50,9 +48,6 @@
 :r .\4_SM\8_TransactionManagement.sql
 :r .\4_SM\9_DropTblSMAlternateApproverGroup.sql
 :r .\4_SM\10_DropTblSMApproverConfigurationForTransaction.sql
-
--- CM
-:r .\5_CM\1_DropTriggers.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql

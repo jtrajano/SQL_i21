@@ -179,11 +179,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\2_DataImportStatus.sql
 :r .\CM\3_PopulateSourceSystemData.sql
 :r .\CM\4_DataFix.sql
-:r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPayment.sql
-:r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPaymentOverflow.sql
-:r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportCMChecks.sql
-:r .\CM\Reports\CheckVoucherMiddle.sql
-:r .\CM\Reports\CheckVoucherMiddleOverflow.sql
 
 --Accounts Receivable
 :r .\AR\EntityTableDataFix.sql

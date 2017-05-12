@@ -129,8 +129,6 @@
     <Folder Include="Scripts\Post-Deployment\AP" />
     <Folder Include="Scripts\Post-Deployment\FRD" />
     <Folder Include="Scripts\Post-Deployment\AP" />
-    <Folder Include="Scripts\Post-Deployment\CM\Reports" />
-    <Folder Include="Scripts\Post-Deployment\CM\Reports\SubReports" />
     <Folder Include="Scripts\Post-Deployment\HD" />
     <Folder Include="Scripts\Post-Deployment\HD\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\IC" />
@@ -629,9 +627,6 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportCMChecks.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleReport.sql" />
-    <None Include="Scripts\Post-Deployment\CM\Reports\CheckVoucherMiddle.sql" />
-    <None Include="Scripts\Post-Deployment\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPayment.sql" />
-    <None Include="Scripts\Post-Deployment\CM\Reports\SubReports\CheckVoucherMiddleSubReportCMChecks.sql" />
     <Build Include="dbo\Tables\tblHDTempEmail.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetail.sql" />
     <Build Include="dbo\Functions\fnHDDecodeComment.sql" />
@@ -5287,8 +5282,6 @@
     <Build Include="dbo\Views\vyuPRPaycheckYTD.sql" />
     <None Include="Scripts\Post-Deployment\EM\011_FixEntityLocationNullTerms.sql" />
     <None Include="i21Database2014.publish.publish.xml" />
-    <None Include="Scripts\Post-Deployment\CM\Reports\CheckVoucherMiddleOverflow.sql" />
-    <None Include="Scripts\Post-Deployment\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPaymentOverflow.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPPaymentOverflow.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckOverflow.sql" />
     <None Include="Scripts\Post-Deployment\ST\1_FileFieldMapping_PricebookSale.sql" />
