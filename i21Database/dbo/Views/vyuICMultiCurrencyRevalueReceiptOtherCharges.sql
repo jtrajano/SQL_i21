@@ -1,40 +1,38 @@
 ﻿CREATE VIEW [dbo].[vyuICMultiCurrencyRevalueReceiptOtherCharges]
 AS
 SELECT
-	 strTransactionType			= r.strReceiptType
-	,strTransactionId			= r.strReceiptNumber
-	,strTransactionDate			= r.dtmReceiptDate
+	 strTransactionType			= rc.strReceiptType
+	,strTransactionId			= rc.strSourceNumber
+	,strTransactionDate			= rc.dtmDate
 	,strTransactionDueDate		= CAST(NULL AS NVARCHAR(50))
-	,strVendorName				= e.strName
+	,strVendorName				= rc.strName
 	,strCommodity				= c.strCommodityCode
 	,strLineOfBusiness			= lob.strLineOfBusiness
 	,strLocation				= loc.strLocationName
 	,strTicket					= rc.strScaleTicketNumber
-	,strContractNumber			= oc.strContractNumber
-	,strItemId					= oc.strItemNo
-	,dblQuantity				= rc.dblQuantityBilled
+	,strContractNumber			= rc.strContractNumber
+	,strItemId					= rc.strItemNo
+	,dblQuantity				= rc.dblOrderQty
 	,dblUnitPrice				= rc.dblUnitCost
-	,dblAmount					= oc.dblAmount
+	,dblAmount					= rc.dblUnitCost + rc.dblTax
 	,intCurrencyId				= rc.intCurrencyId
 	,intForexRateType			= rc.intForexRateTypeId
 	,strForexRateType			= ex.strCurrencyExchangeRateType
 	,dblForexRate				= rc.dblForexRate
-	,dblHistoricAmount			= CAST(NULL AS NUMERIC(18, 6))
+	,dblHistoricAmount			= (rc.dblUnitCost + rc.dblTax) * rc.dblForexRate
 	,dblNewForexRate			= 0 --Calcuate By GL
 	,dblNewAmount				= 0 --Calcuate By GL
 	,dblUnrealizedDebitGain		= 0 --Calcuate By GL
 	,dblUnrealizedCreditGain	= 0 --Calcuate By GL
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
-FROM vyuICChargesForBilling rc
-	LEFT OUTER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = rc.intInventoryReceiptId
-	LEFT JOIN tblEMEntity e ON e.intEntityId = r.intEntityVendorId
+FROM 
+	vyuICChargesForBilling rc
 	LEFT JOIN tblICItem i ON i.intItemId = rc.intItemId
+	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = rc.intLocationId
+	LEFT JOIN tblSMCurrencyExchangeRateType ex ON ex.intCurrencyExchangeRateTypeId = rc.intForexRateTypeId
 	LEFT JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
 	LEFT JOIN tblICCategory ct ON ct.intCategoryId = i.intCategoryId
 	LEFT JOIN tblSMLineOfBusiness lob ON lob.intLineOfBusinessId = ct.intLineOfBusinessId
-	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = r.intLocationId
-	LEFT JOIN tblSMCurrencyExchangeRateType ex ON ex.intCurrencyExchangeRateTypeId = rc.intForexRateTypeId
-	LEFT JOIN vyuICGetInventoryReceiptCharge oc ON oc.intInventoryReceiptId = r.intInventoryReceiptId
-		AND oc.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
-WHERE r.ysnPosted = 1
+WHERE 
+	rc.intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
