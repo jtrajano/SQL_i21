@@ -34,7 +34,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmDepartureTime).HasColumnName("dtmDepartureTime");
             this.Property(t => t.dtmArrivalTime).HasColumnName("dtmArrivalTime");
             this.Property(t => t.dtmDeliveredDate).HasColumnName("dtmDeliveredDate");
-            this.Property(t => t.dtmFreeTime).HasColumnName("dtmFreeTime");
             this.Property(t => t.strReceivedBy).HasColumnName("strReceivedBy");
             this.Property(t => t.strComment).HasColumnName("strComment");
             this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
@@ -42,6 +41,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCreatedUserId).HasColumnName("intCreatedUserId");
             this.Property(t => t.intShipToCompanyLocationId).HasColumnName("intShipToCompanyLocationId");
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.strFreeTime).HasColumnName("strFreeTime");
 
             this.HasMany(p => p.tblICInventoryShipmentItems)
                 .WithRequired(p => p.tblICInventoryShipment)
@@ -149,7 +149,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmDepartureTime).HasColumnName("dtmDepartureTime");
             this.Property(t => t.dtmArrivalTime).HasColumnName("dtmArrivalTime");
             this.Property(t => t.dtmDeliveredDate).HasColumnName("dtmDeliveredDate");
-            this.Property(t => t.dtmFreeTime).HasColumnName("dtmFreeTime");
             this.Property(t => t.strReceivedBy).HasColumnName("strReceivedBy");
             this.Property(t => t.strComment).HasColumnName("strComment");
             this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");

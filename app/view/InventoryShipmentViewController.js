@@ -41,7 +41,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 {dataIndex: 'dtmDepartureTime', text: 'Departure Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
                 {dataIndex: 'dtmArrivalTime', text: 'Arrival Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
                 {dataIndex: 'dtmDeliveredDate', text: 'Delivered Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
-                {dataIndex: 'dtmFreeTime', text: 'Free Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                {dataIndex: 'strFreeTime', text: 'Free Time', flex: 1, dataType: 'string', hidden: true },
                 {dataIndex: 'strReceivedBy', text: 'Received By', flex: 1, dataType: 'string', hidden: true },
                 {dataIndex: 'strComment', text: 'Comment', flex: 1, dataType: 'string', hidden: true }
             ],
@@ -216,7 +216,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnAddOrders: {
                 hidden: '{checkHiddenAddOrders}'
             },
-
+            
             txtShipmentNo: '{current.strShipmentNumber}',
             dtmShipDate: {
                 value: '{current.dtmShipDate}',
@@ -351,8 +351,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 value: '{current.dtmDeliveredDate}',
                 readOnly: '{current.ysnPosted}'
             },
-            dtmFreeTime: {
-                value: '{current.dtmFreeTime}',
+            txtFreeTime: {
+                value: '{current.strFreeTime}',
                 readOnly: '{current.ysnPosted}'
             },
             txtReceivedBy: '{current.strReceivedBy}',

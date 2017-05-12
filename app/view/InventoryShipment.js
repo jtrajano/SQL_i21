@@ -824,7 +824,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'textfield',
+                                                                        xtype: 'timefield',
                                                                         flex: 1,
                                                                         itemId: 'txtAppointmentTime',
                                                                         margin: '0 5 0 0',
@@ -832,7 +832,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'textfield',
+                                                                        xtype: 'timefield',
                                                                         flex: 1,
                                                                         itemId: 'txtDepartureTime',
                                                                         margin: '0 5 0 0',
@@ -840,7 +840,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcombobox',
+                                                                        xtype: 'timefield',
                                                                         flex: 1,
                                                                         itemId: 'txtArrivalTime',
                                                                         margin: '0 5 0 0',
@@ -866,9 +866,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'datefield',
+                                                                        xtype: 'textfield',
                                                                         flex: 1,
-                                                                        itemId: 'dtmFreeTime',
+                                                                        itemId: 'txtFreeTime',
                                                                         margin: '0 5 0 0',
                                                                         fieldLabel: 'Free Time',
                                                                         labelWidth: 110
