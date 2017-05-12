@@ -13,7 +13,7 @@
     [dtmTicketVoidDateTime] DATETIME NULL, 
     [intProcessingLocationId] INT NULL, 
     [strScaleOperatorUser] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [intScaleOperatorId] INT NOT NULL, 
+    [intEntityScaleOperatorId] INT NULL, 
     [strPurchaseOrderNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [strTruckName] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
     [strDriverName] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
@@ -250,7 +250,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
-    @level2name = N'intScaleOperatorId'
+    @level2name = N'intEntityScaleOperatorId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Purchase Order Number',

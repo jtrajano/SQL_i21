@@ -17,7 +17,7 @@
     ,SCTicket.dtmTicketVoidDateTime
     ,SCTicket.intProcessingLocationId
     ,SCTicket.strScaleOperatorUser
-    ,SCTicket.intScaleOperatorId
+    ,SCTicket.intEntityScaleOperatorId
     ,SCTicket.strPurchaseOrderNumber
     ,SCTicket.strTruckName
     ,SCTicket.strDriverName
