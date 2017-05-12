@@ -13,15 +13,19 @@
 		  ,el.strLocationName
 		  ,elc.strTimezone
 		  ,intConcurrencyId = 1
-		  ,intTicketProductId = (select top 1 intProductId from tblARCustomerProductVersion where intCustomerId = c.[intEntityId])
-		  ,intVersionId = (select top 1 intVersionId from tblARCustomerProductVersion where intCustomerId = c.[intEntityId])
+		  ,intTicketProductId = cpv.intProductId
+		  ,intVersionId = cpv.intVersionId
+		  ,intModuleId = cpv.intModuleId
+		  ,strComapny = cpv.strCompany
 		  ,ysnActive = c.ysnActive
 		  ,ysnActiveContact = ec.ysnActive
 		  ,ec.imgPhoto
 		  ,ysnBillable = c.ysnHDBillableSupport
 		  ,strEntityType = (select top 1 et.strType from tblEMEntityType et where et.intEntityId = c.[intEntityId] and et.strType in ('Customer','Prospect'))
-		  ,intModuleId = (select top 1 intModuleId from tblARCustomerProductVersion where intCustomerId = c.[intEntityId])
-		  ,strComapny = (select top 1 strCompany from tblARCustomerProductVersion where intCustomerId = c.[intEntityId])
+		  ,strProjectionProduct = (select top 1 strProduct from tblHDTicketProduct where intProductId = cpv.intProductId)
+		  ,strProjectionVersionNo = (select top 1 strVersionNo from tblHDVersion where intVersionId = cpv.intVersionId)
+		  ,strProjectionModule = (select top 1 strModule from tblHDModule where intModuleId = cpv.intModuleId)
+		  ,intTicketGroupId = (select top 1 intTicketGroupId from tblHDModule where intModuleId = cpv.intModuleId)
 		from
 			tblARCustomer c
 		  inner join tblEMEntityToContact etc on etc.intEntityId = c.[intEntityId]
@@ -30,7 +34,6 @@
 		  left outer join tblEMEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
 		  left outer join tblEMEntityToContact etcc on etcc.intEntityContactId = etc.intEntityContactId
 		  left outer join tblEMEntityLocation elc on elc.intEntityLocationId = etcc.intEntityLocationId
-		  left join tblEMEntityPhoneNumber ph 
-		   on ec.intEntityId = ph.intEntityId
-		  left join tblEMEntityMobileNumber mob
-		   on ec.intEntityId = mob.intEntityId
+		  left join tblEMEntityPhoneNumber ph on ec.intEntityId = ph.intEntityId
+		  left join tblEMEntityMobileNumber mob on ec.intEntityId = mob.intEntityId
+		  left join tblARCustomerProductVersion cpv on cpv.intCustomerId = c.intEntityId
