@@ -162,6 +162,183 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		  AND TCE.intEntityEmployeeId = @intEntityEmployeeId
 		  AND EL.strCalculationType IN ('Overtime')
 
+		/* Insert Shift Differential Hours To Pay Group Detail */
+		INSERT INTO tblPRPayGroupDetail
+			(intPayGroupId
+			,intEntityEmployeeId
+			,intEmployeeEarningId
+			,intTypeEarningId
+			,intDepartmentId
+			,strCalculationType
+			,dblDefaultHours
+			,dblHoursToProcess
+			,dblAmount
+			,dblTotal
+			,dtmDateFrom
+			,dtmDateTo
+			,intSort
+			,intConcurrencyId)
+		SELECT
+			EL.intPayGroupId
+			,EL.intEntityEmployeeId
+			,EL.intEmployeeEarningId
+			,EL.intTypeEarningId
+			,SD.intEmployeeDepartmentId
+			,EL.strCalculationType
+			,0
+			,0
+			,SUM(SD.dblTotal)
+			,SUM(SD.dblTotal)
+			,@dtmBegin 
+			,@dtmEnd
+			,1
+			,1
+		FROM
+			(SELECT TCSH.*, 
+				dblTotal = CONVERT(NUMERIC(18, 2), dblHours * CASE WHEN (strDifferentialPay = 'Shift') THEN dblMaxRate ELSE dblRate END)
+			FROM 
+				(SELECT 
+					SHIFTHOURS.*,
+					MAXRATE.dblMaxRate
+				FROM
+				(SELECT TCS.*
+						,dblHours = CONVERT(NUMERIC(18, 2),
+							CASE WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftStart AND dtmTimeOut < dtmShiftEnd) THEN
+								CAST(DATEDIFF(MI, dtmShiftStart, dtmTimeOut) AS NUMERIC(18, 6)) / 60
+								WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut > dtmShiftEnd) THEN
+								CAST(DATEDIFF(MI, dtmTimeIn, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
+								WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut < dtmShiftEnd) THEN
+								CAST(DATEDIFF(MI, dtmTimeIn, dtmTimeOut) AS NUMERIC(18, 6)) / 60
+								WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftEnd) THEN
+								CAST(DATEDIFF(MI, dtmShiftStart, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
+								ELSE 0
+						END)
+					FROM
+					(SELECT
+						TC.intTimecardId, TC.dtmDate, TC.intEntityEmployeeId, TC.intEmployeeEarningId, EE.intTypeEarningId,
+						TC.intEmployeeDepartmentId,	DS.intShiftNo, TC.dtmTimeIn, TC.dtmTimeOut, D.strDifferentialPay
+						,dtmShiftStart = DATETIMEFROMPARTS(YEAR(dtmDate), MONTH(dtmDate), DAY(dtmDate), DATEPART(HH, dtmStart), DATEPART(MI, dtmStart), 
+											DATEPART(SS, dtmStart), DATEPART(MS, dtmStart))
+						,dtmShiftEnd = CASE WHEN (dtmStart > dtmEnd) THEN
+												DATETIMEFROMPARTS(YEAR(DATEADD(DD, 1, dtmDate)), MONTH(DATEADD(DD, 1, dtmDate)), DAY(DATEADD(DD, 1, dtmDate)), 
+												DATEPART(HH, dtmEnd), DATEPART(MI, dtmEnd), DATEPART(SS, dtmEnd), DATEPART(MS, dtmEnd))
+											ELSE
+												DATETIMEFROMPARTS(YEAR(dtmDate), MONTH(dtmDate), DAY(dtmDate), 
+												DATEPART(HH, dtmEnd), DATEPART(MI, dtmEnd), DATEPART(SS, dtmEnd), DATEPART(MS, dtmEnd))
+											END
+						,dblRate = CONVERT(NUMERIC(18, 6),
+									CASE WHEN (strRateType = 'Per Hour') THEN
+											DS.dblRate
+										ELSE 
+											ISNULL((SELECT TOP 1 dblRateAmount FROM tblPREmployeeEarning 
+														WHERE intEmployeeEarningId = TC.intEmployeeEarningId 
+														AND intEntityEmployeeId = TC.intEntityEmployeeId), 0) 
+											* DS.dblRate
+										END)
+					FROM 
+						(SELECT intTimecardId, intEntityEmployeeId, intEmployeeEarningId, intEmployeeDepartmentId, dtmDate
+							,dtmTimeIn = DATEADD(MI, DATEDIFF(MI, GETUTCDATE(), GETDATE()), dtmTimeIn)
+							,dtmTimeOut = DATEADD(MI, DATEDIFF(MI, GETUTCDATE(), GETDATE()), dtmTimeOut) 
+						FROM tblPRTimecard
+						WHERE ysnApproved = 1 AND intPaycheckId IS NULL AND intPayGroupDetailId IS NULL AND dblHours > 0
+							AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
+							AND CAST(FLOOR(CAST(dtmTimeIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmTimeIn) AS FLOAT)) AS DATETIME)
+							AND CAST(FLOOR(CAST(dtmTimeOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmTimeOut) AS FLOAT)) AS DATETIME)) TC
+						INNER JOIN tblPREmployeeEarning EE
+							ON TC.intEmployeeEarningId = EE.intEmployeeEarningId
+							AND TC.intEntityEmployeeId = EE.intEntityEmployeeId
+						LEFT JOIN tblPRDepartmentShift DS 
+							ON TC.intEmployeeDepartmentId = DS.intDepartmentId
+						INNER JOIN tblPRDepartment D
+							ON D.intDepartmentId = DS.intDepartmentId
+					) TCS
+					WHERE 
+						CONVERT(NUMERIC(18, 2),
+							CASE WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftStart AND dtmTimeOut < dtmShiftEnd) THEN
+								CAST(DATEDIFF(MI, dtmShiftStart, dtmTimeOut) AS NUMERIC(18, 6)) / 60
+								WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut > dtmShiftEnd) THEN
+								CAST(DATEDIFF(MI, dtmTimeIn, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
+								WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut < dtmShiftEnd) THEN
+								CAST(DATEDIFF(MI, dtmTimeIn, dtmTimeOut) AS NUMERIC(18, 6)) / 60
+								WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftEnd) THEN
+								CAST(DATEDIFF(MI, dtmShiftStart, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
+								ELSE 0
+						END) > 0
+					) SHIFTHOURS
+					INNER JOIN 
+					(SELECT intTimecardId
+							,dblMaxRate = MAX(dblRate)
+						FROM
+						(SELECT
+							TC.intTimecardId, TC.dtmDate, TC.intEntityEmployeeId, TC.intEmployeeEarningId, EE.intTypeEarningId,
+							TC.intEmployeeDepartmentId,	DS.intShiftNo, TC.dtmTimeIn, TC.dtmTimeOut, D.strDifferentialPay
+							,dtmShiftStart = DATETIMEFROMPARTS(YEAR(dtmDate), MONTH(dtmDate), DAY(dtmDate), DATEPART(HH, dtmStart), DATEPART(MI, dtmStart), 
+												DATEPART(SS, dtmStart), DATEPART(MS, dtmStart))
+							,dtmShiftEnd = CASE WHEN (dtmStart > dtmEnd) THEN
+													DATETIMEFROMPARTS(YEAR(DATEADD(DD, 1, dtmDate)), MONTH(DATEADD(DD, 1, dtmDate)), DAY(DATEADD(DD, 1, dtmDate)), 
+													DATEPART(HH, dtmEnd), DATEPART(MI, dtmEnd), DATEPART(SS, dtmEnd), DATEPART(MS, dtmEnd))
+												ELSE
+													DATETIMEFROMPARTS(YEAR(dtmDate), MONTH(dtmDate), DAY(dtmDate), 
+													DATEPART(HH, dtmEnd), DATEPART(MI, dtmEnd), DATEPART(SS, dtmEnd), DATEPART(MS, dtmEnd))
+												END
+							,dblRate = CONVERT(NUMERIC(18, 6),
+										CASE WHEN (strRateType = 'Per Hour') THEN
+												DS.dblRate
+											ELSE 
+												ISNULL((SELECT TOP 1 dblRateAmount FROM tblPREmployeeEarning 
+															WHERE intEmployeeEarningId = TC.intEmployeeEarningId 
+															AND intEntityEmployeeId = TC.intEntityEmployeeId), 0) 
+												* DS.dblRate
+											END)
+						FROM 
+							(SELECT intTimecardId, intEntityEmployeeId, intEmployeeEarningId, intEmployeeDepartmentId, dtmDate
+								,dtmTimeIn = DATEADD(MI, DATEDIFF(MI, GETUTCDATE(), GETDATE()), dtmTimeIn)
+								,dtmTimeOut = DATEADD(MI, DATEDIFF(MI, GETUTCDATE(), GETDATE()), dtmTimeOut) 
+							FROM tblPRTimecard
+							WHERE ysnApproved = 1 AND intPaycheckId IS NULL AND intPayGroupDetailId IS NULL AND dblHours > 0
+								AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
+								AND CAST(FLOOR(CAST(dtmTimeIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmTimeIn) AS FLOAT)) AS DATETIME)
+								AND CAST(FLOOR(CAST(dtmTimeOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmTimeOut) AS FLOAT)) AS DATETIME)) TC
+							INNER JOIN tblPREmployeeEarning EE
+								ON TC.intEmployeeEarningId = EE.intEmployeeEarningId
+								AND TC.intEntityEmployeeId = EE.intEntityEmployeeId
+							LEFT JOIN tblPRDepartmentShift DS 
+								ON TC.intEmployeeDepartmentId = DS.intDepartmentId
+							INNER JOIN tblPRDepartment D
+								ON D.intDepartmentId = DS.intDepartmentId
+						) TCS
+						WHERE 
+							CONVERT(NUMERIC(18, 2),
+								CASE WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftStart AND dtmTimeOut < dtmShiftEnd) THEN
+									CAST(DATEDIFF(MI, dtmShiftStart, dtmTimeOut) AS NUMERIC(18, 6)) / 60
+									WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut > dtmShiftEnd) THEN
+									CAST(DATEDIFF(MI, dtmTimeIn, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
+									WHEN (dtmTimeIn > dtmShiftStart AND dtmTimeIn < dtmShiftEnd AND dtmTimeOut < dtmShiftEnd) THEN
+									CAST(DATEDIFF(MI, dtmTimeIn, dtmTimeOut) AS NUMERIC(18, 6)) / 60
+									WHEN (dtmTimeIn < dtmShiftStart AND dtmTimeOut > dtmShiftEnd) THEN
+									CAST(DATEDIFF(MI, dtmShiftStart, dtmShiftEnd) AS NUMERIC(18, 6)) / 60
+									ELSE 0
+							END) > 0
+						GROUP BY intTimecardId
+					) MAXRATE
+					ON SHIFTHOURS.intTimecardId = MAXRATE.intTimecardId
+				) TCSH
+			) SD
+			LEFT JOIN tblPREmployeeEarning EL
+			ON SD.intTypeEarningId = EL.intEmployeeEarningLinkId
+			AND SD.intEntityEmployeeId = EL.intEntityEmployeeId
+					WHERE SD.intEmployeeDepartmentId = @intEmployeeDepartmentId
+						AND SD.dblTotal > 0
+						AND SD.intEntityEmployeeId = @intEntityEmployeeId
+						AND EL.strCalculationType IN ('Shift Differential')
+			GROUP BY
+				EL.intPayGroupId
+				,EL.intEntityEmployeeId
+				,EL.intEmployeeEarningId
+				,EL.intTypeEarningId
+				,SD.intEmployeeDepartmentId
+				,EL.strCalculationType
+
 		/* Update Processed Timecards */
 		UPDATE tblPRTimecard
 		SET dblRegularHours = Y.dblRegularHours
