@@ -56,7 +56,7 @@ BEGIN TRY
 				dtmEndDate,					dtmFeedCreated,				strSubmittedBy,			strSubmittedByNo,
 				strOrigin,					dblNetWeight,				strNetWeightUOM,		strVendorAccountNum,
 				strTermCode,				strContractItemNo,			strContractItemName,	strERPItemNumber,			
-				strERPBatchNumber,			strLoadingPoint
+				strERPBatchNumber,			strLoadingPoint,			strPackingDescription
 		)
 		SELECT	intContractHeaderId,		intContractDetailId,		strCommodityCode,		strCommodityDesc,
 				strContractBasis,			strContractBasisDesc,		strSubLocation,			strCreatedBy,
@@ -70,7 +70,7 @@ BEGIN TRY
 				dtmEndDate,					GETDATE(),					strSubmittedBy,			strSubmittedByNo,
 				strOrigin,					dblNetWeight,				strNetWeightUOM,		strVendorAccountNum,
 				strTermCode,				strContractItemNo,			strContractItemName,	strERPItemNumber,			
-				strERPBatchNumber,			strLoadingPoint
+				strERPBatchNumber,			strLoadingPoint,			strPackingDescription
 		FROM	vyuCTContractFeed
 		WHERE	intContractDetailId = @intContractDetailId
 
