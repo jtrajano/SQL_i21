@@ -5233,7 +5233,6 @@
     <Build Include="dbo\Views\vyuCFCalculatedInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceToStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPQuickVoucherSearch.sql" />
-    <Build Include="vyuPATRefundRate.sql" />
     <Build Include="dbo\Tables\tblICSearchShipmentInvoice.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentInvoiceItems.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentInvoicePriceCharges.sql" />
@@ -5250,6 +5249,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryShipmentBillOfLading.sql" />
     <Build Include="dbo\Views\vyuLGStockSales.sql" />
     <Build Include="dbo\Views\vyuLGGenerateLoad.sql" />
+    <Build Include="dbo\Views\vyuPATRefundRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
