@@ -26,11 +26,11 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.form.field.ComboBox',
         'Ext.form.field.Date',
         'Ext.form.field.TextArea',
-        'Ext.form.field.Number',
         'Ext.grid.Panel',
         'Ext.form.Label',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
+        'Ext.form.field.Number',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.grid.column.Check',
@@ -866,13 +866,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'numberfield',
+                                                                        xtype: 'textfield',
                                                                         flex: 1,
                                                                         itemId: 'txtFreeTime',
                                                                         margin: '0 5 0 0',
                                                                         fieldLabel: 'Free Time',
-                                                                        labelWidth: 110,
-                                                                        minValue: 0
+                                                                        labelWidth: 110
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
