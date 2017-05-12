@@ -785,6 +785,9 @@ namespace iRely.Inventory.Model
         public string strStockUOM { get; set; }
         public string strCategoryCode { get; set; }
         public string strCommodityCode { get; set; }
+        public string strInTransitLocationName { get; set; }
+        public int? intLocationId { get; set; }
+        public int? intInTransitLocationId { get; set; }
     }
 
     public class vyuSMGetCompanyLocationSearchList
