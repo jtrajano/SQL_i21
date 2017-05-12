@@ -67,7 +67,7 @@ BEGIN
 				SET @isTermExists = 0;
 			
 				SELECT TOP 1 
-				 @strTerm			= strTerm			
+				 @strTerm			= ISNULL(ISNULL(strTerm, strTermCode),'')
 				,@strTermCode		= strTermCode		 
 				,@strType			= strType			 
 				,@dblDiscountEP		= dblDiscountEP		 
@@ -146,7 +146,7 @@ BEGIN
 				SET @isTermExists = 0;
 			
 				SELECT TOP 1 
-				 @strTerm			= strTerm			
+				 @strTerm			= ISNULL(ISNULL(strTerm, strTermCode),'')			
 				,@strTermCode		= strTermCode		 
 				,@strType			= strType			 
 				,@dblDiscountEP		= dblDiscountEP		 
