@@ -112,7 +112,7 @@ END
 /*Clear and Update Employee Change Log data */
 DELETE FROM tblPREmployeeChangeLog
 INSERT INTO tblPREmployeeChangeLog (
-	intEmployeeChangeLogId
+	intAuditLogId
 	,intEntityEmployeeId
 	,strEntityNo
 	,strName
@@ -125,7 +125,7 @@ INSERT INTO tblPREmployeeChangeLog (
 	,strFrom
 	,strTo)
 SELECT
-	intEmployeeChangeLogId
+	intAuditLogId
 	,intEntityEmployeeId
 	,strEntityNo
 	,strName
@@ -157,7 +157,7 @@ SELECT
 				ELSE strTo END
 FROM
 	(SELECT 
-		intEmployeeChangeLogId = AUD.intAuditLogId
+		intAuditLogId = AUD.intAuditLogId
 		,intEntityEmployeeId = EM.intEntityId
 		,strEntityNo = EM.strEntityNo
 		,strName = EM.strName
