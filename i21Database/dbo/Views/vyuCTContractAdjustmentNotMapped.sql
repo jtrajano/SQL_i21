@@ -14,7 +14,9 @@ AS
 			CD.dblCashPrice,
 			CD.strPriceUOM,
 			CD.dblBalance,
-			CD.strItemUOM
+			CD.strItemUOM,
+			GA.strAccountId
 			
 	FROM	tblCTContractAdjustment	AD
-	JOIN	vyuCTContractDetailView	CD	ON	AD.intContractDetailId	=	CD.intContractDetailId
+	JOIN	vyuCTContractSequence	CD	ON	AD.intContractDetailId	=	CD.intContractDetailId
+	JOIN	tblGLAccount			GA	ON	GA.intAccountId			=	AD.intAccountId
