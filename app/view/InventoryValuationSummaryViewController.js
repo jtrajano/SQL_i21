@@ -18,7 +18,8 @@ Ext.define('Inventory.view.InventoryValuationSummaryViewController', {
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblValue', text: 'Value', allowSort: true, flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblLastCost', text: 'Last Cost', allowSort: true, flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblStandardCost', text: 'Standard Cost', allowSort: true, flex: 1, dataType: 'float' },
-                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblAverageCost', text: 'Average Cost', allowSort: true, flex: 1, dataType: 'float' }
+                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblAverageCost', text: 'Average Cost', allowSort: true, flex: 1, dataType: 'float' },
+                { dataIndex: 'strInTransitLocationName', text: 'InTransit Location', hidden: true, allowSort: false, dataType: 'string', required: true }
             ],
             showNew: false,
             showOpenSelected: false,
@@ -63,9 +64,13 @@ Ext.define('Inventory.view.InventoryValuationSummaryViewController', {
         return context;
     },
 
-    onViewLocation: function (value, record) {
-        var locationName = record.get('strLocationName');
-        i21.ModuleMgr.Inventory.showScreen(locationName, 'LocationName');
+    onViewLocation: function (value, record) {       
+        var locationName = record.get('strInTransitLocationName');
+        locationName = Ext.isEmpty(locationName) ? record.get('strLocationName') : locationName; 
+
+        if (Ext.isEmpty(locationName) === false) {
+            i21.ModuleMgr.Inventory.showScreen(locationName, 'LocationName');
+        }        
     },
 
     onViewItem: function (value, record) {
