@@ -181,16 +181,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\4_DataFix.sql
 
 --Accounts Receivable
-:r .\AR\EntityTableDataFix.sql
-:r .\AR\PrePaymentLinkToInvoiceFix.sql
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
-:R .\AR\DefaultData\2_SalesOrderDetailDefault.sql
-:R .\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql
-:r .\AR\DefaultData\4_UpdateInvoiceOrderShipVia.sql
 :r .\AR\DefaultData\5_UpdateOrderStatus.sql
-:r .\AR\DefaultData\6_UpdateCustomerShipBillTo.sql
-:r .\AR\DefaultData\7_UpdateInvoiceOrderSalesperson.sql
-:r .\AR\DefaultData\8_UpdateInvoiceType.sql
 :r .\AR\DefaultData\9_FixServiceChargeStartingNumber.sql
 :r .\AR\DefaultData\10_UpdateCustomerTotalARBalance.sql
 :r .\AR\DefaultData\11_UpdateInvoiceSODetailUOM.sql
@@ -198,10 +190,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\13_FixOnOrderCommittedQuantity.sql
 :r .\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql
 :r .\AR\DefaultData\15_FixInvoiceDateForCredits.sql
-:r .\AR\DefaultData\16_FixInvoicePostDate.sql
 :r .\AR\DefaultData\17_AddDefaultQuoteOrderTemplate.sql
-:r .\AR\DefaultData\17_FixInvoiceBillToInfo.sql
-:r .\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql
 :r .\AR\DefaultData\19_UpdateUsedCustomerBudget.sql
 :r .\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql
 :r .\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql

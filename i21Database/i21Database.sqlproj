@@ -635,7 +635,6 @@
     <Build Include="dbo\Views\vyuFRMColumnDescription.sql" />
     <Build Include="dbo\Stored Procedures\uspFRMColumnDescription.sql" />
     <None Include="i21Database.publish.xml" />
-    <None Include="Scripts\Post-Deployment\AR\EntityTableDataFix.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\1_PreferenceCompany.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\2_EventType.sql" />
     <None Include="Scripts\Post-Deployment\CM\3_PopulateSourceSystemData.sql" />
@@ -1605,7 +1604,6 @@
     <Build Include="dbo\Stored Procedures\uspQMAddProductPropertyDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetProductValueDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetTestProperty.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\4_UpdateInvoiceOrderShipVia.sql" />
     <Build Include="dbo\Tables\tblARCustomerRackQuoteVendor.sql" />
     <Build Include="dbo\Tables\tblARCustomerRackQuoteCategory.sql" />
     <Build Include="dbo\Tables\tblARCustomerRackQuoteHeader.sql" />
@@ -1912,8 +1910,6 @@
     <None Include="Scripts\Post-Deployment\EM\012_DeleteOldTables.sql" />
     <Build Include="dbo\Tables\tblSTMassUpdateReportMaster.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\5_UpdateOrderStatus.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\6_UpdateCustomerShipBillTo.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\7_UpdateInvoiceOrderSalesperson.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSummaryPnL.sql" />
     <Build Include="dbo\Tables\tblSTPriceBookStaging.sql" />
@@ -1996,7 +1992,6 @@
     <Build Include="dbo\Stored Procedures\uspGLImportOriginReallocation.sql" />
     <Build Include="dbo\Stored Procedures\uspTMInsertToCobolWrite.sql" />
     <None Include="Scripts\Post-Deployment\TM\Tables\tblTMCOBOLWRITE.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\8_UpdateInvoiceType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateWorkOrder.sql" />
     <Build Include="dbo\Views\vyuICGetAssemblyItem.sql" />
     <Build Include="dbo\Views\vyuAPRptCheckRegister.sql" />
@@ -2341,7 +2336,6 @@
     <Build Include="dbo\Functions\fnARGetItemPrice.sql" />
     <Build Include="dbo\Functions\fnSplitStringWithTrim.sql" />
     <Build Include="dbo\Functions\fnEMCheckEmailDistributionOption.sql" />
-    <None Include="Scripts\Post-Deployment\AR\PrePaymentLinkToInvoiceFix.sql" />
     <Build Include="dbo\Functions\fnARGetFooterComment.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseReservedQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitInBoundQty.sql" />
@@ -3476,7 +3470,6 @@
     <Build Include="dbo\Views\vyuCTContStsCustomerInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARStatementofAccountReport.sql" />
     <Build Include="dbo\Views\vyuAROrderUOM.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\17_FixInvoiceBillToInfo.sql" />
     <Build Include="dbo\Tables\tblLGLoadWarehouse.sql" />
     <Build Include="dbo\Tables\tblLGLoadWarehouseContainer.sql" />
     <Build Include="dbo\Tables\tblLGLoadDetailContainerLink.sql" />
@@ -5263,9 +5256,7 @@
     <None Include="Scripts\Post-Deployment\IC\07_Status.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\InsertWriteOffPaymentMethod.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePOAddressInfo.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\2_SalesOrderDetailDefault.sql" />
     <None Include="Scripts\Post-Deployment\EM\002_UpdateMenuuEntityType.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateEarningDeductionTaxId.sql" />
     <Build Include="dbo\Functions\fnAPCreatePrepaymentGLEntries.sql" />
     <None Include="Scripts\Post-Deployment\EM\003_FixVendorBadData.sql" />
@@ -5322,10 +5313,8 @@
     <None Include="Scripts\Post-Deployment\ST\8_Checkout_Radiant_FGM.sql" />
     <None Include="Scripts\Post-Deployment\ST\9_Checkout_Radiant_MSM.sql" />
     <None Include="Scripts\Post-Deployment\EM\023_RenameEntityContactEmailDistribution.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\16_FixInvoicePostDate.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\17_AddDefaultQuoteOrderTemplate.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\SubReports\PaycheckTimeOffSubReport.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql" />
     <None Include="Scripts\Post-Deployment\CF\1_ImportMapping.sql" />
     <None Include="Scripts\Post-Deployment\EM\024_delete_old_entity_table.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\19_UpdateUsedCustomerBudget.sql" />
