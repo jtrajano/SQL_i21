@@ -5191,6 +5191,8 @@
     <Build Include="dbo\Functions\fnFormatMessage.sql" />
     <Build Include="dbo\Views\vyuCTSequenceCombo.sql" />
     <Build Include="dbo\Tables\tblSMDocumentConfiguration.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCAddScaleOperator.sql" />
+    <Build Include="dbo\Tables\tblSCScaleOperator.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
