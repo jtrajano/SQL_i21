@@ -1,79 +1,260 @@
 StartTest (function (t) {
+    var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
 
-        //region Pre Setup
-        .displayText('===== Pre Setup: Add Inventory Items to Delete =====')
+
+        .displayText('===== Pre-setup =====')
+        /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
+        .displayText('===== 1. Add Indianapolis for Company Location for irelyadmin User =====')
+        .clickMenuFolder('System Manager','Folder')
+        .clickMenuScreen('Users','Screen')
+        .waitUntilLoaded()
+        .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+        .waitUntilLoaded('ementity')
+        .waitUntilLoaded()
+        .selectComboBoxRowValue('Timezone', '(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi', 'Timezone',0)
+        .clickTab('User')
+        .waitUntilLoaded()
+        .clickTab('User Roles')
+
+        .waitUntilLoaded()
+        .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
+        .waitUntilLoaded()
+
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Location already exists.')
+                return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() == 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+
+                    .displayText('Location is not yet existing.')
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .clickMessageBoxButton('no')
+                    .waitUntilLoaded()
+                    .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+                    .waitUntilLoaded('ementity')
+                    .clickTab('User')
+                    .waitUntilLoaded()
+                    .clickTab('User Roles')
+                    .waitUntilLoaded()
+                    .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 'Dummy','strLocationName', '0002 - Indianapolis','strLocationName', 1)
+                    .selectGridComboBoxBottomRowValue('UserRoleCompanyLocationRolePermission', 'strUserRole', 'ADMIN', 'strUserRole', 1)
+                    .clickTab('Detail')
+                    .waitUntilLoaded()
+                    .selectComboBoxRowValue('UserNumberFormat', '1,234,567.89', 'UserNumberFormat',1)
+                    .clickButton('Save')
+                    .waitUntilLoaded()
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+                    .waitUntilLoaded('ementity')
+                    .clickTab('User')
+                    .waitUntilLoaded()
+                    .clickTab('User Roles')
+                    .waitUntilLoaded()
+                    .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
+                    .waitUntilLoaded()
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Location already exists.')
+                return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() != 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+                    .clickMessageBoxButton('no')
+                    .waitUntilLoaded()
+                    .clickMenuFolder('System Manager','Folder')
+                    .waitUntilLoaded()
+                    .done();
+            },
+            continueOnFail: true
+        })
+
+
+        /*====================================== Add Storage Location for Indianapolis======================================*/
         .clickMenuFolder('Inventory','Folder')
+        .waitUntilLoaded()
+        .clickMenuScreen('Storage Locations','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('===== Scenario 1: Add New Storage Location. =====')
+                    .clickMenuScreen('Storage Locations','Screen')
+                    .clickButton('New')
+                    .waitUntilLoaded('icstorageunit')
+                    .enterData('Text Field','Name','Indy Storage')
+                    .enterData('Text Field','Description','Indy Storage')
+                    .selectComboBoxRowNumber('UnitType',6,0)
+                    .selectComboBoxRowNumber('Location',2,0)
+                    .selectComboBoxRowNumber('SubLocation',1,0)
+                    .selectComboBoxRowNumber('ParentUnit',1,0)
+                    .enterData('Text Field','Aisle','Test Aisle - 01')
+                    .clickCheckBox('AllowConsume', true)
+                    .clickCheckBox('AllowMultipleItems', true)
+                    .clickCheckBox('AllowMultipleLots', true)
+                    .clickCheckBox('CycleCounted', true)
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .verifyStatusMessage('Saved')
+                    .clickButton('Close')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickMenuFolder('Inventory','Folder')
+        /*====================================== Add Category ======================================*/
+        //region
+        .clickMenuFolder('Inventory','Folder')
+        .clickMenuScreen('Categories','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'CRUD - Category')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Category already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    //Add Category
+                    .displayText('===== Scenario 4: Add Category =====')
+                    .clickMenuFolder('Inventory','Folder')
+                    .addFunction(function(next){
+                        commonIC.addCategory (t,next, 'CRUD - Category', 'Test Category', 2)
+                    })
+                    .clickMenuFolder('Inventory','Folder')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+
+
+        /*====================================== Add Commodity ======================================*/
+
+        .clickMenuScreen('Commodities','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'CRUD - Commodity')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Commodity already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickMenuFolder('Inventory','Folder')
+                    //Add Commodity
+                    .displayText('===== Scenario 6: Add Commodity =====')
+                    .addFunction(function(next){
+                        commonIC.addCommodity (t,next, 'CRUD - Commodity', 'Test Commodity')
+                    })
+                    .clickMenuFolder('Inventory','Folder')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+
+
+        /*====================================== Add Lotted Item Yes Serial ======================================*/
         .clickMenuScreen('Items','Screen')
-        .clickButton('New')
-        .waitUntilLoaded('icitem')
-        .enterData('Text Field','ItemNo','001 - DLTI')
-        .enterData('Text Field','Description','001 - CRUD Lotted Item Serial')
-        .selectComboBoxRowValue('Category', 'Grains', 'Category',0)
-        .selectComboBoxRowValue('Commodity', 'InventoryCorn', 'Commodity',0)
-        .selectComboBoxRowNumber('LotTracking',2,0)
-        .verifyData('Combo Box','Tracking','Lot Level')
+        .filterGridRecords('Search', 'FilterGrid', '001 - DLTI')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Item already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
 
-        .displayText('===== Setup Item Location=====')
-        .clickTab('Setup')
-        .clickTab('Location')
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickMenuFolder('Inventory','Folder')
+                    .displayText('===== Scenario 1: Add Lotted Item Serial =====')
+                    .addFunction(function(next){
+                        commonIC.addInventoryItem
+                        (t,next,
+                            '001 - DLTI'
+                            , 'Test Lotted Item Serial'
+                            , 'CRUD - Category'
+                            , 'CRUD - Commodity'
+                            , 2
+                            , 'LB'
+                            , 'LB'
+                            , 10
+                            , 10
+                            , 40
+                        )
+                    })
+                    .clickMenuFolder('Inventory','Folder')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
 
-        .displayText('===== Setup Item Pricing=====')
-        .clickTab('Pricing')
-        .waitUntilLoaded('')
-        .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
-        .enterGridData('Pricing', 1, 'dblLastCost', '10')
-        .enterGridData('Pricing', 1, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
-        .enterGridData('Pricing', 1, 'dblAmountPercent', '40')
+        .clickMenuScreen('Items','Screen')
+        .filterGridRecords('Search', 'FilterGrid', '002 - DLTI')
+        .waitUntilLoaded()
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Item already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
 
-        .clickButton('Save')
-        .clickButton('Close')
-        .displayText('===== Add Lotted Yes Serial Item Done=====')
-
-        .displayText('===== Add Lotted Yes Manual Item =====')
-        .clickButton('New')
-        .waitUntilLoaded('icitem')
-        .enterData('Text Field','ItemNo','002 - DLTI')
-        .enterData('Text Field','Description','002 - CRUD Lotted Item Manual')
-        .selectComboBoxRowValue('Category', 'Grains', 'Category',0)
-        .selectComboBoxRowValue('Commodity', 'InventoryCorn', 'Commodity',0)
-        .selectComboBoxRowNumber('LotTracking',1,0)
-        .verifyData('Combo Box','Tracking','Lot Level')
-
-        .displayText('===== Setup Item Location=====')
-        .clickTab('Setup')
-        .clickTab('Location')
-        .clickButton('AddLocation')
-        .waitUntilLoaded('')
-        .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',0)
-        .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',0)
-        .selectComboBoxRowValue('IssueUom', 'LB', 'IssueUom',0)
-        .selectComboBoxRowValue('ReceiveUom', 'LB', 'ReceiveUom',0)
-        .clickButton('Save')
-        .clickButton('Close')
-
-        .displayText('===== Setup Item Pricing=====')
-        .clickTab('Pricing')
-        .waitUntilLoaded('')
-        .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
-        .enterGridData('Pricing', 1, 'dblLastCost', '10')
-        .enterGridData('Pricing', 1, 'dblStandardCost', '10')
-        .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
-        .enterGridData('Pricing', 1, 'dblAmountPercent', '40')
-        .clickButton('Save')
-        .clickButton('Close')
-        .displayText('===== Add Lotted Yes Manual Item Done=====')
-        //endregion
-
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickMenuFolder('Inventory','Folder')
+                    .displayText('===== Scenario 1: Add Lotted Item Serial =====')
+                    .addFunction(function(next){
+                        commonIC.addInventoryItem
+                        (t,next,
+                            '002 - DLTI'
+                            , 'Test Lotted Item Serial'
+                            , 'CRUD - Category'
+                            , 'CRUD - Commodity'
+                            , 2
+                            , 'LB'
+                            , 'LB'
+                            , 10
+                            , 10
+                            , 40
+                        )
+                    })
+                    .clickMenuFolder('Inventory','Folder')
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
 
 
         //region Secnario 1: Delete Unused Item
