@@ -234,27 +234,14 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intOrderType',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strOrderType',
-                                                                        dataType: 'string',
-                                                                        text: 'Order Type',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
+                                                                xtype: 'combobox',
                                                                 flex: 1.25,
                                                                 itemId: 'cboOrderType',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Order Type',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110,
-                                                                selectOnFocus: true,
+                                                                editable: false,
                                                                 displayField: 'strOrderType',
                                                                 valueField: 'intOrderType'
                                                             },
