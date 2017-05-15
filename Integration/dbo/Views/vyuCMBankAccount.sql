@@ -416,9 +416,9 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,apcbk_ach_company_id		= NULL
 					,apcbk_ach_bankname			= NULL
 					,apcbk_gl_cash				= dbo.fnGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
-					,apcbk_gl_ap				= NULL
-					,apcbk_gl_disc				= NULL
-					,apcbk_gl_wthhld			= NULL
+					,apcbk_gl_ap				= (SELECT TOP 1 apcbk_gl_ap FROM apcbkmst)
+					,apcbk_gl_disc				= (SELECT TOP 1 apcbk_gl_disc FROM apcbkmst)
+					,apcbk_gl_wthhld			= (SELECT TOP 1 apcbk_gl_wthhld FROM apcbkmst)
 					,apcbk_gl_curr				= 0
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					,apcbk_bnk_no				= NULL
@@ -653,9 +653,9 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,apcbk_ach_company_id		= NULL
 					,apcbk_ach_bankname			= NULL
 					,apcbk_gl_cash				= dbo.fnGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
-					,apcbk_gl_ap				= NULL
-					,apcbk_gl_disc				= NULL
-					,apcbk_gl_wthhld			= NULL
+					,apcbk_gl_ap				= (SELECT TOP 1 apcbk_gl_ap FROM apcbkmst)
+					,apcbk_gl_disc				= (SELECT TOP 1 apcbk_gl_disc FROM apcbkmst)
+					,apcbk_gl_wthhld			= (SELECT TOP 1 apcbk_gl_wthhld FROM apcbkmst)
 					,apcbk_gl_curr				= 0
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					,apcbk_bnk_no				= NULL
