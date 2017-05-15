@@ -40,6 +40,7 @@
 					,strCampaignName
 					,strCompanyLocation
 					,strEntityLocation
+					,intAge = DATEDIFF(day,dtmCreated,GETDATE())
 		from 
 				(
 				select
