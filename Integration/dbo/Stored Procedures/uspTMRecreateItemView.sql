@@ -48,11 +48,11 @@ BEGIN
 					CREATE VIEW [dbo].[vwitmmst]  
 					AS  
 					SELECT  
-					vwitm_no = agitm_no  
+					vwitm_no = agitm_no  COLLATE Latin1_General_CI_AS
 					,vwitm_loc_no = agitm_loc_no  
 					,vwitm_class = agitm_class  
 					,vwitm_search = agitm_search  
-					,vwitm_desc = RTRIM(ISNULL(agitm_desc,'''')) 
+					,vwitm_desc = RTRIM(ISNULL(agitm_desc,'''')) COLLATE Latin1_General_CI_AS
 					,vwitm_un_desc = CAST(agitm_un_desc AS CHAR(10))  
 					,vwitm_un_prc1 = agitm_un_prc1  
 					,vwitm_un_prc2 = agitm_un_prc2  
@@ -84,11 +84,11 @@ BEGIN
 					CREATE VIEW [dbo].[vwitmmst]  
 					AS  
 					SELECT  
-					vwitm_no = CAST(ptitm_itm_no AS CHAR(13))    
+					vwitm_no = CAST(ptitm_itm_no AS CHAR(13)) COLLATE Latin1_General_CI_AS   
 					,vwitm_loc_no = ptitm_loc_no  
 					,vwitm_class = ptitm_class  
 					,vwitm_search = CAST(''''  AS CHAR(13))    
-					,vwitm_desc = RTRIM(ISNULL(CAST(ptitm_desc AS CHAR(33)),''''))
+					,vwitm_desc = RTRIM(ISNULL(CAST(ptitm_desc AS CHAR(33)),'''')) COLLATE Latin1_General_CI_AS
 					,vwitm_un_desc = CAST(ptitm_unit  AS CHAR(10))  
 					,vwitm_un_prc1 = CAST(ptitm_prc1  AS DECIMAL(18,6))    
 					,vwitm_un_prc2 = CAST(ptitm_prc2  AS DECIMAL(18,6))   
@@ -120,11 +120,11 @@ BEGIN
 			CREATE VIEW [dbo].[vwitmmst]
 			AS
 			SELECT  
-				vwitm_no = A.strItemNo 
+				vwitm_no = A.strItemNo COLLATE Latin1_General_CI_AS
 				,vwitm_loc_no = C.strLocationName
 				,vwitm_class = D.strCategoryCode
 				,vwitm_search = CAST(''''  AS CHAR(13))    
-				,vwitm_desc = A.strDescription
+				,vwitm_desc = A.strDescription COLLATE Latin1_General_CI_AS
 				,vwitm_un_desc = ''''
 				,vwitm_un_prc1 = CAST(0.0  AS DECIMAL(18,6))    
 				,vwitm_un_prc2 = CAST(0.0  AS DECIMAL(18,6))   
