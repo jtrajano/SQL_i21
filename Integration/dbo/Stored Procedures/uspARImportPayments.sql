@@ -1602,8 +1602,8 @@ IF(@Checking = 1)
 			AND P1.[ptpay_invc_no] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON P.[intEntityCustomerId] = C.[intEntityCustomerId]
-			AND I.[intEntityCustomerId] = C.[intEntityCustomerId] 
+			ON P.[intEntityCustomerId] = C.[intEntityId]
+			AND I.[intEntityCustomerId] = C.[intEntityId] 
 			AND P1.[ptpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	LEFT OUTER JOIN
 		[tblGLCOACrossReference] GL

@@ -21,7 +21,7 @@ BEGIN
 		DROP table #IVCTAX	
 	
 
-	SELECT IVC.intInvoiceId, IVC.strInvoiceOriginId, ptstm_itm_no,IVC.intEntityCustomerId,ptstm_bill_to_cus, ITM.intItemId,ITM.intCategoryId,
+	SELECT IVC.intInvoiceId, IVC.strInvoiceOriginId , ptstm_itm_no,IVC.intEntityCustomerId,ptstm_bill_to_cus, ITM.intItemId,ITM.intCategoryId,
 	CAT.intTaxClassId, --TAXG.intTaxGroupId, 
 	ptstm_tax_key, 
 	ptstm_set_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_set_amt * -1 ELSE ptstm_set_amt END) as ptstm_set_amt, 
@@ -40,14 +40,14 @@ BEGIN
 	ptstm_lc11_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc11_amt * -1 ELSE ptstm_lc11_amt END) as ptstm_lc11_amt, 
 	ptstm_lc12_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_lc12_amt * -1 ELSE ptstm_lc12_amt END) as ptstm_lc12_amt into #itmnotax 
 	FROM tblARInvoice IVC 
-	INNER JOIN tblEMEntity ENT on ENT.intEntityId = IVC.intEntityCustomerId
+	INNER JOIN tblEMEntity ENT on ENT.intEntityId = IVC.intEntityCustomerId 
 	INNER JOIN ptstmmst STM ON STM.ptstm_ivc_no COLLATE Latin1_General_CI_AS = IVC.strInvoiceOriginId  COLLATE Latin1_General_CI_AS
-	AND STM.ptstm_bill_to_cus COLLATE Latin1_General_CI_AS = ENT.strEntityNo
+	AND STM.ptstm_bill_to_cus COLLATE Latin1_General_CI_AS = ENT.strEntityNo  
 	INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = STM.ptstm_itm_no  COLLATE Latin1_General_CI_AS
-	INNER JOIN tblICCategoryTax CAT ON CAT.intCategoryId = ITM.intCategoryId
+	INNER JOIN tblICCategoryTax CAT ON CAT.intCategoryId = ITM.intCategoryId 
 	WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL 
-				   AND IVC.strInvoiceOriginId <> ''	AND STM.ptstm_tax_key is not null
-				   and ptstm_itm_no not in (select strOrgItemNo from tblSMTaxXRef)
+				   AND IVC.strInvoiceOriginId  COLLATE Latin1_General_CI_AS	 <> ''	AND STM.ptstm_tax_key is not null
+				   and ptstm_itm_no not in (select strOrgItemNo  COLLATE Latin1_General_CI_AS	 from tblSMTaxXRef)
 
 	------------------------------------------------------------------------------------------------------------------------------------------
 	---** INSERT SET TAX DETAILS **---
@@ -707,7 +707,7 @@ BEGIN
 	INNER JOIN tblICCategoryTax CAT ON CAT.intCategoryId = ITM.intCategoryId
 	WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL 
 				   AND IVC.strInvoiceOriginId <> ''	AND STM.ptstm_tax_key is null
-				   and ptstm_itm_no not in (select strOrgItemNo from tblSMTaxXRef)			  
+				   and ptstm_itm_no not in (select strOrgItemNo  COLLATE Latin1_General_CI_AS	 from tblSMTaxXRef)			  
 	-----------------------------------------------------------------------------------------------------------------------			   			   			  		   
 
 	---** INSERT SET TAX DETAILS **---
@@ -1362,7 +1362,7 @@ BEGIN
 	--drop table #IVCTAX
 	--drop table #tempDTL
 
-	SELECT intInvoiceId,strInvoiceOriginId,ptstm_itm_no, ITM.intItemId, ptstm_tax_key, 
+	SELECT intInvoiceId,strInvoiceOriginId,ptstm_itm_no, ITM.intItemId , ptstm_tax_key , 
 	ptstm_set_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_set_amt * -1 ELSE ptstm_set_amt END) as ptstm_set_amt, 
 	ptstm_fet_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_fet_amt * -1 ELSE ptstm_fet_amt END) as ptstm_fet_amt,
 	ptstm_sst_rt,(CASE WHEN IVC.strTransactionType = 'Credit Memo' THEN ptstm_sst_amt * -1 ELSE ptstm_sst_amt END) as ptstm_sst_amt,
@@ -1384,7 +1384,7 @@ BEGIN
 	AND STM.ptstm_bill_to_cus COLLATE Latin1_General_CI_AS = ENT.strEntityNo
 	INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = STM.ptstm_itm_no  COLLATE Latin1_General_CI_AS
 	WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL AND IVC.strInvoiceOriginId <> ''	
-	and ptstm_itm_no in (select strOrgItemNo from tblSMTaxXRef)
+	and ptstm_itm_no in (select strOrgItemNo  COLLATE Latin1_General_CI_AS	 from tblSMTaxXRef)
 
 	--------------------------------------------------------------------------------------------------------------------------------------
 	---** INSERT SET TAX DETAILS **---
