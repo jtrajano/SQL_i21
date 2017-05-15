@@ -1704,7 +1704,7 @@ END CATCH
 				INNER JOIN 
 					@PostInvoiceData D
 						ON C.intInvoiceId = D.intInvoiceId
-
+				WHERE A.ysnPosted = 1
 
 				--Invoice with created Bank Deposit
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
