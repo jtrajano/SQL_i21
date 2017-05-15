@@ -3,6 +3,7 @@ CREATE PROCEDURE [dbo].[uspFACreateAsset]
 	@ysnPost			AS BIT				= 0,
 	@ysnRecap			AS BIT				= 0,
 	@strBatchId			AS NVARCHAR(100)	= '',
+	@strTransactionId	AS NVARCHAR(100)	= '',
 	@intEntityId		AS INT				= 1,
 	@successfulCount	AS INT				= 0 OUTPUT
 	
@@ -37,7 +38,7 @@ IF ISNULL(@ysnPost, 0) = 0
 		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))
 			BEGIN
 				SET @Param = (SELECT strAssetId FROM tblFAFixedAsset WHERE intAssetId IN (SELECT intAssetId FROM #AssetID))
-				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId,@Param, 0, 'AM', NULL, @intEntityId, @intCount	OUT
+				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId,@Param, 0, 'AMPUR', NULL, @intEntityId, @intCount	OUT
 				SET @successfulCount = @intCount
 				
 				IF(@intCount > 0)
@@ -55,6 +56,7 @@ IF ISNULL(@ysnPost, 0) = 0
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Transaction:
 
+DECLARE @ErrorMessage NVARCHAR(MAX)
 DECLARE @intDefaultCurrencyId	INT, @ysnForeignCurrency BIT = 0
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
 
@@ -102,11 +104,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			
 		)
 		SELECT 
-			 [strTransactionId]		= A.[strAssetId]
+			 [strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= A.[intAssetAccountId]
 			,[strDescription]		= A.[strAssetDescription]
-			,[strReference]			= ''
+			,[strReference]			= A.[strAssetId]
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
 			,[dblDebit]				= A.[dblCost]
 			,[dblCredit]			= 0
@@ -122,16 +124,16 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 0
+			,[dblExchangeRate]		= 1
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'AM' --FA
+			,[strCode]				= 'AMPUR'
 								
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]		= A.[intAssetId]			
-			,[strTransactionType]	= 'Fixed Assets'
+			,[strTransactionType]	= 'Purchase'
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 		
@@ -174,11 +176,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			
 		)
 		SELECT 
-			 [strTransactionId]		= A.[strAssetId]
+			 [strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= A.[intExpenseAccountId]
 			,[strDescription]		= A.[strAssetDescription]
-			,[strReference]			= ''
+			,[strReference]			= A.[strAssetId]
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.[dblCost]
@@ -194,25 +196,31 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 0
+			,[dblExchangeRate]		= 1
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'AM' --FA
+			,[strCode]				= 'AMPUR'
 								
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]		= A.[intAssetId]			
-			,[strTransactionType]	= 'Fixed Assets'
+			,[strTransactionType]	= 'Purchase'
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 		
 		FROM tblFAFixedAsset A
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
+					
+		BEGIN TRY
+			EXEC uspGLBookEntries @GLEntries, @ysnPost
+		END TRY
+		BEGIN CATCH		
+			SET @ErrorMessage  = ERROR_MESSAGE()
+			RAISERROR(@ErrorMessage, 11, 1)
 
-		
-		EXEC uspGLBookEntries @GLEntries, @ysnPost
-		
+			IF @@ERROR <> 0	GOTO Post_Rollback;
+		END CATCH
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -227,6 +235,15 @@ UPDATE tblFAFixedAsset
 	SET [ysnAcquired] = 1
 	WHERE [intAssetId] IN (SELECT intAssetId From #AssetID)
 
+
+IF @@ERROR <> 0	GOTO Post_Rollback;
+
+IF EXISTS(SELECT TOP 1 1 FROM (SELECT TOP 1 A.intAssetId FROM tblFAFixedAsset A 
+						WHERE A.[intAssetId] IN (SELECT intAssetId From #AssetID) 
+								AND ISNULL([dbo].isOpenAccountingDate(A.dtmDateAcquired), 0) = 0) TBL)
+BEGIN
+	GOTO Post_Rollback
+END
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
