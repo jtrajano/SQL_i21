@@ -4,6 +4,7 @@
 , @intItemId int
 , @intItemLocationId int
 , @intItemPricingId int
+, @intCategoryId int
 
 , @strDescription nvarchar(250)
 , @PosDescription nvarchar(250)
@@ -33,9 +34,10 @@ BEGIN
 
 	ELSE
 	BEGIN
-		--strDescription
+		--strDescription, intCategoryId
 		UPDATE dbo.tblICItem
 		SET strDescription = @strDescription
+			, intCategoryId = @intCategoryId
 		FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
 			 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
 			 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
