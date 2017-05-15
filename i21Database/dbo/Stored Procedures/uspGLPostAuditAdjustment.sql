@@ -438,8 +438,8 @@ ELSE
 			,[dblCredit]			= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 											WHEN [dblCredit] < 0 THEN 0
 											ELSE [dblCredit] END	
-			,[dblDebitUnit]			= ISNULL(A.[dblCreditUnit], 0)
-			,[dblCreditUnit]		= ISNULL(A.[dblDebitUnit], 0)
+			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)
+			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0)
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
