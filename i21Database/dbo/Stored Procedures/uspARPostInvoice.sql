@@ -1581,7 +1581,7 @@ END CATCH
 					@batchId,
 					C.intInvoiceId
 				FROM
-					(SELECT intPaymentId, strRecordNumber FROM tblARPayment WITH (NOLOCK)) A
+					(SELECT intPaymentId, strRecordNumber FROM tblARPayment WITH (NOLOCK) WHERE ysnPosted = 1) A
 				INNER JOIN 
 					(SELECT intPaymentId, intInvoiceId FROM tblARPaymentDetail WITH (NOLOCK)) B 
 						ON A.intPaymentId = B.intPaymentId						
