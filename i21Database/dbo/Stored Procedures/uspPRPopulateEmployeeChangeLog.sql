@@ -23,7 +23,7 @@ FROM
 	INNER JOIN tblEMEntity EM
 		ON EM.intEntityId = CAST(AUD.strRecordNo AS INT)
 WHERE strActionType = 'Updated'
-	AND strTransactionType = 'EntityManagement.view.Entity'
+	AND strTransactionType = 'Payroll.view.EntityEmployee'
 	AND EM.intEntityId IN (SELECT intEntityId FROM tblPREmployee)
 	AND PATINDEX('%"changeDescription":%', strJsonData) > 0
 	AND (PATINDEX('%"hidden":true%', strJsonData) > 0 
@@ -53,8 +53,8 @@ BEGIN
 			BEGIN
 				/* Remove hidden fields */
 				WHILE EXISTS(SELECT TOP 1 1 FROM #tmpAuditLog 
-							WHERE PATINDEX('%,"hidden":true%', strJsonData) > 0
-							AND PATINDEX('%,"hidden":false%', SUBSTRING(strJsonData, 0, PATINDEX('%,"hidden":true%', strJsonData))) > 0)
+							WHERE intAuditLogId = @intAuditLogId AND PATINDEX('%,"hidden":true%', strJsonData) > 0
+							AND PATINDEX('%,"hidden":false%', SUBSTRING(strJsonData, 0, PATINDEX('%,"hidden":true%', strJsonData))) = 0)
 				BEGIN
 					UPDATE #tmpAuditLog
 						SET strJsonData = SUBSTRING(strJsonData, PATINDEX('%,"hidden":true%', strJsonData) + 14, LEN(strJsonData))
@@ -132,11 +132,15 @@ SELECT
 	,intEntityChangedId
 	,strChangedBy
 	,dtmChangedOn
-	,strTableName = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE
-					(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-					SUBSTRING(strTableName, 6, 100) COLLATE Latin1_General_CS_AI, 
-					'A',' A'),'B',' B'),'C',' C'),'D', ' D'),'E',' E'), 'F',' F'), 'G',' G'),'H',' H'),'I',' I'),'J',' J'),'K',' K'),'L', ' L'),'M',' M'), 
-					'N',' N'),'O',' O'),'P',' P'),'Q',' Q'),'R',' R'),'S',' S'),'T', ' T'),'U',' U'), 'V',' V'), 'W',' W'),'X',' X'),'Y',' Y'),'Z',' Z')
+	,strTableName = CASE WHEN (strTableName <> '') THEN
+						RTRIM(LTRIM(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE
+						(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+						SUBSTRING(strTableName, 6, 100) COLLATE Latin1_General_CS_AI, 
+						'A',' A'),'B',' B'),'C',' C'),'D', ' D'),'E',' E'), 'F',' F'), 'G',' G'),'H',' H'),'I',' I'),'J',' J'),'K',' K'),'L', ' L'),'M',' M'), 
+						'N',' N'),'O',' O'),'P',' P'),'Q',' Q'),'R',' R'),'S',' S'),'T', ' T'),'U',' U'), 'V',' V'), 'W',' W'),'X',' X'),'Y',' Y'),'Z',' Z')))
+					ELSE
+						'Employee'
+					END
 	,strFieldName
 	,strKeyValue = CASE WHEN (strTableName = 'tblPREmployeeTaxes') THEN 
 							ISNULL((SELECT strTax FROM tblPRTypeTax WHERE intTypeTaxId = (SELECT intTypeTaxId FROM tblPREmployeeTax WHERE intEmployeeTaxId = CAST(strKeyValue AS INT))), '')
@@ -146,15 +150,19 @@ SELECT
 							ISNULL((SELECT strDeduction FROM tblPRTypeDeduction WHERE intTypeDeductionId = (SELECT intTypeDeductionId FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = CAST(strKeyValue AS INT))), '')
 						WHEN (strTableName = 'tblPREmployeeTimeOffs') THEN 
 							ISNULL((SELECT strTimeOff FROM tblPRTypeTimeOff WHERE intTypeTimeOffId = (SELECT intTypeTimeOffId FROM tblPREmployeeTimeOff WHERE intEmployeeTimeOffId = CAST(strKeyValue AS INT))), '')
-					    ELSE '' END
-	,strFrom = CASE WHEN (strFrom = 'true') THEN 'Yes' 
-					WHEN (strFrom = 'false') THEN 'No' 
-					WHEN (strFrom = 'null') THEN '' 
+						ELSE '' END
+	,strFrom = CASE WHEN (strFrom = 'null') THEN '(empty)' 
+					WHEN (strDataType = 'Boolean') THEN
+						CASE WHEN (strFrom = 'true') THEN 'Yes' ELSE 'No' END
+					WHEN (strDataType = 'DateTime') THEN 
+						CONVERT(NVARCHAR(30), CAST(SUBSTRING(strFrom, 5, 12) AS DATETIME),101)
 					ELSE strFrom END
-	,strTo = CASE WHEN (strTo = 'true') THEN 'Yes' 
-				WHEN (strTo = 'false') THEN 'No' 
-				WHEN (strTo = 'null') THEN ''
-				ELSE strTo END
+	,strTo = CASE WHEN (strTo = 'null') THEN '(empty)' 
+					WHEN (strDataType = 'Boolean') THEN
+						CASE WHEN (strTo = 'true') THEN 'Yes' ELSE 'No' END
+					WHEN (strDataType = 'DateTime') THEN 
+						CONVERT(NVARCHAR(30), CAST(SUBSTRING(strTo, 5, 12) AS DATETIME),101)
+					ELSE strTo END
 FROM
 	(SELECT 
 		intAuditLogId = AUD.intAuditLogId
@@ -164,11 +172,27 @@ FROM
 		,intEntityChangedId = AUD.intEntityId
 		,strChangedBy = CASE WHEN (SEC.strFullName = '') THEN strUserName ELSE SEC.strFullName END
 		,dtmChangedOn = AUD.dtmDate
-		,strTableName = REPLACE(SUBSTRING(strJsonString, PATINDEX('%"associationKey":%', strJsonString) + 17, PATINDEX('%,"changeDescription":%', strJsonString) - PATINDEX('%"associationKey":%', strJsonString) - 17), '"', '')
-		,strFieldName = REPLACE(SUBSTRING(strJsonString, PATINDEX('%"changeDescription":%', strJsonString) + 20, PATINDEX('%,"hidden":false%', strJsonString) - PATINDEX('%"changeDescription":%', strJsonString) - 20), '"', '')
-		,strKeyValue = REPLACE(SUBSTRING(strJsonString, PATINDEX('%"keyValue":%', strJsonString) + 11, PATINDEX('%,"associationKey":%', strJsonString) - PATINDEX('%"keyValue":%', strJsonString) - 11), '"', '')
-		,strFrom = REPLACE(SUBSTRING(strJsonString, PATINDEX('%","from":%', strJsonString) + 9, PATINDEX('%,"to":%', strJsonString) - PATINDEX('%","from":%', strJsonString) - 9), '"', '')
-		,strTo = REPLACE(SUBSTRING(strJsonString, PATINDEX('%,"to":%', strJsonString) + 6, PATINDEX('%,"leaf"%', strJsonString) - PATINDEX('%,"to":%', strJsonString) - 6), '"', '')
+		,strDataType = CASE WHEN (PATINDEX('%"change":"dbl%","from":%', strJsonData) > 0) THEN 'Numeric'
+							WHEN (PATINDEX('%"change":"int%","from":%', strJsonData) > 0) THEN 'Integer'
+							WHEN (PATINDEX('%"change":"dtm%","from":%', strJsonData) > 0) THEN 'DateTime'
+							WHEN (PATINDEX('%"change":"ysn%","from":%', strJsonData) > 0) THEN 'Boolean'
+							WHEN (PATINDEX('%"change":"str%","from":%', strJsonData) > 0) THEN 'String'
+							ELSE '' END
+		,strTableName = CASE WHEN (PATINDEX('%"associationKey":%', strJsonString) > 0) THEN
+							REPLACE(SUBSTRING(strJsonString, PATINDEX('%"associationKey":%', strJsonString) + 17, PATINDEX('%,"changeDescription":%', strJsonString) - PATINDEX('%"associationKey":%', strJsonString) - 17), '"', '')
+						ELSE '' END
+		,strFieldName = CASE WHEN (PATINDEX('%"changeDescription":%', strJsonString) > 0) THEN
+							REPLACE(SUBSTRING(strJsonString, PATINDEX('%"changeDescription":%', strJsonString) + 20, PATINDEX('%,"hidden":false%', strJsonString) - PATINDEX('%"changeDescription":%', strJsonString) - 20), '"', '')
+						ELSE '' END
+		,strKeyValue = CASE WHEN (PATINDEX('%"keyValue":%', strJsonString) > 0) THEN
+							REPLACE(SUBSTRING(strJsonString, PATINDEX('%"keyValue":%', strJsonString) + 11, PATINDEX('%,"associationKey":%', strJsonString) - PATINDEX('%"keyValue":%', strJsonString) - 11), '"', '')
+						ELSE '' END	
+		,strFrom = CASE WHEN (PATINDEX('%","from":%', strJsonString) > 0) THEN
+							REPLACE(SUBSTRING(strJsonString, PATINDEX('%","from":%', strJsonString) + 9, PATINDEX('%,"to":%', strJsonString) - PATINDEX('%","from":%', strJsonString) - 9), '"', '')
+						ELSE '' END			
+		,strTo = CASE WHEN (PATINDEX('%,"to":%', strJsonString) > 0) THEN
+							REPLACE(SUBSTRING(strJsonString, PATINDEX('%,"to":%', strJsonString) + 6, PATINDEX('%,"leaf"%', strJsonString) - PATINDEX('%,"to":%', strJsonString) - 6), '"', '')
+						ELSE '' END	
 	FROM
 		tblSMAuditLog AUD
 		INNER JOIN tblEMEntity EM
