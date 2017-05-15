@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
+﻿CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
 	 @entityId					INT			   = NULL
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -311,7 +310,7 @@ BEGIN
 					,''
 					,@EntityCustomerId
 					,@InvoiceReportNumber
-					,(SELECT SUM(dblTotalAmount) FROM #tblCFInvoices WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
+					,(SELECT SUM(ISNULL(dblTotalAmount,0)) FROM #tblCFInvoices WHERE intCustomerId = @loopCustomerId AND intAccountId = @loopAccountId)
 
 					
 

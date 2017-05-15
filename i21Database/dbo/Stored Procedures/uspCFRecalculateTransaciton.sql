@@ -1519,14 +1519,45 @@ BEGIN
 			),
 			(
 				 'Net Price'
-				,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
-				,@dblPrice - (@totalOriginalTax / @dblQuantity) -- @totalOriginalTax to handle tax exemption
+				,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblOriginalPrice - (@totalOriginalTax / @dblQuantity) 
+				,Round((Round(@dblPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblPrice - (@totalOriginalTax / @dblQuantity) 
+					-- @totalOriginalTax to handle tax exemption
 			),
+			-- OLD WAY--
+			--(
+			--	 'Net Price'
+			--	,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+			--	,@dblPrice - (@totalOriginalTax / @dblQuantity) -- @totalOriginalTax to handle tax exemption
+			--),
 			(
 				 'Total Amount'
 				,ROUND(@dblOriginalPrice * @dblQuantity,2)
 				,ROUND((@dblPrice - (@totalOriginalTax / @dblQuantity) + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
 			)
+		END
+	ELSE IF (LOWER(@strPriceBasis) = 'local index fixed')
+		BEGIN
+			INSERT INTO @tblTransactionPrice (
+		 strTransactionPriceId	
+		,dblOriginalAmount		
+		,dblCalculatedAmount	
+		)
+		VALUES
+		(
+			 'Gross Price'
+			,@dblOriginalPrice
+			,@dblPrice 
+		),
+		(
+			 'Net Price'
+			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+			,Round((Round(@dblPrice * @dblQuantity,2) - @totalCalculatedTax ) / @dblQuantity, 6)
+		),
+		(
+			 'Total Amount'
+			,ROUND(@dblOriginalPrice * @dblQuantity,2)
+			,ROUND((@dblPrice * @dblQuantity),2)
+		)
 		END
 	ELSE
 		BEGIN
@@ -1543,15 +1574,23 @@ BEGIN
 		),
 		(
 			 'Net Price'
-			,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
 			,@dblPrice
 		),
+		--OLD WAY--
+		--(
+		--	 'Net Price'
+		--	,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+		--	,@dblPrice
+		--),
 		(
 			 'Total Amount'
 			,ROUND(@dblOriginalPrice * @dblQuantity,2)
 			,ROUND((@dblPrice + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity,2)
 		)
 		END
+
+	
 	---------------------------------------------------
 	--				 PRICE CALCULATION				 --
 	---------------------------------------------------
@@ -1613,9 +1652,62 @@ BEGIN
 			VALUES ('Import',@runDate,@guid, @intTransactionId, 'Duplicate transaction history found.')
 		END
 	END
+
+
 	---------------------------------------------------
 	--				LOG DUPLICATE TRANS				 --
 	---------------------------------------------------
+	DECLARE @ysnVehicleRequire BIT = 0
+
+	IF (@intCardId = 0)
+	BEGIN
+		SET @intCardId = NULL
+	END
+	ELSE
+	BEGIN
+		SELECT TOP 1 
+			@ysnVehicleRequire = a.ysnVehicleRequire
+		FROM tblCFCard as c
+		INNER JOIN tblCFAccount as a
+		ON c.intAccountId = a.intAccountId
+		WHERE intCardId = @intCardId
+	END
+
+	IF(@intProductId = 0 OR @intProductId IS NULL)
+	BEGIN
+		SET @ysnInvalid = 1
+	END
+	IF(@intCardId = 0 OR @intCardId IS NULL)
+	BEGIN
+		SET @ysnInvalid = 1
+	END
+	IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
+	BEGIN
+		SET @intNetworkId = NULL
+		SET @ysnInvalid = 1
+	END
+	IF(@intSiteId = 0 OR @intSiteId IS NULL)
+	BEGIN
+		SET @intSiteId = NULL
+		SET @ysnInvalid = 1
+	END
+	IF(@intCardId = 0 OR @intCardId IS NULL)
+	BEGIN
+		SET @intCardId = NULL
+		SET @ysnInvalid = 1
+	END
+	IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
+	BEGIN
+		SET @ysnInvalid = 1
+	END
+	IF(@intVehicleId = 0 OR @intVehicleId IS NULL)
+	BEGIN
+		SET @intVehicleId = NULL
+		IF(@ysnVehicleRequire = 1)
+		BEGIN
+			SET @ysnInvalid = 1
+		END
+	END
 
 	---------------------------------------------------
 	--					ZERO PRICING				 --

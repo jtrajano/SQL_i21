@@ -15,7 +15,7 @@ BEGIN
 			,SUM(WP.dblPhysicalCount) AS dblPhysicalCount
 			,UM.strUnitMeasure
 		FROM tblMFWorkOrderProducedLot WP
-		JOIN tblICLot L ON L.intLotId = WP.intLotId
+		JOIN tblICLot L ON L.intLotId = WP.intLotId and WP.ysnProductionReversed=0
 		JOIN tblICItem I ON I.intItemId = L.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WP.intPhysicalItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId

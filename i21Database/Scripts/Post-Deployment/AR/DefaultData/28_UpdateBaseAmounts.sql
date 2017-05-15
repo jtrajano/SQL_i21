@@ -25,6 +25,32 @@ WHERE
 	ISNULL(ARID.dblCurrencyExchangeRate, 1) = 1
 	AND ARIDT.dblAdjustedTax <> ISNULL(ARIDT.dblBaseAdjustedTax,0)
 
+UNION ALL
+
+SELECT ARI.intInvoiceId, NULL
+FROM
+	tblARInvoice ARI
+WHERE
+	NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID WHERE ARID.intInvoiceId = ARI.intInvoiceId AND ISNULL(ARID.dblCurrencyExchangeRate, 1) <> 1)
+	AND (
+			ISNULL(ARI.dblAmountDue, @ZeroDecimal) <> ISNULL(ARI.dblBaseAmountDue, @ZeroDecimal)
+		OR
+			ISNULL(ARI.dblDiscount, @ZeroDecimal) <> ISNULL(ARI.dblBaseDiscount, @ZeroDecimal)
+		OR
+			ISNULL(ARI.dblInterest, @ZeroDecimal) <> ISNULL(ARI.dblBaseInterest, @ZeroDecimal)
+		OR
+			ISNULL(ARI.dblInvoiceSubtotal, @ZeroDecimal) <> ISNULL(ARI.dblBaseInvoiceSubtotal, @ZeroDecimal)
+		OR
+			ISNULL(ARI.dblPayment, @ZeroDecimal) <> ISNULL(ARI.dblBasePayment, @ZeroDecimal)
+		OR
+			ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) <> ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal)
+		OR
+			ISNULL(ARI.dblShipping, @ZeroDecimal) <> ISNULL(ARI.dblBaseShipping, @ZeroDecimal)
+		OR
+			ISNULL(ARI.dblTax, @ZeroDecimal) <> ISNULL(ARI.dblBaseTax, @ZeroDecimal)
+		)
+	
+
 
 UPDATE
 	tblARInvoiceDetailTax
@@ -48,35 +74,18 @@ WHERE
 UPDATE
 	tblARInvoice
 SET
-	 [dblBaseTax]				= T.[dblBaseTotalTax]
-	,[dblBaseInvoiceSubtotal]	= T.[dblBaseTotal]
+	 [dblBaseDiscount]			= [dblDiscount]
+	,[dblInterest]				= [dblInterest]
+	,[dblPayment]				= [dblBasePayment]
+	,[dblShipping]				= [dblBaseShipping]
+	,[dblBaseTax]				= [dblTax]
+	,[dblBaseInvoiceSubtotal]	= [dblInvoiceSubtotal]
 	,[dblBasePayment]			= [dblPayment]
-FROM
-	(
-		SELECT 
-			 SUM([dblBaseTotalTax])	AS [dblBaseTotalTax]
-			,SUM([dblBaseTotal])	AS [dblBaseTotal]
-			,[intInvoiceId]
-		FROM
-			tblARInvoiceDetail
-		GROUP BY
-			[intInvoiceId]
-	)
-	 T
+	,[dblBaseAmountDue]			= [dblAmountDue]
+	,[dblBaseInvoiceTotal]		= [dblInvoiceTotal]
 WHERE
-	tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
-	AND tblARInvoice.[intInvoiceId] IN (SELECT DISTINCT [intInvoiceId] FROM @Ids)
-	
-
-UPDATE
-	tblARInvoice
-SET
-	 [dblBaseInvoiceTotal]	= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping])
-	,[dblBaseAmountDue]		= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping]) - ([dblBasePayment] + [dblBaseDiscount])
-WHERE
-	[intInvoiceId] IN (SELECT DISTINCT [intInvoiceId] FROM @Ids)	
-	
-	
+	[intInvoiceId] IN (SELECT DISTINCT [intInvoiceId] FROM @Ids)
+		
 UPDATE
 	ARPD
 SET
@@ -119,6 +128,30 @@ WHERE
 	AND SODT.dblAdjustedTax <> ISNULL(SODT.dblBaseAdjustedTax, @ZeroDecimal)
 
 
+UNION ALL
+
+SELECT SO.intSalesOrderId, NULL
+FROM
+	tblSOSalesOrder SO
+WHERE
+	NOT EXISTS(SELECT NULL FROM tblSOSalesOrderDetail SOD WHERE SOD.intSalesOrderId = SO.intSalesOrderId AND ISNULL(SOD.dblCurrencyExchangeRate, 1) <> 1)
+	AND (
+			ISNULL(SO.dblAmountDue, @ZeroDecimal) <> ISNULL(SO.dblBaseAmountDue, @ZeroDecimal)
+		OR
+			ISNULL(SO.dblDiscount, @ZeroDecimal) <> ISNULL(SO.dblBaseDiscount, @ZeroDecimal)
+		OR
+			ISNULL(SO.dblSalesOrderSubtotal, @ZeroDecimal) <> ISNULL(SO.dblBaseSalesOrderSubtotal, @ZeroDecimal)
+		OR
+			ISNULL(SO.dblPayment, @ZeroDecimal) <> ISNULL(SO.dblBasePayment, @ZeroDecimal)
+		OR
+			ISNULL(SO.dblSalesOrderTotal, @ZeroDecimal) <> ISNULL(SO.dblBaseSalesOrderTotal, @ZeroDecimal)
+		OR
+			ISNULL(SO.dblShipping, @ZeroDecimal) <> ISNULL(SO.dblBaseShipping, @ZeroDecimal)
+		OR
+			ISNULL(SO.dblTax, @ZeroDecimal) <> ISNULL(SO.dblBaseTax, @ZeroDecimal)
+		)
+
+
 UPDATE
 	tblSOSalesOrderDetailTax
 SET
@@ -136,40 +169,21 @@ SET
 	,[dblBaseLicenseAmount]		= [dblBaseLicenseAmount]
 WHERE
 	[intSalesOrderDetailId] IN (SELECT DISTINCT [intSalesOrderDetailId] FROM @SOIds)
-	
-	
+
+
 UPDATE
 	tblSOSalesOrder
 SET
-	 [dblBaseTax]					= T.[dblBaseTotalTax]
-	,[dblBaseSalesOrderSubtotal]	= T.[dblBaseTotal]
+	 [dblBaseDiscount]				= [dblDiscount]
+	,[dblPayment]					= [dblBasePayment]
+	,[dblShipping]					= [dblBaseShipping]
+	,[dblBaseTax]					= [dblTax]
+	,[dblBaseSalesOrderSubtotal]	= [dblSalesOrderSubtotal]
 	,[dblBasePayment]				= [dblPayment]
-FROM
-	(
-		SELECT 
-			 SUM([dblBaseTotalTax])	AS [dblBaseTotalTax]
-			,SUM([dblBaseTotal])	AS [dblBaseTotal]
-			,[intSalesOrderId]
-		FROM
-			tblSOSalesOrderDetail
-		GROUP BY
-			[intSalesOrderId]
-	)
-	 T
+	,[dblBaseAmountDue]				= [dblAmountDue]
+	,[dblBaseSalesOrderTotal]		= [dblSalesOrderTotal]
 WHERE
-	tblSOSalesOrder.[intSalesOrderId] = T.[intSalesOrderId]
-	AND tblSOSalesOrder.[intSalesOrderId] IN (SELECT DISTINCT [intSalesOrderId] FROM @SOIds)
-	
-
-UPDATE
-	tblSOSalesOrder
-SET
-	 [dblBaseSalesOrderTotal]	= ([dblBaseSalesOrderSubtotal] + [dblBaseTax] + [dblBaseShipping])
-	,[dblBaseAmountDue]			= ([dblBaseSalesOrderSubtotal] + [dblBaseTax] + [dblBaseShipping]) - ([dblBasePayment] + [dblBaseDiscount])
-WHERE
-	[intSalesOrderId] IN (SELECT DISTINCT [intSalesOrderId] FROM @SOIds)	
-	
-
-
+	[intSalesOrderId] IN (SELECT DISTINCT [intSalesOrderId] FROM @SOIds)
+			
 GO
 print('/*******************  END Update Update Base Amounts for Mulit-Currency  *******************/')

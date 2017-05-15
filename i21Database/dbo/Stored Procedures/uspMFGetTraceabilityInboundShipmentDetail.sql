@@ -9,5 +9,5 @@ SET NOCOUNT ON;
 	0 intCategoryId,'' strCategoryCode,s.dblQuantity,
 	s.strUnitMeasure strUOM,
 	NULL AS dtmTransactionDate,s.strVendor,'IS' AS strType
-	from vyuLGLoadContainerReceiptContracts s
-	Where s.intLoadId=@intShipmentId
+	from vyuLGLoadContainerReceiptContracts s Join tblLGLoad l on s.intLoadId=l.intLoadId 
+	Where s.intLoadId=@intShipmentId AND l.intShipmentType=1

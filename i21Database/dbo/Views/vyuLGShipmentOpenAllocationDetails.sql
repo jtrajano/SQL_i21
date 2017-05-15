@@ -12,7 +12,10 @@ AS
 			CDP.intItemId AS intPItemId,
 			CAST (CHP.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDP.intContractSeq AS VARCHAR(100)) AS strPContractNumber, 
 			AD.dblPAllocatedQty,
-			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
+			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP
+										  JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
+											  AND ISNULL(L.ysnCancelled, 0) = 0
+										  GROUP BY SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
 								- IsNull((SELECT SUM (PL.dblLotPickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) AS dblPUnAllocatedQty,
 			AD.intPUnitMeasureId,
 			UP.strUnitMeasure as strPUnitMeasure,
@@ -36,7 +39,10 @@ AS
 			CDS.intItemId AS intSItemId,
 			CAST (CHS.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDS.intContractSeq AS VARCHAR(100)) AS strSContractNumber, 
 			AD.dblSAllocatedQty,
-			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
+			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP
+										  JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
+											  AND ISNULL(L.ysnCancelled, 0) = 0
+										  GROUP BY SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
 								- IsNull((SELECT SUM (PL.dblSalePickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0)  AS dblSUnAllocatedQty,
 			AD.intSUnitMeasureId,
 			US.strUnitMeasure as strSUnitMeasure,
@@ -71,9 +77,31 @@ AS
 	LEFT JOIN	tblCTPosition			PS	ON	PS.intPositionId			= CHS.intPositionId
 	LEFT JOIN	tblSMCountry			CP	ON	CP.intCountryID				= ITP.intOriginId
 	LEFT JOIN	tblSMCountry			CS	ON	CS.intCountryID				= ITS.intOriginId
-	WHERE	(
-			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
-								- IsNull((SELECT SUM (PL.dblLotPickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) > 0 AND
-			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
-								- IsNull((SELECT SUM (PL.dblSalePickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) > 0
-			)			
+	WHERE (
+			AD.dblPAllocatedQty - IsNull((
+					SELECT SUM(SP.dblQuantity)
+					FROM tblLGLoadDetail SP
+					JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
+						AND ISNULL(L.ysnCancelled, 0) = 0
+					GROUP BY SP.intAllocationDetailId
+					HAVING AD.intAllocationDetailId = SP.intAllocationDetailId
+					), 0) - IsNull((
+					SELECT SUM(PL.dblLotPickedQty)
+					FROM tblLGPickLotDetail PL
+					GROUP BY PL.intAllocationDetailId
+					HAVING AD.intAllocationDetailId = PL.intAllocationDetailId
+					), 0) > 0
+			AND AD.dblSAllocatedQty - IsNull((
+					SELECT SUM(SP.dblQuantity)
+					FROM tblLGLoadDetail SP
+					JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
+						AND ISNULL(L.ysnCancelled, 0) = 0
+					GROUP BY SP.intAllocationDetailId
+					HAVING AD.intAllocationDetailId = SP.intAllocationDetailId
+					), 0) - IsNull((
+					SELECT SUM(PL.dblSalePickedQty)
+					FROM tblLGPickLotDetail PL
+					GROUP BY PL.intAllocationDetailId
+					HAVING AD.intAllocationDetailId = PL.intAllocationDetailId
+					), 0) > 0
+			)

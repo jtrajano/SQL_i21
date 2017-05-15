@@ -2060,3 +2060,69 @@ BEGIN
         ,0
         ,'SELECT CONVERT(nvarchar,intProductTypeId) AS ValueMember,strProductTypeName AS DisplayMember FROM tblQMProductType WHERE intProductTypeId IN (6,11,12)'
 END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 95
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 95
+        ,'Pick By Upper Tolerance Qty'
+        ,5
+        ,1
+        ,0
+        ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 96
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 96
+        ,'Pre-Start Line Sample Type'
+        ,5
+        ,1
+        ,1
+        ,'Select  convert(varchar,intSampleTypeId) as ValueMember,strSampleTypeName as DisplayMember From tblQMSampleType Order by strSampleTypeName'
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 97
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 97
+        ,'Pre-Close Line Sample Type'
+        ,5
+        ,1
+        ,1
+        ,'Select  convert(varchar,intSampleTypeId) as ValueMember,strSampleTypeName as DisplayMember From tblQMSampleType Order by strSampleTypeName'
+END

@@ -92,6 +92,12 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
 		,@strBatchId OUTPUT
 
+	IF @dtmProductionDate > @dtmDate
+		OR @dtmProductionDate IS NULL
+	BEGIN
+		SELECT @dtmProductionDate = @dtmDate
+	END
+
 	--Non Lot Tracking
 	INSERT INTO @ItemsForPost (
 		intItemId
@@ -117,7 +123,7 @@ BEGIN
 	SELECT intItemId = cl.intItemId
 		,intItemLocationId = il.intItemLocationId
 		,intItemUOMId = cl.intItemIssuedUOMId
-		,dtmDate = GetDate()
+		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblIssuedQuantity)
 		,dblUOMQty = ItemUOM.dblUnitQty
 		,dblCost = ISNULL(IP.dblLastCost,0)+ISNULL((
@@ -152,12 +158,6 @@ BEGIN
 		AND cl.intBatchId = @intBatchId
 		AND ISNULL(cl.intLotId, 0) = 0
 
-	IF @dtmProductionDate > @dtmDate
-		OR @dtmProductionDate IS NULL
-	BEGIN
-		SELECT @dtmProductionDate = @dtmDate
-	END
-
 	INSERT INTO @ItemsForPost (
 		intItemId
 		,intItemLocationId
@@ -185,11 +185,11 @@ BEGIN
 		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
-		,dblCost = ISNULL(l.dblLastCost, 0)+ISNULL((
+		,dblCost = ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId,cl.intItemUOMId,l.dblLastCost), 0)+ISNULL((
 				CASE 
 					WHEN intMarginById = 2
 						THEN ISNULL(RI.dblMargin, 0)/ R.dblQuantity
-					ELSE (ISNULL(l.dblLastCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
+					ELSE (ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId,cl.intItemUOMId,l.dblLastCost), 0) * ISNULL(RI.dblMargin, 0) / 100)
 					END
 				), 0)
 		,dblSalesPrice = 0
@@ -211,6 +211,7 @@ BEGIN
 	INNER JOIN dbo.tblMFWorkOrderRecipeItem RI On RI.intWorkOrderId=cl.intWorkOrderId and RI.intItemId=cl.intItemId
 	INNER JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
 		AND R.intRecipeId = RI.intRecipeId
+	INNER JOIN dbo.tblICItemUOM IU ON l.intItemId = IU.intItemId and IU.ysnStockUnit=1
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND cl.intBatchId = @intBatchId
 

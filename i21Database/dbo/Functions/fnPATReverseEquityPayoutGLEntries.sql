@@ -96,7 +96,7 @@ BEGIN
 		,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
 		,[dblDebitUnit] = [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
 		,[dblCreditUnit] = [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
-		,[strDescription]
+		,'Unposted Equity Payment'
 		,[strCode]
 		,[strReference]
 		,[intCurrencyId]

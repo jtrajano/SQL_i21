@@ -732,7 +732,7 @@ BEGIN TRY
 	FROM @tblICFinalItem I
 	JOIN tblICLot L ON L.intItemId = I.intItemId
 		AND L.intLotStatusId = 1
-		AND L.dtmExpiryDate > GETDATE()
+		AND ISNULL(L.dtmExpiryDate,@dtmCurrentDate) >= @dtmCurrentDate
 		AND L.dblQty > 0
 		AND (
 			L.intStorageLocationId = CASE 

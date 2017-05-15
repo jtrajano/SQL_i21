@@ -45,12 +45,12 @@ BEGIN
 	DECLARE @SCREEN_NAME NVARCHAR(25) = 'Transfer Instrument';
 	DECLARE @MODULE_CODE NVARCHAR(5)  = 'PAT';
 
-	DECLARE @tmpTransacions TABLE (
+	DECLARE @tmpTransactions TABLE (
 		[intTransactionId] [int] PRIMARY KEY,
 		UNIQUE (intTransactionId)
 	);
 
-	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
+	INSERT INTO @tmpTransactions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 
 	--TRANSFER STOCK TO EQUITY
 		INSERT INTO @returnTable
@@ -63,7 +63,7 @@ BEGIN
 			[dblCredit]						=	0,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	A.strTransferDescription,
+			[strDescription]				=	C.strTransferType,
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strTransferNo,
 			[intCurrencyId]					=	0,
@@ -94,7 +94,7 @@ BEGIN
 		INNER JOIN tblPATTransferType C ON
 			C.intTransferType = A.intTransferType
 		CROSS JOIN tblPATCompanyPreference ComPref
-		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransacions) AND A.intTransferType = 2
+		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransactions) AND A.intTransferType = 2
 		UNION ALL
 		--Undistributed Equity(Transfer Stock to Equity)
 		SELECT	
@@ -105,7 +105,7 @@ BEGIN
 			[dblCredit]						=	B.dblQuantityTransferred,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	A.strTransferDescription,
+			[strDescription]				=	C.strTransferType,
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strTransferNo,
 			[intCurrencyId]					=	0,
@@ -137,7 +137,7 @@ BEGIN
 			ON C.intTransferType = A.intTransferType
 		INNER JOIN tblPATRefundRate D
 			ON B.intToRefundTypeId = D.intRefundTypeId
-		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransacions) AND A.intTransferType = 2
+		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransactions) AND A.intTransferType = 2
 		UNION ALL
 		--Voting/Non-voting Stock Issued(Transfer Equity to Stock)
 		SELECT	
@@ -148,7 +148,7 @@ BEGIN
 			[dblCredit]						=	B.dblQuantityTransferred,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	A.strTransferDescription,
+			[strDescription]				=	C.strTransferType,
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strTransferNo,
 			[intCurrencyId]					=	0,
@@ -181,7 +181,7 @@ BEGIN
 		INNER JOIN tblARCustomer D
 			ON D.intEntityCustomerId = B.intTransferorId
 		CROSS JOIN tblPATCompanyPreference ComPref
-		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransacions) AND A.intTransferType = 4
+		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransactions) AND A.intTransferType = 4
 		UNION ALL
 		--Undistributed Equity(Transfer Equity to Stock)
 		SELECT	
@@ -192,7 +192,7 @@ BEGIN
 			[dblCredit]						=	0,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	A.strTransferDescription,
+			[strDescription]				=	C.strTransferType,
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strTransferNo,
 			[intCurrencyId]					=	0,
@@ -224,7 +224,7 @@ BEGIN
 			ON C.intTransferType = A.intTransferType
 		INNER JOIN tblPATRefundRate D
 			ON B.intRefundTypeId = D.intRefundTypeId
-		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransacions) AND A.intTransferType = 4
+		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransactions) AND A.intTransferType = 4
 		UNION ALL
 		--Undistributed Equity(Transfer Equity to Equity Reserve)
 		SELECT	
@@ -235,7 +235,7 @@ BEGIN
 			[dblCredit]						=	0,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	A.strTransferDescription,
+			[strDescription]				=	C.strTransferType,
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strTransferNo,
 			[intCurrencyId]					=	0,
@@ -267,7 +267,7 @@ BEGIN
 			ON C.intTransferType = A.intTransferType
 		INNER JOIN tblPATRefundRate D
 			ON B.intRefundTypeId = D.intRefundTypeId
-		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransacions) AND A.intTransferType = 5
+		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransactions) AND A.intTransferType = 5
 		UNION ALL
 		--Allocated Reserve(Transfer Equity to Equity Reserve)
 		SELECT	
@@ -278,7 +278,7 @@ BEGIN
 			[dblCredit]						=	B.dblQuantityTransferred,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	A.strTransferDescription,
+			[strDescription]				=	C.strTransferType,
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strTransferNo,
 			[intCurrencyId]					=	0,
@@ -310,7 +310,7 @@ BEGIN
 			ON C.intTransferType = A.intTransferType
 		INNER JOIN tblPATRefundRate D
 			ON B.intRefundTypeId = D.intRefundTypeId
-		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransacions) AND A.intTransferType = 5
+		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransactions) AND A.intTransferType = 5
 		UNION ALL
 		--Undistributed Equity(Transfer Equity Reserve to Equity)
 		SELECT	
@@ -321,7 +321,7 @@ BEGIN
 			[dblCredit]						=	B.dblQuantityTransferred,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	A.strTransferDescription,
+			[strDescription]				=	C.strTransferType,
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strTransferNo,
 			[intCurrencyId]					=	0,
@@ -353,7 +353,7 @@ BEGIN
 			ON C.intTransferType = A.intTransferType
 		INNER JOIN tblPATRefundRate D
 			ON B.intToRefundTypeId = D.intRefundTypeId
-		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransacions) AND A.intTransferType = 6
+		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransactions) AND A.intTransferType = 6
 		UNION ALL
 		--Allocated Reserve(Transfer Equity Reserve to Equity)
 		SELECT	
@@ -364,7 +364,7 @@ BEGIN
 			[dblCredit]						=	0,
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
-			[strDescription]				=	A.strTransferDescription,
+			[strDescription]				=	C.strTransferType,
 			[strCode]						=	@MODULE_CODE,
 			[strReference]					=	A.strTransferNo,
 			[intCurrencyId]					=	0,
@@ -396,6 +396,6 @@ BEGIN
 			ON C.intTransferType = A.intTransferType
 		INNER JOIN tblPATRefundRate D
 			ON B.intToRefundTypeId = D.intRefundTypeId
-		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransacions) AND A.intTransferType = 6
+		WHERE	A.intTransferId IN (SELECT intTransactionId FROM @tmpTransactions) AND A.intTransferType = 6
 	RETURN
 END

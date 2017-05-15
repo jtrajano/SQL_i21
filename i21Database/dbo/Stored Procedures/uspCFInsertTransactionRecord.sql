@@ -941,7 +941,7 @@ BEGIN
 		END
 
 		
-		
+		DECLARE @ysnRecalculateInvalid BIT	= 0
 
 		------------------------------------------------------------
 
@@ -1013,7 +1013,7 @@ BEGIN
 		,@dblPriceIndexRate				= dblPriceIndexRate	
 		,@dtmPriceIndexDate				= dtmPriceIndexDate	
 		,@ysnDuplicate					= ysnDuplicate
-		,@ysnInvalid					= ysnInvalid
+		,@ysnRecalculateInvalid			= ysnInvalid
 		FROM ##tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
@@ -1022,6 +1022,11 @@ BEGIN
 		--	INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 		--	VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Duplicate transaction history found.')
 		--END
+
+		IF(@ysnRecalculateInvalid = 1)
+		BEGIN 
+			SET @ysnInvalid = @ysnRecalculateInvalid
+		END
 
 		IF (@strPriceMethod = 'Inventory - Standard Pricing')
 		BEGIN

@@ -61,5 +61,5 @@ BEGIN
 			AND ysnPosted = 1
 			--AND ysnClr = 0
 			AND dblAmount <> 0
-			AND strReferenceNo NOT IN (@CASH_PAYMENT) -- Do not include AP Payments that is paid thru a "Cash" payment method. 
+			AND ISNULL(strReferenceNo,'') NOT IN ('CASH') -- Do not include AP Payments that is paid thru a "Cash" payment method. 
 END

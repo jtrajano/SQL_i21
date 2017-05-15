@@ -62,6 +62,10 @@
 :r "..\dbo\Views\vyuAPOriginCCDTransaction.sql"
 :r "..\dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql"
 
+--Inventory 
+:r "..\Scripts\IC\uspICDCItemMigrationPt.sql" 
+:r "..\Scripts\IC\uspICDCItemMigrationAg.sql" 
+
 
 ---- CUSTOMER PORTAL
 --:r "..\dbo\Views\vyuCPAgcusMst.sql"
@@ -223,9 +227,6 @@
 :r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
 :r "..\dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql"
-
---MANUFACTURING RECIPE
-:r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
 
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 

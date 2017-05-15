@@ -93,7 +93,7 @@ BEGIN
 
 	SET @body += '<br>'
 	SET @body +='Thank you for your business. <br><br>'
-	SET @body +='Sincerely, <br><br>'
+	SET @body +='Sincerely, <br>'
 	SET @body +='#SIGNATURE#'
 	SET @body +='</html>'
 

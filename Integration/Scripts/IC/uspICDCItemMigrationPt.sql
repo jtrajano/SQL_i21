@@ -38,6 +38,7 @@ INSERT INTO tblICItem (
 	,strBarcodePrint
 	,ysnMSDSRequired
 	,ysnAvailableTM
+	,dblDefaultFull
 	,ysnExtendPickTicket
 	,ysnExportEDI
 	,ysnHazardMaterial
@@ -122,6 +123,7 @@ INSERT INTO tblICItem (
 			ELSE 0
 			END
 		)
+	,MIN(ptitm_deflt_percnt)
 	,(
 		CASE 
 			WHEN (min(ptitm_ext_pic_yn) = 'Y')

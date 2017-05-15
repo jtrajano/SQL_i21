@@ -585,12 +585,12 @@ BEGIN
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND A.intTransactionType IN (1,3)
 	AND D.dblTax != 0
-	AND 1 = (
+	/*AND 1 = (
 		--create tax only from item receipt if it is adjusted / Cost is Adjusted  / third party vendor tax in other charge of receipt (AP-3227) // third party inv shipment vendor tax // PO Tax
 		CASE WHEN B.intInventoryReceiptItemId IS NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL AND B.intInventoryReceiptChargeId IS NULL AND B.intInventoryShipmentChargeId IS NULL AND B.intPurchaseDetailId IS NULL --Commented for AP-3461 
 				THEN 0 --AP-2792
 		ELSE 1 END
-	)
+	)*/
 	GROUP BY A.dtmDate
 	,D.ysnTaxAdjusted
 	,D.intAccountId

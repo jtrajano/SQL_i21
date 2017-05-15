@@ -244,7 +244,7 @@ SELECT
 	,[ysnClearDetailTaxes]					= 0
 	,[intTempDetailIdForTaxes]				= @TransactionId
 	,[strType]								= 'CF Tran'
-	,[ysnUpdateAvailableDiscount]			= @UpdateAvailableDiscount
+	,[ysnUpdateAvailableDiscount]			= ISNULL(@UpdateAvailableDiscount,0)
 	,[strItemTermDiscountBy]				= @strItemTermDiscountBy
 	,[dblItemTermDiscount]					= @Discount
 	,[dtmPostedDate]						= cfTrans.dtmPostedDate

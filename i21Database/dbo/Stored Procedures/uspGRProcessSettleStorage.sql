@@ -20,7 +20,7 @@ BEGIN TRY
 	
 	--Storage Varibales
 	DECLARE @SettleStorageKey INT
-	DECLARE @CurrentItemOpenBalance DECIMAL(24, 10)
+	
 	DECLARE @intCustomerStorageId INT
 	DECLARE @dblStorageUnits DECIMAL(24, 10)
 	DECLARE @dblNegativeStorageUnits DECIMAL(24, 10)
@@ -58,8 +58,8 @@ BEGIN TRY
 	DECLARE @dblAdjustPerUnit DECIMAL(24, 10)
 	DECLARE @dblStorageDue DECIMAL(24, 10)
 	DECLARE @intExternalId INT
-	DECLARE @voucherDetailStorage AS [VoucherDetailStorage]
-	DECLARE @intCreatedBillId INT
+	
+	
 	DECLARE @ItemDescription NVARCHAR(100)
 	DECLARE @intSettleVoucherKey INT
 	DECLARE @LocationId INT
@@ -135,7 +135,8 @@ BEGIN TRY
 		,intTicketDiscountId INT NULL
 	)
 
-	SELECT @UserKey = intCreatedUserId
+	SELECT 
+		 @UserKey = intCreatedUserId
 		,@EntityId = intEntityId
 		,@ItemId = intItemId
 		,@TicketNo = strStorageTicket
@@ -256,10 +257,9 @@ BEGIN TRY
 
 	SELECT	@IntCommodityId = a.intCommodityId
 			,@intUnitMeasureId = a.intUnitMeasureId
-	FROM	tblICCommodityUnitMeasure a JOIN tblICItem b 
-				ON b.intCommodityId = a.intCommodityId
-	WHERE	b.intItemId = @ItemId 
-			AND a.ysnStockUnit = 1
+	FROM	tblICCommodityUnitMeasure a 
+	JOIN	tblICItem b ON b.intCommodityId = a.intCommodityId
+	WHERE	b.intItemId = @ItemId AND a.ysnStockUnit = 1
 
 	IF @intUnitMeasureId IS NULL
 	BEGIN
@@ -310,7 +310,7 @@ BEGIN TRY
 	SET @intCompanyLocationId = NULL
 	SET @intStorageTypeId = NULL
 	SET @intStorageScheduleId = NULL
-	SET @CurrentItemOpenBalance = NULL
+	
 	SET @dblDPStorageUnits = NULL
 	SET @DPContractHeaderId = NULL
 	SET @ContractDetailId = NULL
@@ -501,7 +501,8 @@ BEGIN TRY
 
 			WHILE @SettleContractKey > 0
 			BEGIN
-				SELECT @intContractDetailId = intContractDetailId
+				SELECT 
+					 @intContractDetailId = intContractDetailId
 					,@dblContractUnits = dblContractUnits
 					,@strContractNumber = strContractNumber
 					,@ContractEntityId = ContractEntityId
@@ -526,6 +527,13 @@ BEGIN TRY
 					UPDATE @SettleStorage
 					SET dblRemainingUnits = 0
 					WHERE intSettleStorageKey = @SettleStorageKey
+
+					EXEC uspCTUpdateSequenceBalance
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblStorageUnits,
+						@intUserId				=	@UserKey,
+						@intExternalId			=	@intCustomerStorageId,
+						@strScreenName			=	'Settle Storage' 
 					
 					UPDATE tblGRCustomerStorage
 					SET dblOpenBalance = dblOpenBalance - @dblStorageUnits
@@ -544,6 +552,9 @@ BEGIN TRY
 						,[strUserName]
 						,[intEntityId]
 						,[strSettleTicket]
+						,[intTransactionTypeId]
+						,[intInventoryReceiptId]
+						,[dblPaidAmount]
 					)
 					VALUES 
 					(
@@ -557,6 +568,9 @@ BEGIN TRY
 						,@UserName
 						,@ContractEntityId
 						,@TicketNo
+						,4
+						,@intContractDetailId
+						,@dblCashPrice
 					)
 
 					INSERT INTO @SettleVoucherCreate 
@@ -599,7 +613,14 @@ BEGIN TRY
 					UPDATE @SettleStorage
 					SET dblRemainingUnits = dblRemainingUnits-@dblContractUnits
 					WHERE intSettleStorageKey = @SettleStorageKey
-					
+
+					EXEC uspCTUpdateSequenceBalance
+						 @intContractDetailId	=	@intContractDetailId,
+						 @dblQuantityToUpdate	=	@dblContractUnits,
+						 @intUserId				=	@UserKey,
+						 @intExternalId			=	@intCustomerStorageId,
+						 @strScreenName			=	'Settle Storage' 
+
 					UPDATE tblGRCustomerStorage
 					SET dblOpenBalance = dblOpenBalance - @dblContractUnits
 					WHERE intCustomerStorageId = @intCustomerStorageId
@@ -616,6 +637,9 @@ BEGIN TRY
 						,[strUserName]
 						,[intEntityId]
 						,[strSettleTicket]
+						,[intTransactionTypeId]
+						,[intInventoryReceiptId]
+						,[dblPaidAmount]
 					)
 					VALUES 
 					(
@@ -629,6 +653,9 @@ BEGIN TRY
 						,@UserName
 						,@ContractEntityId
 						,@TicketNo
+						,4
+						,@intContractDetailId
+						,@dblCashPrice
 					)
 
 					INSERT INTO @SettleVoucherCreate 
@@ -696,6 +723,8 @@ BEGIN TRY
 					,[strUserName]
 					,[intEntityId]
 					,[strSettleTicket]
+					,[intTransactionTypeId]
+					,[dblPaidAmount]
 				)
 				VALUES 
 				(
@@ -709,6 +738,8 @@ BEGIN TRY
 					,@UserName
 					,NULL
 					,@TicketNo
+					,4
+					,@dblSpotCashPrice
 				)
 				
 				SET @dblSpotUnits = @dblSpotUnits - @dblStorageUnits
@@ -764,6 +795,8 @@ BEGIN TRY
 					,[strUserName]
 					,[intEntityId]
 					,[strSettleTicket]
+					,[intTransactionTypeId]
+					,[dblPaidAmount]
 				)
 				VALUES 
 				(
@@ -777,6 +810,8 @@ BEGIN TRY
 					,@UserName
 					,NULL
 					,@TicketNo
+					,4
+					,@dblSpotCashPrice
 				)
 
 				SET @dblSpotUnits = 0
@@ -820,13 +855,11 @@ BEGIN TRY
 	
 	---Creating Receipt and Voucher.	
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3  	
-	DECLARE @ItemsToStorage AS ItemCostingTableType		   
-		   ,@strBatchId AS NVARCHAR(20)
-		   ,@ReceiptStagingTable ReceiptStagingTable 
-		   ,@OtherCharges ReceiptOtherChargesTableType 
+	DECLARE @ItemsToStorage AS ItemCostingTableType
+		   ,@ItemsToPost  AS ItemCostingTableType		   
+		   ,@strBatchId AS NVARCHAR(20)		   
 		   ,@intReceiptId AS INT
-		   ,@intBillId AS INT 
-		   ,@strReceiptNumber AS NVARCHAR(50)
+		   ,@intBillId AS INT
 		   ,@success AS BIT 
 		   
 	SELECT @intSettleVoucherKey = MIN(intSettleVoucherKey)
@@ -858,6 +891,7 @@ BEGIN TRY
 		END
 		
 		DELETE FROM @ItemsToStorage
+		DELETE FROM @ItemsToPost
 
 		INSERT INTO @ItemsToStorage
 		(
@@ -885,23 +919,68 @@ BEGIN TRY
 			,intItemUOMId = @intSourceItemUOMId
 			,dtmDate = GETDATE() 
 			,dblQty = -SV.[dblUnits]
-			,dblUOMQty = SV.[dblUnits]
-			,dblCost = SV.[dblCashPrice]
+			,dblUOMQty = @dblUOMQty
+			,dblCost = CASE WHEN St.ysnDPOwnedType = 0 THEN SV.[dblCashPrice] ELSE 0 END
 			,dblSalesPrice = 0.00
-			,intCurrencyId = @intDefaultCurrencyId
+			,intCurrencyId = @intCurrencyId
 			,dblExchangeRate = 1
 			,intTransactionId = 1
 			,intTransactionDetailId = SV.[intCustomerStorageId]
-			,strTransactionId = @strStorageAdjustment
+			,strTransactionId =  @TicketNo
 			,intTransactionTypeId = 4
 			,intSubLocationId = CS.intCompanyLocationSubLocationId
 			,intStorageLocationId = CS.intStorageLocationId
 			,ysnIsStorage = 1
-		FROM	@SettleVoucherCreate SV JOIN tblGRCustomerStorage CS 
-					ON CS.intCustomerStorageId = SV.intCustomerStorageId
-				JOIN tblGRStorageType St 
-					ON St.intStorageScheduleTypeId = CS.intStorageTypeId 
-					AND St.ysnDPOwnedType = 0
+		FROM @SettleVoucherCreate SV 
+		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
+		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId --AND St.ysnDPOwnedType = 0
+		WHERE   SV.intCustomerStorageId=@intCustomerStorageId 
+				AND SV.intItemSort = 1 
+				AND SV.IsProcessed = 0 
+				AND SV.strOrderType = @strOrderType   
+		ORDER BY SV.intItemSort
+				
+		INSERT INTO @ItemsToPost
+		(
+			  intItemId  
+			 ,intItemLocationId	
+			 ,intItemUOMId  
+			 ,dtmDate  
+			 ,dblQty  
+			 ,dblUOMQty  
+			 ,dblCost  
+			 ,dblSalesPrice  
+			 ,intCurrencyId  
+			 ,dblExchangeRate  
+			 ,intTransactionId  
+			 ,intTransactionDetailId 
+			 ,strTransactionId  
+			 ,intTransactionTypeId
+			 ,intSubLocationId
+			 ,intStorageLocationId
+			 ,ysnIsStorage
+		)
+		SELECT  
+			 intItemId = SV.[intItemId]
+			,intItemLocationId = @intItemLocationId	
+			,intItemUOMId = @intSourceItemUOMId
+			,dtmDate = GETDATE() 
+			,dblQty = SV.[dblUnits]
+			,dblUOMQty = @dblUOMQty
+			,dblCost = CASE WHEN St.ysnDPOwnedType = 0 THEN SV.[dblCashPrice] ELSE 0 END
+			,dblSalesPrice = 0.00
+			,intCurrencyId = @intCurrencyId
+			,dblExchangeRate = 1
+			,intTransactionId = SV.[intCustomerStorageId]
+			,intTransactionDetailId = SV.[intCustomerStorageId]
+			,strTransactionId = @TicketNo
+			,intTransactionTypeId = 44
+			,intSubLocationId = CS.intCompanyLocationSubLocationId
+			,intStorageLocationId = CS.intStorageLocationId
+			,ysnIsStorage = 0
+		FROM	@SettleVoucherCreate SV 
+		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
+		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId  --AND St.ysnDPOwnedType = 1
 		WHERE	SV.intCustomerStorageId=@intCustomerStorageId 
 				AND SV.intItemSort = 1 
 				AND SV.IsProcessed = 0 
@@ -917,8 +996,18 @@ BEGIN TRY
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;
 		END
 
+		BEGIN
+			 EXEC uspICPostCosting 
+				  @ItemsToPost
+				, @strBatchId
+				,'Cost of Goods'
+				, @UserKey
+			IF @@ERROR <> 0 GOTO SettleStorage_Exit;
+		END
+
 		-- Do a cost adjustment against the inventory receipt created by the scale ticket. 
 		-- Cost adjustment will not require stock qty change. It will only update the cost and the valuation of the stock. 
+		/*
 		BEGIN 
 			DECLARE @adjustCostOfDelayedPricingStock AS ItemCostAdjustmentTableType
 			DECLARE @GLEntries AS RecapTableType 
@@ -1056,7 +1145,7 @@ BEGIN TRY
 				EXEC uspGLBookEntries @GLEntries, 1
 			END 			
 		END 
-
+		*/
 		--Get IR id created from the Scale Ticket
 		BEGIN 
 			SELECT TOP 1 
@@ -1117,6 +1206,7 @@ BEGIN TRY
 			DELETE tblAPBillDetail WHERE intBillId = @intBillId AND intItemId <> @ItemId  
 			DELETE FROM @detailCreated
 
+			-- 1. Adding Other Charges to Voucher Line Item. 
 			INSERT INTO tblAPBillDetail
 			(
 			 intBillId
@@ -1147,12 +1237,13 @@ BEGIN TRY
 			WHERE SV.intCustomerStorageId = @intCustomerStorageId AND SV.IsProcessed = 0 AND SV.intItemSort <> 1
 			--AND   SV.intItemId NOT IN (SELECT intItemId FROM tblAPBillDetail Where intBillId=@intBillId)
 			
+			-- 1. Tax recomputation because of the new cost.
 			INSERT INTO @detailCreated
 			SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId=@intBillId
 			
-			EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
-										
-			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
+			EXEC [uspAPUpdateVoucherDetailTax] @detailCreated										
+			IF @@ERROR <> 0 GOTO SettleStorage_Exit;
+				
 
 			-- Ensure the exchange rate in the voucher has a default value of 1. 
 			UPDATE	bd
@@ -1185,34 +1276,29 @@ BEGIN TRY
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
 		END
 
-		-- TODO: 
-		-- 1. Tax recomputation because of the new cost. Ask help from AP on how to do it. Or maybe ask your PM if you need to compute any taxes. 
-		-- 2. Add any other charges involved with the settlement. 
-
 		-- Update the grain history. Link the history to the Voucher. 
-		BEGIN --CASE WHEN @strOrderType='Direct' THEN NULL ELSE bd.intContractHeaderId END
+		BEGIN 
 			IF @strOrderType='Direct'
 			BEGIN
-			UPDATE SH
-			SET		SH.intBillId = @intBillId
-			FROM	tblGRStorageHistory SH
-			WHERE	SH.strType = 'Settlement' AND SH.intCustomerStorageId = @intCustomerStorageId 
-					AND SH.strSettleTicket = @TicketNo
-					AND SH.intBillId IS NULL					
-					AND SH.intContractHeaderId IS NULL
-					  
+				UPDATE  SH
+				SET		SH.intBillId = @intBillId
+				FROM	tblGRStorageHistory SH
+				WHERE	SH.strType = 'Settlement' AND SH.intCustomerStorageId = @intCustomerStorageId 
+						AND SH.strSettleTicket = @TicketNo
+						AND SH.intBillId IS NULL					
+						AND SH.intContractHeaderId IS NULL
 			END
 			ELSE
 			BEGIN
-			UPDATE SH
-			SET		SH.intBillId = @intBillId
-			FROM	tblGRStorageHistory SH 
-			JOIN    tblAPBillDetail BD ON BD.intContractHeaderId=SH.intContractHeaderId
-			WHERE	SH.strType = 'Settlement' AND SH.intCustomerStorageId = @intCustomerStorageId
-					AND SH.strSettleTicket = @TicketNo
-					AND SH.intBillId IS NULL
-					AND BD.intBillId=@intBillId
-					AND SH.intContractHeaderId > 0
+				UPDATE  SH
+				SET		SH.intBillId = @intBillId
+				FROM	tblGRStorageHistory SH 
+				JOIN    tblAPBillDetail BD ON BD.intContractHeaderId=SH.intContractHeaderId
+				WHERE	SH.strType = 'Settlement' AND SH.intCustomerStorageId = @intCustomerStorageId
+						AND SH.strSettleTicket = @TicketNo
+						AND SH.intBillId IS NULL
+						AND BD.intBillId=@intBillId
+						AND SH.intContractHeaderId > 0
 					
 			END	
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;	

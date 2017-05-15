@@ -1236,6 +1236,7 @@ BEGIN
 			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
+					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Storage -- Do not compute tax if item ownership is Storage. 
 
 			OPEN loopReceiptItems;
 
@@ -1328,8 +1329,6 @@ BEGIN
 
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-						--INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
-						--	ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 						LEFT JOIN dbo.tblICItemUOM ReceiveUOM 
 							ON ReceiveUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 						LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
@@ -1376,113 +1375,7 @@ BEGIN
 						,[intSort]						= 1
 						,[intConcurrencyId]				= 1
 				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0)
-
-			-- Removed this part as taxes are already computed in fnGetItemTaxComputationForVendor
-			  /*	--Compute the tax
-				BEGIN 
-					-- Clear the temp table 
-					DELETE FROM #tmpComputeItemTaxes
-
-					-- Insert data to the temp table in order to process the taxes. 
-					INSERT INTO #tmpComputeItemTaxes (
-						-- Integration fields. Foreign keys. 
-						intHeaderId
-						,intDetailId
-						,intTaxDetailId
-						,dtmDate
-						,intItemId
-
-						-- Taxes fields
-						,intTaxGroupId
-						,intTaxCodeId
-						,intTaxClassId
-						,strTaxableByOtherTaxes
-						,strCalculationMethod
-						,dblRate
-						,dblTax
-						,dblAdjustedTax
-						,ysnCheckoffTax
-
-						-- Fields used in the calculation of the taxes
-						,dblAmount
-						,dblQty
-					)
-					SELECT 
-						-- Integration fields. Foreign keys. 
-						intHeaderId					= Receipt.intInventoryReceiptId
-						,intDetailId				= ReceiptItem.intInventoryReceiptItemId
-						,intTaxDetailId				= ItemTax.intInventoryReceiptItemTaxId
-						,dtmDate					= Receipt.dtmReceiptDate
-						,intItemId					= ReceiptItem.intItemId
-
-						-- Taxes fields
-						,intTaxGroupId				= Receipt.intTaxGroupId
-						,intTaxCodeId				= ItemTax.intTaxCodeId
-						,intTaxClassId				= ItemTax.intTaxClassId
-						,strTaxableByOtherTaxes		= ItemTax.strTaxableByOtherTaxes
-						,strCalculationMethod		= ItemTax.strCalculationMethod
-						,dblRate					= ItemTax.dblRate
-						,dblTax						= ItemTax.dblTax
-						,dblAdjustedTax				= ItemTax.dblAdjustedTax
-						,ysnCheckoffTax				= ItemTax.ysnCheckoffTax
-
-						-- Fields used in the calculation of the taxes
-						,dblAmount					=	-- ReceiptItem.dblUnitCost
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-																	dbo.fnMultiply(
-																		dbo.fnDivide(
-																			ISNULL(dblUnitCost, 0) 
-																			,ISNULL(Receipt.intSubCurrencyCents, 1) 
-																		)
-																		,dbo.fnDivide(
-																			GrossNetUOM.dblUnitQty
-																			,CostUOM.dblUnitQty 
-																		)
-																	)
-																ELSE 
-																	dbo.fnMultiply(
-																		dbo.fnDivide(
-																			ISNULL(dblUnitCost, 0) 
-																			,ISNULL(Receipt.intSubCurrencyCents, 1) 
-																		)
-																		,dbo.fnDivide(
-																			ReceiveUOM.dblUnitQty
-																			,CostUOM.dblUnitQty 
-																		)
-																	)																	
-														END 
-
-						,dblQty						=	CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-																	ReceiptItem.dblNet 
-																ELSE 
-																	ReceiptItem.dblOpenReceive 
-														END 
-
-					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-							INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
-								ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-							LEFT JOIN dbo.tblICItemUOM ReceiveUOM 
-								ON ReceiveUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
-							LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
-								ON GrossNetUOM.intItemUOMId = ReceiptItem.intWeightUOMId
-							LEFT JOIN dbo.tblICItemUOM CostUOM
-								ON CostUOM.intItemUOMId = ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId) 					
-
-					WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
-							AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
-					
-					-- Call the SM stored procedure to compute the tax. 
-					EXEC dbo.[uspSMComputeItemTaxes]
-
-					-- Get the computed tax. 
-					UPDATE	ItemTax
-					SET		dblTax = ComputedTax.dblTax
-					FROM	dbo.tblICInventoryReceiptItemTax ItemTax INNER JOIN #tmpComputeItemTaxes ComputedTax
-								ON ItemTax.intInventoryReceiptItemId = ComputedTax.intDetailId
-								AND ItemTax.intInventoryReceiptItemTaxId = ComputedTax.intTaxDetailId
-				END */
-									
+								
 				-- Get the next item. 
 				FETCH NEXT FROM loopReceiptItems INTO 
 					@ItemId

@@ -12,7 +12,7 @@
 	@batchId			NVARCHAR(100) = NULL OUTPUT,
 	@totalAmount		NUMERIC(18,6) = NULL OUTPUT
 AS
-	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT)	
+	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT, intTermId INT)	
 	DECLARE @tblTypeServiceCharge	  [dbo].[ServiceChargeTableType]
 	DECLARE @tempTblTypeServiceCharge [dbo].[ServiceChargeTableType]
 	DECLARE @temp_aging_table TABLE(
@@ -78,15 +78,15 @@ AS
 	--GET SELECTED CUSTOMERS
 	IF (@customerIds = '')
 		BEGIN
-			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
-			SELECT E.intEntityCustomerId, C.intServiceChargeId FROM vyuARCustomerSearch E
+			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId) 
+			SELECT E.intEntityCustomerId, C.intServiceChargeId, C.intTermsId FROM vyuARCustomerSearch E
 				INNER JOIN tblARCustomer C ON E.intEntityCustomerId = C.intEntityCustomerId
 				WHERE E.ysnActive = 1 AND ISNULL(C.intServiceChargeId, 0) <> 0
 		END
 	ELSE
 		BEGIN
-			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId)
-			SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
+			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId)
+			SELECT intEntityCustomerId, intServiceChargeId, intTermsId FROM tblARCustomer WHERE intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
 		END
 
 	--GET SELECTED STATUS CODES
@@ -106,15 +106,24 @@ AS
 			WHERE [strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strType IN ('CF Tran'))
 		END
 
+	IF EXISTS(SELECT TOP 1 NULL FROM #tmpCustomers WHERE ISNULL(intTermId, 0) = 0) AND @isRecap = 0
+		BEGIN
+			RAISERROR(120042, 16, 1)
+			RETURN 0
+		END
+
 	--PROCESS EACH CUSTOMER
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomers)
 		BEGIN
 			DECLARE @entityId			INT,
-					@serviceChargeId	INT					
+					@serviceChargeId	INT
 
 			SELECT TOP 1 @entityId = intEntityId,
-						 @serviceChargeId = intServiceChargeId FROM #tmpCustomers
+						 @serviceChargeId = intServiceChargeId
+			FROM #tmpCustomers
+
 			DELETE FROM @tempTblTypeServiceCharge
+
 			IF (@serviceChargeId > 0)
 				BEGIN
 					--GET INVOICES DUE

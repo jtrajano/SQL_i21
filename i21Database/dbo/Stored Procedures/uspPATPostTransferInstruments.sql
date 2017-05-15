@@ -27,6 +27,7 @@ DECLARE @error NVARCHAR(200)
 DECLARE @dateToday AS DATETIME = GETDATE();
 DECLARE @batchId NVARCHAR(40);
 
+
 IF(@batchId IS NULL)
 	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
@@ -171,8 +172,8 @@ SET @batchIdUsed = @batchId;
 			WHEN MATCHED
 				THEN UPDATE SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity + TD.dblQuantityTransferred ELSE CE.dblEquity - TD.dblQuantityTransferred END
 			WHEN NOT MATCHED BY TARGET
-				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, intConcurrencyId)
-				VALUES(TD.intTransferorId, TD.intToFiscalYearId, 'Undistributed', TD.intToRefundTypeId, TD.dblQuantityTransferred, 1);
+				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, dblEquityPaid, intConcurrencyId)
+				VALUES(TD.intTransferorId, TD.intToFiscalYearId, 'Undistributed', TD.intToRefundTypeId, TD.dblQuantityTransferred, 0, 1);
 
 		UPDATE CS
 		SET CS.strActivityStatus = CASE WHEN @ysnPosted = 1 THEN 'Xferred' ELSE 'Open' END,
@@ -190,12 +191,20 @@ SET @batchIdUsed = @batchId;
 		IF(@ysnPosted = 1)
 		BEGIN
 			INSERT INTO tblPATCustomerStock(intCustomerPatronId, intStockId, strCertificateNo, strStockStatus, dblSharesNo, dtmIssueDate, strActivityStatus, dblParValue, dblFaceValue, ysnPosted, intConcurrencyId)
-			SELECT intTransferorId, intToStockId, strToCertificateNo, strToStockStatus, dblQuantityTransferred, dtmToIssueDate, 'Open', dblToParValue, (dblQuantityTransferred * dblToParValue), 0, 0
+			SELECT intTransferorId, intToStockId, strToCertificateNo, strToStockStatus, dblQuantityTransferred, dtmToIssueDate, 'Open', dblToParValue, (dblQuantityTransferred * dblToParValue), 0, 1
 			FROM #tempTransferDetails WHERE intTransferType = 4;
 		END
 		ELSE
 		BEGIN
-			DELETE FROM tblPATCustomerStock WHERE strCertificateNo IN (SELECT strToCertificateNo FROM #tempTransferDetails where intTransferType = 4)
+			IF EXISTS(SELECT 1 FROM #tempTransferDetails tempTD INNER JOIN tblPATCustomerStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo WHERE CS.ysnPosted != 1)
+			BEGIN
+				DELETE FROM tblPATCustomerStock WHERE strCertificateNo IN (SELECT strToCertificateNo FROM #tempTransferDetails where intTransferType = 4)
+			END
+			ELSE
+			BEGIN
+				RAISERROR('Stock Issued is already posted.', 16, 1);
+				GOTO Post_Rollback;
+			END
 		END
 
 		UPDATE CE
@@ -215,8 +224,8 @@ SET @batchIdUsed = @batchId;
 			WHEN MATCHED
 				THEN UPDATE SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity + TD.dblQuantityTransferred ELSE CE.dblEquity - TD.dblQuantityTransferred END
 			WHEN NOT MATCHED BY TARGET
-				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, intConcurrencyId)
-				VALUES (TD.intTransferorId, TD.intFiscalYearId, 'Reserve', TD.intRefundTypeId, TD.dblQuantityTransferred, 1);
+				THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, dblEquityPaid, intConcurrencyId)
+				VALUES (TD.intTransferorId, TD.intFiscalYearId, 'Reserve', TD.intRefundTypeId, TD.dblQuantityTransferred, 0, 1);
 
 		UPDATE CE
 		SET CE.dblEquity = CASE WHEN @ysnPosted = 1 THEN CE.dblEquity - tempTD.dblQuantityTransferred ELSE CE.dblEquity + tempTD.dblQuantityTransferred END

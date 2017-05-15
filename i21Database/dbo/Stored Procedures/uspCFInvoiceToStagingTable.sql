@@ -101,7 +101,7 @@ BEGIN TRY
 	,strSiteAddress
 	,strSiteCity
 	,strPrintTimeStamp
-	,strEmailDistributionOption
+	,strEmailDistributionOption 
 	,strEmail
 	,strDepartmentDescription
 	,strShortName
@@ -110,6 +110,7 @@ BEGIN TRY
 	,strItemDescription
 	,strTerm
 	,strTermCode
+	,strTermType
 	,dtmTransactionDate
 	,dtmDate
 	,dtmPostedDate
@@ -229,6 +230,7 @@ BEGIN TRY
 	,strItemDescription
 	,strTerm
 	,strTermCode
+	,strTermType
 	,dtmTransactionDate
 	,dtmDate
 	,dtmPostedDate

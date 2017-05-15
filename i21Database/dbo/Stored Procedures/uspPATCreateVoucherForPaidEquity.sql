@@ -78,7 +78,7 @@ END
 			@intEquityPaySummaryId = tEP.intEquityPaySummaryId,
 			@intCustomerPatronId = tEP.intCustomerPatronId,
 			@dblEquityPay = ROUND(tEP.dblEquityPaid,2),
-			@strVenderOrderNumber = tEP.strPaymentNumber + '' + CONVERT(NVARCHAR(MAX), tEP.intEquityPaySummaryId)
+			@strVenderOrderNumber = tEP.strPaymentNumber + '-' + CONVERT(NVARCHAR(MAX), tEP.intEquityPaySummaryId)
 		FROM @equityPayments dEP INNER JOIN #tempEquityPayments tEP ON tEP.intEquityPaySummaryId = dEP.intId
 
 		INSERT INTO @voucherDetailNonInventory([intAccountId],[intItemId],[strMiscDescription],[dblQtyReceived],[dblDiscount],[dblCost],[intTaxGroupId])
@@ -94,7 +94,19 @@ END
 			,@voucherDate = @dtmDate
 			,@billId = @intCreatedBillId OUTPUT;
 
-		UPDATE tblPATEquityPaySummary SET intBillId = @intCreatedBillId, ysnVouchered = 1 WHERE intEquityPaySummaryId = @intEquityPaySummaryId;
+		UPDATE tblPATEquityPaySummary SET intBillId = @intCreatedBillId WHERE intEquityPaySummaryId = @intEquityPaySummaryId;
+
+		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
+		BEGIN
+			DECLARE @voucherId AS Id;
+			INSERT INTO @voucherId SELECT intBillId FROM tblAPBillDetail where intBillId = @intCreatedBillId;
+
+			DELETE FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intId FROM @voucherId);
+			UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intId FROM @voucherId);
+			UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intId FROM @voucherId);
+
+			EXEC uspAPUpdateVoucherTotal @voucherId
+		END
 
 		EXEC [dbo].[uspAPPostBill]
 			@batchId = @intCreatedBillId,

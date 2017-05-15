@@ -51,7 +51,10 @@ WHERE
 	ARID.intInvoiceId = @TransactionId
 	AND ARID.dblContractBalance <> CTCD.dblBalance
 
---Committed QUatities
+--Sales Order Status 
+EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId, @ForDelete
+
+--Committed QUatities - should call [[uspARUpdateSOStatusFromInvoice]] first
 EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId, 1
 
 --Reserved QUatities
@@ -59,9 +62,6 @@ EXEC dbo.[uspARUpdateReservedStock] @TransactionId, 0, @userId, 1, @post
 
 --In Transit Outbound Quantities 
 EXEC dbo.[uspARUpdateInTransit] @TransactionId, @post, 0
-
---Sales Order Status
-EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId, @ForDelete
 
 DECLARE	@EntityCustomerId INT
 		,@LoadId INT

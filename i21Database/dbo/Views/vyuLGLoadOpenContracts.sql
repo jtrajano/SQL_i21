@@ -88,6 +88,7 @@ SELECT CD.intContractDetailId
 	,intShipmentType = 1
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
+	,CO.strCountry AS strOrigin
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -108,6 +109,16 @@ LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
+	AND CD.intItemContractId = ICI.intItemContractId
+LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
+		CASE 
+			WHEN ISNULL(ICI.intCountryId, 0) = 0
+				THEN ISNULL(CA.intCountryID, 0)
+			ELSE ICI.intCountryId
+			END
+		)
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -148,14 +159,7 @@ SELECT CD.intContractDetailId
 	,U1.strUnitMeasure AS strUnitMeasure
 	,CD.intCompanyLocationId
 	,CL.strLocationName AS strLocationName
-	,ISNULL(CD.dblQuantity, 0) - ISNULL((
-			SELECT SUM(LD.dblQuantity)
-			FROM tblLGLoadDetail LD
-			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			WHERE LD.intPContractDetailId = CD.intContractDetailId
-				AND L.intShipmentType = 2
-				AND ISNULL(L.ysnCancelled,0) = 0 
-			), 0) AS dblUnLoadedQuantity
+	,ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblShippingInstructionQty,0) AS dblUnLoadedQuantity
 	,CH.intContractTypeId intPurchaseSale
 	,CH.intEntityId
 	,CH.strContractNumber
@@ -167,13 +171,7 @@ SELECT CD.intContractDetailId
 	,CD.dtmEndDate
 	,CD.dtmPlannedAvailabilityDate
 	,EY.intDefaultLocationId
-	,ISNULL((SELECT SUM(LD.dblQuantity)
-			 FROM tblLGLoadDetail LD
-			 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			 WHERE CD.intContractDetailId = (CASE WHEN CH.intContractTypeId = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END)
-				 AND L.intShipmentType = 2
-				 AND ISNULL(L.ysnCancelled,0) = 0 
-			 ), 0) AS dblScheduleQty
+	,ISNULL(CD.dblShippingInstructionQty, 0) AS dblScheduleQty
 	,CH.strCustomerContract
 	,ISNULL(CD.dblBalance, 0) AS dblBalance
 	,CASE WHEN CP.ysnValidateExternalPONo = 1 AND ISNULL(CD.strERPPONumber,'')= ''
@@ -190,14 +188,7 @@ SELECT CD.intContractDetailId
 							)
 						AND (
 							(
-								ISNULL(CD.dblQuantity, 0) - ISNULL((
-										SELECT SUM(LD.dblQuantity)
-										FROM tblLGLoadDetail LD
-										JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-										WHERE CD.intContractDetailId = (CASE WHEN CH.intContractTypeId = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END)
-											AND L.intShipmentType = 2
-											AND ISNULL(L.ysnCancelled,0) = 0 
-										), 0) > 0
+								ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblShippingInstructionQty, 0) > 0
 								)
 							OR (CH.ysnUnlimitedQuantity = 1)
 							)
@@ -246,18 +237,13 @@ SELECT CD.intContractDetailId
 	,intShipmentType = 2
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
+	,CO.strCountry AS strOrigin
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
-	AND EY.strEntityType = (
-		CASE 
-			WHEN CH.intContractTypeId = 1
-				THEN 'Vendor'
-			ELSE 'Customer'
-			END
-		)
+	AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
@@ -266,6 +252,16 @@ LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
+	AND CD.intItemContractId = ICI.intItemContractId
+LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
+		CASE 
+			WHEN ISNULL(ICI.intCountryId, 0) = 0
+				THEN ISNULL(CA.intCountryID, 0)
+			ELSE ICI.intCountryId
+			END
+		)
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -349,3 +345,5 @@ GROUP BY CD.intContractDetailId
 	,SL.strName
 	,CD.intStorageLocationId
 	,WG.ysnSample
+	,CD.dblShippingInstructionQty
+	,CO.strCountry

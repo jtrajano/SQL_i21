@@ -1,7 +1,7 @@
-﻿CREATE VIEW dbo.vyuCFCalculatedInvoice
+﻿CREATE VIEW [dbo].[vyuCFCalculatedInvoice]
 AS
 SELECT        cfInv.intCustomerId, cfInv.strTempInvoiceReportNumber, cfInv.dblAccountTotalAmount, cfInv.dblAccountTotalDiscount, cfInv.intTermID, cfInv.dtmInvoiceDate, cfInvFee.dblFeeTotalAmount, 
-                         cfInv.dblAccountTotalAmount + cfInvFee.dblFeeTotalAmount AS dblInvoiceTotal, SUM(cfInv.dblQuantity) AS dblTotalQuantity, cfInv.dblEligableGallon, cfInv.strCustomerName, cfInv.strEmail, 
+                         ISNULL(cfInv.dblAccountTotalAmount,0) + ISNULL(cfInvFee.dblFeeTotalAmount,0) AS dblInvoiceTotal, SUM(cfInv.dblQuantity) AS dblTotalQuantity, cfInv.dblEligableGallon, cfInv.strCustomerName, cfInv.strEmail, 
                          cfInv.strEmailDistributionOption, 'Ready' AS strStatus
 FROM            dbo.tblCFInvoiceStagingTable AS cfInv LEFT JOIN
                              (SELECT        dblFeeTotalAmount, intAccountId

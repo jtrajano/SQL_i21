@@ -166,7 +166,7 @@ BEGIN TRY
 			INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			INNER JOIN tblTFTaxCategory ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 			INNER JOIN tblEMEntity Vendor ON Receipt.intEntityVendorId = Vendor.intEntityId ON Origin.intEntityLocationId = Receipt.intShipFromId
-			LEFT OUTER JOIN tblSMTaxCode ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId AND tblSMTaxCode.intTaxCodeId = ReceiptItemTax.intTaxCodeId ON tblTRSupplyPoint.intEntityVendorId = Receipt.intShipFromId
+			LEFT OUTER JOIN tblSMTaxCode ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId AND tblSMTaxCode.intTaxCodeId = ReceiptItemTax.intTaxCodeId ON tblTRSupplyPoint.intEntityVendorId = Receipt.intEntityVendorId AND tblTRSupplyPoint.intEntityLocationId = Receipt.intShipFromId
 			FULL OUTER JOIN tblSMShipVia ShipVia
 			FULL OUTER JOIN tblEMEntity AS Transporter ON ShipVia.intEntityShipViaId = Transporter.intEntityId ON Receipt.intShipViaId = ShipVia.intEntityShipViaId
 			CROSS JOIN (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup

@@ -1,7 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblPATAdjustVolumeDetails]
 (
 	[intAdjustmentDetailId] INT NOT NULL IDENTITY, 
-    [intAdjustmentId] INT NULL, 
+    [intAdjustmentId] INT NULL,
+	[intCustomerVolumeId] INT NULL,
 	[intFiscalYearId] INT NULL,
     [intPatronageCategoryId] INT NULL, 
     [dblQuantityAvailable] NUMERIC(18, 6) NULL, 

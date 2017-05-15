@@ -66,7 +66,7 @@ FROM
 			D.intBillId
 			,D.intPaymentId
 			,D.strPaymentInfo
-			,CONVERT(NVARCHAR(MAX),DecryptByKey(CAST(N'' as XML).value('xs:base64Binary(sql:column(''strBankAccountNo''))', 'varbinary(128)')))	 AS strBankAccountNo
+			,D.strBankAccountNo
 			,D.ysnPrinted
 			,D.ysnVoid
 			,D.ysnCleared

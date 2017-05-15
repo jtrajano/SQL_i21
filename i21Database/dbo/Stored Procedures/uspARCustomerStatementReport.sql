@@ -90,6 +90,7 @@ DECLARE @temp_statement_table TABLE(
 	,[dblMonthlyBudget]				NUMERIC(18,6)
 	,[dblRunningBalance]			NUMERIC(18,6)
 	,[strCustomerNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,[strDisplayName]				NVARCHAR(100)
 	,[strName]						NVARCHAR(100)
 	,[strBOLNumber]					NVARCHAR(100)
 	,[dblCreditLimit]				NUMERIC(18,6)
@@ -181,7 +182,7 @@ SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
 SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo, NULL, NULL, NULL, @strLocationName, @ysnIncludeBudget, @ysnPrintCreditBalance
 
 DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'dtmDate', 'strStatementFormat', 'ysnPrintZeroBalance', 'ysnPrintCreditBalance', 'ysnIncludeBudget', 'ysnPrintOnlyPastDue', 'ysnReportDetail')
 UPDATE @temp_xml_table SET fieldname = 'strName' WHERE fieldname = 'strCustomerName'
@@ -225,12 +226,13 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](C.intEntityCustomerId, I.dtmDate), 0)
 	 , dblRunningBalance = SUM(CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)) OVER (PARTITION BY I.intEntityCustomerId ORDER BY I.dtmPostDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 	 , C.strCustomerNumber
-	 , strName = CASE WHEN CUST.strStatementFormat <> ''Running Balance'' THEN C.strName ELSE ISNULL(CC.strCheckPayeeName, C.strName) END
+	 , strDisplayName = CASE WHEN CUST.strStatementFormat <> ''Running Balance'' THEN C.strName ELSE ISNULL(CC.strCheckPayeeName, C.strName) END
+	 , strName = C.strName
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
 	 , strAccountStatusCode = dbo.fnARGetCustomerAccountStatusCodes(C.intEntityCustomerId)
 	 , CL.strLocationName
-	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
+	 , strFullAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
 	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
@@ -286,6 +288,7 @@ IF @ysnIncludeBudget = 1
 				  , dblMonthlyBudget			= dblBudgetAmount
 				  , dblRunningBalance			= SUM(dblBudgetAmount - dblAmountPaid) OVER (PARTITION BY C.intEntityCustomerId ORDER BY intCustomerBudgetId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 				  , strCustomerNumber			= C.strCustomerNumber
+				  , strDisplayName				= C.strDisplayName
 				  , strName						= C.strName
 				  , strBOLNumber				= NULL
 				  , dblCreditLimit				= C.dblCreditLimit
@@ -437,6 +440,7 @@ BEGIN
 		  ,STATEMENTREPORT.dblMonthlyBudget
 		  ,STATEMENTREPORT.dblRunningBalance
 		  ,STATEMENTREPORT.strCustomerNumber
+		  ,STATEMENTREPORT.strDisplayName
 		  ,STATEMENTREPORT.strName
 		  ,STATEMENTREPORT.strBOLNumber
 		  ,STATEMENTREPORT.dblCreditLimit	  
@@ -465,6 +469,7 @@ BEGIN
 		  ,dblMonthlyBudget								= SUM(STATEMENTREPORT.dblMonthlyBudget)
 		  ,dblRunningBalance							= SUM(STATEMENTREPORT.dblRunningBalance)
 		  ,STATEMENTREPORT.strCustomerNumber
+		  ,STATEMENTREPORT.strDisplayName
 		  ,STATEMENTREPORT.strName
 		  ,STATEMENTREPORT.strBOLNumber
 		  ,STATEMENTREPORT.dblCreditLimit	  
@@ -487,6 +492,7 @@ BEGIN
 		   , CFReportTable.dtmInvoiceDate
 		   , STATEMENTREPORT.strTransactionType	  
 		   , STATEMENTREPORT.strCustomerNumber
+		   , STATEMENTREPORT.strDisplayName
 		   , STATEMENTREPORT.strName
 		   , STATEMENTREPORT.strBOLNumber
 		   , STATEMENTREPORT.dblCreditLimit	  
@@ -531,6 +537,7 @@ ELSE
 		  ,STATEMENTREPORT.dblMonthlyBudget
 		  ,STATEMENTREPORT.dblRunningBalance
 		  ,STATEMENTREPORT.strCustomerNumber
+		  ,STATEMENTREPORT.strDisplayName
 		  ,STATEMENTREPORT.strName
 		  ,STATEMENTREPORT.strBOLNumber
 		  ,STATEMENTREPORT.dblCreditLimit	  
@@ -559,6 +566,7 @@ ELSE
 		  ,dblMonthlyBudget								= SUM(STATEMENTREPORT.dblMonthlyBudget)
 		  ,dblRunningBalance							= SUM(STATEMENTREPORT.dblRunningBalance)
 		  ,STATEMENTREPORT.strCustomerNumber
+		  ,STATEMENTREPORT.strDisplayName
 		  ,STATEMENTREPORT.strName
 		  ,STATEMENTREPORT.strBOLNumber
 		  ,STATEMENTREPORT.dblCreditLimit	  
@@ -581,6 +589,7 @@ ELSE
 		   , CFReportTable.dtmInvoiceDate
 		   , STATEMENTREPORT.strTransactionType	  
 		   , STATEMENTREPORT.strCustomerNumber
+		   , STATEMENTREPORT.strDisplayName
 		   , STATEMENTREPORT.strName
 		   , STATEMENTREPORT.strBOLNumber
 		   , STATEMENTREPORT.dblCreditLimit	  

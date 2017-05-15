@@ -72,6 +72,7 @@
     [strItemDescription]           NVARCHAR (MAX)  NULL,
     [strTerm]                      NVARCHAR (MAX)  NULL,
     [strTermCode]                  NVARCHAR (MAX)  NULL,
+    [strTermType]                  NVARCHAR (MAX)  NULL,
     [strCalculationType]           NVARCHAR (MAX)  NULL,
     [strFeeDescription]            NVARCHAR (MAX)  NULL,
     [strFee]                       NVARCHAR (MAX)  NULL,
@@ -131,6 +132,8 @@
     [ysnActive]                    BIT             NULL,
     [ysnEnergyTrac]                BIT             NULL
 );
+
+
 
 
 

@@ -5181,10 +5181,18 @@
     <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
     <Build Include="dbo\Triggers\trgCustomJDESAPReceiptUpdateExportFlag.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MS_Mississippi.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMTransactionCheckIfRequiredApproval.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateContractShippingInstructionQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSaveTestInTemplates.sql" />
+    <Build Include="dbo\Views\vyuLGGetInventoryDocumentList.sql" />
     <Build Include="dbo\Stored Procedures\uspICRaiseError.sql" />
     <Build Include="dbo\Functions\fnICGetErrorMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFProcessBeforePreview.sql" />
+    <Build Include="dbo\Views\vyuICLoadContainerPurchaseContracts.sql" />
     <Build Include="dbo\Functions\fnFormatMessage.sql" />
+    <Build Include="dbo\Views\vyuCTSequenceCombo.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentConfiguration.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCAddScaleOperator.sql" />
+    <Build Include="dbo\Tables\tblSCScaleOperator.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5384,8 +5392,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\SM\DefaultData\25_DocumentSource.sql" />
   </ItemGroup>
 </Project>

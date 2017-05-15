@@ -3,9 +3,9 @@ WITH SCHEMABINDING
 AS 
 
 SELECT 
-	A.dblAmountPaid ,
-	A.dblUnapplied ,
-	A.dblWithheld ,
+	ISNULL(A.dblAmountPaid,0) AS dblAmountPaid ,
+	ISNULL(A.dblUnapplied,0) AS dblUnapplied,
+	ISNULL(A.dblWithheld,0) AS dblWithheld,
 	A.dtmDatePaid ,
 	A.intAccountId ,
 	A.intBankAccountId ,
@@ -24,8 +24,8 @@ SELECT
 	CAST(CASE WHEN E.dtmCheckPrinted IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnPrinted,
 	ISNULL(E.ysnCheckVoid,0) AS ysnVoid,
 	C.strBankName,
-	B.strBankAccountNo,
-	D.dblCreditLimit AS dblCredit,
+	dbo.[fnAESDecryptASym](B.strBankAccountNo) AS strBankAccountNo,
+	ISNULL(D.dblCreditLimit,0) AS dblCredit,
 	D.strVendorId,
 	D1.strName,
 	ISNULL(E.ysnClr,0) AS ysnClear,

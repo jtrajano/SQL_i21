@@ -91,6 +91,38 @@ Declare @tblNodeData AS table
 	intImageTypeId int Default 0
 )
 
+Declare @tblNodeDataFinal AS table
+(
+	[key] int,
+	intRecordId int,
+	intParentId int,
+	strTransactionName nvarchar(50),
+	intLotId int,
+	strLotNumber nvarchar(50),
+	strLotAlias nvarchar(50),
+	dblQuantity numeric(18,6),
+	strUOM nvarchar(50),
+	dtmTransactionDate DateTime,
+	intItemId int,
+	strItemNo nvarchar(50),
+	strItemDesc nvarchar(200),
+	intCategoryId int,
+	strCategoryCode nvarchar(50),
+	intParentLotId int,
+	strProcessName nvarchar(50),
+	strType nvarchar(2),
+	strVendor nvarchar(200),
+	strCustomer nvarchar(200),
+	intAttributeTypeId int Default 0,
+	intImageTypeId int Default 0,
+	strImage nvarchar(max),
+	strNodeText nvarchar(max),
+	strToolTip nvarchar(max),
+	intControlPointId int,
+	ysnExcludedNode bit default 0,
+	intGroupRowNo int
+)
+
 Declare @tblLinkData AS table
 (
 	intFromRecordId int,
@@ -162,9 +194,10 @@ Begin
 	If @intObjectTypeId=4
 	Begin
 		--If Lot is received via Contract show contract
-		Select TOP 1 @intContractId=ISNULL(ri.intOrderId,0),@intShipmentId=ISNULL(ri.intSourceId,0),@intContainerId=ISNULL(ri.intContainerId,0)  
+		Select TOP 1 @intContractId=ISNULL(ri.intOrderId,0),@intShipmentId=ISNULL(ld.intLoadId,0),@intContainerId=ISNULL(ri.intContainerId,0)  
 		From tblICInventoryReceiptItem ri Join tblICInventoryReceiptItemLot rl on ri.intInventoryReceiptItemId=rl.intInventoryReceiptItemId 
 		Join tblICInventoryReceipt rh on ri.intInventoryReceiptId=rh.intInventoryReceiptId 
+		Join tblLGLoadDetail ld on ri.intSourceId=ld.intLoadDetailId
 		Where rl.intLotId=@intLotId And rh.strReceiptType='Purchase Contract'
 
 		--Contract
@@ -577,7 +610,12 @@ Begin
 	--Select intParentId,intRecordId,strTransactionName From @tblNodeData
 End
 
-	Select intRecordId AS [key],*,
+	Insert Into @tblNodeDataFinal([key],intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId,strImage,strNodeText,strToolTip,
+	intControlPointId)
+	Select intRecordId AS [key],
+	intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId,
 	Case When strType='L' Then 
 		Case When intImageTypeId = 2 Then '../resources/images/graphics/traceability-raw-material.png' 
 			When intImageTypeId = 4 Then '../resources/images/graphics/traceability-wip-material.png' 
@@ -608,3 +646,21 @@ End
 	Else 5 
 	End AS intControlPointId
 	From @tblNodeData
+
+	--Generate Group Row No
+	Update f set f.ysnExcludedNode=1,f.intGroupRowNo=t.intRowNo From @tblNodeDataFinal f Join
+	(
+	Select ROW_NUMBER() over (partition by (convert(varchar,strTransactionName) + convert(varchar,intLotId)) order by [key]) intRowNo,[key]
+	From @tblNodeDataFinal
+	) t on f.[key]=t.[key]
+	Where intRowNo>1
+
+	--Update Duplicate Rows
+	Update f set f.intRecordId=t.intMinRecordId From @tblNodeDataFinal f Join
+	(
+	Select MIN(intRecordId) intMinRecordId,(convert(varchar,strTransactionName) + convert(varchar,intLotId)) AS strKey
+	From @tblNodeDataFinal group by (convert(varchar,strTransactionName) + convert(varchar,intLotId))
+	) t on (convert(varchar,f.strTransactionName) + convert(varchar,f.intLotId))=t.strKey
+	Where f.intGroupRowNo is not null
+
+	Select * from @tblNodeDataFinal

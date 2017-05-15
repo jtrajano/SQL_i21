@@ -14,9 +14,9 @@ SELECT
 	,Alloc.strPContractNumber
 	,Alloc.intPContractSeq
 	,Alloc.dblPAllocatedQty
-	,dblGrossWt = (LD.dblGross / LD.dblQuantity) * Alloc.dblPAllocatedQty
-	,dblTareWt = (LD.dblTare / LD.dblQuantity) * Alloc.dblPAllocatedQty
-	,dblNetWt = (LD.dblNet / LD.dblQuantity) * Alloc.dblPAllocatedQty
+	,dblGrossWt = (LD.dblGross / CASE WHEN ISNULL(LD.dblQuantity,0) = 0 THEN 1 ELSE LD.dblQuantity END) * Alloc.dblPAllocatedQty
+	,dblTareWt = (LD.dblTare / CASE WHEN ISNULL(LD.dblQuantity,0) = 0 THEN 1 ELSE LD.dblQuantity END) * Alloc.dblPAllocatedQty
+	,dblNetWt = (LD.dblNet / CASE WHEN ISNULL(LD.dblQuantity,0) = 0 THEN 1 ELSE LD.dblQuantity END) * Alloc.dblPAllocatedQty
 	,L.intWeightUnitMeasureId
 	,UOM.strUnitMeasure as strWeightUOM
 	,LD.intItemId as intPItemId

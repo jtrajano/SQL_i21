@@ -275,7 +275,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			)
 
 		-- 4. Logistics
-		LEFT JOIN vyuICLoadContainerReceiptContracts LogisticsView
+		LEFT JOIN vyuICLoadContainerPurchaseContracts LogisticsView
 			ON LogisticsView.intLoadDetailId = ReceiptItem.intSourceId
 			AND intLoadContainerId = ReceiptItem.intContainerId
 			AND Receipt.intSourceType = 2

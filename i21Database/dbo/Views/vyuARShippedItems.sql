@@ -54,7 +54,7 @@ SELECT
 	,[dblTotalTax]						= SOD.[dblTotalTax]
 	,[dblTotal]							= SOD.[dblTotal]
 	,[intStorageLocationId]				= SOD.[intStorageLocationId]
-	,[strStorageLocationName]			= SL.[strName]
+	,[strStorageLocationName]			= CAST(ISNULL(SL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
@@ -284,7 +284,7 @@ SELECT
 	,[dblTotalTax]						= SOD.[dblTotalTax]
 	,[dblTotal]							= SOD.[dblTotal]
 	,[intStorageLocationId]				= SOD.[intStorageLocationId]
-	,[strStorageLocationName]			= SL.[strName]
+	,[strStorageLocationName]			= CAST(ISNULL(SL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId]
@@ -516,7 +516,7 @@ SELECT
 	,[dblTotalTax]						= SOD.[dblTotalTax]
 	,[dblTotal]							= SOD.[dblTotal]
 	,[intStorageLocationId]				= ISNULL(SHP.intStorageLocationId, SOD.[intStorageLocationId])
-	,[strStorageLocationName]			= SL.[strName]
+	,[strStorageLocationName]			= CAST(ISNULL(SL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
@@ -815,8 +815,7 @@ LEFT JOIN
 	 FROM tblICUnitMeasure WITH (NOLOCK)) U2 ON IU2.[intUnitMeasureId] = U2.[intUnitMeasureId]
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId]		
-	 FROM tblARInvoiceDetail WITH (NOLOCK)
-	 WHERE ISNULL([intInventoryShipmentItemId],0) = 0	) ARID
+	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 		ON SHP.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 LEFT OUTER JOIN
 	(SELECT [intCurrencyID],
@@ -885,7 +884,7 @@ SELECT
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ARCC.[intItemUOMId], ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) * ISNULL(ARCC.[dblCashPrice], ICISI.[dblUnitPrice])
 	,[intStorageLocationId]				= ICISI.[intStorageLocationId]
-	,[strStorageLocationName]			= ICSL.[strName]
+	,[strStorageLocationName]			= CAST(ISNULL(ICSL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -1087,8 +1086,7 @@ LEFT OUTER JOIN
 	 FROM tblICStorageLocation WITH (NOLOCK)) ICSL ON ICISI.[intStorageLocationId] = ICSL.[intStorageLocationId]				
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId]		
-	 FROM tblARInvoiceDetail WITH (NOLOCK)
-	 WHERE ISNULL([intInventoryShipmentItemId],0) = 0) ARID ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 LEFT OUTER JOIN
 	(SELECT [intCompanyLocationId],
 		strLocationName
@@ -1162,7 +1160,7 @@ SELECT
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= 1 * ICISC.[dblAmount]
 	,[intStorageLocationId]				= ICISI.[intStorageLocationId]
-	,[strStorageLocationName]			= NULL
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -1277,8 +1275,7 @@ INNER JOIN
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId],
 		[intInventoryShipmentChargeId]	
-	 FROM tblARInvoiceDetail WITH (NOLOCK)
-	 WHERE ISNULL([intInventoryShipmentChargeId],0) = 0) ARID ON ICISC.intInventoryShipmentChargeId = ARID.[intInventoryShipmentChargeId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ICISC.intInventoryShipmentChargeId = ARID.[intInventoryShipmentChargeId]
 LEFT OUTER JOIN
 	(SELECT [intCompanyLocationId],
 		strLocationName
@@ -1297,164 +1294,164 @@ LEFT OUTER JOIN
 		ON ICISC.[intForexRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE ISNULL(ARID.[intInventoryShipmentChargeId],0) = 0
 
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [strTransactionType]				= 'Inbound Shipment'
-	,[strTransactionNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
-	,[strShippedItemId]					= 'lgis:' + CAST(LGS.intShipmentId AS NVARCHAR(250))
-	,[intEntityCustomerId]				= LGS.[intCustomerEntityId] 
-	,[strCustomerName]					= E.[strName]
-	,[intCurrencyId]					= ISNULL(ISNULL(ARSID.[intCurrencyId], C.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WITH (NOLOCK) WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
-	,[intSalesOrderId]					= NULL
-	,[intSalesOrderDetailId]			= NULL
-	,[strSalesOrderNumber]				= ''
-	,[dtmProcessDate]					= ISNULL(LGS.dtmShipmentDate, ISNULL(LGS.[dtmInventorizedDate], GETDATE()))
-	,[intInventoryShipmentId]			= NULL
-	,[intInventoryShipmentItemId]		= NULL	
-	,[intInventoryShipmentChargeId]		= NULL
-	,[strInventoryShipmentNumber]		= ''	
-	,[intShipmentId]					= LGS.[intShipmentId]
-	,[strShipmentNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
-	,[intLoadId]						= NULL	
-	,[intLoadDetailId]					= NULL
-	,[intLotId]							= ARSID.[intLotId]
-	,[strLoadNumber]					= NULL
-	,[intRecipeItemId]					= NULL
-	,[intContractHeaderId]				= NULL
-	,[strContractNumber]				= ''
-	,[intContractDetailId]				= NULL
-	,[intContractSeq]					= NULL
-	,[intCompanyLocationId]				= LGS.[intCompanyLocationId]
-	,[strLocationName]					= CL.[strLocationName]
-	,[intShipToLocationId]				= ISNULL(SL.[intEntityLocationId], EL.[intEntityLocationId])
-	,[intFreightTermId]					= NULL
-	,[intItemId]						= NULL
-	,[strItemNo]						= ''
-	,[strItemDescription]				= ''
-	,[intItemUOMId]						= NULL
-	,[strUnitMeasure]					= ''
-	,[intOrderUOMId]					= NULL
-	,[strOrderUnitMeasure]				= ''
-	,[intShipmentItemUOMId]				= NULL
-	,[strShipmentUnitMeasure]			= ''
-	,[dblQtyShipped]					= 0.00
-	,[dblQtyOrdered]					= 0.00
-	,[dblShipmentQuantity]				= 0.00
-	,[dblShipmentQtyShippedTotal]		= 0.00
-	,[dblQtyRemaining]					= 0.00
-	,[dblDiscount]						= 0.00
-	,[dblPrice]							= 0.00
-	,[dblShipmentUnitPrice]				= 0.00
-	,[strPricing]						= ''
-	,[strVFDDocumentNumber]				= NULL
-	,[dblTotalTax]						= 0.00
-	,[dblTotal]							= 0.00
-	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= NULL
-	,[intTermID]						= NULL
-	,[strTerm]							= ''
-	,[intEntityShipViaId]				= NULL
-	,[strShipVia]						= ''
-	,[strTicketNumber]					= NULL
-	,[strCustomerReference]				= NULL
-	,[intTicketId]						= NULL
-	,[intTaxGroupId]					= NULL
-	,[strTaxGroup]						= NULL
-	,[dblWeight]						= 0.00
-	,[intWeightUOMId]					= NULL
-	,[strWeightUnitMeasure]				= ''
-	,[dblGrossWt]						= 0.00
-	,[dblTareWt]						= 0.00
-	,[dblNetWt]							= 0.00
-	,[strPONumber]						= ''
-	,[strBOLNumber]						= ''
-	,[intSplitId]						= NULL
-	,[intEntitySalespersonId]			= NULL
-	,[strSalespersonName]				= NULL
-	,[ysnBlended]						= NULL
-	,[intRecipeId]						= NULL
-	,[intSubLocationId]					= NULL
-	,[intCostTypeId]					= NULL
-	,[intMarginById]					= NULL
-	,[intCommentTypeId]					= NULL
-	,[dblMargin]						= NULL
-	,[dblRecipeQuantity]				= NULL
-	,[intStorageScheduleTypeId]			= NULL
-	,[intDestinationGradeId]			= NULL
-	,[strDestinationGrade]				= ''
-	,[intDestinationWeightId]			= NULL
-	,[strDestinationWeight]				= ''
-	,[intCurrencyExchangeRateTypeId]	= ARSID.[intCurrencyExchangeRateTypeId]
-	,[strCurrencyExchangeRateType]		= ARSID.[strCurrencyExchangeRateType]
-	,[intCurrencyExchangeRateId]		= ARSID.[intCurrencyExchangeRateId]
-	,[dblCurrencyExchangeRate]			= ARSID.[dblCurrencyExchangeRate]
-	,[intSubCurrencyId]					= ARSID.[intSubCurrencyId]
-	,[dblSubCurrencyRate]				= ARSID.[dblSubCurrencyRate]
-	,[strSubCurrency]					= ARSID.[strSubCurrency]
-FROM
-	(SELECT [intSubCurrencyId],
-			[dblSubCurrencyRate],
-			[strSubCurrency],
-			[intShipmentId],
-			[intCurrencyId],
-			[intCurrencyExchangeRateTypeId],
-			[strCurrencyExchangeRateType],
-			[intCurrencyExchangeRateId],
-			[dblCurrencyExchangeRate],
-			[intLotId]
-	 FROM vyuARShippedItemDetail WITH (NOLOCK))ARSID
-INNER JOIN
-	(SELECT [intShipmentId],
-		intCustomerEntityId,
-		intCompanyLocationId,
-		dtmShipmentDate,
-		dtmInventorizedDate
-	 FROM vyuLGShipmentHeader WITH (NOLOCK)
-	 WHERE [ysnInventorized] = 1
-		AND [intShipmentId] IN (SELECT [intShipmentId] FROM vyuLGDropShipmentDetails WITH (NOLOCK))) LGS		
-		ON ARSID.[intShipmentId] = LGS.[intShipmentId]
-INNER JOIN
-	(SELECT [intEntityCustomerId],
-			[intCurrencyId],
-			[intShipToId]
-	 FROM tblARCustomer WITH (NOLOCK)) C
-		ON LGS.[intCustomerEntityId] = C.[intEntityCustomerId] 
-INNER JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) E ON C.[intEntityCustomerId]  = E.[intEntityId]
-LEFT OUTER JOIN
-	(SELECT [intCompanyLocationId],
-		strLocationName
-	 FROM tblSMCompanyLocation WITH (NOLOCK)) CL ON LGS.[intCompanyLocationId] = CL.[intCompanyLocationId]
-LEFT OUTER JOIN
-		(	SELECT 
-				 [intEntityLocationId]
-				,[strLocationName]
-				,[strAddress]
-				,[intEntityId] 
-				,[strCountry]
-				,[strState]
-				,[strCity]
-				,[strZipCode]
-				,[intTermsId]
-				,[intShipViaId]
-			FROM 
-				[tblEMEntityLocation] WITH (NOLOCK)
-			WHERE
-				ysnDefaultLocation = 1
-		) EL
-			ON LGS.[intCustomerEntityId] = EL.[intEntityId]
-LEFT OUTER JOIN
-	(SELECT intEntityLocationId 
-	 FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
-		ON C.intShipToId = SL.intEntityLocationId
-LEFT OUTER JOIN
-	(SELECT [intInventoryShipmentItemId],
-		[intShipmentId]	
-	 FROM tblARInvoiceDetail WITH (NOLOCK)
-	 WHERE intInvoiceId IS NULL) ARID ON LGS.[intShipmentId] = ARID.[intShipmentId]
+--SELECT
+--	 [strTransactionType]				= 'Inbound Shipment'
+--	,[strTransactionNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
+--	,[strShippedItemId]					= 'lgis:' + CAST(LGS.intShipmentId AS NVARCHAR(250))
+--	,[intEntityCustomerId]				= LGS.[intCustomerEntityId] 
+--	,[strCustomerName]					= E.[strName]
+--	,[intCurrencyId]					= ISNULL(ISNULL(ARSID.[intCurrencyId], C.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WITH (NOLOCK) WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
+--	,[intSalesOrderId]					= NULL
+--	,[intSalesOrderDetailId]			= NULL
+--	,[strSalesOrderNumber]				= ''
+--	,[dtmProcessDate]					= ISNULL(LGS.dtmShipmentDate, ISNULL(LGS.[dtmInventorizedDate], GETDATE()))
+--	,[intInventoryShipmentId]			= NULL
+--	,[intInventoryShipmentItemId]		= NULL	
+--	,[intInventoryShipmentChargeId]		= NULL
+--	,[strInventoryShipmentNumber]		= ''	
+--	,[intShipmentId]					= LGS.[intShipmentId]
+--	,[strShipmentNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
+--	,[intLoadId]						= NULL	
+--	,[intLoadDetailId]					= NULL
+--	,[intLotId]							= ARSID.[intLotId]
+--	,[strLoadNumber]					= NULL
+--	,[intRecipeItemId]					= NULL
+--	,[intContractHeaderId]				= NULL
+--	,[strContractNumber]				= ''
+--	,[intContractDetailId]				= NULL
+--	,[intContractSeq]					= NULL
+--	,[intCompanyLocationId]				= LGS.[intCompanyLocationId]
+--	,[strLocationName]					= CL.[strLocationName]
+--	,[intShipToLocationId]				= ISNULL(SL.[intEntityLocationId], EL.[intEntityLocationId])
+--	,[intFreightTermId]					= NULL
+--	,[intItemId]						= NULL
+--	,[strItemNo]						= ''
+--	,[strItemDescription]				= ''
+--	,[intItemUOMId]						= NULL
+--	,[strUnitMeasure]					= ''
+--	,[intOrderUOMId]					= NULL
+--	,[strOrderUnitMeasure]				= ''
+--	,[intShipmentItemUOMId]				= NULL
+--	,[strShipmentUnitMeasure]			= ''
+--	,[dblQtyShipped]					= 0.00
+--	,[dblQtyOrdered]					= 0.00
+--	,[dblShipmentQuantity]				= 0.00
+--	,[dblShipmentQtyShippedTotal]		= 0.00
+--	,[dblQtyRemaining]					= 0.00
+--	,[dblDiscount]						= 0.00
+--	,[dblPrice]							= 0.00
+--	,[dblShipmentUnitPrice]				= 0.00
+--	,[strPricing]						= ''
+--	,[strVFDDocumentNumber]				= NULL
+--	,[dblTotalTax]						= 0.00
+--	,[dblTotal]							= 0.00
+--	,[intStorageLocationId]				= NULL
+--	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+--	,[intTermID]						= NULL
+--	,[strTerm]							= ''
+--	,[intEntityShipViaId]				= NULL
+--	,[strShipVia]						= ''
+--	,[strTicketNumber]					= NULL
+--	,[strCustomerReference]				= NULL
+--	,[intTicketId]						= NULL
+--	,[intTaxGroupId]					= NULL
+--	,[strTaxGroup]						= NULL
+--	,[dblWeight]						= 0.00
+--	,[intWeightUOMId]					= NULL
+--	,[strWeightUnitMeasure]				= ''
+--	,[dblGrossWt]						= 0.00
+--	,[dblTareWt]						= 0.00
+--	,[dblNetWt]							= 0.00
+--	,[strPONumber]						= ''
+--	,[strBOLNumber]						= ''
+--	,[intSplitId]						= NULL
+--	,[intEntitySalespersonId]			= NULL
+--	,[strSalespersonName]				= NULL
+--	,[ysnBlended]						= NULL
+--	,[intRecipeId]						= NULL
+--	,[intSubLocationId]					= NULL
+--	,[intCostTypeId]					= NULL
+--	,[intMarginById]					= NULL
+--	,[intCommentTypeId]					= NULL
+--	,[dblMargin]						= NULL
+--	,[dblRecipeQuantity]				= NULL
+--	,[intStorageScheduleTypeId]			= NULL
+--	,[intDestinationGradeId]			= NULL
+--	,[strDestinationGrade]				= ''
+--	,[intDestinationWeightId]			= NULL
+--	,[strDestinationWeight]				= ''
+--	,[intCurrencyExchangeRateTypeId]	= ARSID.[intCurrencyExchangeRateTypeId]
+--	,[strCurrencyExchangeRateType]		= ARSID.[strCurrencyExchangeRateType]
+--	,[intCurrencyExchangeRateId]		= ARSID.[intCurrencyExchangeRateId]
+--	,[dblCurrencyExchangeRate]			= ARSID.[dblCurrencyExchangeRate]
+--	,[intSubCurrencyId]					= ARSID.[intSubCurrencyId]
+--	,[dblSubCurrencyRate]				= ARSID.[dblSubCurrencyRate]
+--	,[strSubCurrency]					= ARSID.[strSubCurrency]
+--FROM
+--	(SELECT [intSubCurrencyId],
+--			[dblSubCurrencyRate],
+--			[strSubCurrency],
+--			[intShipmentId],
+--			[intCurrencyId],
+--			[intCurrencyExchangeRateTypeId],
+--			[strCurrencyExchangeRateType],
+--			[intCurrencyExchangeRateId],
+--			[dblCurrencyExchangeRate],
+--			[intLotId]
+--	 FROM vyuARShippedItemDetail WITH (NOLOCK))ARSID
+--INNER JOIN
+--	(SELECT [intShipmentId],
+--		intCustomerEntityId,
+--		intCompanyLocationId,
+--		dtmShipmentDate,
+--		dtmInventorizedDate
+--	 FROM vyuLGShipmentHeader WITH (NOLOCK)
+--	 WHERE [ysnInventorized] = 1
+--		AND [intShipmentId] IN (SELECT [intShipmentId] FROM vyuLGDropShipmentDetails WITH (NOLOCK))) LGS		
+--		ON ARSID.[intShipmentId] = LGS.[intShipmentId]
+--INNER JOIN
+--	(SELECT [intEntityCustomerId],
+--			[intCurrencyId],
+--			[intShipToId]
+--	 FROM tblARCustomer WITH (NOLOCK)) C
+--		ON LGS.[intCustomerEntityId] = C.[intEntityCustomerId] 
+--INNER JOIN
+--	(SELECT [intEntityId],
+--			strName
+--	 FROM tblEMEntity WITH (NOLOCK)) E ON C.[intEntityCustomerId]  = E.[intEntityId]
+--LEFT OUTER JOIN
+--	(SELECT [intCompanyLocationId],
+--		strLocationName
+--	 FROM tblSMCompanyLocation WITH (NOLOCK)) CL ON LGS.[intCompanyLocationId] = CL.[intCompanyLocationId]
+--LEFT OUTER JOIN
+--		(	SELECT 
+--				 [intEntityLocationId]
+--				,[strLocationName]
+--				,[strAddress]
+--				,[intEntityId] 
+--				,[strCountry]
+--				,[strState]
+--				,[strCity]
+--				,[strZipCode]
+--				,[intTermsId]
+--				,[intShipViaId]
+--			FROM 
+--				[tblEMEntityLocation] WITH (NOLOCK)
+--			WHERE
+--				ysnDefaultLocation = 1
+--		) EL
+--			ON LGS.[intCustomerEntityId] = EL.[intEntityId]
+--LEFT OUTER JOIN
+--	(SELECT intEntityLocationId 
+--	 FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
+--		ON C.intShipToId = SL.intEntityLocationId
+--LEFT OUTER JOIN
+--	(SELECT [intInventoryShipmentItemId],
+--		[intShipmentId]	
+--	 FROM tblARInvoiceDetail WITH (NOLOCK)
+--	 WHERE intInvoiceId IS NULL) ARID ON LGS.[intShipmentId] = ARID.[intShipmentId]
 		 
 
 UNION ALL
@@ -1511,7 +1508,7 @@ SELECT
 	,[dblTotalTax]						= 0.00
 	,[dblTotal]							= MFG.[dblLineTotal]
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= ''
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= T.[intTermID]
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
@@ -1619,8 +1616,7 @@ LEFT OUTER JOIN
 			[intCurrencyExchangeRateTypeId],
 			[intCurrencyExchangeRateId],
 			[dblCurrencyExchangeRate]
-	 FROM tblARInvoiceDetail WITH (NOLOCK)
-	 WHERE (ISNULL([intRecipeItemId], 0)	= 0) )ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK))ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
 LEFT OUTER JOIN
 	(SELECT intRecipeItemId,
 		intRecipeId
@@ -1697,7 +1693,7 @@ SELECT DISTINCT
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= MFG.[dblLineTotal]
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= NULL
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -1805,8 +1801,7 @@ LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId],
 		[intRecipeItemId],
 		[strShipmentNumber]	
-	 FROM tblARInvoiceDetail WITH (NOLOCK)
-	 WHERE ISNULL([intRecipeItemId],0) = 0) ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
 		AND ICIS.[strShipmentNumber] = ARID.[strShipmentNumber]
 LEFT OUTER JOIN
 	(SELECT [intCompanyLocationId],
@@ -1885,7 +1880,7 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId]), ISNULL(LD.[intWeightItemUOMId], ISNULL(ARCC.[intItemUOMId],LD.[intItemUOMId])), ISNULL(LD.[dblQuantity], 0)) * ARCC.[dblCashPrice]
 	,[intStorageLocationId]				= SL.[intStorageLocationId]
-	,[strStorageLocationName]			= SL.[strName]
+	,[strStorageLocationName]			= CAST(ISNULL(SL.[strName],'') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -1943,12 +1938,6 @@ JOIN (SELECT intLoadId,
 			intPContractDetailId,
 			dblQuantity
 	  FROM tblLGLoadDetail WITH (NOLOCK)) LD ON L.intLoadId  = LD.intLoadId
-JOIN (SELECT intLoadDetailId,
-			intLotId,
-			dblGross,
-			dblTare,
-			dblNet
-	  FROM tblLGLoadDetailLot WITH (NOLOCK)) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 INNER JOIN 
 	(SELECT [intEntityCustomerId],
 			[intCurrencyId]
@@ -1958,6 +1947,12 @@ INNER JOIN
 		[strItemNo],
 		[strDescription]
 	 FROM tblICItem WITH (NOLOCK)) ICI ON LD.intItemId = ICI.intItemId
+LEFT JOIN (SELECT intLoadDetailId,
+			intLotId,
+			dblGross,
+			dblTare,
+			dblNet
+	  FROM tblLGLoadDetailLot WITH (NOLOCK)) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 LEFT JOIN 
 	(SELECT intLotId,
 			intStorageLocationId
@@ -2025,8 +2020,7 @@ LEFT OUTER JOIN
 		[intRecipeItemId],
 		[strShipmentNumber],
 		[intLoadDetailId]
-	 FROM tblARInvoiceDetail WITH (NOLOCK)
-	 WHERE ISNULL([intLoadDetailId],0) = 0) ARID ON LDL.intLoadDetailId = ARID.[intLoadDetailId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON LD.intLoadDetailId = ARID.[intLoadDetailId]
 LEFT OUTER JOIN 
 	(SELECT [intCompanyLocationId],
 		strLocationName
@@ -2034,7 +2028,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN 
 	(SELECT [intCurrencyID],
 		[strCurrency]
-	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID] 
+	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]
+WHERE
+	ISNULL(ARID.[intLoadDetailId], 0) = 0
 	 
 
 UNION
@@ -2090,7 +2086,7 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= LWS.[dblTotal]
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= NULL
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -2246,7 +2242,7 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= LC.[dblTotal]
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= NULL
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -2317,8 +2313,7 @@ LEFT OUTER JOIN
 		[intCurrencyExchangeRateTypeId],
 		[intCurrencyExchangeRateId],
 		[dblCurrencyExchangeRate]
-	 FROM tblARInvoiceDetail WITH (NOLOCK)
-	 WHERE ISNULL([intLoadDetailId], 0) = 0) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
 LEFT OUTER JOIN
 	(
 		SELECT
@@ -2420,7 +2415,7 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[dblTotalTax]						= 0
 	,[dblTotal]							= LC.[dblTotal]
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= NULL
+	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -2491,8 +2486,7 @@ LEFT OUTER JOIN
 		[intCurrencyExchangeRateTypeId],
 		[intCurrencyExchangeRateId],
 		[dblCurrencyExchangeRate]
-	FROM tblARInvoiceDetail WITH (NOLOCK)
-	WHERE ISNULL([intLoadDetailId], 0) = 0) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
+	FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
 LEFT OUTER JOIN
 	(
 		SELECT

@@ -149,7 +149,6 @@ BEGIN TRY
 			, tblSMCompanySetup.strFederalTaxID
 		FROM tblTFProductCode
 		INNER JOIN tblSMTaxCode
-		INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 		INNER JOIN tblARInvoiceDetail
 		INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
 		INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId
@@ -226,162 +225,135 @@ BEGIN TRY
 			SET @Count = @Count - 1
 		END
 
-		--INVENTORY TRANSFER
-			INSERT INTO @TFTransaction(intId
-				, intInvoiceDetailId
-				, intTaxAuthorityId
-				, strFormCode
-				, intReportingComponentId
-				, strScheduleCode
-				, strType
-				, intProductCode
-				, strProductCode
-				, intItemId
-				, dblQtyShipped
-				, dblGross
-				, dblNet
-				, dblBillQty
-				, strBillOfLading
-				, dtmDate
-				, strDestinationCity
-				, strDestinationState
-				, strOriginCity
-				, strOriginState
-				, strCustomerName
-				, strCustomerFEIN
-				, strAccountStatusCode
-				, strShipVia
-				, strTransporterLicense
-				, strTransportationMode
-				, strTransporterName
-				, strTransporterFEIN
-				, strConsignorName
-				, strConsignorFEIN
-				, strTaxCode
-				, strTerminalControlNumber
-				, strVendorName
-				, strVendorFederalTaxId
-				, strHeaderCompanyName
-				, strHeaderAddress
-				, strHeaderCity
-				, strHeaderState
-				, strHeaderZip
-				, strHeaderPhone
-				, strHeaderStateTaxID
-				, strHeaderFederalTaxID)
-			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
-				, *
-			FROM (
-			SELECT DISTINCT tblICInventoryTransferDetail.intInventoryTransferDetailId
-				, tblTFReportingComponent.intTaxAuthorityId
-				, tblTFReportingComponent.strFormCode
-				, tblTFReportingComponent.intReportingComponentId
-				, tblTFReportingComponent.strScheduleCode
-				, tblTFReportingComponent.strType
-				, tblTFReportingComponentProductCode.intProductCodeId
-				, tblTFProductCode.strProductCode
-				, tblICInventoryTransferDetail.intItemId
-				, tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped
-				, tblICInventoryTransferDetail.dblQuantity AS dblGross
-				, tblICInventoryTransferDetail.dblQuantity AS dblNet
-				, tblICInventoryTransferDetail.dblQuantity
-				, tblTRLoadReceipt.strBillOfLading AS strBOLNumber
-				, tblICInventoryTransfer.dtmTransferDate AS dtmDate
-				, tblSMCompanyLocation.strCity AS strDestinationCity
-				, tblSMCompanyLocation.strStateProvince AS strDestinationState
-				, tblEMEntityLocation.strCity AS strOriginCity
-				, tblEMEntityLocation.strState AS strOriginState
-				, tblSMCompanyLocation.strLocationName AS strCustomerName
-				, tblSMCompanySetup.strEin AS strCustomerFEIN
-				, NULL AS strAccountStatusCode
-				, tblSMShipVia.strShipVia
-				, tblSMShipVia.strTransporterLicense
-				, tblSMShipVia.strTransportationMode
-				, tblEMEntity.strName AS strTransporterName
-				, tblEMEntity.strFederalTaxId AS strTransporterFEIN
-				, tblEMEntity.strName AS strConsignorName
-				, tblEMEntity.strFederalTaxId AS strConsignorFEIN
-				, tblTFTaxCategory.strTaxCategory
-				, tblTFTerminalControlNumber.strTerminalControlNumber
-				, EntityAPVendor.strName AS strVendorName
-				, EntityAPVendor.strFederalTaxId AS strVendorFEIN
-				, tblSMCompanySetup.strCompanyName
-				, tblSMCompanySetup.strAddress
-				, tblSMCompanySetup.strCity
-				, tblSMCompanySetup.strState
-				, tblSMCompanySetup.strZip
-				, tblSMCompanySetup.strPhone
-				, tblSMCompanySetup.strStateTaxID
-				, tblSMCompanySetup.strFederalTaxID 
-			FROM tblTFProductCode
-			INNER JOIN tblICInventoryTransferDetail
-			INNER JOIN tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId
-			INNER JOIN tblICItemMotorFuelTax
-			INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
-			INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
-				ON tblICInventoryTransferDetail.intItemId = tblICItemMotorFuelTax.intItemId
-			INNER JOIN tblTRLoadReceipt ON tblICInventoryTransferDetail.intSourceId = tblTRLoadReceipt.intLoadReceiptId
-			INNER JOIN tblTRLoadHeader ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
-			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
-				AND tblTRLoadDistributionHeader.intCompanyLocationId = tblICInventoryTransfer.intToLocationId
-			INNER JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityShipViaId
-			INNER JOIN tblEMEntity ON tblSMShipVia.intEntityShipViaId = tblEMEntity.intEntityId
-			INNER JOIN tblAPVendor ON tblTRLoadReceipt.intTerminalId = tblAPVendor.intEntityVendorId
-			INNER JOIN tblEMEntity AS EntityAPVendor ON tblAPVendor.intEntityVendorId = EntityAPVendor.intEntityId
-			INNER JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId
-			INNER JOIN tblEMEntityLocation ON tblTRSupplyPoint.intEntityLocationId = tblEMEntityLocation.intEntityLocationId
-			INNER JOIN tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
-				ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
-			LEFT OUTER JOIN tblTFTaxCategory
-			INNER JOIN tblTFReportingComponentCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
-				ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
-			LEFT OUTER JOIN tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId
-			LEFT OUTER JOIN tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId
-			CROSS JOIN tblSMCompanySetup
-			WHERE tblICInventoryTransfer.intSourceType = 3
-				AND tblTFReportingComponent.intReportingComponentId = @RCId
-				AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
-				AND (tblARInvoice.strBOLNumber IS NULL)
-				AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
-				AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
-				AND (tblICInventoryTransfer.ysnPosted = 1)
-				AND (tblTFReportingComponentCriteria.strCriteria <> '= 0' 
-				OR tblTFReportingComponentCriteria.strCriteria IS NULL)
-			)tblTransactions
+		-- INVENTORY TRANSFERS --
+
+		DECLARE @ConfigGUTRate NUMERIC(18, 6)
+		SELECT TOP 1 @ConfigGUTRate = ISNULL(strConfiguration, 0) FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'GT-103-2DGasoline'	
+
+		INSERT INTO @TFTransaction(intId
+			, intInvoiceDetailId
+			, intTaxAuthorityId
+			, strFormCode
+			, intReportingComponentId
+			, strScheduleCode
+			, strType
+			, intProductCode
+			, strProductCode
+			, intItemId
+			, dblQtyShipped
+			, dblGross
+			, dblNet
+			, dblBillQty
+			, strBillOfLading
+			, dtmDate
+			, strDestinationCity
+			, strDestinationState
+			, strOriginCity
+			, strOriginState
+			, strCustomerName
+			, strCustomerFEIN
+			, strAccountStatusCode
+			, strShipVia
+			, strTransporterLicense
+			, strTransportationMode
+			, strTransporterName
+			, strTransporterFEIN
+			, strConsignorName
+			, strConsignorFEIN
+			, strTaxCode
+			, strTerminalControlNumber
+			, strVendorName
+			, strVendorFederalTaxId
+			, strHeaderCompanyName
+			, strHeaderAddress
+			, strHeaderCity
+			, strHeaderState
+			, strHeaderZip
+			, strHeaderPhone
+			, strHeaderStateTaxID
+			, strHeaderFederalTaxID
+			, dblTax
+			, dblTaxExempt)
+		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
+			, *
+		FROM (
+		SELECT DISTINCT tblICInventoryTransferDetail.intInventoryTransferDetailId
+			, tblTFReportingComponent.intTaxAuthorityId
+			, tblTFReportingComponent.strFormCode
+			, tblTFReportingComponent.intReportingComponentId
+			, tblTFReportingComponent.strScheduleCode
+			, tblTFReportingComponent.strType
+			, tblTFReportingComponentProductCode.intProductCodeId
+			, tblTFProductCode.strProductCode
+			, tblICInventoryTransferDetail.intItemId
+			, tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped
+			, tblICInventoryTransferDetail.dblQuantity AS dblGross
+			, tblICInventoryTransferDetail.dblQuantity AS dblNet
+			, tblICInventoryTransferDetail.dblQuantity
+			, tblTRLoadReceipt.strBillOfLading AS strBOLNumber
+			, tblICInventoryTransfer.dtmTransferDate AS dtmDate
+			, tblSMCompanyLocation.strCity AS strDestinationCity
+			, tblSMCompanyLocation.strStateProvince AS strDestinationState
+			, tblEMEntityLocation.strCity AS strOriginCity
+			, tblEMEntityLocation.strState AS strOriginState
+			, tblSMCompanyLocation.strLocationName AS strCustomerName
+			, tblSMCompanySetup.strEin AS strCustomerFEIN
+			, NULL AS strAccountStatusCode
+			, tblSMShipVia.strShipVia
+			, tblSMShipVia.strTransporterLicense
+			, tblSMShipVia.strTransportationMode
+			, tblEMEntity.strName AS strTransporterName
+			, tblEMEntity.strFederalTaxId AS strTransporterFEIN
+			, tblEMEntity.strName AS strConsignorName
+			, tblEMEntity.strFederalTaxId AS strConsignorFEIN
+			, @ExemptGallSold AS strTaxCode
+			, tblTFTerminalControlNumber.strTerminalControlNumber
+			, EntityAPVendor.strName AS strVendorName
+			, EntityAPVendor.strFederalTaxId AS strVendorFEIN
+			, tblSMCompanySetup.strCompanyName
+			, tblSMCompanySetup.strAddress
+			, tblSMCompanySetup.strCity
+			, tblSMCompanySetup.strState
+			, tblSMCompanySetup.strZip
+			, tblSMCompanySetup.strPhone
+			, tblSMCompanySetup.strStateTaxID
+			, tblSMCompanySetup.strFederalTaxID
+			, (ISNULL(tblICInventoryTransferDetail.dblQuantity, 0) * @ConfigGUTRate) AS dblTax
+			, 0.000000 AS dblTaxExempt
+		FROM tblTFProductCode
+		INNER JOIN tblICInventoryTransferDetail
+		INNER JOIN tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId
+		INNER JOIN tblICItemMotorFuelTax
+		INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
+		INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
+			ON tblICInventoryTransferDetail.intItemId = tblICItemMotorFuelTax.intItemId
+		INNER JOIN tblTRLoadReceipt ON tblICInventoryTransferDetail.intSourceId = tblTRLoadReceipt.intLoadReceiptId
+		INNER JOIN tblTRLoadHeader ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
+		INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
+			AND tblTRLoadDistributionHeader.intCompanyLocationId = tblICInventoryTransfer.intToLocationId
+		INNER JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityShipViaId
+		INNER JOIN tblEMEntity ON tblSMShipVia.intEntityShipViaId = tblEMEntity.intEntityId
+		INNER JOIN tblAPVendor ON tblTRLoadReceipt.intTerminalId = tblAPVendor.intEntityVendorId
+		INNER JOIN tblEMEntity AS EntityAPVendor ON tblAPVendor.intEntityVendorId = EntityAPVendor.intEntityId
+		INNER JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId
+		INNER JOIN tblEMEntityLocation ON tblTRSupplyPoint.intEntityLocationId = tblEMEntityLocation.intEntityLocationId
+		INNER JOIN tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
+			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
+		LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
+		LEFT OUTER JOIN tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId
+		LEFT OUTER JOIN tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId
+		CROSS JOIN tblSMCompanySetup
+		WHERE tblICInventoryTransfer.intSourceType = 3
+			AND tblTFReportingComponent.intReportingComponentId = @RCId
+			AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
+			AND (tblARInvoice.strBOLNumber IS NULL)
+			AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
+			AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
+			AND (tblICInventoryTransfer.ysnPosted = 1)
+			AND (tblTFReportingComponentCriteria.strCriteria <> '= 0' 
+			OR tblTFReportingComponentCriteria.strCriteria IS NULL)
+		)tblTransactions
 				
-		-- INVENTORY TRANSFER --
-		-- SET INCREMENT PRIMARY ID FOR TEMP @TFTransaction
-		DECLARE @TFTransaction_intId INT
-		SET @TFTransaction_intId = 0 UPDATE @TFTransaction 
-		SET @TFTransaction_intId = intId = @TFTransaction_intId + 1
-
-		SET @Count = (SELECT COUNT(intId) FROM @TFTransaction) 				
-		WHILE(@Count > 0) -- LOOP ON INVOICE ID/S
-		BEGIN
-			SET @InvoiceDetailId = (SELECT intInvoiceDetailId FROM @TFTransaction WHERE intId = @Count)
-			DECLARE @TaxAmountInvTransfer NUMERIC(18, 6)
-			DECLARE @TaxExemptInvTransfer NUMERIC(18, 6)
-			DECLARE @TaxAmountInvTransferTotal NUMERIC(18, 6)
-			DECLARE @ConfigGUTRate NUMERIC(18, 6)
-			DECLARE @GasoholConfig NUMERIC(18, 6)
-
-			-- GASOLINE USE TAX COLLECTED
-			SET @ConfigGUTRate = (SELECT TOP 1 strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'GT-103-2DGasoline') 
-			SET @TaxAmountInvTransfer = (SELECT dblQtyShipped FROM @TFTransaction WHERE intId = @Count)
-			SET @TaxAmountInvTransferTotal = @TaxAmountInvTransfer * @ConfigGUTRate
-			UPDATE @TFTransaction SET dblTax = ISNULL(@TaxAmountInvTransferTotal, 0) WHERE strInvoiceNumber IS NULL AND intInvoiceDetailId = @InvoiceDetailId
-
-			--EXEMPT GALLONS SOLD
-			SET @TaxExemptInvTransfer = (SELECT tblARInvoiceDetail.dblQtyShipped
-			FROM tblSMTaxCode INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
-							INNER JOIN tblARInvoiceDetailTax ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId 
-							INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetailTax.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId 
-							INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
-			WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId AND (tblTFTaxCategory.strTaxCategory = 'IN Gasoline Use Tax (GUT)') AND tblARInvoiceDetailTax.dblTax = 0)
-			UPDATE @TFTransaction SET dblTaxExempt = ISNULL(@TaxExemptInvTransfer, 0), strTaxCode = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
-			SET @Count = @Count - 1
-		END
-
 		IF (@ReportingComponentId <> '')
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid

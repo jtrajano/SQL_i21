@@ -17,8 +17,8 @@ AS
 			END	AS	ysnActive,
 			CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShipVia,
 			CAST(ISNULL(V.intEntityVendorId	,0) AS BIT) ysnVendor,
-			CASE	WHEN Y.strType = 'Vendor'	THEN	V.intTermsId
-					WHEN Y.strType = 'Customer'	THEN	U.intTermsId
+			CASE	WHEN Y.strType = 'Vendor'	THEN	CASE WHEN TM.ysnActive = 1 THEN V.intTermsId ELSE NULL END
+					WHEN Y.strType = 'Customer'	THEN	CASE WHEN TM.ysnActive = 1 THEN U.intTermsId ELSE NULL END
 					ELSE L.intTermsId 
 			END AS intTermId,
 			V.strVendorAccountNum
@@ -37,3 +37,7 @@ AS
 				JOIN	[tblEMEntityType]	ET	ON	ET.intEntityId	=	EY.intEntityId	
 												AND	ET.strType		=	'Ship Via'
 			)						S	ON	S.intEntityId			=	E.intEntityId
+LEFT JOIN	tblSMTerm				TM	ON TM.intTermID =	CASE	WHEN Y.strType = 'Vendor'	THEN	V.intTermsId
+																	WHEN Y.strType = 'Customer'	THEN	U.intTermsId
+																	ELSE L.intTermsId 
+															END 

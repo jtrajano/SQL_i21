@@ -19,6 +19,8 @@ SELECT @intTimeOffRequestId = @intTransactionId
 		DELETE FROM tblSMEvents
 		WHERE CAST(strRecordNo AS INT) = @intTimeOffRequestId
 			AND strScreen = 'Payroll.view.TimeOffRequest'
+
+		EXEC uspSMAuditLog 'Payroll.view.TimeOffRequest', @intTransactionId, @intUserId, 'Unposted from Calendar', '', '', ''
 		
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblPREmployeeEarning EE INNER JOIN tblPRTimeOffRequest TOR
 						ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
@@ -117,6 +119,8 @@ SELECT @intTimeOffRequestId = @intTransactionId
 			SET ysnPostedToCalendar = 1
 				,intEventId = (SELECT TOP 1 intEventId FROM @udtSMEventsIn)
 			WHERE intTimeOffRequestId = @intTimeOffRequestId
+
+			EXEC uspSMAuditLog 'Payroll.view.TimeOffRequest', @intTransactionId, @intUserId, 'Posted to Calendar', '', '', ''
 		
 			IF EXISTS (SELECT TOP 1 1 FROM tblPREmployeeEarning EE INNER JOIN tblPRTimeOffRequest TOR
 						ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
@@ -200,12 +204,12 @@ SELECT @intTimeOffRequestId = @intTransactionId
 					,EL.dblRateAmount
 					,dblTotal = CASE WHEN (EL.strCalculationType IN ('Rate Factor', 'Overtime') AND EL.intEmployeeEarningLinkId IS NOT NULL) THEN 
 									CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = EL.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
-										TOR.dblRequest * EL.dblRateAmount
+										CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END * EL.dblRateAmount
 									ELSE
 										EL.dblRateAmount
 									END
 								WHEN (EL.strCalculationType = 'Hourly Rate') THEN
-									TOR.dblRequest * EL.dblRateAmount
+									CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END * EL.dblRateAmount
 								ELSE
 									EL.dblRateAmount
 								END

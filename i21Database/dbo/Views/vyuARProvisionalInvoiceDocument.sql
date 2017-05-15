@@ -33,5 +33,5 @@ SELECT
 FROM
 	vyuARShippedItems ARSI
 WHERE
-	[strTransactionType] = 'Inbound Shipment'
+	[strTransactionType] IN ('Inbound Shipment', 'Load Schedule')
 	
