@@ -478,6 +478,41 @@ StartTest (function (t) {
         .clickButton('Close')
         .waitUntilLoaded()
 
+
+        .displayText('===== Delete Storage Measurement Reading ====')
+        //region Scenario 1. Delete Storage Measurement Reading
+        .displayText('===== Scenario 1. Delete 1 Storage Measurement Reading ====')
+        .clickMenuScreen('Storage Measurement Reading','Screen')
+        .waitUntilLoaded()
+        .doubleClickSearchRowValue('0001 - Fort Wayne', 'strLocation', 3)
+        .waitUntilLoaded()
+        .verifyGridData('StorageMeasurementReading', 1, 'colItem', 'SMRLTI - 01')
+        .verifyGridData('StorageMeasurementReading', 1, 'colSubLocation', 'Raw Station')
+        .clickButton('Delete')
+        .waitUntilLoaded()
+        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded()
+        .displayText('===== Scenario 1. Delete Storage Measurement Reading Done ====')
+
+
+        .displayText('=== Scenario 2: Delete multiple Storage Measurement Reading ====')
+        .waitUntilLoaded()
+        .selectSearchRowNumber([1,2])
+        .clickButton('OpenSelected')
+        .waitUntilLoaded()
+        .clickButton('Delete')
+        .waitUntilLoaded()
+        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded()
+        .clickButton('Delete')
+        .waitUntilLoaded()
+        .verifyMessageBox('iRely i21','Are you sure you want to delete this record?','yesno', 'question')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded()
+        .displayText('=== Scenario 4: Delete multiple Storage Measurement Reading ====')
+
         .done();
 
 

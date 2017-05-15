@@ -376,16 +376,8 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'StorageMeasurementReading',
                     items: [
                         {
-                            url: 'CRUDScripts/StorageMeasurementReading/AddSMR.js?v='+version,
-                            title: 'AddSMR',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/StorageMeasurementReading/DeleteSMR.js?v='+version,
-                            title: 'DeleteSMR',
+                            url: 'CRUDScripts/StorageMeasurementReading/AddAndDeleteSMR.js?v='+version,
+                            title: 'AddAndDeleteSMR',
                             preload: [
                                 functionalTest,
                                 commonIC

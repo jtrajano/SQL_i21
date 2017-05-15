@@ -351,7 +351,7 @@ StartTest (function (t) {
         .selectComboBoxRowValue('Vendor', 'ABC Trucking', 'Vendor',1)
         .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',0)
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo','IR - LTI - 04','strItemNo')
-		  .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', 100000, 'LB')
+		.enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', 100000, 'LB')
         .verifyGridData('InventoryReceipt', 1, 'colItemSubCurrency', 'USD')
         .enterGridData('InventoryReceipt', 1, 'colUnitCost', '10')
         .verifyGridData('InventoryReceipt', 1, 'colCostUOM', 'LB')
