@@ -428,7 +428,7 @@ BEGIN
 			CROSS JOIN (SELECT intSalesAccount FROM tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId) SADef
 			WHERE CS.intCustomerStockId = @intCustomerStockId
 
-			EXEC uspARProcessInvoices 
+			EXEC [dbo].[uspARProcessInvoices]
 				@InvoiceEntries = @EntriesForInvoice,
 				@UserId = @intUserId,
 				@GroupingOption = 11,
@@ -441,6 +441,39 @@ BEGIN
 		END
 		ELSE
 		BEGIN
+			BEGIN TRY
+
+				SET ANSI_WARNINGS ON;
+				DECLARE @invoiceIds AS NVARCHAR(MAX);
+				SELECT @invoiceIds = STUFF((SELECT ',' + CONVERT(NVARCHAR(MAX),intInvoiceId)  FROM #tempCustomerStock 
+				FOR XML PATH(''), TYPE).value('.','NVARCHAR(MAX)'),1,1,'');
+				SET ANSI_WARNINGS OFF;
+
+				EXEC [dbo].[uspARPostInvoice]
+					@batchId			= NULL,
+					@post				= 0,
+					@recap				= 0,
+					@param				= @invoiceIds,
+					@userId				= @intUserId,
+					@beginDate			= NULL,
+					@endDate			= NULL,
+					@beginTransaction	= NULL,
+					@endTransaction		= NULL,
+					@exclude			= NULL,
+					@successfulCount	= @successfulCount OUTPUT,
+					@invalidCount		= @invalidCount OUTPUT,
+					@success			= @success OUTPUT,
+					@batchIdUsed		= @batchIdUsed OUTPUT,
+					@transType			= N'all',
+					@raiseError			= @error
+
+			END TRY
+			BEGIN CATCH
+				RAISERROR(@error,16,1);
+				GOTO Post_Rollback;
+			END CATCH
+
+
 			DELETE FROM tblARInvoice WHERE intInvoiceId IN (SELECT intInvoiceId FROM #tempCustomerStock) AND ysnPaid <> 1;
 			UPDATE tblPATCustomerStock SET intInvoiceId = null WHERE intCustomerStockId = @intCustomerStockId;
 		END
