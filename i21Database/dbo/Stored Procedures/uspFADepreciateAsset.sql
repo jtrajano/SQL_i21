@@ -3,6 +3,7 @@ CREATE PROCEDURE [dbo].[uspFADepreciateAsset]
 	@ysnPost			AS BIT				= 0,
 	@ysnRecap			AS BIT				= 0,
 	@strBatchId			AS NVARCHAR(100)	= '',
+	@strTransactionId	AS NVARCHAR(100)	= '',
 	@intEntityId		AS INT				= 1,
 	@successfulCount	AS INT				= 0 OUTPUT
 	
@@ -37,7 +38,7 @@ IF ISNULL(@ysnPost, 0) = 0
 		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))
 			BEGIN
 				SET @Param = (SELECT strAssetId FROM tblFAFixedAsset WHERE intAssetId IN (SELECT intAssetId FROM #AssetID))
-				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId,@Param, 0, 'AM', NULL, @intEntityId, @intCount	OUT
+				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId,@Param, 0, 'AMDPR', NULL, @intEntityId, @intCount	OUT
 				SET @successfulCount = @intCount
 				
 				IF(@intCount > 0)
@@ -55,15 +56,118 @@ IF ISNULL(@ysnPost, 0) = 0
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Transaction:
 
+DECLARE @ErrorMessage NVARCHAR(MAX)
 DECLARE @intDefaultCurrencyId	INT, @ysnForeignCurrency BIT = 0
-SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 
-DECLARE @dblDailyRate	NUMERIC (18,6)
+-- Entire record
+SELECT * INTO #FAAsset FROM tblFAFixedAsset where intAssetId IN (SELECT [intAssetId] FROM #AssetID)
+
+-- Service Year
+DECLARE @intYear		INT = (SELECT (COUNT(*)/12)+1 as intYear FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID))
+
+-- Service Year Percentage
+DECLARE @dblPercentage	INT = (SELECT ISNULL(dblPercentage,1) as dblPercentage FROM tblFADepreciationMethodDetail A 
+										WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset) and intYear = @intYear)
+
+-- Running Balance
+DECLARE @dblYear		NUMERIC (18,6) = (SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID) ORDER BY intAssetDepreciationId DESC)
+
+-- Computation
+DECLARE @dblBasis		NUMERIC (18,6)	= (SELECT TOP 1 dblCost - dblSalvageValue FROM #FAAsset)
+DECLARE @dblAnnualDep	NUMERIC (18,6)	= (@dblBasis * (@dblPercentage * .01))
+DECLARE @dblMonth		NUMERIC (18,6)	= (@dblAnnualDep / 12)								--NEED TO VERIFY IF ITS REALLY 12
+DECLARE @dblDepre		NUMERIC (18,6)	= (@dblMonth / 2) + ISNULL(@dblYear,0)				--NEED TO VERIFY IF ITS REALLY 2
+
 
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN							
 		
 		DECLARE @GLEntries RecapTableType				
+		
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID))
+		BEGIN
+			INSERT INTO tblFAFixedAssetDepreciation (
+						[intAssetId],
+						[intDepreciationMethodId],
+						[dblBasis],
+						[dtmDateInService],
+						[dtmDispositionDate],
+						[dtmDepreciationToDate],
+						[dblDepreciationToDate],
+						[dblSalvageValue],
+						[strTransaction],
+						[strType],
+						[strConvention]
+					)
+				SELECT
+						(SELECT TOP 1 [intAssetId] FROM #AssetID),
+						(SELECT TOP 1 [intDepreciationMethodId] FROM #FAAsset),
+						@dblBasis,
+						(SELECT TOP 1 dtmDateInService FROM #FAAsset),
+						NULL,
+						(SELECT TOP 1 dtmDateInService FROM #FAAsset),
+						0,
+						(SELECT TOP 1 dblSalvageValue FROM #FAAsset),
+						'Place in service',
+						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset)),
+						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset))
+
+			INSERT INTO tblFAFixedAssetDepreciation (
+					[intAssetId],
+					[intDepreciationMethodId],
+					[dblBasis],
+					[dtmDateInService],
+					[dtmDispositionDate],
+					[dtmDepreciationToDate],
+					[dblDepreciationToDate],
+					[dblSalvageValue],
+					[strTransaction],
+					[strType],
+					[strConvention]
+				)
+			SELECT
+					(SELECT TOP 1 [intAssetId] FROM #AssetID),
+					(SELECT TOP 1 [intDepreciationMethodId] FROM #FAAsset),
+					@dblBasis,
+					(SELECT TOP 1 dtmDateInService FROM #FAAsset),
+					NULL,
+					(SELECT DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID))) + 1, 0))),
+					@dblDepre,
+					(SELECT TOP 1 dblSalvageValue FROM #FAAsset),
+					'Depreciation',
+					(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset)),
+					(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset))
+
+		END
+		ELSE
+		BEGIN
+			INSERT INTO tblFAFixedAssetDepreciation (
+					[intAssetId],
+					[intDepreciationMethodId],
+					[dblBasis],
+					[dtmDateInService],
+					[dtmDispositionDate],
+					[dtmDepreciationToDate],
+					[dblDepreciationToDate],
+					[dblSalvageValue],
+					[strTransaction],
+					[strType],
+					[strConvention]
+				)
+			SELECT
+					(SELECT TOP 1 [intAssetId] FROM #AssetID),
+					(SELECT TOP 1 [intDepreciationMethodId] FROM #FAAsset),
+					@dblBasis,
+					(SELECT TOP 1 dtmDateInService FROM #FAAsset),
+					NULL,
+					(SELECT DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID) ORDER BY intAssetDepreciationId DESC)) + 2, 0))),
+					(SELECT (SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID) ORDER BY intAssetDepreciationId DESC) + @dblMonth),
+					(SELECT TOP 1 dblSalvageValue FROM #FAAsset),
+					'Depreciation',
+					(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset)),
+					(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset))
+		END
 		
 		DELETE FROM @GLEntries
 		INSERT INTO @GLEntries (
@@ -101,13 +205,13 @@ IF ISNULL(@ysnRecap, 0) = 0
 			
 		)
 		SELECT 
-			 [strTransactionId]		= A.[strAssetId]
+			 [strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= A.[intDepreciationAccountId]
 			,[strDescription]		= A.[strAssetDescription]
-			,[strReference]			= ''
-			,[dtmTransactionDate]	= A.[dtmDateAcquired]
-			,[dblDebit]				= A.[dblCost]
+			,[strReference]			= A.[strAssetId]
+			,[dtmTransactionDate]	= (SELECT TOP 1 B.[dtmDepreciationToDate] FROM tblFAFixedAssetDepreciation B WHERE B.intAssetId = A.[intAssetId] ORDER BY B.intAssetDepreciationId DESC)
+			,[dblDebit]				= ISNULL(A.[dblCost], 0) - ISNULL(A.[dblSalvageValue], 0)
 			,[dblCredit]			= 0
 			,[dblDebitForeign]		= 0
 			,[dblCreditForeign]		= 0
@@ -117,26 +221,25 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblForeignRate]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[dtmDate]				= ISNULL(A.[dtmDateAcquired], GETDATE())
+			,[dtmDate]				= (SELECT TOP 1 B.[dtmDepreciationToDate] FROM tblFAFixedAssetDepreciation B WHERE B.intAssetId = A.[intAssetId] ORDER BY B.intAssetDepreciationId DESC)
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 0
+			,[dblExchangeRate]		= 1
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'AM' --FA
+			,[strCode]				= 'AMDPR'
 								
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]		= A.[intAssetId]			
-			,[strTransactionType]	= 'Fixed Assets'
+			,[strTransactionType]	= 'Depreciation'
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 		
 		FROM tblFAFixedAsset A
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
-
 
 		INSERT INTO @GLEntries (
 			 [strTransactionId]
@@ -173,14 +276,14 @@ IF ISNULL(@ysnRecap, 0) = 0
 			
 		)
 		SELECT 
-			 [strTransactionId]		= A.[strAssetId]
+			 [strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
-			,[intAccountId]			= A.[intAccumulatedAccountId]
+			,[intAccountId]			= A.[intDepreciationAccountId]
 			,[strDescription]		= A.[strAssetDescription]
-			,[strReference]			= ''
-			,[dtmTransactionDate]	= A.[dtmDateAcquired]
+			,[strReference]			= A.[strAssetId]
+			,[dtmTransactionDate]	= (SELECT TOP 1 B.[dtmDepreciationToDate] FROM tblFAFixedAssetDepreciation B WHERE B.intAssetId = A.[intAssetId] ORDER BY B.intAssetDepreciationId DESC)
 			,[dblDebit]				= 0
-			,[dblCredit]			= A.[dblCost]
+			,[dblCredit]			= ISNULL(A.[dblCost], 0) - ISNULL(A.[dblSalvageValue], 0)
 			,[dblDebitForeign]		= 0
 			,[dblCreditForeign]		= 0
 			,[dblDebitReport]		= 0
@@ -189,29 +292,40 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblForeignRate]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[dtmDate]				= ISNULL(A.[dtmDateAcquired], GETDATE())
+			,[dtmDate]				= (SELECT TOP 1 B.[dtmDepreciationToDate] FROM tblFAFixedAssetDepreciation B WHERE B.intAssetId = A.[intAssetId] ORDER BY B.intAssetDepreciationId DESC)
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 0
+			,[dblExchangeRate]		= 1
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'AM' --FA
+			,[strCode]				= 'AMDPR'
 								
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]		= A.[intAssetId]			
-			,[strTransactionType]	= 'Fixed Assets'
+			,[strTransactionType]	= 'Depreciation'
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 		
 		FROM tblFAFixedAsset A
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
-
 		
+		BEGIN TRY
 		EXEC uspGLBookEntries @GLEntries, @ysnPost
-		
+		END TRY
+		BEGIN CATCH		
+			SET @ErrorMessage  = ERROR_MESSAGE()
+			RAISERROR(@ErrorMessage, 11, 1)
+
+			IF @@ERROR <> 0	GOTO Post_Rollback;
+		END CATCH
+
+		IF @@ERROR <> 0	GOTO Post_Rollback;
+
+		DELETE #FAAsset
+		DROP TABLE #FAAsset
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -229,6 +343,15 @@ UPDATE tblFAFixedAsset
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
+
+IF EXISTS(SELECT TOP 1 1 FROM (SELECT TOP 1 A.intAssetDepreciationId FROM tblFAFixedAssetDepreciation A 
+						WHERE A.[intAssetId] IN (SELECT intAssetId From #AssetID) 
+								AND ISNULL([dbo].isOpenAccountingDate(A.[dtmDepreciationToDate]), 0) = 0 ORDER BY A.intAssetDepreciationId DESC ) TBL)
+BEGIN
+	GOTO Post_Rollback
+END
+
+IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --=====================================================================================================================================
 -- 	RETURN TOTAL NUMBER OF VALID FIXEDASSETS
