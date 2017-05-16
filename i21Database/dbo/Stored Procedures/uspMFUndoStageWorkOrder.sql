@@ -199,13 +199,7 @@ BEGIN TRY
 				,L.dtmDateCreated ASC
 		END
 
-		SELECT @dblAdjustByQuantity = - @dblNewWeight / (
-				CASE 
-					WHEN @intWeightUOMId IS NULL
-						THEN 1
-					ELSE @dblWeightPerQty
-					END
-				)
+		SELECT @dblAdjustByQuantity = - @dblNewWeight 
 
 		EXEC uspICInventoryAdjustment_CreatePostLotMerge
 			-- Parameters for filtering:
