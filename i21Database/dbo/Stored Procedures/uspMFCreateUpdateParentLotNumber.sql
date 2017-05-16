@@ -138,6 +138,14 @@ BEGIN
 	BEGIN
 		DECLARE @strLotNumber NVARCHAR(50)
 			,@intBondStatusId INT
+			,@strContainerNo NVARCHAR(50)
+			,@intInventoryReceiptItemId INT
+			,@intInventoryReceiptId INT
+			,@strVendorRefNo NVARCHAR(50)
+			,@strWarehouseRefNo NVARCHAR(50)
+			,@strReceiptNumber NVARCHAR(50)
+			,@strTransactionId NVARCHAR(50)
+			,@dtmReceiptDate DATETIME
 
 		SELECT @strLotNumber = strLotNumber
 		FROM tblICLot
@@ -147,6 +155,10 @@ BEGIN
 
 		SELECT @intBondStatusId = LI.intBondStatusId
 			,@intItemOwnerId = LI.intItemOwnerId
+			,@strVendorRefNo = LI.strVendorRefNo
+			,@strWarehouseRefNo = LI.strWarehouseRefNo
+			,@strReceiptNumber = LI.strReceiptNumber
+			,@dtmReceiptDate = dtmReceiptDate
 		FROM tblMFLotInventory LI
 		JOIN tblICLot L ON L.intLotId = LI.intLotId
 		WHERE L.strLotNumber = @strLotNumber
@@ -163,10 +175,28 @@ BEGIN
 				AND ysnDefault = 1
 		END
 
+		IF @strReceiptNumber IS NULL
+		BEGIN
+			SELECT @strTransactionId = strTransactionId
+			FROM tblICLot
+			WHERE intLotId = @intLotId
+
+			SELECT @strVendorRefNo = strVendorRefNo
+				,@strWarehouseRefNo = strWarehouseRefNo
+				,@strReceiptNumber = strReceiptNumber
+				,@dtmReceiptDate = dtmReceiptDate
+			FROM tblICInventoryReceipt
+			WHERE strReceiptNumber = @strTransactionId
+		END
+
 		INSERT INTO tblMFLotInventory (
 			intLotId
 			,intBondStatusId
 			,intItemOwnerId
+			,strVendorRefNo
+			,strWarehouseRefNo
+			,strReceiptNumber
+			,dtmReceiptDate
 			)
 		SELECT @intLotId
 			,IsNULL(@intBondStatusId, (
@@ -180,5 +210,18 @@ BEGIN
 						END
 					))
 			,@intItemOwnerId
+			,@strVendorRefNo
+			,@strWarehouseRefNo
+			,@strReceiptNumber
+			,@dtmReceiptDate
+	END
+	ELSE
+	BEGIN
+		UPDATE tblMFLotInventory
+		SET strVendorRefNo = @strVendorRefNo
+			,strWarehouseRefNo = @strWarehouseRefNo
+			,strReceiptNumber = @strReceiptNumber
+			,dtmReceiptDate = @dtmReceiptDate
+		WHERE intLotId = @intLotId
 	END
 END
