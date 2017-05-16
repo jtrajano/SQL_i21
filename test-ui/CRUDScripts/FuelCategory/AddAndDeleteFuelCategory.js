@@ -255,6 +255,57 @@ StartTest (function (t) {
         })
         //endregion
 
+        /*====================================== DELETE FUEL CATEGORY  ======================================*/
+        //region
+        .displayText('=====  DELETE FUEL CARTEGORY =====')
+        .displayText('=====  Scenario 1: Delete Unused Fuel Category =====')
+
+        .clickButton('FuelCategory')
+        .waitUntilLoaded('')
+        .selectGridRowNumber('GridTemplate',[1])
+        .clickButton('Delete')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
+        .displayText('=====  Scenario 1: Delete Unused Fuel Category Done=====')
+        //endregion
+
+        //region Scenario 2: Delete Used Fuel Category
+        .displayText('=====  Scenario 2: Delete Used Fuel Category =====')
+
+        .clickButton('FuelCategory')
+        .waitUntilLoaded('')
+        .selectGridRowNumber('GridTemplate',[3])
+        .clickButton('Delete')
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .verifyMessageBox('iRely i21','The record you are trying to delete is being used.','ok','error')
+        .clickMessageBoxButton('ok')
+        .waitUntilLoaded('')
+        .clickButton('Close')
+        .waitUntilLoaded()
+        .displayText('=====  Scenario 2: Delete Used Fuel Category Done=====')
+        //endregion
+
+        //region Scenario 3: Delete Multiple Fuel Category
+        .displayText('=====  Scenario 3: Delete Multiple Fuel Category =====')
+        .clickButton('FuelCategory')
+        .waitUntilLoaded('icfuelcategory')
+        .selectGridRowNumber('GridTemplate',[1,2,4])
+        .clickMessageBoxButton('yes')
+        .waitUntilLoaded('')
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .clickButton('Close')
+        .waitUntilLoaded()
+        .displayText('=====  Scenario 3: Delete Multiple Fuel Category Done=====')
+        //endregion
+
 
 
         .done();

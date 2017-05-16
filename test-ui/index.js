@@ -119,16 +119,8 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'FuelCategory',
                     items: [
                         {
-                            url: 'CRUDScripts/FuelCategory/AddFuelCategory.js?v='+version,
-                            title: 'AddFuelCategory',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/FuelCategory/DeleteFuelCategory.js?v='+version,
-                            title: 'DeleteFuelCategory',
+                            url: 'CRUDScripts/FuelCategory/AddAndDeleteFuelCategory.js?v='+version,
+                            title: 'AddAndDeleteFuelCategory',
                             preload: [
                                 functionalTest,
                                 commonIC
