@@ -5233,6 +5233,7 @@
     <Build Include="dbo\Stored Procedures\uspEMGetEntityTypeHasData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDeletePatronageTaxes.sql" />
     <Build Include="dbo\Views\vyuLGContarctWithoutShippingAdvice.sql" />
+    <Build Include="dbo\Tables\tblSMApprovalHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5359,6 +5360,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\27_RenamePricingForContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspSMTransactionApproved.sql" />
     <None Include="dbo\Triggers\trgAfterInsertUpdatetblMFWorkOrder.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\25_ApprovalHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
