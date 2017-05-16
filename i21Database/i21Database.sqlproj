@@ -5358,6 +5358,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
+    <Build Include="dbo\Views\vyuAPVendorDefault.sql" />
     <None Include="Scripts\Post-Deployment\MF\5_WSPattern.sql" />
     <None Include="Scripts\Post-Deployment\LG\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\IC\19_M2MComputations.sql" />
