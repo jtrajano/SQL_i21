@@ -106,7 +106,7 @@ BEGIN TRY
 
 		SELECT @strNewLotNumber = strLotNumber
 			,@dblWeightPerQty = dblWeightPerQty
-			,@intItemUOMId = intItemUOMId
+			,@intItemUOMId=intItemUOMId
 		FROM dbo.tblICLot
 		WHERE intLotId = @intLotId
 
@@ -226,7 +226,7 @@ BEGIN TRY
 			,@intNewItemUOMId = NULL
 			,@intNewWeightUOMId = NULL
 			,@dblNewUnitCost = NULL
-			,@intItemUOMId = @intItemUOMId
+			,@intItemUOMId = @intNewItemUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
