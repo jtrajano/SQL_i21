@@ -1,56 +1,116 @@
 StartTest (function (t) {
     new iRely.FunctionalTest().start(t)
 
-
-        //region Scenario 1. Add stock UOM first
+        /*====================================== Scenario 1: Add stock UOM first ======================================*/
+        //region
         .displayText('===== Scenario 1. Add stock UOM first  =====')
         .clickMenuFolder('Inventory','Folder')
+        .waitUntilLoaded()
         .clickMenuScreen('Inventory UOM','Screen')
-        .clickButton('New')
-        .waitUntilLoaded('icinventoryuom')
-        .enterData('Text Field','UnitMeasure','Test_LB')
-        .enterData('Text Field','Symbol','Test_LB')
-        .selectComboBoxRowNumber('UnitType',6,0)
-        .verifyStatusMessage('Edited')
-        .clickButton('Save')
+        .filterGridRecords('Search', 'FilterGrid', 'Test_LB')
         .waitUntilLoaded()
-        .verifyStatusMessage('Saved')
-        .clickButton('Close')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    .clickButton('New')
+                    .waitUntilLoaded('')
+                    .enterData('Text Field','UnitMeasure','Test_LB')
+                    .enterData('Text Field','Symbol','Test_LB')
+                    .selectComboBoxRowNumber('UnitType',6,0)
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .waitUntilLoaded()
+                    .verifyStatusMessage('Saved')
+                    .clickButton('Close')
+
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .displayText('===== Add stock UOM first Done  =====')
         //endregion
 
 
-        //region Scenario 2. Add Conversion UOM's
+        /*====================================== Scenario 2. Add Conversion UOM's ======================================*/
+        //region
         .displayText('===== Scenario 2. Add Conversion UOMs =====')
-        .clickButton('New')
-        .waitUntilLoaded('icinventoryuom')
-        .enterData('Text Field','UnitMeasure','Test_5 LB bag')
-        .enterData('Text Field','Symbol','Test_5 LB bag')
-        .selectComboBoxRowNumber('UnitType',7,0)
-//        .selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Test_LB','strUnitMeasure')
-        .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
-        //.selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        .enterGridData('Conversion', 1, 'dblConversionToStock', '5')
-        .verifyStatusMessage('Edited')
-        .clickButton('Save')
+        .clickMenuScreen('Inventory UOM','Screen')
+        .filterGridRecords('Search', 'FilterGrid', 'Test_5 LB bag')
         .waitUntilLoaded()
-        .verifyStatusMessage('Saved')
-        .clickButton('Close')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+
+                    .clickButton('New')
+                    .waitUntilLoaded('icinventoryuom')
+                    .enterData('Text Field','UnitMeasure','Test_5 LB bag')
+                    .enterData('Text Field','Symbol','Test_5 LB bag')
+                    .selectComboBoxRowNumber('UnitType',7,0)
+                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                    .enterGridData('Conversion', 1, 'dblConversionToStock', '5')
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .waitUntilLoaded()
+                    .verifyStatusMessage('Saved')
+                    .clickButton('Close')
+                    .waitUntilLoaded()
+
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clearTextFilter('FilterGrid')
         .waitUntilLoaded()
 
-        .clickButton('New')
-        .waitUntilLoaded('icinventoryuom')
-        .enterData('Text Field','UnitMeasure','Test_10 LB bag')
-        .enterData('Text Field','Symbol','Test_10 LB bag')
-        .selectComboBoxRowNumber('UnitType',7,0)
-        //.selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Test_LB','strUnitMeasure')
-        .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
-        .enterGridData('Conversion', 1, 'dblConversionToStock', '10')
-        .verifyStatusMessage('Edited')
-        .clickButton('Save')
+        .filterGridRecords('Search', 'FilterGrid', 'Test_10 LB bag')
         .waitUntilLoaded()
-        .verifyStatusMessage('Saved')
-        .clickButton('Close')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
+
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+
+                    .clickButton('New')
+                    .waitUntilLoaded('icinventoryuom')
+                    .enterData('Text Field','UnitMeasure','Test_10 LB bag')
+                    .enterData('Text Field','Symbol','Test_10 LB bag')
+                    .selectComboBoxRowNumber('UnitType',7,0)
+                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                    .enterGridData('Conversion', 1, 'dblConversionToStock', '10')
+                    .verifyStatusMessage('Edited')
+                    .clickButton('Save')
+                    .waitUntilLoaded()
+                    .verifyStatusMessage('Saved')
+                    .clickButton('Close')
+
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clearTextFilter('FilterGrid')
+        .waitUntilLoaded()
+        .displayText('===== Add Conversion UOM Done  =====')
         //endregion
+
+
 
         //region Scenario 3. Update UOM
         .displayText('===== Scenario 3. Update UOM =====')
