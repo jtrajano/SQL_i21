@@ -63,7 +63,7 @@ SELECT l.intLotId
 	,'' AS strCurrency
 	,'' AS strCostUOM
 	,0 AS intContainerId
-	,'' AS strContainerNo
+	,(Select Top 1 RL.strContainerNo from tblICInventoryReceiptItemLot RL Where RL.strLotNumber =l.strLotNumber) AS strContainerNo
 	,ISNULL(S.dblQty, 0) AS dblReservedQty
 	,Convert(DECIMAL(18, 4), ISNULL(S.dblQty, 0) / CASE 
 			WHEN ISNULL(l.dblWeightPerQty, 0) = 0
@@ -93,6 +93,10 @@ SELECT l.intLotId
 	,LI.intItemOwnerId
 	,R.strDisplayMember As strRestrictionType
 	,LS1.strSecondaryStatus As strBondStatus
+	,LI.strVendorRefNo
+	,LI.strWarehouseRefNo 
+	,LI.strReceiptNumber As strReceiptNo
+	,LI.dtmReceiptDate 
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
