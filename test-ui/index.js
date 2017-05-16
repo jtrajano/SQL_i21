@@ -132,16 +132,8 @@ if(_url.indexOf('version=TF') < 1) {
                 { group: 'FeedStock',
                     items: [
                         {
-                            url: 'CRUDScripts/FeedStock/AddFeedStock.js?v='+version,
-                            title: 'AddFeedStock',
-                            preload: [
-                                functionalTest,
-                                commonIC
-                            ]
-                        },
-                        {
-                            url: 'CRUDScripts/FeedStock/DeleteFeedStock.js?v='+version,
-                            title: 'DeleteFeedStock',
+                            url: 'CRUDScripts/FeedStock/AddAndDeleteFeedStock.js?v='+version,
+                            title: 'AddAndDeleteFeedStock',
                             preload: [
                                 functionalTest,
                                 commonIC
