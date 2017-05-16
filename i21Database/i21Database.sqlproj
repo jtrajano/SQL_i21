@@ -5231,6 +5231,7 @@
     <Build Include="dbo\Stored Procedures\uspSMAddOppositeRateDetail.sql" />
     <Build Include="dbo\Views\vyuRKFuturesPSHeaderNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspEMGetEntityTypeHasData.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDeletePatronageTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
