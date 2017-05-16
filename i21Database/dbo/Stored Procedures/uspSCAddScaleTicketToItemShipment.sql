@@ -122,9 +122,9 @@ BEGIN
 										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
 									END
 		,intShipFromLocationId		= SC.intProcessingLocationId
-		,intShipToLocationId		= (select top 1 intShipToId from tblARCustomer where intEntityCustomerId = @intEntityId)
+		,intShipToLocationId		= AR.intShipToId
 		,intShipViaId				= SC.intFreightCarrierId
-		,intFreightTermId			= 1
+		,intFreightTermId			= (select top 1 intFreightTermId from tblEMEntityLocation where intEntityLocationId = AR.intShipToId)
 		,strBOLNumber				= SC.strTicketNumber
 		,intDiscountSchedule		= SC.intDiscountId
 		,intForexRateTypeId			= CASE
@@ -173,6 +173,7 @@ BEGIN
 		INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
+		LEFT JOIN tblARCustomer AR ON AR.intEntityCustomerId = SC.intEntityId
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 END 
 
