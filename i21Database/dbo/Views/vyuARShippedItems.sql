@@ -227,8 +227,7 @@ LEFT OUTER JOIN
 		ON SOD.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE
       SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
-      AND SOD.[dblQtyOrdered] - ISNULL(SOD.[dblQtyShipped], 0.000000) <> 0.000000
-      AND ISNULL(ISD.[intLineNo],0) = 0
+	  AND ((SOD.[dblQtyOrdered] - ISNULL(SOD.[dblQtyShipped], 0.000000) <> 0.000000) OR (ISNULL(ISD.[intLineNo],0) = 0))
 	
 UNION ALL
 
