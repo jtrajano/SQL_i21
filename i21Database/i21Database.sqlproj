@@ -5238,6 +5238,7 @@
     <Build Include="dbo\Stored Procedures\uspSMAddOppositeRateDetail.sql" />
     <Build Include="dbo\Views\vyuRKFuturesPSHeaderNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspEMGetEntityTypeHasData.sql" />
+    <Build Include="dbo\Stored Procedures\uspAREntityTypeConversion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
