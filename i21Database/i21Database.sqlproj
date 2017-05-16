@@ -5232,6 +5232,7 @@
     <Build Include="dbo\Views\vyuRKFuturesPSHeaderNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspEMGetEntityTypeHasData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDeletePatronageTaxes.sql" />
+    <Build Include="dbo\Views\vyuLGContarctWithoutShippingAdvice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
