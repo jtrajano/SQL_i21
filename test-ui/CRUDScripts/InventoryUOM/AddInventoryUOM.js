@@ -56,7 +56,7 @@ StartTest (function (t) {
                 new iRely.FunctionalTest().start(t, next)
 
                     .clickButton('New')
-                    .waitUntilLoaded('icinventoryuom')
+                    .waitUntilLoaded('')
                     .enterData('Text Field','UnitMeasure','Test_5 LB bag')
                     .enterData('Text Field','Symbol','Test_5 LB bag')
                     .selectComboBoxRowNumber('UnitType',7,0)
@@ -89,7 +89,7 @@ StartTest (function (t) {
                 new iRely.FunctionalTest().start(t, next)
 
                     .clickButton('New')
-                    .waitUntilLoaded('icinventoryuom')
+                    .waitUntilLoaded('')
                     .enterData('Text Field','UnitMeasure','Test_10 LB bag')
                     .enterData('Text Field','Symbol','Test_10 LB bag')
                     .selectComboBoxRowNumber('UnitType',7,0)
@@ -111,11 +111,11 @@ StartTest (function (t) {
         //endregion
 
 
-
-        //region Scenario 3. Update UOM
+        /*====================================== Scenario 3. Update UOM ======================================*/
+        //region
         .displayText('===== Scenario 3. Update UOM =====')
         .doubleClickSearchRowValue('Test_10 LB bag', 'strUnitMeasure', 1)
-        .waitUntilLoaded('icinventoryuom')
+        .waitUntilLoaded('')
         .enterData('Text Field','UnitMeasure','Test_10 LB bag - Updated')
         .enterData('Text Field','Symbol','Test_10 LB bag - Updated')
         .selectGridComboBoxRowNumber('Conversion',2,'colOtherUOM',11)
@@ -129,7 +129,7 @@ StartTest (function (t) {
         .clickButton('Close') 
         .selectSearchRowNumber(1)
         .clickButton('OpenSelected')
-        .waitUntilLoaded('icinventoryuom')
+        .waitUntilLoaded('')
         .verifyData('Text Field','UnitMeasure','Test_10 LB bag - Updated')
         .verifyData('Text Field','Symbol','Test_10 LB bag - Updated')
         .verifyGridData('Conversion', 2, 'colConversionStockUOM', 'KG')
@@ -138,18 +138,19 @@ StartTest (function (t) {
         .clearTextFilter('FilterGrid')
         //endregion
 
-        //region Scenario 4: Check Required Fields
+        /*====================================== Scenario 4: Check Required Fields ======================================*/
+        //region
         .displayText('===== Scenario 4: Check Required Fields =====')
         .clickButton('New')
-        .waitUntilLoaded('icinventoryuom')
+        .waitUntilLoaded('')
         .clickButton('Save')
         .clickButton('Close')
         //endregion
 
-        //region Scenario 5. Add duplicate Inventory UOM
+        /*====================================== Scenario 5. Add duplicate Inventory UOM ======================================*/
         .displayText('===== Scenario 5. Add duplicate Inventory UOM  =====')
         .clickButton('New')
-        .waitUntilLoaded('icinventoryuom')
+        .waitUntilLoaded('')
         .enterData('Text Field','UnitMeasure','Test_LB')
         .enterData('Text Field','Symbol','Test_LB')
         .selectComboBoxRowNumber('UnitType',6,0)
