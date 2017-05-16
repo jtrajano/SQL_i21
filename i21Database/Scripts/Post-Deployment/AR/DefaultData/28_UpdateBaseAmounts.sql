@@ -1,5 +1,13 @@
-﻿print('/*******************  BEGIN Update Base Amounts for Mulit-Currency  *******************/')
+﻿print('/*******************  BEGIN Update Base Amounts for Multi-Currency  *******************/')
 GO
+
+
+ UPDATE tblARInvoice
+ Set dblPayment = dblBasePayment
+ WHERE
+	dblBasePayment <> 0
+	AND dblPayment = 0
+	AND ysnPosted = 1
 
 DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000
@@ -75,9 +83,8 @@ UPDATE
 	tblARInvoice
 SET
 	 [dblBaseDiscount]			= [dblDiscount]
-	,[dblInterest]				= [dblInterest]
-	,[dblPayment]				= [dblBasePayment]
-	,[dblShipping]				= [dblBaseShipping]
+	,[dblBaseInterest]			= [dblInterest]
+	,[dblBaseShipping]			= [dblShipping]
 	,[dblBaseTax]				= [dblTax]
 	,[dblBaseInvoiceSubtotal]	= [dblInvoiceSubtotal]
 	,[dblBasePayment]			= [dblPayment]
@@ -175,8 +182,7 @@ UPDATE
 	tblSOSalesOrder
 SET
 	 [dblBaseDiscount]				= [dblDiscount]
-	,[dblPayment]					= [dblBasePayment]
-	,[dblShipping]					= [dblBaseShipping]
+	,[dblBaseShipping]				= [dblShipping]
 	,[dblBaseTax]					= [dblTax]
 	,[dblBaseSalesOrderSubtotal]	= [dblSalesOrderSubtotal]
 	,[dblBasePayment]				= [dblPayment]
@@ -186,4 +192,4 @@ WHERE
 	[intSalesOrderId] IN (SELECT DISTINCT [intSalesOrderId] FROM @SOIds)
 			
 GO
-print('/*******************  END Update Update Base Amounts for Mulit-Currency  *******************/')
+print('/*******************  END Update Update Base Amounts for Multi-Currency  *******************/')
