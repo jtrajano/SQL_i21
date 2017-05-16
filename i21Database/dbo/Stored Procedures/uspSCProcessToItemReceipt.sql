@@ -2,7 +2,7 @@ CREATE PROCEDURE [dbo].[uspSCProcessToItemReceipt]
 	 @intSourceTransactionId AS INT
 	,@strSourceType AS NVARCHAR(100) 
 	,@intUserId AS INT
-	,@dblNetUnits AS DECIMAL (13,3)
+	,@dblNetUnits AS DECIMAL (38,20)
 	,@dblCost AS DECIMAL (9,5)
 	,@intEntityId AS INT
 	,@intContractId AS INT
@@ -30,8 +30,8 @@ DECLARE @strDummyDistributionOption AS NVARCHAR(3) = NULL
 
 DECLARE @ItemsForItemReceipt AS ItemCostingTableType
 DECLARE @intTicketId AS INT = @intSourceTransactionId
-DECLARE @dblRemainingUnits AS DECIMAL (13,3)
-DECLARE @dblRemainingQuantity AS DECIMAL (13,3)
+DECLARE @dblRemainingUnits AS NUMERIC(38, 20)
+DECLARE @dblRemainingQuantity AS NUMERIC(38, 20)
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @intDirectType AS INT = 3
 DECLARE @intTicketUOM INT
@@ -76,13 +76,13 @@ BEGIN
 	ST.strStorageTypeCode = @strDistributionOption
 END
 
-DECLARE @ErrMsg                    NVARCHAR(MAX),
-              @dblBalance          NUMERIC(12,4),                    
-              @intItemId           INT,
-              @dblNewBalance       NUMERIC(12,4),
-              @strInOutFlag        NVARCHAR(4),
-              @dblQuantity         NUMERIC(12,4),
-              @strAdjustmentNo     NVARCHAR(50)
+DECLARE @ErrMsg              NVARCHAR(MAX),
+        @dblBalance          NUMERIC(38, 20),                    
+        @intItemId           INT,
+        @dblNewBalance       NUMERIC(38, 20),
+        @strInOutFlag        NVARCHAR(4),
+        @dblQuantity         NUMERIC(38, 20),
+        @strAdjustmentNo     NVARCHAR(50)
 
 BEGIN TRY
 		IF @strDistributionOption = 'LOD'
