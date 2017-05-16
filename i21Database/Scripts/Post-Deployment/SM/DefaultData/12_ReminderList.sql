@@ -266,16 +266,8 @@ GO
 		SELECT [strReminder]        =        N'Approved',
 				[strType]           =        N'Transaction',
 				[strMessage]        =        N'{0} Transaction(s) {2} approved.',
-				[strQuery]          =        N'SELECT 
-                                                    intTransactionId 
-                                                FROM tblSMApproval 
-                                                WHERE intTransactionId IN (
-                                                    SELECT intTransactionId 
-                                                    FROM tblSMTransaction 
-                                                    WHERE strApprovalStatus = ''Approved''
-                                                ) and ysnCurrent = 1  and strStatus = ''Approved'' 
-                                                AND (intSubmittedById = {0} OR intApproverId = {0})
-                                                GROUP BY intTransactionId',
+				[strQuery]          =        N'select intApprovalId from tblSMApprovalHistory
+												where intEntityId = {0} and ysnApproved = 1 and ysnRead = 0',
 				[strNamespace]      =        N'i21.view.Approval?activeTab=Approved',
 				[intSort]           =        12
 
@@ -283,16 +275,8 @@ GO
 	ELSE
 	BEGIN
 		UPDATE [tblSMReminderList]
-		SET	[strQuery] =       N'SELECT 
-                                        intTransactionId 
-                                    FROM tblSMApproval 
-                                    WHERE intTransactionId IN (
-                                        SELECT intTransactionId 
-                                        FROM tblSMTransaction 
-                                        WHERE strApprovalStatus = ''Approved''
-                                    ) and ysnCurrent = 1  and strStatus = ''Approved'' 
-                                    AND (intSubmittedById = {0} OR intApproverId = {0})
-                                    GROUP BY intTransactionId'
+		SET	[strQuery] =       N'select intApprovalId from tblSMApprovalHistory
+								where intEntityId = {0} and ysnApproved = 1 and ysnRead = 0'
 		WHERE [strReminder] = N'Approved' AND [strType] = N'Transaction'
 	END
 
@@ -302,21 +286,18 @@ GO
         SELECT [strReminder]        =        N'Closed',
                 [strType]           =        N'Transaction',
                 [strMessage]        =        N'{0} Transaction(s) {2} closed.',
-                [strQuery]          =        N'    SELECT 
-                                                    intTransactionId 
-                                                FROM tblSMApproval 
-                                                WHERE intTransactionId IN (
-                                                        SELECT intTransactionId 
-                                                        FROM tblSMTransaction 
-                                                        WHERE strApprovalStatus = ''Closed''
-                                                    ) 
-                                                    AND ysnCurrent = 1 
-                                                    AND strStatus = ''Closed'' 
-                                                    AND intSubmittedById = {0}
-                                                GROUP BY intTransactionId',
+                [strQuery]          =        N'select intApprovalId from tblSMApprovalHistory
+												where intEntityId = {0} and ysnClosed = 1 and ysnRead = 0',
                 [strNamespace]      =        N'i21.view.Approval?activeTab=Closed',
                 [intSort]           =        13
-    END    
+    END
+	ELSE
+	BEGIN
+		UPDATE [tblSMReminderList]
+		SET	[strQuery] =        N'select intApprovalId from tblSMApprovalHistory
+								where intEntityId = {0} and ysnClosed = 1 and ysnRead = 0'
+		WHERE [strReminder] = N'Approved' AND [strType] = N'Transaction'
+	END    
   
     IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Transaction')
     BEGIN
@@ -345,24 +326,16 @@ GO
         SELECT [strReminder]        =        N'Rejected',
                 [strType]           =        N'Transaction',
                 [strMessage]        =        N'{0} Transaction(s) {2} rejected.',
-                [strQuery]          =        N'    SELECT 
-                                                    intTransactionId 
-                                                FROM tblSMApproval 
-                                                WHERE    ysnCurrent = 1 AND 
-                                                        strStatus IN (''Rejected'') AND 
-                                                        {0} = {0}',
+                [strQuery]          =        N'select * from tblSMApprovalHistory
+												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0',
                 [strNamespace]      =        N'i21.view.Approval?activeTab=Rejected',
                 [intSort]           =        15
     END
 	ELSE
 		BEGIN
 			UPDATE [tblSMReminderList]
-			SET	[strQuery] = N'    SELECT 
-										intTransactionId 
-									FROM tblSMApproval 
-									WHERE    ysnCurrent = 1 AND 
-											strStatus IN (''Rejected'') AND 
-											{0} = {0}'
+			SET	[strQuery] = N'select * from tblSMApprovalHistory
+							where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0'
 			WHERE [strReminder] = N'Rejected' AND [strType] = N'Transaction' 
 		END
 
