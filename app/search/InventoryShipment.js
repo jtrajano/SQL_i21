@@ -37,7 +37,7 @@ Ext.define('Inventory.search.InventoryShipment', {
                 { dataIndex: 'dtmDepartureTime', text: 'Departure Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
                 { dataIndex: 'dtmArrivalTime', text: 'Arrival Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
                 { dataIndex: 'dtmDeliveredDate', text: 'Delivered Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
-                { dataIndex: 'dtmFreeTime', text: 'Free Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                { dataIndex: 'strFreeTime', text: 'Free Time', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strReceivedBy', text: 'Received By', flex: 1, dataType: 'string', hidden: true },
                 { dataIndex: 'strComment', text: 'Comment', flex: 1, dataType: 'string', hidden: true }
             ]

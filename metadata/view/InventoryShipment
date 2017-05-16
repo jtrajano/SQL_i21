@@ -495,10 +495,23 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": null,
-                                                        "designer|createAlias": "combobox",
+                                                        "columns": [
+                                                            "[",
+                                                            "    {",
+                                                            "        dataIndex: 'intOrderType',",
+                                                            "        dataType: 'numeric',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "\t{",
+                                                            "        dataIndex: 'strOrderType',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Order Type',",
+                                                            "        flex: 1",
+                                                            "    }",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
                                                         "displayField": "strOrderType",
-                                                        "editable": false,
                                                         "fieldLabel": "Order Type",
                                                         "itemId": "cboOrderType",
                                                         "labelAlign": "top",
@@ -508,6 +521,7 @@
                                                         "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
+                                                        "selectOnFocus": true,
                                                         "tabIndex": null,
                                                         "valueField": "intOrderType"
                                                     },
@@ -605,7 +619,7 @@
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strCustomerName",
+                                                        "displayField": "strName",
                                                         "enableDrillDown": true,
                                                         "fieldLabel": "Customer",
                                                         "itemId": "cboCustomer",
@@ -617,7 +631,7 @@
                                                         "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
-                                                        "valueField": "strCustomerName"
+                                                        "valueField": "intEntityCustomerId"
                                                     },
                                                     "name": "MyComboBox71",
                                                     "configAlternates": {
@@ -756,7 +770,7 @@
                                                         "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
-                                                        "valueField": "strFreightTerm"
+                                                        "valueField": "intFreightTermId"
                                                     },
                                                     "name": "MyComboBox73",
                                                     "configAlternates": {
@@ -828,7 +842,7 @@
                                                         "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
-                                                        "valueField": "strCurrency",
+                                                        "valueField": "intCurrencyID",
                                                         "width": 60
                                                     },
                                                     "name": "MyComboBox16",
@@ -1022,7 +1036,7 @@
                                                                         "layout|margins": "0 0 0 5",
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "strLocationName",
+                                                                        "valueField": "intCompanyLocationId",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox27",
@@ -1139,7 +1153,7 @@
                                                                         "layout|margins": null,
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "strLocationName",
+                                                                        "valueField": "intEntityLocationId",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox70",
@@ -1225,7 +1239,7 @@
                                                                         "layout|margins": null,
                                                                         "name": null,
                                                                         "readOnly": null,
-                                                                        "valueField": "strLocationName",
+                                                                        "valueField": "intCompanyLocationId",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyComboBox8",
@@ -1431,7 +1445,7 @@
                                                                 "layout|margins": null,
                                                                 "margin": "0 5 0 0",
                                                                 "name": null,
-                                                                "valueField": "strShipVia",
+                                                                "valueField": "intEntityShipViaId",
                                                                 "width": null
                                                             },
                                                             "name": "MyComboBox10",
@@ -1613,7 +1627,8 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "designer|createAlias": null,
+                                                                "columns": null,
+                                                                "designer|createAlias": "timefield",
                                                                 "fieldLabel": "Appointment Time",
                                                                 "itemId": "txtAppointmentTime",
                                                                 "labelWidth": 110,
@@ -1624,39 +1639,15 @@
                                                                 "readOnly": null,
                                                                 "width": null
                                                             },
-                                                            "name": "MyTextField",
-                                                            "designerId": "8991b931-5cf2-49a6-a4bc-8ccb896c02d5"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Text",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "designer|createAlias": null,
-                                                                "fieldLabel": "Departure Time",
-                                                                "hideTrigger": null,
-                                                                "itemId": "txtDepartureTime",
-                                                                "labelWidth": 110,
-                                                                "layout|flex": 1,
-                                                                "layout|margins": null,
-                                                                "margin": "0 5 0 0",
-                                                                "name": null,
-                                                                "readOnly": null,
-                                                                "width": null
-                                                            },
-                                                            "name": "MyTextField2",
+                                                            "name": "MyTextField14",
                                                             "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean"
+                                                                "columns": "array"
                                                             },
-                                                            "designerId": "54ee6927-b719-4120-afcf-a70e0a18b96e",
+                                                            "designerId": "897ea82d-2a77-4066-842e-5829bcd732cd",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "name": "columns",
                                                                     "type": "string"
                                                                 }
                                                             ]
@@ -1670,7 +1661,40 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "columns": null,
-                                                                "designer|createAlias": "gridcombobox",
+                                                                "designer|createAlias": "timefield",
+                                                                "fieldLabel": "Departure Time",
+                                                                "itemId": "txtDepartureTime",
+                                                                "labelWidth": 110,
+                                                                "layout|flex": 1,
+                                                                "layout|margins": null,
+                                                                "margin": "0 5 0 0",
+                                                                "name": null,
+                                                                "readOnly": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyTextField44",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "12b47272-6460-4d6e-ac6c-e71198fd82c4",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": null,
+                                                                "designer|createAlias": "timefield",
                                                                 "fieldLabel": "Arrival Time",
                                                                 "itemId": "txtArrivalTime",
                                                                 "labelWidth": 110,
@@ -1748,39 +1772,21 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Date",
+                                                            "type": "Ext.form.field.Text",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "designer|createAlias": null,
                                                                 "fieldLabel": "Free Time",
-                                                                "hidden": null,
-                                                                "hideTrigger": null,
-                                                                "itemId": "dtmFreeTime",
+                                                                "itemId": "txtFreeTime",
                                                                 "labelWidth": 110,
                                                                 "layout|flex": 1,
-                                                                "layout|margins": null,
-                                                                "margin": "0 5 0 0",
-                                                                "name": null,
-                                                                "readOnly": null,
-                                                                "width": null
+                                                                "margin": "0 5 0 0"
                                                             },
-                                                            "name": "MyDateField11",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean"
-                                                            },
-                                                            "designerId": "b1f2ab44-9e4f-4f8f-9024-11d22888bcd3",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
+                                                            "name": "MyTextField21",
+                                                            "designerId": "c32bcab4-845f-4225-81d0-86421aaa393a"
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Text",
@@ -2932,7 +2938,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strSubLocation",
                                                                 "itemId": "colSubLocation",
-                                                                "text": "Storage Location",
+                                                                "text": "Sub Location",
                                                                 "width": 100
                                                             },
                                                             "name": "MyColumn35",
@@ -2951,7 +2957,7 @@
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'intCompanyLocationSubLocationId',",
                                                                             "\t\tdataType: 'numeric',",
-                                                                            "\t\ttext: 'Storage Location Id',",
+                                                                            "\t\ttext: 'Sub Location Id',",
                                                                             "\t\thidden: true",
                                                                             "\t},",
                                                                             "\t{",
@@ -2963,7 +2969,7 @@
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'strSubLocationName',",
                                                                             "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Storage Location Name',",
+                                                                            "\t\ttext: 'Sub Location Name',",
                                                                             "\t\tflex: 1",
                                                                             "\t},",
                                                                             "\t{",
@@ -3004,7 +3010,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "itemId": "colStorageLocation",
-                                                                "text": "Storage Unit",
+                                                                "text": "Storage Location",
                                                                 "width": 100
                                                             },
                                                             "name": "MyColumn72",
@@ -3041,12 +3047,10 @@
                                                                             "                                                                                {",
                                                                             "                                                                                    dataIndex: 'intSubLocationId',",
                                                                             "                                                                                    dataType: 'numeric',",
-                                                                            "                                                                                    text: 'Storage Location Id',",
                                                                             "                                                                                    hidden: true",
                                                                             "                                                                                },",
                                                                             "                                                                                {",
                                                                             "                                                                                    dataIndex: 'strSubLocationName',",
-                                                                            "                                                                                    text: 'Storage Location',",
                                                                             "                                                                                    dataType: 'string',",
                                                                             "                                                                                    hidden: true",
                                                                             "                                                                                }",
@@ -4581,7 +4585,7 @@
                                                         "columns": [
                                                             "[",
                                                             "\t{",
-                                                            "\t\tdataIndex: 'intEntityId',",
+                                                            "\t\tdataIndex: 'intEntityVendorId',",
                                                             "\t\tdataType: 'numeric',",
                                                             "\t\ttext: 'Vendor Id',",
                                                             "\t\thidden: true",

@@ -30,6 +30,7 @@ namespace iRely.Inventory.Model
         public int? intShipToLocationId { get; set; }
         public int? intFreightTermId { get; set; }
         public int? intCurrencyId { get; set; }
+        public string strFreeTime { get; set; }
         public string strBOLNumber { get; set; }
         public int? intShipViaId { get; set; }
         public string strVessel { get; set; }
@@ -41,7 +42,6 @@ namespace iRely.Inventory.Model
         public DateTime? dtmDepartureTime { get; set; }
         public DateTime? dtmArrivalTime { get; set; }
         public DateTime? dtmDeliveredDate { get; set; }
-        public DateTime? dtmFreeTime { get; set; }
         public string strReceivedBy { get; set; }
         public string strComment { get; set; }
         public bool? ysnPosted { get; set; }
@@ -467,7 +467,6 @@ namespace iRely.Inventory.Model
         public DateTime? dtmDepartureTime { get; set; }
         public DateTime? dtmArrivalTime { get; set; }
         public DateTime? dtmDeliveredDate { get; set; }
-        public DateTime? dtmFreeTime { get; set; }
         public string strReceivedBy { get; set; }
         public string strComment { get; set; }
         public bool? ysnPosted { get; set; }

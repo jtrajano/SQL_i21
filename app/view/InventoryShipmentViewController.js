@@ -39,7 +39,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnAddOrders: {
                 hidden: '{checkHiddenAddOrders}'
             },
-
+            
             txtShipmentNo: '{current.strShipmentNumber}',
             dtmShipDate: {
                 value: '{current.dtmShipDate}',
@@ -187,8 +187,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 value: '{current.dtmDeliveredDate}',
                 readOnly: '{current.ysnPosted}'
             },
-            dtmFreeTime: {
-                value: '{current.dtmFreeTime}',
+            txtFreeTime: {
+                value: '{current.strFreeTime}',
                 readOnly: '{current.ysnPosted}'
             },
             txtReceivedBy: '{current.strReceivedBy}',
