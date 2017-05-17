@@ -5208,6 +5208,7 @@
     <Build Include="dbo\Stored Procedures\uspAPDeletePatronageTaxes.sql" />
     <Build Include="dbo\Tables\tblSMApprovalHistory.sql" />
     <Build Include="dbo\Views\vyuLGContarctWithoutShippingAdvice.sql" />
+    <Build Include="dbo\Views\vyuICStockDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
