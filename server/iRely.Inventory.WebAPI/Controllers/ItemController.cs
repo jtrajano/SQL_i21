@@ -223,5 +223,11 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemSubLocations(param));
         }
 
+        [HttpGet]
+        [ActionName("GetStockDetail")]
+        public async Task<HttpResponseMessage> GetStockDetail(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetStockDetail(param));
+        }
     }
 }

@@ -932,4 +932,66 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICStockDetailMap : EntityTypeConfiguration<vyuICStockDetail>
+    {
+        public vyuICStockDetailMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intKey);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICStockDetail");
+            this.Property(t => t.intKey).HasColumnName("intKey");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strType).HasColumnName("strType");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.strInventoryTracking).HasColumnName("strInventoryTracking");
+            this.Property(t => t.strStatus).HasColumnName("strStatus");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
+            this.Property(t => t.strCategoryCode).HasColumnName("strCategoryCode");
+            this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
+            this.Property(t => t.strCommodityCode).HasColumnName("strCommodityCode");
+            this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.strLocationType).HasColumnName("strLocationType");
+            this.Property(t => t.intStockUOMId).HasColumnName("intStockUOMId");
+            this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
+            this.Property(t => t.strStockUOMType).HasColumnName("strStockUOMType");
+            this.Property(t => t.dblStockUnitQty).HasColumnName("dblStockUnitQty");
+            this.Property(t => t.dblMinOrder).HasColumnName("dblMinOrder");
+            this.Property(t => t.dblReorderPoint).HasColumnName("dblReorderPoint");
+            this.Property(t => t.intAllowNegativeInventory).HasColumnName("intAllowNegativeInventory");
+            this.Property(t => t.strAllowNegativeInventory).HasColumnName("strAllowNegativeInventory");
+            this.Property(t => t.intCostingMethod).HasColumnName("intCostingMethod");
+            this.Property(t => t.strCostingMethod).HasColumnName("strCostingMethod");
+            this.Property(t => t.dblAmountPercent).HasColumnName("dblAmountPercent");
+            this.Property(t => t.dblSalePrice).HasColumnName("dblSalePrice");
+            this.Property(t => t.dblMSRPPrice).HasColumnName("dblMSRPPrice");
+            this.Property(t => t.strPricingMethod).HasColumnName("strPricingMethod");
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost");
+            this.Property(t => t.dblStandardCost).HasColumnName("dblStandardCost");
+            this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost");
+            this.Property(t => t.dblEndMonthCost).HasColumnName("dblEndMonthCost");
+            this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder");
+            this.Property(t => t.dblInTransitInbound).HasColumnName("dblInTransitInbound");
+            this.Property(t => t.dblUnitOnHand).HasColumnName("dblUnitOnHand");
+            this.Property(t => t.dblInTransitOutbound).HasColumnName("dblInTransitOutbound");
+            this.Property(t => t.dblBackOrder).HasColumnName("dblBackOrder");
+            this.Property(t => t.dblOrderCommitted).HasColumnName("dblOrderCommitted");
+            this.Property(t => t.dblUnitStorage).HasColumnName("dblUnitStorage");
+            this.Property(t => t.dblConsignedPurchase).HasColumnName("dblConsignedPurchase");
+            this.Property(t => t.dblConsignedSale).HasColumnName("dblConsignedSale");
+            this.Property(t => t.dblUnitReserved).HasColumnName("dblUnitReserved");
+            this.Property(t => t.dblAvailable).HasColumnName("dblAvailable");
+            this.Property(t => t.dblExtendedCost).HasColumnName("dblExtendedCost");
+        }
+    }
+
 }
