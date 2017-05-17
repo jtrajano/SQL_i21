@@ -5253,6 +5253,7 @@
     <Build Include="dbo\Tables\tblSMApprovalHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDeleteDocumentSourceFolder.sql" />
     <Build Include="dbo\Stored Procedures\uspSMLicenseKey.sql" />
+    <Build Include="dbo\Views\vyuICStockDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
