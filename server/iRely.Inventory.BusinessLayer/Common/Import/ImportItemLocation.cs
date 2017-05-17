@@ -93,7 +93,7 @@ namespace iRely.Inventory.BusinessLayer
                         lu = GetLookUpId<vyuAPVendor>(
                             context,
                             m => m.strVendorId == value,
-                            e => (int)e.intEntityVendorId);
+                            e => (int)e.intEntityId);
                         if (lu != null)
                             fc.intVendorId = (int)lu;
                         else

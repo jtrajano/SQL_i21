@@ -102,12 +102,11 @@ namespace iRely.Inventory.Model
         public vyuAPVendorMap()
         {
             // Primary Key
-            this.HasKey(t => t.intEntityVendorId);
+            this.HasKey(t => t.intEntityId);
 
             // Table & Column Mappings
             this.ToTable("vyuAPVendor");
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
-            this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
             this.Property(t => t.strName).HasColumnName("strName");
             this.Property(t => t.strVendorAccountNum).HasColumnName("strVendorAccountNum");
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
@@ -119,11 +118,11 @@ namespace iRely.Inventory.Model
         public tblARCustomerMap()
         {
             // Primary Key
-            this.HasKey(t => t.intEntityCustomerId);
+            this.HasKey(t => t.intEntityId);
 
             // Table & Column Mappings
             this.ToTable("vyuARCustomerSearch");
-            this.Property(t => t.intEntityCustomerId).HasColumnName("intEntityCustomerId");
+            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.strCustomerNumber).HasColumnName("strCustomerNumber");
             this.Property(t => t.strCustomerName).HasColumnName("strName");
         }

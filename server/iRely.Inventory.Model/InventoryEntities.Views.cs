@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsbb06d5932c4fb92ff5e692793cae956d36b329a7ffd458322d8498cef673bb06))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets9bd85a26d35d0b48605cb8876f5885ecae4095b7b3f7ae3836a46d754a448c5b))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsbb06d5932c4fb92ff5e692793cae956d36b329a7ffd458322d8498cef673bb06 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets9bd85a26d35d0b48605cb8876f5885ecae4095b7b3f7ae3836a46d754a448c5b : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "bb06d5932c4fb92ff5e692793cae956d36b329a7ffd458322d8498cef673bb06"; }
+            get { return "9bd85a26d35d0b48605cb8876f5885ecae4095b7b3f7ae3836a46d754a448c5b"; }
         }
 
         /// <summary>
@@ -2892,10 +2892,10 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblARCustomer
-        [CodeFirstDatabaseSchema.tblARCustomer](T1.tblARCustomer_intEntityCustomerId, T1.tblARCustomer_strName, T1.tblARCustomer_strCustomerNumber)
+        [CodeFirstDatabaseSchema.tblARCustomer](T1.tblARCustomer_intEntityId, T1.tblARCustomer_strName, T1.tblARCustomer_strCustomerNumber)
     FROM (
         SELECT 
-            T.intEntityCustomerId AS tblARCustomer_intEntityCustomerId, 
+            T.intEntityId AS tblARCustomer_intEntityId, 
             T.strCustomerName AS tblARCustomer_strName, 
             T.strCustomerNumber AS tblARCustomer_strCustomerNumber, 
             True AS _from0
@@ -3151,10 +3151,9 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuAPVendor
-        [CodeFirstDatabaseSchema.vyuAPVendor](T1.vyuAPVendor_intEntityVendorId, T1.vyuAPVendor_intEntityId, T1.vyuAPVendor_strName, T1.vyuAPVendor_strVendorAccountNum, T1.vyuAPVendor_strVendorId)
+        [CodeFirstDatabaseSchema.vyuAPVendor](T1.vyuAPVendor_intEntityId, T1.vyuAPVendor_strName, T1.vyuAPVendor_strVendorAccountNum, T1.vyuAPVendor_strVendorId)
     FROM (
         SELECT 
-            T.intEntityVendorId AS vyuAPVendor_intEntityVendorId, 
             T.intEntityId AS vyuAPVendor_intEntityId, 
             T.strName AS vyuAPVendor_strName, 
             T.strVendorAccountNum AS vyuAPVendor_strVendorAccountNum, 
@@ -6510,10 +6509,10 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblARCustomers
-        [iRely.Inventory.Model.tblARCustomer](T1.tblARCustomer_intEntityCustomerId, T1.tblARCustomer_strCustomerName, T1.tblARCustomer_strCustomerNumber)
+        [iRely.Inventory.Model.tblARCustomer](T1.tblARCustomer_intEntityId, T1.tblARCustomer_strCustomerName, T1.tblARCustomer_strCustomerNumber)
     FROM (
         SELECT 
-            T.intEntityCustomerId AS tblARCustomer_intEntityCustomerId, 
+            T.intEntityId AS tblARCustomer_intEntityId, 
             T.strName AS tblARCustomer_strCustomerName, 
             T.strCustomerNumber AS tblARCustomer_strCustomerNumber, 
             True AS _from0
@@ -6769,10 +6768,9 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuAPVendors
-        [iRely.Inventory.Model.vyuAPVendor](T1.vyuAPVendor_intEntityVendorId, T1.vyuAPVendor_intEntityId, T1.vyuAPVendor_strName, T1.vyuAPVendor_strVendorAccountNum, T1.vyuAPVendor_strVendorId)
+        [iRely.Inventory.Model.vyuAPVendor](T1.vyuAPVendor_intEntityId, T1.vyuAPVendor_strName, T1.vyuAPVendor_strVendorAccountNum, T1.vyuAPVendor_strVendorId)
     FROM (
         SELECT 
-            T.intEntityVendorId AS vyuAPVendor_intEntityVendorId, 
             T.intEntityId AS vyuAPVendor_intEntityId, 
             T.strName AS vyuAPVendor_strName, 
             T.strVendorAccountNum AS vyuAPVendor_strVendorAccountNum, 

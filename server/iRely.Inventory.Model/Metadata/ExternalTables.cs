@@ -82,7 +82,6 @@ namespace iRely.Inventory.Model
     {
         public int intEntityId { get; set; }
         public string strName { get; set; }
-        public int intEntityVendorId { get; set; }
         public string strVendorAccountNum { get; set; }
         public string strVendorId { get; set; }
 
@@ -92,7 +91,7 @@ namespace iRely.Inventory.Model
 
     public class tblARCustomer
     {
-        public int intEntityCustomerId { get; set; }
+        public int intEntityId { get; set; }
         public string strCustomerName { get; set; }
         public string strCustomerNumber { get; set; }
 
