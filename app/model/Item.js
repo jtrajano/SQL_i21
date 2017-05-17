@@ -98,7 +98,6 @@ Ext.define('Inventory.model.Item', {
         { name: 'intMedicationTag', type: 'int', allowNull: true },
         { name: 'intIngredientTag', type: 'int', allowNull: true },
         { name: 'intHazmatMessage', type: 'int', allowNull: true },
-        { name: 'intItemMessage', type: 'int', allowNull: true },
         { name: 'strVolumeRebateGroup', type: 'string' },
         { name: 'intPhysicalItem', type: 'int', allowNull: true },
         { name: 'ysnExtendPickTicket', type: 'boolean' },
