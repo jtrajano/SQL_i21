@@ -5240,6 +5240,8 @@
     <Build Include="dbo\Tables\tblSCScaleOperator.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAddScaleOperator.sql" />
     <Build Include="dbo\Views\vyuICStockDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportBondedPalletTag.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportUCCPalletLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
