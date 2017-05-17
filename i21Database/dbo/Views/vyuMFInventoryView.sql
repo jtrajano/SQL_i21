@@ -96,7 +96,8 @@ SELECT l.intLotId
 	,LI.strVendorRefNo
 	,LI.strWarehouseRefNo 
 	,LI.strReceiptNumber As strReceiptNo
-	,LI.dtmReceiptDate 
+	,LI.dtmReceiptDate
+	,CAST(0 AS BIT) AS ysnPartialPallet
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
