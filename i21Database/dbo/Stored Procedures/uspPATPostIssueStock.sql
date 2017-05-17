@@ -28,6 +28,8 @@ DECLARE @batchId NVARCHAR(40);
 DECLARE @isGLSucces AS BIT = 0;
 DECLARE @intCreatedId INT;
 
+DECLARE @voucherId as Id;
+
 CREATE TABLE #tempValidateTable (
 	[strError] [NVARCHAR](MAX),
 	[strTransactionType] [NVARCHAR](50),
@@ -237,6 +239,19 @@ BEGIN
 				,@billId = @intCreatedId OUTPUT
 
 			UPDATE tblPATCustomerStock SET intBillId = @intCreatedId WHERE intCustomerStockId = @intCustomerStockId
+
+			IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedId))
+			BEGIN
+				INSERT INTO @voucherId SELECT intBillId FROM tblAPBill where intBillId = @intCreatedId;
+
+				EXEC [dbo].[uspAPDeletePatronageTaxes] @voucherId;
+
+				UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
+				UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
+
+				EXEC uspAPUpdateVoucherTotal @voucherId;
+				DELETE FROM @voucherId;
+			END
 
 			EXEC [dbo].[uspAPPostBill]
 				@batchId = @intCreatedId,
