@@ -8,7 +8,7 @@ BEGIN
 			SET A.dbl1099 = ((A.dblTotal + A.dblTax) / B.dblTotal) * Origin1099Amount.aptrx_1099_amt
 		FROM tblAPBillDetail A
 		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
-		INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.intEntityVendorId
+		INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.intEntityId
 		CROSS APPLY (
 			SELECT * FROM (
 				SELECT 

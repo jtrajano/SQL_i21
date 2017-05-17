@@ -63,8 +63,8 @@ BEGIN
 	FROM aptrxmst A
 	WHERE EXISTS(
 		SELECT 1 FROM tblAPBill B
-			INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityVendorId = D.intEntityId) 
-			ON B.intEntityVendorId = C.intEntityVendorId
+			INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityId = D.intEntityId) 
+			ON B.intEntityVendorId = C.intEntityId
 		WHERE A.aptrx_ivc_no = B.strVendorOrderNumber COLLATE Latin1_General_CS_AS
 		AND A.aptrx_vnd_no = C.strVendorId COLLATE Latin1_General_CS_AS
 	)
@@ -76,8 +76,8 @@ BEGIN
 	FROM apivcmst A
 	WHERE EXISTS(
 		SELECT 1 FROM tblAPBill B
-			INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityVendorId = D.intEntityId) 
-			ON B.intEntityVendorId = C.intEntityVendorId
+			INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityId = D.intEntityId) 
+			ON B.intEntityVendorId = C.intEntityId
 		WHERE A.apivc_ivc_no = B.strVendorOrderNumber COLLATE Latin1_General_CS_AS
 		AND A.apivc_vnd_no = C.strVendorId COLLATE Latin1_General_CS_AS
 	)
