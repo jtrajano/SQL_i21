@@ -95,7 +95,8 @@ namespace iRely.Inventory.WebApi
             int? newInvoice = null;
             var result = _bl.ProcessInvoice(p.id, out newInvoice);
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            HttpStatusCode httpStatusCode = result.HasError ? HttpStatusCode.Conflict : HttpStatusCode.Accepted;            
+            return Request.CreateResponse(httpStatusCode, new
             {
                 success = !result.HasError,
                 message = new
@@ -174,6 +175,27 @@ namespace iRely.Inventory.WebApi
             var ctx = repo.ContextManager.Database.SqlQuery<Customer>(query, new object[] { p });
             var customer = await ctx.ToListAsync();
             return Request.CreateResponse(HttpStatusCode.OK, customer.AsQueryable());
+        }
+
+        [HttpPost]
+        [ActionName("UpdateShipmentInvoice")]
+        public HttpResponseMessage UpdateShipmentInvoice()
+        {
+            var result = _bl.UpdateShipmentInvoice();
+
+            var httpStatusCode = HttpStatusCode.OK;
+            if (result.HasError) httpStatusCode = HttpStatusCode.BadRequest;
+
+            return Request.CreateResponse(httpStatusCode, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
         }
     }
 

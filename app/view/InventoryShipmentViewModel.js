@@ -28,6 +28,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'ContractManagement.store.WeightGradeBuffered',
         'i21.store.CurrencyExchangeRateTypeBuffered',
         'GeneralLedger.controls.RecapTab'
+        //'AccountsReceivable.common.ARFunctions'
     ],
 
     data: {
@@ -540,6 +541,62 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             else {
                 cboShipToAddress.setFieldLabel('Ship To <span style="color:red">*</span>');
             }
-        }   
+        },
+
+        strShipFromAddress: {
+            bind: {
+                strStreet: '{current.strShipFromStreet}',
+                strCity: '{current.strShipFromCity}',
+                strState: '{current.strShipFromState}',
+                strZipCode: '{current.strShipFromZipPostalCode}',
+                strCountry: '{current.strShipFromCountry}'
+            },
+            get: function (data) {
+                var address = '';
+
+                if(data && data.strStreet && data.strStreet.trim() && data.strStreet.trim() !== '')
+                    address = data.strStreet.trim();
+                if(data && data.strCity && data.strCity.trim() && data.strCity.trim() !== '')
+                    address = address + '\n' + data.strCity.trim()
+                if(data && data.strState && data.strState.trim() && data.strState.trim() !== '')
+                    address = address + ', ' + data.strState.trim()
+                if(data && data.strZipCode && data.strZipCode.trim() && data.strZipCode.trim() !== '')
+                    address = address + ', ' + data.strZipCode.trim()
+                if(data && data.strCountry && data.strCountry.trim() && data.strCountry.trim() !== '')
+                    address = address + ' ' + data.strCountry.trim()
+
+                return address.indexOf(', ') == 0 ? address.substring(2,address.length) : address;
+
+                //return AccountsReceivable.common.ARFunctions.composeAddress(data);                
+            }
+        },     
+
+        strShipToAddress: {
+            bind: {
+                strStreet: '{current.strShipToStreet}',
+                strCity: '{current.strShipToCity}',
+                strState: '{current.strShipToState}',
+                strZipCode: '{current.strShipToZipPostalCode}',
+                strCountry: '{current.strShipToCountry}'
+            },
+            get: function (data) {
+                var address = '';
+
+                if(data && data.strStreet && data.strStreet.trim() && data.strStreet.trim() !== '')
+                    address = data.strStreet.trim();
+                if(data && data.strCity && data.strCity.trim() && data.strCity.trim() !== '')
+                    address = address + '\n' + data.strCity.trim()
+                if(data && data.strState && data.strState.trim() && data.strState.trim() !== '')
+                    address = address + ', ' + data.strState.trim()
+                if(data && data.strZipCode && data.strZipCode.trim() && data.strZipCode.trim() !== '')
+                    address = address + ', ' + data.strZipCode.trim()
+                if(data && data.strCountry && data.strCountry.trim() && data.strCountry.trim() !== '')
+                    address = address + ' ' + data.strCountry.trim()
+
+                return address.indexOf(', ') == 0 ? address.substring(2,address.length) : address;
+
+                //return AccountsReceivable.common.ARFunctions.composeAddress(data);
+            }
+        }               
     }
 });

@@ -9,7 +9,7 @@ Ext.define('Inventory.view.StockDetailViewController', {
         searchConfig: {
             mainTitle: 'Stock Details',
             title: 'Locations YTD',
-            url: '../Inventory/api/Item/GetItemStocks',
+            url: '../Inventory/api/Item/GetStockDetail',
             groupedOnLoad: true,
             columns: [
                 { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },

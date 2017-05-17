@@ -30,6 +30,7 @@ namespace iRely.Inventory.Model
         public int? intShipToLocationId { get; set; }
         public int? intFreightTermId { get; set; }
         public int? intCurrencyId { get; set; }
+        public string strFreeTime { get; set; }
         public string strBOLNumber { get; set; }
         public int? intShipViaId { get; set; }
         public string strVessel { get; set; }
@@ -41,7 +42,6 @@ namespace iRely.Inventory.Model
         public DateTime? dtmDepartureTime { get; set; }
         public DateTime? dtmArrivalTime { get; set; }
         public DateTime? dtmDeliveredDate { get; set; }
-        public DateTime? dtmFreeTime { get; set; }
         public string strReceivedBy { get; set; }
         public string strComment { get; set; }
         public bool? ysnPosted { get; set; }
@@ -49,44 +49,246 @@ namespace iRely.Inventory.Model
         public int? intCreatedUserId { get; set; }
         public int? intShipToCompanyLocationId { get; set; }
 
-        private string _shipFromAddress;
+        //private string _shipFromAddress;
+        //[NotMapped]
+        //public string strShipFromAddress
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_shipFromAddress))
+        //            if (vyuICGetInventoryShipment != null)
+        //                return vyuICGetInventoryShipment.strShipFromAddress;
+        //            else
+        //                return null;
+        //        else
+        //            return _shipFromAddress;
+        //    }
+        //    set
+        //    {
+        //        _shipFromAddress = value;
+        //    }
+
+        //}
+        private string _strShipFromStreet;
         [NotMapped]
-        public string strShipFromAddress
+        public string strShipFromStreet
         {
             get
             {
-                if (string.IsNullOrEmpty(_shipFromAddress))
+                if (string.IsNullOrEmpty(_strShipFromStreet))
                     if (vyuICGetInventoryShipment != null)
-                        return vyuICGetInventoryShipment.strShipFromAddress;
+                        return vyuICGetInventoryShipment.strShipFromStreet;
                     else
                         return null;
                 else
-                    return _shipFromAddress;
+                    return _strShipFromStreet;
             }
             set
             {
-                _shipFromAddress = value;
+                _strShipFromStreet = value;
             }
         }
-        private string _shipToAddress;
+
+        private string _strShipFromCity;
         [NotMapped]
-        public string strShipToAddress
+        public string strShipFromCity
         {
             get
             {
-                if (string.IsNullOrEmpty(_shipToAddress))
+                if (string.IsNullOrEmpty(_strShipFromCity))
                     if (vyuICGetInventoryShipment != null)
-                        return vyuICGetInventoryShipment.strShipToAddress;
+                        return vyuICGetInventoryShipment.strShipFromCity;
                     else
                         return null;
                 else
-                    return _shipToAddress;
+                    return _strShipFromCity;
             }
             set
             {
-                _shipToAddress = value;
+                _strShipFromCity = value;
             }
         }
+
+        private string _strShipFromState;
+        [NotMapped]
+        public string strShipFromState
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strShipFromState))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strShipFromState;
+                    else
+                        return null;
+                else
+                    return _strShipFromState;
+            }
+            set
+            {
+                _strShipFromState = value;
+            }
+        }
+
+        private string _strShipFromZipPostalCode;
+        [NotMapped]
+        public string strShipFromZipPostalCode
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strShipFromZipPostalCode))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strShipFromZipPostalCode;
+                    else
+                        return null;
+                else
+                    return _strShipFromZipPostalCode;
+            }
+            set
+            {
+                _strShipFromZipPostalCode = value;
+            }
+        }
+
+        private string _strShipFromCountry;
+        [NotMapped]
+        public string strShipFromCountry
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strShipFromCountry))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strShipFromCountry;
+                    else
+                        return null;
+                else
+                    return _strShipFromCountry;
+            }
+            set
+            {
+                _strShipFromCountry = value;
+            }
+        }
+
+        //private string _shipToAddress;
+        //[NotMapped]
+        //public string strShipToAddress
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_shipToAddress))
+        //            if (vyuICGetInventoryShipment != null)
+        //                return vyuICGetInventoryShipment.strShipToAddress;
+        //            else
+        //                return null;
+        //        else
+        //            return _shipToAddress;
+        //    }
+        //    set
+        //    {
+        //        _shipToAddress = value;
+        //    }
+        //}
+
+        private string _strShipToStreet;
+        [NotMapped]
+        public string strShipToStreet
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strShipToStreet))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strShipToStreet;
+                    else
+                        return null;
+                else
+                    return _strShipToStreet;
+            }
+            set
+            {
+                _strShipToStreet = value;
+            }
+        }
+
+        private string _strShipToCity;
+        [NotMapped]
+        public string strShipToCity
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strShipToCity))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strShipToCity;
+                    else
+                        return null;
+                else
+                    return _strShipToCity;
+            }
+            set
+            {
+                _strShipToCity = value;
+            }
+        }
+
+        private string _strShipToState;
+        [NotMapped]
+        public string strShipToState
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strShipToState))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strShipToState;
+                    else
+                        return null;
+                else
+                    return _strShipToState;
+            }
+            set
+            {
+                _strShipToState = value;
+            }
+        }
+
+        private string _strShipToZipPostalCode;
+        [NotMapped]
+        public string strShipToZipPostalCode
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strShipToZipPostalCode))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strShipToZipPostalCode;
+                    else
+                        return null;
+                else
+                    return _strShipToZipPostalCode;
+            }
+            set
+            {
+                _strShipToZipPostalCode = value;
+            }
+        }
+
+        private string _strShipToCountry;
+        [NotMapped]
+        public string strShipToCountry
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strShipToCountry))
+                    if (vyuICGetInventoryShipment != null)
+                        return vyuICGetInventoryShipment.strShipToCountry;
+                    else
+                        return null;
+                else
+                    return _strShipToCountry;
+            }
+            set
+            {
+                _strShipToCountry = value;
+            }
+        }
+
         private string _custName;
         [NotMapped]
         public string strCustomerName
@@ -142,12 +344,22 @@ namespace iRely.Inventory.Model
         public int? intShipFromLocationId { get; set; }
         public string strShipFromLocation { get; set; }
         public string strShipFromAddress { get; set; }
+        public string strShipFromStreet { get; set; }
+        public string strShipFromCity { get; set; }
+        public string strShipFromState { get; set; }
+        public string strShipFromZipPostalCode { get; set; }
+        public string strShipFromCountry { get; set; }
         public int? intEntityCustomerId { get; set; }
         public string strCustomerNumber { get; set; }
         public string strCustomerName { get; set; }
         public int? intShipToLocationId { get; set; }
         public string strShipToLocation { get; set; }
         public string strShipToAddress { get; set; }
+        public string strShipToStreet { get; set; }
+        public string strShipToCity { get; set; }
+        public string strShipToState { get; set; }
+        public string strShipToZipPostalCode { get; set; }
+        public string strShipToCountry { get; set; }
         public int? intFreightTermId { get; set; }
         public string strFreightTerm { get; set; }
         public string strFobPoint { get; set; }
@@ -163,13 +375,14 @@ namespace iRely.Inventory.Model
         public DateTime? dtmDepartureTime { get; set; }
         public DateTime? dtmArrivalTime { get; set; }
         public DateTime? dtmDeliveredDate { get; set; }
-        public DateTime? dtmFreeTime { get; set; }
         public string strReceivedBy { get; set; }
         public string strComment { get; set; }
         public bool? ysnPosted { get; set; }
         public int? intWarehouseInstructionHeaderId { get; set; }
         public int? intCurrencyId { get; set; }
         public string strCurrency { get; set; }
+
+
 
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
     }
@@ -1486,26 +1699,37 @@ namespace iRely.Inventory.Model
 
     public class vyuICShipmentInvoice
     {
-        public int? intInventoryShipmentItemId { get; set;}
-        public string strInvoiceNumber { get; set; }
-        public DateTime? dtmDateInvoiced { get; set; }
-        public string strCustomerName { get; set; }
-        public string strDestination { get; set; }
+        public int intInventoryShipmentId { get; set; }
+        public int? intInventoryShipmentItemId { get; set; }
+        public int? intInventoryShipmentChargeId { get; set; }
         public string strShipmentNumber { get; set; }
         public DateTime? dtmShipDate { get; set; }
+        public string strCustomer { get; set; }
+        public string strLocationName { get; set; }
+        public string strDestination { get; set; }
         public string strBOLNumber { get; set; }
-        public int? intOrderType { get; set; }
         public string strOrderType { get; set; }
         public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
         public decimal? dblUnitCost { get; set; }
-        public decimal? dblShipmentAmount { get; set; }
-        public decimal? dblTotal { get; set; }
-        public decimal? dblQtyInvoiced { get; set; }
-        public decimal? dblQtyShipped { get; set; }
-        public decimal? dblCOGSAmount { get; set; }
-        public decimal? dblQtyToInvoice { get; set; }
-        public decimal? dblInTransitAmount { get; set; }
+        public decimal? dblShipmentQty { get; set; }
+        public decimal? dblInTransitQty { get; set; }
+        public decimal? dblInvoiceQty { get; set; }
+        public decimal? dblShipmentLineTotal { get; set; }
+        public decimal? dblInTransitTotal { get; set; }
+        public decimal? dblInvoiceLineTotal { get; set; }
+        public decimal? dblShipmentTax { get; set; }
+        public decimal? dblInvoiceTax { get; set; }
+        public decimal? dblOpenQty { get; set; }
+        public decimal? dblItemsReceivable { get; set; }
+        public decimal? dblTaxesReceivable { get; set; }
+        public DateTime? dtmLastInvoiceDate { get; set; }
+        public string strAllVouchers { get; set; }
+        public string strFilterString { get; set; }
+        public DateTime? dtmCreated { get; set; }
         public int? intCurrencyId { get; set; }
-        public string strCurrency { get; set;  }
+        public string strCurrency { get; set; }
+        public string strItemUOM { get; set; }
+        public int? intItemUOMId { get; set; }
     }
 }

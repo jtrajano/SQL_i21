@@ -41,7 +41,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 {dataIndex: 'dtmDepartureTime', text: 'Departure Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
                 {dataIndex: 'dtmArrivalTime', text: 'Arrival Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
                 {dataIndex: 'dtmDeliveredDate', text: 'Delivered Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
-                {dataIndex: 'dtmFreeTime', text: 'Free Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                {dataIndex: 'strFreeTime', text: 'Free Time', flex: 1, dataType: 'string', hidden: true },
                 {dataIndex: 'strReceivedBy', text: 'Received By', flex: 1, dataType: 'string', hidden: true },
                 {dataIndex: 'strComment', text: 'Comment', flex: 1, dataType: 'string', hidden: true }
             ],
@@ -150,25 +150,38 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         read: '../Inventory/api/InventoryShipment/ShipmentInvoice'
                     },
                     columns: [
-                        { dataIndex: 'intInventoryShipmentItemId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
-                        { dataIndex: 'strShipmentNumber', text: 'Shipment No', flex: 1, dataType: 'string', drillDownText: 'View Shipment', drillDownClick: 'onViewShipmentNo'},
-                        { dataIndex: 'strInvoiceNumber', text: 'Invoice No', flex: 1, dataType: 'string', drillDownText: 'View Invoice', drillDownClick: 'onViewInvoice' },
-                        { dataIndex: 'dtmDateInvoiced', text: 'Date Invoiced', flex: 1, dataType: 'date', xtype: 'datecolumn'},
-                        { dataIndex: 'strCustomerName', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Customer', drillDownClick: 'onViewCustomerName' },
-                        { dataIndex: 'strDestination', text: 'Destination', flex: 1, dataType: 'string' },
-                        { dataIndex: 'dtmShipDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
-                        { dataIndex: 'strCurrency', text: 'Currency', width: 80, dataType: 'string'},
-                        { dataIndex: 'strItemNo', text: 'Item', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo' },
-                        { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', dataIndex: 'dblQtyShipped', text: 'Qty Shipped', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', format: '#,##0.0000', aggregateFormat: '#,##0.0000', aggregate: 'sum', dataIndex: 'dblShipmentAmount', text: 'Shipment Amount', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', format: '#,##0.0000', aggregateFormat: '#,##0.0000', aggregate: 'sum', dataIndex: 'dblInTransitAmount', text: 'In Transit Amount', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', format: '#,##0.0000', aggregateFormat: '#,##0.0000', aggregate: 'sum', dataIndex: 'dblCOGSAmount', text: 'COGS Amount', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', dataIndex: 'dblQtyToInvoice', text: 'Qty to Invoice', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', dataIndex: 'dblQtyInvoiced', text: 'Qty Invoiced', flex: 1, dataType: 'float'},
-                        { dataIndex: 'strOrderType', text: 'Order Type', flex: 1, dataType: 'string' },
-                        { dataIndex: 'strBOLNumber', text: 'BOL No', flex: 1, dataType: 'string' }
-                    ]
+                        { dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, dataType: 'numeric', key: true, hidden: true},
+                        { dataIndex: 'intInventoryShipmentItemId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true},
+                        { dataIndex: 'intInventoryShipmentChargeId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true},
+                        { dataIndex: 'strAllVouchers', text: 'Invoice Nos.', width: 100, dataType: 'string', drillDownText: 'View Invoice', drillDownClick: 'onViewInvoice' },
+                        { dataIndex: 'strShipmentNumber', text: 'Shipment No.', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'string'},
+                        { dataIndex: 'dtmShipDate', text: 'Ship Date', width: 100, dataType: 'date', xtype: 'datecolumn'},
+                        { dataIndex: 'strCustomer', text: 'Customer', width: 300, dataType: 'string' },
+                        { dataIndex: 'strLocationName', text: 'Ship From', width: 200, dataType: 'string' },
+                        { dataIndex: 'strDestination', text: 'Ship To', width: 200, dataType: 'string' },
+                        { dataIndex: 'strBOLNumber', text: 'Bill of Lading', width: 100, dataType: 'string' },
+                        { dataIndex: 'strOrderType', text: 'Order Type', width: 120, dataType: 'string' },
+                        { dataIndex: 'strItemNo', text: 'Item No.', width: 100, dataType: 'string' },
+                        { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Cost', width: 100, dataType: 'float', xtype: 'numbercolumn'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblShipmentQty', text: 'Shipped Qty', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblInTransitQty', text: 'In-Transit Qty', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblInvoiceQty', text: 'Invoiced Qty', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblShipmentLineTotal', text: 'Shipment Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},                        
+                        { xtype: 'numbercolumn', dataIndex: 'dblInvoiceLineTotal', text: 'Invoice Line Total', width: 120, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblOpenQty', text: 'Uncleared Qty', width: 150, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblInTransitTotal', text: 'Uncleared Items Total', width: 150, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00'},
+                        { dataIndex: 'dtmLastInvoiceDate', text: 'Last Invoice Date', width: 120, dataType: 'date', xtype: 'datecolumn' },
+                        { dataIndex: 'strFilterString', text: 'Voucher Nos.', flex: 1, dataType: 'string', required: true, hidden: true }               
+                        
+                    ],
+                    buttons: [
+                        {
+                            text: 'Refresh Invoices',
+                            itemId: 'btnRefreshInvoices',
+                            clickHandler: 'onRefreshInvoicesClick',
+                            width: 400
+                        }                        
+                    ]                                        
                 }
             ]
         },
@@ -203,7 +216,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnAddOrders: {
                 hidden: '{checkHiddenAddOrders}'
             },
-
+            
             txtShipmentNo: '{current.strShipmentNumber}',
             dtmShipDate: {
                 value: '{current.dtmShipDate}',
@@ -259,7 +272,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 store: '{shipFromLocation}',
                 readOnly: '{current.ysnPosted}'
             },
-            txtShipFromAddress: '{current.strShipFromAddress}',
+            txtShipFromAddress: '{strShipFromAddress}',
             cboShipToAddress: {
                 value: '{current.intShipToLocationId}',
                 store: '{shipToLocation}',
@@ -284,7 +297,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 hidden: '{hideShipToCompanyLocation}',
                 fieldLabel: '{setShipToFieldLabel}'
             },
-            txtShipToAddress: '{current.strShipToAddress}',
+            txtShipToAddress: '{strShipToAddress}',
             txtDeliveryInstructions: {
                 value: '{current.strDeliveryInstruction}',
                 readOnly: '{current.ysnPosted}'
@@ -338,8 +351,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 value: '{current.dtmDeliveredDate}',
                 readOnly: '{current.ysnPosted}'
             },
-            dtmFreeTime: {
-                value: '{current.dtmFreeTime}',
+            txtFreeTime: {
+                value: '{current.strFreeTime}',
                 readOnly: '{current.ysnPosted}'
             },
             txtReceivedBy: '{current.strReceivedBy}',
@@ -794,6 +807,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             window: win,
             store: store,
             enableActivity: true,
+            enableCustomTab: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
             onSaveClick: me.saveAndPokeGrid(win, grdInventoryShipment),
@@ -924,13 +938,46 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     },
 
     createRecord: function(config, action) {
+        var me = this;
         var today = new Date();
         var record = Ext.create('Inventory.model.Shipment');
         var defaultShipmentType = i21.ModuleMgr.Inventory.getCompanyPreference('intShipmentOrderType');
         var defaultSourceType = i21.ModuleMgr.Inventory.getCompanyPreference('intShipmentSourceType');
+        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
         
-        if (app.DefaultLocation > 0)
-            record.set('intShipFromLocationId', app.DefaultLocation);
+        if (defaultLocation){
+            record.set('intShipFromLocationId', defaultLocation);
+            Ext.create('i21.store.CompanyLocationBuffered', {
+                storeId: 'icShipFrom',
+                autoLoad: {
+                    filters: [
+                        {
+                            dataIndex: 'intCompanyLocationId',
+                            value: defaultLocation,
+                            condition: 'eq'
+                        }
+                    ],
+                    params: {
+                        columns: 'intCompanyLocationId:strLocationName:strAddress:strCity:strStateProvince:strZipPostalCode:strCountry:'
+                    },
+                    callback: function(records, operation, success){
+                        var companyLocation; 
+                        if (records && records.length > 0) {
+                            companyLocation = records[0];
+                        }
+
+                        if(success && companyLocation){
+                            record.set('strShipFromStreet', companyLocation.get('strAddress'));
+                            record.set('strShipFromCity', companyLocation.get('strCity'));
+                            record.set('strShipFromState', companyLocation.get('strStateProvince'));
+                            record.set('strShipFromZipPostalCode', companyLocation.get('strZipPostalCode'));
+                            record.set('strShipFromCountry', companyLocation.get('strCountry'));    
+                        }
+                    }
+                }
+            });
+        }
+            
         record.set('dtmShipDate', today);
 
         if(defaultShipmentType !== null) {
@@ -951,37 +998,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     },
 
     onLotCreateRecord: function(config, action) {
-        // var win = config.grid.up('window');
-        // var currentShipmentItem = win.viewModel.data.currentShipmentItem;
         var record = Ext.create('Inventory.model.ShipmentItemLot');
-        // record.set('strWeightUOM', currentShipmentItem.get('strWeightUOM'));
         record.set('dblQuantityShipped', config.dummy.get('dblQuantityShipped'));
         action(record);
     },
-    
-    // statics: {
-    //     getCustomerCurrency: function(customerId, action) {
-    //         if(customerId) {
-    //             ic.utils.ajax({
-    //                 timeout: 120000,
-    //                 url: '../Inventory/api/InventoryShipment/GetCustomerCurrency',
-    //                 method: 'GET',
-    //                 params: {
-    //                     customerId: customerId
-    //                 }
-    //             })
-    //                 .subscribe(
-    //                     function(response) {
-    //                         var json = Ext.decode(response.responseText);
-    //                         action(true, json);
-    //                     },
-    //                     function(response) {
-    //                         action(false, response);
-    //                     }
-    //                 );
-    //         }
-    //     }
-    // },
 
     getCustomerCurrency: function(customerId, action) {
         action = (typeof action === "function") ? action : function(){};
@@ -1061,7 +1081,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                            shipmentItems.removeAt(i);
                                   }
 
-                                 current.set('strShipFromAddress', records[0].get('strAddress'));
+                                  current.set('strShipFromStreet', records[0].get('strAddress'));
+                                  current.set('strShipFromCity', records[0].get('strCity'));
+                                  current.set('strShipFromState', records[0].get('strStateProvince'));
+                                  current.set('strShipFromZipPostalCode', records[0].get('strZipPostalCode'));
+                                  current.set('strShipFromCountry', records[0].get('strCountry'));
                             }
                             else {
                                current.set('intShipFromLocationId', Inventory.view.InventoryShipmentViewController.orgValueShipFrom);
@@ -1071,18 +1095,30 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         if(grdInventoryShipmentCount > 0) {
                                 iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Ship From location will clear all Items. Do you want to continue?', buttonAction);
                             }
-                        else {
-                            current.set('strShipFromAddress', records[0].get('strAddress'));
+                        else {                            
+                            current.set('strShipFromStreet', records[0].get('strAddress'));
+                            current.set('strShipFromCity', records[0].get('strCity'));
+                            current.set('strShipFromState', records[0].get('strStateProvince'));
+                            current.set('strShipFromZipPostalCode', records[0].get('strZipPostalCode'));
+                            current.set('strShipFromCountry', records[0].get('strCountry'));                            
                         }
                             
                     }
                  
             }
             else if (combo.itemId === 'cboShipToAddress'){
-                current.set('strShipToAddress', records[0].get('strAddress'));
+                current.set('strShipToStreet', records[0].get('strAddress'));
+                current.set('strShipToCity', records[0].get('strCity'));
+                current.set('strShipToState', records[0].get('strState'));
+                current.set('strShipToZipPostalCode', records[0].get('strZipCode'));
+                current.set('strShipToCountry', records[0].get('strCountry'));
             }
             else if (combo.itemId === 'cboShipToCompanyAddress'){
-                current.set('strShipToAddress', records[0].get('strAddress'));
+                current.set('strShipToStreet', records[0].get('strAddress'));
+                current.set('strShipToCity', records[0].get('strCity'));
+                current.set('strShipToState', records[0].get('strStateProvince'));
+                current.set('strShipToZipPostalCode', records[0].get('strZipPostalCode'));
+                current.set('strShipToCountry', records[0].get('strCountry'));
             }
         }
     },
@@ -1093,12 +1129,23 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (records.length <= 0)
             return;
 
+        var record = records[0];
         var win = combo.up('window');
         var current = win.viewModel.data.current;
+        var cboShipToAddress = win.down('#cboShipToAddress');
 
-        if (current){
-            current.set('intEntityCustomerId', records[0].get('intEntityCustomerId'));
-            current.set('strCustomerName', records[0].get('strName'));
+        if (current && record){            
+            current.set('intEntityCustomerId', record.get('intEntityCustomerId'));
+            current.set('strCustomerName', record.get('strName'));
+
+            //current.set('intShipToLocationId'), record.get('intShipToId');   
+            current.set('strShipToStreet', record.get('strShipToAddress'));
+            current.set('strShipToCity', record.get('strShipToCity'));
+            current.set('strShipToState', record.get('strShipToState'));
+            current.set('strShipToZipPostalCode', record.get('strShipToZipCode'));
+            current.set('strShipToCountry', record.get('strShipToCountry'));
+
+            if (cboShipToAddress) cboShipToAddress.setValue(record.get('intShipToId'));
         }
 
         var isHidden = true;
@@ -1690,6 +1737,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
+            if(current.get('intOrderType') === 3) { //'Transfer Order'
+                iRely.Functions.showErrorDialog('Invalid order type. An invoice is not applicable on transfer orders.');
+                return;
+            }
+
             ic.utils.ajax({
                 timeout: 120000,
                 url: '../Inventory/api/InventoryShipment/ProcessInvoice',
@@ -1699,16 +1751,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 method: 'post'
             })
             .subscribe(
-                function(response){
-                    var jsonData = Ext.decode(response.responseText);
-                    if (jsonData.success) {
+                function(successResponse){
+                    var jsonData = Ext.decode(successResponse.responseText);
+                    var message = jsonData.message; 
+                    if (message && message.InvoiceId){
                         var buttonAction = function(button) {
                             if (button === 'yes') {
                                 iRely.Functions.openScreen('AccountsReceivable.view.Invoice', {
                                     filters: [
                                         {
                                             column: 'intInvoiceId',
-                                            value: jsonData.message.InvoiceId
+                                            value: message.InvoiceId
                                         }
                                     ],
                                     action: 'view'
@@ -1718,36 +1771,85 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         };
                         iRely.Functions.showCustomDialog('question', 'yesno', 'Invoice successfully processed. Do you want to view this Invoice?', buttonAction);
                     }
-                    else {
-                        var jsonData = Ext.decode(response.responseText);
-                        var msg = jsonData.ExceptionMessage;
-                        if(!jsonData.success) {
-                            if(jsonData.message.statusText === " " && jsonData.message.status === 9998)
-                                msg = "Can't process Invoice for Items that don't have order number.";
-                        }
-                        iRely.Functions.showErrorDialog(msg);
-                    }
                 },
-                function(response) {
-                    var jsonData = Ext.decode(response.responseText);
-                    var msg = jsonData.ExceptionMessage;
-                    if(!jsonData.success) {
-                        if(jsonData.message.statusText === " " && jsonData.message.status === 9998)
-                                msg = "Can't process Invoice for Items that don't have order number.";
-                    }
-                    iRely.Functions.showErrorDialog(msg);
+                function(failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    var message = jsonData.message; 
+                    iRely.Functions.showErrorDialog(message.statusText);
                 }
             );
         }
     },
 
+    processShipmentToInvoice: function (shipmentId, callback) {
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryShipment/ProcessInvoice',
+            params:{
+                id: shipmentId
+            },
+            method: 'post'  
+        })
+        .subscribe(
+            function(successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+                callback(jsonData);
+            }
+            ,function(failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                var message = jsonData.message; 
+                iRely.Functions.showErrorDialog(message.statusText);
+            }
+        );          
+    },
+
     onViewShipmentNo: function (value, record) {
         i21.ModuleMgr.Inventory.showScreen(value, 'ShipmentNo');
     },
+    
+    // onViewInvoice: function (value, record) {
+    //     var strName = record.get('strInvoiceNumber');
+    //     i21.ModuleMgr.Inventory.showScreen(strName, 'Invoice');
+    // },
 
     onViewInvoice: function (value, record) {
-        var strName = record.get('strInvoiceNumber');
-        i21.ModuleMgr.Inventory.showScreen(strName, 'Invoice');
+        var me = this;
+
+        if (value === 'New Invoice') {
+            if(record.get('strOrderType') === 'Transfer Order') {
+                iRely.Functions.showErrorDialog('Invalid order type. An invoice is not applicable on transfer orders.');
+                return;
+            }
+
+            me.processShipmentToInvoice(record.get('intInventoryShipmentId'), function(data) {
+                iRely.Functions.openScreen('AccountsReceivable.view.Invoice', {
+                    filters: [
+                        {
+                            column: 'intInvoiceId',
+                            value: data.message.InvoiceId
+                        }
+                    ],
+                    action: 'view',
+                    listeners: {
+                        close: function(e) {
+                            dashboard.$initParent.grid.controller.reload();  
+                        }
+                    }
+                });        
+            });            
+            
+        }
+        else {
+            var invoices = record.get('strFilterString');
+            iRely.Functions.openScreen('AccountsReceivable.view.Invoice', {
+                filters: [
+                    {
+                        column: 'intInvoiceId',
+                        value: invoices
+                    }
+                ],
+                action: 'view'
+            });        
+        }
     },
 
     onViewCustomerNo: function (value, record) {
@@ -3352,30 +3454,30 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },      
 
-    onShipFromAddressChange: function (combo, newValue, oldValue, eOpts) {
-        var win = combo.up('window');
-		var txtShipFromAddress = win.down('#txtShipFromAddress');
+    // onShipFromAddressChange: function (combo, newValue, oldValue, eOpts) {
+    //     var win = combo.up('window');
+	// 	var txtShipFromAddress = win.down('#txtShipFromAddress');
 
-          ic.utils.ajax({
-                url: '../i21/api/companylocation/search'
-            })
-            .flatMap(function(res) {
-                var json = JSON.parse(res.responseText);
-                return json.data;
-            })
-            .filter(function(data) {
-                return data.intCompanyLocationId === newValue;
-            })
-            .subscribe(
-                function(successResponse) {
-                    txtShipFromAddress.setValue(successResponse.strAddress)                 
-                }
-                ,function(failureResponse) {
-                    var jsonData = Ext.decode(failureResponse.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
-                }
-            )
-    },
+    //       ic.utils.ajax({
+    //             url: '../i21/api/companylocation/search'
+    //         })
+    //         .flatMap(function(res) {
+    //             var json = JSON.parse(res.responseText);
+    //             return json.data;
+    //         })
+    //         .filter(function(data) {
+    //             return data.intCompanyLocationId === newValue;
+    //         })
+    //         .subscribe(
+    //             function(successResponse) {
+    //                 txtShipFromAddress.setValue(successResponse.strAddress)                 
+    //             }
+    //             ,function(failureResponse) {
+    //                 var jsonData = Ext.decode(failureResponse.responseText);
+    //                 iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+    //             }
+    //         )
+    // },
 
     onCustomerDrilldown: function (combo) {
         var win = combo.up('window');
@@ -3482,12 +3584,45 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onRefreshInvoicesClick: function (control) {
+        ic.utils.ajax({
+            url: '../Inventory/api/InventoryShipment/UpdateShipmentInvoice',
+            method: 'post'  
+        })
+        .subscribe(
+            function(successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+                var panel = control.up('panel');
+                var grdSearch = panel ? panel.query('#grdSearch') : null;
+
+                if (grdSearch && grdSearch.length > 0){
+                    grdSearch.forEach(function (grid) {
+                        if (grid && grid.url == '../Inventory/api/InventoryShipment/ShipmentInvoice'){
+                            var store = grid ? grid.getStore() : null;
+                            if (store){
+                                store.reload({
+                                    callback: function(){
+                                        grid.getView().refresh();
+                                    }
+                                });                    
+                            }
+                        }
+                    }); 
+                }                
+            }
+            , function(failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                iRely.Functions.showErrorDialog(jsonData.message.statusText);
+            }
+        );        
+    },    
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
                 select: this.onShipLocationSelect,
-                beforeselect: this.onShipFromAddressBeforeSelect,
-                change: this.onShipFromAddressChange
+                beforeselect: this.onShipFromAddressBeforeSelect
+                //change: this.onShipFromAddressChange
             },
             "#cboShipToAddress": {
                 select: this.onShipLocationSelect

@@ -4,16 +4,16 @@ var PONumber;
 
     var commonIC = Ext.create('Inventory.CommonIC');
     new iRely.FunctionalTest().start(t)
-                  
-             
-            .addScenario(1,'',1000)
+
+        /*====================================== Scenario 1: Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Open  ======================================*/
+            .addScenario(1,'Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Open',1000)
             .addFunction(function(next){
                 record=Math.floor((Math.random() * 1000000) + 1);
                 new iRely.FunctionalTest().start(t, next)
                 .done()
             })
             .clickMenuFolder('Inventory')
-            
+
             .addFunction(function(next){
                 commonIC.insertInventoryItem(t,next,record)
             })
@@ -25,24 +25,24 @@ var PONumber;
                 PONumber = Ext.WindowManager.getActive().down('#txtPurchaseOrderNo').rawValue;
                 new iRely.FunctionalTest().start(t, next)
                 .waitUntilLoaded('appurchaseorder')
-                .clickButton('Close')   
-                .waitUntilLoaded()  
+                .clickButton('Close')
+                .waitUntilLoaded()
                 .addFunction(function (next) {
-                     commonIC.createInventoryReceipt(t,next,100,true)
+                     commonIC.createInventoryReceipt(t,next,100,true,10)
                 })
-                .waitUntilLoaded()  
+                .waitUntilLoaded()
                 .clickMenuFolder('Inventory')
-                
 
-                .addScenario(2,'',1000)
+        /*====================================== Scenario 2: Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Closed  ======================================*/
+                .addScenario(2,'Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Closed',1000)
 
                 .clickMenuScreen('Purchase Orders')
                 .waitUntilLoaded()
                 .doubleClickSearchRowValue(PONumber, 'strPurchaseOrderNumber', 1)
                 .waitUntilLoaded('appurchaseorder')
                 .verifyData('Combo Box', 'OrderStatus', 'Closed')
-                .clickButton('Close') 
-                
+                .clickButton('Close')
+
                 .addFunction(function (next) {
                     commonIC.checkIfClosedPOShowsInIR(t,next,PONumber)
                 })
@@ -50,8 +50,8 @@ var PONumber;
             })
 
 
-
-            .addScenario(3,'',1000)
+        /*====================================== Scenario 3: Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Partial ======================================*/
+            .addScenario(3,'Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Partial',1000)
             .addFunction(function(next){
                 record=Math.floor((Math.random() * 1000000) + 1);
                 new iRely.FunctionalTest().start(t, next)
@@ -69,7 +69,7 @@ var PONumber;
                 new iRely.FunctionalTest().start(t, next)
                 .clickButton('Close')
                 .addFunction(function (next) {
-                     commonIC.createInventoryReceipt(t,next,50,true)
+                     commonIC.createInventoryReceipt(t,next,50,true,10)
                 })
                 .clickMenuScreen('Purchase Orders')
                 .waitUntilLoaded()
@@ -79,15 +79,16 @@ var PONumber;
                 .clickButton('Close') 
                 .clickMenuFolder('Inventory')
                 .displayText(PONumber)
-                .addScenario(4,'',1000)
+        /*====================================== Scenario 4: Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Cancelled======================================*/
+                .addScenario(4,'Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Cancelled',1000)
                 .addFunction(function (next) {
                     commonIC.checkIfClosedPOShowsInIR(t,next,PONumber)
                 })
               .done()
            })
-           
 
-            .addScenario(5,'',1000)
+        /*====================================== Scenario 5: Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Pending ======================================*/
+            .addScenario(5,'Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Pending',1000)
             .addFunction(function(next){
                 record=Math.floor((Math.random() * 1000000) + 1);
                 new iRely.FunctionalTest().start(t, next)
@@ -105,7 +106,7 @@ var PONumber;
                 new iRely.FunctionalTest().start(t, next)
                 .clickButton('Close')
                 .addFunction(function (next) {
-                     commonIC.createInventoryReceipt(t,next,100,false)
+                     commonIC.createInventoryReceipt(t,next,100,false,10)
                 })
                 .clickMenuScreen('Purchase Orders')
                 .waitUntilLoaded()
@@ -114,16 +115,18 @@ var PONumber;
                 .verifyData('Combo Box', 'OrderStatus', 'Pending')
                 .clickButton('Close') 
                 .addFunction(function (next) {
-                     commonIC.createInventoryReceipt(t,next,100,true)
+                     commonIC.createInventoryReceipt(t,next,100,true,10)
                 })
-                .addScenario(6,'',1000)
+        /*====================================== Scenario 6: Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Short Closed ======================================*/
+                .addScenario(6,'Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Short Closed',1000)
                 .clickMenuFolder('Inventory')
                 .addFunction(function (next) {
                     commonIC.checkIfClosedPOShowsInIR(t,next,PONumber)
                 })
               .done()
            })
-            .addScenario(7,'',1000)
+        /*====================================== Scenario 7: Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Open, Vendor has no currency setup ======================================*/
+            .addScenario(7,'Inventory Receipt Add Orders, Order Type: Purchase Order, Purchase Order Status: Open, Vendor has no currency setup',1000)
             .waitUntilLoaded()
 			.clickMenuScreen('Vendors')
 			.waitUntilLoaded()
@@ -153,7 +156,7 @@ var PONumber;
                 new iRely.FunctionalTest().start(t, next)
                 .clickButton('Close')     
                 .addFunction(function (next) {
-                     commonIC.createInventoryReceipt(t,next,100,true)
+                     commonIC.createInventoryReceipt(t,next,100,true,10)
                 })
                 .clickMenuFolder('Inventory')
                 .displayText(PONumber)

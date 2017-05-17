@@ -234,27 +234,14 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intOrderType',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strOrderType',
-                                                                        dataType: 'string',
-                                                                        text: 'Order Type',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
+                                                                xtype: 'combobox',
                                                                 flex: 1.25,
                                                                 itemId: 'cboOrderType',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Order Type',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110,
-                                                                selectOnFocus: true,
+                                                                editable: false,
                                                                 displayField: 'strOrderType',
                                                                 valueField: 'intOrderType'
                                                             },
@@ -306,8 +293,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     }
                                                                 ],
                                                                 enableDrillDown: true,
-                                                                flex: 1.5,
                                                                 lookUpField: true,
+                                                                flex: 1.5,
                                                                 itemId: 'cboCustomer',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Customer',
@@ -501,6 +488,30 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                         dataType: 'string',
                                                                                         text: 'Address',
                                                                                         hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCity',
+                                                                                        dataType: 'string',
+                                                                                        text: 'City',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strStateProvince',
+                                                                                        dataType: 'string',
+                                                                                        text: 'State',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strZipPostalCode',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Zip Code',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCountry',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Country',
+                                                                                        hidden: true
                                                                                     }
                                                                                 ],
                                                                                 margins: '0 0 0 5',
@@ -549,6 +560,30 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                         dataType: 'string',
                                                                                         text: 'Address',
                                                                                         hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCity',
+                                                                                        dataType: 'string',
+                                                                                        text: 'City',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strState',
+                                                                                        dataType: 'string',
+                                                                                        text: 'State',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strZipCode',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Zip Code',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCountry',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Country',
+                                                                                        hidden: true
                                                                                     }
                                                                                 ],
                                                                                 itemId: 'cboShipToAddress',
@@ -582,6 +617,30 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                         dataIndex: 'strAddress',
                                                                                         dataType: 'string',
                                                                                         text: 'Address',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCity',
+                                                                                        dataType: 'string',
+                                                                                        text: 'City',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strStateProvince',
+                                                                                        dataType: 'string',
+                                                                                        text: 'State',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strZipPostalCode',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Zip Code',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCountry',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Country',
                                                                                         hidden: true
                                                                                     }
                                                                                 ],
@@ -752,7 +811,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'textfield',
+                                                                        xtype: 'timefield',
                                                                         flex: 1,
                                                                         itemId: 'txtAppointmentTime',
                                                                         margin: '0 5 0 0',
@@ -760,7 +819,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'textfield',
+                                                                        xtype: 'timefield',
                                                                         flex: 1,
                                                                         itemId: 'txtDepartureTime',
                                                                         margin: '0 5 0 0',
@@ -768,7 +827,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcombobox',
+                                                                        xtype: 'timefield',
                                                                         flex: 1,
                                                                         itemId: 'txtArrivalTime',
                                                                         margin: '0 5 0 0',
@@ -794,9 +853,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'datefield',
+                                                                        xtype: 'textfield',
                                                                         flex: 1,
-                                                                        itemId: 'dtmFreeTime',
+                                                                        itemId: 'txtFreeTime',
                                                                         margin: '0 5 0 0',
                                                                         fieldLabel: 'Free Time',
                                                                         labelWidth: 110

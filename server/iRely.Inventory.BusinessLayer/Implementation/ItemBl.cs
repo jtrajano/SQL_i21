@@ -838,11 +838,11 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<vyuICGetInventoryValuationSummary>()
                         .Filter(param, true);                              
 
-            var sorts = new List<SearchSort>();
-            sorts.Add(new SearchSort() { property = "intItemId" });
-            sorts.Add(new SearchSort() { property = "intItemLocationId" });
-            sorts.AddRange(param.sort.ToList());
-            param.sort = sorts;
+            //var sorts = new List<SearchSort>();
+            //sorts.Add(new SearchSort() { property = "intItemId" });
+            //sorts.Add(new SearchSort() { property = "intItemLocationId" });
+            //sorts.AddRange(param.sort.ToList());
+            //param.sort = sorts;
 
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
@@ -1007,6 +1007,30 @@ namespace iRely.Inventory.BusinessLayer
         public async Task<SearchResult> GetItemSubLocations(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemSubLocations>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
+
+        /// <summary>
+        /// Get Item Stock
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetStockDetail(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICStockDetail>()
+                .Where(
+                    p => (p.strType == "Inventory" ||
+                    p.strType == "Finished Good" ||
+                    p.strType == "Raw Material") && p.intLocationId != null
+                )
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 

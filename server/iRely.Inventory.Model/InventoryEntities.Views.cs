@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsf357756693a222913336117fa0609518b2b27c90793a109c6e6ded7aabd75f2e))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets890414aa633e594e45fb9b5d23d6d3c838b18247df4f57117b6d61e6872c92af))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsf357756693a222913336117fa0609518b2b27c90793a109c6e6ded7aabd75f2e : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets890414aa633e594e45fb9b5d23d6d3c838b18247df4f57117b6d61e6872c92af : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "f357756693a222913336117fa0609518b2b27c90793a109c6e6ded7aabd75f2e"; }
+            get { return "890414aa633e594e45fb9b5d23d6d3c838b18247df4f57117b6d61e6872c92af"; }
         }
 
         /// <summary>
@@ -1995,6 +1995,16 @@ namespace Edm_EntityMappingGeneratedViews
             if (extentName == "InventoryEntities.vyuICGetItemSubLocations")
             {
                 return GetView389();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuICStockDetail")
+            {
+                return GetView390();
+            }
+
+            if (extentName == "InventoryEntities.vyuICStockDetails")
+            {
+                return GetView391();
             }
 
             return null;
@@ -9627,7 +9637,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipment
-        [CodeFirstDatabaseSchema.tblICInventoryShipment](T1.tblICInventoryShipment_intInventoryShipmentId, T1.tblICInventoryShipment_strShipmentNumber, T1.tblICInventoryShipment_dtmShipDate, T1.tblICInventoryShipment_intOrderType, T1.tblICInventoryShipment_intSourceType, T1.tblICInventoryShipment_strReferenceNumber, T1.tblICInventoryShipment_dtmRequestedArrivalDate, T1.tblICInventoryShipment_intShipFromLocationId, T1.tblICInventoryShipment_intEntityCustomerId, T1.tblICInventoryShipment_intShipToLocationId, T1.tblICInventoryShipment_intFreightTermId, T1.tblICInventoryShipment_intCurrencyId, T1.tblICInventoryShipment_strBOLNumber, T1.tblICInventoryShipment_intShipViaId, T1.tblICInventoryShipment_strVessel, T1.tblICInventoryShipment_strProNumber, T1.tblICInventoryShipment_strDriverId, T1.tblICInventoryShipment_strSealNumber, T1.tblICInventoryShipment_strDeliveryInstruction, T1.tblICInventoryShipment_dtmAppointmentTime, T1.tblICInventoryShipment_dtmDepartureTime, T1.tblICInventoryShipment_dtmArrivalTime, T1.tblICInventoryShipment_dtmDeliveredDate, T1.tblICInventoryShipment_dtmFreeTime, T1.tblICInventoryShipment_strReceivedBy, T1.tblICInventoryShipment_strComment, T1.tblICInventoryShipment_ysnPosted, T1.tblICInventoryShipment_intEntityId, T1.tblICInventoryShipment_intCreatedUserId, T1.tblICInventoryShipment_intShipToCompanyLocationId, T1.tblICInventoryShipment_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryShipment](T1.tblICInventoryShipment_intInventoryShipmentId, T1.tblICInventoryShipment_strShipmentNumber, T1.tblICInventoryShipment_dtmShipDate, T1.tblICInventoryShipment_intOrderType, T1.tblICInventoryShipment_intSourceType, T1.tblICInventoryShipment_strReferenceNumber, T1.tblICInventoryShipment_dtmRequestedArrivalDate, T1.tblICInventoryShipment_intShipFromLocationId, T1.tblICInventoryShipment_intEntityCustomerId, T1.tblICInventoryShipment_intShipToLocationId, T1.tblICInventoryShipment_intFreightTermId, T1.tblICInventoryShipment_intCurrencyId, T1.tblICInventoryShipment_strFreeTime, T1.tblICInventoryShipment_strBOLNumber, T1.tblICInventoryShipment_intShipViaId, T1.tblICInventoryShipment_strVessel, T1.tblICInventoryShipment_strProNumber, T1.tblICInventoryShipment_strDriverId, T1.tblICInventoryShipment_strSealNumber, T1.tblICInventoryShipment_strDeliveryInstruction, T1.tblICInventoryShipment_dtmAppointmentTime, T1.tblICInventoryShipment_dtmDepartureTime, T1.tblICInventoryShipment_dtmArrivalTime, T1.tblICInventoryShipment_dtmDeliveredDate, T1.tblICInventoryShipment_strReceivedBy, T1.tblICInventoryShipment_strComment, T1.tblICInventoryShipment_ysnPosted, T1.tblICInventoryShipment_intEntityId, T1.tblICInventoryShipment_intCreatedUserId, T1.tblICInventoryShipment_intShipToCompanyLocationId, T1.tblICInventoryShipment_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentId AS tblICInventoryShipment_intInventoryShipmentId, 
@@ -9642,6 +9652,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intShipToLocationId AS tblICInventoryShipment_intShipToLocationId, 
             T.intFreightTermId AS tblICInventoryShipment_intFreightTermId, 
             T.intCurrencyId AS tblICInventoryShipment_intCurrencyId, 
+            T.strFreeTime AS tblICInventoryShipment_strFreeTime, 
             T.strBOLNumber AS tblICInventoryShipment_strBOLNumber, 
             T.intShipViaId AS tblICInventoryShipment_intShipViaId, 
             T.strVessel AS tblICInventoryShipment_strVessel, 
@@ -9653,7 +9664,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.dtmDepartureTime AS tblICInventoryShipment_dtmDepartureTime, 
             T.dtmArrivalTime AS tblICInventoryShipment_dtmArrivalTime, 
             T.dtmDeliveredDate AS tblICInventoryShipment_dtmDeliveredDate, 
-            T.dtmFreeTime AS tblICInventoryShipment_dtmFreeTime, 
             T.strReceivedBy AS tblICInventoryShipment_strReceivedBy, 
             T.strComment AS tblICInventoryShipment_strComment, 
             T.ysnPosted AS tblICInventoryShipment_ysnPosted, 
@@ -9745,7 +9755,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryShipment
-        [CodeFirstDatabaseSchema.vyuICGetInventoryShipment](T1.vyuICGetInventoryShipment_intInventoryShipmentId, T1.vyuICGetInventoryShipment_strShipmentNumber, T1.vyuICGetInventoryShipment_dtmShipDate, T1.vyuICGetInventoryShipment_intOrderType, T1.vyuICGetInventoryShipment_strOrderType, T1.vyuICGetInventoryShipment_intSourceType, T1.vyuICGetInventoryShipment_strSourceType, T1.vyuICGetInventoryShipment_strReferenceNumber, T1.vyuICGetInventoryShipment_dtmRequestedArrivalDate, T1.vyuICGetInventoryShipment_intShipFromLocationId, T1.vyuICGetInventoryShipment_strShipFromLocation, T1.vyuICGetInventoryShipment_strShipFromAddress, T1.vyuICGetInventoryShipment_intEntityCustomerId, T1.vyuICGetInventoryShipment_strCustomerNumber, T1.vyuICGetInventoryShipment_strCustomerName, T1.vyuICGetInventoryShipment_intShipToLocationId, T1.vyuICGetInventoryShipment_strShipToLocation, T1.vyuICGetInventoryShipment_strShipToAddress, T1.vyuICGetInventoryShipment_intFreightTermId, T1.vyuICGetInventoryShipment_strFreightTerm, T1.vyuICGetInventoryShipment_strFobPoint, T1.vyuICGetInventoryShipment_strBOLNumber, T1.vyuICGetInventoryShipment_intShipViaId, T1.vyuICGetInventoryShipment_strShipVia, T1.vyuICGetInventoryShipment_strVessel, T1.vyuICGetInventoryShipment_strProNumber, T1.vyuICGetInventoryShipment_strDriverId, T1.vyuICGetInventoryShipment_strSealNumber, T1.vyuICGetInventoryShipment_strDeliveryInstruction, T1.vyuICGetInventoryShipment_dtmAppointmentTime, T1.vyuICGetInventoryShipment_dtmDepartureTime, T1.vyuICGetInventoryShipment_dtmArrivalTime, T1.vyuICGetInventoryShipment_dtmDeliveredDate, T1.vyuICGetInventoryShipment_dtmFreeTime, T1.vyuICGetInventoryShipment_strReceivedBy, T1.vyuICGetInventoryShipment_strComment, T1.vyuICGetInventoryShipment_ysnPosted, T1.vyuICGetInventoryShipment_intWarehouseInstructionHeaderId, T1.vyuICGetInventoryShipment_intCurrencyId, T1.vyuICGetInventoryShipment_strCurrency)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryShipment](T1.vyuICGetInventoryShipment_intInventoryShipmentId, T1.vyuICGetInventoryShipment_strShipmentNumber, T1.vyuICGetInventoryShipment_dtmShipDate, T1.vyuICGetInventoryShipment_intOrderType, T1.vyuICGetInventoryShipment_strOrderType, T1.vyuICGetInventoryShipment_intSourceType, T1.vyuICGetInventoryShipment_strSourceType, T1.vyuICGetInventoryShipment_strReferenceNumber, T1.vyuICGetInventoryShipment_dtmRequestedArrivalDate, T1.vyuICGetInventoryShipment_intShipFromLocationId, T1.vyuICGetInventoryShipment_strShipFromLocation, T1.vyuICGetInventoryShipment_strShipFromAddress, T1.vyuICGetInventoryShipment_strShipFromStreet, T1.vyuICGetInventoryShipment_strShipFromCity, T1.vyuICGetInventoryShipment_strShipFromState, T1.vyuICGetInventoryShipment_strShipFromZipPostalCode, T1.vyuICGetInventoryShipment_strShipFromCountry, T1.vyuICGetInventoryShipment_intEntityCustomerId, T1.vyuICGetInventoryShipment_strCustomerNumber, T1.vyuICGetInventoryShipment_strCustomerName, T1.vyuICGetInventoryShipment_intShipToLocationId, T1.vyuICGetInventoryShipment_strShipToLocation, T1.vyuICGetInventoryShipment_strShipToAddress, T1.vyuICGetInventoryShipment_strShipToStreet, T1.vyuICGetInventoryShipment_strShipToCity, T1.vyuICGetInventoryShipment_strShipToState, T1.vyuICGetInventoryShipment_strShipToZipPostalCode, T1.vyuICGetInventoryShipment_strShipToCountry, T1.vyuICGetInventoryShipment_intFreightTermId, T1.vyuICGetInventoryShipment_strFreightTerm, T1.vyuICGetInventoryShipment_strFobPoint, T1.vyuICGetInventoryShipment_strBOLNumber, T1.vyuICGetInventoryShipment_intShipViaId, T1.vyuICGetInventoryShipment_strShipVia, T1.vyuICGetInventoryShipment_strVessel, T1.vyuICGetInventoryShipment_strProNumber, T1.vyuICGetInventoryShipment_strDriverId, T1.vyuICGetInventoryShipment_strSealNumber, T1.vyuICGetInventoryShipment_strDeliveryInstruction, T1.vyuICGetInventoryShipment_dtmAppointmentTime, T1.vyuICGetInventoryShipment_dtmDepartureTime, T1.vyuICGetInventoryShipment_dtmArrivalTime, T1.vyuICGetInventoryShipment_dtmDeliveredDate, T1.vyuICGetInventoryShipment_strReceivedBy, T1.vyuICGetInventoryShipment_strComment, T1.vyuICGetInventoryShipment_ysnPosted, T1.vyuICGetInventoryShipment_intWarehouseInstructionHeaderId, T1.vyuICGetInventoryShipment_intCurrencyId, T1.vyuICGetInventoryShipment_strCurrency)
     FROM (
         SELECT 
             T.intInventoryShipmentId AS vyuICGetInventoryShipment_intInventoryShipmentId, 
@@ -9760,12 +9770,22 @@ namespace Edm_EntityMappingGeneratedViews
             T.intShipFromLocationId AS vyuICGetInventoryShipment_intShipFromLocationId, 
             T.strShipFromLocation AS vyuICGetInventoryShipment_strShipFromLocation, 
             T.strShipFromAddress AS vyuICGetInventoryShipment_strShipFromAddress, 
+            T.strShipFromStreet AS vyuICGetInventoryShipment_strShipFromStreet, 
+            T.strShipFromCity AS vyuICGetInventoryShipment_strShipFromCity, 
+            T.strShipFromState AS vyuICGetInventoryShipment_strShipFromState, 
+            T.strShipFromZipPostalCode AS vyuICGetInventoryShipment_strShipFromZipPostalCode, 
+            T.strShipFromCountry AS vyuICGetInventoryShipment_strShipFromCountry, 
             T.intEntityCustomerId AS vyuICGetInventoryShipment_intEntityCustomerId, 
             T.strCustomerNumber AS vyuICGetInventoryShipment_strCustomerNumber, 
             T.strCustomerName AS vyuICGetInventoryShipment_strCustomerName, 
             T.intShipToLocationId AS vyuICGetInventoryShipment_intShipToLocationId, 
             T.strShipToLocation AS vyuICGetInventoryShipment_strShipToLocation, 
             T.strShipToAddress AS vyuICGetInventoryShipment_strShipToAddress, 
+            T.strShipToStreet AS vyuICGetInventoryShipment_strShipToStreet, 
+            T.strShipToCity AS vyuICGetInventoryShipment_strShipToCity, 
+            T.strShipToState AS vyuICGetInventoryShipment_strShipToState, 
+            T.strShipToZipPostalCode AS vyuICGetInventoryShipment_strShipToZipPostalCode, 
+            T.strShipToCountry AS vyuICGetInventoryShipment_strShipToCountry, 
             T.intFreightTermId AS vyuICGetInventoryShipment_intFreightTermId, 
             T.strFreightTerm AS vyuICGetInventoryShipment_strFreightTerm, 
             T.strFobPoint AS vyuICGetInventoryShipment_strFobPoint, 
@@ -9781,7 +9801,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.dtmDepartureTime AS vyuICGetInventoryShipment_dtmDepartureTime, 
             T.dtmArrivalTime AS vyuICGetInventoryShipment_dtmArrivalTime, 
             T.dtmDeliveredDate AS vyuICGetInventoryShipment_dtmDeliveredDate, 
-            T.dtmFreeTime AS vyuICGetInventoryShipment_dtmFreeTime, 
             T.strReceivedBy AS vyuICGetInventoryShipment_strReceivedBy, 
             T.strComment AS vyuICGetInventoryShipment_strComment, 
             T.ysnPosted AS vyuICGetInventoryShipment_ysnPosted, 
@@ -10005,7 +10024,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipments
-        [iRely.Inventory.Model.tblICInventoryShipment](T1.tblICInventoryShipment_intInventoryShipmentId, T1.tblICInventoryShipment_strShipmentNumber, T1.tblICInventoryShipment_dtmShipDate, T1.tblICInventoryShipment_intOrderType, T1.tblICInventoryShipment_intSourceType, T1.tblICInventoryShipment_strReferenceNumber, T1.tblICInventoryShipment_dtmRequestedArrivalDate, T1.tblICInventoryShipment_intShipFromLocationId, T1.tblICInventoryShipment_intEntityCustomerId, T1.tblICInventoryShipment_intShipToLocationId, T1.tblICInventoryShipment_intFreightTermId, T1.tblICInventoryShipment_intCurrencyId, T1.tblICInventoryShipment_strBOLNumber, T1.tblICInventoryShipment_intShipViaId, T1.tblICInventoryShipment_strVessel, T1.tblICInventoryShipment_strProNumber, T1.tblICInventoryShipment_strDriverId, T1.tblICInventoryShipment_strSealNumber, T1.tblICInventoryShipment_strDeliveryInstruction, T1.tblICInventoryShipment_dtmAppointmentTime, T1.tblICInventoryShipment_dtmDepartureTime, T1.tblICInventoryShipment_dtmArrivalTime, T1.tblICInventoryShipment_dtmDeliveredDate, T1.tblICInventoryShipment_dtmFreeTime, T1.tblICInventoryShipment_strReceivedBy, T1.tblICInventoryShipment_strComment, T1.tblICInventoryShipment_ysnPosted, T1.tblICInventoryShipment_intEntityId, T1.tblICInventoryShipment_intCreatedUserId, T1.tblICInventoryShipment_intShipToCompanyLocationId, T1.tblICInventoryShipment_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryShipment](T1.tblICInventoryShipment_intInventoryShipmentId, T1.tblICInventoryShipment_strShipmentNumber, T1.tblICInventoryShipment_dtmShipDate, T1.tblICInventoryShipment_intOrderType, T1.tblICInventoryShipment_intSourceType, T1.tblICInventoryShipment_strReferenceNumber, T1.tblICInventoryShipment_dtmRequestedArrivalDate, T1.tblICInventoryShipment_intShipFromLocationId, T1.tblICInventoryShipment_intEntityCustomerId, T1.tblICInventoryShipment_intShipToLocationId, T1.tblICInventoryShipment_intFreightTermId, T1.tblICInventoryShipment_intCurrencyId, T1.tblICInventoryShipment_strFreeTime, T1.tblICInventoryShipment_strBOLNumber, T1.tblICInventoryShipment_intShipViaId, T1.tblICInventoryShipment_strVessel, T1.tblICInventoryShipment_strProNumber, T1.tblICInventoryShipment_strDriverId, T1.tblICInventoryShipment_strSealNumber, T1.tblICInventoryShipment_strDeliveryInstruction, T1.tblICInventoryShipment_dtmAppointmentTime, T1.tblICInventoryShipment_dtmDepartureTime, T1.tblICInventoryShipment_dtmArrivalTime, T1.tblICInventoryShipment_dtmDeliveredDate, T1.tblICInventoryShipment_strReceivedBy, T1.tblICInventoryShipment_strComment, T1.tblICInventoryShipment_ysnPosted, T1.tblICInventoryShipment_intEntityId, T1.tblICInventoryShipment_intCreatedUserId, T1.tblICInventoryShipment_intShipToCompanyLocationId, T1.tblICInventoryShipment_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentId AS tblICInventoryShipment_intInventoryShipmentId, 
@@ -10020,6 +10039,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intShipToLocationId AS tblICInventoryShipment_intShipToLocationId, 
             T.intFreightTermId AS tblICInventoryShipment_intFreightTermId, 
             T.intCurrencyId AS tblICInventoryShipment_intCurrencyId, 
+            T.strFreeTime AS tblICInventoryShipment_strFreeTime, 
             T.strBOLNumber AS tblICInventoryShipment_strBOLNumber, 
             T.intShipViaId AS tblICInventoryShipment_intShipViaId, 
             T.strVessel AS tblICInventoryShipment_strVessel, 
@@ -10031,7 +10051,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.dtmDepartureTime AS tblICInventoryShipment_dtmDepartureTime, 
             T.dtmArrivalTime AS tblICInventoryShipment_dtmArrivalTime, 
             T.dtmDeliveredDate AS tblICInventoryShipment_dtmDeliveredDate, 
-            T.dtmFreeTime AS tblICInventoryShipment_dtmFreeTime, 
             T.strReceivedBy AS tblICInventoryShipment_strReceivedBy, 
             T.strComment AS tblICInventoryShipment_strComment, 
             T.ysnPosted AS tblICInventoryShipment_ysnPosted, 
@@ -10123,7 +10142,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryShipments
-        [iRely.Inventory.Model.vyuICGetInventoryShipment](T1.vyuICGetInventoryShipment_intInventoryShipmentId, T1.vyuICGetInventoryShipment_strShipmentNumber, T1.vyuICGetInventoryShipment_dtmShipDate, T1.vyuICGetInventoryShipment_intOrderType, T1.vyuICGetInventoryShipment_strOrderType, T1.vyuICGetInventoryShipment_intSourceType, T1.vyuICGetInventoryShipment_strSourceType, T1.vyuICGetInventoryShipment_strReferenceNumber, T1.vyuICGetInventoryShipment_dtmRequestedArrivalDate, T1.vyuICGetInventoryShipment_intShipFromLocationId, T1.vyuICGetInventoryShipment_strShipFromLocation, T1.vyuICGetInventoryShipment_strShipFromAddress, T1.vyuICGetInventoryShipment_intEntityCustomerId, T1.vyuICGetInventoryShipment_strCustomerNumber, T1.vyuICGetInventoryShipment_strCustomerName, T1.vyuICGetInventoryShipment_intShipToLocationId, T1.vyuICGetInventoryShipment_strShipToLocation, T1.vyuICGetInventoryShipment_strShipToAddress, T1.vyuICGetInventoryShipment_intFreightTermId, T1.vyuICGetInventoryShipment_strFreightTerm, T1.vyuICGetInventoryShipment_strFobPoint, T1.vyuICGetInventoryShipment_strBOLNumber, T1.vyuICGetInventoryShipment_intShipViaId, T1.vyuICGetInventoryShipment_strShipVia, T1.vyuICGetInventoryShipment_strVessel, T1.vyuICGetInventoryShipment_strProNumber, T1.vyuICGetInventoryShipment_strDriverId, T1.vyuICGetInventoryShipment_strSealNumber, T1.vyuICGetInventoryShipment_strDeliveryInstruction, T1.vyuICGetInventoryShipment_dtmAppointmentTime, T1.vyuICGetInventoryShipment_dtmDepartureTime, T1.vyuICGetInventoryShipment_dtmArrivalTime, T1.vyuICGetInventoryShipment_dtmDeliveredDate, T1.vyuICGetInventoryShipment_dtmFreeTime, T1.vyuICGetInventoryShipment_strReceivedBy, T1.vyuICGetInventoryShipment_strComment, T1.vyuICGetInventoryShipment_ysnPosted, T1.vyuICGetInventoryShipment_intWarehouseInstructionHeaderId, T1.vyuICGetInventoryShipment_intCurrencyId, T1.vyuICGetInventoryShipment_strCurrency)
+        [iRely.Inventory.Model.vyuICGetInventoryShipment](T1.vyuICGetInventoryShipment_intInventoryShipmentId, T1.vyuICGetInventoryShipment_strShipmentNumber, T1.vyuICGetInventoryShipment_dtmShipDate, T1.vyuICGetInventoryShipment_intOrderType, T1.vyuICGetInventoryShipment_strOrderType, T1.vyuICGetInventoryShipment_intSourceType, T1.vyuICGetInventoryShipment_strSourceType, T1.vyuICGetInventoryShipment_strReferenceNumber, T1.vyuICGetInventoryShipment_dtmRequestedArrivalDate, T1.vyuICGetInventoryShipment_intShipFromLocationId, T1.vyuICGetInventoryShipment_strShipFromLocation, T1.vyuICGetInventoryShipment_strShipFromAddress, T1.vyuICGetInventoryShipment_strShipFromStreet, T1.vyuICGetInventoryShipment_strShipFromCity, T1.vyuICGetInventoryShipment_strShipFromState, T1.vyuICGetInventoryShipment_strShipFromZipPostalCode, T1.vyuICGetInventoryShipment_strShipFromCountry, T1.vyuICGetInventoryShipment_intEntityCustomerId, T1.vyuICGetInventoryShipment_strCustomerNumber, T1.vyuICGetInventoryShipment_strCustomerName, T1.vyuICGetInventoryShipment_intShipToLocationId, T1.vyuICGetInventoryShipment_strShipToLocation, T1.vyuICGetInventoryShipment_strShipToAddress, T1.vyuICGetInventoryShipment_strShipToStreet, T1.vyuICGetInventoryShipment_strShipToCity, T1.vyuICGetInventoryShipment_strShipToState, T1.vyuICGetInventoryShipment_strShipToZipPostalCode, T1.vyuICGetInventoryShipment_strShipToCountry, T1.vyuICGetInventoryShipment_intFreightTermId, T1.vyuICGetInventoryShipment_strFreightTerm, T1.vyuICGetInventoryShipment_strFobPoint, T1.vyuICGetInventoryShipment_strBOLNumber, T1.vyuICGetInventoryShipment_intShipViaId, T1.vyuICGetInventoryShipment_strShipVia, T1.vyuICGetInventoryShipment_strVessel, T1.vyuICGetInventoryShipment_strProNumber, T1.vyuICGetInventoryShipment_strDriverId, T1.vyuICGetInventoryShipment_strSealNumber, T1.vyuICGetInventoryShipment_strDeliveryInstruction, T1.vyuICGetInventoryShipment_dtmAppointmentTime, T1.vyuICGetInventoryShipment_dtmDepartureTime, T1.vyuICGetInventoryShipment_dtmArrivalTime, T1.vyuICGetInventoryShipment_dtmDeliveredDate, T1.vyuICGetInventoryShipment_strReceivedBy, T1.vyuICGetInventoryShipment_strComment, T1.vyuICGetInventoryShipment_ysnPosted, T1.vyuICGetInventoryShipment_intWarehouseInstructionHeaderId, T1.vyuICGetInventoryShipment_intCurrencyId, T1.vyuICGetInventoryShipment_strCurrency)
     FROM (
         SELECT 
             T.intInventoryShipmentId AS vyuICGetInventoryShipment_intInventoryShipmentId, 
@@ -10138,12 +10157,22 @@ namespace Edm_EntityMappingGeneratedViews
             T.intShipFromLocationId AS vyuICGetInventoryShipment_intShipFromLocationId, 
             T.strShipFromLocation AS vyuICGetInventoryShipment_strShipFromLocation, 
             T.strShipFromAddress AS vyuICGetInventoryShipment_strShipFromAddress, 
+            T.strShipFromStreet AS vyuICGetInventoryShipment_strShipFromStreet, 
+            T.strShipFromCity AS vyuICGetInventoryShipment_strShipFromCity, 
+            T.strShipFromState AS vyuICGetInventoryShipment_strShipFromState, 
+            T.strShipFromZipPostalCode AS vyuICGetInventoryShipment_strShipFromZipPostalCode, 
+            T.strShipFromCountry AS vyuICGetInventoryShipment_strShipFromCountry, 
             T.intEntityCustomerId AS vyuICGetInventoryShipment_intEntityCustomerId, 
             T.strCustomerNumber AS vyuICGetInventoryShipment_strCustomerNumber, 
             T.strCustomerName AS vyuICGetInventoryShipment_strCustomerName, 
             T.intShipToLocationId AS vyuICGetInventoryShipment_intShipToLocationId, 
             T.strShipToLocation AS vyuICGetInventoryShipment_strShipToLocation, 
             T.strShipToAddress AS vyuICGetInventoryShipment_strShipToAddress, 
+            T.strShipToStreet AS vyuICGetInventoryShipment_strShipToStreet, 
+            T.strShipToCity AS vyuICGetInventoryShipment_strShipToCity, 
+            T.strShipToState AS vyuICGetInventoryShipment_strShipToState, 
+            T.strShipToZipPostalCode AS vyuICGetInventoryShipment_strShipToZipPostalCode, 
+            T.strShipToCountry AS vyuICGetInventoryShipment_strShipToCountry, 
             T.intFreightTermId AS vyuICGetInventoryShipment_intFreightTermId, 
             T.strFreightTerm AS vyuICGetInventoryShipment_strFreightTerm, 
             T.strFobPoint AS vyuICGetInventoryShipment_strFobPoint, 
@@ -10159,7 +10188,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.dtmDepartureTime AS vyuICGetInventoryShipment_dtmDepartureTime, 
             T.dtmArrivalTime AS vyuICGetInventoryShipment_dtmArrivalTime, 
             T.dtmDeliveredDate AS vyuICGetInventoryShipment_dtmDeliveredDate, 
-            T.dtmFreeTime AS vyuICGetInventoryShipment_dtmFreeTime, 
             T.strReceivedBy AS vyuICGetInventoryShipment_strReceivedBy, 
             T.strComment AS vyuICGetInventoryShipment_strComment, 
             T.ysnPosted AS vyuICGetInventoryShipment_ysnPosted, 
@@ -10453,30 +10481,41 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICShipmentInvoice
-        [CodeFirstDatabaseSchema.vyuICShipmentInvoice](T1.vyuICShipmentInvoice_intInventoryShipmentItemId, T1.vyuICShipmentInvoice_strInvoiceNumber, T1.vyuICShipmentInvoice_dtmDateInvoiced, T1.vyuICShipmentInvoice_strCustomerName, T1.vyuICShipmentInvoice_strDestination, T1.vyuICShipmentInvoice_strShipmentNumber, T1.vyuICShipmentInvoice_dtmShipDate, T1.vyuICShipmentInvoice_strBOLNumber, T1.vyuICShipmentInvoice_intOrderType, T1.vyuICShipmentInvoice_strOrderType, T1.vyuICShipmentInvoice_strItemNo, T1.[vyuICShipmentInvoice_dblUnitCost ], T1.vyuICShipmentInvoice_dblShipmentAmount, T1.vyuICShipmentInvoice_dblTotal, T1.vyuICShipmentInvoice_dblQtyInvoiced, T1.vyuICShipmentInvoice_dblQtyShipped, T1.vyuICShipmentInvoice_dblCOGSAmount, T1.vyuICShipmentInvoice_dblQtyToInvoice, T1.vyuICShipmentInvoice_dblInTransitAmount, T1.vyuICShipmentInvoice_intCurrencyId, T1.vyuICShipmentInvoice_strCurrency)
+        [CodeFirstDatabaseSchema.vyuICShipmentInvoice](T1.vyuICShipmentInvoice_intInventoryShipmentItemId, T1.vyuICShipmentInvoice_intInventoryShipmentId, T1.vyuICShipmentInvoice_intInventoryShipmentChargeId, T1.vyuICShipmentInvoice_strShipmentNumber, T1.vyuICShipmentInvoice_dtmShipDate, T1.vyuICShipmentInvoice_strCustomer, T1.vyuICShipmentInvoice_strLocationName, T1.vyuICShipmentInvoice_strDestination, T1.vyuICShipmentInvoice_strBOLNumber, T1.vyuICShipmentInvoice_strOrderType, T1.vyuICShipmentInvoice_strItemNo, T1.vyuICShipmentInvoice_strItemDescription, T1.vyuICShipmentInvoice_dblUnitCost, T1.vyuICShipmentInvoice_dblShipmentQty, T1.vyuICShipmentInvoice_dblInTransitQty, T1.vyuICShipmentInvoice_dblInvoiceQty, T1.vyuICShipmentInvoice_dblShipmentLineTotal, T1.vyuICShipmentInvoice_dblInTransitTotal, T1.vyuICShipmentInvoice_dblInvoiceLineTotal, T1.vyuICShipmentInvoice_dblShipmentTax, T1.vyuICShipmentInvoice_dblInvoiceTax, T1.vyuICShipmentInvoice_dblOpenQty, T1.vyuICShipmentInvoice_dblItemsReceivable, T1.vyuICShipmentInvoice_dblTaxesReceivable, T1.vyuICShipmentInvoice_dtmLastInvoiceDate, T1.vyuICShipmentInvoice_strAllVouchers, T1.vyuICShipmentInvoice_strFilterString, T1.vyuICShipmentInvoice_dtmCreated, T1.vyuICShipmentInvoice_intCurrencyId, T1.vyuICShipmentInvoice_strCurrency, T1.vyuICShipmentInvoice_strItemUOM, T1.vyuICShipmentInvoice_intItemUOMId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS vyuICShipmentInvoice_intInventoryShipmentItemId, 
-            T.strInvoiceNumber AS vyuICShipmentInvoice_strInvoiceNumber, 
-            T.dtmDateInvoiced AS vyuICShipmentInvoice_dtmDateInvoiced, 
-            T.strCustomerName AS vyuICShipmentInvoice_strCustomerName, 
-            T.strDestination AS vyuICShipmentInvoice_strDestination, 
+            T.intInventoryShipmentId AS vyuICShipmentInvoice_intInventoryShipmentId, 
+            T.intInventoryShipmentChargeId AS vyuICShipmentInvoice_intInventoryShipmentChargeId, 
             T.strShipmentNumber AS vyuICShipmentInvoice_strShipmentNumber, 
             T.dtmShipDate AS vyuICShipmentInvoice_dtmShipDate, 
+            T.strCustomer AS vyuICShipmentInvoice_strCustomer, 
+            T.strLocationName AS vyuICShipmentInvoice_strLocationName, 
+            T.strDestination AS vyuICShipmentInvoice_strDestination, 
             T.strBOLNumber AS vyuICShipmentInvoice_strBOLNumber, 
-            T.intOrderType AS vyuICShipmentInvoice_intOrderType, 
             T.strOrderType AS vyuICShipmentInvoice_strOrderType, 
             T.strItemNo AS vyuICShipmentInvoice_strItemNo, 
-            T.dblUnitCost AS [vyuICShipmentInvoice_dblUnitCost ], 
-            T.dblShipmentAmount AS vyuICShipmentInvoice_dblShipmentAmount, 
-            T.dblTotal AS vyuICShipmentInvoice_dblTotal, 
-            T.dblQtyInvoiced AS vyuICShipmentInvoice_dblQtyInvoiced, 
-            T.dblQtyShipped AS vyuICShipmentInvoice_dblQtyShipped, 
-            T.dblCOGSAmount AS vyuICShipmentInvoice_dblCOGSAmount, 
-            T.dblQtyToInvoice AS vyuICShipmentInvoice_dblQtyToInvoice, 
-            T.dblInTransitAmount AS vyuICShipmentInvoice_dblInTransitAmount, 
+            T.strItemDescription AS vyuICShipmentInvoice_strItemDescription, 
+            T.dblUnitCost AS vyuICShipmentInvoice_dblUnitCost, 
+            T.dblShipmentQty AS vyuICShipmentInvoice_dblShipmentQty, 
+            T.dblInTransitQty AS vyuICShipmentInvoice_dblInTransitQty, 
+            T.dblInvoiceQty AS vyuICShipmentInvoice_dblInvoiceQty, 
+            T.dblShipmentLineTotal AS vyuICShipmentInvoice_dblShipmentLineTotal, 
+            T.dblInTransitTotal AS vyuICShipmentInvoice_dblInTransitTotal, 
+            T.dblInvoiceLineTotal AS vyuICShipmentInvoice_dblInvoiceLineTotal, 
+            T.dblShipmentTax AS vyuICShipmentInvoice_dblShipmentTax, 
+            T.dblInvoiceTax AS vyuICShipmentInvoice_dblInvoiceTax, 
+            T.dblOpenQty AS vyuICShipmentInvoice_dblOpenQty, 
+            T.dblItemsReceivable AS vyuICShipmentInvoice_dblItemsReceivable, 
+            T.dblTaxesReceivable AS vyuICShipmentInvoice_dblTaxesReceivable, 
+            T.dtmLastInvoiceDate AS vyuICShipmentInvoice_dtmLastInvoiceDate, 
+            T.strAllVouchers AS vyuICShipmentInvoice_strAllVouchers, 
+            T.strFilterString AS vyuICShipmentInvoice_strFilterString, 
+            T.dtmCreated AS vyuICShipmentInvoice_dtmCreated, 
             T.intCurrencyId AS vyuICShipmentInvoice_intCurrencyId, 
             T.strCurrency AS vyuICShipmentInvoice_strCurrency, 
+            T.strItemUOM AS vyuICShipmentInvoice_strItemUOM, 
+            T.intItemUOMId AS vyuICShipmentInvoice_intItemUOMId, 
             True AS _from0
         FROM InventoryEntities.vyuICShipmentInvoices AS T
     ) AS T1");
@@ -10490,30 +10529,41 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICShipmentInvoices
-        [iRely.Inventory.Model.vyuICShipmentInvoice](T1.vyuICShipmentInvoice_intInventoryShipmentItemId, T1.vyuICShipmentInvoice_strInvoiceNumber, T1.vyuICShipmentInvoice_dtmDateInvoiced, T1.vyuICShipmentInvoice_strCustomerName, T1.vyuICShipmentInvoice_strDestination, T1.vyuICShipmentInvoice_strShipmentNumber, T1.vyuICShipmentInvoice_dtmShipDate, T1.vyuICShipmentInvoice_strBOLNumber, T1.vyuICShipmentInvoice_intOrderType, T1.vyuICShipmentInvoice_strOrderType, T1.vyuICShipmentInvoice_strItemNo, T1.vyuICShipmentInvoice_dblUnitCost, T1.vyuICShipmentInvoice_dblShipmentAmount, T1.vyuICShipmentInvoice_dblTotal, T1.vyuICShipmentInvoice_dblQtyInvoiced, T1.vyuICShipmentInvoice_dblQtyShipped, T1.vyuICShipmentInvoice_dblCOGSAmount, T1.vyuICShipmentInvoice_dblQtyToInvoice, T1.vyuICShipmentInvoice_dblInTransitAmount, T1.vyuICShipmentInvoice_intCurrencyId, T1.vyuICShipmentInvoice_strCurrency)
+        [iRely.Inventory.Model.vyuICShipmentInvoice](T1.vyuICShipmentInvoice_intInventoryShipmentItemId, T1.vyuICShipmentInvoice_intInventoryShipmentId, T1.vyuICShipmentInvoice_intInventoryShipmentChargeId, T1.vyuICShipmentInvoice_strShipmentNumber, T1.vyuICShipmentInvoice_dtmShipDate, T1.vyuICShipmentInvoice_strCustomer, T1.vyuICShipmentInvoice_strLocationName, T1.vyuICShipmentInvoice_strDestination, T1.vyuICShipmentInvoice_strBOLNumber, T1.vyuICShipmentInvoice_strOrderType, T1.vyuICShipmentInvoice_strItemNo, T1.vyuICShipmentInvoice_strItemDescription, T1.vyuICShipmentInvoice_dblUnitCost, T1.vyuICShipmentInvoice_dblShipmentQty, T1.vyuICShipmentInvoice_dblInTransitQty, T1.vyuICShipmentInvoice_dblInvoiceQty, T1.vyuICShipmentInvoice_dblShipmentLineTotal, T1.vyuICShipmentInvoice_dblInTransitTotal, T1.vyuICShipmentInvoice_dblInvoiceLineTotal, T1.vyuICShipmentInvoice_dblShipmentTax, T1.vyuICShipmentInvoice_dblInvoiceTax, T1.vyuICShipmentInvoice_dblOpenQty, T1.vyuICShipmentInvoice_dblItemsReceivable, T1.vyuICShipmentInvoice_dblTaxesReceivable, T1.vyuICShipmentInvoice_dtmLastInvoiceDate, T1.vyuICShipmentInvoice_strAllVouchers, T1.vyuICShipmentInvoice_strFilterString, T1.vyuICShipmentInvoice_dtmCreated, T1.vyuICShipmentInvoice_intCurrencyId, T1.vyuICShipmentInvoice_strCurrency, T1.vyuICShipmentInvoice_strItemUOM, T1.vyuICShipmentInvoice_intItemUOMId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS vyuICShipmentInvoice_intInventoryShipmentItemId, 
-            T.strInvoiceNumber AS vyuICShipmentInvoice_strInvoiceNumber, 
-            T.dtmDateInvoiced AS vyuICShipmentInvoice_dtmDateInvoiced, 
-            T.strCustomerName AS vyuICShipmentInvoice_strCustomerName, 
-            T.strDestination AS vyuICShipmentInvoice_strDestination, 
+            T.intInventoryShipmentId AS vyuICShipmentInvoice_intInventoryShipmentId, 
+            T.intInventoryShipmentChargeId AS vyuICShipmentInvoice_intInventoryShipmentChargeId, 
             T.strShipmentNumber AS vyuICShipmentInvoice_strShipmentNumber, 
             T.dtmShipDate AS vyuICShipmentInvoice_dtmShipDate, 
+            T.strCustomer AS vyuICShipmentInvoice_strCustomer, 
+            T.strLocationName AS vyuICShipmentInvoice_strLocationName, 
+            T.strDestination AS vyuICShipmentInvoice_strDestination, 
             T.strBOLNumber AS vyuICShipmentInvoice_strBOLNumber, 
-            T.intOrderType AS vyuICShipmentInvoice_intOrderType, 
             T.strOrderType AS vyuICShipmentInvoice_strOrderType, 
             T.strItemNo AS vyuICShipmentInvoice_strItemNo, 
-            T.[dblUnitCost ] AS vyuICShipmentInvoice_dblUnitCost, 
-            T.dblShipmentAmount AS vyuICShipmentInvoice_dblShipmentAmount, 
-            T.dblTotal AS vyuICShipmentInvoice_dblTotal, 
-            T.dblQtyInvoiced AS vyuICShipmentInvoice_dblQtyInvoiced, 
-            T.dblQtyShipped AS vyuICShipmentInvoice_dblQtyShipped, 
-            T.dblCOGSAmount AS vyuICShipmentInvoice_dblCOGSAmount, 
-            T.dblQtyToInvoice AS vyuICShipmentInvoice_dblQtyToInvoice, 
-            T.dblInTransitAmount AS vyuICShipmentInvoice_dblInTransitAmount, 
+            T.strItemDescription AS vyuICShipmentInvoice_strItemDescription, 
+            T.dblUnitCost AS vyuICShipmentInvoice_dblUnitCost, 
+            T.dblShipmentQty AS vyuICShipmentInvoice_dblShipmentQty, 
+            T.dblInTransitQty AS vyuICShipmentInvoice_dblInTransitQty, 
+            T.dblInvoiceQty AS vyuICShipmentInvoice_dblInvoiceQty, 
+            T.dblShipmentLineTotal AS vyuICShipmentInvoice_dblShipmentLineTotal, 
+            T.dblInTransitTotal AS vyuICShipmentInvoice_dblInTransitTotal, 
+            T.dblInvoiceLineTotal AS vyuICShipmentInvoice_dblInvoiceLineTotal, 
+            T.dblShipmentTax AS vyuICShipmentInvoice_dblShipmentTax, 
+            T.dblInvoiceTax AS vyuICShipmentInvoice_dblInvoiceTax, 
+            T.dblOpenQty AS vyuICShipmentInvoice_dblOpenQty, 
+            T.dblItemsReceivable AS vyuICShipmentInvoice_dblItemsReceivable, 
+            T.dblTaxesReceivable AS vyuICShipmentInvoice_dblTaxesReceivable, 
+            T.dtmLastInvoiceDate AS vyuICShipmentInvoice_dtmLastInvoiceDate, 
+            T.strAllVouchers AS vyuICShipmentInvoice_strAllVouchers, 
+            T.strFilterString AS vyuICShipmentInvoice_strFilterString, 
+            T.dtmCreated AS vyuICShipmentInvoice_dtmCreated, 
             T.intCurrencyId AS vyuICShipmentInvoice_intCurrencyId, 
             T.strCurrency AS vyuICShipmentInvoice_strCurrency, 
+            T.strItemUOM AS vyuICShipmentInvoice_strItemUOM, 
+            T.intItemUOMId AS vyuICShipmentInvoice_intItemUOMId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICShipmentInvoice AS T
     ) AS T1");
@@ -12429,7 +12479,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryValuationSummary
-        [CodeFirstDatabaseSchema.vyuICGetInventoryValuationSummary](T1.vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, T1.vyuICGetInventoryValuationSummary_intItemId, T1.vyuICGetInventoryValuationSummary_strItemNo, T1.vyuICGetInventoryValuationSummary_strItemDescription, T1.vyuICGetInventoryValuationSummary_intItemLocationId, T1.vyuICGetInventoryValuationSummary_strLocationName, T1.vyuICGetInventoryValuationSummary_intSubLocationId, T1.vyuICGetInventoryValuationSummary_strSubLocationName, T1.vyuICGetInventoryValuationSummary_dblQuantity, T1.vyuICGetInventoryValuationSummary_dblValue, T1.vyuICGetInventoryValuationSummary_dblLastCost, T1.vyuICGetInventoryValuationSummary_dblStandardCost, T1.vyuICGetInventoryValuationSummary_dblAverageCost, T1.vyuICGetInventoryValuationSummary_dblQuantityInStockUOM, T1.vyuICGetInventoryValuationSummary_strStockUOM, T1.vyuICGetInventoryValuationSummary_strCategoryCode, T1.vyuICGetInventoryValuationSummary_strCommodityCode)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryValuationSummary](T1.vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, T1.vyuICGetInventoryValuationSummary_intItemId, T1.vyuICGetInventoryValuationSummary_strItemNo, T1.vyuICGetInventoryValuationSummary_strItemDescription, T1.vyuICGetInventoryValuationSummary_intItemLocationId, T1.vyuICGetInventoryValuationSummary_strLocationName, T1.vyuICGetInventoryValuationSummary_intSubLocationId, T1.vyuICGetInventoryValuationSummary_strSubLocationName, T1.vyuICGetInventoryValuationSummary_dblQuantity, T1.vyuICGetInventoryValuationSummary_dblValue, T1.vyuICGetInventoryValuationSummary_dblLastCost, T1.vyuICGetInventoryValuationSummary_dblStandardCost, T1.vyuICGetInventoryValuationSummary_dblAverageCost, T1.vyuICGetInventoryValuationSummary_dblQuantityInStockUOM, T1.vyuICGetInventoryValuationSummary_strStockUOM, T1.vyuICGetInventoryValuationSummary_strCategoryCode, T1.vyuICGetInventoryValuationSummary_strCommodityCode, T1.vyuICGetInventoryValuationSummary_strInTransitLocationName, T1.vyuICGetInventoryValuationSummary_intLocationId, T1.vyuICGetInventoryValuationSummary_intInTransitLocationId)
     FROM (
         SELECT 
             T.intInventoryValuationKeyId AS vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, 
@@ -12449,6 +12499,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.strStockUOM AS vyuICGetInventoryValuationSummary_strStockUOM, 
             T.strCategoryCode AS vyuICGetInventoryValuationSummary_strCategoryCode, 
             T.strCommodityCode AS vyuICGetInventoryValuationSummary_strCommodityCode, 
+            T.strInTransitLocationName AS vyuICGetInventoryValuationSummary_strInTransitLocationName, 
+            T.intLocationId AS vyuICGetInventoryValuationSummary_intLocationId, 
+            T.intInTransitLocationId AS vyuICGetInventoryValuationSummary_intInTransitLocationId, 
             True AS _from0
         FROM InventoryEntities.vyuICGetInventoryValuationSummaries AS T
     ) AS T1");
@@ -12462,7 +12515,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryValuationSummaries
-        [iRely.Inventory.Model.vyuICGetInventoryValuationSummary](T1.vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, T1.vyuICGetInventoryValuationSummary_intItemId, T1.vyuICGetInventoryValuationSummary_strItemNo, T1.vyuICGetInventoryValuationSummary_strItemDescription, T1.vyuICGetInventoryValuationSummary_intItemLocationId, T1.vyuICGetInventoryValuationSummary_strLocationName, T1.vyuICGetInventoryValuationSummary_intSubLocationId, T1.vyuICGetInventoryValuationSummary_strSubLocationName, T1.vyuICGetInventoryValuationSummary_dblQuantity, T1.vyuICGetInventoryValuationSummary_dblValue, T1.vyuICGetInventoryValuationSummary_dblLastCost, T1.vyuICGetInventoryValuationSummary_dblStandardCost, T1.vyuICGetInventoryValuationSummary_dblAverageCost, T1.vyuICGetInventoryValuationSummary_dblQuantityInStockUOM, T1.vyuICGetInventoryValuationSummary_strStockUOM, T1.vyuICGetInventoryValuationSummary_strCategoryCode, T1.vyuICGetInventoryValuationSummary_strCommodityCode)
+        [iRely.Inventory.Model.vyuICGetInventoryValuationSummary](T1.vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, T1.vyuICGetInventoryValuationSummary_intItemId, T1.vyuICGetInventoryValuationSummary_strItemNo, T1.vyuICGetInventoryValuationSummary_strItemDescription, T1.vyuICGetInventoryValuationSummary_intItemLocationId, T1.vyuICGetInventoryValuationSummary_strLocationName, T1.vyuICGetInventoryValuationSummary_intSubLocationId, T1.vyuICGetInventoryValuationSummary_strSubLocationName, T1.vyuICGetInventoryValuationSummary_dblQuantity, T1.vyuICGetInventoryValuationSummary_dblValue, T1.vyuICGetInventoryValuationSummary_dblLastCost, T1.vyuICGetInventoryValuationSummary_dblStandardCost, T1.vyuICGetInventoryValuationSummary_dblAverageCost, T1.vyuICGetInventoryValuationSummary_dblQuantityInStockUOM, T1.vyuICGetInventoryValuationSummary_strStockUOM, T1.vyuICGetInventoryValuationSummary_strCategoryCode, T1.vyuICGetInventoryValuationSummary_strCommodityCode, T1.vyuICGetInventoryValuationSummary_strInTransitLocationName, T1.vyuICGetInventoryValuationSummary_intLocationId, T1.vyuICGetInventoryValuationSummary_intInTransitLocationId)
     FROM (
         SELECT 
             T.intInventoryValuationKeyId AS vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, 
@@ -12482,6 +12535,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.strStockUOM AS vyuICGetInventoryValuationSummary_strStockUOM, 
             T.strCategoryCode AS vyuICGetInventoryValuationSummary_strCategoryCode, 
             T.strCommodityCode AS vyuICGetInventoryValuationSummary_strCommodityCode, 
+            T.strInTransitLocationName AS vyuICGetInventoryValuationSummary_strInTransitLocationName, 
+            T.intLocationId AS vyuICGetInventoryValuationSummary_intLocationId, 
+            T.intInTransitLocationId AS vyuICGetInventoryValuationSummary_intInTransitLocationId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetInventoryValuationSummary AS T
     ) AS T1");
@@ -15922,6 +15978,138 @@ namespace Edm_EntityMappingGeneratedViews
             T.intCountryId AS vyuICGetItemSubLocations_intCountryId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetItemSubLocations AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICStockDetail.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView390()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICStockDetail
+        [CodeFirstDatabaseSchema.vyuICStockDetail](T1.vyuICStockDetail_intKey, T1.vyuICStockDetail_intItemId, T1.vyuICStockDetail_strItemNo, T1.vyuICStockDetail_strType, T1.vyuICStockDetail_strDescription, T1.vyuICStockDetail_strLotTracking, T1.vyuICStockDetail_strInventoryTracking, T1.vyuICStockDetail_strStatus, T1.vyuICStockDetail_intLocationId, T1.vyuICStockDetail_intItemLocationId, T1.vyuICStockDetail_intSubLocationId, T1.vyuICStockDetail_intCategoryId, T1.vyuICStockDetail_strCategoryCode, T1.vyuICStockDetail_intCommodityId, T1.vyuICStockDetail_strCommodityCode, T1.vyuICStockDetail_strStorageLocationName, T1.vyuICStockDetail_strSubLocationName, T1.vyuICStockDetail_intStorageLocationId, T1.vyuICStockDetail_strLocationName, T1.vyuICStockDetail_strLocationType, T1.vyuICStockDetail_intStockUOMId, T1.vyuICStockDetail_strStockUOM, T1.vyuICStockDetail_strStockUOMType, T1.vyuICStockDetail_dblStockUnitQty, T1.vyuICStockDetail_dblMinOrder, T1.vyuICStockDetail_dblReorderPoint, T1.vyuICStockDetail_intAllowNegativeInventory, T1.vyuICStockDetail_strAllowNegativeInventory, T1.vyuICStockDetail_intCostingMethod, T1.vyuICStockDetail_strCostingMethod, T1.vyuICStockDetail_dblAmountPercent, T1.vyuICStockDetail_dblSalePrice, T1.vyuICStockDetail_dblMSRPPrice, T1.vyuICStockDetail_strPricingMethod, T1.vyuICStockDetail_dblLastCost, T1.vyuICStockDetail_dblStandardCost, T1.vyuICStockDetail_dblAverageCost, T1.vyuICStockDetail_dblEndMonthCost, T1.vyuICStockDetail_dblOnOrder, T1.vyuICStockDetail_dblInTransitInbound, T1.vyuICStockDetail_dblUnitOnHand, T1.vyuICStockDetail_dblInTransitOutbound, T1.vyuICStockDetail_dblBackOrder, T1.vyuICStockDetail_dblOrderCommitted, T1.vyuICStockDetail_dblUnitStorage, T1.vyuICStockDetail_dblConsignedPurchase, T1.vyuICStockDetail_dblConsignedSale, T1.vyuICStockDetail_dblUnitReserved, T1.vyuICStockDetail_dblAvailable, T1.vyuICStockDetail_dblExtendedCost)
+    FROM (
+        SELECT 
+            T.intKey AS vyuICStockDetail_intKey, 
+            T.intItemId AS vyuICStockDetail_intItemId, 
+            T.strItemNo AS vyuICStockDetail_strItemNo, 
+            T.strType AS vyuICStockDetail_strType, 
+            T.strDescription AS vyuICStockDetail_strDescription, 
+            T.strLotTracking AS vyuICStockDetail_strLotTracking, 
+            T.strInventoryTracking AS vyuICStockDetail_strInventoryTracking, 
+            T.strStatus AS vyuICStockDetail_strStatus, 
+            T.intLocationId AS vyuICStockDetail_intLocationId, 
+            T.intItemLocationId AS vyuICStockDetail_intItemLocationId, 
+            T.intSubLocationId AS vyuICStockDetail_intSubLocationId, 
+            T.intCategoryId AS vyuICStockDetail_intCategoryId, 
+            T.strCategoryCode AS vyuICStockDetail_strCategoryCode, 
+            T.intCommodityId AS vyuICStockDetail_intCommodityId, 
+            T.strCommodityCode AS vyuICStockDetail_strCommodityCode, 
+            T.strStorageLocationName AS vyuICStockDetail_strStorageLocationName, 
+            T.strSubLocationName AS vyuICStockDetail_strSubLocationName, 
+            T.intStorageLocationId AS vyuICStockDetail_intStorageLocationId, 
+            T.strLocationName AS vyuICStockDetail_strLocationName, 
+            T.strLocationType AS vyuICStockDetail_strLocationType, 
+            T.intStockUOMId AS vyuICStockDetail_intStockUOMId, 
+            T.strStockUOM AS vyuICStockDetail_strStockUOM, 
+            T.strStockUOMType AS vyuICStockDetail_strStockUOMType, 
+            T.dblStockUnitQty AS vyuICStockDetail_dblStockUnitQty, 
+            T.dblMinOrder AS vyuICStockDetail_dblMinOrder, 
+            T.dblReorderPoint AS vyuICStockDetail_dblReorderPoint, 
+            T.intAllowNegativeInventory AS vyuICStockDetail_intAllowNegativeInventory, 
+            T.strAllowNegativeInventory AS vyuICStockDetail_strAllowNegativeInventory, 
+            T.intCostingMethod AS vyuICStockDetail_intCostingMethod, 
+            T.strCostingMethod AS vyuICStockDetail_strCostingMethod, 
+            T.dblAmountPercent AS vyuICStockDetail_dblAmountPercent, 
+            T.dblSalePrice AS vyuICStockDetail_dblSalePrice, 
+            T.dblMSRPPrice AS vyuICStockDetail_dblMSRPPrice, 
+            T.strPricingMethod AS vyuICStockDetail_strPricingMethod, 
+            T.dblLastCost AS vyuICStockDetail_dblLastCost, 
+            T.dblStandardCost AS vyuICStockDetail_dblStandardCost, 
+            T.dblAverageCost AS vyuICStockDetail_dblAverageCost, 
+            T.dblEndMonthCost AS vyuICStockDetail_dblEndMonthCost, 
+            T.dblOnOrder AS vyuICStockDetail_dblOnOrder, 
+            T.dblInTransitInbound AS vyuICStockDetail_dblInTransitInbound, 
+            T.dblUnitOnHand AS vyuICStockDetail_dblUnitOnHand, 
+            T.dblInTransitOutbound AS vyuICStockDetail_dblInTransitOutbound, 
+            T.dblBackOrder AS vyuICStockDetail_dblBackOrder, 
+            T.dblOrderCommitted AS vyuICStockDetail_dblOrderCommitted, 
+            T.dblUnitStorage AS vyuICStockDetail_dblUnitStorage, 
+            T.dblConsignedPurchase AS vyuICStockDetail_dblConsignedPurchase, 
+            T.dblConsignedSale AS vyuICStockDetail_dblConsignedSale, 
+            T.dblUnitReserved AS vyuICStockDetail_dblUnitReserved, 
+            T.dblAvailable AS vyuICStockDetail_dblAvailable, 
+            T.dblExtendedCost AS vyuICStockDetail_dblExtendedCost, 
+            True AS _from0
+        FROM InventoryEntities.vyuICStockDetails AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICStockDetails.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView391()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICStockDetails
+        [iRely.Inventory.Model.vyuICStockDetail](T1.vyuICStockDetail_intKey, T1.vyuICStockDetail_intItemId, T1.vyuICStockDetail_strItemNo, T1.vyuICStockDetail_strType, T1.vyuICStockDetail_strDescription, T1.vyuICStockDetail_strLotTracking, T1.vyuICStockDetail_strInventoryTracking, T1.vyuICStockDetail_strStatus, T1.vyuICStockDetail_intLocationId, T1.vyuICStockDetail_intItemLocationId, T1.vyuICStockDetail_intSubLocationId, T1.vyuICStockDetail_intCategoryId, T1.vyuICStockDetail_strCategoryCode, T1.vyuICStockDetail_intCommodityId, T1.vyuICStockDetail_strCommodityCode, T1.vyuICStockDetail_strStorageLocationName, T1.vyuICStockDetail_strSubLocationName, T1.vyuICStockDetail_intStorageLocationId, T1.vyuICStockDetail_strLocationName, T1.vyuICStockDetail_strLocationType, T1.vyuICStockDetail_intStockUOMId, T1.vyuICStockDetail_strStockUOM, T1.vyuICStockDetail_strStockUOMType, T1.vyuICStockDetail_dblStockUnitQty, T1.vyuICStockDetail_dblMinOrder, T1.vyuICStockDetail_dblReorderPoint, T1.vyuICStockDetail_intAllowNegativeInventory, T1.vyuICStockDetail_strAllowNegativeInventory, T1.vyuICStockDetail_intCostingMethod, T1.vyuICStockDetail_strCostingMethod, T1.vyuICStockDetail_dblAmountPercent, T1.vyuICStockDetail_dblSalePrice, T1.vyuICStockDetail_dblMSRPPrice, T1.vyuICStockDetail_strPricingMethod, T1.vyuICStockDetail_dblLastCost, T1.vyuICStockDetail_dblStandardCost, T1.vyuICStockDetail_dblAverageCost, T1.vyuICStockDetail_dblEndMonthCost, T1.vyuICStockDetail_dblOnOrder, T1.vyuICStockDetail_dblInTransitInbound, T1.vyuICStockDetail_dblUnitOnHand, T1.vyuICStockDetail_dblInTransitOutbound, T1.vyuICStockDetail_dblBackOrder, T1.vyuICStockDetail_dblOrderCommitted, T1.vyuICStockDetail_dblUnitStorage, T1.vyuICStockDetail_dblConsignedPurchase, T1.vyuICStockDetail_dblConsignedSale, T1.vyuICStockDetail_dblUnitReserved, T1.vyuICStockDetail_dblAvailable, T1.vyuICStockDetail_dblExtendedCost)
+    FROM (
+        SELECT 
+            T.intKey AS vyuICStockDetail_intKey, 
+            T.intItemId AS vyuICStockDetail_intItemId, 
+            T.strItemNo AS vyuICStockDetail_strItemNo, 
+            T.strType AS vyuICStockDetail_strType, 
+            T.strDescription AS vyuICStockDetail_strDescription, 
+            T.strLotTracking AS vyuICStockDetail_strLotTracking, 
+            T.strInventoryTracking AS vyuICStockDetail_strInventoryTracking, 
+            T.strStatus AS vyuICStockDetail_strStatus, 
+            T.intLocationId AS vyuICStockDetail_intLocationId, 
+            T.intItemLocationId AS vyuICStockDetail_intItemLocationId, 
+            T.intSubLocationId AS vyuICStockDetail_intSubLocationId, 
+            T.intCategoryId AS vyuICStockDetail_intCategoryId, 
+            T.strCategoryCode AS vyuICStockDetail_strCategoryCode, 
+            T.intCommodityId AS vyuICStockDetail_intCommodityId, 
+            T.strCommodityCode AS vyuICStockDetail_strCommodityCode, 
+            T.strStorageLocationName AS vyuICStockDetail_strStorageLocationName, 
+            T.strSubLocationName AS vyuICStockDetail_strSubLocationName, 
+            T.intStorageLocationId AS vyuICStockDetail_intStorageLocationId, 
+            T.strLocationName AS vyuICStockDetail_strLocationName, 
+            T.strLocationType AS vyuICStockDetail_strLocationType, 
+            T.intStockUOMId AS vyuICStockDetail_intStockUOMId, 
+            T.strStockUOM AS vyuICStockDetail_strStockUOM, 
+            T.strStockUOMType AS vyuICStockDetail_strStockUOMType, 
+            T.dblStockUnitQty AS vyuICStockDetail_dblStockUnitQty, 
+            T.dblMinOrder AS vyuICStockDetail_dblMinOrder, 
+            T.dblReorderPoint AS vyuICStockDetail_dblReorderPoint, 
+            T.intAllowNegativeInventory AS vyuICStockDetail_intAllowNegativeInventory, 
+            T.strAllowNegativeInventory AS vyuICStockDetail_strAllowNegativeInventory, 
+            T.intCostingMethod AS vyuICStockDetail_intCostingMethod, 
+            T.strCostingMethod AS vyuICStockDetail_strCostingMethod, 
+            T.dblAmountPercent AS vyuICStockDetail_dblAmountPercent, 
+            T.dblSalePrice AS vyuICStockDetail_dblSalePrice, 
+            T.dblMSRPPrice AS vyuICStockDetail_dblMSRPPrice, 
+            T.strPricingMethod AS vyuICStockDetail_strPricingMethod, 
+            T.dblLastCost AS vyuICStockDetail_dblLastCost, 
+            T.dblStandardCost AS vyuICStockDetail_dblStandardCost, 
+            T.dblAverageCost AS vyuICStockDetail_dblAverageCost, 
+            T.dblEndMonthCost AS vyuICStockDetail_dblEndMonthCost, 
+            T.dblOnOrder AS vyuICStockDetail_dblOnOrder, 
+            T.dblInTransitInbound AS vyuICStockDetail_dblInTransitInbound, 
+            T.dblUnitOnHand AS vyuICStockDetail_dblUnitOnHand, 
+            T.dblInTransitOutbound AS vyuICStockDetail_dblInTransitOutbound, 
+            T.dblBackOrder AS vyuICStockDetail_dblBackOrder, 
+            T.dblOrderCommitted AS vyuICStockDetail_dblOrderCommitted, 
+            T.dblUnitStorage AS vyuICStockDetail_dblUnitStorage, 
+            T.dblConsignedPurchase AS vyuICStockDetail_dblConsignedPurchase, 
+            T.dblConsignedSale AS vyuICStockDetail_dblConsignedSale, 
+            T.dblUnitReserved AS vyuICStockDetail_dblUnitReserved, 
+            T.dblAvailable AS vyuICStockDetail_dblAvailable, 
+            T.dblExtendedCost AS vyuICStockDetail_dblExtendedCost, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICStockDetail AS T
     ) AS T1");
         }
     }

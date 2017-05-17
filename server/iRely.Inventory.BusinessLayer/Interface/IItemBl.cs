@@ -31,6 +31,6 @@ namespace iRely.Inventory.BusinessLayer
         Task<object> GetItemUOMsByType(int? intItemId, string strUnitType);
         Task<SearchResult> GetItemOwner(GetParameter param);
         Task<SearchResult> GetItemSubLocations(GetParameter param);
-
+        Task<SearchResult> GetStockDetail(GetParameter param);
     }
 }
