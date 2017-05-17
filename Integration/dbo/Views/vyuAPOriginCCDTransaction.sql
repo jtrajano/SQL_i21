@@ -38,7 +38,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAP
 					) DuplicateData
 					WHERE A.apivc_trans_type IN (''I'',''C'',''A'')
 					AND A.apivc_orig_amt != 0
-					AND 1 = (CASE WHEN 1 = 1 AND A.apivc_comment = ''CCD Reconciliation'' AND A.apivc_status_ind = ''U'' THEN 1
+					AND 1 = (CASE WHEN 1 = 1 AND A.apivc_comment IN (''CCD Reconciliation'', ''CCD Reconciliation Reversal'') AND A.apivc_status_ind = ''U'' THEN 1
 								WHEN 1 = 0 THEN 1	
 							ELSE 0 END)
 					AND NOT EXISTS(
