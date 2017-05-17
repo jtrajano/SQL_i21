@@ -5209,6 +5209,8 @@
     <Build Include="dbo\Tables\tblSMApprovalHistory.sql" />
     <Build Include="dbo\Views\vyuLGContarctWithoutShippingAdvice.sql" />
     <Build Include="dbo\Views\vyuICStockDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportBondedPalletTag.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportUCCPalletLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
