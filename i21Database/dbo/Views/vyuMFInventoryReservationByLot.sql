@@ -5,6 +5,7 @@ AS
 	r.intLotId,
 	r.strTransactionId AS [strWorkOrderBOLNo],
 	i.strItemNo AS strBlend,
+	i1.intItemId,
 	i1.strItemNo,
 	i1.strDescription,
 	r.dblQty,
