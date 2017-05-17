@@ -27,7 +27,7 @@ WHERE intTransactionId IN (
 ) 
 and ysnCurrent = 1  and strStatus = 'Approved' 
 
---APPROVED SUBMITTER ENTRIES
+--APPROVED SUBMITTER ENTRIES FOR NOT THE SAME VALUES OF INTSUBMITTEDBYID AND INTAPPROVERID
 INSERT INTO #TempApprovalHistory(intApprovalId, intEntityId, ysnApproved)
 SELECT intApprovalId, intSubmittedById, 1
 FROM tblSMApproval 
@@ -37,6 +37,7 @@ WHERE intTransactionId IN (
     WHERE strApprovalStatus = 'Approved'
 ) 
 and ysnCurrent = 1  and strStatus = 'Approved' 
+and intApproverId <> intSubmittedById
 
 --ALL POSSIBLE USERS
 DECLARE users_cursor CURSOR FOR
