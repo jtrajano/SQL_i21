@@ -103,7 +103,7 @@ BEGIN
 	BEGIN
 		DROP TABLE #tmpSDToInvoice
 	END
-	SELECT * INTO #tmpSDToInvoice 
+	SELECT intImportSDToInvoiceId = IDENTITY(INT, 1, 1), * INTO #tmpSDToInvoice 
 	FROM @StagingTable
 
 	IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpUniqueInvoiceList')) 

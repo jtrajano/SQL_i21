@@ -97,16 +97,14 @@ BEGIN
 						ON EAL.intAuditLogId = AL.intAuditLogId
 					WHERE AL.intAuditLogId = @intAuditLogId
 					AND EAL.intExtractedAuditLogId = @intInsertedId
-				ELSE
-					DELETE FROM #tmpAuditLog WHERE intAuditLogId = @intAuditLogId
 
-				/* If delete entry if no more unhidden fields */
+				/* Delete entry if no more unhidden fields */
 				DELETE FROM #tmpAuditLog WHERE intAuditLogId = @intAuditLogId 
 					AND PATINDEX('%,"hidden":false%', strJsonData) = 0
 			END
 
 	/* Loop control */
-	DELETE FROM #tmpAuditLog WHERE intAuditLogId = @intAuditLogId
+	--DELETE FROM #tmpAuditLog WHERE intAuditLogId = @intAuditLogId
 END
 
 /*Clear and Update Employee Change Log data */
@@ -151,13 +149,13 @@ SELECT
 						WHEN (strTableName = 'tblPREmployeeTimeOffs') THEN 
 							ISNULL((SELECT strTimeOff FROM tblPRTypeTimeOff WHERE intTypeTimeOffId = (SELECT intTypeTimeOffId FROM tblPREmployeeTimeOff WHERE intEmployeeTimeOffId = CAST(strKeyValue AS INT))), '')
 						ELSE '' END
-	,strFrom = CASE WHEN (strFrom = 'null') THEN '(empty)' 
+	,strFrom = CASE WHEN (strFrom IN ('null', '')) THEN '(empty)' 
 					WHEN (strDataType = 'Boolean') THEN
 						CASE WHEN (strFrom = 'true') THEN 'Yes' ELSE 'No' END
 					WHEN (strDataType = 'DateTime') THEN 
 						CONVERT(NVARCHAR(30), CAST(SUBSTRING(strFrom, 5, 12) AS DATETIME),101)
 					ELSE strFrom END
-	,strTo = CASE WHEN (strTo = 'null') THEN '(empty)' 
+	,strTo = CASE WHEN (strTo IN ('null', '')) THEN '(empty)' 
 					WHEN (strDataType = 'Boolean') THEN
 						CASE WHEN (strTo = 'true') THEN 'Yes' ELSE 'No' END
 					WHEN (strDataType = 'DateTime') THEN 
@@ -172,11 +170,11 @@ FROM
 		,intEntityChangedId = AUD.intEntityId
 		,strChangedBy = CASE WHEN (SEC.strFullName = '') THEN strUserName ELSE SEC.strFullName END
 		,dtmChangedOn = AUD.dtmDate
-		,strDataType = CASE WHEN (PATINDEX('%"change":"dbl%","from":%', strJsonData) > 0) THEN 'Numeric'
-							WHEN (PATINDEX('%"change":"int%","from":%', strJsonData) > 0) THEN 'Integer'
-							WHEN (PATINDEX('%"change":"dtm%","from":%', strJsonData) > 0) THEN 'DateTime'
-							WHEN (PATINDEX('%"change":"ysn%","from":%', strJsonData) > 0) THEN 'Boolean'
-							WHEN (PATINDEX('%"change":"str%","from":%', strJsonData) > 0) THEN 'String'
+		,strDataType = CASE WHEN (PATINDEX('%"change":"dbl%', strJsonString) > 0) THEN 'Numeric'
+							WHEN (PATINDEX('%"change":"int%', strJsonString) > 0) THEN 'Integer'
+							WHEN (PATINDEX('%"change":"dtm%', strJsonString) > 0) THEN 'DateTime'
+							WHEN (PATINDEX('%"change":"ysn%', strJsonString) > 0) THEN 'Boolean'
+							WHEN (PATINDEX('%"change":"str%', strJsonString) > 0) THEN 'String'
 							ELSE '' END
 		,strTableName = CASE WHEN (PATINDEX('%"associationKey":%', strJsonString) > 0) THEN
 							REPLACE(SUBSTRING(strJsonString, PATINDEX('%"associationKey":%', strJsonString) + 17, PATINDEX('%,"changeDescription":%', strJsonString) - PATINDEX('%"associationKey":%', strJsonString) - 17), '"', '')
@@ -204,9 +202,6 @@ FROM
 	WHERE 
 		PATINDEX('%"change":"strOriRowState","from":%', strJsonString) <= 0
 		AND PATINDEX('%,"to":%', strJsonString) - PATINDEX('%","from"%', strJsonString) > 0
-		AND REPLACE(SUBSTRING(strJsonString, PATINDEX('%","from":%', strJsonString) + 9, PATINDEX('%,"to":%', strJsonString) - PATINDEX('%","from":%', strJsonString) - 9), '"', '') <> ''
-		AND REPLACE(SUBSTRING(strJsonString, PATINDEX('%,"to":%', strJsonString) + 6, PATINDEX('%,"leaf"%', strJsonString) - PATINDEX('%,"to":%', strJsonString) - 6), '"', '') <> ''
-		AND PATINDEX('%,"hidden":true%', strJsonString) = 0
 	) EC
 ORDER BY 
 	dtmChangedOn DESC

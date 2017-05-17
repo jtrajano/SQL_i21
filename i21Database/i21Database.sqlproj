@@ -5232,6 +5232,13 @@
     <Build Include="dbo\Views\vyuRKFuturesPSHeaderNotMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspEMGetEntityTypeHasData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDeletePatronageTaxes.sql" />
+    <Build Include="dbo\Views\vyuLGContarctWithoutShippingAdvice.sql" />
+    <Build Include="dbo\Tables\tblSMApprovalHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspAREntityTypeConversion.sql" />
+    <Build Include="dbo\Views\vyuAPBillDetailTax.sql" />
+    <Build Include="dbo\Views\vyuDBPanel.sql" />
+    <Build Include="dbo\Tables\tblSCScaleOperator.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCAddScaleOperator.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5343,6 +5350,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
+    <Build Include="dbo\Views\vyuAPVendorDefault.sql" />
     <None Include="Scripts\Post-Deployment\MF\5_WSPattern.sql" />
     <None Include="Scripts\Post-Deployment\LG\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\IC\19_M2MComputations.sql" />
@@ -5358,6 +5366,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\27_RenamePricingForContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspSMTransactionApproved.sql" />
     <None Include="dbo\Triggers\trgAfterInsertUpdatetblMFWorkOrder.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\25_ApprovalHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

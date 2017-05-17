@@ -324,8 +324,8 @@ BEGIN
 			(
 				SELECT 
 					C.intTermsId
-				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
-				WHERE B.intEntityVendorId = A.intEntityVendorId
+				FROM tblAPVendor B INNER JOIN tblEMEntityLocation C ON B.intEntityId = C.intEntityId AND C.ysnDefaultLocation = 1
+				WHERE B.intEntityId = A.intEntityVendorId
 			) Terms
 			WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
 
@@ -607,7 +607,7 @@ BEGIN
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 			LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 			LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
-			INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+			INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityId
 			LEFT JOIN tblCTWeightGrade W ON E.intWeightId = W.intWeightGradeId
 			OUTER APPLY (
 				SELECT 
