@@ -1622,6 +1622,7 @@ BEGIN
 	,(SELECT TOP 1 dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Gross Price')
 	,@dblTransferCost	
 	,@strTransactionType
+	,@strPriceBasis
 	)
 	---------------------------------------------------
 	--				MARGIN COMPUTATION				 --

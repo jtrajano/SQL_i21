@@ -1,4 +1,5 @@
-﻿CREATE FUNCTION [dbo].[fnCFGetTransactionMargin] (
+﻿
+CREATE FUNCTION [dbo].[fnCFGetTransactionMargin] (
 	 @intTransactionId		INT = 0
 	 ,@intItemId			INT = 0
 	 ,@intLocationId		INT = 0
@@ -6,6 +7,7 @@
 	 ,@dblGrossPrice		NUMERIC(18,6) = 0.0
 	 ,@dblTransferCost		NUMERIC(18,6) = 0.0
 	 ,@strTransactionType	NVARCHAR(MAX) = ''
+	 ,@strPriceBasis		NVARCHAR(MAX) = ''
 )
 RETURNS @returntable TABLE
 (
@@ -24,14 +26,16 @@ BEGIN
 	DECLARE @strExistingTransactionType NVARCHAR(MAX)
 	DECLARE @strExistingTransactionPosted BIT
 
+
 	SELECT TOP 1
 	 @strExistingTransactionType = strTransactionType
 	,@strExistingTransactionPosted = ysnPosted
+	,@strPriceBasis = strPriceBasis
 	FROM tblCFTransaction 
 	WHERE intTransactionId = @intTransactionId
 
 
-	IF (@strExistingTransactionType = 'Local/Network' )
+	IF (@strExistingTransactionType = 'Local/Network' AND  @strPriceBasis != 'Transfer Cost')
 	BEGIN
 		IF (@strExistingTransactionPosted = 1)
 		BEGIN
@@ -105,7 +109,13 @@ BEGIN
 	CASE @strTransactionType 
 	WHEN 'Local/Network' 
 		THEN 
-			@dblNetPrice - dblAverageCost
+			CASE @strPriceBasis
+			WHEN 'Transfer Cost'
+			THEN
+				@dblNetPrice - @dblTransferCost
+			ELSE
+				@dblNetPrice - dblAverageCost
+			END
 	WHEN 'Extended Remote' 
 	THEN @dblGrossPrice - @dblTransferCost 
 	WHEN 'Remote' 
@@ -116,7 +126,14 @@ BEGIN
 	END),
 	dblCost = CASE @strTransactionType 
 	WHEN 'Local/Network' 
-		THEN dblAverageCost
+		THEN 
+			CASE @strPriceBasis
+				WHEN 'Transfer Cost'
+				THEN
+					@dblTransferCost
+				ELSE
+					dblAverageCost
+				END
 	WHEN 'Extended Remote' 
 	THEN @dblTransferCost 
 	WHEN 'Remote' 
