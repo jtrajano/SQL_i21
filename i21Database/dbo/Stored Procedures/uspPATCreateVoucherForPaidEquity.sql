@@ -101,11 +101,13 @@ END
 		BEGIN
 			INSERT INTO @voucherId SELECT intBillId FROM tblAPBill where intBillId = @intCreatedBillId;
 
-			DELETE FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail where intBillId IN (SELECT intId FROM @voucherId));
+			EXEC [dbo].[uspAPDeletePatronageTaxes] @voucherId;
+
 			UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
 			UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
 
-			EXEC uspAPUpdateVoucherTotal @voucherId;
+			EXEC [dbo].[uspAPUpdateVoucherTotal] @voucherId;
+
 			DELETE FROM @voucherId;
 		END
 
