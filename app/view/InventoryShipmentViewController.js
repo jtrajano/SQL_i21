@@ -643,6 +643,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             window: win,
             store: store,
             enableActivity: true,
+            enableCustomTab: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
             //onSaveClick: me.saveAndPokeGrid(win, grdInventoryShipment),
