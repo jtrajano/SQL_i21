@@ -164,7 +164,7 @@ BEGIN
 								THEN
 									CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 								ELSE 1 END)
-					AND 1 = (CASE WHEN @creditCardOnly = 1 AND A.apivc_comment = ''CCD Reconciliation'' AND A.apivc_status_ind = ''U'' THEN 1
+					AND 1 = (CASE WHEN @creditCardOnly = 1 AND A.apivc_comment IN (''CCD Reconciliation'', ''CCD Reconciliation Reversal'') AND A.apivc_status_ind = ''U'' THEN 1
 								WHEN @creditCardOnly = 0 THEN 1	
 							ELSE 0 END)
 					AND NOT EXISTS(
@@ -302,7 +302,7 @@ BEGIN
 								ELSE 1 END)
 				AND C2.apivc_trans_type IN (''I'',''C'',''A'',''O'')
 				AND C2.apivc_orig_amt != 0
-				AND 1 = (CASE WHEN @creditCardOnly = 1 AND C2.apivc_comment = ''CCD Reconciliation'' AND C2.apivc_status_ind = ''U'' THEN 1 
+				AND 1 = (CASE WHEN @creditCardOnly = 1 AND C2.apivc_comment IN (''CCD Reconciliation'', ''CCD Reconciliation Reversal'') AND C2.apivc_status_ind = ''U'' THEN 1 
 							WHEN @creditCardOnly = 0 THEN 1
 							ELSE 0 END)
 				AND NOT EXISTS(
