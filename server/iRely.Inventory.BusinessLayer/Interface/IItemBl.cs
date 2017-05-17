@@ -32,5 +32,6 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchItemOwner(GetParameter param);
         Task<SearchResult> SearchItemSubLocations(GetParameter param);
         Task<SearchResult> GetItemMotorFuelTax(GetParameter param);
+        Task<SearchResult> SearchStockDetail(GetParameter param);
     }
 }

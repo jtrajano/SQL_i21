@@ -1040,5 +1040,27 @@ namespace iRely.Inventory.BusinessLayer
             };
 
         }
+        /// Get Item Stock
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> SearchStockDetail(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICStockDetail>()
+                .Where(
+                    p => (p.strType == "Inventory" ||
+                    p.strType == "Finished Good" ||
+                    p.strType == "Raw Material") && p.intLocationId != null
+                )
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
     }
 }

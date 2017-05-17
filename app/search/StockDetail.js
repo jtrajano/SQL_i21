@@ -6,7 +6,7 @@ Ext.define('Inventory.search.StockDetail', {
         {
             mainTitle: 'Stock Details',
             title: 'Search Locations YTD',
-            url: '../Inventory/api/Item/SearchItemStocks',
+            url: '../Inventory/api/Item/SearchStockDetail',
             groupedOnLoad: true,
             columns: [
                 { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
