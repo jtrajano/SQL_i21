@@ -6715,6 +6715,124 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
+    onCurrencyBeforeSelect: function(field, record){
+        var me = this;
+        var current = me.getViewModel().data.current;
+        var receiptItemCount = 0;
+
+        var currentCurrencyId = current.get('intCurrencyId');
+        currencyCurrencyId = currentCurrencyId ? currentCurrencyId : 0;
+        var selectedCurrencyId = record.get('intCurrencyID');
+        selectedCurrencyId = selectedCurrencyId ? selectedCurrencyId : 0; 
+        var selectedCurrency = record.get('strCurrency');
+
+        if (current){
+			if (current.tblICInventoryReceiptItems()) {
+                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (row) {
+                    if (!row.dummy) {
+                        receiptItemCount++;  
+                        return false;                       
+                    }
+                });
+            }
+        }
+
+        if (receiptItemCount > 0 && currencyCurrencyId != selectedCurrencyId){
+            var buttonAction = function (button) {
+                if (button === 'yes') {
+                    var items = current.tblICInventoryReceiptItems().data.items; 
+                    for (var i = items.length - 1; i >= 0; i--){
+                        if (!items[i].dummy){
+                            var item = items[i];
+                            // Remove the taxes related to the item. 
+                            if (item){
+                                item.tblICInventoryReceiptItemTaxes().removeAll();                                
+                            }
+                            // and then remove the item itself. 
+                            current.tblICInventoryReceiptItems().removeAt(i);
+                        }
+                    }
+
+                    current.set('intCurrencyId', selectedCurrencyId);
+                    current.set('strCurrency', selectedCurrency);
+                }
+            };       
+
+            iRely.Functions.showCustomDialog('question', 'yesno', 'Changing the currency will clear all the items. Do you want to continue?', buttonAction);
+            return false; 
+        }
+
+        return true;
+    },
+
+    onReceiptDateChange: function(field, newValue, oldValue, eOpts){
+        if (!(oldValue && newValue)) return;
+        if (oldValue == newValue) return; 
+
+        var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+        //var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
+
+        if (!functionalCurrencyId) return; 
+
+        var me = this;
+        var win = me.getView().screenMgr.window;
+        var dtmReceiptDate = win.down('#dtmReceiptDate');
+        var cboCurrency = win.down('#cboCurrency');
+        var current = me.getViewModel().data.current;
+        var receiptItemCount = 0;
+        
+        var currentCurrencyId = current.get('intCurrencyId');
+        currencyCurrencyId = currentCurrencyId ? currentCurrencyId : 0;
+
+        if (current){
+			if (current.tblICInventoryReceiptItems()) {
+                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (row) {
+                    if (!row.dummy) {
+                        receiptItemCount++;  
+                        return false;                       
+                    }
+                });
+            }
+        }
+
+        if (receiptItemCount > 0 && currencyCurrencyId != functionalCurrencyId){
+            var buttonAction = function (button) {
+                if (button === 'yes') {
+                    var items = current.tblICInventoryReceiptItems().data.items; 
+                    for (var i = items.length - 1; i >= 0; i--){
+                        if (!items[i].dummy){
+                            var item = items[i];
+                            // Remove the taxes related to the item. 
+                            if (item){
+                                item.tblICInventoryReceiptItemTaxes().removeAll();                                
+                            }
+                            // and then remove the item itself. 
+                            current.tblICInventoryReceiptItems().removeAt(i);
+                        }
+                    }
+                }
+                else {                    
+                    dtmReceiptDate.suspendEvent('change');                                        
+                    dtmReceiptDate.setValue(oldValue);
+                    cboCurrency.focus(); // Change control focus to force the dtmReceiptDate's Blur event to fire. 
+                }
+            };       
+            iRely.Functions.showCustomDialog('question', 'yesno', 'Changing the date while using a foreign currency will clear all the items. Do you want to continue?', buttonAction);
+        }
+    },
+
+    onReceiptDateBlur: function(dtmReceiptDate, e, eOpts){
+        if (!dtmReceiptDate) return; 
+        
+        dtmReceiptDate.resumeEvents();
+
+        var events = dtmReceiptDate.events;
+        var change = events ? events.change : null; 
+        if (change){
+            dtmReceiptDate.resumeEvent('change');
+        }    
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -6728,7 +6846,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboCurrency": {
                 drilldown: this.onCurrencyDrilldown,
-                select: this.onCurrencySelect
+                select: this.onCurrencySelect,
+                beforeselect: this.onCurrencyBeforeSelect
+            },
+            "#dtmReceiptDate": {
+                change: this.onReceiptDateChange,
+                blur: this.onReceiptDateBlur
             },
             /*"#cboTaxGroup": {
                 drilldown: this.onTaxGroupDrilldown,

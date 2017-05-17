@@ -72,13 +72,19 @@ namespace iRely.Inventory.BusinessLayer
             {
                 var connection = _db.ContextManager.Database.Connection;
                 try
-                {                  
+                {
                     // Get the shipment id from deleted records 
                     var deletedShipments = _db.ContextManager.ChangeTracker.Entries<tblICInventoryShipment>().Where(p => p.State == EntityState.Deleted).ToList();
 
                     // Log the original data. 
                     foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
                     {
+                        // Clear the receipt per charge records. Let the Receipt posting re-create it. 
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
+                            "uspICDeleteChargePerItemOnShipmentSave @intShipmentNo",
+                            new SqlParameter("intShipmentId", shipment.intInventoryShipmentId)
+                        );
+
                         // Log the original detail records. 
                         _db.ContextManager.Database.ExecuteSqlCommand(
                             "uspICLogTransactionDetail @TransactionType, @TransactionId",

@@ -206,6 +206,12 @@ namespace iRely.Inventory.BusinessLayer
                     // Log the original data. 
                     foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
                     {
+                        // Clear the receipt per charge records. Let the Receipt posting re-create it. 
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
+                            "uspICDeleteChargePerItemOnReceiptSave @intReceiptNo",
+                            new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId)
+                        );
+
                         await _db.ContextManager.Database.ExecuteSqlCommandAsync(
                             "uspICLogTransactionDetail @TransactionType, @TransactionId", 
                             new SqlParameter("TransactionType", 1),
