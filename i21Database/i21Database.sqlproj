@@ -5236,6 +5236,7 @@
     <Build Include="dbo\Tables\tblSMApprovalHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspAREntityTypeConversion.sql" />
     <Build Include="dbo\Views\vyuAPBillDetailTax.sql" />
+    <Build Include="dbo\Views\vyuDBPanel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
