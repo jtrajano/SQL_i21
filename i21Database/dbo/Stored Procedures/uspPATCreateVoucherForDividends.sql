@@ -43,6 +43,8 @@ BEGIN TRANSACTION
 	DECLARE @dividendCustomerIds AS Id;
 	DECLARE @totalRecords AS INT = 0;
 
+	DECLARE @voucherId as Id;
+
 	INSERT INTO @dividendCustomerIds
 	SELECT intDividendCustomerId FROM #tempDivCust
 BEGIN TRY
@@ -71,6 +73,19 @@ BEGIN TRY
 			,@billId = @intCreatedBillId OUTPUT
 
 		UPDATE tblAPBillDetail SET int1099Form = 5, int1099Category= 0 WHERE intBillId = @intCreatedBillId
+
+		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
+		BEGIN
+			INSERT INTO @voucherId SELECT intBillId FROM tblAPBill where intBillId = @intCreatedBillId;
+
+			EXEC [dbo].[uspAPDeletePatronageTaxes] @voucherId;
+
+			UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
+			UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
+
+			EXEC uspAPUpdateVoucherTotal @voucherId;
+			DELETE FROM @voucherId;
+		END
 
 		EXEC [dbo].[uspAPPostBill]
 			@batchId = @intCreatedBillId,
