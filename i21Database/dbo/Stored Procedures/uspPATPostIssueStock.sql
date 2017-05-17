@@ -412,7 +412,7 @@ BEGIN
 				,[dblMaintenanceAmount]					= NULL
 				,[dblLicenseAmount]						= NULL
 				,[intTaxGroupId]						= NULL
-				,[ysnRecomputeTax]						= 1
+				,[ysnRecomputeTax]						= 0
 				,[intSCInvoiceId]						= NULL
 				,[strSCInvoiceNumber]					= ''
 				,[intInventoryShipmentItemId]			= NULL
