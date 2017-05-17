@@ -4363,6 +4363,18 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Derivativ
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'RiskManagement.view.DerivativeScreen?showSearch=true' WHERE strMenuName = 'Derivative Screen' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskParentMenuId
 
+/* Tank Management */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TankManagementParentMenuId)
+INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@TankManagementParentMenuId)
+
+DECLARE @ConsumptionSitesMenuId INT
+SELECT  @ConsumptionSitesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Consumption Sites' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Consumption Sites' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ConsumptionSitesMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@ConsumptionSitesMenuId)
+END
+
 GO
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------- ADJUST uspSMSortOriginMenus' sorting -------------------------------------------------------
