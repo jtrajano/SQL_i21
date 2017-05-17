@@ -74,7 +74,6 @@ namespace iRely.Inventory.Model
         public bool? ysnHandAddIngredient { get; set; }
         public int? intMedicationTag { get; set; }
         public int? intIngredientTag { get; set; }
-        public int? intItemMessage { get; set; }
         public int? intHazmatMessage { get; set; }
         public string strVolumeRebateGroup { get; set; }
         public int? intPhysicalItem { get; set; }
@@ -319,27 +318,6 @@ namespace iRely.Inventory.Model
             set
             {
                 _hazmatMessage = value;
-            }
-        }
-
-        private string _itemMessage;
-
-        [NotMapped]
-        public string strItemMessage
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_itemMessage))
-                    if (vyuICGetCompactItem != null)
-                        return vyuICGetCompactItem.strItemMessage;
-                    else
-                        return null;
-                else
-                    return _itemMessage;
-            }
-            set
-            {
-                _itemMessage = value;
             }
         }
 
@@ -636,7 +614,6 @@ namespace iRely.Inventory.Model
         public string strMedicationTag { get; set; }
         public string strIngredientTag { get; set; }
         public string strHazmatMessage { get; set; }
-        public string strItemMessage { get; set; }
         public string strPhysicalItem { get; set; }
         public string strPatronageCategory { get; set; }
         public string strPatronageDirect { get; set; }
