@@ -310,6 +310,7 @@ INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
 LEFT JOIN tblICItem ICI ON ICSI.intItemId = ICI.intItemId
 WHERE ICSI.intOrderId = @SalesOrderId
 AND ICS.ysnPosted = 1
+AND ICSI.intInventoryShipmentItemId NOT IN (SELECT intInventoryShipmentItemId FROM dbo.tblARInvoiceDetail WITH (NOLOCK) WHERE ISNULL(intInventoryShipmentItemId, 0) <> 0)
 
 --GET ITEMS FROM Manufacturing - Other Charges
 INSERT INTO @tblItemsToInvoiceUnsorted

@@ -88,15 +88,15 @@ FROM
 							, ID.intItemUOMId
 							, dblQtyShipped	= CASE WHEN ISNULL(ISHI.dblQuantity, 0) = 0 THEN ID.dblQtyShipped ELSE ID.dblQtyShipped - ISNULL(ISHI.dblQuantity, 0) END
 						FROM tblARInvoiceDetail ID 
-								INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnPosted = 1
+								INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 								LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
-											ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId AND ISH.ysnPosted = 1)
+											ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId)
 												ON ISHI.intLineNo = ID.intSalesOrderDetailId
 							) ID
 				ON SOD.intSalesOrderDetailId = ID.intSalesOrderDetailId
 			LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
-							ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId AND ISH.ysnPosted = 1)							
-				ON SOD.intSalesOrderDetailId = ISHI.intLineNo
+							ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId)
+				ON SOD.intSalesOrderDetailId = ISHI.intLineNo AND SOD.intSalesOrderId = ISHI.intOrderId
 		WHERE SOD.dblQtyOrdered > 0
 		GROUP BY SOD.intSalesOrderDetailId
 	) SHP
