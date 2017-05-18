@@ -1413,10 +1413,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        dataIndex: 'strUOM',
                                                                         itemId: 'colWeightUOM',
                                                                         width: 100,
-                                                                        dataIndex: 'strUOM',
-                                                                        text: 'Weight UOM',
+                                                                        text: 'Gross/Net UOM',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -1450,6 +1450,27 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                             displayField: 'strUnitMeasure',
                                                                             valueField: 'strUnitMeasure'
                                                                         }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colLineGross',
+                                                                        width: 85,
+                                                                        dataIndex: 'dblGross',
+                                                                        text: 'Gross'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colLineTare',
+                                                                        width: 85,
+                                                                        dataIndex: 'dblTare',
+                                                                        text: 'Tare'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colLineNet',
+                                                                        width: 85,
+                                                                        dataIndex: 'dblNet',
+                                                                        text: 'Net'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -1821,7 +1842,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         itemId: 'colLotWeightUOM',
                                                                         width: 100,
                                                                         dataIndex: 'strWeightUOM',
-                                                                        text: 'Lot Wgt UOM'
+                                                                        text: 'Gross/Net UOM'
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
