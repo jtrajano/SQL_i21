@@ -104,18 +104,33 @@ BEGIN
 			 ,@dblContractQuantity = dblContractQuantity
 		FROM #tmpBaseToInvoice
 		ORDER BY intImportBaseEngineeringId ASC
-			 
+		
+		---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	    IF (ISNULL(@dblPrice,0) = 0) 
+			 BEGIN
+			 SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Price should be positive.'
+		END
+		IF (ISNULL(@dblQuantity,0) = 0) 
+			 BEGIN
+			 SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Quanity should be positive.'
+			END
 		--Get Customer Entity Id
 		SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)
-	
+		
+		IF (ISNULL(@intCustomerEntityId,0) = 0)
+		BEGIN
+			SET @strErrorMessage =  REPLACE(@strErrorMessage,'.',', ') + 'Invalid Customer.'
+		END
 		--Get Location Id
 		SET @intLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @strLocation)
 
 		--Get Item id
 		SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
-
+		IF (ISNULL(@intItemId ,0) = 0)
+		BEGIN
+			SET @strErrorMessage =  REPLACE(@strErrorMessage,'.',', ') + 'Invalid Item.'
+		END
 		--Get Site Info
-		
 		-- Tax id  Mismatch - IET-99 JAN192017
 		SET @intSiteId = NULL
 		SET @intSiteTaxId = NULL
@@ -131,9 +146,15 @@ BEGIN
 
 		IF (ISNULL(@intSiteId,0) = 0)
 		BEGIN
-			SET @strErrorMessage = 'Invalid Site.'
-			GOTO LOGERROR
+			SET @strErrorMessage =  REPLACE(@strErrorMessage,'.',', ') + 'Invalid Site.'
 		END
+
+		IF LTRIM(@strErrorMessage) != ''
+			BEGIN		
+				GOTO LOGERROR
+			END
+		
+		-------------------------------------------------------------------------------------------------------------------------------------------------
 		
 		IF ISNULL(@intTaxGroupId,0) = 0
 		BEGIN 
