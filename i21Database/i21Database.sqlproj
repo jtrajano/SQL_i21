@@ -5211,6 +5211,7 @@
     <Build Include="dbo\Views\vyuICStockDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportBondedPalletTag.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportUCCPalletLabel.sql" />
+    <Build Include="dbo\Views\vyuSMDocument.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
