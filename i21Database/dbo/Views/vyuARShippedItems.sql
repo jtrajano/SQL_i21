@@ -814,7 +814,8 @@ LEFT JOIN
 	 FROM tblICUnitMeasure WITH (NOLOCK)) U2 ON IU2.[intUnitMeasureId] = U2.[intUnitMeasureId]
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId]		
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intInventoryShipmentItemId],0) = 0	) ARID
 		ON SHP.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 LEFT OUTER JOIN
 	(SELECT [intCurrencyID],
@@ -1085,7 +1086,8 @@ LEFT OUTER JOIN
 	 FROM tblICStorageLocation WITH (NOLOCK)) ICSL ON ICISI.[intStorageLocationId] = ICSL.[intStorageLocationId]				
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId]		
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intInventoryShipmentItemId],0) = 0) ARID ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 LEFT OUTER JOIN
 	(SELECT [intCompanyLocationId],
 		strLocationName
@@ -1274,7 +1276,8 @@ INNER JOIN
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId],
 		[intInventoryShipmentChargeId]	
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ICISC.intInventoryShipmentChargeId = ARID.[intInventoryShipmentChargeId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intInventoryShipmentChargeId],0) = 0) ARID ON ICISC.intInventoryShipmentChargeId = ARID.[intInventoryShipmentChargeId]
 LEFT OUTER JOIN
 	(SELECT [intCompanyLocationId],
 		strLocationName
@@ -1615,7 +1618,8 @@ LEFT OUTER JOIN
 			[intCurrencyExchangeRateTypeId],
 			[intCurrencyExchangeRateId],
 			[dblCurrencyExchangeRate]
-	 FROM tblARInvoiceDetail WITH (NOLOCK))ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE (ISNULL([intRecipeItemId], 0)	= 0) )ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
 LEFT OUTER JOIN
 	(SELECT intRecipeItemId,
 		intRecipeId
@@ -1800,7 +1804,8 @@ LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId],
 		[intRecipeItemId],
 		[strShipmentNumber]	
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intRecipeItemId],0) = 0) ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
 		AND ICIS.[strShipmentNumber] = ARID.[strShipmentNumber]
 LEFT OUTER JOIN
 	(SELECT [intCompanyLocationId],
@@ -2019,7 +2024,8 @@ LEFT OUTER JOIN
 		[intRecipeItemId],
 		[strShipmentNumber],
 		[intLoadDetailId]
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON LD.intLoadDetailId = ARID.[intLoadDetailId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intLoadDetailId],0) = 0) ARID ON LDL.intLoadDetailId = ARID.[intLoadDetailId]
 LEFT OUTER JOIN 
 	(SELECT [intCompanyLocationId],
 		strLocationName
@@ -2027,9 +2033,7 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN 
 	(SELECT [intCurrencyID],
 		[strCurrency]
-	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]
-WHERE
-	ISNULL(ARID.[intLoadDetailId], 0) = 0
+	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID] 
 	 
 
 UNION
@@ -2312,7 +2316,8 @@ LEFT OUTER JOIN
 		[intCurrencyExchangeRateTypeId],
 		[intCurrencyExchangeRateId],
 		[dblCurrencyExchangeRate]
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intLoadDetailId], 0) = 0) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
 LEFT OUTER JOIN
 	(
 		SELECT
@@ -2485,7 +2490,8 @@ LEFT OUTER JOIN
 		[intCurrencyExchangeRateTypeId],
 		[intCurrencyExchangeRateId],
 		[dblCurrencyExchangeRate]
-	FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
+	FROM tblARInvoiceDetail WITH (NOLOCK)
+	WHERE ISNULL([intLoadDetailId], 0) = 0) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
 LEFT OUTER JOIN
 	(
 		SELECT
