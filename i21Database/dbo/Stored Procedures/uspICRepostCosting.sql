@@ -614,6 +614,10 @@ BEGIN
 					,[dtmCreated]
 					,[intCreatedUserId]
 					,[intConcurrencyId]
+					,[intCostingMethod]
+					,[strDescription]
+					,[intForexRateTypeId]
+					,[dblForexRate]
 			)			
 		SELECT	
 				[intItemId]								= AutoNegative.intItemId
@@ -625,7 +629,7 @@ BEGIN
 				,[dblQty]								= 0
 				,[dblUOMQty]							= 0
 				,[dblCost]								= 0
-				,[dblValue]								= (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+				,[dblValue]								= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
 				,[dblSalesPrice]						= 0
 				,[intCurrencyId]						= AutoNegative.intCurrencyId
 				,[dblExchangeRate]						= AutoNegative.dblExchangeRate
@@ -642,6 +646,23 @@ BEGIN
 				,[dtmCreated]							= GETDATE()
 				,[intCreatedUserId]						= @intEntityUserSecurityId
 				,[intConcurrencyId]						= 1
+				,[intCostingMethod]						= @AVERAGECOST
+				,[strDescription]						= -- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
+														 dbo.fnFormatMessage(
+															dbo.fnICGetErrorMessage(80078)
+															,CONVERT(NVARCHAR, CAST(dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) AS MONEY), 2)															
+															,CONVERT(NVARCHAR, CAST(Stock.dblUnitOnHand AS MONEY), 1)
+															,CONVERT(NVARCHAR, CAST(ItemPricing.dblAverageCost AS MONEY), 2)
+															,CONVERT(NVARCHAR, CAST((Stock.dblUnitOnHand * ItemPricing.dblAverageCost) AS MONEY), 2)
+															, DEFAULT
+															, DEFAULT
+															, DEFAULT
+															, DEFAULT
+															, DEFAULT
+															, DEFAULT
+														)
+				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
+				,[dblForexRate]							= 1 -- @dblForexRate
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
@@ -651,8 +672,8 @@ BEGIN
 				INNER JOIN dbo.tblICInventoryTransaction InvTrans
 					ON InvTrans.intInventoryTransactionId = @intInventoryTransactionId
 		WHERE	AutoNegative.intId = @intIdAutoNegative
-				AND (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
-
+				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
+				
 		-- Delete the item and item-location from the table variable. 
 		DELETE FROM	@ItemsForAutoNegative
 		WHERE	intItemId = @intItemId 
