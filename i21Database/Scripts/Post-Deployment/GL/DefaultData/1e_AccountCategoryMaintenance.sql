@@ -2,7 +2,7 @@
 
 DECLARE @tbl TABLE (cat NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 INSERT INTO @tbl 
-SELECT'Begin Inventory' UNION 
+SELECT 'Begin Inventory' UNION 
 SELECT 'Broker Expense' UNION 
 SELECT 'Cash Over/Short' UNION
 SELECT 'Contract Equity' UNION
@@ -24,12 +24,15 @@ SELECT 'Options Expense'UNION
 SELECT 'Options Income' UNION
 SELECT 'Purchase Account'UNION
 SELECT 'Revalue Sold' UNION 
-SELECT'Storage Expense'UNION 
-SELECT'Storage Income'UNION 
+SELECT 'Storage Expense'UNION 
+SELECT 'Storage Income'UNION 
 SELECT 'Storage Receivable'UNION 
-SELECT'Variance Account'UNION 
-SELECT'Write-Off Sold'UNION 
-SELECT'Fee Expense'
+SELECT 'Variance Account'UNION 
+SELECT 'Write-Off Sold'UNION 
+SELECT 'Sales Adv Account'UNION 
+SELECT 'Work In Progress' UNION 
+SELECT 'Auto-Variance' UNION
+SELECT 'Fee Expense'
 
 DECLARE @intGeneralCategoryId INT
 SELECT @intGeneralCategoryId = intAccountCategoryId FROM tblGLAccountCategory  WHERE strAccountCategory = 'General'
