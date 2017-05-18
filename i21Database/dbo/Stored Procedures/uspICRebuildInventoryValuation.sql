@@ -1576,7 +1576,7 @@ BEGIN
 						,[dblForeignRate]
 						,[strRateType]
 				)			
-				EXEC dbo.uspICCreateGLEntries
+				EXEC @intReturnId = dbo.uspICCreateGLEntries
 					@strBatchId 
 					,@strAccountToCounterInventory
 					,@intEntityUserSecurityId
@@ -1837,7 +1837,7 @@ BEGIN
 						,[dblForeignRate]
 						,[strRateType]
 				)			
-				EXEC dbo.uspICCreateGLEntries
+				EXEC @intReturnId = dbo.uspICCreateGLEntries
 					@strBatchId 
 					,@strAccountToCounterInventory
 					,@intEntityUserSecurityId
