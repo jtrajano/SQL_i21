@@ -26,11 +26,16 @@ Ext.define('Inventory.Utils', {
             /* Defaults method to 'GET' when method is not defined. */
             if (!options.method)
                 options.method = "get";
-            /* Inserts or overrides the Authorization header key-value pair when method is 'POST'. */
+            
+            /**
+             * @deprecated Is now supported by the Framework
+             * Inserts or overrides the Authorization header key-value pair when method is 'POST'.
+             */
             if (options.method.toLowerCase() === "post") {
                 if (!options.headers)
                     options.headers = {};
-                options.headers.Authorization = iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId);
+                // options.headers.Authorization = iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId); // Old
+                // options.headers.Authorization = iRely.Configuration.Security.AuthToken;
             }
             var o = Rx.Observable.defer(function () { return Ext.Ajax.request(options); });
             return o;

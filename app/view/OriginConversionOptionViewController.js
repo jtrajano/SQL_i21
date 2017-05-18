@@ -16,30 +16,33 @@
 Ext.define('Inventory.view.OriginConversionOptionViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icoriginconversionoption',
-
-    load: function(component, con) {
-        "use strict";
-        var me = con || this;
-        var win = me.getView();
+    requires: ['Inventory.controller.Inventory'],
+    initViewModel: function() {
         
-        ic.utils.ajax({
+    },
+    load: function(component, con) {
+        var me = this || con;
+        this.initializePreferences(me);
+    },
+
+    initializePreferences: function(me) {
+        var win = me.getView();
+                
+        jQuery.ajax({
             url: '../Inventory/api/CompanyPreference/Get',
             method: 'get',
             params: {
                 page: 1,
                 start: 0,
                 limit: 50
-            }
-        })
-        .map(function(res) {
-            var json = JSON.parse(res.responseText);
-            if(json.data && json.data.length > 0) {
-                return  { task: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
-            }
-            return null;
-        })
-        .subscribe(
-            function(pref) {
+            },
+            success: function(response) {
+                var json = JSON.parse(res.responseText);
+                var pref = {};
+                if(json.data && json.data.length > 0) {
+                    pref =  { task: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
+                }
+                
                 if(pref) {
                     var lastLob = pref.lob;
                     if (lastLob && lastLob !== '')
@@ -79,7 +82,19 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                     }
                 }
             }
-        )
+        });
+        // .map(function(res) {
+        //     var json = JSON.parse(res.responseText);
+        //     if(json.data && json.data.length > 0) {
+        //         return  { task: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
+        //     }
+        //     return null;
+        // })
+        // .subscribe(
+        //     function(pref) {
+                
+        //     }
+        // );
     },
 
     onImportButtonClick: function(button, e, eOpts) {
@@ -228,7 +243,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             method: 'post',
             headers: {
                 'Content-Type': 'multipart/form-data',
-                'Authorization': iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId),
+                'Authorization': iRely.Configuration.Security.AuthToken,
                 'X-Import-Type': originTypes[type],
                 'X-Import-LineOfBusiness': lineOfBusiness
             },
