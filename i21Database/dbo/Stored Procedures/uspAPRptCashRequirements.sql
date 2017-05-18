@@ -35,7 +35,7 @@ BEGIN
 --SET @xmlParam = NULL 
 --Add this so that XtraReports have fields to get
 	SELECT 
-		0 AS intEntityVendorId,
+		0 AS intEntityId,
 		NULL AS strVendorId,
 		NULL AS strVendorIdName,
 		NULL AS strBillId,
@@ -89,7 +89,7 @@ SELECT @dateFrom = [from], @dateTo = [to] FROM @temp_xml_table WHERE [fieldname]
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SET @innerQuery = 
 		'SELECT 
-			 intEntityVendorId,
+			 intEntityId,
 			 strVendorId,
 			 strVendorIdName,
 			 strBillId,

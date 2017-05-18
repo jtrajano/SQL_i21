@@ -201,7 +201,7 @@ SET @query = '
 		,A.dtmDueDate
 		,B.strVendorId
 		,C.strName as strVendorName
-		,B.[intEntityVendorId]
+		,B.intEntityId as intEntityVendorId
 		,A.intBillId
 		,A.strBillId
 		,A.intAccountId
@@ -253,8 +253,8 @@ SET @query = '
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBill A
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId
-		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityVendorId] = C.intEntityId)
-		ON B.[intEntityVendorId] = A.[intEntityVendorId]
+		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+		ON B.[intEntityId] = A.[intEntityVendorId]
 		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) SubQuery
