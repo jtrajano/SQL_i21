@@ -28,21 +28,21 @@ END
 -- 'Unable to find an open fiscal year period to match the transaction date.'
 IF (dbo.isOpenAccountingDate(@dtmStartDate) = 0) 
 BEGIN 	
-	EXEC uspICRaiseError 80168; 
+	EXEC uspICRaiseError 80177, @dtmStartDate; 
 	RETURN -1; 
 END 
 
 -- Unable to find an open fiscal year period for %s module to match the transaction date.
 IF (dbo.isOpenAccountingDateByModule(@dtmStartDate,'Inventory') = 0)
 BEGIN 
-	EXEC uspICRaiseError 80173, 'Inventory'; 
+	EXEC uspICRaiseError 80178, 'Inventory', @dtmStartDate; 
 	RETURN -1; 
 END 
 
 -- Unable to find an open fiscal year period for %s module to match the transaction date.
 IF (dbo.isOpenAccountingDateByModule(@dtmStartDate,'Accounts Receivable') = 0)
 BEGIN 
-	EXEC uspICRaiseError 80173, 'Accounts Receivable'; 
+	EXEC uspICRaiseError 80178, 'Accounts Receivable', @dtmStartDate; 
 	RETURN -1; 
 END 
 
@@ -621,7 +621,7 @@ BEGIN
 
 		-- Run the post routine. 
 		BEGIN 
-			PRINT 'Posting ' + @strBatchId
+			--PRINT 'Posting ' + @strBatchId
 
 			-- Setup the GL Description
 			SET @strGLDescription = 
