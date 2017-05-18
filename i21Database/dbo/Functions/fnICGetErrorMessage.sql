@@ -190,6 +190,8 @@ BEGIN
 		WHEN @msgId = 80174 THEN 'Unable to find a template.'
 		WHEN @msgId = 80175 THEN 'Unable to create the G/L entries.'
 		WHEN @msgId = 80176 THEN 'Not enough stocks for %s. Reserved stocks is %f while Lot Qty is %f.'
+		WHEN @msgId = 80177 THEN 'Fiscal month is already closed. Please open the fiscal month for %d to continue.'
+		WHEN @msgId = 80178 THEN 'Fiscal month is already closed for %s module. Please open the fiscal month for %d to continue.'
 	END 
 
 	RETURN @msg
