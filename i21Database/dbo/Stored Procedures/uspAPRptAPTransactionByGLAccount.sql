@@ -104,7 +104,7 @@ BEGIN
 	END
 END
 
-SET @query = 'SELECT [intEntityVendorId]
+SET @query = 'SELECT [intEntityId]
       ,[strMainCompanyName]
       ,[intTransactionId]
       ,[strVendorID]
