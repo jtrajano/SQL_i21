@@ -296,7 +296,7 @@ GO
 		UPDATE [tblSMReminderList]
 		SET	[strQuery] =        N'select intApprovalId from tblSMApprovalHistory
 								where intEntityId = {0} and ysnClosed = 1 and ysnRead = 0'
-		WHERE [strReminder] = N'Approved' AND [strType] = N'Transaction'
+		WHERE [strReminder] = N'Closed' AND [strType] = N'Transaction'
 	END    
   
     IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Transaction')
