@@ -108,11 +108,11 @@ BEGIN
 		---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	    IF (ISNULL(@dblPrice,0) = 0) 
 			 BEGIN
-			 SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Price should be positive.'
+			 SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Price must have a value.'
 		END
 		IF (ISNULL(@dblQuantity,0) = 0) 
 			 BEGIN
-			 SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Quanity should be positive.'
+			 SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Quantity must have a value.'
 			END
 		--Get Customer Entity Id
 		SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)
