@@ -718,8 +718,6 @@ namespace iRely.Inventory.BusinessLayer
 
             // Create the filter for the Prior Balance Query
             List<SearchFilter> priorBalanceFilter = new List<SearchFilter>();
-            var itemChanges = false;
-            var locationChanges = false;
 
             // Get the page. Convert it into a list for the loop below. 
             var paged_data = await query.PagingBySelector(param).ToListAsync();
@@ -737,18 +735,14 @@ namespace iRely.Inventory.BusinessLayer
                     currentLocation = row.strLocationName;
                     currentItem = row.strItemNo;
                     currentIntInventoryTransactionId = row.intInventoryTransactionId.ToString();
+
+                    // Check if we need to reset the beginning qty and balance. It will reset if the item or location changes. 
                     if (lastItem == "" || lastLocation == "" || currentItem != lastItem || currentLocation != lastLocation)
                     {
                         // Reset the qty and balances back to zero. 
                         dblBeginningBalance = 0;
                         dblBeginningQty = 0;
 
-                        itemChanges = true;
-                        locationChanges = true;                         
-                    }
-
-                    // Check if we need to rest the beginning qty and balance. It will reset if the item or location changes. 
-                    if (itemChanges || locationChanges) {
                         priorBalanceFilter.RemoveAll(p => p.c == "strItemNo" || p.c == "strLocationName" || p.c == "intInventoryTransactionId");
 
                         priorBalanceFilter.Add(
@@ -799,7 +793,7 @@ namespace iRely.Inventory.BusinessLayer
 
                     // Calculate the beginning and running quantity
                     row.dblBeginningQtyBalance = dblBeginningQty;
-                    dblRunningQty = dblBeginningQty + row.dblQuantityInStockUOM; // Calculate the Qty using the Stokc Qty. 
+                    dblRunningQty = dblBeginningQty + row.dblQuantityInStockUOM; // Calculate the Qty using the Stock Qty. 
                     row.dblRunningQtyBalance = dblRunningQty;
                     dblBeginningQty = dblRunningQty;
                 }
