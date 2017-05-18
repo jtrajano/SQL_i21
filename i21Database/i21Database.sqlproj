@@ -5252,6 +5252,7 @@
     <Build Include="dbo\Views\vyuMFGetAvailableStorageLocation.sql" />
     <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
     <Build Include="dbo\Views\vyuLGGetInventoryDocumentList.sql" />
+    <Build Include="dbo\Views\vyuSMDocument.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
