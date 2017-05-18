@@ -228,7 +228,7 @@ SELECT @mRowNumber=MIN(RowNumber) FROM @tblExercisedAssignedDetail
 WHILE @mRowNumber IS NOT NULL    
 BEGIN  
 	
-	INSERT INTO tblRKFutOptTransactionHeader  
+	INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId)  
 	VALUES (1)  
 	SELECT @NewFutOptTransactionHeaderId = SCOPE_IDENTITY();  
 
