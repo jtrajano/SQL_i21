@@ -1,5 +1,169 @@
 ﻿CREATE VIEW [dbo].[vyuARShippedItems]
 AS
+
+WITH SCALETICKET AS (
+	SELECT intTicketId
+		 , strTicketNumber
+		 , strCustomerReference
+	FROM dbo.tblSCTicket WITH (NOLOCK)
+),
+DESTINATIONGRADE AS (
+	SELECT intWeightGradeId		= intWeightGradeId
+		 , strDestinationGrade  = strWeightGradeDesc
+	FROM dbo.tblCTWeightGrade WITH (NOLOCK)
+),
+DESTINATIONWEIGHT AS (
+	SELECT intWeightGradeId		= intWeightGradeId
+		 , strDestinationWeight	= strWeightGradeDesc
+	FROM dbo.tblCTWeightGrade WITH (NOLOCK)
+),
+CURRENCY AS (
+	SELECT intCurrencyID
+	     , intCent
+		 , strCurrency
+	FROM dbo.tblSMCurrency WITH (NOLOCK)
+),
+CURRENCYEXCHANGERATE AS (
+	SELECT intCurrencyExchangeRateTypeId
+	     , strCurrencyExchangeRateType
+	FROM dbo.tblSMCurrencyExchangeRateType WITH (NOLOCK)
+),
+COMPANYLOCATION AS (
+	SELECT intCompanyLocationId
+		 , strLocationName
+	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+),
+CUSTOMER AS (
+	SELECT intEntityCustomerId
+		 , intCurrencyId
+	FROM dbo.tblARCustomer WITH (NOLOCK)
+),
+ENTITY AS (
+	SELECT intEntityId
+		 , strName
+	FROM dbo.tblEMEntity WITH (NOLOCK)
+),
+TERM AS (
+	SELECT intTermID
+		 , strTerm
+	FROM dbo.tblSMTerm WITH (NOLOCK)
+),
+SHIPVIA AS (
+	SELECT intEntityShipViaId
+		 , strShipVia
+	FROM dbo.tblSMShipVia WITH (NOLOCK)
+),
+STORAGELOCATION AS (
+	SELECT intStorageLocationId
+		 , strName
+	FROM dbo.tblICStorageLocation WITH (NOLOCK)
+),
+ITEM AS (
+	SELECT intItemId
+		 , strItemNo
+		 , strDescription
+		 , strLotTracking
+	FROM dbo.tblICItem WITH (NOLOCK)
+),
+ITEMUOM AS (
+	SELECT intItemUOMId
+		 , intItemId
+		 , intUnitMeasureId
+		 , intWeightUOMId
+	FROM dbo.tblICItemUOM WITH (NOLOCK)
+),
+ITEMUNITMEASURE AS (
+	SELECT intUnitMeasureId
+		 , strUnitMeasure
+	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+),
+TAXGROUP AS (
+	SELECT intTaxGroupId
+		 , strTaxGroup
+	FROM dbo.tblSMTaxGroup WITH (NOLOCK)
+),
+CUSTOMERCONTRACT AS (
+	SELECT intContractHeaderId
+		 , intContractDetailId
+		 , strContractNumber
+		 , intContractSeq
+		 , intDestinationGradeId
+		 , strDestinationGrade
+		 , intDestinationWeightId
+		 , strDestinationWeight
+		 , intSubCurrencyId
+		 , intCurrencyId
+		 , strUnitMeasure
+		 , intOrderUOMId
+		 , intItemUOMId
+		 , strOrderUnitMeasure
+		 , dblCashPrice
+		 , dblDetailQuantity
+		 , intFreightTermId
+		 , dblShipQuantity
+		 , dblOrderQuantity
+		 , dblSubCurrencyRate
+		 , intCurrencyExchangeRateTypeId
+		 , strCurrencyExchangeRateType
+		 , intCurrencyExchangeRateId
+		 , dblCurrencyExchangeRate
+	 FROM dbo.vyuARCustomerContract WITH (NOLOCK)
+),
+SALESORDER AS (
+	SELECT intSalesOrderId
+		 , strSalesOrderNumber
+		 , intEntityCustomerId
+		 , intCurrencyId
+		 , dtmDate
+		 , strPONumber
+		 , strBOLNumber
+		 , intSplitId
+		 , intEntitySalespersonId
+		 , intCompanyLocationId
+		 , intShipToLocationId
+		 , intFreightTermId
+		 , intTermId
+		 , intShipViaId
+		 , strTransactionType
+		 , strOrderStatus
+	FROM dbo.tblSOSalesOrder WITH (NOLOCK)	
+),
+SALESORDERDETAIL AS (
+	SELECT intSalesOrderId
+		 , intItemId
+		 , intContractHeaderId
+		 , intContractDetailId
+		 , intStorageLocationId
+		 , intItemUOMId
+		 , intTaxGroupId
+		 , intSalesOrderDetailId
+		 , intSubCurrencyId
+		 , intRecipeItemId
+		 , strItemDescription
+		 , dblQtyShipped
+		 , dblQtyOrdered
+		 , dblDiscount
+		 , dblPrice
+		 , dblTotalTax
+		 , dblTotal
+		 , strPricing
+		 , ysnBlended
+		 , intRecipeId
+		 , intSubLocationId
+		 , intCostTypeId
+		 , intMarginById
+		 , intCommentTypeId
+		 , dblMargin
+		 , dblRecipeQuantity
+		 , intStorageScheduleTypeId
+		 , dblSubCurrencyRate
+		 , intCurrencyExchangeRateTypeId
+		 , intCurrencyExchangeRateId
+		 , dblCurrencyExchangeRate
+		 , strVFDDocumentNumber
+	FROM dbo.tblSOSalesOrderDetail WITH (NOLOCK)
+)
+
 SELECT NEWID() AS id, ShippedItems.* FROM 
 (
 SELECT
@@ -95,119 +259,22 @@ SELECT
 	,[intSubCurrencyId]					= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= SOD.[dblSubCurrencyRate]
 	,[strSubCurrency]					= SMC.[strCurrency]
-FROM
-	(SELECT [intSalesOrderId], 
-			[strSalesOrderNumber],
-			[intEntityCustomerId], 
-			[intCurrencyId],
-			[dtmDate],
-			[strPONumber],
-			[strBOLNumber],
-			[intSplitId],
-			[intEntitySalespersonId],
-			[intCompanyLocationId],
-			[intShipToLocationId],
-			[intFreightTermId],
-			[intTermId],
-			[intShipViaId],
-			[strTransactionType],
-			[strOrderStatus]
-	FROM tblSOSalesOrder  WITH (NOLOCK)) SO
-INNER JOIN
-	(SELECT [intSalesOrderId],
-			[intItemId],
-			[intContractHeaderId],
-			[intContractDetailId],
-			[intStorageLocationId],
-			[intItemUOMId],
-			[intTaxGroupId],
-			[intSalesOrderDetailId],
-			[intSubCurrencyId],
-			[intRecipeItemId],
-			[strItemDescription],
-			[dblQtyShipped],
-			[dblQtyOrdered],
-			[dblDiscount],
-			[dblPrice],
-			[dblTotalTax],
-			[dblTotal],
-			[strPricing],
-			[ysnBlended],
-			[intRecipeId],
-			[intSubLocationId],
-			[intCostTypeId],
-			[intMarginById],
-			[intCommentTypeId],
-			[dblMargin],
-			[dblRecipeQuantity],
-			[intStorageScheduleTypeId],
-			[dblSubCurrencyRate],
-			[intCurrencyExchangeRateTypeId],
-			[intCurrencyExchangeRateId],
-			[dblCurrencyExchangeRate],
-			[strVFDDocumentNumber]
-		FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOD ON SO.[intSalesOrderId] = SOD.[intSalesOrderId] 
-INNER JOIN
-	(SELECT [intItemId],
-			[strLotTracking],
-			[strItemNo]
-	 FROM tblICItem WITH (NOLOCK)) I ON SOD.[intItemId] = I.[intItemId] AND (dbo.fnIsStockTrackingItem(I.[intItemId]) = 0 OR ISNULL(strLotTracking, 'No') = 'No')
-INNER JOIN
-	(SELECT [intEntityCustomerId],
-			[intCurrencyId]
-	 FROM tblARCustomer WITH (NOLOCK)) C ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
-INNER JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) E ON C.[intEntityCustomerId] = E.[intEntityId]
-LEFT OUTER JOIN 
-	(SELECT [intContractHeaderId],
-			[intContractDetailId],
-			[strContractNumber],
-			[intContractSeq]
-	 FROM vyuARCustomerContract WITH (NOLOCK)) ARCR	 ON SOD.[intContractHeaderId] = ARCR.[intContractHeaderId] AND SOD.[intContractDetailId] = ARCR.[intContractDetailId]
-LEFT JOIN
-	(SELECT [intEntityId],
-			[strName]
-	 FROM tblEMEntity WITH (NOLOCK)) ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
-LEFT OUTER JOIN
-	(SELECT [intTermID],
-			[strTerm]
-	 FROM tblSMTerm WITH (NOLOCK)) T ON SO.[intTermId] = T.[intTermID] 
-LEFT OUTER JOIN
-	(SELECT [intEntityShipViaId],
-			[strShipVia]
-	 FROM tblSMShipVia WITH (NOLOCK)) S ON SO.[intShipViaId] = S.[intEntityShipViaId] 
-LEFT OUTER JOIN
-	(SELECT [intStorageLocationId],
-		[strName]
-	 FROM tblICStorageLocation WITH (NOLOCK)) SL ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
-LEFT JOIN
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId],
-		[intWeightUOMId]
-	 FROM tblICItemUOM WITH (NOLOCK)) IU ON SOD.[intItemUOMId] = IU.[intItemUOMId]
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) U2 ON IU.[intWeightUOMId] = U2.[intUnitMeasureId]
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[intItemId],
-		[intItemUOMId]
-	 FROM tblICItemUOM WITH (NOLOCK)) IU2 ON IU.[intWeightUOMId] = IU2.[intUnitMeasureId] AND  SOD.[intItemId] = IU2.[intItemId]
-LEFT OUTER JOIN
-	(SELECT [intCompanyLocationId],
-		[strLocationName]
-	 FROM tblSMCompanyLocation WITH (NOLOCK)) CL ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
-LEFT OUTER JOIN
-	(SELECT [intTaxGroupId],
-		[strTaxGroup]
-	 FROM tblSMTaxGroup WITH (NOLOCK)) TG ON SOD.[intTaxGroupId] = TG.intTaxGroupId
+FROM SALESORDER SO
+INNER JOIN SALESORDERDETAIL SOD ON SO.[intSalesOrderId] = SOD.[intSalesOrderId] 
+INNER JOIN ITEM I ON SOD.[intItemId] = I.[intItemId] AND (dbo.fnIsStockTrackingItem(I.[intItemId]) = 0 OR ISNULL(strLotTracking, 'No') = 'No')
+INNER JOIN CUSTOMER C ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
+INNER JOIN ENTITY E ON C.[intEntityCustomerId] = E.[intEntityId]
+LEFT OUTER JOIN CUSTOMERCONTRACT ARCR ON SOD.[intContractHeaderId] = ARCR.[intContractHeaderId] AND SOD.[intContractDetailId] = ARCR.[intContractDetailId]
+LEFT JOIN ENTITY ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
+LEFT OUTER JOIN TERM T ON SO.[intTermId] = T.[intTermID] 
+LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.[intEntityShipViaId] 
+LEFT OUTER JOIN STORAGELOCATION SL ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
+LEFT JOIN ITEMUOM IU ON SOD.[intItemUOMId] = IU.[intItemUOMId]
+LEFT JOIN ITEMUNITMEASURE U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+LEFT JOIN ITEMUNITMEASURE U2 ON IU.[intWeightUOMId] = U2.[intUnitMeasureId]
+LEFT JOIN ITEMUOM IU2 ON IU.[intWeightUOMId] = IU2.[intUnitMeasureId] AND  SOD.[intItemId] = IU2.[intItemId]
+LEFT OUTER JOIN COMPANYLOCATION CL ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
+LEFT OUTER JOIN TAXGROUP TG ON SOD.[intTaxGroupId] = TG.intTaxGroupId
 LEFT OUTER JOIN
 	(SELECT D.intLineNo 
 	 FROM (SELECT [intLineNo],
@@ -218,15 +285,9 @@ LEFT OUTER JOIN
 		 FROM tblICInventoryShipment WITH (NOLOCK)
 		) H ON H.[intInventoryShipmentId] = D.[intInventoryShipmentId]
 	  WHERE H.[intOrderType] = 2) ISD ON SOD.[intSalesOrderDetailId] = ISD.[intLineNo]
-LEFT OUTER JOIN
-	(SELECT intCurrencyID,
-			[strCurrency]
-	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID]
-LEFT OUTER JOIN
-	tblSMCurrencyExchangeRateType SMCRT
-		ON SOD.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
-WHERE
-      SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
+LEFT OUTER JOIN CURRENCY SMC ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID]
+LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON SOD.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+WHERE SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	  AND ((SOD.[dblQtyOrdered] - ISNULL(SOD.[dblQtyShipped], 0.000000) <> 0.000000) OR (ISNULL(ISD.[intLineNo],0) = 0))
 	
 UNION ALL
@@ -324,133 +385,24 @@ SELECT
 	,[intSubCurrencyId]					= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= SOD.[dblSubCurrencyRate]
 	,[strSubCurrency]					= SMC.[strCurrency]
-FROM
-	(SELECT [intSalesOrderId], 
-			[strSalesOrderNumber],
-			[intEntityCustomerId], 
-			[intCurrencyId],
-			[dtmDate],
-			[strPONumber],
-			[strBOLNumber],
-			[intSplitId],
-			[intEntitySalespersonId],
-			[intCompanyLocationId],
-			[intShipToLocationId],
-			[intFreightTermId],
-			[intTermId],
-			[intShipViaId],
-			[strTransactionType],
-			strOrderStatus
-	FROM tblSOSalesOrder WITH (NOLOCK)) SO
-INNER JOIN
-	(SELECT [intSalesOrderId],
-			[intItemId],
-			[intContractHeaderId],
-			[intContractDetailId],
-			[intStorageLocationId],
-			[intItemUOMId],
-			[intTaxGroupId],
-			[intSalesOrderDetailId],
-			[intSubCurrencyId],
-			[intRecipeItemId],
-			[strItemDescription],
-			[dblQtyShipped],
-			[dblQtyOrdered],
-			[dblDiscount],
-			[dblPrice],
-			[dblTotalTax],
-			[dblTotal],
-			[strPricing],
-			[ysnBlended],
-			[intRecipeId],
-			[intSubLocationId],
-			[intCostTypeId],
-			[intMarginById],
-			[intCommentTypeId],
-			[dblMargin],
-			[dblRecipeQuantity],
-			[intStorageScheduleTypeId],
-			[dblSubCurrencyRate],
-			[intCurrencyExchangeRateTypeId],
-			[strVFDDocumentNumber],
-			[intCurrencyExchangeRateId],
-			[dblCurrencyExchangeRate]
-	 FROM tblSOSalesOrderDetail WITH (NOLOCK)
-	 WHERE [intSalesOrderDetailId] NOT IN (SELECT ISNULL(ARID.[intSalesOrderDetailId],0) 
-										FROM (SELECT intInvoiceId,
-												intSalesOrderDetailId,
-												dblQtyShipped 
-											  FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
-										INNER JOIN 
-											(SELECT intInvoiceId
-											FROM tblARInvoice WITH (NOLOCK)) ARI ON ARID.intInvoiceId = ARI.intInvoiceId)) SOD ON SO.[intSalesOrderId] = SOD.[intSalesOrderId] AND intItemId IS NULL AND strItemDescription <> ''
-INNER JOIN
-	(SELECT [intEntityCustomerId],
-			[intCurrencyId]
-	 FROM tblARCustomer WITH (NOLOCK)) C ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
-INNER JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) E ON C.[intEntityCustomerId] = E.[intEntityId] 
-LEFT OUTER JOIN 
-	(SELECT [intContractHeaderId],
-			[intContractDetailId],
-			[strContractNumber],
-			[intContractSeq]
-	 FROM vyuARCustomerContract WITH (NOLOCK)) ARCC	 ON SOD.[intContractHeaderId] = ARCC.[intContractHeaderId] AND SOD.[intContractDetailId] = ARCC.[intContractDetailId]
-LEFT JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
-LEFT OUTER JOIN
-	(SELECT [intTermID],
-		[strTerm]
-	 FROM tblSMTerm WITH (NOLOCK))  T ON SO.[intTermId] = T.[intTermID] 
-LEFT OUTER JOIN
-	(SELECT [intEntityShipViaId],
-		[strShipVia]
-	 FROM tblSMShipVia WITH (NOLOCK)) S
-		ON SO.[intShipViaId] = S.[intEntityShipViaId] 
-LEFT OUTER JOIN
-	(SELECT [intStorageLocationId],
-		[strName]
-	 FROM tblICStorageLocation WITH (NOLOCK)) SL
-		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
-LEFT JOIN
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId],
-		[intWeightUOMId]
-	 FROM tblICItemUOM WITH (NOLOCK)) IU ON SOD.[intItemUOMId] = IU.[intItemUOMId]
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) U2 ON IU.[intWeightUOMId] = U2.[intUnitMeasureId]
-LEFT JOIN
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId],
-		[intItemId]
-	 FROM tblICItemUOM WITH (NOLOCK)) IU2 ON IU.[intWeightUOMId] = IU2.[intUnitMeasureId] AND  SOD.[intItemId] = IU2.[intItemId]
-LEFT OUTER JOIN
-	(SELECT [intCompanyLocationId],
-		strLocationName
-	 FROM tblSMCompanyLocation WITH (NOLOCK)) CL ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
-LEFT OUTER JOIN
-	(SELECT [intTaxGroupId],
-		[strTaxGroup]
-	 FROM tblSMTaxGroup WITH (NOLOCK)) TG ON SOD.[intTaxGroupId] = TG.intTaxGroupId
-LEFT OUTER JOIN
-	(SELECT [intCurrencyID],
-			[strCurrency]
-	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID] 
-LEFT OUTER JOIN
-	tblSMCurrencyExchangeRateType SMCRT
-		ON SOD.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
-WHERE
-    SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
+FROM SALESORDER SO
+INNER JOIN SALESORDERDETAIL SOD ON SO.[intSalesOrderId] = SOD.[intSalesOrderId] AND intItemId IS NULL AND strItemDescription <> ''
+INNER JOIN CUSTOMER C ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
+INNER JOIN ENTITY E ON C.[intEntityCustomerId] = E.[intEntityId] 
+LEFT OUTER JOIN CUSTOMERCONTRACT ARCC ON SOD.[intContractHeaderId] = ARCC.[intContractHeaderId] AND SOD.[intContractDetailId] = ARCC.[intContractDetailId]
+LEFT JOIN ENTITY ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
+LEFT OUTER JOIN TERM T ON SO.[intTermId] = T.[intTermID] 
+LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.[intEntityShipViaId] 
+LEFT OUTER JOIN STORAGELOCATION SL ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
+LEFT JOIN ITEMUOM IU ON SOD.[intItemUOMId] = IU.[intItemUOMId]
+LEFT JOIN ITEMUNITMEASURE U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+LEFT JOIN ITEMUNITMEASURE U2 ON IU.[intWeightUOMId] = U2.[intUnitMeasureId]
+LEFT JOIN ITEMUOM IU2 ON IU.[intWeightUOMId] = IU2.[intUnitMeasureId] AND  SOD.[intItemId] = IU2.[intItemId]
+LEFT OUTER JOIN COMPANYLOCATION CL ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
+LEFT OUTER JOIN TAXGROUP TG ON SOD.[intTaxGroupId] = TG.intTaxGroupId
+LEFT OUTER JOIN CURRENCY SMC ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID] 
+LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON SOD.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+WHERE SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
          FROM 
 			(SELECT intInvoiceId, [intSalesOrderDetailId], dblQtyShipped FROM tblARInvoiceDetail WITH (NOLOCK))  tblARInvoiceDetail
 		 INNER JOIN 
@@ -458,9 +410,7 @@ WHERE
          WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped)
      AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
      AND SOD.[dblQtyOrdered] - ISNULL(SOD.[dblQtyShipped], 0.000000) <> 0.000000
-
-	
-	
+	 
 UNION ALL
 
 SELECT
@@ -506,7 +456,7 @@ SELECT
 	,[dblQtyOrdered]					= SOD.[dblQtyOrdered] 
 	,[dblShipmentQuantity]				= SHP.[dblQuantity]	
 	,[dblShipmentQtyShippedTotal]		= SHP.[dblQuantity]
-	,[dblQtyRemaining]					= SOD.[dblQtyOrdered]
+	,[dblQtyRemaining]					= SHP.[dblQuantity] - ISNULL(INVOICEDETAIL.dblQtyShipped, 0)
 	,[dblDiscount]						= SOD.[dblDiscount] 
 	,[dblPrice]							= SOD.[dblPrice]
 	,[dblShipmentUnitPrice]				= SHP.[dblUnitPrice]
@@ -520,9 +470,9 @@ SELECT
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
 	,[strShipVia]						= S.[strShipVia]
-	,[strTicketNumber]					= SCT.[strTicketNumber]
-	,[strCustomerReference]				= SCT.[strCustomerReference]
-	,[intTicketId]						= SCT.[intTicketId]
+	,[strTicketNumber]					= SCALETICKET.[strTicketNumber]
+	,[strCustomerReference]				= SCALETICKET.[strCustomerReference]
+	,[intTicketId]						= SCALETICKET.[intTicketId]
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
 	,[dblWeight]						= [dbo].[fnCalculateQtyBetweenUOM](IU2.[intItemUOMId],SOD.[intItemUOMId],1) --IU1.[dblWeight]
@@ -556,106 +506,19 @@ SELECT
 	,[intSubCurrencyId]					= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]				= SOD.[dblSubCurrencyRate]
 	,[strSubCurrency]					= SMC.[strCurrency]
-FROM
-	(SELECT [intSalesOrderId], 
-			[strSalesOrderNumber],
-			[intEntityCustomerId], 
-			[intCurrencyId],
-			[dtmDate],
-			[strPONumber],
-			[strBOLNumber],
-			[intSplitId],
-			[intEntitySalespersonId],
-			[intCompanyLocationId],
-			[intShipToLocationId],
-			[intFreightTermId],
-			[intTermId],
-			[intShipViaId]
-	FROM tblSOSalesOrder WITH (NOLOCK)
-	WHERE [strTransactionType] = 'Order' AND strOrderStatus <> 'Cancelled') SO
-INNER JOIN
-	(SELECT [intSalesOrderId],
-			[intItemId],
-			[intContractHeaderId],
-			[intContractDetailId],
-			[intStorageLocationId],
-			[intItemUOMId],
-			[intTaxGroupId],
-			[intSalesOrderDetailId],
-			[intSubCurrencyId],
-			[intRecipeItemId],
-			[strItemDescription],
-			[dblQtyShipped],
-			[dblQtyOrdered],
-			[dblDiscount],
-			[dblPrice],
-			[dblTotalTax],
-			[dblTotal],
-			[strPricing],
-			[ysnBlended],
-			[intRecipeId],
-			[intSubLocationId],
-			[intCostTypeId],
-			[intMarginById],
-			[intCommentTypeId],
-			[dblMargin],
-			[dblRecipeQuantity],
-			[intStorageScheduleTypeId],
-			[dblSubCurrencyRate],
-			[intCurrencyExchangeRateTypeId],
-			[strVFDDocumentNumber]
-	 FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
-INNER JOIN
-	(SELECT [intEntityCustomerId],
-			[intCurrencyId]
-	 FROM tblARCustomer WITH (NOLOCK)) C ON SO.intEntityCustomerId = C.intEntityCustomerId
-LEFT OUTER JOIN 
-	(SELECT [intContractHeaderId],
-			[intContractDetailId],
-			[strContractNumber],
-			[intContractSeq], 
-			[intDestinationGradeId],
-			[strDestinationGrade],
-			[intDestinationWeightId],
-			[strDestinationWeight]
-	 FROM vyuARCustomerContract WITH (NOLOCK)) ARCC	 ON SOD.[intContractHeaderId] = ARCC.[intContractHeaderId] AND SOD.[intContractDetailId] = ARCC.[intContractDetailId]
-INNER JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) E ON C.[intEntityCustomerId] = E.[intEntityId]
-LEFT JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId] 
-LEFT OUTER JOIN
-	(SELECT [intTermID],
-		[strTerm]
-	 FROM tblSMTerm WITH (NOLOCK)) T ON SO.[intTermId] = T.[intTermID] 
-LEFT OUTER JOIN
-	(SELECT [intEntityShipViaId],
-		[strShipVia]
-	 FROM tblSMShipVia WITH (NOLOCK)) S
-		ON SO.[intShipViaId] = S.[intEntityShipViaId]
-INNER JOIN
-	(SELECT [intItemId],
-		[strItemNo]
-	 FROM tblICItem WITH (NOLOCK)) I ON SOD.[intItemId] = I.[intItemId]
-LEFT JOIN
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId]
-	 FROM tblICItemUOM WITH (NOLOCK)) IU ON SOD.[intItemUOMId] = IU.[intItemUOMId]
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]		
-LEFT OUTER JOIN
-	(SELECT [intCompanyLocationId],
-		strLocationName
-	 FROM tblSMCompanyLocation WITH (NOLOCK)) CL ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId] 
-LEFT OUTER JOIN
-	(SELECT [intTaxGroupId],
-		[strTaxGroup]
-	 FROM tblSMTaxGroup WITH (NOLOCK)) TG ON SOD.[intTaxGroupId] = TG.intTaxGroupId 
+FROM SALESORDER SO
+INNER JOIN SALESORDERDETAIL SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
+INNER JOIN CUSTOMER C ON SO.intEntityCustomerId = C.intEntityCustomerId
+LEFT OUTER JOIN CUSTOMERCONTRACT ARCC ON SOD.[intContractHeaderId] = ARCC.[intContractHeaderId] AND SOD.[intContractDetailId] = ARCC.[intContractDetailId]
+INNER JOIN ENTITY E ON C.[intEntityCustomerId] = E.[intEntityId]
+LEFT JOIN ENTITY ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId] 
+LEFT OUTER JOIN TERM T ON SO.[intTermId] = T.[intTermID] 
+LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.[intEntityShipViaId]
+INNER JOIN ITEM I ON SOD.[intItemId] = I.[intItemId]
+LEFT JOIN ITEMUOM IU ON SOD.[intItemUOMId] = IU.[intItemUOMId]
+LEFT JOIN ITEMUNITMEASURE U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]		
+LEFT OUTER JOIN COMPANYLOCATION CL ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId] 
+LEFT OUTER JOIN TAXGROUP TG ON SOD.[intTaxGroupId] = TG.intTaxGroupId 
 CROSS APPLY
 	(
 	SELECT 
@@ -712,41 +575,11 @@ CROSS APPLY
 		 FROM tblICInventoryShipment WITH (NOLOCK)
 		 WHERE [ysnPosted] = 1) ISH
 			ON ISI.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
-	LEFT JOIN
-		(SELECT [intItemUOMId],
-			[intUnitMeasureId]
-		FROM tblICItemUOM WITH (NOLOCK)) IU ON ISI.[intItemUOMId] = IU.[intItemUOMId]
-	LEFT JOIN
-		(SELECT [intUnitMeasureId],
-			[strUnitMeasure]
-		 FROM tblICUnitMeasure WITH (NOLOCK)) U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
-	LEFT OUTER JOIN
-		(SELECT [intCompanyLocationId],
-			strLocationName
-		 FROM tblSMCompanyLocation WITH (NOLOCK)) CL ON ISH.[intShipFromLocationId] = CL.[intCompanyLocationId]
-	LEFT OUTER JOIN
-		(SELECT [intInventoryShipmentItemId]
-		 FROM tblARInvoiceDetail WITH (NOLOCK)
-		 WHERE [intInventoryShipmentItemId] IS NULL	) IND
-			ON ISI.[intInventoryShipmentItemId] = IND.[intInventoryShipmentItemId]
-	LEFT OUTER JOIN
-			(
-				SELECT
-					[intWeightGradeId]		= [intWeightGradeId]
-					,[strDestinationGrade]	= [strWeightGradeDesc]
-				FROM
-					tblCTWeightGrade WITH (NOLOCK)
-			) CTDG
-				ON ISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
-	LEFT OUTER JOIN
-		(
-			SELECT
-				[intWeightGradeId]		= [intWeightGradeId]
-				,[strDestinationWeight]	= [strWeightGradeDesc]
-			FROM
-				tblCTWeightGrade WITH (NOLOCK)
-		) CTDW
-			ON ISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
+	LEFT JOIN ITEMUOM IU ON ISI.[intItemUOMId] = IU.[intItemUOMId]
+	LEFT JOIN ITEMUNITMEASURE U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+	LEFT OUTER JOIN COMPANYLOCATION CL ON ISH.[intShipFromLocationId] = CL.[intCompanyLocationId]	
+	LEFT OUTER JOIN DESTINATIONGRADE CTDG ON ISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+	LEFT OUTER JOIN DESTINATIONWEIGHT CTDW ON ISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
 	WHERE		
 		ISI.[intLineNo] = SOD.[intSalesOrderDetailId]		 
 		 
@@ -776,11 +609,7 @@ CROSS APPLY
 		,ISI.[intForexRateTypeId]
 		,ISI.[dblForexRate] 
 	) SHP
-LEFT OUTER JOIN
-	(SELECT [intTicketId],
-		[strTicketNumber],
-		[strCustomerReference]
-	 FROM tblSCTicket WITH (NOLOCK)) SCT ON SHP.[intSourceId] = SCT.[intTicketId]
+LEFT OUTER JOIN SCALETICKET ON SHP.[intSourceId] = SCALETICKET.[intTicketId]
 LEFT OUTER JOIN
 	(
 		SELECT
@@ -794,41 +623,20 @@ LEFT OUTER JOIN
 			intInventoryShipmentItemId
 	) ISISIL
 		ON SHP.[intInventoryShipmentItemId] = ISISIL.[intInventoryShipmentItemId]
-LEFT JOIN
-	(SELECT [intItemUOMId],
-			[intUnitMeasureId]
-		FROM tblICItemUOM WITH (NOLOCK)) IU1
-		ON SHP.[intItemUOMId] = IU1.[intItemUOMId]
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) U1
-		ON IU1.[intUnitMeasureId] = U1.[intUnitMeasureId]	
-LEFT JOIN
-	(SELECT [intItemUOMId],
-			[intUnitMeasureId]
-		FROM tblICItemUOM WITH (NOLOCK)) IU2 ON SHP.[intWeightUOMId] = IU2.[intItemUOMId]
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) U2 ON IU2.[intUnitMeasureId] = U2.[intUnitMeasureId]
-LEFT OUTER JOIN
-	(SELECT [intInventoryShipmentItemId]		
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
-		ON SHP.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
-LEFT OUTER JOIN
-	(SELECT [intCurrencyID],
-		[strCurrency]
-	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID]
-LEFT OUTER JOIN
-	(SELECT [intStorageLocationId],
-			[strName]
-	 FROM tblICStorageLocation WITH (NOLOCK)) SL ON ISNULL(SHP.[intStorageLocationId], SOD.[intStorageLocationId]) = SL.[intStorageLocationId] 	
-LEFT OUTER JOIN
-	tblSMCurrencyExchangeRateType SMCRT
-		ON ISNULL(SHP.[intForexRateTypeId], SOD.[intCurrencyExchangeRateTypeId]) = SMCRT.[intCurrencyExchangeRateTypeId]
-WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0			
-	
+LEFT JOIN ITEMUOM IU1 ON SHP.[intItemUOMId] = IU1.[intItemUOMId]
+LEFT JOIN ITEMUNITMEASURE U1 ON IU1.[intUnitMeasureId] = U1.[intUnitMeasureId]	
+LEFT JOIN ITEMUOM IU2 ON SHP.[intWeightUOMId] = IU2.[intItemUOMId]
+LEFT JOIN ITEMUNITMEASURE U2 ON IU2.[intUnitMeasureId] = U2.[intUnitMeasureId]
+LEFT OUTER JOIN CURRENCY SMC ON SOD.[intSubCurrencyId] = SMC.[intCurrencyID]
+LEFT OUTER JOIN STORAGELOCATION SL ON ISNULL(SHP.[intStorageLocationId], SOD.[intStorageLocationId]) = SL.[intStorageLocationId] 	
+LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON ISNULL(SHP.[intForexRateTypeId], SOD.[intCurrencyExchangeRateTypeId]) = SMCRT.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN (SELECT intInventoryShipmentItemId
+				      , dblQtyShipped 
+				FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+				WHERE ISNULL(intInventoryShipmentItemId, 0) <> 0) INVOICEDETAIL ON SHP.intInventoryShipmentItemId = INVOICEDETAIL.intInventoryShipmentItemId
+WHERE SO.strTransactionType = 'Order' AND SO.strOrderStatus <> 'Cancelled'
+  AND SHP.dblQuantity - ISNULL(INVOICEDETAIL.dblQtyShipped, 0) <> 0
+
 UNION ALL
 
 SELECT
@@ -888,9 +696,9 @@ SELECT
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= SCT.strTicketNumber
-	,[strCustomerReference]				= SCT.strCustomerReference
-	,[intTicketId]						= SCT.intTicketId
+	,[strTicketNumber]					= SCALETICKET.strTicketNumber
+	,[strCustomerReference]				= SCALETICKET.strCustomerReference
+	,[intTicketId]						= SCALETICKET.intTicketId
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
 	,[dblWeight]						= [dbo].[fnCalculateQtyBetweenUOM](ICISI.[intWeightUOMId],ICISI.[intItemUOMId],1) --ICIU1.[dblWeight]
@@ -1006,102 +814,27 @@ LEFT OUTER JOIN
 				ON ICIRI1.[intLineNo] = LGSD.[intContractDetailId]
 	) LGICShipment
 		ON ICISI.[intInventoryShipmentItemId] = LGICShipment.[intInventoryShipmentItemId]
-LEFT OUTER JOIN 
-	(SELECT [intContractHeaderId],
-			[intContractDetailId],
-			[strContractNumber],
-			[intContractSeq], 
-			[intDestinationGradeId],
-			[strDestinationGrade],
-			[intDestinationWeightId],
-			[strDestinationWeight],
-			[intSubCurrencyId],
-			[intCurrencyId],
-			[strUnitMeasure],
-			[intOrderUOMId],
-			[intItemUOMId],
-			[strOrderUnitMeasure],
-			[dblCashPrice],
-			[dblDetailQuantity]
-	 FROM vyuARCustomerContract WITH (NOLOCK)) ARCC	 ON ICISI.[intLineNo] = ARCC.[intContractDetailId] AND ICIS.[intOrderType] = 1
-LEFT OUTER JOIN
-	(
-		SELECT
-			[intWeightGradeId]		= [intWeightGradeId]
-			,[strDestinationGrade]	= [strWeightGradeDesc]
-		FROM
-			tblCTWeightGrade WITH (NOLOCK)
-	) CTDG
-		ON ICISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
-LEFT OUTER JOIN
-	(
-		SELECT
-			[intWeightGradeId]		= [intWeightGradeId]
-			,[strDestinationWeight]	= [strWeightGradeDesc]
-		FROM
-			tblCTWeightGrade WITH (NOLOCK)
-	) CTDW
-		ON ICISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
-INNER JOIN
-	(SELECT [intEntityCustomerId],
-			[intCurrencyId]
-	 FROM tblARCustomer WITH (NOLOCK)) ARC ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
-INNER JOIN
-	(SELECT [intItemId],
-		[strItemNo],
-		[strDescription]
-	 FROM tblICItem WITH (NOLOCK)) ICI ON ICISI.[intItemId] = ICI.[intItemId]
-LEFT JOIN
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId]
-	 FROM tblICItemUOM WITH (NOLOCK)) ICIU ON ICISI.[intItemUOMId] = ICIU.[intItemUOMId] 
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) ICUM ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]	
-LEFT JOIN
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId]
-	 FROM tblICItemUOM WITH (NOLOCK)) ICIU1 ON ICISI.[intItemUOMId] = ICIU1.[intItemUOMId] 
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) ICUM1 ON ICIU1.[intUnitMeasureId] = ICUM1.[intUnitMeasureId]
-LEFT JOIN
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId]
-	 FROM tblICItemUOM WITH (NOLOCK)) ICUM3 ON ICISI.[intWeightUOMId] = ICUM3.[intItemUOMId]				
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) ICIU2 ON ICUM3.[intUnitMeasureId] = ICIU2.[intUnitMeasureId]					
-INNER JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
-LEFT OUTER JOIN
-	(SELECT [intStorageLocationId],
-		[strName]
-	 FROM tblICStorageLocation WITH (NOLOCK)) ICSL ON ICISI.[intStorageLocationId] = ICSL.[intStorageLocationId]				
+LEFT OUTER JOIN CUSTOMERCONTRACT ARCC ON ICISI.[intLineNo] = ARCC.[intContractDetailId] AND ICIS.[intOrderType] = 1
+LEFT OUTER JOIN DESTINATIONGRADE CTDG ON ICISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+LEFT OUTER JOIN DESTINATIONWEIGHT CTDW ON ICISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
+INNER JOIN CUSTOMER ARC ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+INNER JOIN ITEM ICI ON ICISI.[intItemId] = ICI.[intItemId]
+LEFT JOIN ITEMUOM ICIU ON ICISI.[intItemUOMId] = ICIU.[intItemUOMId] 
+LEFT JOIN ITEMUNITMEASURE ICUM ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]	
+LEFT JOIN ITEMUOM ICIU1 ON ICISI.[intItemUOMId] = ICIU1.[intItemUOMId] 
+LEFT JOIN ITEMUNITMEASURE ICUM1 ON ICIU1.[intUnitMeasureId] = ICUM1.[intUnitMeasureId]
+LEFT JOIN ITEMUOM ICUM3 ON ICISI.[intWeightUOMId] = ICUM3.[intItemUOMId]				
+LEFT JOIN ITEMUNITMEASURE ICIU2 ON ICUM3.[intUnitMeasureId] = ICIU2.[intUnitMeasureId]					
+INNER JOIN ENTITY EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+LEFT OUTER JOIN STORAGELOCATION ICSL ON ICISI.[intStorageLocationId] = ICSL.[intStorageLocationId]				
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId]		
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
-LEFT OUTER JOIN
-	(SELECT [intCompanyLocationId],
-		strLocationName
-	 FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]
-LEFT OUTER JOIN
-	(SELECT [intCurrencyID],
-		[strCurrency]
-	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]	
-LEFT OUTER JOIN
-	(SELECT [intTicketId],
-			[strTicketNumber],
-			[strCustomerReference]
-	 FROM tblSCTicket WITH (NOLOCK)) SCT ON ICISI.[intSourceId] = SCT.[intTicketId]		
-LEFT OUTER JOIN
-	tblSMCurrencyExchangeRateType SMCRT
-		ON ICISI.[intForexRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intInventoryShipmentItemId],0) = 0) ARID ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
+LEFT OUTER JOIN COMPANYLOCATION SMCL ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]
+LEFT OUTER JOIN CURRENCY SMC ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]	
+LEFT OUTER JOIN SCALETICKET ON ICISI.[intSourceId] = SCALETICKET.[intTicketId]		
+LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON ICISI.[intForexRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 
 UNION ALL
@@ -1164,9 +897,9 @@ SELECT
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
 	,[strShipVia]						= ''
-	,[strTicketNumber]					= SCT.strTicketNumber
-	,[strCustomerReference]				= SCT.strCustomerReference
-	,[intTicketId]						= SCT.intTicketId
+	,[strTicketNumber]					= SCALETICKET.strTicketNumber
+	,[strCustomerReference]				= SCALETICKET.strCustomerReference
+	,[intTicketId]						= SCALETICKET.intTicketId
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
 	,[dblWeight]						= 0.00
@@ -1231,227 +964,22 @@ LEFT OUTER JOIN
 			intStorageLocationId
 		 FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI 
 			ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
-LEFT OUTER JOIN 
-	(SELECT [intContractHeaderId],
-			[intContractDetailId],
-			[strContractNumber],
-			[intContractSeq], 
-			[intDestinationGradeId],
-			[strDestinationGrade],
-			[intDestinationWeightId],
-			[strDestinationWeight],
-			[intSubCurrencyId],
-			[intCurrencyId],
-			[strUnitMeasure],
-			[intOrderUOMId],
-			[intItemUOMId],
-			[strOrderUnitMeasure],
-			[dblCashPrice],
-			[dblDetailQuantity]
-	 FROM vyuARCustomerContract WITH (NOLOCK)) ARCC	ON ICISC.[intContractId] = ARCC.[intContractHeaderId]
-INNER JOIN
-	(SELECT [intEntityCustomerId],
-			[intCurrencyId]
-	 FROM tblARCustomer WITH (NOLOCK)) ARC
-		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
-INNER JOIN
-	(SELECT [intItemId],
-		[strItemNo],
-		[strDescription]
-	 FROM tblICItem WITH (NOLOCK)) ICI ON ICISC.[intChargeId] = ICI.[intItemId]
-LEFT JOIN
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId]
-	 FROM tblICItemUOM WITH (NOLOCK)) ICIU ON ICISC.[intCostUOMId] = ICIU.[intItemUOMId] 
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) ICUM ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]		
-INNER JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+LEFT OUTER JOIN CUSTOMERCONTRACT ARCC ON ICISC.[intContractId] = ARCC.[intContractHeaderId]
+INNER JOIN CUSTOMER ARC ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+INNER JOIN ITEM ICI ON ICISC.[intChargeId] = ICI.[intItemId]
+LEFT JOIN ITEMUOM ICIU ON ICISC.[intCostUOMId] = ICIU.[intItemUOMId] 
+LEFT JOIN ITEMUNITMEASURE ICUM ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]		
+INNER JOIN ENTITY EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId],
 		[intInventoryShipmentChargeId]	
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ICISC.intInventoryShipmentChargeId = ARID.[intInventoryShipmentChargeId]
-LEFT OUTER JOIN
-	(SELECT [intCompanyLocationId],
-		strLocationName
-	 FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]
-LEFT OUTER JOIN
-	(SELECT [intCurrencyID],
-		[strCurrency]
-	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON ICISC.[intCurrencyId] = SMC.[intCurrencyID] 
-LEFT OUTER JOIN
-	(SELECT [intTicketId],
-			[strTicketNumber],
-			[strCustomerReference]
-	 FROM tblSCTicket WITH (NOLOCK)) SCT ON ICISI.[intSourceId] = SCT.[intTicketId]
-LEFT OUTER JOIN
-	tblSMCurrencyExchangeRateType SMCRT
-		ON ICISC.[intForexRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intInventoryShipmentChargeId],0) = 0) ARID ON ICISC.intInventoryShipmentChargeId = ARID.[intInventoryShipmentChargeId]
+LEFT OUTER JOIN COMPANYLOCATION SMCL ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]
+LEFT OUTER JOIN CURRENCY SMC ON ICISC.[intCurrencyId] = SMC.[intCurrencyID] 
+LEFT OUTER JOIN SCALETICKET ON ICISI.[intSourceId] = SCALETICKET.[intTicketId]
+LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON ICISC.[intForexRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE ISNULL(ARID.[intInventoryShipmentChargeId],0) = 0
-
---UNION ALL
-
---SELECT
---	 [strTransactionType]				= 'Inbound Shipment'
---	,[strTransactionNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
---	,[strShippedItemId]					= 'lgis:' + CAST(LGS.intShipmentId AS NVARCHAR(250))
---	,[intEntityCustomerId]				= LGS.[intCustomerEntityId] 
---	,[strCustomerName]					= E.[strName]
---	,[intCurrencyId]					= ISNULL(ISNULL(ARSID.[intCurrencyId], C.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WITH (NOLOCK) WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
---	,[intSalesOrderId]					= NULL
---	,[intSalesOrderDetailId]			= NULL
---	,[strSalesOrderNumber]				= ''
---	,[dtmProcessDate]					= ISNULL(LGS.dtmShipmentDate, ISNULL(LGS.[dtmInventorizedDate], GETDATE()))
---	,[intInventoryShipmentId]			= NULL
---	,[intInventoryShipmentItemId]		= NULL	
---	,[intInventoryShipmentChargeId]		= NULL
---	,[strInventoryShipmentNumber]		= ''	
---	,[intShipmentId]					= LGS.[intShipmentId]
---	,[strShipmentNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
---	,[intLoadId]						= NULL	
---	,[intLoadDetailId]					= NULL
---	,[intLotId]							= ARSID.[intLotId]
---	,[strLoadNumber]					= NULL
---	,[intRecipeItemId]					= NULL
---	,[intContractHeaderId]				= NULL
---	,[strContractNumber]				= ''
---	,[intContractDetailId]				= NULL
---	,[intContractSeq]					= NULL
---	,[intCompanyLocationId]				= LGS.[intCompanyLocationId]
---	,[strLocationName]					= CL.[strLocationName]
---	,[intShipToLocationId]				= ISNULL(SL.[intEntityLocationId], EL.[intEntityLocationId])
---	,[intFreightTermId]					= NULL
---	,[intItemId]						= NULL
---	,[strItemNo]						= ''
---	,[strItemDescription]				= ''
---	,[intItemUOMId]						= NULL
---	,[strUnitMeasure]					= ''
---	,[intOrderUOMId]					= NULL
---	,[strOrderUnitMeasure]				= ''
---	,[intShipmentItemUOMId]				= NULL
---	,[strShipmentUnitMeasure]			= ''
---	,[dblQtyShipped]					= 0.00
---	,[dblQtyOrdered]					= 0.00
---	,[dblShipmentQuantity]				= 0.00
---	,[dblShipmentQtyShippedTotal]		= 0.00
---	,[dblQtyRemaining]					= 0.00
---	,[dblDiscount]						= 0.00
---	,[dblPrice]							= 0.00
---	,[dblShipmentUnitPrice]				= 0.00
---	,[strPricing]						= ''
---	,[strVFDDocumentNumber]				= NULL
---	,[dblTotalTax]						= 0.00
---	,[dblTotal]							= 0.00
---	,[intStorageLocationId]				= NULL
---	,[strStorageLocationName]			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
---	,[intTermID]						= NULL
---	,[strTerm]							= ''
---	,[intEntityShipViaId]				= NULL
---	,[strShipVia]						= ''
---	,[strTicketNumber]					= NULL
---	,[strCustomerReference]				= NULL
---	,[intTicketId]						= NULL
---	,[intTaxGroupId]					= NULL
---	,[strTaxGroup]						= NULL
---	,[dblWeight]						= 0.00
---	,[intWeightUOMId]					= NULL
---	,[strWeightUnitMeasure]				= ''
---	,[dblGrossWt]						= 0.00
---	,[dblTareWt]						= 0.00
---	,[dblNetWt]							= 0.00
---	,[strPONumber]						= ''
---	,[strBOLNumber]						= ''
---	,[intSplitId]						= NULL
---	,[intEntitySalespersonId]			= NULL
---	,[strSalespersonName]				= NULL
---	,[ysnBlended]						= NULL
---	,[intRecipeId]						= NULL
---	,[intSubLocationId]					= NULL
---	,[intCostTypeId]					= NULL
---	,[intMarginById]					= NULL
---	,[intCommentTypeId]					= NULL
---	,[dblMargin]						= NULL
---	,[dblRecipeQuantity]				= NULL
---	,[intStorageScheduleTypeId]			= NULL
---	,[intDestinationGradeId]			= NULL
---	,[strDestinationGrade]				= ''
---	,[intDestinationWeightId]			= NULL
---	,[strDestinationWeight]				= ''
---	,[intCurrencyExchangeRateTypeId]	= ARSID.[intCurrencyExchangeRateTypeId]
---	,[strCurrencyExchangeRateType]		= ARSID.[strCurrencyExchangeRateType]
---	,[intCurrencyExchangeRateId]		= ARSID.[intCurrencyExchangeRateId]
---	,[dblCurrencyExchangeRate]			= ARSID.[dblCurrencyExchangeRate]
---	,[intSubCurrencyId]					= ARSID.[intSubCurrencyId]
---	,[dblSubCurrencyRate]				= ARSID.[dblSubCurrencyRate]
---	,[strSubCurrency]					= ARSID.[strSubCurrency]
---FROM
---	(SELECT [intSubCurrencyId],
---			[dblSubCurrencyRate],
---			[strSubCurrency],
---			[intShipmentId],
---			[intCurrencyId],
---			[intCurrencyExchangeRateTypeId],
---			[strCurrencyExchangeRateType],
---			[intCurrencyExchangeRateId],
---			[dblCurrencyExchangeRate],
---			[intLotId]
---	 FROM vyuARShippedItemDetail WITH (NOLOCK))ARSID
---INNER JOIN
---	(SELECT [intShipmentId],
---		intCustomerEntityId,
---		intCompanyLocationId,
---		dtmShipmentDate,
---		dtmInventorizedDate
---	 FROM vyuLGShipmentHeader WITH (NOLOCK)
---	 WHERE [ysnInventorized] = 1
---		AND [intShipmentId] IN (SELECT [intShipmentId] FROM vyuLGDropShipmentDetails WITH (NOLOCK))) LGS		
---		ON ARSID.[intShipmentId] = LGS.[intShipmentId]
---INNER JOIN
---	(SELECT [intEntityCustomerId],
---			[intCurrencyId],
---			[intShipToId]
---	 FROM tblARCustomer WITH (NOLOCK)) C
---		ON LGS.[intCustomerEntityId] = C.[intEntityCustomerId] 
---INNER JOIN
---	(SELECT [intEntityId],
---			strName
---	 FROM tblEMEntity WITH (NOLOCK)) E ON C.[intEntityCustomerId]  = E.[intEntityId]
---LEFT OUTER JOIN
---	(SELECT [intCompanyLocationId],
---		strLocationName
---	 FROM tblSMCompanyLocation WITH (NOLOCK)) CL ON LGS.[intCompanyLocationId] = CL.[intCompanyLocationId]
---LEFT OUTER JOIN
---		(	SELECT 
---				 [intEntityLocationId]
---				,[strLocationName]
---				,[strAddress]
---				,[intEntityId] 
---				,[strCountry]
---				,[strState]
---				,[strCity]
---				,[strZipCode]
---				,[intTermsId]
---				,[intShipViaId]
---			FROM 
---				[tblEMEntityLocation] WITH (NOLOCK)
---			WHERE
---				ysnDefaultLocation = 1
---		) EL
---			ON LGS.[intCustomerEntityId] = EL.[intEntityId]
---LEFT OUTER JOIN
---	(SELECT intEntityLocationId 
---	 FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
---		ON C.intShipToId = SL.intEntityLocationId
---LEFT OUTER JOIN
---	(SELECT [intInventoryShipmentItemId],
---		[intShipmentId]	
---	 FROM tblARInvoiceDetail WITH (NOLOCK)
---	 WHERE intInvoiceId IS NULL) ARID ON LGS.[intShipmentId] = ARID.[intShipmentId]
-		 
 
 UNION ALL
 
@@ -1548,74 +1076,26 @@ SELECT
 	,[intSubCurrencyId]					= NULL
 	,[dblSubCurrencyRate]				= 1
 	,[strSubCurrency]					= ''
-FROM
-	(SELECT [intSalesOrderId], 
-			[strSalesOrderNumber],
-			[intEntityCustomerId], 
-			[intCurrencyId],
-			[dtmDate],
-			[strPONumber],
-			[strBOLNumber],
-			[intSplitId],
-			[intEntitySalespersonId],
-			[intCompanyLocationId],
-			[intShipToLocationId],
-			[intFreightTermId],
-			[intTermId],
-			[intShipViaId],
-			[strTransactionType],
-			[strOrderStatus]
-	FROM tblSOSalesOrder  WITH (NOLOCK)
-	WHERE [strTransactionType] = 'Order' AND strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')) SO
+FROM SALESORDER SO
 CROSS APPLY
 	[dbo].[fnMFGetInvoiceChargesByShipment](0,SO.[intSalesOrderId]) MFG
-INNER JOIN
-	(SELECT [intItemId],
-		[strItemNo],
-		[strDescription]
-	 FROM tblICItem WITH (NOLOCK)) I
-		ON MFG.[intItemId] = I.[intItemId]
-INNER JOIN
-	(SELECT [intEntityCustomerId],
-			[intCurrencyId]
-	 FROM tblARCustomer WITH (NOLOCK)) C
-		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
-INNER JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) E ON C.[intEntityCustomerId] = E.[intEntityId]
-LEFT JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
-LEFT OUTER JOIN
-	(SELECT [intTermID],
-		[strTerm]
-	 FROM tblSMTerm WITH (NOLOCK)) T ON SO.[intTermId] = T.[intTermID] 
-LEFT OUTER JOIN
-	(SELECT [intEntityShipViaId],
-		[strShipVia]
-	 FROM tblSMShipVia WITH (NOLOCK)) S
-		ON SO.[intShipViaId] = S.[intEntityShipViaId] 
-LEFT JOIN
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId]
-	 FROM tblICItemUOM WITH (NOLOCK)) IU ON MFG.[intItemUOMId] = IU.[intItemUOMId]
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
-LEFT OUTER JOIN
-	(SELECT [intCompanyLocationId],
-		strLocationName
-	 FROM tblSMCompanyLocation WITH (NOLOCK)) CL ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
+INNER JOIN ITEM I ON MFG.[intItemId] = I.[intItemId]
+INNER JOIN CUSTOMER C ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
+INNER JOIN ENTITY E ON C.[intEntityCustomerId] = E.[intEntityId]
+LEFT JOIN ENTITY ESP ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
+LEFT OUTER JOIN TERM T ON SO.[intTermId] = T.[intTermID] 
+LEFT OUTER JOIN SHIPVIA S ON SO.[intShipViaId] = S.[intEntityShipViaId] 
+LEFT JOIN ITEMUOM IU ON MFG.[intItemUOMId] = IU.[intItemUOMId]
+LEFT JOIN ITEMUNITMEASURE U ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+LEFT OUTER JOIN COMPANYLOCATION CL ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId],
 			[intRecipeItemId],
 			[intCurrencyExchangeRateTypeId],
 			[intCurrencyExchangeRateId],
 			[dblCurrencyExchangeRate]
-	 FROM tblARInvoiceDetail WITH (NOLOCK))ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE (ISNULL([intRecipeItemId], 0)	= 0) )ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
 LEFT OUTER JOIN
 	(SELECT intRecipeItemId,
 		intRecipeId
@@ -1630,9 +1110,7 @@ LEFT OUTER JOIN
 				 FROM tblICInventoryShipment WITH (NOLOCK)
 				 WHERE [intOrderType] = 2) H ON H.[intInventoryShipmentId] = D.[intInventoryShipmentId]) ISD
 		ON SO.[intSalesOrderId] = ISD.[intOrderId] 
-LEFT OUTER JOIN
-	tblSMCurrencyExchangeRateType SMCRT
-		ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE
 	SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	AND ISNULL(ARID.[intRecipeItemId],0) = 0
@@ -1755,70 +1233,28 @@ INNER JOIN
 	FROM tblICInventoryShipment WITH (NOLOCK)
 	WHERE [ysnPosted] = 1) ICIS
 		ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]		 
-LEFT OUTER JOIN
-	(
-		SELECT
-			[intWeightGradeId]		= [intWeightGradeId]
-			,[strDestinationGrade]	= [strWeightGradeDesc]
-		FROM
-			tblCTWeightGrade WITH (NOLOCK)
-	) CTDG
-		ON ICISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
-LEFT OUTER JOIN
-	(
-		SELECT
-			[intWeightGradeId]		= [intWeightGradeId]
-			,[strDestinationWeight]	= [strWeightGradeDesc]
-		FROM
-			tblCTWeightGrade WITH (NOLOCK)
-	) CTDW
-		ON ICISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
-INNER JOIN
-	(SELECT [intEntityCustomerId],
-			[intCurrencyId]
-	 FROM tblARCustomer WITH (NOLOCK)) ARC
-		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
-INNER JOIN
-	(SELECT [intItemId],
-		[strItemNo],
-		[strDescription]
-	 FROM tblICItem WITH (NOLOCK)) ICI
-		ON MFG.[intItemId] = ICI.[intItemId]
-LEFT JOIN
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId]
-	 FROM tblICItemUOM WITH (NOLOCK)) ICIU ON MFG.[intItemUOMId] = ICIU.[intItemUOMId] 
-LEFT JOIN
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) ICUM ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]		
-INNER JOIN
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]			
+LEFT OUTER JOIN DESTINATIONGRADE CTDG ON ICISI.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+LEFT OUTER JOIN DESTINATIONWEIGHT CTDW ON ICISI.[intDestinationWeightId] = CTDW.[intWeightGradeId]
+INNER JOIN CUSTOMER ARC ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+INNER JOIN ITEM ICI ON MFG.[intItemId] = ICI.[intItemId]
+LEFT JOIN ITEMUOM ICIU ON MFG.[intItemUOMId] = ICIU.[intItemUOMId] 
+LEFT JOIN ITEMUNITMEASURE ICUM ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]		
+INNER JOIN ENTITY EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]			
 LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentItemId],
 		[intRecipeItemId],
 		[strShipmentNumber]	
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intRecipeItemId],0) = 0) ARID ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
 		AND ICIS.[strShipmentNumber] = ARID.[strShipmentNumber]
-LEFT OUTER JOIN
-	(SELECT [intCompanyLocationId],
-		strLocationName
-	 FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]	
-LEFT OUTER JOIN
-	(SELECT [intCurrencyID],
-		[strCurrency],
-		[intCent]
-	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON ICISI.[intCurrencyId] = SMC.[intCurrencyID]
+LEFT OUTER JOIN COMPANYLOCATION SMCL ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]	
+LEFT OUTER JOIN CURRENCY SMC ON ICISI.[intCurrencyId] = SMC.[intCurrencyID]
 LEFT OUTER JOIN
 (SELECT intRecipeItemId,
 		intRecipeId
 	 FROM tblMFRecipeItem WITH(NOLOCK)) MFI
 		ON MFG.intRecipeItemId = MFI.intRecipeItemId
-LEFT OUTER JOIN
-	tblSMCurrencyExchangeRateType SMCRT
-		ON ICISI.[intForexRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON ICISI.[intForexRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE ISNULL(ARID.[intRecipeItemId],0) = 0
 
 UNION ALL 
@@ -1937,15 +1373,8 @@ JOIN (SELECT intLoadId,
 			intPContractDetailId,
 			dblQuantity
 	  FROM tblLGLoadDetail WITH (NOLOCK)) LD ON L.intLoadId  = LD.intLoadId
-INNER JOIN 
-	(SELECT [intEntityCustomerId],
-			[intCurrencyId]
-	 FROM tblARCustomer WITH (NOLOCK)) ARC ON LD.intCustomerEntityId = ARC.intEntityCustomerId
-INNER JOIN 
-	(SELECT [intItemId],
-		[strItemNo],
-		[strDescription]
-	 FROM tblICItem WITH (NOLOCK)) ICI ON LD.intItemId = ICI.intItemId
+INNER JOIN CUSTOMER ARC ON LD.intCustomerEntityId = ARC.intEntityCustomerId
+INNER JOIN ITEM ICI ON LD.intItemId = ICI.intItemId
 LEFT JOIN (SELECT intLoadDetailId,
 			intLotId,
 			dblGross,
@@ -1956,82 +1385,25 @@ LEFT JOIN
 	(SELECT intLotId,
 			intStorageLocationId
 	FROM tblICLot WITH (NOLOCK)) LO ON LO.intLotId = LDL.intLotId
-LEFT JOIN 
-	(SELECT [intStorageLocationId],
-		[strName]
-	 FROM tblICStorageLocation WITH (NOLOCK)) SL ON SL.intStorageLocationId = LO.intStorageLocationId
-LEFT JOIN 
-	(SELECT [intContractHeaderId],
-			[intContractDetailId],
-			[strContractNumber],
-			[intContractSeq], 
-			[intDestinationGradeId],
-			[strDestinationGrade],
-			[intDestinationWeightId],
-			[strDestinationWeight],
-			[intSubCurrencyId],
-			[intCurrencyId],
-			[strUnitMeasure],
-			[intOrderUOMId],
-			[intItemUOMId],
-			[strOrderUnitMeasure],
-			[dblCashPrice],
-			[dblDetailQuantity],
-			[intFreightTermId],
-			[dblShipQuantity],
-			[dblOrderQuantity],
-			[dblSubCurrencyRate],
-			[intCurrencyExchangeRateTypeId],
-			[strCurrencyExchangeRateType],
-			[intCurrencyExchangeRateId],
-			[dblCurrencyExchangeRate]
-	 FROM vyuARCustomerContract WITH (NOLOCK)) ARCC ON ARCC.intContractDetailId = LD.intSContractDetailId
-LEFT JOIN 
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId]
-	 FROM tblICItemUOM WITH (NOLOCK)) ICIU ON LD.intItemUOMId = ICIU.intItemUOMId
-LEFT JOIN 
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) ICUM ON ICIU.intUnitMeasureId = ICUM.intUnitMeasureId
-LEFT JOIN 
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId]
-	 FROM tblICItemUOM WITH (NOLOCK)) ICIU1 ON LD.intItemUOMId = ICIU1.intItemUOMId
-LEFT JOIN 
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) ICUM1 ON ICIU1.intUnitMeasureId = ICUM1.intUnitMeasureId
-LEFT JOIN 
-	(SELECT [intItemUOMId],
-		[intUnitMeasureId]
-	 FROM tblICItemUOM WITH (NOLOCK)) ICUM3 ON LD.intWeightItemUOMId = ICUM3.intItemUOMId
-LEFT JOIN 
-	(SELECT [intUnitMeasureId],
-		[strUnitMeasure]
-	 FROM tblICUnitMeasure WITH (NOLOCK)) ICIU2 ON ICUM3.intUnitMeasureId = ICIU2.intUnitMeasureId
-INNER JOIN 
-	(SELECT [intEntityId],
-			strName
-	 FROM tblEMEntity WITH (NOLOCK)) EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+LEFT JOIN STORAGELOCATION SL ON SL.intStorageLocationId = LO.intStorageLocationId
+LEFT JOIN CUSTOMERCONTRACT ARCC ON ARCC.intContractDetailId = LD.intSContractDetailId
+LEFT JOIN ITEMUOM ICIU ON LD.intItemUOMId = ICIU.intItemUOMId
+LEFT JOIN ITEMUNITMEASURE ICUM ON ICIU.intUnitMeasureId = ICUM.intUnitMeasureId
+LEFT JOIN ITEMUOM ICIU1 ON LD.intItemUOMId = ICIU1.intItemUOMId
+LEFT JOIN ITEMUNITMEASURE ICUM1 ON ICIU1.intUnitMeasureId = ICUM1.intUnitMeasureId
+LEFT JOIN ITEMUOM ICUM3 ON LD.intWeightItemUOMId = ICUM3.intItemUOMId
+LEFT JOIN ITEMUNITMEASURE ICIU2 ON ICUM3.intUnitMeasureId = ICIU2.intUnitMeasureId
+INNER JOIN ENTITY EME ON ARC.[intEntityCustomerId] = EME.[intEntityId]
 LEFT OUTER JOIN 
 	(SELECT [intInventoryShipmentItemId],
 		[intRecipeItemId],
 		[strShipmentNumber],
 		[intLoadDetailId]
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON LD.intLoadDetailId = ARID.[intLoadDetailId]
-LEFT OUTER JOIN 
-	(SELECT [intCompanyLocationId],
-		strLocationName
-	 FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL ON LD.intSCompanyLocationId = SMCL.[intCompanyLocationId]
-LEFT OUTER JOIN 
-	(SELECT [intCurrencyID],
-		[strCurrency]
-	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID]
-WHERE
-	ISNULL(ARID.[intLoadDetailId], 0) = 0
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intLoadDetailId],0) = 0) ARID ON LDL.intLoadDetailId = ARID.[intLoadDetailId]
+LEFT OUTER JOIN  COMPANYLOCATION SMCL ON LD.intSCompanyLocationId = SMCL.[intCompanyLocationId]
+LEFT OUTER JOIN CURRENCY SMC ON ARCC.[intSubCurrencyId] = SMC.[intCurrencyID] 
 	 
-
 UNION
 		
 SELECT  [strTransactionType]			= 'Load Schedule'
@@ -2160,32 +1532,10 @@ LEFT OUTER JOIN
 		[intCurrencyExchangeRateId],
 		[dblCurrencyExchangeRate]
 	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ARID.intLoadDetailId = LWS.[intLoadDetailId]
-LEFT OUTER JOIN
-	(
-		SELECT
-			[intWeightGradeId]		= [intWeightGradeId]
-			,[strDestinationGrade]	= [strWeightGradeDesc]
-		FROM
-			tblCTWeightGrade WITH (NOLOCK)
-	) CTDG
-		ON ARID.[intDestinationGradeId] = CTDG.[intWeightGradeId]
-LEFT OUTER JOIN
-	(
-		SELECT
-			[intWeightGradeId]		= [intWeightGradeId]
-			,[strDestinationWeight]	= [strWeightGradeDesc]
-		FROM
-			tblCTWeightGrade WITH (NOLOCK)
-	) CTDW
-		ON ARID.[intDestinationWeightId] = CTDW.[intWeightGradeId]
-LEFT OUTER JOIN 
-	(SELECT [intCurrencyID],
-		[strCurrency],
-		[intCent]
-	 FROM tblSMCurrency WITH (NOLOCK)) SMC ON LWS.[intCurrencyId] = SMC.[intCurrencyID] 
-LEFT OUTER JOIN
-	tblSMCurrencyExchangeRateType SMCRT
-		ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN DESTINATIONGRADE CTDG ON ARID.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+LEFT OUTER JOIN DESTINATIONWEIGHT CTDW ON ARID.[intDestinationWeightId] = CTDW.[intWeightGradeId]
+LEFT OUTER JOIN CURRENCY SMC ON LWS.[intCurrencyId] = SMC.[intCurrencyID] 
+LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 WHERE LWS.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0 AND ISNULL(LWS.intItemId,0) <> 0
 
 UNION
@@ -2312,33 +1662,12 @@ LEFT OUTER JOIN
 		[intCurrencyExchangeRateTypeId],
 		[intCurrencyExchangeRateId],
 		[dblCurrencyExchangeRate]
-	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
-LEFT OUTER JOIN
-	(
-		SELECT
-			[intWeightGradeId]		= [intWeightGradeId]
-			,[strDestinationGrade]	= [strWeightGradeDesc]
-		FROM
-			tblCTWeightGrade WITH (NOLOCK)
-	) CTDG
-		ON ARID.[intDestinationGradeId] = CTDG.[intWeightGradeId]
-LEFT OUTER JOIN
-	(
-		SELECT
-			[intWeightGradeId]		= [intWeightGradeId]
-			,[strDestinationWeight]	= [strWeightGradeDesc]
-		FROM
-			tblCTWeightGrade WITH (NOLOCK)
-	) CTDW
-		ON ARID.[intDestinationWeightId] = CTDW.[intWeightGradeId]
-LEFT OUTER JOIN 
-	(SELECT [intCurrencyID], 
-		[strCurrency], 
-		[intCent] 
-	FROM tblSMCurrency WITH (NOLOCK)) SMC ON LC.[intCurrencyId] = SMC.[intCurrencyID] 
-LEFT OUTER JOIN
-	tblSMCurrencyExchangeRateType SMCRT
-		ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+	 FROM tblARInvoiceDetail WITH (NOLOCK)
+	 WHERE ISNULL([intLoadDetailId], 0) = 0) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
+LEFT OUTER JOIN DESTINATIONGRADE CTDG ON ARID.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+LEFT OUTER JOIN DESTINATIONWEIGHT CTDW ON ARID.[intDestinationWeightId] = CTDW.[intWeightGradeId]
+LEFT OUTER JOIN CURRENCY SMC ON LC.[intCurrencyId] = SMC.[intCurrencyID] 
+LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN
 	(
 		SELECT 
@@ -2485,33 +1814,12 @@ LEFT OUTER JOIN
 		[intCurrencyExchangeRateTypeId],
 		[intCurrencyExchangeRateId],
 		[dblCurrencyExchangeRate]
-	FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
-LEFT OUTER JOIN
-	(
-		SELECT
-			[intWeightGradeId]		= [intWeightGradeId]
-			,[strDestinationGrade]	= [strWeightGradeDesc]
-		FROM
-			tblCTWeightGrade WITH (NOLOCK)
-	) CTDG
-		ON ARID.[intDestinationGradeId] = CTDG.[intWeightGradeId]
-LEFT OUTER JOIN
-	(
-		SELECT
-			[intWeightGradeId]		= [intWeightGradeId]
-			,[strDestinationWeight]	= [strWeightGradeDesc]
-		FROM
-			tblCTWeightGrade WITH (NOLOCK)
-	) CTDW
-		ON ARID.[intDestinationWeightId] = CTDW.[intWeightGradeId]
-LEFT OUTER JOIN 
-	(SELECT [intCurrencyID], 
-		[strCurrency], 
-		[intCent] 
-	FROM tblSMCurrency WITH (NOLOCK)) SMC ON LC.[intCurrencyId] = SMC.[intCurrencyID] 
-LEFT OUTER JOIN
-	tblSMCurrencyExchangeRateType SMCRT
-		ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
+	FROM tblARInvoiceDetail WITH (NOLOCK)
+	WHERE ISNULL([intLoadDetailId], 0) = 0) ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
+LEFT OUTER JOIN DESTINATIONGRADE CTDG ON ARID.[intDestinationGradeId] = CTDG.[intWeightGradeId]
+LEFT OUTER JOIN DESTINATIONWEIGHT CTDW ON ARID.[intDestinationWeightId] = CTDW.[intWeightGradeId]
+LEFT OUTER JOIN CURRENCY SMC ON LC.[intCurrencyId] = SMC.[intCurrencyID] 
+LEFT OUTER JOIN CURRENCYEXCHANGERATE SMCRT ON ARID.[intCurrencyExchangeRateTypeId] = SMCRT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN
 	(
 		SELECT 
