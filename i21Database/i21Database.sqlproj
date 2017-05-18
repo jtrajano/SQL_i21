@@ -5244,6 +5244,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportUCCPalletLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteChargePerItemOnReceiptSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteChargePerItemOnShipmentSave.sql" />
+    <Build Include="dbo\Views\vyuRKMarketDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
