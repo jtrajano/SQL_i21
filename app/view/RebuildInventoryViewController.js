@@ -1,17 +1,3 @@
-var months = [
-    { intId: 1, strMonth: 'January' },
-    { intId: 2, strMonth: 'February' },
-    { intId: 3, strMonth: 'March' },
-    { intId: 4, strMonth: 'April' },
-    { intId: 5, strMonth: 'May' },
-    { intId: 6, strMonth: 'June' },
-    { intId: 7, strMonth: 'July' },
-    { intId: 8, strMonth: 'August' },
-    { intId: 9, strMonth: 'September' },
-    { intId: 10, strMonth: 'October' },
-    { intId: 11, strMonth: 'November' },
-    { intId: 12, strMonth: 'December' }
-];
 Ext.define('Inventory.view.RebuildInventoryViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icrebuildinventory',
@@ -224,6 +210,21 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
     show: function (config) {
         "use strict";
 
+        var months = [
+            { intId: 1, strMonth: 'January' },
+            { intId: 2, strMonth: 'February' },
+            { intId: 3, strMonth: 'March' },
+            { intId: 4, strMonth: 'April' },
+            { intId: 5, strMonth: 'May' },
+            { intId: 6, strMonth: 'June' },
+            { intId: 7, strMonth: 'July' },
+            { intId: 8, strMonth: 'August' },
+            { intId: 9, strMonth: 'September' },
+            { intId: 10, strMonth: 'October' },
+            { intId: 11, strMonth: 'November' },
+            { intId: 12, strMonth: 'December' }
+        ];
+
         var me = this,
             win = this.getView(),
             vm = win.viewModel;
@@ -258,35 +259,11 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                 }
             }
         });
-        // ic.utils.ajax({
-        //     url: '../Inventory/api/InventoryValuation/GetFiscalMonths',
-        //     method: 'GET'
-        // }).subscribe(function(success) {
-        //     if(success.responseText !== "") {
-        //         var res = JSON.parse(success.responseText);
-        //         if(res && res.success === true) {
-        //             var fy = _.filter(res.data, function(x) {
-        //                 return x.intStartMonth === intMonth && d.getFullYear().toString() === x.strFiscalYear;
-        //             });
-        //             if(fy) {
-        //                 var current = vm.data.current;
-        //                 current.set('intMonth', fy[0].intStartMonth);
-        //                 current.set('dtmDate', fy[0].dtmStartDate);
-        //                 current.set('strMonth', fy[0].strStartMonth);
-        //             }
-        //         }
-        //     }
-        // }, function(failure) {
-
-        // });
     },
 
     createRecord: function (config, action) {
         var record = Ext.create('Inventory.model.RebuildInventory');
         var d = new Date();
-        // record.set('intMonth', d.getMonth() + 1);
-        // record.set('strMonth', months[d.getMonth()].strMonth);
-        // record.set('dtmDate', new Date(d.getFullYear(), d.getMonth(), 1));
         record.set('strPostOrder', 'Periodic');
         action(record);
     },
