@@ -25,7 +25,7 @@ FROM         dbo.tblCFAccount AS A LEFT JOIN
                          dbo.tblCFCard AS C ON A.intAccountId = C.intAccountId LEFT OUTER JOIN
                          dbo.tblCFNetwork AS N ON N.intNetworkId = C.intNetworkId LEFT OUTER JOIN
                          dbo.tblCFDepartment AS D ON D.intDepartmentId = C.intDepartmentId LEFT JOIN
-                         dbo.vyuCFCustomerEntity AS Cus ON A.intCustomerId = Cus.[intEntityId] INNER JOIN
-                         dbo.tblCFInvoiceCycle AS I ON I.intInvoiceCycleId = A.intInvoiceCycle LEFT JOIN
-                         dbo.vyuARCustomerContacts AS arCustCon ON A.intCustomerId = arCustCon.intCustomerEntityId AND arCustCon.ysnDefaultContact = 1 AND arCustCon.ysnPortalAccess = 0
+                         dbo.vyuCFCustomerEntity AS Cus ON A.intCustomerId = Cus.intEntityId INNER JOIN
+                         dbo.tblCFInvoiceCycle AS I ON I.intInvoiceCycleId = A.intInvoiceCycle INNER JOIN
+						 dbo.tblEMEntity AS E ON E.intEntityId = A.intCustomerId
 GO
