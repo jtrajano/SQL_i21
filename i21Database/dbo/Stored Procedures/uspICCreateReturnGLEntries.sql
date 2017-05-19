@@ -15,7 +15,7 @@ SET ANSI_WARNINGS OFF
 
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
-		,@AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Auto-Variance'
+		,@AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance'
 		,@AccountCategory_Cost_of_Goods AS NVARCHAR(30) = 'Cost of Goods'
 
 -- Get the default currency ID
