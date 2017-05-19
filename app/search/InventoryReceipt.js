@@ -54,7 +54,45 @@ Ext.define('Inventory.search.InventoryReceipt', {
                 { xtype: 'numbercolumn', dataIndex: 'dblTotalGross', text: 'Gross', flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', dataIndex: 'dblTotalNet', text: 'Net', flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', dataIndex: 'dblGrandTotal', text: 'Total', flex: 1, dataType: 'float' },
-            ]
+            ],
+            buttons: [
+                {
+                    text: 'Items',
+                    itemId: 'btnItem',
+                    clickHandler: 'onItemClick',
+                    width: 80
+                },
+                {
+                    text: 'Categories',
+                    itemId: 'btnCategory',
+                    clickHandler: 'onCategoryClick',
+                    width: 100
+                },
+                {
+                    text: 'Commodities',
+                    itemId: 'btnCommodity',
+                    clickHandler: 'onCommodityClick',
+                    width: 100
+                },
+                {
+                    text: 'Locations',
+                    itemId: 'btnLocation',
+                    clickHandler: 'onLocationClick',
+                    width: 100
+                },
+                {
+                    text: 'Storage Locations',
+                    itemId: 'btnStorageLocation',
+                    clickHandler: 'onStorageLocationClick',
+                    width: 110
+                },
+                {
+                    text: 'Vendor',
+                    itemId: 'btnVendor',
+                    clickHandler: 'onBtnVendorClick',
+                    width: 80
+                }
+            ],                    
         },
         {
             title: 'Details',
@@ -184,51 +222,15 @@ Ext.define('Inventory.search.InventoryReceipt', {
                 { dataIndex: 'dblTaxesPayable', text: 'Uncleared Taxes Total', width: 150, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate: 'sum', aggregateFormat: '#,###.00' },
                 { dataIndex: 'dtmLastVoucherDate', text: 'Last Voucher Date', width: 120, dataType: 'date', xtype: 'datecolumn' },
                 { dataIndex: 'strFilterString', text: 'Voucher Nos.', flex: 1, dataType: 'string', required: true, hidden: true }
+            ],
+            buttons: [
+                {
+                    text: 'Refresh Vouchers',
+                    itemId: 'btnRefreshVoucher',
+                    clickHandler: 'onRefreshVoucherClick',
+                    width: 400
+                }                
             ]
-        }
-    ],
-    buttons: [
-        {
-            text: 'Refresh Vouchers',
-            itemId: 'btnRefreshVoucher',
-            clickHandler: 'onRefreshVoucherClick',
-            width: 400
-        },
-        {
-            text: 'Items',
-            itemId: 'btnItem',
-            clickHandler: 'onItemClick',
-            width: 80
-        },
-        {
-            text: 'Categories',
-            itemId: 'btnCategory',
-            clickHandler: 'onCategoryClick',
-            width: 100
-        },
-        {
-            text: 'Commodities',
-            itemId: 'btnCommodity',
-            clickHandler: 'onCommodityClick',
-            width: 100
-        },
-        {
-            text: 'Locations',
-            itemId: 'btnLocation',
-            clickHandler: 'onLocationClick',
-            width: 100
-        },
-        {
-            text: 'Storage Locations',
-            itemId: 'btnStorageLocation',
-            clickHandler: 'onStorageLocationClick',
-            width: 110
-        },
-        {
-            text: 'Vendor',
-            itemId: 'btnVendor',
-            clickHandler: 'onBtnVendorClick',
-            width: 80
         }
     ],
 
