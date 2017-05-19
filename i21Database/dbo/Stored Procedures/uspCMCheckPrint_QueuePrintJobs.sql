@@ -235,26 +235,37 @@ FROM	tblCMBankTransaction f INNER JOIN #tmpPrintJobSpoolTable TMP
 			AND f.intTransactionId = TMP.intTransactionId
 
 -- Retrieve the highest check number entered for the print queue. 
-SET @strNextCheckNumber = NULL 
+--SET @strNextCheckNumber = NULL 
+--SELECT	TOP 1 
+--		@strNextCheckNumber = MAX(dbo.fnAddZeroPrefixes(strCheckNo, @intCheckNoLength))
+--FROM	#tmpPrintJobSpoolTable
+--WHERE	ISNUMERIC(strCheckNo) = 1
+
+--Retrieve the next check number from the check number audit
+DECLARE @strNextCheckNumberForBankAccount AS NVARCHAR(20)
 SELECT	TOP 1 
-		@strNextCheckNumber = MAX(dbo.fnAddZeroPrefixes(strCheckNo, @intCheckNoLength))
-FROM	#tmpPrintJobSpoolTable
-WHERE	ISNUMERIC(strCheckNo) = 1
+		@strNextCheckNumberForBankAccount = strCheckNo
+FROM	dbo.tblCMCheckNumberAudit
+WHERE	intBankAccountId = @intBankAccountId			
+		AND strCheckNo >= @strNextCheckNumber
+		AND intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
+		AND strCheckNo NOT IN (SELECT strCheckNo FROM #tmpManuallyAssignedCheckNumbers)
+ORDER BY strCheckNo
 
 -- Increment the next check number 
-IF (@strNextCheckNumber IS NOT NULL)
+IF (@strNextCheckNumberForBankAccount IS NOT NULL)
 BEGIN 
 	-- Update the next check number 
 	UPDATE	dbo.tblCMBankAccount
-	SET		intCheckNextNo = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber,intCheckNoLength) AS INT) + 1
+	SET		intCheckNextNo = CAST(@strNextCheckNumberForBankAccount AS INT)
 	WHERE	intBankAccountId = @intBankAccountId
-			AND ISNULL(@strNextCheckNumber, '') <> ''
-			AND intCheckNextNo <= CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber,intCheckNoLength) AS INT)
+			AND ISNULL(@strNextCheckNumberForBankAccount, '') <> ''
+			--AND intCheckNextNo <= CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber,intCheckNoLength) AS INT)
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 
 	-- Update the next check number to the checkbook in origin.
 	EXEC dbo.uspCMUpdateOriginNextCheckNo
-		@strNextCheckNumber
+		@strNextCheckNumberForBankAccount
 		,@intBankAccountId
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 END 
