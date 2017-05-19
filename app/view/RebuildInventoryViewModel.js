@@ -61,7 +61,11 @@ Ext.define('Inventory.view.RebuildInventoryViewModel', {
                     item = '"' + get('current.strItemNo') + '" item';
             } catch(e) {}
             var year = get('current.dtmDate').getFullYear();
-            return 'Inventory for ' + item + ' will be rebuilt from ' + month + '-' + moment(get('current.dtmDate')).format('l') + ' and onwards. Any Finished Goods will be rebuilt as well if ' + item + ' is an ingredient of it. <br/><br/>Do you want to continue?';
+
+            if (item === 'all items'){
+                return 'Inventory for ' + item + ' will be rebuilt from ' + moment(get('current.dtmDate')).format('l') + ' and onwards.<br/><br/>Do you want to continue?';
+            }
+            return 'Inventory for ' + item + ' will be rebuilt from ' + moment(get('current.dtmDate')).format('l') + ' and onwards. Any Finished Goods will be rebuilt as well if it is used as an ingredient.<br/><br/>Do you want to continue?';
         },
         canPost: function(get) {
             return (get('current.strPostOrder') && get('current.strMonth')) && !get('inProgress'); 
