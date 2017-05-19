@@ -337,6 +337,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\037_DefaultDataLocationPayee.sql
 :r .\EM\038_UpdateEncryptionUsed.sql
 :r .\EM\039_MoveDefaultTermsToVendorTerm.sql
+--START KEEP FROM 1710-1720
+:r .\EM\DataMigration\1710_1720_CCSite_migration.sql
+--END KEEP FROM 1710-1720
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
