@@ -12,7 +12,7 @@ SELECT A.intDocumentMaintenanceId
 	 , B.intDocumentMaintenanceMessageId
 	 , B.strHeaderFooter
 	 , B.intCharacterLimit
-	 , strMessage								= REPLACE(REPLACE(REPLACE(CONVERT(VarChar(max), B.blbMessage), '<p>', ''), '</p>',''), '&nbsp;', ' ')	 
+	 , strMessage							= dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
 	 , B.ysnRecipe
 	 , B.ysnQuote
 	 , B.ysnSalesOrder
@@ -22,14 +22,36 @@ SELECT A.intDocumentMaintenanceId
 	 , B.ysnScaleTicket 
 	 , C.strCustomerNumber
 	 , CL.strLocationName
-FROM
-	(SELECT intDocumentMaintenanceId, intEntityCustomerId, intCompanyLocationId, strCode, strTitle, intLineOfBusinessId, strSource, strType, ysnCopyAll 
-	 FROM tblSMDocumentMaintenance) A 
-INNER JOIN 
-	(SELECT intDocumentMaintenanceId, blbMessage, intDocumentMaintenanceMessageId, strHeaderFooter, intCharacterLimit, ysnRecipe, ysnQuote, ysnSalesOrder, ysnPickList, ysnBOL, 
-		ysnInvoice, ysnScaleTicket 
-	 FROM tblSMDocumentMaintenanceMessage) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
-LEFT JOIN 
-	(SELECT intEntityCustomerId, strCustomerNumber FROM vyuARCustomer) C ON A.intEntityCustomerId = C.intEntityCustomerId
-LEFT JOIN 
-	(SELECT intCompanyLocationId, strLocationName FROM tblSMCompanyLocation) CL ON A.intCompanyLocationId = CL.intCompanyLocationId
+FROM (SELECT intDocumentMaintenanceId
+		   , intEntityCustomerId
+		   , intCompanyLocationId
+		   , strCode
+		   , strTitle
+		   , intLineOfBusinessId
+		   , strSource
+		   , strType
+		   , ysnCopyAll 
+	 FROM dbo.tblSMDocumentMaintenance WITH (NOLOCK)
+) A 
+INNER JOIN (SELECT intDocumentMaintenanceId
+				 , blbMessage
+				 , intDocumentMaintenanceMessageId
+				 , strHeaderFooter
+				 , intCharacterLimit
+				 , ysnRecipe
+				 , ysnQuote
+				 , ysnSalesOrder
+				 , ysnPickList
+				 , ysnBOL
+				 , ysnInvoice
+				 , ysnScaleTicket 
+			FROM dbo.tblSMDocumentMaintenanceMessage WITH (NOLOCK)
+) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
+LEFT JOIN (SELECT intEntityCustomerId
+				, strCustomerNumber 
+		   FROM dbo.tblARCustomer WITH (NOLOCK)
+) C ON A.intEntityCustomerId = C.intEntityCustomerId
+LEFT JOIN (SELECT intCompanyLocationId
+				, strLocationName 
+		   FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+) CL ON A.intCompanyLocationId = CL.intCompanyLocationId
