@@ -266,7 +266,7 @@ IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
 IF @CurrencyId IS NOT NULL
 	SET @DefaultCurrency = @CurrencyId
 ELSE
-	SET @DefaultCurrency = [dbo].[fnARGetCustomerDefaultCurreny](@EntityCustomerId)
+	SET @DefaultCurrency = [dbo].[fnARGetCustomerDefaultCurrency](@EntityCustomerId)
 
 
 IF ISNULL(@CurrencyId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM tblSMCurrency WHERE [intCurrencyID] = @CurrencyId)

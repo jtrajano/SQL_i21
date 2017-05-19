@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnARGetCustomerDefaultCurreny]
+﻿CREATE FUNCTION [dbo].[fnARGetCustomerDefaultCurrency]
 (
 	@EntityCustomerId	INT
 )

@@ -3783,7 +3783,6 @@
     <Build Include="dbo\Stored Procedures\uspCTAddToContractImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessContractImport.sql" />
     <None Include="Scripts\Post-Deployment\CM\4_DataFix.sql" />
-    <Build Include="dbo\Functions\fnARGetCustomerDefaultCurreny.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceTypeAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateCustomerPrepayment.sql" />
     <Build Include="dbo\Views\vyuICGetStorageBinMeasurementReading.sql" />
@@ -5362,6 +5361,22 @@
     <Build Include="dbo\Functions\fnAPCalculateVoucherUnits.sql" />
     <Build Include="dbo\Tables\tblCRMProspectRequirement.sql" />
     <Build Include="dbo\Views\vyuCRMProspectRequirementLink.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerDefaultCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddInventoryItemToInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddItemToInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddNonInventoryItemToInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateCustomerInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceIntegrationLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceIntegrationLogDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessInvoicesByBatch.sql" />
+    <Build Include="dbo\Stored Procedures\uspARReComputeInvoicesAmounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspARReComputeInvoicesTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateLoadShipmentOnInvoicePost.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceIntegrationLog.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceIntegrationLogDetail.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceId.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceIntegrationLogStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
