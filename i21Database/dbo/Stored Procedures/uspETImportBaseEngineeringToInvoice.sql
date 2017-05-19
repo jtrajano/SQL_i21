@@ -106,6 +106,12 @@ BEGIN
 		ORDER BY intImportBaseEngineeringId ASC
 		
 		---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		
+		IF (ISNULL(@dtmDate,0) = 0) 
+			 BEGIN
+			 SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Invalid Date.'
+		END
+
 	    IF (ISNULL(@dblPrice,0) = 0) 
 			 BEGIN
 			 SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Price must have a value.'
