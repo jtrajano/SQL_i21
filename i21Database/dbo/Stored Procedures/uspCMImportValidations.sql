@@ -14,6 +14,7 @@ CREATE PROCEDURE [dbo].[uspCMImportValidations]
 	,@Missing_Cash_Account_Group AS BIT OUTPUT
 	,@Future_Clear_Date_Found AS BIT OUTPUT
 	,@Unbalance_Found AS BIT OUTPUT
+	,@Duplicate_Bank_Name_Found AS BIT OUTPUT
 AS
 
 SELECT	@Invalid_UserId_Found = ISNULL(@Invalid_UserId_Found, 0)
@@ -24,5 +25,6 @@ SELECT	@Invalid_UserId_Found = ISNULL(@Invalid_UserId_Found, 0)
 		,@Missing_Cash_Account_Group = ISNULL(@Missing_Cash_Account_Group, 0)
 		,@Future_Clear_Date_Found = ISNULL(@Future_Clear_Date_Found, 0)
 		,@Unbalance_Found = ISNULL(@Unbalance_Found, 0)
+		,@Duplicate_Bank_Name_Found = ISNULL(@Duplicate_Bank_Name_Found, 0)
 
 GO
