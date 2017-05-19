@@ -51,6 +51,10 @@ UPDATE A
 	,ysnForApprovalSubmitted = 0
 	,dtmApprovalDate = NULL
 	,ysnForApproval = @isVendorContact
+	,dtmDateCreated = GETDATE()
+	,dtmDate = GETDATE()
+	,dtmBillDate = GETDATE()
+	,dtmDueDate = dbo.fnGetDueDateBasedOnTerm(GETDATE(),A.intTermsId)
 FROM #tmpDuplicateBill A
 
 --INSERT INTO tblAPBill(
