@@ -37,11 +37,13 @@ BEGIN
 
 	SELECT @strItemNoList = LEFT(@Txt1, LEN(@Txt1) - 1)
 
-	SELECT *
+	SELECT RM.*
+		,C.strCategoryCode
 		,@intItemIdList AS 'intItemIdList'
 		,@strItemNoList AS 'strItemNoList'
-	FROM dbo.tblCTInvPlngReportMaster
-	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
+	FROM dbo.tblCTInvPlngReportMaster RM
+	JOIN tblICCategory C ON C.intCategoryId = RM.intCategoryId
+	WHERE RM.intInvPlngReportMasterID = @intInvPlngReportMasterID
 
 	DECLARE @intReportMasterID INT
 
