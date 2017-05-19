@@ -932,6 +932,7 @@ namespace iRely.Inventory.Model
         public string strAccountType { get; set; }
         public string strAccountCategory { get; set; }
         public int? intSort { get; set; }
+        public string strAccountDescription { get; set; }
 
         public vyuICGetItemStock vyuICGetItemStock { get; set; }
     }

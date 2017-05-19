@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets9bd85a26d35d0b48605cb8876f5885ecae4095b7b3f7ae3836a46d754a448c5b))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsd2f656b73093f335d0b10fe63b2ee3d99cc52674d4f10a8fbf727f1b6ebe2ed3))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets9bd85a26d35d0b48605cb8876f5885ecae4095b7b3f7ae3836a46d754a448c5b : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsd2f656b73093f335d0b10fe63b2ee3d99cc52674d4f10a8fbf727f1b6ebe2ed3 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "9bd85a26d35d0b48605cb8876f5885ecae4095b7b3f7ae3836a46d754a448c5b"; }
+            get { return "d2f656b73093f335d0b10fe63b2ee3d99cc52674d4f10a8fbf727f1b6ebe2ed3"; }
         }
 
         /// <summary>
@@ -11829,7 +11829,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemAccount
-        [CodeFirstDatabaseSchema.vyuICGetItemAccount](T1.vyuICGetItemAccount_intAccountKey, T1.vyuICGetItemAccount_intKey, T1.vyuICGetItemAccount_intItemAccountId, T1.vyuICGetItemAccount_intItemId, T1.vyuICGetItemAccount_intAccountId, T1.vyuICGetItemAccount_strAccountId, T1.vyuICGetItemAccount_intAccountGroupId, T1.vyuICGetItemAccount_intAccountCategoryId, T1.vyuICGetItemAccount_strAccountGroup, T1.vyuICGetItemAccount_strAccountType, T1.vyuICGetItemAccount_strAccountCategory, T1.vyuICGetItemAccount_intSort)
+        [CodeFirstDatabaseSchema.vyuICGetItemAccount](T1.vyuICGetItemAccount_intAccountKey, T1.vyuICGetItemAccount_intKey, T1.vyuICGetItemAccount_intItemAccountId, T1.vyuICGetItemAccount_intItemId, T1.vyuICGetItemAccount_intAccountId, T1.vyuICGetItemAccount_strAccountId, T1.vyuICGetItemAccount_intAccountGroupId, T1.vyuICGetItemAccount_intAccountCategoryId, T1.vyuICGetItemAccount_strAccountGroup, T1.vyuICGetItemAccount_strAccountType, T1.vyuICGetItemAccount_strAccountCategory, T1.vyuICGetItemAccount_intSort, T1.vyuICGetItemAccount_strAccountDescription)
     FROM (
         SELECT 
             T.intAccountKey AS vyuICGetItemAccount_intAccountKey, 
@@ -11844,6 +11844,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strAccountType AS vyuICGetItemAccount_strAccountType, 
             T.strAccountCategory AS vyuICGetItemAccount_strAccountCategory, 
             T.intSort AS vyuICGetItemAccount_intSort, 
+            T.strAccountDescription AS vyuICGetItemAccount_strAccountDescription, 
             True AS _from0
         FROM InventoryEntities.vyuICGetItemAccounts AS T
     ) AS T1");
@@ -12021,7 +12022,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemAccounts
-        [iRely.Inventory.Model.vyuICGetItemAccount](T1.vyuICGetItemAccount_intAccountKey, T1.vyuICGetItemAccount_intKey, T1.vyuICGetItemAccount_intItemAccountId, T1.vyuICGetItemAccount_intItemId, T1.vyuICGetItemAccount_intAccountId, T1.vyuICGetItemAccount_strAccountId, T1.vyuICGetItemAccount_intAccountGroupId, T1.vyuICGetItemAccount_intAccountCategoryId, T1.vyuICGetItemAccount_strAccountGroup, T1.vyuICGetItemAccount_strAccountType, T1.vyuICGetItemAccount_strAccountCategory, T1.vyuICGetItemAccount_intSort)
+        [iRely.Inventory.Model.vyuICGetItemAccount](T1.vyuICGetItemAccount_intAccountKey, T1.vyuICGetItemAccount_intKey, T1.vyuICGetItemAccount_intItemAccountId, T1.vyuICGetItemAccount_intItemId, T1.vyuICGetItemAccount_intAccountId, T1.vyuICGetItemAccount_strAccountId, T1.vyuICGetItemAccount_intAccountGroupId, T1.vyuICGetItemAccount_intAccountCategoryId, T1.vyuICGetItemAccount_strAccountGroup, T1.vyuICGetItemAccount_strAccountType, T1.vyuICGetItemAccount_strAccountCategory, T1.vyuICGetItemAccount_intSort, T1.vyuICGetItemAccount_strAccountDescription)
     FROM (
         SELECT 
             T.intAccountKey AS vyuICGetItemAccount_intAccountKey, 
@@ -12036,6 +12037,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strAccountType AS vyuICGetItemAccount_strAccountType, 
             T.strAccountCategory AS vyuICGetItemAccount_strAccountCategory, 
             T.intSort AS vyuICGetItemAccount_intSort, 
+            T.strAccountDescription AS vyuICGetItemAccount_strAccountDescription, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetItemAccount AS T
     ) AS T1");
