@@ -68,16 +68,16 @@ BEGIN
 				SELECT
 					intAuditLogId
 					,strJsonData = CASE 
-							WHEN (PATINDEX('%"change":"dbl%","from":%', strJsonData) > 0) THEN
-								SUBSTRING(strJsonData, PATINDEX('%"change":"dbl%","from":%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"dbl%', strJsonData) + 15)
-							WHEN (PATINDEX('%"change":"int%","from":%', strJsonData) > 0) THEN
-								SUBSTRING(strJsonData, PATINDEX('%"change":"int%","from":%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"int%', strJsonData) + 15)
-							WHEN (PATINDEX('%"change":"dtm%","from":%', strJsonData) > 0) THEN
-								SUBSTRING(strJsonData, PATINDEX('%"change":"dtm%","from":%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"dtm%', strJsonData) + 15)
-							WHEN (PATINDEX('%"change":"ysn%","from":%', strJsonData) > 0) THEN
-								SUBSTRING(strJsonData, PATINDEX('%"change":"ysn%","from":%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"ysn%', strJsonData) + 15)
-							WHEN (PATINDEX('%"change":"str%","from":%', strJsonData) > 0) THEN
-								SUBSTRING(strJsonData, PATINDEX('%"change":"str%","from":%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"str%', strJsonData) + 15)
+							WHEN (PATINDEX('%"change":"dbl%', SUBSTRING(strJsonData, 0, PATINDEX('%,"hidden":false%', strJsonData) + 15)) > 0) THEN
+								SUBSTRING(strJsonData, PATINDEX('%"change":"dbl%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"dbl%', strJsonData) + 15)
+							WHEN (PATINDEX('%"change":"int%', SUBSTRING(strJsonData, 0, PATINDEX('%,"hidden":false%', strJsonData) + 15)) > 0) THEN
+								SUBSTRING(strJsonData, PATINDEX('%"change":"int%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"int%', strJsonData) + 15)
+							WHEN (PATINDEX('%"change":"dtm%', SUBSTRING(strJsonData, 0, PATINDEX('%,"hidden":false%', strJsonData) + 15)) > 0) THEN
+								SUBSTRING(strJsonData, PATINDEX('%"change":"dtm%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"dtm%', strJsonData) + 15)
+							WHEN (PATINDEX('%"change":"ysn%', SUBSTRING(strJsonData, 0, PATINDEX('%,"hidden":false%', strJsonData) + 15)) > 0) THEN
+								SUBSTRING(strJsonData, PATINDEX('%"change":"ysn%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"ysn%', strJsonData) + 15)
+							WHEN (PATINDEX('%"change":"str%', SUBSTRING(strJsonData, 0, PATINDEX('%,"hidden":false%', strJsonData) + 15)) > 0) THEN
+								SUBSTRING(strJsonData, PATINDEX('%"change":"str%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"str%', strJsonData) + 15)
 							ELSE '' END
 				FROM #tmpAuditLog WHERE intAuditLogId = @intAuditLogId
 					AND (PATINDEX('%"change":"str%","from":%', strJsonData) > 0
