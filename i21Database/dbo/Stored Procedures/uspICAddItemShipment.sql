@@ -262,7 +262,7 @@ DECLARE @Header TABLE (
 	intBaseId INT NOT NULL,
 	strSourceScreenName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	intCurrencyId INT NULL,
-	strReferenceNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	strReferenceNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 
 -- Get Headers
