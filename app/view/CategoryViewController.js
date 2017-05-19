@@ -32,7 +32,6 @@ Ext.define('Inventory.view.CategoryViewController', {
                     conjunction: 'and'
                 }]
             },
-
             txtGlDivisionNumber: '{current.strGLDivisionNumber}',
             chkSalesAnalysisByTon: '{current.ysnSalesAnalysisByTon}',
             cboMaterialFee: {
@@ -653,8 +652,11 @@ Ext.define('Inventory.view.CategoryViewController', {
     onTaxClassHeaderClick: function(menu, column) {
        // var grid = column.initOwnerCt.grid;
         var grid = column.$initParent.grid;
-        
-        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('i21.view.TaxClass', grid, 'intTaxClassId');
+        var sel = grid.getSelectionModel().selected.items;
+        if(sel && sel.length > 0) {
+            var filters = _.map(sel, function(r) { return { column: 'intTaxClassId', condition: 'eq', conjunction: 'or', value: r.data.intTaxClassId }; });
+            iRely.Functions.openScreen('i21.view.TaxClass', { filters: filters }); 
+        }
     },
 
     onUOMHeaderClick: function(menu, column) {
