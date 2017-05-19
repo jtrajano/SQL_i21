@@ -419,7 +419,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,apcbk_gl_ap				= (SELECT TOP 1 apcbk_gl_ap FROM apcbkmst)
 					,apcbk_gl_disc				= (SELECT TOP 1 apcbk_gl_disc FROM apcbkmst)
 					,apcbk_gl_wthhld			= (SELECT TOP 1 apcbk_gl_wthhld FROM apcbkmst)
-					,apcbk_gl_curr				= 0
+					,apcbk_gl_curr				= (SELECT TOP 1 apcbk_gl_curr FROM apcbkmst)
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					,apcbk_bnk_no				= NULL
 					,apcbk_user_id				= dbo.fnConverti21UserIdtoOrigin(i.intCreatedUserId)
@@ -656,7 +656,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,apcbk_gl_ap				= (SELECT TOP 1 apcbk_gl_ap FROM apcbkmst)
 					,apcbk_gl_disc				= (SELECT TOP 1 apcbk_gl_disc FROM apcbkmst)
 					,apcbk_gl_wthhld			= (SELECT TOP 1 apcbk_gl_wthhld FROM apcbkmst)
-					,apcbk_gl_curr				= 0
+					,apcbk_gl_curr				= (SELECT TOP 1 apcbk_gl_curr FROM apcbkmst)
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					,apcbk_bnk_no				= NULL
 					,apcbk_user_id				= dbo.fnConverti21UserIdtoOrigin(i.intLastModifiedUserId)
