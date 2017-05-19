@@ -353,7 +353,7 @@ GO
 														dtmStartDate
 												FROM tblSMActivity A LEFT OUTER JOIN tblSMActivityAttendee B
 													ON A.intActivityId = B.intActivityId AND B.intEntityId = {0}
-												WHERE ysnRemind = 1 AND (intCreatedBy = {0} OR intAssignedTo = {0}) AND
+												WHERE ysnRemind = 1 AND (intCreatedBy = {0} OR intAssignedTo = {0}) AND (ysnDismiss = 0 OR ysnDismiss IS NULL) AND
 														CASE WHEN strReminder = ''0 minutes'' THEN dtmStartDate
 															 WHEN strReminder = ''5 minutes'' THEN DATEADD(MINUTE, -5, dtmStartDate)
 															 WHEN strReminder = ''10 minutes'' THEN DATEADD(MINUTE, -10, dtmStartDate)
@@ -382,6 +382,44 @@ GO
                 [strNamespace]      =        N'GlobalComponentEngine.view.ActivityReminder',
                 [intSort]           =        1
     END
+	ELSE
+		BEGIN
+			UPDATE [tblSMReminderList]
+			SET	[strQuery] = N'SELECT	A.intActivityId, 
+														B.intEntityId,
+														strSubject, 
+														strType,
+														dtmStartDate
+												FROM tblSMActivity A LEFT OUTER JOIN tblSMActivityAttendee B
+													ON A.intActivityId = B.intActivityId AND B.intEntityId = {0}
+												WHERE ysnRemind = 1 AND (intCreatedBy = {0} OR intAssignedTo = {0}) AND (ysnDismiss = 0 OR ysnDismiss IS NULL) AND
+														CASE WHEN strReminder = ''0 minutes'' THEN dtmStartDate
+															 WHEN strReminder = ''5 minutes'' THEN DATEADD(MINUTE, -5, dtmStartDate)
+															 WHEN strReminder = ''10 minutes'' THEN DATEADD(MINUTE, -10, dtmStartDate)
+															 WHEN strReminder = ''15 minutes'' THEN DATEADD(MINUTE, -15, dtmStartDate)
+															 WHEN strReminder = ''30 minutes'' THEN DATEADD(MINUTE, -30, dtmStartDate)
+															 WHEN strReminder = ''1 hour'' THEN DATEADD(HOUR, -1, dtmStartDate)
+															 WHEN strReminder = ''2 hours'' THEN DATEADD(HOUR, -2, dtmStartDate)
+															 WHEN strReminder = ''3 hours'' THEN DATEADD(HOUR, -3, dtmStartDate)
+															 WHEN strReminder = ''4 hours'' THEN DATEADD(HOUR, -4, dtmStartDate)
+															 WHEN strReminder = ''5 hours'' THEN DATEADD(HOUR, -5, dtmStartDate)
+															 WHEN strReminder = ''6 hours'' THEN DATEADD(HOUR, -6, dtmStartDate)
+															 WHEN strReminder = ''7 hours'' THEN DATEADD(HOUR, -7, dtmStartDate)
+															 WHEN strReminder = ''8 hours'' THEN DATEADD(HOUR, -8, dtmStartDate)
+															 WHEN strReminder = ''9 hours'' THEN DATEADD(HOUR, -9, dtmStartDate)
+															 WHEN strReminder = ''10 hours'' THEN DATEADD(HOUR, -10, dtmStartDate)
+															 WHEN strReminder = ''11 hours'' THEN DATEADD(HOUR, -11, dtmStartDate)
+															 WHEN strReminder = ''12 hours'' THEN DATEADD(HOUR, -12, dtmStartDate)
+															 WHEN strReminder = ''18 hours'' THEN DATEADD(HOUR, -18, dtmStartDate)
+															 WHEN strReminder = ''1 day'' THEN DATEADD(DAY, -1, dtmStartDate)
+															 WHEN strReminder = ''2 days'' THEN DATEADD(DAY, -2, dtmStartDate)
+															 WHEN strReminder = ''3 days'' THEN DATEADD(DAY, -3, dtmStartDate)
+															 WHEN strReminder = ''4 days'' THEN DATEADD(DAY, -4, dtmStartDate)
+															 WHEN strReminder = ''1 week'' THEN DATEADD(WEEK, -1, dtmStartDate)
+															 WHEN strReminder = ''2 weeks'' THEN DATEADD(WEEK, -2, dtmStartDate)
+														END <= GETUTCDATE()'
+			WHERE [strReminder] = N'Activity' AND [strType] = N'Reminder'
+		END
 
 	IF EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order')
 		BEGIN
