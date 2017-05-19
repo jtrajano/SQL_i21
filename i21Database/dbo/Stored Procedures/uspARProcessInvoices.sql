@@ -1094,7 +1094,7 @@ BEGIN TRY
 			,@EntityCustomerId				= [intEntityCustomerId]
 			,@CompanyLocationId				= [intCompanyLocationId]
 			,@AccountId						= [intAccountId] 
-			,@CurrencyId					= ISNULL([intCurrencyId], [dbo].[fnARGetCustomerDefaultCurreny]([intEntityCustomerId]))
+			,@CurrencyId					= ISNULL([intCurrencyId], [dbo].[fnARGetCustomerDefaultCurrency]([intEntityCustomerId]))
 			,@TermId						= [intTermId]
 			,@Date							= CAST([dtmDate] AS DATE)
 			,@DueDate						= [dtmDueDate]

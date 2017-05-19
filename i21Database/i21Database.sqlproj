@@ -1881,7 +1881,6 @@
     <Build Include="dbo\Tables\tblWHTaskPriority.sql" />
     <Build Include="dbo\Tables\tblWHTaskState.sql" />
     <Build Include="dbo\Tables\tblWHTaskType.sql" />
-    <Build Include="dbo\Stored Procedures\uspARAddInvoice.sql" />
     <Build Include="dbo\User Defined Types\InvoiceStagingTable.sql" />
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
@@ -3805,7 +3804,6 @@
     <Build Include="dbo\Stored Procedures\uspCTAddToContractImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessContractImport.sql" />
     <None Include="Scripts\Post-Deployment\CM\4_DataFix.sql" />
-    <Build Include="dbo\Functions\fnARGetCustomerDefaultCurreny.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceTypeAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateCustomerPrepayment.sql" />
     <Build Include="dbo\Views\vyuICGetStorageBinMeasurementReading.sql" />
@@ -5214,6 +5212,25 @@
     <Build Include="dbo\Stored Procedures\uspICDeleteChargePerItemOnReceiptSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteChargePerItemOnShipmentSave.sql" />
     <Build Include="dbo\Views\vyuSMDocument.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerDefaultContact.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerDefaultCurrency.sql" />
+    <Build Include="dbo\Functions\fnARGetDefaultComment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddInventoryItemToInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddItemToInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddNonInventoryItemToInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateCustomerInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceIntegrationLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceIntegrationLogDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessInvoicesByBatch.sql" />
+    <Build Include="dbo\Stored Procedures\uspARReComputeInvoicesAmounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspARReComputeInvoicesTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMInserAuditLogs.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceIntegrationLog.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceIntegrationLogDetail.sql" />
+    <Build Include="dbo\User Defined Types\AuditLogStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceId.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceIntegrationLogStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

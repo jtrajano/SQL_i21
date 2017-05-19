@@ -10,9 +10,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
-DECLARE @Ids AS Id
-INSERT INTO @Ids(intId) SELECT @InvoiceId
-EXEC dbo.[uspARUpdateTransactionAccounts] @Ids = @Ids, @TransactionType	= 1
+--DECLARE @Ids AS Id -- a call in uspARPostInvoice will suffice
+--INSERT INTO @Ids(intId) SELECT @InvoiceId
+--EXEC dbo.[uspARUpdateTransactionAccounts] @Ids = @Ids, @TransactionType	= 1
 
 EXEC dbo.[uspARUpdatePricingHistory] 2, @InvoiceId, @UserId
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @InvoiceId, @ForDelete

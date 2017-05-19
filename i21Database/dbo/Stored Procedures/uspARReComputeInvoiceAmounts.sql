@@ -92,8 +92,8 @@ WHERE
 UPDATE
 	tblARInvoice
 SET
-	  [dblDiscountAvailable]	= [dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal]
-	 ,[dblTotalTermDiscount]	= T.[dblItemTermDiscountTotal]
+	  [dblDiscountAvailable]	= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal], @ZeroDecimal)
+	 ,[dblTotalTermDiscount]	= ISNULL(T.[dblItemTermDiscountTotal], @ZeroDecimal)
 FROM
 	(
 		SELECT 
