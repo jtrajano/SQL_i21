@@ -51,7 +51,7 @@ BEGIN
 		FROM dbo.tblMFWorkOrderProducedLot  PL
 		JOIN dbo.tblICLot L on L.intLotId=PL.intLotId
 		WHERE PL.intWorkOrderId = @intWorkOrderId
-			AND L.intLotStatusId = 3
+			AND L.intLotStatusId <> 1
 			AND L.dblQty>0
 	END
 	ELSE
@@ -60,7 +60,7 @@ BEGIN
 		SELECT L.intLotId
 		FROM dbo.tblICLot L
 		WHERE L.intParentLotId = @intParentLotId
-			AND L.intLotStatusId = 3
+			AND L.intLotStatusId <> 1
 			AND L.dblQty>0
 	END
 
