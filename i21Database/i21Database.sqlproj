@@ -5232,6 +5232,7 @@
     <Build Include="dbo\User Defined Types\InvoiceId.sql" />
     <Build Include="dbo\User Defined Types\InvoiceIntegrationLogStagingTable.sql" />
     <Build Include="dbo\Views\vyuSCGradeReadingReport.sql" />
+    <Build Include="dbo\Views\vyuMFGetAvailableStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
