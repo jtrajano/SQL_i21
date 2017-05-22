@@ -176,14 +176,14 @@ BEGIN TRY
 	FROM dbo.tblICLotStatus
 	WHERE intLotStatusId = @intLotStatusId
 
-	IF @intLotStatusId = 2
-	BEGIN
-		RAISERROR (
-				'Pallet Lot has been marked as a ghost and cannot be released. Please call Supervisor to reverse this!.'
-				,11
-				,1
-				)
-	END
+	--IF @intLotStatusId = 2
+	--BEGIN
+	--	RAISERROR (
+	--			'Pallet Lot has been marked as a ghost and cannot be released. Please call Supervisor to reverse this!.'
+	--			,11
+	--			,1
+	--			)
+	--END
 
 	IF @intLotStatusId = 1
 		OR (
