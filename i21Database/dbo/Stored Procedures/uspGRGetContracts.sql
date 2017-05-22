@@ -22,7 +22,8 @@ BEGIN TRY
     ,intEntityId  
     ,strEntityName       
     ,dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intUnitMeasureId,'+LTRIM(@intUnitMeasureId)+',dblAvailableQty)dblAvailableQty
-	,dblAvailableQtyInItemStockUOM  
+	,dblAvailableQtyInItemStockUOM
+	,dblBalanceInItemStockUOM  
     ,strContractType  
     ,dblCashPrice
 	,dblFutures   
