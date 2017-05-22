@@ -294,9 +294,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= DebitForeign.Value 
+		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CreditForeign.Value
+		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -310,22 +310,22 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)
-		) Debit
+		) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(
 			ISNULL(dblLineTotal, 0) 			
-		) Credit
-		CROSS APPLY dbo.fnGetDebitForeign(
+		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitFunctional(
 			ISNULL(dblLineTotal, 0)	
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) DebitForeign
-		CROSS APPLY dbo.fnGetCreditForeign(
+		) Debit
+		CROSS APPLY dbo.fnGetCreditFunctional(
 			ISNULL(dblLineTotal, 0) 			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) CreditForeign
+		) Credit
 
 WHERE	ForGLEntries_CTE.dblQty <> 0 
 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
@@ -362,9 +362,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CreditForeign.Value
+		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= DebitForeign.Value 
+		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -378,22 +378,22 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)			
-		) Debit
+		) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(
 			ISNULL(dblLineTotal, 0) 			
-		) Credit
-		CROSS APPLY dbo.fnGetDebitForeign(
+		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitFunctional(
 			ISNULL(dblLineTotal, 0)			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) DebitForeign
-		CROSS APPLY dbo.fnGetCreditForeign(
+		) Debit
+		CROSS APPLY dbo.fnGetCreditFunctional(
 			ISNULL(dblLineTotal, 0) 			
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
-		) CreditForeign
+		) Credit
 
 WHERE	ForGLEntries_CTE.dblQty <> 0 
 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
@@ -433,9 +433,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= DebitForeign.Value 
+		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CreditForeign.Value
+		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -573,9 +573,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= DebitForeign.Value 
+		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CreditForeign.Value
+		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -636,9 +636,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CreditForeign.Value
+		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= DebitForeign.Value 
+		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -702,9 +702,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= DebitForeign.Value 
+		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CreditForeign.Value
+		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -765,9 +765,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CreditForeign.Value
+		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= DebitForeign.Value 
+		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
