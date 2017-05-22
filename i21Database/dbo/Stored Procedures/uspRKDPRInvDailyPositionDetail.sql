@@ -114,19 +114,20 @@ if isnull(@intVendorId,0) = 0
 BEGIN
 
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,intCommodityId,intFromCommodityUnitMeasureId,strTruckName,strDriverName,[Storage Due])
-				SELECT distinct 1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,'Receipt' AS [strType],
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((it1.dblUnitOnHand),0)) dblTotal
-				, ic.strLocationName,i.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
+								SELECT distinct 1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,'Receipt' AS [strType],
+				dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,
+				isnull((a.dblUnitOnHand),0)) dblTotal
+				, sl.strLocationName,i.strItemNo,@intCommodityId intCommodityId,
+				@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 				,null [Storage Due] 
-				FROM tblICItem i
-				INNER JOIN tblICInventoryReceiptItem ii on ii.intItemId = i.intItemId
-				INNER JOIN tblICInventoryReceipt ir on ir.intInventoryReceiptId=ii.intInventoryReceiptId
-				INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
-				INNER JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
-				INNER JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-				INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-				INNER JOIN tblSMCompanyLocation ic on ic.intCompanyLocationId = il.intLocationId
-				WHERE i.intCommodityId =@intCommodityId AND il.intLocationId= case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
+				FROM 
+				tblICItemStock a  
+		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId AND ISNULL(a.dblUnitOnHand,0) > 0
+		  JOIN tblICItem i on a.intItemId=i.intItemId  
+		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
+		  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
+		  INNER JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
+			WHERE i.intCommodityId =@intCommodityId AND il.intLocationId= case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end	
 
 				UNION
 				SELECT distinct 1 AS intSeqId,'In-House',@strDescription,[Storage Type] AS [strType],
@@ -378,12 +379,14 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 		 AS dblTotal,@intCommodityId,@intCommodityUnitMeasureId
 	FROM (
 		SELECT isnull((select sum(dblUnitOnHand) from (
-					SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(it1.dblUnitOnHand,0)) dblUnitOnHand
-					FROM tblICItem i
-					INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
-					INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-					JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
-					JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
+					SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,
+					isnull(a.dblUnitOnHand,0)) dblUnitOnHand
+					FROM tblICItemStock a  
+		  JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId AND ISNULL(a.dblUnitOnHand,0) > 0
+		  JOIN tblICItem i on a.intItemId=i.intItemId  
+		  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
+		  JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
+		  INNER JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
 					WHERE i.intCommodityId = @intCommodityId
 					AND il.intLocationId  = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end							
 					)t), 0) AS invQty

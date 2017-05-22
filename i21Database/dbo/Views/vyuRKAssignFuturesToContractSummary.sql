@@ -1,6 +1,7 @@
 ﻿CREATE VIEW vyuRKAssignFuturesToContractSummary
 			
 AS
+SELECT * FROM (
 SELECT cs.intAssignFuturesToContractSummaryId,
 		ch.strContractNumber,
 		ct.strContractType,  
@@ -49,7 +50,7 @@ LEFT JOIN tblCTSubBook sb on cd.intSubBookId=sb.intSubBookId
 LEFT JOIN tblCTBook b1 on fot.intBookId=b1.intBookId
 LEFT JOIN tblCTSubBook sb1 on fot.intSubBookId=sb.intSubBookId  where isnull(ch.ysnMultiplePriceFixation,0) = 0
 
-UNION all
+UNION 
 
 SELECT cs.intAssignFuturesToContractSummaryId,
 		ch.strContractNumber,
@@ -97,3 +98,5 @@ LEFT JOIN tblCTBook b on b.intBookId = (select top 1 intBookId from tblCTContrac
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId = (select top 1 intSubBookId from tblCTContractDetail cd where cd.intContractHeaderId=ch.intContractHeaderId)
 LEFT JOIN tblCTBook b1 on b1.intBookId = (select top 1 intBookId from tblCTContractDetail cd where cd.intContractHeaderId=ch.intContractHeaderId)
 LEFT JOIN tblCTSubBook sb1 on sb1.intSubBookId = (select top 1 intSubBookId from tblCTContractDetail cd where cd.intContractHeaderId=ch.intContractHeaderId)
+where isnull(ch.ysnMultiplePriceFixation,0) = 1
+)tbl
