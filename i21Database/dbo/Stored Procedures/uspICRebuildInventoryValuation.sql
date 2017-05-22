@@ -1844,6 +1844,7 @@ BEGIN
 					,@strGLDescription
 					,NULL 
 					,@intItemId -- This is only used when rebuilding the stocks. 
+					,@strTransactionId -- This is only used when rebuilding the stocks. 
 						
 				IF @intReturnId <> 0 
 				BEGIN 
@@ -1955,7 +1956,8 @@ BEGIN
 					,@strAccountToCounterInventory 
 					,@intEntityUserSecurityId
 					,@strGLDescription
-					,@intItemId
+					,@intItemId -- This is only used when rebuilding the stocks. 
+					,@strTransactionId -- This is only used when rebuilding the stocks. 
 
 				IF @intReturnId <> 0 
 				BEGIN 
