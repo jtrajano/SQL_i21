@@ -59,13 +59,25 @@ SELECT
 	intCent = CASE WHEN (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId) IS NOT NULL THEN 0 ELSE E.intCent END,
 	ysnSubCurrency = ISNULL(E.ysnSubCurrency, 0),
 	intSubCurrencyCent = (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId),
-
 	B.strStoreFTPPath,
 	B.strStoreFTPUsername,
 	B.strStoreFTPPassword,
 	B.intStoreStoreId,
 	I.intStoreNo,
-	storeDescription = I.strDescription
+	storeDescription = I.strDescription,
+
+	B.intShipFromId,
+	strShipFrom = M.strLocationName,
+	B.intBillToId,
+	strPayTo = N.strLocationName,
+
+	strContactName = D.strName,
+	strTerm = J.strTerm,
+	strShipVia = K.strName,
+	L.strFreightTerm
+	
+
+
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -89,3 +101,13 @@ FROM
 		ON B.intPaymentMethodId = H.intPaymentMethodID
 	LEFT JOIN dbo.tblSTStore I
 		ON I.intStoreId = B.intStoreStoreId
+	LEFT JOIN tblSMTerm J
+		ON B.intTermsId = J.intTermID
+	LEFT JOIN tblSMShipVia K
+		ON K.intEntityId = C.intShipViaId
+	LEFT JOIN tblSMFreightTerms L
+		ON L.intFreightTermId = C.intFreightTermId
+	LEFT JOIN tblEMEntityLocation M
+		ON M.intEntityLocationId = B.intShipFromId
+	LEFT JOIN tblEMEntityLocation N
+		ON N.intEntityLocationId = B.intBillToId
