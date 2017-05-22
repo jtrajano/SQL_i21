@@ -21,8 +21,15 @@ AS
 					WHEN Y.strType = 'Customer'	THEN	CASE WHEN TM.ysnActive = 1 THEN U.intTermsId ELSE NULL END
 					ELSE L.intTermsId 
 			END AS intTermId,
-			V.strVendorAccountNum
+			V.strVendorAccountNum,
+			CY.intCurrencyID	AS	intCurrencyId,
+			CY.strCurrency,
+			CY.ysnSubCurrency,
+			MY.strCurrency		AS	strMainCurrency
+
 	FROM	tblEMEntity				E
+	CROSS
+	APPLY	tblSMCompanyPreference	SC	
 	JOIN	[tblEMEntityLocation]	L	ON	E.intEntityId			=	L.intEntityId 
 										AND L.ysnDefaultLocation	=	1
 	JOIN	[tblEMEntityType]		Y	ON	Y.intEntityId			=	E.intEntityId
@@ -36,8 +43,13 @@ AS
 				FROM	tblEMEntity			EY
 				JOIN	[tblEMEntityType]	ET	ON	ET.intEntityId	=	EY.intEntityId	
 												AND	ET.strType		=	'Ship Via'
-			)						S	ON	S.intEntityId			=	E.intEntityId
-LEFT JOIN	tblSMTerm				TM	ON TM.intTermID =	CASE	WHEN Y.strType = 'Vendor'	THEN	V.intTermsId
-																	WHEN Y.strType = 'Customer'	THEN	U.intTermsId
-																	ELSE L.intTermsId 
-															END 
+			)						S	ON	S.intEntityId			=	E.intEntityId			LEFT
+	JOIN	tblSMTerm				TM	ON TM.intTermID				=	CASE	WHEN Y.strType = 'Vendor'	THEN	V.intTermsId
+																				WHEN Y.strType = 'Customer'	THEN	U.intTermsId
+																				ELSE L.intTermsId 
+																		END						LEFT
+	JOIN	tblSMCurrency			CY	ON CY.intCurrencyID			=	CASE	WHEN Y.strType = 'Vendor'	THEN	ISNULL(V.intCurrencyId,SC.intDefaultCurrencyId)
+																				WHEN Y.strType = 'Customer'	THEN	ISNULL(U.intCurrencyId,SC.intDefaultCurrencyId)
+																				ELSE SC.intDefaultCurrencyId
+																		END						LEFT
+	JOIN	tblSMCurrency			MY	ON MY.intCurrencyID			=	CY.intMainCurrencyId	

@@ -117,7 +117,8 @@ AS
 	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
 	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intDestinationPortId		LEFT
-	JOIN	tblSMCountry					OG	ON	OG.intCountryID				=	IM.intOriginId				LEFT
+	JOIN	tblICCommodityAttribute			EO	ON	EO.intCommodityAttributeId	=	IM.intOriginId				LEFT
+	JOIN	tblSMCountry					OG	ON	OG.intCountryID				=	EO.intCountryID				LEFT
 	JOIN	tblSMCountry					IG	ON	IG.intCountryID				=	IC.intCountryId				LEFT
 	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= CD.intSubLocationId 	LEFT
 	JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
