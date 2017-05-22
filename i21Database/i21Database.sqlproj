@@ -5249,6 +5249,7 @@
     <None Include="Scripts\Post-Deployment\EM\DataMigration\1710_1720_CCSite_migration.sql" />
     <Build Include="dbo\Views\vyuSCGradeReadingReport.sql" />
     <Build Include="dbo\Views\vyuSMCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuMFGetAvailableStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
