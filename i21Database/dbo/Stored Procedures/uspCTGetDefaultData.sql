@@ -8,7 +8,9 @@
 	@intLocationId			INT = NULL,
 	@intCommodityId			INT = NULL,
 	@intStorageLocationId	INT = NULL,
-	@intItemContractId		INT = NULL
+	@intItemContractId		INT = NULL,
+	@intEntityId			INT = NULL,
+	@intContractTypeId		INT = NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId	INT,
@@ -28,7 +30,8 @@ BEGIN
 			@intLocationId			= CASE WHEN @intLocationId= 0 THEN NULL ELSE @intLocationId END,
 			@intCommodityId			= CASE WHEN @intCommodityId= 0 THEN NULL ELSE @intCommodityId END,
 			@intStorageLocationId	= CASE WHEN @intStorageLocationId= 0 THEN NULL ELSE @intStorageLocationId END,
-			@intItemContractId		= CASE WHEN @intItemContractId= 0 THEN NULL ELSE @intItemContractId END
+			@intItemContractId		= CASE WHEN @intItemContractId= 0 THEN NULL ELSE @intItemContractId END,
+			@intEntityId			= CASE WHEN @intEntityId= 0 THEN NULL ELSE @intEntityId END
 
 	DECLARE @intVendorId INT, @strCity NVARCHAR(100),@intCityId INT, @ysnPort BIT, @ysnRegion BIT
 
@@ -179,4 +182,8 @@ BEGIN
 		SELECT * FROM @Item
 	END
 
+	IF @strType = 'Currency'
+	BEGIN
+		SELECT intCurrencyId,strCurrency,ysnSubCurrency,strMainCurrency FROM vyuCTEntity WHERE intEntityId = @intEntityId AND strEntityType = CASE WHEN @intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END
+	END
 END
