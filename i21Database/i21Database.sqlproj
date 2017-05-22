@@ -5245,6 +5245,7 @@
     <Build Include="dbo\Stored Procedures\uspICDeleteChargePerItemOnReceiptSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteChargePerItemOnShipmentSave.sql" />
     <Build Include="dbo\Views\vyuSMCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuMFGetAvailableStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
