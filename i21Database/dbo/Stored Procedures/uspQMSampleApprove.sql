@@ -104,7 +104,7 @@ BEGIN TRY
 		UPDATE LI
 		SET intBondStatusId = @intLotStatusId
 		FROM dbo.tblICParentLot AS PL
-		JOIN dbo.tblICLot AS L ON PL.intParentLotId = L.intParentLotId
+		JOIN dbo.tblICLot AS L ON PL.intParentLotId = L.intParentLotId AND L.ysnProduced =0
 			AND PL.intParentLotId = @intProductValueId
 		JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
 	END
