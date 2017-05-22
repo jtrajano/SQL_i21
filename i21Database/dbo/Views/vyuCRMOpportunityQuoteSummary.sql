@@ -17,6 +17,7 @@
 				and c.dblMaintenanceAmount = 0
 		where
 			a.strTransactionType = 'Quote'
+			and a.strOrderStatus <> 'Expired'
 		group by
 			a.intSalesOrderId
 			,a.strSalesOrderNumber
