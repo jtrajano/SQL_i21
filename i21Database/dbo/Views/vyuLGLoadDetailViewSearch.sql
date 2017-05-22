@@ -81,6 +81,8 @@ SELECT   Load.intLoadId
 		,LoadDetail.strExternalBatchNo
         ,intGenerateReferenceNumber = GLoad.intReferenceNumber
         ,intNumberOfLoads = GLoad.intNumberOfLoads
+		,CASE WHEN Load.intPurchaseSale = 2 THEN SHeader.intContractHeaderId ELSE PHeader.intContractHeaderId END intContractHeaderId
+		,PHeader.intContractHeaderId AS intPContractHeaderId 
 
 -- Inbound Company Location
         ,strPLocationName = PCL.strLocationName
