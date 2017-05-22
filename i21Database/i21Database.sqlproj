@@ -5250,6 +5250,7 @@
     <Build Include="dbo\Views\vyuSCGradeReadingReport.sql" />
     <Build Include="dbo\Views\vyuSMCompanyLocation.sql" />
     <Build Include="dbo\Views\vyuMFGetAvailableStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
