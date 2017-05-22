@@ -252,9 +252,11 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                     });
                     if(fy) {
                         var current = vm.data.current;
-                        current.set('intMonth', fy[0].data.intStartMonth);
-                        current.set('dtmDate', fy[0].data.dtmStartDate);
-                        current.set('strMonth', fy[0].data.strStartMonth);
+                        if(fy.length > 0 ) {
+                            current.set('intMonth', fy[0].data.intStartMonth);
+                            current.set('dtmDate', fy[0].data.dtmStartDate);
+                            current.set('strMonth', fy[0].data.strStartMonth);
+                        }
                     }
                 }
             }

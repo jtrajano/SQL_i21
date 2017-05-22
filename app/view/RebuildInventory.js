@@ -158,15 +158,16 @@ Ext.define('Inventory.view.RebuildInventory', {
                                     dataIndex: 'strType',
                                     dataType: 'string',
                                     text: 'Type',
-                                    flex: 1
+                                    width: 100
                                 },
                                 {
                                     dataIndex: 'strDescription',
                                     dataType: 'string',
                                     text: 'Description',
-                                    flex: 1
+                                    flex: 2
                                 }
                             ],
+                            pickerWidth: 600,
                             anchor: '100%',
                             publishes: 'value',
                             reference: 'item',
