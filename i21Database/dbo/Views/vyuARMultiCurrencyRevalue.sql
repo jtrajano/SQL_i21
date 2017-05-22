@@ -14,7 +14,7 @@ SELECT DISTINCT
 	,strItemId					= ICI.strItemNo
 	,dblQuantity				= ARID.dblQtyShipped
 	,dblUnitPrice				= ARID.dblPrice
-	,dblAmount					= ARID.dblTotal
+	,dblAmount					= ARID.dblTotal + ARID.dblTotalTax
 	,intCurrencyId				= ARI.intCurrencyId
 	,intForexRateType			= ARID.intCurrencyExchangeRateTypeId
 	,strForexRateType			= SMCERT.strCurrencyExchangeRateType 
