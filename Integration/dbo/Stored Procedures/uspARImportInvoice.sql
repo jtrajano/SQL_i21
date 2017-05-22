@@ -105,6 +105,7 @@ BEGIN
 			   ,[dblDiscount]
 			   ,[dblAmountDue]
 			   ,[dblPayment]
+			   ,[dblInterest]
 			   ,[strTransactionType]
 			   ,[intPaymentMethodId]
 			   ,[strComments]
@@ -136,6 +137,7 @@ BEGIN
 				ROUND(ISNULL(agivc_disc_amt, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblDiscount]
 				ROUND(ISNULL(agivc_bal_due, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblAmountDue]
 				ROUND(ISNULL(agivc_amt_paid, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblPayment]
+				ROUND(ISNULL(agivc_srvchr_amt, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblInterest]
 				(CASE 
 					WHEN agivc_type = 'I' 
 						THEN 'Invoice' 
@@ -204,6 +206,7 @@ BEGIN
 			   ,[dblDiscount]
 			   ,[dblAmountDue]
 			   ,[dblPayment]
+			   ,[dblInterest]
 			   ,[strTransactionType]
 			   ,[intPaymentMethodId]
 			   ,[strComments]
@@ -235,6 +238,7 @@ BEGIN
 				ROUND(ISNULL(ptivc_disc_amt, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblDiscount]
 				ROUND(ISNULL(ptivc_bal_due, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblAmountDue]
 				ROUND(ISNULL(ptivc_amt_applied, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblPayment]
+				ROUND(ISNULL(ptivc_serv_chg, @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()),--[dblInterest]				
 				(CASE 
 					WHEN ptivc_type = 'I' 
 						THEN 'Invoice' 
