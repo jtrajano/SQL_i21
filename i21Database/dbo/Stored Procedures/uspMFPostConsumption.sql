@@ -58,6 +58,8 @@ DECLARE @dblOtherCharges NUMERIC(18, 6)
 	,@strInstantConsumption NVARCHAR(50)
 	,@intManufacturingProcessId INT
 	,@intAttributeTypeId INT
+	,@strLocationName AS NVARCHAR(50)
+
 DECLARE @GLEntriesForOtherCost TABLE (
 	dtmDate DATETIME
 	,intItemId INT
@@ -356,30 +358,23 @@ BEGIN
 		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
 		WHERE ChargesGLAccounts.intOtherChargeExpense IS NULL
 
+		SELECT	TOP 1 
+				@strLocationName = c.strLocationName
+		FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+					ON il.intLocationId = c.intCompanyLocationId
+				INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
+					ON ChargesGLAccounts.intChargeId = il.intItemId
+					AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
+		WHERE	il.intItemId = @intItemId1
+				AND ChargesGLAccounts.intOtherChargeExpense IS NULL
+
 		IF @intItemId1 IS NOT NULL
 		BEGIN
-			-- {Item} is missing a GL account setup for {Account Category} account category.
-			EXEC uspICRaiseError 80008, @strItemNo1, @ACCOUNT_CATEGORY_OtherChargeExpense;
+			-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+			EXEC uspICRaiseError 80008, @strItemNo1, @strLocationName, @ACCOUNT_CATEGORY_OtherChargeExpense;
 			RETURN;
 		END
 
-		--SELECT TOP 1 @intItemId1 = Item.intItemId
-		--	,@strItemNo1 = Item.strItemNo
-		--FROM dbo.tblICItem Item
-		--INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
-		--WHERE ChargesGLAccounts.intOtherChargeIncome IS NULL
-		--IF @intItemId1 IS NOT NULL
-		--BEGIN
-		--	-- {Item} is missing a GL account setup for {Account Category} account category.
-		--	RAISERROR (
-		--			80008
-		--			,11
-		--			,1
-		--			,@strItemNo1
-		--			,@ACCOUNT_CATEGORY_OtherChargeIncome
-		--			)
-		--	RETURN;
-		--END
 		SELECT @intRecipeItemUOMId = intItemUOMId
 		FROM tblMFWorkOrderRecipe
 		WHERE intWorkOrderId = @intWorkOrderId
@@ -579,30 +574,23 @@ BEGIN
 		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
 		WHERE ChargesGLAccounts.intOtherChargeExpense IS NULL
 
+		SELECT	TOP 1 
+				@strLocationName = c.strLocationName
+		FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+					ON il.intLocationId = c.intCompanyLocationId
+				INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
+					ON ChargesGLAccounts.intChargeId = il.intItemId
+					AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
+		WHERE	il.intItemId = @intItemId1
+				AND ChargesGLAccounts.intOtherChargeExpense IS NULL
+
 		IF @intItemId1 IS NOT NULL
 		BEGIN
-			-- {Item} is missing a GL account setup for {Account Category} account category.
-			EXEC uspICRaiseError 80008, @strItemNo1, @ACCOUNT_CATEGORY_OtherChargeExpense;
+			-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+			EXEC uspICRaiseError 80008, @strItemNo1, @strLocationName, @ACCOUNT_CATEGORY_OtherChargeExpense;
 			RETURN;
 		END
 
-		--SELECT TOP 1 @intItemId1 = Item.intItemId
-		--	,@strItemNo1 = Item.strItemNo
-		--FROM dbo.tblICItem Item
-		--INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
-		--WHERE ChargesGLAccounts.intOtherChargeIncome IS NULL
-		--IF @intItemId1 IS NOT NULL
-		--BEGIN
-		--	-- {Item} is missing a GL account setup for {Account Category} account category.
-		--	RAISERROR (
-		--			80008
-		--			,11
-		--			,1
-		--			,@strItemNo1
-		--			,@ACCOUNT_CATEGORY_OtherChargeIncome
-		--			)
-		--	RETURN;
-		--END
 		SELECT @intRecipeItemUOMId = intItemUOMId
 		FROM tblMFWorkOrderRecipe
 		WHERE intWorkOrderId = @intWorkOrderId
