@@ -62,6 +62,7 @@ END
 -- Check for missing Auto Variance Account Id
 DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intItemId AS INT
+DECLARE @strLocationName AS NVARCHAR(50)
 
 IF EXISTS (
 	SELECT	TOP 1 1 
@@ -84,11 +85,21 @@ BEGIN
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intAutoNegativeId IS NULL 				 			
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @AccountCategory_Auto_Negative;
+		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Auto_Negative;
 		RETURN;
 	END 
 END 
