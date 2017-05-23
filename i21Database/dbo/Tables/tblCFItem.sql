@@ -31,23 +31,6 @@
     CONSTRAINT [FK_tblCFItem_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCFItem_intItemId]
     ON [dbo].[tblCFItem]([intItemId] ASC);
@@ -72,3 +55,6 @@ GO
 CREATE NONCLUSTERED INDEX [tblCFItem_intARItemId]
     ON [dbo].[tblCFItem]([intARItemId] ASC);
 
+GO
+CREATE UNIQUE NONCLUSTERED INDEX UniqueNetworkSiteItem 
+	ON tblCFItem (intNetworkId,intSiteId,strProductNumber);

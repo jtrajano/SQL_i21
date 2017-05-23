@@ -10,6 +10,7 @@
 );
 
 
-
-
+GO
+CREATE UNIQUE NONCLUSTERED INDEX tblCFStateCode_UniqueNetworkStateCode
+	ON tblCFStateCode (intNetworkId,strStateName);
 
