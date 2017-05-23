@@ -62,6 +62,7 @@ BEGIN
 		FROM tblEMEntity
 		WHERE intEntityId = @intEntityId
 
+
 		SELECT @strIds = STUFF((
 					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
@@ -100,6 +101,7 @@ BEGIN
 		SELECT @strEntityName = strName
 		FROM tblEMEntity
 		WHERE intEntityId = @intEntityId
+
 
 		SELECT @strIds = STUFF((
 					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
@@ -142,6 +144,7 @@ BEGIN
 		FROM tblEMEntity
 		WHERE intEntityId = @intEntityId
 
+
 		SELECT @strIds = STUFF((
 					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
 					FROM vyuCTEntityToContact
@@ -182,6 +185,7 @@ BEGIN
 		SELECT @strEntityName = strName
 		FROM tblEMEntity
 		WHERE intEntityId = @intEntityId
+
 
 		SELECT @strIds = STUFF((
 					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
@@ -238,6 +242,7 @@ BEGIN
 		SELECT @strEntityName = strName
 		FROM tblEMEntity
 		WHERE intEntityId = @intEntityId
+
 
 		SELECT @strIds = STUFF((
 					SELECT DISTINCT ', ' + LTRIM(intEntityContactId)
