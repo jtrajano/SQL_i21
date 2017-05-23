@@ -2,14 +2,17 @@
 AS
 SELECT        
 	S.intAccountSegmentId, 
-	U.intSort, S.strCode, 
+	U.intSort, 
+	S.strCode, 
 	C.strAccountCategory, 
 	S.intAccountCategoryId, 
 	S.strDescription, 
 	G.strAccountType, 
 	S.intAccountStructureId,
 	U.intStructureType,
-	U.strStructureName 
+	U.strStructureName,
+	G.intAccountGroupId,
+	G.strAccountGroup
 FROM            
 	dbo.tblGLAccountSegment AS S LEFT OUTER JOIN
 	dbo.tblGLAccountGroup AS G ON S.intAccountGroupId = G.intAccountGroupId LEFT OUTER JOIN
