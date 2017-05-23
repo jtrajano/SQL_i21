@@ -16,6 +16,31 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @FOB_ORIGIN AS INT = 1
 		,@FOB_DESTINATION AS INT = 2
+
+-- Validate the item-location. 
+BEGIN 
+	DECLARE @intItemId AS INT 
+			,@strItemNo AS NVARCHAR(50)
+
+	SELECT	@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	@ItemsToIncreaseInTransitOutBound ItemsToValidate LEFT JOIN dbo.tblICItem Item
+				ON ItemsToValidate.intItemId = Item.intItemId
+	WHERE	NOT EXISTS (
+				SELECT TOP 1 1 
+				FROM	dbo.tblICItemLocation
+				WHERE	tblICItemLocation.intItemLocationId = ItemsToValidate.intItemLocationId
+						AND tblICItemLocation.intItemId = ItemsToValidate.intItemId
+			)
+			AND ItemsToValidate.intItemId IS NOT NULL 	
+			
+	-- 'Item-Location is invalid or missing for {Item}.'
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		EXEC uspICRaiseError 80002, @strItemNo;
+		GOTO _Exit
+	END 
+END 
 		
 -- Do an upsert for the Item Stock table when updating the In-Transit Outbound Qty
 MERGE	
@@ -23,22 +48,29 @@ INTO	dbo.tblICItemStock
 WITH	(HOLDLOCK) 
 AS		ItemStock	
 USING (
-		SELECT	ItemsToIncreaseInTransitOutBound.intItemId
-				,ItemsToIncreaseInTransitOutBound.intItemLocationId
-				,Aggregrate_InTransitOutboundQty = SUM(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(tblICItemUOM.dblUnitQty, 0))) 	-- Convert the qty to stock unit. 			
-		FROM	@ItemsToIncreaseInTransitOutBound ItemsToIncreaseInTransitOutBound LEFT JOIN dbo.tblICItemUOM 
-					ON ItemsToIncreaseInTransitOutBound.intItemUOMId = tblICItemUOM.intItemUOMId
-		WHERE	ISNULL(ItemsToIncreaseInTransitOutBound.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
-		GROUP BY ItemsToIncreaseInTransitOutBound.intItemId
-				, ItemsToIncreaseInTransitOutBound.intItemLocationId
+		SELECT	ob.intItemId
+				,ob.intItemLocationId
+				,Aggregrate_Qty =  SUM(dbo.fnCalculateQtyBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty))   --SUM(ISNULL(dbo.fnCalculateCostBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty), 0)) 	-- Convert the qty to stock unit. 			
+		FROM	@ItemsToIncreaseInTransitOutBound ob 
+				CROSS APPLY (
+					SELECT	TOP 1 
+							intItemUOMId
+							,dblUnitQty 
+					FROM	tblICItemUOM iUOM
+					WHERE	iUOM.intItemId = ob.intItemId
+							AND iUOM.ysnStockUnit = 1 
+				) StockUOM 
+		WHERE	ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
+		GROUP BY ob.intItemId
+				, ob.intItemLocationId
 ) AS Source_Query  
 	ON ItemStock.intItemId = Source_Query.intItemId
 	AND ItemStock.intItemLocationId = Source_Query.intItemLocationId
 
--- If matched, update the On-Order qty 
+-- If matched, update the In-Transit Outbound qty 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblInTransitOutbound = ISNULL(ItemStock.dblInTransitOutbound, 0) + Source_Query.Aggregrate_InTransitOutboundQty 
+	SET		dblInTransitOutbound = ISNULL(ItemStock.dblInTransitOutbound, 0) + Source_Query.Aggregrate_Qty 
 
 -- If none is found, insert a new item stock record
 WHEN NOT MATCHED THEN 
@@ -52,7 +84,7 @@ WHEN NOT MATCHED THEN
 	VALUES (
 		Source_Query.intItemId
 		,Source_Query.intItemLocationId
-		,CASE WHEN Source_Query.Aggregrate_InTransitOutboundQty < 0 THEN 0 ELSE Source_Query.Aggregrate_InTransitOutboundQty END -- dblInTransitOutbound
+		,CASE WHEN Source_Query.Aggregrate_Qty < 0 THEN 0 ELSE Source_Query.Aggregrate_Qty END -- dblInTransitOutbound
 		,NULL 
 		,1	
 	)		
@@ -64,42 +96,53 @@ INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
 AS		ItemStockUOM
 USING (
-		-- Update the stock as-is. 
-		SELECT	ItemsToIncreaseInTransitOutBound.intItemId
-				,ItemsToIncreaseInTransitOutBound.intItemLocationId
-				,ItemsToIncreaseInTransitOutBound.intItemUOMId
-				,Aggregrate_InTransitOutboundQty = SUM(ISNULL(dblQty, 0))
-		FROM	@ItemsToIncreaseInTransitOutBound ItemsToIncreaseInTransitOutBound INNER JOIN dbo.tblICItemUOM 
-					ON ItemsToIncreaseInTransitOutBound.intItemUOMId = tblICItemUOM.intItemUOMId
-		WHERE	ISNULL(ItemsToIncreaseInTransitOutBound.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION	-- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 		
-		GROUP BY ItemsToIncreaseInTransitOutBound.intItemId
-				, ItemsToIncreaseInTransitOutBound.intItemLocationId
-				, ItemsToIncreaseInTransitOutBound.intItemUOMId
-		-- Update the stock unit. 
+		-- Aggregrate the In-Transit Outbound Qty 'as-is'.
+		SELECT	ob.intItemId
+				,ob.intItemLocationId
+				,ob.intItemUOMId
+				,ob.intSubLocationId
+				,ob.intStorageLocationId
+				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
+		FROM	@ItemsToIncreaseInTransitOutBound ob 
+		WHERE	ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION	-- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 		
+		GROUP BY ob.intItemId
+				, ob.intItemLocationId
+				, ob.intItemUOMId
+				, ob.intSubLocationId
+				, ob.intStorageLocationId
+		-- Convert the In-Transit Outbound Qty to 'Stock UOM' before doing the aggregrate.
 		UNION ALL 
-		SELECT	ItemsToIncreaseInTransitOutBound.intItemId
-				,ItemsToIncreaseInTransitOutBound.intItemLocationId
+		SELECT	ob.intItemId
+				,ob.intItemLocationId
 				,StockUOM.intItemUOMId
-				,Aggregrate_InTransitOutboundQty = SUM(ISNULL(dbo.fnCalculateCostBetweenUOM(ItemsToIncreaseInTransitOutBound.intItemUOMId, StockUOM.intItemUOMId, dblQty) , 0)) -- Convert the qty to the stock unit. 
-		FROM	@ItemsToIncreaseInTransitOutBound ItemsToIncreaseInTransitOutBound INNER JOIN dbo.tblICItemUOM 
-					ON ItemsToIncreaseInTransitOutBound.intItemUOMId = tblICItemUOM.intItemUOMId
-				INNER JOIN dbo.tblICItemUOM StockUOM
-					ON StockUOM.intItemId = ItemsToIncreaseInTransitOutBound.intItemId 
-					AND StockUOM.ysnStockUnit = 1
-					AND StockUOM.intItemUOMId <> tblICItemUOM.intItemUOMId
-		WHERE	ISNULL(ItemsToIncreaseInTransitOutBound.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
-		GROUP BY ItemsToIncreaseInTransitOutBound.intItemId
-				, ItemsToIncreaseInTransitOutBound.intItemLocationId
+				,ob.intSubLocationId
+				,ob.intStorageLocationId
+				,Aggregrate_Qty = SUM(dbo.fnCalculateQtyBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty)) 
+		FROM	@ItemsToIncreaseInTransitOutBound ob 
+				CROSS APPLY (
+					SELECT	TOP 1 
+							intItemUOMId
+							,dblUnitQty 
+					FROM	tblICItemUOM iUOM
+					WHERE	iUOM.intItemId = ob.intItemId
+							AND iUOM.ysnStockUnit = 1 
+				) StockUOM 
+		WHERE	ob.intItemUOMId <> StockUOM.intItemUOMId
+				AND ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
+		GROUP BY ob.intItemId
+				, ob.intItemLocationId
 				, StockUOM.intItemUOMId
+				, ob.intSubLocationId
+				, ob.intStorageLocationId
 ) AS Source_Query  
 	ON ItemStockUOM.intItemId = Source_Query.intItemId
 	AND ItemStockUOM.intItemLocationId = Source_Query.intItemLocationId
 	AND ItemStockUOM.intItemUOMId = Source_Query.intItemUOMId
 
--- If matched, update the On-Order qty 
+-- If matched, update the In-Transit Outbound qty 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblInTransitOutbound = ISNULL(ItemStockUOM.dblInTransitOutbound, 0) + Source_Query.Aggregrate_InTransitOutboundQty 
+	SET		dblInTransitOutbound = ISNULL(ItemStockUOM.dblInTransitOutbound, 0) + Source_Query.Aggregrate_Qty 
 
 -- If none is found, insert a new item stock record
 WHEN NOT MATCHED THEN 
@@ -114,7 +157,9 @@ WHEN NOT MATCHED THEN
 		Source_Query.intItemId
 		,Source_Query.intItemLocationId
 		,Source_Query.intItemUOMId
-		,Source_Query.Aggregrate_InTransitOutboundQty 
+		,Source_Query.Aggregrate_Qty 
 		,1	
 	)
 ;
+
+_Exit: 
