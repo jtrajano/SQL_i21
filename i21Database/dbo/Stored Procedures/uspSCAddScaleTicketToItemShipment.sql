@@ -296,7 +296,7 @@ BEGIN
 	SELECT	
 	[intOrderType]						= SE.intOrderType
 	,[intSourceType]					= SE.intSourceType
-	,[intEntityCustomerId]				= SE.intEntityCustomerId
+	,[intEntityCustomerId]				= NULL
 	,[dtmShipDate]						= SE.dtmShipDate
 	,[intShipFromLocationId]			= SE.intShipFromLocationId
 	,[intShipToLocationId]				= SE.intShipToLocationId
