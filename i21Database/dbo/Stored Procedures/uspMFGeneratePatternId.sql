@@ -321,7 +321,7 @@ BEGIN
 			BEGIN
 				SELECT @strSequence = 0
 
-				IF @ysnPaddingZero = 1
+				IF @ysnPaddingZero = 1 AND @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1))) > 0
 				BEGIN
 					SELECT @strSequence = replicate('0', @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1)))) + convert(VARCHAR(32), (@strSequence + 1))
 				END
@@ -350,7 +350,7 @@ BEGIN
 			END
 			ELSE
 			BEGIN
-				IF @ysnPaddingZero = 1
+				IF @ysnPaddingZero = 1 AND @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1))) > 0
 				BEGIN
 					SELECT @strSequence = replicate('0', @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1)))) + convert(VARCHAR(32), (@strSequence + 1))
 				END
