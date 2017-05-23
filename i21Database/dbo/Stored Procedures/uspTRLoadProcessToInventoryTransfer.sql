@@ -139,28 +139,34 @@ END
 			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 OR TR.dblFreightRate != 0 OR TR.dblPurSurcharge != 0)))
 	GROUP BY TR.intLoadReceiptId, TR.intCompanyLocationId, DH.intCompanyLocationId
 
+
+	UPDATE @TransferEntries
+	SET intInventoryTransferId = tblPatch.intInventoryTransferId
+	FROM (
+		SELECT Header.intInventoryTransferId
+			, intLoadReceiptId = Detail.intSourceId
+			, intFromLocId = Header.intFromLocationId
+			, intToLocId = Header.intToLocationId
+			, Detail.dblQuantity
+		FROM tblICInventoryTransfer Header
+		LEFT JOIN tblICInventoryTransferDetail Detail ON Detail.intInventoryTransferId = Header.intInventoryTransferId
+		WHERE intSourceType = 3
+	)tblPatch
+	WHERE intSourceId = tblPatch.intLoadReceiptId
+		AND intFromLocationId = tblPatch.intFromLocId
+		AND intToLocationId = tblPatch.intToLocId
+		AND dblQuantity = tblPatch.dblQuantity
+
+
 	--if No Records to Process exit
     SELECT @total = COUNT(*) FROM @TransferEntries;
     IF (@total = 0)
 	   RETURN;
 
-    -- If the integrating module needs to know the created transfer(s), the create a temp table called tmpAddInventoryTransferResult
-    -- The temp table will be accessed by uspICAddInventoryTransfer to send feedback on the created transfer transaction.
-    --IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult'))
-    --BEGIN
-    --    CREATE TABLE #tmpAddInventoryTransferResult (
-    --        intSourceId INT
-    --        ,intInventoryTransferId INT
-    --    )
-    --END
-     
-     
     -- Call uspICAddInventoryTransfer stored procedure.
     EXEC dbo.uspICAddInventoryTransfer
             @TransferEntries
             ,@intUserId
- 
-
 
 	-- Update the Inventory Transfer Key to the Transaction Table
 	UPDATE	TR
