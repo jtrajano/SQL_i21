@@ -103,8 +103,10 @@ GO
 CREATE NONCLUSTERED INDEX [tblCFSite_intNetworkId]
     ON [dbo].[tblCFSite]([intNetworkId] ASC);
 
-
 GO
 CREATE NONCLUSTERED INDEX [tblCFSite_intCardId]
     ON [dbo].[tblCFSite]([intCardId] ASC);
-
+	
+GO
+CREATE UNIQUE NONCLUSTERED INDEX tblCFSite_UniqueNetworkSiteName 
+	ON tblCFSite (intNetworkId,strSiteName);
