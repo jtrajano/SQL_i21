@@ -113,14 +113,13 @@ BEGIN
 					,@SiteId				= NULL
 					,@FreightTermId			= @FreightTermId
 
-
+				-- Fields used in the calculation of the taxes
 				DECLARE	@Amount	NUMERIC(38,20) 
 						,@Qty	NUMERIC(38,20)
-				-- Fields used in the calculation of the taxes
-
+				
 				SELECT TOP 1
-						 @Amount = Charge.dblAmount
-						,@Qty	 = 1
+						 @Amount = CASE WHEN Charge.ysnAccrue = 1 THEN Charge.dblAmount ELSE 0 END -- Note: Zero out the amount so that tax will be zero if ysnAccrue = false. Do not compute tax if it can't be converted to voucher. 
+						,@Qty	 = CASE WHEN Charge.ysnAccrue = 1 THEN 1 ELSE 0 END -- Note: Zero out the Qty so that tax will be zero if ysnAccrue = false. Do not compute tax if it can't be converted to voucher. 
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
 							ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
