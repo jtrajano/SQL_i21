@@ -14,9 +14,6 @@ BEGIN TRY
 		DECLARE @errorNum INT
 		DECLARE @dateNow DATETIME
 		SELECT @dateNow = GETDATE()
-		IF EXISTS(SELECT TOP 1 1 FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId AND ysnPosted = 1)
-				RAISERROR ('The transaction is already posted.',11,1)
-		
 		DECLARE @errorMsg NVARCHAR(300) = ''
 		IF EXISTS (SELECT TOP 1 1  FROM dbo.fnGLValidateRevaluePeriod(@intConsolidationId))
 		BEGIN
@@ -26,7 +23,11 @@ BEGIN TRY
 		END
 
 		IF @ysnRecap = 0
-			EXEC [dbo].uspGLGetNewID 3, @strPostBatchId OUTPUT 		
+			BEGIN
+				IF EXISTS(SELECT TOP 1 1 FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId AND ysnPosted = 1)
+				RAISERROR ('The transaction is already posted.',11,1)
+				EXEC [dbo].uspGLGetNewID 3, @strPostBatchId OUTPUT 		
+			END
 		ELSE
 			SELECT @strPostBatchId =  NEWID()
 
