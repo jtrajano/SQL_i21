@@ -105,23 +105,23 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation SMCL WITH (NOLOCK) WHERE SMCL.[intCompanyLocationId] = IT.[intCompanyLocationId])
 		
-UNION ALL
+--UNION ALL
 
-SELECT
-	 [intId]				= IT.[intId]
-	,[strErrorMessage]		= 'The item was not set up to be available on the specified location!'
-	,[strTransactionType]	= IT.[strTransactionType]
-	,[strType]				= IT.[strType]
-	,[strSourceTransaction]	= IT.[strSourceTransaction]
-	,[intSourceId]			= IT.[intSourceId]
-	,[strSourceId]			= IT.[strSourceId]
-	,[intInvoiceId]			= IT.[intInvoiceId]
-FROM
-	@ItemEntries IT
-WHERE
-	NOT EXISTS(	SELECT NULL 
-				FROM tblICItem IC WITH (NOLOCK) INNER JOIN tblICItemLocation IL WITH (NOLOCK) ON IC.intItemId = IL.intItemId
-				WHERE IC.[intItemId] = IT.[intItemId] AND IL.[intLocationId] = IT.[intCompanyLocationId])
+--SELECT
+--	 [intId]				= IT.[intId]
+--	,[strErrorMessage]		= 'The item(' + CAST(IT.[intItemId] AS NVARCHAR(20)) + ') was not set up to be available on the specified location(' + CAST(IT.[intCompanyLocationId] AS NVARCHAR(20)) + ')!'
+--	,[strTransactionType]	= IT.[strTransactionType]
+--	,[strType]				= IT.[strType]
+--	,[strSourceTransaction]	= IT.[strSourceTransaction]
+--	,[intSourceId]			= IT.[intSourceId]
+--	,[strSourceId]			= IT.[strSourceId]
+--	,[intInvoiceId]			= IT.[intInvoiceId]
+--FROM
+--	@ItemEntries IT
+--WHERE
+--	NOT EXISTS(	SELECT NULL 
+--				FROM tblICItem IC WITH (NOLOCK) INNER JOIN tblICItemLocation IL WITH (NOLOCK) ON IC.intItemId = IL.intItemId
+--				WHERE IC.[intItemId] = IT.[intItemId] AND IL.[intLocationId] = IT.[intCompanyLocationId])
 	
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
@@ -330,6 +330,7 @@ USING
 	(
 	SELECT
 		 [intInvoiceId]							= IE.[intInvoiceId]
+		,[intInvoiceDetailId]					= NULL
 		,[strDocumentNumber]					= IE.[strDocumentNumber]
 		,[intItemId]							= IC.[intItemId]
 		,[intPrepayTypeId]						= IE.[intPrepayTypeId]
@@ -337,13 +338,13 @@ USING
 		,[strItemDescription]					= ISNULL(ISNULL(IE.[strItemDescription], IC.[strDescription]), '')
 		,[dblQtyOrdered]						= ISNULL(IE.[dblQtyOrdered], @ZeroDecimal)
 		,[intOrderUOMId]						= IE.[intOrderUOMId]
-		,[dblQtyShipped]						= ISNULL(IE.[intQtyShipped], @ZeroDecimal)
+		,[dblQtyShipped]						= ISNULL(IE.[dblQtyShipped], @ZeroDecimal)
 		,[intItemUOMId]							= ISNULL(ISNULL(IE.[intItemUOMId], IL.[intIssueUOMId]), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM ICUOM WITH (NOLOCK) WHERE ICUOM.[intItemId] = IC.[intItemId] ORDER BY ICUOM.[ysnStockUnit] DESC, [intItemUOMId]))
 		,[dblItemWeight]						= IE.[dblItemWeight]
 		,[intItemWeightUOMId]					= IE.[intItemWeightUOMId]
-		,[dblDiscount]							= ISNULL(IE.[dblItemDiscount], @ZeroDecimal)
+		,[dblDiscount]							= ISNULL(IE.[dblDiscount], @ZeroDecimal)
 		,[dblItemTermDiscount]					= ISNULL(ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount]), @ZeroDecimal)
-		,[strItemTermDiscountBy]				= ISNULL(IP.[strItemTermDiscountBy], IE.[strItemTermDiscountBy])
+		,[strItemTermDiscountBy]				= ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
 		,[dblPrice]								= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
 		,[dblBasePrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
 		,[strPricing]							= ISNULL(IP.[strPricing], IE.[strPricing])
@@ -484,7 +485,9 @@ USING
 			 [intAccountId] 
 			,[intCOGSAccountId] 
 			,[intSalesAccountId]
-			,[intInventoryAccountId]				
+			,[intInventoryAccountId]	
+			,[intGeneralAccountId]
+			,[intMaintenanceSalesAccountId]		
 			,[intItemId]
 			,[intLocationId]			
 		FROM vyuARGetItemAccount WITH (NOLOCK)
