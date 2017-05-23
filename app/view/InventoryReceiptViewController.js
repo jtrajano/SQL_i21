@@ -5800,6 +5800,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             var totalItemTax = 0.00,
                                 taxGroupId = 0,
                                 taxGroupName = null;
+
                             charge.tblICInventoryReceiptChargeTaxes().removeAll();
 
                             Ext.Array.each(itemTaxes, function (itemDetailTax) {
@@ -5820,13 +5821,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     taxAmount = -(taxAmount);
                                 }
 
+                                // Zero out the tax if ysnAccrue = false. Do not compute tax if it can't be converted to voucher. 
+                                if (!charge.get('ysnAccrue')){
+                                    taxAmount = 0.00;
+                                }
+
                                 taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
 
                                 if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
                                     if (itemDetailTax.ysnTaxExempt) {
                                         taxAmount = 0.00;
                                     }
-
                                     itemDetailTax.dblTax = taxAmount;
                                     itemDetailTax.dblAdjustedTax = taxAmount;
                                 }
