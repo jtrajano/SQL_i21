@@ -37,7 +37,7 @@ BEGIN   Try
     
 
 
-INSERT INTO tblRKFutOptTransactionHeader  Values(1)
+INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId)  Values(1)
 SELECT @intFutOptTransactionHeaderId = SCOPE_IDENTITY() 
 DECLARE @idoc int
 EXEC sp_xml_preparedocument @idoc OUTPUT, @XML          

@@ -5244,8 +5244,9 @@
     <Build Include="dbo\Tables\tblSCScaleOperator.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAddScaleOperator.sql" />
     <None Include="Scripts\Post-Deployment\EM\DataMigration\1710_1720_CCSite_migration.sql" />
-	<Build Include="dbo\Views\vyuDBPanel.sql" />
+    <Build Include="dbo\Views\vyuDBPanel.sql" />
     <Build Include="dbo\Views\vyuSMCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuRKMarketDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

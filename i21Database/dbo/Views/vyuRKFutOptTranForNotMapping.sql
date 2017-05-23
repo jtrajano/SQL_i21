@@ -15,8 +15,10 @@ fm.strFutureMonth strFutureMonthYearWOSymbol,
   		strOptionMonth strOptionMonthYearWOSymbol
 		,(SELECT TOP 1 chn.strContractNumber FROM tblCTContractHeader chn where chn.intContractHeaderId = cd.intContractHeaderId)  + ' - ' + CONVERT(varchar,cd.intContractSeq) as strContractSeq,
 		ch.strContractNumber strContractNumber
-		,frm.strFutureMonth strRollingMonth, ft.intRollingMonthId
+		,frm.strFutureMonth strRollingMonth, ft.intRollingMonthId,
+		CASE WHEN ISNULL(intSelectedInstrumentTypeId,1) =1  then 'Exchange Traded' else 'OTC' end as strSelectedInstrumentType,intAssignedLots as intAssignedLots
 FROM [tblRKFutOptTransaction] AS ft
+LEFT OUTER JOIN [dbo].[vyuRKGetAssignedLots] AS al ON ft.[intFutOptTransactionId] = al.[intFutOptTransactionId]
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN [dbo].tblEMEntity AS e1 ON ft.[intTraderId] = e1.[intEntityId]
 LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
