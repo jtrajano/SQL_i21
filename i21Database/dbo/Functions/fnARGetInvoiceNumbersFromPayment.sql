@@ -6,26 +6,13 @@ RETURNS NVARCHAR(MAX) AS
 BEGIN
 	DECLARE @strInvoiceNumbers NVARCHAR(MAX) = NULL
 
-	DECLARE @tmpTable TABLE(intInvoiceId INT)
-	INSERT INTO @tmpTable
-	SELECT intInvoiceId FROM tblARPaymentDetail WHERE intPaymentId = @intPaymentId and not dblPayment = 0 AND intInvoiceId IS NOT NULL
-	
-	IF EXISTS(SELECT NULL FROM @tmpTable)
-		BEGIN
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @tmpTable)
-			BEGIN
-				DECLARE @intInvoiceId INT
-				
-				SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @tmpTable ORDER BY intInvoiceId
-				
-				IF (SELECT COUNT(*) FROM @tmpTable) > 1
-					SELECT @strInvoiceNumbers = ISNULL(@strInvoiceNumbers, '') + strInvoiceNumber + ', ' FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
-				ELSE
-					SELECT @strInvoiceNumbers = ISNULL(@strInvoiceNumbers, '') + strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
-
-				DELETE FROM @tmpTable WHERE intInvoiceId = @intInvoiceId
-			END
-		END
+	SELECT @strInvoiceNumbers = COALESCE(@strInvoiceNumbers + ', ', '') + RTRIM(LTRIM(I.strInvoiceNumber)) 
+	FROM dbo.tblARPaymentDetail P WITH(NOLOCK) 
+		INNER JOIN (SELECT intInvoiceId
+						 , strInvoiceNumber
+					FROM dbo.tblARInvoice WITH (NOLOCK)
+		) I ON I.intInvoiceId = P.intInvoiceId	
+	WHERE P.intPaymentId = @intPaymentId
 
 	RETURN @strInvoiceNumbers
 END
