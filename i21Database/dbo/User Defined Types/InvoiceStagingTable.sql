@@ -46,6 +46,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
 	,[intEntityCustomerId]					INT												NOT NULL	-- Entity Id of Customer (tblARCustomer.intEntityCustomerId)	
+	,[intEntityContactId]					INT												NULL		-- Entity Id of Contact (tblEMEntity.intEntityId)		
 	,[intCompanyLocationId]					INT												NOT NULL	-- Company Location Id (tblSMCompanyLocation.intCompanyLocationId)
 	,[intAccountId]							INT												NULL		-- Key Value from tblGLAccount
 	,[intCurrencyId]						INT												NULL		-- Currency Id (tblSMCurrency.intCurrencyID)
