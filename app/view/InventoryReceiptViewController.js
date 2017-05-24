@@ -6125,10 +6125,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         // If there is no data change, calculate the charge and do the recap. 
         if (!context.data.hasChanges()) {
-            me.doOtherChargeCalculate(
-                win,
-                doRecap(win.viewModel.data.current)
-            );
+            // If already posted or preview was called right after a post or unpost, do not calculate the charges and only do the recap. 
+            if ((current && current.get('ysnPosted')) || (isAfterPostCall)){
+                doRecap(current); 
+            }
+            // If not yet posted, calculate the charges first before doing the recap. 
+            else {
+                me.doOtherChargeCalculate(
+                    win, 
+                    doRecap(current)
+                );
+            }
             return;
         }
 
@@ -6137,7 +6144,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             successFn: function () {
                 me.doOtherChargeCalculate(
                     win,
-                    doRecap(win.viewModel.data.current)
+                    doRecap(current)
                 );
             }
         });
@@ -6457,11 +6464,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 .subscribe(
                 function (successResponse) {
                     me.onAfterReceive(true);
-                    // context.configuration.paging.store.load({
-                    //     callback: function(records, options, success) {
-                    //         me.doOtherChargeTaxCalculate(win);
-                    //     }
-                    // });
                     // Check what is the active tab. If it is the Post Preview tab, load the recap data. 
                     if (activeTab.itemId == 'pgePostPreview') {
                         var cfg = {
@@ -6483,10 +6485,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (button === 'yes') {
                     // If there is no data change, do the post.
                     if (!context.data.hasChanges()) {
-                        me.doOtherChargeCalculate(
-                            win
-                            , doPost
-                        );
+                        // Calculate the other charge if record is not yet posted. 
+                        if (currentRecord && currentRecord.get('ysnPosted') == false){
+                            me.doOtherChargeCalculate(
+                                win
+                                ,doPost                       
+                            );
+                        }
+                        // Otherwise, simply do the post. 
+                        else {
+                            doPost();
+                        }
                         return;
                     }
 
@@ -6509,16 +6518,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (!row.dummy) {
                         //If there is Gross, check if the value is equivalent to Received Quantity
                         if (row.get('intWeightUOMId') !== null) {
-                            // var receiptItemQty = row.get('dblOpenReceive');
-                            // var receiptUOMCF = row.get('dblItemUOMConvFactor');
-                            // var weightUOMCF = row.get('dblWeightUOMConvFactor');
-
-                            // if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
-                            // if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
-                            // if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
-
-                            //var totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF;
-                            //var totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
 
                             var dblGross = row.get('dblGross');
                             var dblNet = row.get('dblNet');
@@ -6544,24 +6543,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 );
             }
             else {
-                // If there is no data change, do the post.
-                if (!context.data.hasChanges()) {
-                    me.doOtherChargeCalculate(
-                        win,
-                        doPost
-                    );
-                    return;
-                }
-
-                // Save has data changes first before doing the post.
-                context.data.saveRecord({
-                    successFn: function () {
-                        me.doOtherChargeCalculate(
-                            win,
-                            doPost
-                        );
-                    }
-                });
+                buttonAction('yes');
             }
         }
     },
