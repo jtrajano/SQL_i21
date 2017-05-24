@@ -23,6 +23,15 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 	
+	UPDATE tblTFReportingComponent
+	SET tblTFReportingComponent.intMasterId = Source.intMasterId
+	FROM @ReportingComponent Source
+	WHERE tblTFReportingComponent.strFormCode COLLATE Latin1_General_CI_AS = Source.strFormCode COLLATE Latin1_General_CI_AS
+		AND tblTFReportingComponent.strScheduleCode COLLATE Latin1_General_CI_AS = Source.strScheduleCode COLLATE Latin1_General_CI_AS
+		AND tblTFReportingComponent.strType COLLATE Latin1_General_CI_AS = Source.strType COLLATE Latin1_General_CI_AS
+		AND tblTFReportingComponent.intTaxAuthorityId = @TaxAuthorityId
+		AND ISNULL(tblTFReportingComponent.intMasterId, '') = ''
+	
 	MERGE	
 	INTO	tblTFReportingComponent
 	WITH	(HOLDLOCK) 
@@ -30,10 +39,7 @@ BEGIN TRY
 	USING (
 		SELECT * FROM @ReportingComponent
 	) AS SOURCE
-		ON TARGET.strFormCode COLLATE Latin1_General_CI_AS = SOURCE.strFormCode COLLATE Latin1_General_CI_AS
-			AND TARGET.strScheduleCode COLLATE Latin1_General_CI_AS = SOURCE.strScheduleCode COLLATE Latin1_General_CI_AS
-			AND TARGET.strType COLLATE Latin1_General_CI_AS = SOURCE.strType COLLATE Latin1_General_CI_AS
-			AND TARGET.intTaxAuthorityId = @TaxAuthorityId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -60,6 +66,7 @@ BEGIN TRY
 			, strSPInventory
 			, strSPInvoice
 			, strSPRunReport
+			, intMasterId
 		)
 		VALUES (
 			@TaxAuthorityId
@@ -74,6 +81,7 @@ BEGIN TRY
 			, SOURCE.strSPInventory
 			, SOURCE.strSPInvoice
 			, SOURCE.strSPRunReport
+			, SOURCE.intMasterId
 		);
 	
 END TRY

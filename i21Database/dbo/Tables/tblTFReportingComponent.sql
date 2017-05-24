@@ -13,6 +13,7 @@
     [strSPInvoice] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strSPRunReport] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnIncludeSalesFreightOnly] BIT NULL,
+	[intMasterId] INT NULL,
     [intConcurrencyId] INT DEFAULT((1)) NULL, 
     CONSTRAINT [PK_tblTFReportingComponent] PRIMARY KEY ([intReportingComponentId] ASC),
 )

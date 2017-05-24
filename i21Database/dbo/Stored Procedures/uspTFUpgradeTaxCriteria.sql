@@ -23,21 +23,30 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 
+	SELECT TaxCrit.*, TaxCat.intTaxCategoryId, RC.intReportingComponentId
+	INTO #tmpTaxCrit
+	FROM @TaxCriteria TaxCrit
+	LEFT JOIN tblTFTaxCategory TaxCat ON TaxCat.strTaxCategory COLLATE Latin1_General_CI_AS = TaxCrit.strTaxCategory COLLATE Latin1_General_CI_AS
+		AND TaxCat.strState COLLATE Latin1_General_CI_AS = TaxCrit.strState COLLATE Latin1_General_CI_AS
+	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = TaxCrit.strFormCode COLLATE Latin1_General_CI_AS
+		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = TaxCrit.strScheduleCode COLLATE Latin1_General_CI_AS
+		AND RC.strType COLLATE Latin1_General_CI_AS = TaxCrit.strType COLLATE Latin1_General_CI_AS
+
+	UPDATE tblTFReportingComponentCriteria
+	SET tblTFReportingComponentCriteria.intMasterId = Source.intMasterId
+	FROM #tmpTaxCrit Source
+	WHERE tblTFReportingComponentCriteria.intReportingComponentId = Source.intReportingComponentId
+		AND tblTFReportingComponentCriteria.intTaxCategoryId = Source.intTaxCategoryId
+		AND ISNULL(tblTFReportingComponentCriteria.intMasterId, '') = ''
+
 	MERGE	
 	INTO	tblTFReportingComponentCriteria
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
-		SELECT TaxCrit.*, TaxCat.intTaxCategoryId, RC.intReportingComponentId FROM @TaxCriteria TaxCrit
-		LEFT JOIN tblTFTaxCategory TaxCat ON TaxCat.strTaxCategory COLLATE Latin1_General_CI_AS = TaxCrit.strTaxCategory COLLATE Latin1_General_CI_AS
-			AND TaxCat.strState COLLATE Latin1_General_CI_AS = TaxCrit.strState COLLATE Latin1_General_CI_AS
-		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = TaxCrit.strFormCode COLLATE Latin1_General_CI_AS
-			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = TaxCrit.strScheduleCode COLLATE Latin1_General_CI_AS
-			AND RC.strType COLLATE Latin1_General_CI_AS = TaxCrit.strType COLLATE Latin1_General_CI_AS
-
+		SELECT * FROM #tmpTaxCrit
 	) AS SOURCE
-		ON TARGET.intTaxCategoryId = SOURCE.intTaxCategoryId
-			AND TARGET.intReportingComponentId = SOURCE.intReportingComponentId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -50,12 +59,16 @@ BEGIN TRY
 			intTaxCategoryId
 			, intReportingComponentId
 			, strCriteria
+			, intMasterId
 		)
 		VALUES (
 			SOURCE.intTaxCategoryId
 			, SOURCE.intReportingComponentId
 			, SOURCE.strCriteria
+			, SOURCE.intMasterId
 		);
+
+	DROP TABLE #tmpTaxCrit
 
 END TRY
 BEGIN CATCH

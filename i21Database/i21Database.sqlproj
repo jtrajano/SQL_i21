@@ -2239,7 +2239,6 @@
     <Build Include="dbo\Tables\tblTFTaxAuthority.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityConfiguration.sql" />
     <Build Include="dbo\Tables\tblTFTerminalControlNumber.sql" />
-    <Build Include="dbo\Tables\tblTFDeploymentNote.sql" />
     <Build Include="dbo\Tables\tblCTSpreadArbitrage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStartBlendSheet.sql" />
@@ -2985,7 +2984,6 @@
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
