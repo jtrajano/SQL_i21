@@ -13,6 +13,7 @@
 	[strLastIndexOf] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 	[strSegment] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConfigurationSequence] [int] NULL,
+	[intMasterId] INT NULL,
 	[intConcurrencyId] INT DEFAULT((1)) NULL, 
     CONSTRAINT [PK_tblTFReportingComponentConfiguration] PRIMARY KEY ([intReportingComponentConfigurationId] ASC),
 	CONSTRAINT [FK_tblTFReportingComponentConfiguration_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId]) REFERENCES [dbo].[tblTFReportingComponent] ([intReportingComponentId]) ON DELETE CASCADE

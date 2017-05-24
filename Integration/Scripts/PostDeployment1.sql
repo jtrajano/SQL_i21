@@ -9,15 +9,21 @@ Post-Deployment Script Template
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
+--Accounts Payable
+:r "..\dbo\Views\vyuAPOriginCCDTransaction.sql"
+
+--General Ledger
+:r "..\Scripts\GL\1a_OriginCrossReferenceMapping.sql"
+:r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
+:r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
+:r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
 
 --We have to move it here due to schema changes before executing this store procedure
 :r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
 
-
 -- DROP temp table created from PreDeployment script
 IF OBJECT_ID('tempdb..##tblOriginMod') IS NOT NULL DROP TABLE ##tblOriginMod
 GO
-
 
 :r "..\Scripts\AP\TransferImportedTermsData.sql"
 :r "..\Scripts\AP\FixImportedVendorOriginFlag.sql"
@@ -39,11 +45,6 @@ GO
 --Patronage
 :r "..\Scripts\PAT\DropStoredProcedures.sql"
 
---General Ledger
-:r "..\Scripts\GL\1a_OriginCrossReferenceMapping.sql"
-:r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
-:r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
-:r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
 --Inventory Receipt
 GO 
 :r "..\Scripts\IC\uspICImportInventoryReceipts_CreateTrigger.sql"

@@ -117,9 +117,12 @@ BEGIN
 				DECLARE	@Amount	NUMERIC(38,20) 
 						,@Qty	NUMERIC(38,20)
 				
+				-- Get the taxable amount and qty from the charges. 
 				SELECT TOP 1
-						 @Amount = CASE WHEN Charge.ysnAccrue = 1 THEN Charge.dblAmount ELSE 0 END -- Note: Zero out the amount so that tax will be zero if ysnAccrue = false. Do not compute tax if it can't be converted to voucher. 
-						,@Qty	 = CASE WHEN Charge.ysnAccrue = 1 THEN 1 ELSE 0 END -- Note: Zero out the Qty so that tax will be zero if ysnAccrue = false. Do not compute tax if it can't be converted to voucher. 
+						-- Note: Do not compute tax if it can't be converted to voucher. Zero out the amount and Qty so that tax will be zero too. 
+						-- Charges with Accrue = false and Price = false does not create vouchers. 
+						 @Amount = CASE WHEN ISNULL(Charge.ysnAccrue, 0) = 1 OR ISNULL(Charge.ysnPrice, 0) = 1 THEN Charge.dblAmount ELSE 0 END 
+						,@Qty	 = CASE WHEN ISNULL(Charge.ysnAccrue, 0) = 1 OR ISNULL(Charge.ysnPrice, 0) = 1 THEN 1 ELSE 0 END 
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
 							ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
@@ -179,13 +182,7 @@ BEGIN
 
 		-- Calculate the tax per line item 
 		UPDATE	Charge 
-		SET		dblTax = CASE 
-							-- Negate Tax if Other Charge is marked as Price Down
-							WHEN Charge.ysnPrice = 1 
-								THEN -(ROUND(dbo.fnDivide(ISNULL(Taxes.dblTaxPerLineItem, 0) ,ISNULL(Receipt.intSubCurrencyCents, 1)), 2))
-							ELSE
-								ROUND(dbo.fnDivide(ISNULL(Taxes.dblTaxPerLineItem, 0) ,ISNULL(Receipt.intSubCurrencyCents, 1)), 2) 
-						END	
+		SET		dblTax = ROUND(dbo.fnDivide(ISNULL(Taxes.dblTaxPerLineItem, 0) ,ISNULL(Receipt.intSubCurrencyCents, 1)), 2)  					
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
 						ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 				LEFT JOIN (

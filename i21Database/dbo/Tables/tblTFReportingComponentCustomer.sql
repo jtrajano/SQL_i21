@@ -5,6 +5,7 @@
 	[intEntityCustomerId] INT NOT NULL,
 	[strCustomerNumber] NVARCHAR (150) COLLATE Latin1_General_CI_AS NULL,
 	[ysnInclude] [bit] NOT NULL,
+	[intMasterId] INT NULL,
 	[intConcurrencyId] INT DEFAULT ((1)) NULL, 
     CONSTRAINT [PK_tblTFReportingComponentCustomer] PRIMARY KEY ([intReportingComponentCustomerId]), 
     CONSTRAINT [AK_tblTFReportingComponentCustomer] UNIQUE ([intReportingComponentId], [intEntityCustomerId]), 

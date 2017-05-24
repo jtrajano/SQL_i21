@@ -23,19 +23,29 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 
+	SELECT FP.*, RC.intReportingComponentId
+	INTO #tmpFP
+	FROM @FilingPackets FP
+	LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = FP.strFormCode COLLATE Latin1_General_CI_AS
+		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = FP.strScheduleCode COLLATE Latin1_General_CI_AS
+		AND RC.strType COLLATE Latin1_General_CI_AS = FP.strType COLLATE Latin1_General_CI_AS
+		AND RC.intTaxAuthorityId = @TaxAuthorityId
+
+	UPDATE tblTFFilingPacket
+	SET intMasterId = Source.intMasterId
+	FROM #tmpFP Source
+	WHERE tblTFFilingPacket.intReportingComponentId = Source.intReportingComponentId
+		AND tblTFFilingPacket.intTaxAuthorityId = @TaxAuthorityId
+		AND ISNULL(tblTFFilingPacket.intMasterId, '') = ''
+
 	MERGE	
 	INTO	tblTFFilingPacket
 	WITH	(HOLDLOCK) 
 	AS		TARGET
 	USING (
-		SELECT FP.*, RC.intReportingComponentId FROM @FilingPackets FP
-		LEFT JOIN tblTFReportingComponent RC ON RC.strFormCode COLLATE Latin1_General_CI_AS = FP.strFormCode COLLATE Latin1_General_CI_AS
-			AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = FP.strScheduleCode COLLATE Latin1_General_CI_AS
-			AND RC.strType COLLATE Latin1_General_CI_AS = FP.strType COLLATE Latin1_General_CI_AS
-			AND RC.intTaxAuthorityId = @TaxAuthorityId
+		SELECT * FROM #tmpFP
 	) AS SOURCE
-		ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
-			AND TARGET.intTaxAuthorityId = @TaxAuthorityId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -47,13 +57,17 @@ BEGIN TRY
 			, intReportingComponentId
 			, ysnStatus
 			, intFrequency
+			, intMasterId
 		)
 		VALUES (
 			@TaxAuthorityId
 			, SOURCE.intReportingComponentId
 			, SOURCE.ysnStatus
 			, SOURCE.intFrequency
+			, SOURCE.intMasterId
 		);
+
+	DROP TABLE #tmpFP
 
 END TRY
 BEGIN CATCH

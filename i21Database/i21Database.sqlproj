@@ -2252,7 +2252,6 @@
     <Build Include="dbo\Tables\tblTFTaxAuthority.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityConfiguration.sql" />
     <Build Include="dbo\Tables\tblTFTerminalControlNumber.sql" />
-    <Build Include="dbo\Tables\tblTFDeploymentNote.sql" />
     <Build Include="dbo\Tables\tblCTSpreadArbitrage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStartBlendSheet.sql" />
@@ -3000,7 +2999,6 @@
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
@@ -3010,8 +3008,6 @@
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemLists.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ConfigurationTemplate.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ConfigurationType.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateADuplicateRecord.sql" />
@@ -4505,7 +4501,6 @@
     <Build Include="dbo\Tables\tblTFIntegrationSystem.sql" />
     <Build Include="dbo\Tables\tblTFIntegrationError.sql" />
     <Build Include="dbo\Stored Procedures\uspTFOriginDataIntegration.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_IntegrationSystem.sql" />
     <Build Include="dbo\Stored Procedures\uspSCManualDistributionOutbound.sql" />
     <Build Include="dbo\Stored Procedures\uspARCollectionOverdueDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARSearchLetterCustomer.sql" />
@@ -5358,7 +5353,6 @@
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <None Include="Scripts\Post-Deployment\MF\5_WSPattern.sql" />
     <None Include="Scripts\Post-Deployment\LG\1_MasterTables.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_CompanyPreference.sql" />
     <None Include="Scripts\Post-Deployment\IC\19_M2MComputations.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\IN_Indiana.sql" />
     <Build Include="dbo\User Defined Types\TFReportingComponentConfigurations.sql">

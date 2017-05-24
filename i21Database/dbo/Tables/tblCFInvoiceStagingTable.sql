@@ -130,8 +130,12 @@
     [ysnIncludeInQuantityDiscount] BIT             NULL,
     [ysnAllowEFT]                  BIT             NULL,
     [ysnActive]                    BIT             NULL,
-    [ysnEnergyTrac]                BIT             NULL
+    [ysnEnergyTrac]                BIT             NULL,
+    [strDiscountSchedule]          NVARCHAR (MAX)  NULL,
+    [ysnShowOnCFInvoice]           BIT             NULL
 );
+
+
 
 
 

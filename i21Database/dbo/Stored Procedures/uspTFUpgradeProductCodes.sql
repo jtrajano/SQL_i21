@@ -23,6 +23,13 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 
+	UPDATE tblTFProductCode
+	SET tblTFProductCode.intMasterId = Source.intMasterId
+	FROM @ProductCodes Source
+	WHERE tblTFProductCode.strProductCode COLLATE Latin1_General_CI_AS = Source.strProductCode COLLATE Latin1_General_CI_AS
+		AND tblTFProductCode.intTaxAuthorityId = @TaxAuthorityId
+		AND ISNULL(tblTFProductCode.intMasterId, '') = ''
+
 	MERGE	
 	INTO	tblTFProductCode 
 	WITH	(HOLDLOCK) 
@@ -30,8 +37,7 @@ BEGIN TRY
 	USING (
 		SELECT * FROM @ProductCodes
 	) AS SOURCE
-		ON TARGET.strProductCode COLLATE Latin1_General_CI_AS = SOURCE.strProductCode COLLATE Latin1_General_CI_AS
-			AND TARGET.intTaxAuthorityId = @TaxAuthorityId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -46,6 +52,7 @@ BEGIN TRY
 			, strDescription
 			, strProductCodeGroup
 			, strNote
+			, intMasterId
 		)
 		VALUES (
 			@TaxAuthorityId
@@ -53,6 +60,7 @@ BEGIN TRY
 			, SOURCE.strDescription
 			, SOURCE.strProductCodeGroup
 			, SOURCE.strNote
+			, SOURCE.intMasterId
 		);
 
 	-- Update existing Product Code associated with Tax Authority Id that is not within Source

@@ -32,6 +32,13 @@ BEGIN TRY
 	LEFT JOIN tblTFProductCode PC ON PC.strProductCode COLLATE Latin1_General_CI_AS = VPC.strProductCode COLLATE Latin1_General_CI_AS
 		AND PC.intTaxAuthorityId = RC.intTaxAuthorityId
 
+	UPDATE tblTFReportingComponentProductCode
+	SET tblTFReportingComponentProductCode.intMasterId = Source.intMasterId
+	FROM #tmpVPC Source
+	WHERE tblTFReportingComponentProductCode.intProductCodeId = Source.intProductCodeId
+		AND tblTFReportingComponentProductCode.intReportingComponentId = Source.intReportingComponentId
+		AND ISNULL(tblTFReportingComponentProductCode.intMasterId, '') = ''
+
 	MERGE	
 	INTO	tblTFReportingComponentProductCode
 	WITH	(HOLDLOCK) 
@@ -39,8 +46,7 @@ BEGIN TRY
 	USING (
 		SELECT * FROM #tmpVPC
 	) AS SOURCE
-		ON TARGET.intProductCodeId = SOURCE.intProductCodeId
-			AND TARGET.intReportingComponentId = SOURCE.intReportingComponentId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -53,11 +59,13 @@ BEGIN TRY
 			intReportingComponentId
 			, intProductCodeId
 			, strType
+			, intMasterId
 		)
 		VALUES (
 			SOURCE.intReportingComponentId
 			, SOURCE.intProductCodeId
 			, SOURCE.strType
+			, SOURCE.intMasterId
 		);
 
 	-- Delete existing Valid Product Codes that is not within Source
