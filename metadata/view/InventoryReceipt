@@ -3051,7 +3051,7 @@
                                                                         "dataIndex": "strDescription",
                                                                         "itemId": "colSubLocation",
                                                                         "text": "Storage Location",
-                                                                        "width": 90
+                                                                        "width": 100
                                                                     },
                                                                     "name": "MyColumn1",
                                                                     "designerId": "0f567d0c-1633-4ddc-91b4-509cf9ccd1a7",
@@ -3786,7 +3786,7 @@
                                                                         "dataIndex": "string",
                                                                         "itemId": "colLotParentLotId",
                                                                         "text": "Parent Lot Number",
-                                                                        "width": 100
+                                                                        "width": 110
                                                                     },
                                                                     "name": "MyColumn34",
                                                                     "designerId": "88478352-00af-41f7-85d4-d041f9134c58",
