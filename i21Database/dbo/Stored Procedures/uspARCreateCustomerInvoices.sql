@@ -1303,7 +1303,7 @@ VALUES(
 			,[ysnSuccess]
 		);	
 	
-	IF ISNULL(@IntegrationLogId, 0) <> 0 AND ISNULL(@RaiseError,0) = 0
+	IF ISNULL(@IntegrationLogId, 0) <> 0
 		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
 	
 END TRY

@@ -5228,6 +5228,14 @@
     <Build Include="dbo\User Defined Types\InvoiceIntegrationLogStagingTable.sql" />
     <Build Include="dbo\Views\vyuSCGradeReadingReport.sql" />
     <Build Include="dbo\Views\vyuMFGetAvailableStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInboundShipmentOnInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoicesIntegrations.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateLineItemsCommitted.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateLineItemsComponent.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateLineItemsReservedStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateProvisionalOnStandardInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateSOStatusFromInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateTransactionsPricingHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
