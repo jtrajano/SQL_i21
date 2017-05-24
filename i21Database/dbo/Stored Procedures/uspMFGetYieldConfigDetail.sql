@@ -70,14 +70,16 @@ BEGIN
 				)
 	END
 
-	SELECT intYieldId
-		,intManufacturingProcessId
-		,strInputFormula
-		,strOutputFormula
-		,strYieldFormula
-		,intConcurrencyId
-	FROM dbo.tblMFYield
-	WHERE intYieldId = @intYieldId
+	SELECT Y.intYieldId
+		,Y.intManufacturingProcessId
+		,Y.strInputFormula
+		,Y.strOutputFormula
+		,Y.strYieldFormula
+		,Y.intConcurrencyId
+		,MP.strProcessName
+	FROM tblMFYield Y
+	LEFT JOIN tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = Y.intManufacturingProcessId
+	WHERE Y.intYieldId = @intYieldId
 
 	SELECT ISNULL(@intYieldId, 0) AS intYieldId
 		,CASE 
