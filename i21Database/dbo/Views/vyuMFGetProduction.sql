@@ -3,7 +3,8 @@ AS
 SELECT Convert(char,WP.dtmProductionDate,101) AS [Production Date]
 	,I.strItemNo AS Item
 	,I.strDescription AS Description
-	,W.strWorkOrderNo AS [Job #]
+	,W.strWorkOrderNo AS [Work Order #]
+	,W.strReferenceNo AS [Job #]
 	,PL.strParentLotNumber AS [Production Lot]
 	,SUM(WP.dblPhysicalCount) AS [Quantity]
 	,IUM.strUnitMeasure AS [Quantity UOM]
@@ -23,6 +24,7 @@ GROUP BY WP.dtmProductionDate
 	,I.strItemNo
 	,I.strDescription
 	,W.strWorkOrderNo
+	,W.strReferenceNo
 	,PL.strParentLotNumber
 	,IUM.strUnitMeasure
 	,UM.strUnitMeasure
