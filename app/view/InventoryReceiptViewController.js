@@ -5818,12 +5818,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     taxAmount = -(taxAmount);
                                 }
 
-                                // Zero out the tax if ysnAccrue = false. Do not compute tax if it can't be converted to voucher. 
-                                if (!charge.get('ysnAccrue')){
+                                taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
+
+                                // Do not compute tax if it can't be converted to voucher. 
+                                // This means accrue is false and price down is false. 
+                                if (!charge.get('ysnAccrue') && !charge.get('ysnPrice')){
                                     taxAmount = 0.00;
                                 }
-
-                                taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
 
                                 if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
                                     if (itemDetailTax.ysnTaxExempt) {
