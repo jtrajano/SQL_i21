@@ -35,10 +35,7 @@ BEGIN   Try
 			@dblNoOfLots numeric(18,6),
 			@intSelectedInstrumentTypeId INT
     
-
-
-INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId)  Values(1)
-SELECT @intFutOptTransactionHeaderId = SCOPE_IDENTITY() 
+		
 DECLARE @idoc int
 EXEC sp_xml_preparedocument @idoc OUTPUT, @XML          
       
@@ -98,6 +95,11 @@ intContractHeaderId INT,
 intContractDetailId INT,
 intSelectedInstrumentTypeId INT
 )      
+
+INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId,dtmTransactionDate,intSelectedInstrumentTypeId,strSelectedInstrumentType)  
+	VALUES(1,@dtmTransactionDate,@intSelectedInstrumentTypeId,case when isnull(@intSelectedInstrumentTypeId,1)=1 then 'Exchange Traded' else 'OTC' end)
+SELECT @intFutOptTransactionHeaderId = SCOPE_IDENTITY() 
+
 IF ISNULL(@intFutOptTransactionId,0) > 0
 BEGIN
       UPDATE tblRKFutOptTransaction
