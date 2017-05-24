@@ -3078,7 +3078,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Derivativ
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Derivative Screen', N'Risk Management', @RiskManagementParentMenuId, N'Derivative Screen', N'Activity', N'Screen', N'RiskManagement.view.DerivativeScreen', N'small-menu-activity', 0, 0, 0, 1, 11, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'RiskManagement.view.SourciDerivativeScreenngReport' WHERE strMenuName = 'Derivative Screen' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'RiskManagement.view.DerivativeScreen' WHERE strMenuName = 'Derivative Screen' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Futures Markets' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
