@@ -110,6 +110,7 @@
 :r .\11_IC\Clean_Valuation_Indexes.sql
 :r .\11_IC\Relink_Line_Of_Business.sql
 :r .\11_IC\Remove_Unused_Shipment_Item_Fields.sql 
+:r .\11_IC\Update_Item_Commodity_Origin_Keys.sql
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql
