@@ -118,12 +118,12 @@ INSERT INTO tblICItem (
 		)
 	,(
 		CASE 
-			WHEN (min(ptitm_avail_tm) = 'Y')
+			WHEN (max(ptitm_avail_tm) = 'Y')
 				THEN 1
 			ELSE 0
 			END
 		)
-	,MIN(ptitm_deflt_percnt)
+	,max(ptitm_deflt_percnt)
 	,(
 		CASE 
 			WHEN (min(ptitm_ext_pic_yn) = 'Y')
