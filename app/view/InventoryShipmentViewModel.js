@@ -530,18 +530,18 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             }
         },
 
-        setShipToFieldLabel: function(get) {
-            var win = this.getView();
-            var cboShipToAddress = win.down('#cboShipToAddress');
-            var cboShipToCompanyAddress = win.down('#cboShipToCompanyAddress');
+        // setShipToFieldLabel: function(get) {
+        //     var win = this.getView();
+        //     var cboShipToAddress = win.down('#cboShipToAddress');
+        //     var cboShipToCompanyAddress = win.down('#cboShipToCompanyAddress');
         
-            if (get('current.intOrderType') == 3) {
-                cboShipToCompanyAddress.setFieldLabel('Ship To <span style="color:red">*</span>');
-            }
-            else {
-                cboShipToAddress.setFieldLabel('Ship To <span style="color:red">*</span>');
-            }
-        },
+        //     if (get('current.intOrderType') == 3) {
+        //         cboShipToCompanyAddress.setFieldLabel('Ship To <span style="color:red">*</span>');
+        //     }
+        //     else {
+        //         cboShipToAddress.setFieldLabel('Ship To <span style="color:red">*</span>');
+        //     }
+        // },
 
         strShipFromAddress: {
             bind: {

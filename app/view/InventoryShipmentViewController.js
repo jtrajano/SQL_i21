@@ -113,8 +113,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     column: 'intEntityId',
                     value: '{current.intEntityCustomerId}'
                 }],
-                hidden: '{hideShipToLocation}',
-                fieldLabel: '{setShipToFieldLabel}'
+                hidden: '{hideShipToLocation}'
+                //fieldLabel: '{setShipToFieldLabel}'
             },
             cboShipToCompanyAddress: {
                 value: '{current.strShipToLocation}',
@@ -128,8 +128,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     conjunction: 'and',
                     condition: 'noteq'
                 }],
-                hidden: '{hideShipToCompanyLocation}',
-                fieldLabel: '{setShipToFieldLabel}'
+                hidden: '{hideShipToCompanyLocation}'
+                //fieldLabel: '{setShipToFieldLabel}'
             },
             txtShipToAddress: '{strShipToAddress}',
             txtDeliveryInstructions: {
