@@ -105,23 +105,23 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation SMCL WITH (NOLOCK) WHERE SMCL.[intCompanyLocationId] = IT.[intCompanyLocationId])
 		
---UNION ALL
+UNION ALL
 
---SELECT
---	 [intId]				= IT.[intId]
---	,[strErrorMessage]		= 'The item(' + CAST(IT.[intItemId] AS NVARCHAR(20)) + ') was not set up to be available on the specified location(' + CAST(IT.[intCompanyLocationId] AS NVARCHAR(20)) + ')!'
---	,[strTransactionType]	= IT.[strTransactionType]
---	,[strType]				= IT.[strType]
---	,[strSourceTransaction]	= IT.[strSourceTransaction]
---	,[intSourceId]			= IT.[intSourceId]
---	,[strSourceId]			= IT.[strSourceId]
---	,[intInvoiceId]			= IT.[intInvoiceId]
---FROM
---	@ItemEntries IT
---WHERE
---	NOT EXISTS(	SELECT NULL 
---				FROM tblICItem IC WITH (NOLOCK) INNER JOIN tblICItemLocation IL WITH (NOLOCK) ON IC.intItemId = IL.intItemId
---				WHERE IC.[intItemId] = IT.[intItemId] AND IL.[intLocationId] = IT.[intCompanyLocationId])
+SELECT
+	 [intId]				= IT.[intId]
+	,[strErrorMessage]		= 'The item(' + CAST(IT.[intItemId] AS NVARCHAR(20)) + ') was not set up to be available on the specified location(' + CAST(IT.[intCompanyLocationId] AS NVARCHAR(20)) + ')!'
+	,[strTransactionType]	= IT.[strTransactionType]
+	,[strType]				= IT.[strType]
+	,[strSourceTransaction]	= IT.[strSourceTransaction]
+	,[intSourceId]			= IT.[intSourceId]
+	,[strSourceId]			= IT.[strSourceId]
+	,[intInvoiceId]			= IT.[intInvoiceId]
+FROM
+	@ItemEntries IT
+WHERE
+	NOT EXISTS(	SELECT NULL 
+				FROM tblICItem IC WITH (NOLOCK) INNER JOIN tblICItemLocation IL WITH (NOLOCK) ON IC.intItemId = IL.intItemId
+				WHERE IC.[intItemId] = IT.[intItemId] AND IL.[intLocationId] = IT.[intCompanyLocationId])
 	
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
@@ -762,8 +762,8 @@ VALUES(
 			,[ysnSuccess]
 		);					
 
-	IF ISNULL(@IntegrationLogId, 0) <> 0 AND ISNULL(@RaiseError,0) = 0
-		EXEC [uspARInsertInvoiceIntegrationLog] @IntegrationLogEntries = @IntegrationLog
+	IF ISNULL(@IntegrationLogId, 0) <> 0
+		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
 			
 END TRY
 BEGIN CATCH
