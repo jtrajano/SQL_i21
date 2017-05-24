@@ -21,6 +21,8 @@
     [dblAPR]                      NUMERIC (18, 6) NULL,
     [intAccountId]                INT             NULL,
     [intTransactionId]            INT             NULL,
-    [dblEligableGallon]           NUMERIC (18, 6) NULL
+    [dblEligableGallon]           NUMERIC (18, 6) NULL,
+    [strDiscountSchedule]         NVARCHAR (MAX)  NULL,
+    [ysnShowOnCFInvoice]          BIT             NULL
 );
 
