@@ -38,6 +38,9 @@ FROM	tblICInventoryShipment Shipment
 		)
 			ON ItemUOM.intItemUOMId = ShipmentItem.intItemUOMId
 
+		LEFT JOIN tblSMFreightTerms FreightTerm
+			ON Shipment.intFreightTermId = FreightTerm.intFreightTermId 
+
 		LEFT JOIN tblSMCompanyLocation fromLocation
 			ON fromLocation.intCompanyLocationId = Shipment.intShipFromLocationId
 
@@ -50,7 +53,7 @@ FROM	tblICInventoryShipment Shipment
 					,ShipmentCost = ShipmentBasedOnInventoryTransaction.dblShipmentCost
 					,ShipmentItemTotal = d.dblQuantity * ShipmentBasedOnInventoryTransaction.dblShipmentCost
 					,InvoiceItemTotal = ISNULL(InvoicedItem.dblQuantity, 0) * ShipmentBasedOnInventoryTransaction.dblShipmentCost
-					,OpenQty = d.dblQuantity - ISNULL(InvoicedItem.dblQuantity, 0) 
+					,OpenQty = CASE WHEN FreightTerm.strFobPoint = 'Origin' THEN CAST(0.00 AS NUMERIC(18,6)) ELSE d.dblQuantity - ISNULL(InvoicedItem.dblQuantity, 0) END
 					,d.intInventoryShipmentItemId
 					,dblItemsReceivable = (d.dblQuantity - ISNULL(InvoicedItem.dblQuantity, 0)) * ShipmentBasedOnInventoryTransaction.dblShipmentCost
 			FROM	tblICInventoryShipmentItem d 
