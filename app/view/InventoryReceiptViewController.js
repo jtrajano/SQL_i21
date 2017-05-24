@@ -2567,10 +2567,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         var ysnPrice = charge.get('ysnPrice'); 
                         var ysnAccrue = charge.get('ysnAccrue'); 
 
+                        otherChargeTax = Ext.isNumeric(otherChargeTax) ? otherChargeTax : 0.00;  
                         chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
-
                         if (transactionCurrencyId == chargeCurrencyId) {
-                            totalChargeTaxes += (ysnPrice || (transactionVendorId == chargeVendorId && ysnAccrue)) ? otherChargeTax : 0;
+                            totalChargeTaxes += ysnPrice ? -otherChargeTax : (transactionVendorId == chargeVendorId && ysnAccrue) ? otherChargeTax : 0;
                         }
                     }
                 });
@@ -2602,6 +2602,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         var ysnPrice = charge.get('ysnPrice');
                         var ysnAccrue = charge.get('ysnAccrue'); 
 
+                        amount = Ext.isNumeric(amount) ? amount : 0.00; 
                         chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
                         chargeVendorId = Ext.isNumeric(chargeVendorId) ? chargeVendorId : transactionVendorId; 
                         if (transactionCurrencyId == chargeCurrencyId) {
@@ -6130,9 +6131,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                  taxAmount = -(taxAmount);
                               }
 
-                              if (charge.get('ysnPrice')) {
-                                  taxAmount = -(taxAmount);
-                              }
+                            //   if (charge.get('ysnPrice')) {
+                            //       taxAmount = -(taxAmount);
+                            //   }
 
                               taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
 
@@ -6185,26 +6186,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                          //get EntityIdId and BillShipToLocationId
                          var valEntityId, valTaxGroupId;
-                        
-                        // Get the charge vendor id and tax group. 
-                        if (charge.get('ysnAccrue') === true) {
-                            valEntityId = current.get('intEntityVendorId');
-                            valTaxGroupId = charge.get('intTaxGroupId');
-                        }
-                        var currentCharge = {
-                               ItemId: charge.get('intChargeId'),
-                               TransactionDate: current.get('dtmReceiptDate'),
-                               LocationId: current.get('intLocationId'),
-                               TransactionType: 'Purchase',
-                               TaxGroupId: valTaxGroupId,
-                               EntityId: valEntityId,
-                               BillShipToLocationId: current.get('intShipFromId'),
-                               FreightTermId: current.get('intFreightTermId'),
-                               CardId: null,
-                               VehicleId: null,
-                               IncludeExemptedCodes: false
-                        };
-                        iRely.Functions.getItemTaxes(currentCharge, computeItemTax, me);
+                         
+                         valEntityId = charge.get('intEntityVendorId');
+                         valEntityId = valEntityId ? valEntityId : current.get('intEntityVendorId');
+
+                         valTaxGroupId = charge.get('intTaxGroupId');
+                         
+                         var currentCharge = {
+                                ItemId: charge.get('intChargeId'),
+                                TransactionDate: current.get('dtmReceiptDate'),
+                                LocationId: current.get('intLocationId'),
+                                TransactionType: 'Purchase',
+                                TaxGroupId: valTaxGroupId,
+                                EntityId: valEntityId,
+                                BillShipToLocationId: current.get('intShipFromId'),
+                                FreightTermId: current.get('intFreightTermId'),
+                                CardId: null,
+                                VehicleId: null,
+                                IncludeExemptedCodes: false
+                         };
+                         iRely.Functions.getItemTaxes(currentCharge, computeItemTax, me);
                      }
                 });
             }
