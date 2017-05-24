@@ -1102,18 +1102,21 @@ BEGIN
 		[strCalculationMethod]	=	A.strCalculationMethod, 
 		[dblRate]				=	A.dblRate, 
 		[intAccountId]			=	A.intTaxAccountId, 
-		[dblTax]				=	(CASE WHEN B.intEntityVendorId != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
-											WHEN B.intEntityVendorId != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 THEN A.dblTax * -1
-											ELSE A.dblTax END), 
-		[dblAdjustedTax]		=	(CASE WHEN B.intEntityVendorId != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 THEN ABS(dblAdjustedTax) 
-											WHEN B.intEntityVendorId != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 THEN dblAdjustedTax * -1
-											ELSE dblAdjustedTax END), 
+		[dblTax]				=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 THEN  (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE ABS(A.dblTax) END) 
+										  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 THEN A.dblTax * -1
+											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+											ELSE (CASE WHEN B.ysnPrice = 1 AND A.dblTax > 0 THEN A.dblTax * -1 ELSE A.dblTax END) END), 
+		[dblAdjustedTax]		=	(CASE WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 0 THEN (CASE WHEN B.ysnPrice = 1  AND A.dblTax > 0  THEN A.dblTax  ELSE ABS(dblAdjustedTax) END) 
+										  WHEN ISNULL(B.intEntityVendorId,E.intEntityVendorId) != (SELECT TOP 1 intEntityVendorId FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId) AND ysnCheckoffTax = 1 THEN dblAdjustedTax * -1
+											-- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+											ELSE (CASE WHEN B.ysnPrice = 1 AND dblAdjustedTax > 0 THEN dblAdjustedTax * -1  ELSE dblAdjustedTax END) END), 
 		[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	0, 
 		[ysnCheckOffTax]		=	A.ysnCheckoffTax
 	FROM tblICInventoryReceiptChargeTax A
 	INNER JOIN dbo.tblICInventoryReceiptCharge B ON A.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 	INNER JOIN dbo.tblAPBillDetail D ON D.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+	INNER JOIN dbo.tblAPBill E ON E.intBillId = D.intBillId
 	AND B.intInventoryReceiptId IN (@receiptId) AND D.intBillId  = @currentVoucher
 	END
 	DELETE FROM #tmpReceiptIds WHERE intInventoryReceiptId = @receiptId  
