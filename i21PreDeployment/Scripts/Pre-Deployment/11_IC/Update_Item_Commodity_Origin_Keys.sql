@@ -11,8 +11,11 @@ BEGIN
 
 	UPDATE tblICItem SET intOriginId = NULL WHERE intOriginId IS NOT NULL
 
-	ALTER TABLE tblICItem
-	DROP CONSTRAINT FK_tblICItem_tblSMCountry
+	IF (OBJECT_ID(''FK_tblICItem_tblSMCountry'', ''F'') IS NOT NULL)
+	BEGIN
+		ALTER TABLE tblICItem
+		DROP CONSTRAINT FK_tblICItem_tblSMCountry
+	END
 
 	--ALTER TABLE tblICItem
 	--ADD CONSTRAINT FK_tblICItem_tblICCommodityAttribute
