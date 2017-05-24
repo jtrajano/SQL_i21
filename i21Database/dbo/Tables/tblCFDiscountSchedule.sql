@@ -4,6 +4,7 @@
     [strDescription]          NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [ysnDiscountOnRemotes]    BIT            NULL,
     [ysnDiscountOnExtRemotes] BIT            NULL,
+    [ysnShowOnCFInvoice]      BIT            NULL,
     [intConcurrencyId]        INT            CONSTRAINT [DF_tblCFDiscountSchedule_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFDiscountSchedule] PRIMARY KEY CLUSTERED ([intDiscountScheduleId] ASC)
 );
