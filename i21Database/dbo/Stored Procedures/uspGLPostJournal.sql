@@ -66,8 +66,6 @@ IF ISNULL(@ysnPost, 0) = 0
 					UPDATE tblGLJournal SET ysnPosted = 0 WHERE intJournalId IN (SELECT intJournalId FROM @tmpPostJournals)
 					
 					--GL REVERSAL
-					UPDATE t SET intFiscalYearId = NULL, intFiscalPeriodId = NULL FROM tblGLJournal t JOIN @tmpPostJournals p ON t.intJournalId = p.intJournalId
-					
 					UPDATE s SET ysnReversed = 0  FROM tblGLJournal t JOIN tblGLJournal s on s.intJournalId = t.intJournalIdToReverse JOIN @tmpPostJournals p ON t.intJournalId = p.intJournalId
 				END									
 			END
