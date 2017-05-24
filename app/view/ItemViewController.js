@@ -934,7 +934,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.strOrigin}',
                 origUpdateField: 'intOriginId',
                 origValueField: 'intCommodityAttributeId',
-                store: '{originAttribute}'
+                store: '{originAttribute}',
+                defaultFilters: [{
+                    column: 'intCommodityId',
+                    value: '{current.intCommodityId}'
+                }]
             },
             cboProductType: {
                 value: '{current.strProductType}',
