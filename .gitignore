@@ -117,3 +117,4 @@ test/api
 server/iRely.Inventory.WebAPI/Properties/PublishProfiles/1520.pubxml
 server/iRely.Inventory.WebAPI/Properties/PublishProfiles/1530.pubxml
 coverage/
+gulpfile.js
