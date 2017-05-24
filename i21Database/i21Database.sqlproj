@@ -5380,6 +5380,7 @@
     <Build Include="dbo\Stored Procedures\uspSMTransactionApproved.sql" />
     <None Include="dbo\Triggers\trgAfterInsertUpdatetblMFWorkOrder.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\25_ApprovalHistory.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateAmountSign.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
