@@ -37,6 +37,7 @@ SET ANSI_WARNINGS OFF
 	,strBarcodePrint
 	,ysnMSDSRequired
 	,ysnAvailableTM
+	,dblDefaultFull
 	,ysnExtendPickTicket
 	,ysnExportEDI
 	,ysnHazardMaterial
@@ -121,11 +122,12 @@ SET ANSI_WARNINGS OFF
 		) MSDSRequired
 	,(
 		CASE 
-			WHEN (min(agitm_avail_tm) = 'Y')
+			WHEN (MAX(agitm_avail_tm) = 'Y')
 				THEN 1
 			ELSE 0
 			END
 		) AvailableTM
+	,MAX(agitm_deflt_percnt)	
 	,0 PickTicket
 	,0 ExportEDI
 	,(
