@@ -3,6 +3,7 @@
 	[intReportingComponentId] [int] NOT NULL,
 	[intOriginDestinationStateId] [int] NOT NULL,
 	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[intMasterId] INT NULL,
 	[intConcurrencyId] [int] DEFAULT ((1)) NULL,
 	CONSTRAINT [PK_tblTFReportingComponentDestinationState] PRIMARY KEY ([intReportingComponentDestinationStateId]),
 	CONSTRAINT [AK_tblTFReportingComponentDestinationState] UNIQUE ([intReportingComponentId], [intOriginDestinationStateId]), 

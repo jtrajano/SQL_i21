@@ -22,6 +22,13 @@ BEGIN TRY
 	BEGIN
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
+
+	UPDATE tblTFTerminalControlNumber
+	SET tblTFTerminalControlNumber.intMasterId = Source.intMasterId
+	FROM @TerminalControlNumbers Source
+	WHERE tblTFTerminalControlNumber.strTerminalControlNumber COLLATE Latin1_General_CI_AS = Source.strTerminalControlNumber COLLATE Latin1_General_CI_AS
+		AND tblTFTerminalControlNumber.intTaxAuthorityId = @TaxAuthorityId
+		AND ISNULL(tblTFTerminalControlNumber.intMasterId, '') = ''
 	
 	MERGE	
 	INTO	tblTFTerminalControlNumber 
@@ -30,8 +37,7 @@ BEGIN TRY
 	USING (
 		SELECT * FROM @TerminalControlNumbers
 	) AS SOURCE
-		ON TARGET.strTerminalControlNumber COLLATE Latin1_General_CI_AS = SOURCE.strTerminalControlNumber COLLATE Latin1_General_CI_AS
-			AND TARGET.intTaxAuthorityId = @TaxAuthorityId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -50,6 +56,7 @@ BEGIN TRY
 			, strCity
 			, dtmApprovedDate
 			, strZip
+			, intMasterId
 		)
 		VALUES (
 			@TaxAuthorityId
@@ -59,6 +66,7 @@ BEGIN TRY
 			, SOURCE.strCity
 			, SOURCE.dtmApprovedDate
 			, SOURCE.strZip
+			, SOURCE.intMasterId
 		);
 	
 END TRY

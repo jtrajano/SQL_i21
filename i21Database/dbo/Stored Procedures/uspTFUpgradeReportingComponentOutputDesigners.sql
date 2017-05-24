@@ -30,6 +30,13 @@ BEGIN TRY
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCOD.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = RCOD.strType COLLATE Latin1_General_CI_AS
 	ORDER BY RCOD.intScheduleColumnId
+	
+	UPDATE tblTFReportingComponentField
+	SET tblTFReportingComponentField.intMasterId = Source.intMasterId
+	FROM #tmpRCOD Source
+	WHERE tblTFReportingComponentField.intReportingComponentId = Source.intReportingComponentId
+		AND tblTFReportingComponentField.strColumn COLLATE Latin1_General_CI_AS = Source.strColumn COLLATE Latin1_General_CI_AS
+		AND ISNULL(tblTFReportingComponentField.intMasterId, '') = ''
 
 	UPDATE tblTFReportingComponentField
 	SET intReportingComponentId	= SOURCE.intReportingComponentId
@@ -39,9 +46,8 @@ BEGIN TRY
 		, strFooter				= SOURCE.strFooter
 		, intWidth				= SOURCE.intWidth
 	FROM #tmpRCOD SOURCE
-	WHERE tblTFReportingComponentField.intReportingComponentId = SOURCE.intReportingComponentId
-		AND tblTFReportingComponentField.strColumn = SOURCE.strColumn
-
+	WHERE tblTFReportingComponentField.intMasterId = SOURCE.intMasterId
+		
 	INSERT INTO tblTFReportingComponentField(
 		intReportingComponentId
 		, strColumn
@@ -49,6 +55,7 @@ BEGIN TRY
 		, strFormat
 		, strFooter
 		, intWidth
+		, intMasterId
 	)
 	SELECT SOURCE.intReportingComponentId
 		, SOURCE.strColumn
@@ -56,9 +63,9 @@ BEGIN TRY
 		, SOURCE.strFormat
 		, SOURCE.strFooter
 		, SOURCE.intWidth
+		, SOURCE.intMasterId
 	FROM #tmpRCOD SOURCE
-	LEFT JOIN tblTFReportingComponentField TARGET ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
-		AND TARGET.strColumn = SOURCE.strColumn
+	LEFT JOIN tblTFReportingComponentField TARGET ON TARGET.intMasterId = SOURCE.intMasterId
 	WHERE ISNULL(TARGET.intReportingComponentFieldId, '') = ''
 	ORDER BY SOURCE.intScheduleColumnId
 

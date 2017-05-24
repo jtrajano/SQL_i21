@@ -5,6 +5,7 @@
 	[intReportingComponentId] INT NOT NULL,
 	[ysnStatus] BIT NULL DEFAULT ((1)),
 	[intFrequency] INT NOT NULL,
+	[intMasterId] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT((1)),
 	CONSTRAINT [PK_tblTFFilingPacket] PRIMARY KEY ([intFilingPacketId]),
 	CONSTRAINT [FK_tblTFFilingPacket_tblTFTaxAuthority] FOREIGN KEY([intTaxAuthorityId]) REFERENCES [tblTFTaxAuthority] ([intTaxAuthorityId]),

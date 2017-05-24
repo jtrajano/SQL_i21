@@ -15,6 +15,12 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
+	UPDATE tblTFOriginDestinationState
+	SET tblTFOriginDestinationState.intMasterId = Source.intMasterId
+	FROM @OriginDestinationStates Source
+	WHERE tblTFOriginDestinationState.strOriginDestinationState COLLATE Latin1_General_CI_AS = Source.strOriginDestinationState COLLATE Latin1_General_CI_AS
+		AND ISNULL(tblTFOriginDestinationState.intMasterId, '') = ''
+
 	MERGE	
 	INTO	tblTFOriginDestinationState
 	WITH	(HOLDLOCK) 
@@ -22,8 +28,7 @@ BEGIN TRY
 	USING (
 		SELECT * FROM @OriginDestinationStates
 	) AS SOURCE
-		ON TARGET.strOriginDestinationState COLLATE Latin1_General_CI_AS = SOURCE.strOriginDestinationState COLLATE Latin1_General_CI_AS
-
+		ON TARGET.intMasterId = SOURCE.intMasterId
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
@@ -31,9 +36,11 @@ BEGIN TRY
 	WHEN NOT MATCHED THEN 
 		INSERT (
 			strOriginDestinationState
+			, intMasterId
 		)
 		VALUES (
 			SOURCE.strOriginDestinationState
+			, SOURCE.intMasterId
 		);
 	
 END TRY

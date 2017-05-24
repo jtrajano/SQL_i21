@@ -23,6 +23,13 @@ BEGIN TRY
 		RAISERROR('Tax Authority code does not exist.', 16, 1)
 	END
 	
+	UPDATE tblTFTaxCategory
+	SET tblTFTaxCategory.intMasterId = Source.intMasterId
+	FROM @TaxCategories Source
+	WHERE tblTFTaxCategory.strTaxCategory COLLATE Latin1_General_CI_AS = Source.strTaxCategory COLLATE Latin1_General_CI_AS
+		AND tblTFTaxCategory.intTaxAuthorityId = @TaxAuthorityId
+		AND ISNULL(tblTFTaxCategory.intMasterId, '') = ''
+
 	MERGE	
 	INTO	tblTFTaxCategory
 	WITH	(HOLDLOCK) 
@@ -30,8 +37,7 @@ BEGIN TRY
 	USING (
 		SELECT * FROM @TaxCategories
 	) AS SOURCE
-		ON TARGET.strTaxCategory COLLATE Latin1_General_CI_AS = SOURCE.strTaxCategory COLLATE Latin1_General_CI_AS
-			AND TARGET.intTaxAuthorityId = @TaxAuthorityId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -42,11 +48,13 @@ BEGIN TRY
 			intTaxAuthorityId
 			, strState
 			, strTaxCategory
+			, intMasterId
 		)
 		VALUES (
 			@TaxAuthorityId
 			, SOURCE.strState
 			, SOURCE.strTaxCategory
+			, SOURCE.intMasterId
 		);
 	
 END TRY

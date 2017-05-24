@@ -30,6 +30,13 @@ BEGIN TRY
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = RCC.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = RCC.strType COLLATE Latin1_General_CI_AS
 
+	UPDATE tblTFReportingComponentConfiguration
+	SET tblTFReportingComponentConfiguration.intMasterId = Source.intMasterId
+	FROM #tmpRCC Source
+	WHERE tblTFReportingComponentConfiguration.intReportingComponentId = Source.intReportingComponentId
+		AND tblTFReportingComponentConfiguration.strTemplateItemId COLLATE Latin1_General_CI_AS = Source.strTemplateItemId COLLATE Latin1_General_CI_AS
+		AND ISNULL(tblTFReportingComponentConfiguration.intMasterId, '') = ''
+
 	MERGE	
 	INTO	tblTFReportingComponentConfiguration
 	WITH	(HOLDLOCK) 
@@ -37,10 +44,8 @@ BEGIN TRY
 	USING (
 		SELECT * FROM #tmpRCC
 	) AS SOURCE
-		ON TARGET.intReportingComponentId = SOURCE.intReportingComponentId
-			AND TARGET.strTemplateItemId = SOURCE.strTemplateItemId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 		
-
 	WHEN MATCHED THEN 
 		UPDATE
 		SET 
@@ -71,6 +76,7 @@ BEGIN TRY
 			, strLastIndexOf
 			, strSegment
 			, intConfigurationSequence
+			, intMasterId
 		)
 		VALUES (
 			SOURCE.intReportingComponentId
@@ -86,6 +92,7 @@ BEGIN TRY
 			, SOURCE.strLastIndexOf
 			, SOURCE.strSegment
 			, SOURCE.intSort
+			, SOURCE.intMasterId
 		);
 
 	
@@ -99,6 +106,16 @@ BEGIN TRY
 		WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 			AND ISNULL(tmp.strTemplateItemId, '') = ''
 	)
+
+	DELETE FROM tblTFReportingComponentConfiguration
+	WHERE intMasterId IN (SELECT intMasterId 
+						FROM tblTFReportingComponentConfiguration
+						GROUP BY intMasterId
+						HAVING COUNT(*) > 1)
+		AND intReportingComponentConfigurationId NOT IN (SELECT MAX(intReportingComponentConfigurationId) intReportingComponentConfigurationId 
+														FROM tblTFReportingComponentConfiguration
+														GROUP BY intMasterId
+														HAVING COUNT(*) > 1)
 
 	DROP TABLE #tmpRCC
 

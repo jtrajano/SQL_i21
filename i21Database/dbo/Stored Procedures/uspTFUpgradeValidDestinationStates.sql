@@ -31,6 +31,13 @@ BEGIN TRY
 		AND RC.strScheduleCode COLLATE Latin1_General_CI_AS = VDS.strScheduleCode COLLATE Latin1_General_CI_AS
 		AND RC.strType COLLATE Latin1_General_CI_AS = VDS.strType COLLATE Latin1_General_CI_AS
 
+	UPDATE tblTFReportingComponentDestinationState
+	SET tblTFReportingComponentDestinationState.intMasterId = Source.intMasterId
+	FROM #tmpVDS Source
+	WHERE tblTFReportingComponentDestinationState.intOriginDestinationStateId = Source.intOriginDestinationStateId
+		AND tblTFReportingComponentDestinationState.intReportingComponentId = Source.intReportingComponentId
+		AND ISNULL(tblTFReportingComponentDestinationState.intMasterId, '') = ''
+
 	MERGE	
 	INTO	tblTFReportingComponentDestinationState
 	WITH	(HOLDLOCK) 
@@ -38,8 +45,7 @@ BEGIN TRY
 	USING (
 		SELECT * FROM #tmpVDS
 	) AS SOURCE
-		ON TARGET.intOriginDestinationStateId = SOURCE.intOriginDestinationStateId
-			AND TARGET.intReportingComponentId = SOURCE.intReportingComponentId
+		ON TARGET.intMasterId = SOURCE.intMasterId
 
 	WHEN MATCHED THEN 
 		UPDATE
@@ -52,11 +58,13 @@ BEGIN TRY
 			intReportingComponentId
 			, intOriginDestinationStateId
 			, strType
+			, intMasterId
 		)
 		VALUES (
 			SOURCE.intReportingComponentId
 			, SOURCE.intOriginDestinationStateId
 			, SOURCE.strStatus
+			, SOURCE.intMasterId
 		);
 
 	-- Delete existing Valid Destination States that is not within Source
