@@ -188,9 +188,10 @@ BEGIN
 				,dblTax								= 
 													-- Negate the tax if it is an Inventory Return 
 													CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN
-															-(ChargeTaxes.dblTax)
+															-(CASE WHEN ReceiptCharge.ysnPrice = 1 THEN -ChargeTaxes.dblTax ELSE ChargeTaxes.dblTax END )
 														ELSE
-															ChargeTaxes.dblTax 
+															-- Negate the tax if Charge is ysnPrice = 1 (Price Down)
+															CASE WHEN ReceiptCharge.ysnPrice = 1 THEN -ChargeTaxes.dblTax ELSE ChargeTaxes.dblTax END 															
 													END 
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= ReceiptCharge.intCurrencyId

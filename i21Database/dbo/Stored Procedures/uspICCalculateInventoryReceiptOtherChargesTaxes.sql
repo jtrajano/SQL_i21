@@ -179,13 +179,7 @@ BEGIN
 
 		-- Calculate the tax per line item 
 		UPDATE	Charge 
-		SET		dblTax = CASE 
-							-- Negate Tax if Other Charge is marked as Price Down
-							WHEN Charge.ysnPrice = 1 
-								THEN -(ROUND(dbo.fnDivide(ISNULL(Taxes.dblTaxPerLineItem, 0) ,ISNULL(Receipt.intSubCurrencyCents, 1)), 2))
-							ELSE
-								ROUND(dbo.fnDivide(ISNULL(Taxes.dblTaxPerLineItem, 0) ,ISNULL(Receipt.intSubCurrencyCents, 1)), 2) 
-						END	
+		SET		dblTax = ROUND(dbo.fnDivide(ISNULL(Taxes.dblTaxPerLineItem, 0) ,ISNULL(Receipt.intSubCurrencyCents, 1)), 2)  					
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
 						ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 				LEFT JOIN (
