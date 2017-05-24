@@ -8,7 +8,9 @@
     CONSTRAINT [FK_tblCFHost_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]) ON DELETE CASCADE
 );
 
-
+GO
+CREATE UNIQUE NONCLUSTERED INDEX tblCFHost_UniqueNetworkHost
+	ON tblCFHost (intNetworkId,strHostNumber);
 
 
 

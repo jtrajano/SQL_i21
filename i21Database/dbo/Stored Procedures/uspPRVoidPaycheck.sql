@@ -10,6 +10,17 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 
 DECLARE @isReversingSuccessful BIT = 0
+	,@ysnTransactionVoided AS BIT
+
+SELECT @ysnTransactionVoided = ysnVoid 
+FROM tblPRPaycheck 
+WHERE strPaycheckId = @strTransactionId
+
+IF (@ysnTransactionVoided = 1)
+BEGIN
+	RAISERROR('Transaction is already voided.', 11, 1)
+	GOTO Void_Exit
+END
 
 /* Create Temporary Table required by uspCMBankTransactionReversal */
 CREATE TABLE #tmpCMBankTransaction (
@@ -91,6 +102,7 @@ BEGIN
 END
 
 -- Clean-up routines:
+Void_Exit:
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCMBankTransaction')) DROP TABLE #tmpCMBankTransaction
 
 GO

@@ -9,5 +9,9 @@
     CONSTRAINT [FK_tblCFCardType_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]) ON DELETE CASCADE
 );
 
+GO
+
+CREATE UNIQUE NONCLUSTERED INDEX tblCFCardType_UniqueNetworkCardType
+	ON tblCFCardType (intNetworkId,strCardType);
 
 

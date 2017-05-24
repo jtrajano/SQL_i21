@@ -6,26 +6,13 @@ RETURNS NVARCHAR(MAX) AS
 BEGIN
 	DECLARE @strReferences NVARCHAR(MAX) = NULL
 
-	DECLARE @tmpTable TABLE(intInvoiceId INT)
-	INSERT INTO @tmpTable
-	SELECT intInvoiceId FROM tblARPaymentDetail WHERE intPaymentId = @intPaymentId AND intInvoiceId IS NOT NULL
-	
-	IF EXISTS(SELECT NULL FROM @tmpTable)
-		BEGIN
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @tmpTable)
-			BEGIN
-				DECLARE @intInvoiceId INT
-				
-				SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @tmpTable ORDER BY intInvoiceId
-				
-				IF (SELECT COUNT(*) FROM @tmpTable) > 1
-					SELECT @strReferences = ISNULL(@strReferences, '') + dbo.fnARGetCustomerReferencesFromInvoice(@intInvoiceId) + ', '
-				ELSE
-					SELECT @strReferences = ISNULL(@strReferences, '') + dbo.fnARGetCustomerReferencesFromInvoice(@intInvoiceId)
-
-				DELETE FROM @tmpTable WHERE intInvoiceId = @intInvoiceId
-			END
-		END
+	SELECT @strReferences = COALESCE(@strReferences + ', ', '') + RTRIM(LTRIM(T.strCustomerReference)) 
+	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+		INNER JOIN (SELECT intTicketId
+						 , strCustomerReference
+					FROM dbo.tblSCTicket WITH (NOLOCK)
+		) T ON PD.intInvoiceId = T.intTicketId
+	WHERE PD.intPaymentId = @intPaymentId AND PD.intInvoiceId IS NOT NULL
 
 	RETURN @strReferences
 END

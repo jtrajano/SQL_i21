@@ -18,144 +18,9 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal NUMERIC(18, 6) = 0.000000
 		,@DateOnly DATETIME = CAST(GETDATE() AS DATE)
 
-CREATE TABLE  #InvoicesToGenerate(
-	 [intId]								INT
-	,[strTransactionType]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-	,[strType]								NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-	,[strSourceTransaction]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
-	,[intSourceId]							INT												NULL
-	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
-	,[intInvoiceId]							INT												NULL
-	,[intEntityCustomerId]					INT												NOT NULL
-	,[intCompanyLocationId]					INT												NOT NULL
-	,[intAccountId]							INT												NULL
-	,[intCurrencyId]						INT												NULL
-	,[intEntityContactId]					INT												NULL
-	,[intTermId]							INT												NULL
-	,[intPeriodsToAccrue]					INT												NULL
-	,[dtmDate]								DATETIME										NOT NULL
-	,[dtmDueDate]							DATETIME										NULL
-	,[dtmShipDate]							DATETIME										NULL
-	,[dtmPostDate]							DATETIME										NULL
-	,[intEntitySalespersonId]				INT												NULL
-	,[intFreightTermId]						INT												NULL
-	,[intShipViaId]							INT												NULL
-	,[intPaymentMethodId]					INT												NULL
-	,[strInvoiceOriginId]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-	,[ysnUseOriginIdAsInvoiceNumber]		BIT												NULL
-	,[strPONumber]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-	,[strBOLNumber]							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
-	,[strDeliverPickup]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-	,[strComments]							NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
-	,[intShipToLocationId]					INT												NULL
-	,[intBillToLocationId]					INT												NULL
-	,[ysnTemplate]							BIT												NULL		
-	,[ysnForgiven]							BIT												NULL		
-	,[ysnCalculated]						BIT												NULL		
-	,[ysnSplitted]							BIT												NULL	
-	,[intPaymentId]							INT												NULL
-	,[intSplitId]							INT												NULL
-	,[intLoadDistributionHeaderId]			INT												NULL
-	,[strActualCostId]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
-	,[intShipmentId]						INT												NULL
-	,[intTransactionId]						INT												NULL
-	,[intMeterReadingId]					INT												NULL
-	,[intContractHeaderId]					INT												NULL
-	,[intLoadId]							INT												NULL
-	,[intOriginalInvoiceId]					INT												NULL
-	,[intEntityId]							INT												NOT NULL
-	,[intTruckDriverId]						INT												NULL
-	,[intTruckDriverReferenceId]			INT												NULL
-	,[ysnResetDetails]						BIT												NULL
-	,[ysnRecap]								BIT												NULL
-	,[ysnPost]								BIT												NULL
-	,[ysnUpdateAvailableDiscount]			BIT												NULL
-	,[intInvoiceDetailId]					INT												NULL
-    ,[intItemId]							INT												NULL
-	,[intPrepayTypeId]						INT												NULL
-	,[dblPrepayRate]						NUMERIC(18, 6)									NULL
-    ,[ysnInventory]							BIT												NULL
-	,[strDocumentNumber]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-    ,[strItemDescription]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
-	,[intOrderUOMId]						INT												NULL
-    ,[dblQtyOrdered]						NUMERIC(18, 6)									NULL
-	,[intItemUOMId]							INT												NULL
-    ,[dblQtyShipped]						NUMERIC(18, 6)									NULL
-	,[dblDiscount]							NUMERIC(18, 6)									NULL
-	,[dblItemTermDiscount]					NUMERIC(18, 6)									NULL
-	,[strItemTermDiscountBy]				NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
-	,[dblItemWeight]						NUMERIC(18, 6)									NULL
-	,[intItemWeightUOMId]					INT												NULL	
-    ,[dblPrice]								NUMERIC(18, 6)									NULL
-    ,[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
-	,[strVFDDocumentNumber]					NVARCHAR(100) 	COLLATE Latin1_General_CI_AS	NULL
-    ,[ysnRefreshPrice]						BIT												NULL
-	,[strMaintenanceType]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-    ,[strFrequency]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-    ,[dtmMaintenanceDate]					DATETIME										NULL
-    ,[dblMaintenanceAmount]					NUMERIC(18, 6)									NULL
-    ,[dblLicenseAmount]						NUMERIC(18, 6)									NULL
-	,[intTaxGroupId]						INT												NULL
-	,[intStorageLocationId]					INT												NULL
-	,[intCompanyLocationSubLocationId]		INT												NULL
-	,[ysnRecomputeTax]						BIT												NULL
-	,[intSCInvoiceId]						INT												NULL
-	,[strSCInvoiceNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-	,[intSCBudgetId]						INT												NULL
-	,[strSCBudgetDescription]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-	,[intInventoryShipmentItemId]			INT												NULL
-	,[intInventoryShipmentChargeId]			INT												NULL
-	,[strShipmentNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
-	,[intRecipeItemId]						INT												NULL
-	,[intRecipeId]							INT												NULL
-	,[intSubLocationId]						INT												NULL
-	,[intCostTypeId]						INT												NULL
-	,[intMarginById]						INT												NULL
-	,[intCommentTypeId]						INT												NULL
-	,[dblMargin]							NUMERIC(18,6)									NULL
-	,[dblRecipeQuantity]					NUMERIC(18,6)									NULL
-	,[intSalesOrderDetailId]				INT												NULL
-	,[strSalesOrderNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-	,[intContractDetailId]					INT												NULL
-	,[intShipmentPurchaseSalesContractId]	INT												NULL
-	,[dblShipmentGrossWt]					NUMERIC(18, 6)									NULL
-	,[dblShipmentTareWt]					NUMERIC(18, 6)									NULL
-	,[dblShipmentNetWt]						NUMERIC(18, 6)									NULL
-	,[intTicketId]							INT												NULL
-	,[intTicketHoursWorkedId]				INT												NULL
-	,[intDocumentMaintenanceId]				INT												NULL
-	,[intCustomerStorageId]					INT												NULL
-	,[intSiteDetailId]						INT												NULL
-	,[intLoadDetailId]						INT												NULL
-	,[intLotId]								INT												NULL
-	,[intOriginalInvoiceDetailId]			INT												NULL
-	,[intSiteId]							INT												NULL
-	,[strBillingBy]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-	,[dblPercentFull]						NUMERIC(18, 6)									NULL
-	,[dblNewMeterReading]					NUMERIC(18, 6)									NULL		
-	,[dblPreviousMeterReading]				NUMERIC(18, 6)									NULL
-	,[dblConversionFactor]					NUMERIC(18, 8)									NULL
-	,[intPerformerId]						INT												NULL		    		
-	,[ysnLeaseBilling]						BIT												NULL
-	,[ysnVirtualMeterReading]				BIT												NULL
-	,[ysnClearDetailTaxes]					BIT												NULL
-	,[intTempDetailIdForTaxes]				INT												NULL
-	,[intCurrencyExchangeRateTypeId]		INT												NULL
-	,[intCurrencyExchangeRateId]			INT												NULL
-	,[dblCurrencyExchangeRate]				NUMERIC(18, 6)									NULL
-	,[intSubCurrencyId]						INT												NULL
-	,[dblSubCurrencyRate]					NUMERIC(18, 6)									NULL
-	,[ysnBlended]							BIT												NULL
-	,[strImportFormat]						NVARCHAR(50)									NULL
-	,[dblCOGSAmount]						NUMERIC(18, 6)									NULL
-    ,[intConversionAccountId]               INT												NULL
-	,[intSalesAccountId]					INT												NULL
-	,[intStorageScheduleTypeId]				INT												NULL
-	,[intDestinationGradeId]				INT												NULL
-	,[intDestinationWeightId]				INT												NULL
-)
-DELETE FROM #InvoicesToGenerate
-INSERT INTO #InvoicesToGenerate (
+DECLARE @InvoicesToGenerate AS InvoiceStagingTable
+DELETE FROM @InvoicesToGenerate
+INSERT INTO @InvoicesToGenerate (
 	 [intId]
 	,[strTransactionType]
 	,[strType]
@@ -164,6 +29,7 @@ INSERT INTO #InvoicesToGenerate (
 	,[strSourceId]
 	,[intInvoiceId]
 	,[intEntityCustomerId]
+	,[intEntityContactId]
 	,[intCompanyLocationId]
 	,[intAccountId]
 	,[intCurrencyId]
@@ -299,6 +165,7 @@ SELECT
 	,[strSourceId]						= [strSourceId]
 	,[intInvoiceId]						= [intInvoiceId]
 	,[intEntityCustomerId]				= [intEntityCustomerId]
+	,[intEntityContactId]				= [intEntityContactId]
 	,[intCompanyLocationId]				= [intCompanyLocationId]
 	,[intAccountId]						= [intAccountId]
 	,[intCurrencyId]					= [intCurrencyId]
@@ -459,7 +326,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ISNULL([strSourceTransaction],'') = 'Transport Load'
 	AND  NOT EXISTS(SELECT NULL FROM tblTRLoadDistributionHeader WITH (NOLOCK) WHERE [intLoadDistributionHeaderId] = ITG.[intSourceId])
@@ -476,7 +343,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ISNULL([strSourceTransaction],'') = 'Inbound Shipment'
 	AND  NOT EXISTS(SELECT NULL FROM tblLGShipment WITH (NOLOCK) WHERE [intShipmentId] = ITG.[intSourceId])
@@ -493,7 +360,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	(	ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' 
 		OR 
@@ -512,7 +379,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ISNULL([strSourceTransaction],'') = 'Meter Billing'
 	AND  NOT EXISTS(SELECT NULL FROM tblMBMeterReading WITH (NOLOCK) WHERE [intMeterReadingId] = ITG.[intSourceId])
@@ -529,7 +396,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ISNULL([strSourceTransaction],'') = 'Provisional'
 	AND  NOT EXISTS(SELECT NULL FROM tblARInvoice WITH (NOLOCK) WHERE [intInvoiceId] = ITG.[intSourceId])
@@ -546,7 +413,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ISNULL([strSourceTransaction],'') = 'Inventory Shipment'
 	AND  NOT EXISTS(SELECT NULL FROM tblICInventoryShipment WITH (NOLOCK) WHERE [intInventoryShipmentId] = ITG.[intSourceId])
@@ -563,7 +430,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ISNULL([strSourceTransaction],'') = 'Sales Contract'
 	AND  NOT EXISTS(SELECT NULL FROM tblCTContractHeader WITH (NOLOCK) WHERE [intContractHeaderId] = ITG.[intSourceId])
@@ -580,18 +447,18 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ISNULL([strSourceTransaction],'') = 'Load Schedule'
 	AND  NOT EXISTS(SELECT NULL FROM tblLGLoad WITH (NOLOCK) WHERE [intLoadId] = ITG.[intSourceId])
 
 
 DELETE FROM V
-FROM #InvoicesToGenerate V
+FROM @InvoicesToGenerate V
 WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
 
 UPDATE
-	#InvoicesToGenerate
+	@InvoicesToGenerate
 SET
 	[strTransactionType] = 'Invoice'
 WHERE
@@ -599,7 +466,7 @@ WHERE
 
 
 UPDATE
-	#InvoicesToGenerate
+	@InvoicesToGenerate
 SET
 	[strType] = 'Standard'
 WHERE
@@ -625,7 +492,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation SMCL WITH (NOLOCK) WHERE SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId])
 
@@ -641,7 +508,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation SMCL WITH (NOLOCK) WHERE SMCL.[intCompanyLocationId] IS NOT NULL AND SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId] AND SMCL.[ysnLocationActive] = 1)
 
@@ -657,7 +524,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[strTransactionType] NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment')
 
@@ -673,7 +540,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[strType] NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice')
 
@@ -689,7 +556,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId])
 
@@ -705,7 +572,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
 
@@ -722,7 +589,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblEMEntity EME WITH (NOLOCK) WHERE EME.[intEntityId] = ITG.[intEntityId])
 
@@ -739,25 +606,25 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ISNULL(ITG.[ysnUseOriginIdAsInvoiceNumber], 0) = 1
 	AND EXISTS (SELECT TOP 1 NULL FROM tblARInvoice WITH (NOLOCK) WHERE tblARInvoice.[strInvoiceNumber] = ITG.[strInvoiceOriginId])
 
 DELETE FROM V
-FROM #InvoicesToGenerate V
+FROM @InvoicesToGenerate V
 WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
 
 
 UPDATE
-	#InvoicesToGenerate
+	@InvoicesToGenerate
 SET
 	[intAccountId] = [dbo].[fnARGetInvoiceTypeAccount](strTransactionType, intCompanyLocationId)
 WHERE
 	ISNULL([intAccountId], 0) = 0
 
 UPDATE
-	#InvoicesToGenerate
+	@InvoicesToGenerate
 SET
 	[strDeliverPickup] = ISNULL((SELECT TOP 1 SMCL.strDeliverPickupDefault FROM tblSMCompanyLocation SMCL WHERE SMCL.intCompanyLocationId = [intCompanyLocationId]),'')
 WHERE
@@ -765,7 +632,7 @@ WHERE
 	OR LTRIM(RTRIM([strDeliverPickup])) = ''
 
 UPDATE
-	#InvoicesToGenerate
+	@InvoicesToGenerate
 SET
 	[strComments] = [dbo].[fnARGetDefaultComment](intCompanyLocationId, intEntityCustomerId, strTransactionType, strType, intDocumentMaintenanceId)
 WHERE
@@ -773,14 +640,14 @@ WHERE
 	OR LTRIM(RTRIM([strComments])) = ''
 
 UPDATE
-	#InvoicesToGenerate
+	@InvoicesToGenerate
 SET
 	[intEntityContactId] = [dbo].[fnARGetCustomerDefaultContact](intEntityCustomerId)
 WHERE
 	ISNULL([intEntityContactId], 0) = 0
 
 UPDATE
-	#InvoicesToGenerate
+	@InvoicesToGenerate
 SET
 	[intCurrencyId] = [dbo].[fnARGetCustomerDefaultCurrency](intEntityCustomerId)
 WHERE
@@ -807,7 +674,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[intAccountId] IS NULL
 	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
@@ -825,7 +692,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[intAccountId] IS NOT NULL
 	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
@@ -843,7 +710,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 INNER JOIN
 	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
 		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
@@ -864,7 +731,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 INNER JOIN
 	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
 		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
@@ -885,7 +752,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 INNER JOIN
 	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
 		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
@@ -905,7 +772,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 INNER JOIN
 	(SELECT CL.[intCompanyLocationId], CL.[strLocationName] FROM tblSMCompanyLocation CL WITH (NOLOCK)) SMCL
 		ON SMCL.[intCompanyLocationId] = ITG.[intCompanyLocationId]
@@ -926,7 +793,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[intCurrencyId] IS NOT NULL
 	AND NOT EXISTS (SELECT NULL FROM tblSMCurrency SMC WITH (NOLOCK) WHERE SMC.[intCurrencyID] = ITG.[intCurrencyId])
@@ -943,7 +810,7 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[intCurrencyId] IS NULL
 	AND NOT EXISTS (SELECT NULL FROM tblSMCompanyPreference WITH (NOLOCK) WHERE intDefaultCurrencyId IS NOT NULL)
@@ -960,13 +827,13 @@ SELECT
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
 FROM
-	#InvoicesToGenerate ITG WITH (NOLOCK)
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[intTermId] IS NULL
 	AND NOT EXISTS (SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intTermsId] IS NOT NULL AND ARC.[intEntityCustomerId] = ITG.[intEntityCustomerId])
 	
 DELETE FROM V
-FROM #InvoicesToGenerate V
+FROM @InvoicesToGenerate V
 WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
 
 
@@ -1151,9 +1018,9 @@ USING
 		,[ysnPost]						= ITG.[ysnPost]
 		,[ysnUpdateAvailableDiscount]	= ITG.[ysnUpdateAvailableDiscount]
 	FROM	
-		#InvoicesToGenerate ITG WITH (NOLOCK)
+		@InvoicesToGenerate ITG --WITH (NOLOCK)
 	INNER JOIN
-		(SELECT intId FROM #InvoicesToGenerate WITH (NOLOCK)) ITG2
+		(SELECT intId FROM @InvoicesToGenerate) ITG2  --WITH (NOLOCK)) ITG2
 			ON ITG.[intId] = ITG2.[intId]
 	INNER JOIN
 		(SELECT [intEntityCustomerId], [intTermsId], [intSalespersonId], [intShipToId], [intBillToId] FROM tblARCustomer WITH (NOLOCK)) ARC
@@ -1384,6 +1251,10 @@ VALUES(
 			,0										--[intRecapUnPostedExistingCount]
 			,NULL									--[intIntegrationLogDetailId]
 			,INSERTED.[intInvoiceId]				--[intInvoiceId]
+			,INSERTED.[intEntityCustomerId]			--[intEntityCustomerId]
+			,INSERTED.[intCompanyLocationId]		--[intCompanyLocationId]
+			,INSERTED.[intCurrencyId]				--[intCurrencyId]
+			,INSERTED.[intTermId]					--[intTermId]
 			,NULL									--[intInvoiceDetailId]
 			,Source.[intId]							--[intId]
 			,INSERTED.[strTransactionType]			--[strTransactionType]
@@ -1415,6 +1286,10 @@ VALUES(
 			,[intRecapUnPostedExistingCount]
 			,[intIntegrationLogDetailId]
 			,[intInvoiceId]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intCurrencyId]
+			,[intTermId]
 			,[intInvoiceDetailId]
 			,[intId]
 			,[strTransactionType]
@@ -1429,7 +1304,7 @@ VALUES(
 		);	
 	
 	IF ISNULL(@IntegrationLogId, 0) <> 0 AND ISNULL(@RaiseError,0) = 0
-		EXEC [uspARInsertInvoiceIntegrationLog] @IntegrationLogEntries = @IntegrationLog
+		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
 	
 END TRY
 BEGIN CATCH
@@ -1445,290 +1320,287 @@ END CATCH
 
 BEGIN TRY
 	DECLARE @LineItems InvoiceStagingTable
---	INSERT INTO @LineItems
---	([intId]
---	,[strTransactionType]
---	,[strType]
---	,[strSourceTransaction]
---	,[intSourceId]
---	,[strSourceId]
---	,[intInvoiceId]
---	,[intEntityCustomerId]
---	,[intCompanyLocationId]
---	,[intAccountId]
---	,[intCurrencyId]
---	,[intTermId]
---	,[intPeriodsToAccrue]
---	,[dtmDate]
---	,[dtmDueDate]
---	,[dtmShipDate]
---	,[dtmPostDate]
---	,[intEntitySalespersonId]
---	,[intFreightTermId]
---	,[intShipViaId]
---	,[intPaymentMethodId]
---	,[strInvoiceOriginId]
---	,[ysnUseOriginIdAsInvoiceNumber]
---	,[strPONumber]
---	,[strBOLNumber]
---	,[strDeliverPickup]
---	,[strComments]
---	,[intShipToLocationId]
---	,[intBillToLocationId]
---	,[ysnTemplate]
---	,[ysnForgiven]
---	,[ysnCalculated]
---	,[ysnSplitted]
---	,[intPaymentId]
---	,[intSplitId]
---	,[intLoadDistributionHeaderId]
---	,[strActualCostId]
---	,[intShipmentId]
---	,[intTransactionId]
---	,[intMeterReadingId]
---	,[intContractHeaderId]
---	,[intLoadId]
---	,[intOriginalInvoiceId]
---	,[intEntityId]
---	,[intTruckDriverId]
---	,[intTruckDriverReferenceId]
---	,[ysnResetDetails]
---	,[ysnRecap]
---	,[ysnPost]
---	,[ysnUpdateAvailableDiscount]
---	,[ysnInsertDetail]
---	--Detail																																															
---	,[intInvoiceDetailId]
---    ,[intItemId]
---	,[intPrepayTypeId]
---	,[dblPrepayRate]
---	,[ysnRestricted]
---    ,[ysnInventory]
---	,[strDocumentNumber]
---    ,[strItemDescription]
---	,[intOrderUOMId]
---    ,[dblQtyOrdered]
---	,[intItemUOMId]
---    ,[dblQtyShipped]
---	,[dblDiscount]
---	,[dblItemTermDiscount]
---	,[strItemTermDiscountBy]
---	,[dblItemWeight]
---	,[intItemWeightUOMId]
---    ,[dblPrice]
---    ,[strPricing]
---	,[strVFDDocumentNumber]
---    ,[ysnRefreshPrice]
---	,[strMaintenanceType]
---    ,[strFrequency]
---	,[intMaintenanceAccountId]
---    ,[dtmMaintenanceDate]
---    ,[dblMaintenanceAmount]
---	,[intLicenseAccountId]
---    ,[dblLicenseAmount]
---	,[intTaxGroupId]
---	,[intStorageLocationId]
---	,[intCompanyLocationSubLocationId]
---	,[ysnRecomputeTax]
---	,[intSCInvoiceId]
---	,[strSCInvoiceNumber]
---	,[intSCBudgetId]
---	,[strSCBudgetDescription]
---	,[intInventoryShipmentItemId]
---	,[intInventoryShipmentChargeId]
---	,[strShipmentNumber]
---	,[intRecipeItemId]
---	,[intRecipeId]
---	,[intSubLocationId]
---	,[intCostTypeId]
---	,[intMarginById]
---	,[intCommentTypeId]
---	,[dblMargin]
---	,[dblRecipeQuantity]
---	,[intSalesOrderDetailId]
---	,[strSalesOrderNumber]
---	,[intContractDetailId]
---	,[intShipmentPurchaseSalesContractId]
---	,[dblShipmentGrossWt]
---	,[dblShipmentTareWt]
---	,[dblShipmentNetWt]
---	,[intTicketId]
---	,[intTicketHoursWorkedId]
---	,[intDocumentMaintenanceId]
---	,[intCustomerStorageId]
---	,[intSiteDetailId]
---	,[intLoadDetailId]
---	,[intLotId]
---	,[intOriginalInvoiceDetailId]
---	,[intSiteId]
---	,[strBillingBy]
---	,[dblPercentFull]
---	,[dblNewMeterReading]
---	,[dblPreviousMeterReading]
---	,[dblConversionFactor]
---	,[intPerformerId]
---	,[ysnLeaseBilling]
---	,[ysnVirtualMeterReading]
---	,[ysnClearDetailTaxes]
---	,[intTempDetailIdForTaxes]
---	,[intCurrencyExchangeRateTypeId]
---	,[intCurrencyExchangeRateId]
---	,[dblCurrencyExchangeRate]
---	,[intSubCurrencyId]
---	,[dblSubCurrencyRate]
---	,[ysnBlended]
---	,[strImportFormat]
---	,[dblCOGSAmount]
---    ,[intConversionAccountId]
---	,[intSalesAccountId]
---	,[intStorageScheduleTypeId]
---	,[intDestinationGradeId]
---	,[intDestinationWeightId])
---SELECT
---	 [intId]
---	,[strTransactionType]
---	,[strType]
---	,[strSourceTransaction]
---	,[intSourceId]
---	,[strSourceId]
---	,[intInvoiceId]
---	,[intEntityCustomerId]
---	,[intCompanyLocationId]
---	,[intAccountId]
---	,[intCurrencyId]
---	,[intTermId]
---	,[intPeriodsToAccrue]
---	,[dtmDate]
---	,[dtmDueDate]
---	,[dtmShipDate]
---	,[dtmPostDate]
---	,[intEntitySalespersonId]
---	,[intFreightTermId]
---	,[intShipViaId]
---	,[intPaymentMethodId]
---	,[strInvoiceOriginId]
---	,[ysnUseOriginIdAsInvoiceNumber]
---	,[strPONumber]
---	,[strBOLNumber]
---	,[strDeliverPickup]
---	,[strComments]
---	,[intShipToLocationId]
---	,[intBillToLocationId]
---	,[ysnTemplate]
---	,[ysnForgiven]
---	,[ysnCalculated]
---	,[ysnSplitted]
---	,[intPaymentId]
---	,[intSplitId]
---	,[intLoadDistributionHeaderId]
---	,[strActualCostId]
---	,[intShipmentId]
---	,[intTransactionId]
---	,[intMeterReadingId]
---	,[intContractHeaderId]
---	,[intLoadId]
---	,[intOriginalInvoiceId]
---	,[intEntityId]
---	,[intTruckDriverId]
---	,[intTruckDriverReferenceId]
---	,[ysnResetDetails]
---	,[ysnRecap]
---	,[ysnPost]
---	,[ysnUpdateAvailableDiscount]
---	,[ysnInsertDetail]
---	--Detail																																															
---	,[intInvoiceDetailId]
---    ,[intItemId]
---	,[intPrepayTypeId]
---	,[dblPrepayRate]
---	,[ysnRestricted]
---    ,[ysnInventory]
---	,[strDocumentNumber]
---    ,[strItemDescription]
---	,[intOrderUOMId]
---    ,[dblQtyOrdered]
---	,[intItemUOMId]
---    ,[dblQtyShipped]
---	,[dblDiscount]
---	,[dblItemTermDiscount]
---	,[strItemTermDiscountBy]
---	,[dblItemWeight]
---	,[intItemWeightUOMId]
---    ,[dblPrice]
---    ,[strPricing]
---	,[strVFDDocumentNumber]
---    ,[ysnRefreshPrice]
---	,[strMaintenanceType]
---    ,[strFrequency]
---	,[intMaintenanceAccountId]
---    ,[dtmMaintenanceDate]
---    ,[dblMaintenanceAmount]
---	,[intLicenseAccountId]
---    ,[dblLicenseAmount]
---	,[intTaxGroupId]
---	,[intStorageLocationId]
---	,[intCompanyLocationSubLocationId]
---	,[ysnRecomputeTax]
---	,[intSCInvoiceId]
---	,[strSCInvoiceNumber]
---	,[intSCBudgetId]
---	,[strSCBudgetDescription]
---	,[intInventoryShipmentItemId]
---	,[intInventoryShipmentChargeId]
---	,[strShipmentNumber]
---	,[intRecipeItemId]
---	,[intRecipeId]
---	,[intSubLocationId]
---	,[intCostTypeId]
---	,[intMarginById]
---	,[intCommentTypeId]
---	,[dblMargin]
---	,[dblRecipeQuantity]
---	,[intSalesOrderDetailId]
---	,[strSalesOrderNumber]
---	,[intContractDetailId]
---	,[intShipmentPurchaseSalesContractId]
---	,[dblShipmentGrossWt]
---	,[dblShipmentTareWt]
---	,[dblShipmentNetWt]
---	,[intTicketId]
---	,[intTicketHoursWorkedId]
---	,[intDocumentMaintenanceId]
---	,[intCustomerStorageId]
---	,[intSiteDetailId]
---	,[intLoadDetailId]
---	,[intLotId]
---	,[intOriginalInvoiceDetailId]
---	,[intSiteId]
---	,[strBillingBy]
---	,[dblPercentFull]
---	,[dblNewMeterReading]
---	,[dblPreviousMeterReading]
---	,[dblConversionFactor]
---	,[intPerformerId]
---	,[ysnLeaseBilling]
---	,[ysnVirtualMeterReading]
---	,[ysnClearDetailTaxes]
---	,[intTempDetailIdForTaxes]
---	,[intCurrencyExchangeRateTypeId]
---	,[intCurrencyExchangeRateId]
---	,[dblCurrencyExchangeRate]
---	,[intSubCurrencyId]
---	,[dblSubCurrencyRate]
---	,[ysnBlended]
---	,[strImportFormat]
---	,[dblCOGSAmount]
---    ,[intConversionAccountId]
---	,[intSalesAccountId]
---	,[intStorageScheduleTypeId]
---	,[intDestinationGradeId]
---	,[intDestinationWeightId]
---FROM
---	@InvoiceEntries IE
---INNER JOIN
---	@IntegrationLog IL
---		ON IE.[intId] = IL.[intId]
-
+	DELETE FROM @LineItems
+	INSERT INTO @LineItems
+		([intId]
+		,[strTransactionType]
+		,[strType]
+		,[strSourceTransaction]
+		,[strSourceId]
+		,[intInvoiceId]
+		,[intEntityCustomerId]
+		,[intEntityContactId]
+		,[intCompanyLocationId]
+		,[intAccountId]
+		,[intCurrencyId]
+		,[intTermId]
+		,[intPeriodsToAccrue]
+		,[dtmDate]
+		,[dtmDueDate]
+		,[dtmShipDate]
+		,[dtmPostDate]
+		,[intEntitySalespersonId]
+		,[intFreightTermId]
+		,[intShipViaId]
+		,[intPaymentMethodId]
+		,[strInvoiceOriginId]
+		,[ysnUseOriginIdAsInvoiceNumber]
+		,[strPONumber]
+		,[strBOLNumber]
+		,[strDeliverPickup]
+		,[strComments]
+		,[intShipToLocationId]
+		,[intBillToLocationId]
+		,[ysnTemplate]
+		,[ysnForgiven]
+		,[ysnCalculated]
+		,[ysnSplitted]
+		,[intPaymentId]
+		,[intSplitId]
+		,[intLoadDistributionHeaderId]
+		,[strActualCostId]
+		,[intShipmentId]
+		,[intTransactionId]
+		,[intMeterReadingId]
+		,[intContractHeaderId]
+		,[intLoadId]
+		,[intOriginalInvoiceId]
+		,[intEntityId]
+		,[intTruckDriverId]
+		,[intTruckDriverReferenceId]
+		,[ysnResetDetails]
+		,[ysnRecap]
+		,[ysnPost]
+		,[ysnUpdateAvailableDiscount]
+		,[ysnInsertDetail]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[intPrepayTypeId]
+		,[ysnRestricted]
+		,[ysnInventory]
+		,[strDocumentNumber]
+		,[strItemDescription]
+		,[intOrderUOMId]
+		,[dblQtyOrdered]
+		,[intItemUOMId]
+		,[dblQtyShipped]
+		,[dblDiscount]
+		,[dblItemTermDiscount]
+		,[strItemTermDiscountBy]
+		,[dblItemWeight]
+		,[intItemWeightUOMId]
+		,[dblPrice]
+		,[strPricing]
+		,[strVFDDocumentNumber]
+		,[ysnRefreshPrice]
+		,[strMaintenanceType]
+		,[strFrequency]
+		,[intMaintenanceAccountId]
+		,[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]
+		,[intLicenseAccountId]
+		,[dblLicenseAmount]
+		,[intTaxGroupId]
+		,[intStorageLocationId]
+		,[intCompanyLocationSubLocationId]
+		,[ysnRecomputeTax]
+		,[intSCInvoiceId]
+		,[strSCInvoiceNumber]
+		,[intSCBudgetId]
+		,[strSCBudgetDescription]
+		,[intInventoryShipmentItemId]
+		,[intInventoryShipmentChargeId]
+		,[strShipmentNumber]
+		,[intRecipeItemId]
+		,[intRecipeId]
+		,[intSubLocationId]
+		,[intCostTypeId]
+		,[intMarginById]
+		,[intCommentTypeId]
+		,[dblMargin]
+		,[dblRecipeQuantity]
+		,[intSalesOrderDetailId]
+		,[strSalesOrderNumber]
+		,[intContractDetailId]
+		,[intShipmentPurchaseSalesContractId]
+		,[dblShipmentGrossWt]
+		,[dblShipmentTareWt]
+		,[dblShipmentNetWt]
+		,[intTicketId]
+		,[intTicketHoursWorkedId]
+		,[intDocumentMaintenanceId]
+		,[intCustomerStorageId]
+		,[intSiteDetailId]
+		,[intLoadDetailId]
+		,[intLotId]
+		,[intOriginalInvoiceDetailId]
+		,[intSiteId]
+		,[strBillingBy]
+		,[dblPercentFull]
+		,[dblNewMeterReading]
+		,[dblPreviousMeterReading]
+		,[dblConversionFactor]
+		,[intPerformerId]
+		,[ysnLeaseBilling]
+		,[ysnVirtualMeterReading]
+		,[ysnClearDetailTaxes]
+		,[intTempDetailIdForTaxes]
+		,[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]
+		,[intSubCurrencyId]
+		,[dblSubCurrencyRate]
+		,[ysnBlended]
+		,[strImportFormat]
+		,[dblCOGSAmount]
+		,[intConversionAccountId]
+		,[intSalesAccountId]
+		,[intStorageScheduleTypeId]
+		,[intDestinationGradeId]
+		,[intDestinationWeightId])
+	SELECT
+		 [intId]								= IL.[intId]
+		,[strTransactionType]					= ITG.[strTransactionType]
+		,[strType]								= ITG.[strType]
+		,[strSourceTransaction]					= ITG.[strSourceTransaction]
+		,[strSourceId]							= ITG.[strSourceId]
+		,[intInvoiceId]							= IL.[intInvoiceId]
+		,[intEntityCustomerId]					= IL.[intEntityCustomerId]
+		,[intEntityContactId]					= ITG.[intEntityContactId]
+		,[intCompanyLocationId]					= IL.[intCompanyLocationId]
+		,[intAccountId]							= ITG.[intAccountId]
+		,[intCurrencyId]						= IL.[intCurrencyId]
+		,[intTermId]							= IL.[intTermId]
+		,[intPeriodsToAccrue]					= ITG.[intPeriodsToAccrue]
+		,[dtmDate]								= ITG.[dtmDate]
+		,[dtmDueDate]							= ITG.[dtmDueDate]
+		,[dtmShipDate]							= ITG.[dtmShipDate]
+		,[dtmPostDate]							= ITG.[dtmPostDate]
+		,[intEntitySalespersonId]				= ITG.[intEntitySalespersonId]
+		,[intFreightTermId]						= ITG.[intFreightTermId]
+		,[intShipViaId]							= ITG.[intShipViaId]
+		,[intPaymentMethodId]					= ITG.[intPaymentMethodId]
+		,[strInvoiceOriginId]					= ITG.[strInvoiceOriginId]
+		,[ysnUseOriginIdAsInvoiceNumber]		= ITG.[ysnUseOriginIdAsInvoiceNumber]
+		,[strPONumber]							= ITG.[strPONumber]
+		,[strBOLNumber]							= ITG.[strBOLNumber]
+		,[strDeliverPickup]						= ITG.[strDeliverPickup]
+		,[strComments]							= ITG.[strComments]
+		,[intShipToLocationId]					= ITG.[intShipToLocationId]
+		,[intBillToLocationId]					= ITG.[intBillToLocationId]
+		,[ysnTemplate]							= ITG.[ysnTemplate]
+		,[ysnForgiven]							= ITG.[ysnForgiven]
+		,[ysnCalculated]						= ITG.[ysnCalculated]
+		,[ysnSplitted]							= ITG.[ysnSplitted]
+		,[intPaymentId]							= ITG.[intPaymentId]
+		,[intSplitId]							= ITG.[intSplitId]
+		,[intLoadDistributionHeaderId]			= ITG.[intLoadDistributionHeaderId]
+		,[strActualCostId]						= ITG.[strActualCostId]
+		,[intShipmentId]						= ITG.[intShipmentId]
+		,[intTransactionId]						= ITG.[intTransactionId]
+		,[intMeterReadingId]					= ITG.[intMeterReadingId]
+		,[intContractHeaderId]					= ITG.[intContractHeaderId]
+		,[intLoadId]							= ITG.[intLoadId]
+		,[intOriginalInvoiceId]					= ITG.[intOriginalInvoiceId]
+		,[intEntityId]							= ITG.[intEntityId]
+		,[intTruckDriverId]						= ITG.[intTruckDriverId]
+		,[intTruckDriverReferenceId]			= ITG.[intTruckDriverReferenceId]
+		,[ysnResetDetails]						= ITG.[ysnResetDetails]
+		,[ysnRecap]								= ITG.[ysnRecap]
+		,[ysnPost]								= ITG.[ysnPost]
+		,[ysnUpdateAvailableDiscount]			= ITG.[ysnUpdateAvailableDiscount]
+		,[ysnInsertDetail]						= ITG.[ysnInsertDetail]
+		,[intInvoiceDetailId]					= ITG.[intInvoiceDetailId]
+		,[intItemId]							= ITG.[intItemId]
+		,[intPrepayTypeId]						= ITG.[intPrepayTypeId]
+		,[ysnRestricted]						= ITG.[ysnRestricted]
+		,[ysnInventory]							= ITG.[ysnInventory]
+		,[strDocumentNumber]					= ITG.[strDocumentNumber]
+		,[strItemDescription]					= ITG.[strItemDescription]
+		,[intOrderUOMId]						= ITG.[intOrderUOMId]
+		,[dblQtyOrdered]						= ITG.[dblQtyOrdered]
+		,[intItemUOMId]							= ITG.[intItemUOMId]
+		,[dblQtyShipped]						= ITG.[dblQtyShipped]
+		,[dblDiscount]							= ITG.[dblDiscount]
+		,[dblItemTermDiscount]					= ITG.[dblItemTermDiscount]
+		,[strItemTermDiscountBy]				= ITG.[strItemTermDiscountBy]
+		,[dblItemWeight]						= ITG.[dblItemWeight]
+		,[intItemWeightUOMId]					= ITG.[intItemWeightUOMId]
+		,[dblPrice]								= ITG.[dblPrice]
+		,[strPricing]							= ITG.[strPricing]
+		,[strVFDDocumentNumber]					= ITG.[strVFDDocumentNumber]
+		,[ysnRefreshPrice]						= ITG.[ysnRefreshPrice]
+		,[strMaintenanceType]					= ITG.[strMaintenanceType]
+		,[strFrequency]							= ITG.[strFrequency]
+		,[intMaintenanceAccountId]				= ITG.[intMaintenanceAccountId]
+		,[dtmMaintenanceDate]					= ITG.[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]					= ITG.[dblMaintenanceAmount]
+		,[intLicenseAccountId]					= ITG.[intLicenseAccountId]
+		,[dblLicenseAmount]						= ITG.[dblLicenseAmount]
+		,[intTaxGroupId]						= ITG.[intTaxGroupId]
+		,[intStorageLocationId]					= ITG.[intStorageLocationId]
+		,[intCompanyLocationSubLocationId]		= ITG.[intCompanyLocationSubLocationId]
+		,[ysnRecomputeTax]						= ITG.[ysnRecomputeTax]
+		,[intSCInvoiceId]						= ITG.[intSCInvoiceId]
+		,[strSCInvoiceNumber]					= ITG.[strSCInvoiceNumber]
+		,[intSCBudgetId]						= ITG.[intSCBudgetId]
+		,[strSCBudgetDescription]				= ITG.[strSCBudgetDescription]
+		,[intInventoryShipmentItemId]			= ITG.[intInventoryShipmentItemId]
+		,[intInventoryShipmentChargeId]			= ITG.[intInventoryShipmentChargeId]
+		,[strShipmentNumber]					= ITG.[strShipmentNumber]
+		,[intRecipeItemId]						= ITG.[intRecipeItemId]
+		,[intRecipeId]							= ITG.[intRecipeId]
+		,[intSubLocationId]						= ITG.[intSubLocationId]
+		,[intCostTypeId]						= ITG.[intCostTypeId]
+		,[intMarginById]						= ITG.[intMarginById]
+		,[intCommentTypeId]						= ITG.[intCommentTypeId]
+		,[dblMargin]							= ITG.[dblMargin]
+		,[dblRecipeQuantity]					= ITG.[dblRecipeQuantity]
+		,[intSalesOrderDetailId]				= ITG.[intSalesOrderDetailId]
+		,[strSalesOrderNumber]					= ITG.[strSalesOrderNumber]
+		,[intContractDetailId]					= ITG.[intContractDetailId]
+		,[intShipmentPurchaseSalesContractId]	= ITG.[intShipmentPurchaseSalesContractId]
+		,[dblShipmentGrossWt]					= ITG.[dblShipmentGrossWt]
+		,[dblShipmentTareWt]					= ITG.[dblShipmentTareWt]
+		,[dblShipmentNetWt]						= ITG.[dblShipmentNetWt]
+		,[intTicketId]							= ITG.[intTicketId]
+		,[intTicketHoursWorkedId]				= ITG.[intTicketHoursWorkedId]
+		,[intDocumentMaintenanceId]				= ITG.[intDocumentMaintenanceId]
+		,[intCustomerStorageId]					= ITG.[intCustomerStorageId]
+		,[intSiteDetailId]						= ITG.[intSiteDetailId]
+		,[intLoadDetailId]						= ITG.[intLoadDetailId]
+		,[intLotId]								= ITG.[intLotId]
+		,[intOriginalInvoiceDetailId]			= ITG.[intOriginalInvoiceDetailId]
+		,[intSiteId]							= ITG.[intSiteId]
+		,[strBillingBy]							= ITG.[strBillingBy]
+		,[dblPercentFull]						= ITG.[dblPercentFull]
+		,[dblNewMeterReading]					= ITG.[dblNewMeterReading]
+		,[dblPreviousMeterReading]				= ITG.[dblPreviousMeterReading]
+		,[dblConversionFactor]					= ITG.[dblConversionFactor]
+		,[intPerformerId]						= ITG.[intPerformerId]
+		,[ysnLeaseBilling]						= ITG.[ysnLeaseBilling]
+		,[ysnVirtualMeterReading]				= ITG.[ysnVirtualMeterReading]
+		,[ysnClearDetailTaxes]					= ITG.[ysnClearDetailTaxes]
+		,[intTempDetailIdForTaxes]				= ITG.[intTempDetailIdForTaxes]
+		,[intCurrencyExchangeRateTypeId]		= ITG.[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]			= ITG.[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]				= ITG.[dblCurrencyExchangeRate]
+		,[intSubCurrencyId]						= ITG.[intSubCurrencyId]
+		,[dblSubCurrencyRate]					= ITG.[dblSubCurrencyRate]
+		,[ysnBlended]							= ITG.[ysnBlended]
+		,[strImportFormat]						= ITG.[strImportFormat]
+		,[dblCOGSAmount]						= ITG.[dblCOGSAmount]
+		,[intConversionAccountId]				= ITG.[intConversionAccountId]
+		,[intSalesAccountId]					= ITG.[intSalesAccountId]
+		,[intStorageScheduleTypeId]				= ITG.[intStorageScheduleTypeId]
+		,[intDestinationGradeId]				= ITG.[intDestinationGradeId]
+		,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
+	FROM
+		@InvoicesToGenerate ITG
+	INNER JOIN
+		@IntegrationLog IL
+			ON ITG.[intId] = IL.[intId]
+			AND IL.[ysnSuccess] = 1
 
 	EXEC [dbo].[uspARAddItemToInvoices]
 		 @InvoiceEntries	= @LineItems
@@ -1826,5 +1698,3 @@ RETURN 1;
 	
 END
 GO
-
-

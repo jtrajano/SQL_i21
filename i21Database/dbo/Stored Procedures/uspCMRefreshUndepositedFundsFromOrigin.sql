@@ -35,7 +35,14 @@ IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 UPDATE tblCMUndepositedFund
 set intBankAccountId = @intBankAccountId
 WHERE strSourceSystem = 'AR'
-	AND (intSourceTransactionId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1 AND intBankAccountId IS NULL) OR intSourceTransactionId IN (SELECT intInvoiceId FROM tblARInvoice WHERE ysnPosted = 1 ))
+	AND intSourceTransactionId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1 AND intBankAccountId IS NULL)
+	AND intBankDepositId IS NULL
+
+-- Update any outdated records from the Deposit Entry table that came from Invoice.
+UPDATE tblCMUndepositedFund
+set intBankAccountId = @intBankAccountId
+WHERE strSourceSystem = 'AR'
+	AND strSourceTransactionId LIKE 'SI-%'
 	AND intBankDepositId IS NULL
 
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
