@@ -20,6 +20,7 @@ DECLARE @intPaycheckId INT
 		,@intCreatedEntityId AS INT
 		,@intBankAccountId AS INT
 		,@strBatchNo AS NVARCHAR(50) = @strBatchId
+		,@ysnPaycheckPosted AS BIT
 		,@PAYCHECK INT = 21
 		,@DIRECT_DEPOSIT INT = 23
 		,@BankTransactionTable BankTransactionTable
@@ -32,6 +33,7 @@ SELECT @intPaycheckId = intPaycheckId
 	  ,@dtmPayDate = dtmPayDate
 	  ,@intCreatedEntityId = intCreatedUserId
 	  ,@intBankAccountId = intBankAccountId
+	  ,@ysnPaycheckPosted = ysnPosted
 	  ,@intBankTransactionTypeId = CASE WHEN (ISNULL(ysnDirectDeposit, 0) = 1) THEN @DIRECT_DEPOSIT ELSE @PAYCHECK END
 FROM tblPRPaycheck 
 WHERE strPaycheckId = @strPaycheckId
@@ -40,16 +42,21 @@ WHERE strPaycheckId = @strPaycheckId
 	CREATING BANK TRANSACTION RECORD
 *****************************************/
 
--- Check if transaction has Bank Account
+-- Validations before generating Bank Transaction Record
 IF @ysnPost = 1
 BEGIN 
 	IF (@intBankAccountId IS NULL)
 	BEGIN
-		-- Bank Account is required to post the transaction
 		RAISERROR('Bank Account is required to post the transaction.', 11, 1)
 		GOTO Post_Exit
 	END
-END 
+
+	IF (@ysnRecap = 0 AND @ysnPaycheckPosted = 1)
+	BEGIN
+		RAISERROR('The transaction is already posted.', 11, 1)
+		GOTO Post_Exit
+	END
+END
 
 IF (@ysnPost = 1)
 BEGIN
@@ -1139,12 +1146,12 @@ Post_Commit:
 -- If error occured, undo changes to all tables affected
 Post_Rollback:
 	SET @isSuccessful = 0
-	ROLLBACK TRANSACTION		            
+	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION		            
 	GOTO Post_Exit
 	
 Recap_Rollback: 
 	SET @isSuccessful = 1
-	ROLLBACK TRANSACTION 
+	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION
 	EXEC dbo.uspGLPostRecap @RecapTable
 	GOTO Post_Exit
 	

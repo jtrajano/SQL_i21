@@ -3,8 +3,12 @@ AS
 SELECT CC.intContractDetailId, 		
 			CC.dblRate,
 			IU.intUnitMeasureId,
-			CD.intItemId
+			CC.intItemId,
+			CH.intContractBasisId
+
 FROM		tblCTContractCost	CC
 JOIN		tblCTContractDetail CD ON CD.intContractDetailId	=	CC.intContractDetailId
-JOIN  tblICItemUOM		IU ON IU.intItemUOMId			=	CC.intItemUOMId
+join		tblCTContractHeader CH ON CH.intContractHeaderId	=	CD.intContractHeaderId
+JOIN  tblICItemUOM		IU 
+ON IU.intItemUOMId		=	CC.intItemUOMId
 

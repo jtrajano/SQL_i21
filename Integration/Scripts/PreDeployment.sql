@@ -59,7 +59,7 @@
 
 -- ACCOUNTS PAYABLE
 :r "..\dbo\Views\vwapivcmst.sql"
-:r "..\dbo\Views\vyuAPOriginCCDTransaction.sql"
+
 :r "..\dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql"
 
 --Inventory 

@@ -155,6 +155,7 @@
     <None Include="Scripts\Pre-Deployment\4_SM\10_DropTblSMApproverConfigurationForTransaction.sql" />
     <None Include="Scripts\Pre-Deployment\23_MFT\0_Remove_Unused_Tables_FK.sql" />
     <None Include="Scripts\Pre-Deployment\23_MFT\1_CleanUp_Data.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\Update_Item_Commodity_Origin_Keys.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
