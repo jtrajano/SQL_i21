@@ -5465,6 +5465,7 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\25_ApprovalHistory.sql" />
     <None Include="Scripts\Post-Deployment\CT\172To173.sql" />
     <None Include="Scripts\Post-Deployment\IC\20_UpdateContractItemStatuses.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateAmountSign.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
