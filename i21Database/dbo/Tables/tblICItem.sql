@@ -172,7 +172,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId]), 
 		CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
 		CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
-		CONSTRAINT [FK_tblICItem_tblSMCountry] FOREIGN KEY ([intOriginId]) REFERENCES [tblSMCountry]([intCountryID]), 
+		CONSTRAINT [FK_tblICItem_tblICCommodityAttribute] FOREIGN KEY ([intOriginId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]), 
 		CONSTRAINT [FK_tblICItem_MaterialPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 		CONSTRAINT [FK_tblICItem_Owner] FOREIGN KEY ([intOwnerId]) REFERENCES [tblARCustomer]([intEntityId]),
 		CONSTRAINT [FK_tblICItem_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityId]), 
