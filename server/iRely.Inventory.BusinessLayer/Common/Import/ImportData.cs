@@ -45,7 +45,7 @@ namespace iRely.Inventory.BusinessLayer
 
             SqlParameter pLob = new SqlParameter("@strLineOfBusiness", lob);
             SqlParameter pType = new SqlParameter("@strType", type);
-            SqlParameter pEntityId = new SqlParameter("@intEntityUserSecurityId", type);
+            SqlParameter pEntityId = new SqlParameter("@intEntityUserSecurityId", Security.GetEntityId());
             sql = "EXEC dbo.uspICImportDataFromOrigin @strLineOfBusiness, @strType, @intEntityUserSecurityId";
 
             var res = new ImportDataResult()
