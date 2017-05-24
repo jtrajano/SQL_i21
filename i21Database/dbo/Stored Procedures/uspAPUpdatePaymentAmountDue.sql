@@ -20,8 +20,6 @@ BEGIN
 	SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 
 												THEN CAST((B.dblDiscount + B.dblPayment - B.dblInterest) AS DECIMAL(18,2))
 											ELSE (B.dblAmountDue + B.dblPayment) END)
-		,tblAPPaymentDetail.dblPayment = (CASE WHEN C.intTransactionType = 3 THEN ABS(B.dblPayment) ELSE B.dblPayment END)
-		,tblAPPaymentDetail.dblTotal = (CASE WHEN C.intTransactionType = 3 THEN ABS(B.dblTotal) ELSE B.dblTotal END)
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
@@ -34,12 +32,12 @@ BEGIN
 	UPDATE B
 		SET B.dblAmountDue = CASE WHEN CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2)) = CAST(B.dblAmountDue AS DECIMAL(18,2))
 								THEN 0 ELSE CAST((B.dblAmountDue) - (B.dblPayment) AS DECIMAL(18,2)) END
-		,B.dblPayment = (CASE WHEN C.intTransactionType = 3 THEN ABS(B.dblPayment) ELSE B.dblPayment END)
-		,B.dblTotal = (CASE WHEN C.intTransactionType = 3 THEN ABS(B.dblTotal) ELSE B.dblTotal END)
+		--B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+		--					THEN B.dblDiscount ELSE 0 END,
+		--B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+		--					THEN B.dblInterest ELSE 0 END
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
-		LEFT JOIN tblAPBill C
-			ON B.intBillId = C.intBillId
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 END
